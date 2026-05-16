@@ -1605,9 +1605,9 @@ func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, ma
 			charge = _battle.skill_charges[monster.get("id", "")]
 		var charge_ratio: float = clamp(float(charge) / float(skill_cost) if skill_cost > 0 else 0.0, 0.0, 1.0)
 		if charge_ratio >= 1.0:
-			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["gold"], C["gold"])
+			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["gold"])
 		else:
-			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["bg_card"], C["gold"])
+			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["bg_card"])
 
 func _draw_board_background() -> void:
 	# 棋盘区域背景
@@ -2492,7 +2492,7 @@ func _process_poison_fog_turn() -> void:
 	# 显示毒雾伤害浮动文字
 	for idx in range(alive_team.size()):
 		var member: Dictionary = alive_team[idx]
-		var mx := 15.0 + _battle.player_team.find(member) * 120.0 + 55.0
+		var mx: float = 15.0 + float(_battle.player_team.find(member)) * 120.0 + 55.0
 		var my := 195.0
 		_floating_texts.append({
 			"text": "-%d☠️" % damage_per_member,
