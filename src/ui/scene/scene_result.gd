@@ -75,6 +75,11 @@ var _shake_offset_x: float = 0.0
 var _capture_anim_timer: float = 0.0
 var _capture_effect_node: CaptureEffect = null
 
+# 入场动画
+var _entry_offset_y: float = 200.0  # 从下方200px开始滑入
+var _entry_timer: float = 0.0
+const ENTRY_DURATION: float = 0.4
+
 # ==================== 生命周期 ====================
 
 var _bg_texture: ColorRect
@@ -706,6 +711,20 @@ func _update_levelups() -> void:
 # ==================== 动画更新 ====================
 
 func _update_animation(delta: float) -> void:
+	# 入场动画：从下方滑入 + 淡入（0.4s）
+	if _entry_timer < ENTRY_DURATION:
+		_entry_timer += delta
+		var progress: float = clamp(_entry_timer / ENTRY_DURATION, 0.0, 1.0)
+		var ease_progress: float = ease(progress, 0.5)  # ease_out
+		_entry_offset_y = lerp(200.0, 0.0, ease_progress)
+	else:
+		_entry_offset_y = 0.0
+	
+	# 应用偏移到主容器
+	if has_node("ScrollContainer"):
+		var scroll: ScrollContainer = get_node("ScrollContainer")
+		scroll.position.y = _entry_offset_y
+	
 	if _capture_anim_timer > 0:
 		_capture_anim_timer -= delta
 		_shake_offset_x = sin(_capture_anim_timer * 80.0) * 5.0

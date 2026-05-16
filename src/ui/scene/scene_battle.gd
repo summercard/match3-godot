@@ -134,6 +134,30 @@ var _element_glow: Dictionary = {"type": "", "timer": 0.0, "color": Color()}
 ## 伤害数字弹出队列
 var _damage_popup_queue: Array[Dictionary] = []
 
+## 敌人倒下粒子爆散
+var _defeat_explosions: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size}]
+var _defeated_enemies: Array[int] = []  # 已触发倒下特效的敌人索引（防止重复触发）
+
+## 胜利粒子效果
+var _victory_particles: Array[Dictionary] = []
+
+## 战斗结束慢动作
+var _slowmotion_timer: float = 0.0
+
+## 棋盘屏幕震动（大量消除时）
+var _board_shake_timer: float = 0.0
+var _board_shake_offset: Vector2 = Vector2.ZERO
+
+## 特殊宝石激活动画（4-match 生成强化宝石时）
+var _special_transform_anim: Dictionary = {
+	"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false
+}
+
+## 元素连锁全屏波纹（cross/L/T 触发时）
+var _element_ripple: Dictionary = {
+	"active": false, "color": Color(), "timer": 0.0, "duration": 0.6
+}
+
 ## 关卡数据
 var _stage_data: Dictionary = {}
 var _stage_id: String = ""
@@ -555,6 +579,11 @@ func _process_matches() -> void:
 	_state = BattleState.MATCHING
 	_board.cascade_count += 1
 	
+	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
+	var total_elim: int = matches.size() + enhanced_matches.size() + bomb_matches.size() + rainbow_matches.size()
+	if total_elim >= 5 or _board.cascade_count >= 4:
+		_board_shake_timer = 0.3
+	
 	# ===== 第1步：记录普通消除宝石（动画用）=====
 	_eliminating_gems.clear()
 	for m in matches:
@@ -590,6 +619,24 @@ func _process_matches() -> void:
 		_show_message("💥 十字爆炸！")
 		# 触发火焰连锁光晕
 		_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
+		# 触发元素连锁全屏波纹（cross型）
+		_trigger_element_ripple("fire", Color(1.0, 0.4, 0.0))
+	
+	# 特殊宝石激活动画（4-match 生成强化宝石时的转换特效）
+	if enhanced_matches.size() > 0:
+		# 只对第一个强化宝石播放激活动画（避免动画过多）
+		var first_enh: Dictionary = enhanced_matches[0]
+		var gem_type: String = "fire"
+		if _board != null and first_enh["row"] >= 0 and first_enh["row"] < _board.rows and first_enh["col"] >= 0 and first_enh["col"] < _board.cols:
+			gem_type = _board.grid[first_enh["row"]][first_enh["col"]]
+		_special_transform_anim = {
+			"row": first_enh["row"],
+			"col": first_enh["col"],
+			"type": gem_type,
+			"timer": 0.5,
+			"duration": 0.5,
+			"triggered": false
+		}
 	
 	# 炸弹 emoji + 震动
 	for bomb in bomb_matches:
@@ -915,6 +962,14 @@ func _trigger_attack_shake() -> void:
 func _trigger_element_glow(element_type: String, glow_color: Color) -> void:
 	_element_glow = {"type": element_type, "timer": 0.5, "color": glow_color}
 
+func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
+	_element_ripple = {
+		"active": true,
+		"color": ripple_color,
+		"timer": 0.6,
+		"duration": 0.6
+	}
+
 ## ============================================
 # BOSS 技能视觉
 ## ============================================
@@ -997,74 +1052,108 @@ func _find_enemy_index(name: String) -> int:
 ## ============================================
 
 func _process(delta: float) -> void:
+	# 战斗结束慢动作效果（局部时间缩放，不影响 Engine.time_scale）
+	var effective_delta: float = delta
+	if _slowmotion_timer > 0:
+		_slowmotion_timer -= delta
+		effective_delta = delta * 0.3  # 0.3x 慢动作
+		if _slowmotion_timer <= 0:
+			_slowmotion_timer = 0.0
+			_spawn_victory_particles()  # 慢动作结束后播放胜利粒子
+	
 	# 更新消息
 	if _message_timer > 0:
-		_message_timer -= delta
+		_message_timer -= effective_delta
 	
 	# 更新连击弹窗
 	if _combo_popup.has("combo"):
-		_update_combo_popup(delta)
+		_update_combo_popup(effective_delta)
 	
 	# 更新受击闪烁
 	for i in range(_hit_flashes.size() - 1, -1, -1):
-		_hit_flashes[i]["timer"] -= delta
+		_hit_flashes[i]["timer"] -= effective_delta
 		if _hit_flashes[i]["timer"] <= 0:
 			_hit_flashes.remove_at(i)
 	
 	# 更新倒下提示
 	for i in range(_fall_messages.size() - 1, -1, -1):
-		_fall_messages[i]["timer"] -= delta
+		_fall_messages[i]["timer"] -= effective_delta
 		if _fall_messages[i]["timer"] <= 0:
 			_fall_messages.remove_at(i)
 	
 	# 更新 idle 动画
 	if _state == BattleState.IDLE or _state == BattleState.ENEMY_TURN:
-		_idle_time += delta
+		_idle_time += effective_delta
 	
 	# 更新选中光环脉冲
 	if _selected_gem.x >= 0 and _selected_gem.y >= 0:
-		_selection_pulse += delta
+		_selection_pulse += effective_delta
 	
 	# 更新攻击震动
-	_update_attack_shake(delta)
+	_update_attack_shake(effective_delta)
 	
 	# 更新 HP 渐变动画
-	_update_hp_display(delta)
+	_update_hp_display(effective_delta)
 	
 	# 更新浮动文字
-	_update_floating_texts(delta)
+	_update_floating_texts(effective_delta)
 	
 	# 更新宝石消除动画
-	_update_gem_animations(delta)
+	_update_gem_animations(effective_delta)
 	
 	# 更新特殊消除分时动画
-	_special_elim_timer += delta
+	_special_elim_timer += effective_delta
 	for phase in _special_elim_phases:
 		if phase["triggered"]:
 			continue
-		phase["timer"] += delta
+		phase["timer"] += effective_delta
 		if phase["timer"] >= phase["delay"]:
 			phase["triggered"] = true
 			_trigger_special_elim(phase)
 	
 	# 更新彩虹全屏闪光
 	if _rainbow_flash > 0:
-		_rainbow_flash -= delta
+		_rainbow_flash -= effective_delta
 	
 	# 更新下落动画
-	_update_fall_animations(delta)
+	_update_fall_animations(effective_delta)
 	
 	# 更新解锁碎裂动画
-	_update_unlock_animations(delta)
+	_update_unlock_animations(effective_delta)
 	
 	# 更新毒雾扩散动画
-	_update_poison_fog_anims(delta)
+	_update_poison_fog_anims(effective_delta)
 	
 	# 更新宝石消除粒子
-	_update_gem_particles(delta)
+	_update_gem_particles(effective_delta)
 	
 	# 更新障碍物破坏粒子
-	_update_obstacle_particles(delta)
+	_update_obstacle_particles(effective_delta)
+	
+	# 更新敌人倒下粒子
+	_update_defeat_particles(effective_delta)
+	
+	# 更新胜利粒子
+	_update_victory_particles(effective_delta)
+	
+	# 更新棋盘屏幕震动
+	if _board_shake_timer > 0:
+		_board_shake_timer -= effective_delta
+		var intensity: float = maxf(0.0, _board_shake_timer / 0.3)  # 0.3s 时长，逐渐减弱
+		_board_shake_offset.x = (randf() - 0.5) * 6.0 * intensity
+		_board_shake_offset.y = (randf() - 0.5) * 4.0 * intensity
+	else:
+		_board_shake_offset = Vector2.ZERO
+	
+	# 更新特殊宝石激活动画
+	if _special_transform_anim.get("timer", 0.0) > 0:
+		_special_transform_anim["timer"] -= effective_delta
+	
+	# 更新元素连锁全屏波纹
+	if _element_ripple.get("active", false):
+		_element_ripple["timer"] -= effective_delta
+		if _element_ripple["timer"] <= 0:
+			_element_ripple["active"] = false
 	
 	# 同步 BOSS 技能视觉状态
 	_sync_boss_skill_visuals()
@@ -1217,6 +1306,12 @@ func _draw() -> void:
 	# 渲染障碍物破坏粒子
 	_draw_obstacle_particles()
 	
+	# 渲染敌人倒下粒子
+	_draw_defeat_particles()
+	
+	# 渲染胜利粒子
+	_draw_victory_particles()
+	
 	# 选中高亮
 	_draw_selection()
 	
@@ -1261,6 +1356,12 @@ func _draw() -> void:
 	
 	# 元素连锁光晕
 	_draw_element_glow()
+	
+	# 元素连锁全屏波纹（cross/L/T 触发）
+	_draw_element_ripple()
+	
+	# 特殊宝石激活动画
+	_draw_special_transform()
 	
 	# 关闭震动
 	if _attack_shake_timer > 0:
@@ -1337,6 +1438,11 @@ func _draw_enemy_card(x: float, y: float, index: int, name: String, hp: int, max
 	
 	# HP 数值
 	_draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 82, C["text_muted"], 9.0)
+	
+	# 敌人倒下特效：当 HP <= 0 且未被处理过
+	if hp <= 0 and not _defeated_enemies.has(index):
+		_defeated_enemies.append(index)
+		_spawn_defeat_particles(x + card_w / 2.0, y + card_h / 2.0, C["danger"])
 	
 	# ===== BOSS 技能视觉反馈 =====
 	if _boss_skill_visuals.has(index) and hp > 0:
@@ -1436,12 +1542,12 @@ func _draw_board_background() -> void:
 
 func _draw_board() -> void:
 	var cell_size := 42.0
-	var board_x := (DESIGN_W - 336.0) / 2.0
-	var board_y := 280.0
+	var board_x := (DESIGN_W - 336.0) / 2.0 + _board_shake_offset.x
+	var board_y := 280.0 + _board_shake_offset.y
 	if _board != null:
 		cell_size = float(_board.cell_size)
-		board_x = float(_board.offset_x)
-		board_y = float(_board.offset_y)
+		board_x = float(_board.offset_x) + _board_shake_offset.x
+		board_y = float(_board.offset_y) + _board_shake_offset.y
 	
 	for row in range(8):
 		for col in range(8):
@@ -1918,6 +2024,63 @@ func _update_obstacle_particles(delta: float) -> void:
 		if p["life"] <= 0:
 			_obstacle_particles.remove_at(i)
 
+func _update_defeat_particles(delta: float) -> void:
+	for i in range(_defeat_explosions.size() - 1, -1, -1):
+		var p: Dictionary = _defeat_explosions[i]
+		p["x"] += p["vx"] * delta
+		p["y"] += p["vy"] * delta
+		p["vy"] += 180.0 * delta  # 下落加速
+		p["life"] -= delta
+		if p["life"] <= 0:
+			_defeat_explosions.remove_at(i)
+
+func _update_victory_particles(delta: float) -> void:
+	for i in range(_victory_particles.size() - 1, -1, -1):
+		var p: Dictionary = _victory_particles[i]
+		p["x"] += p["vx"] * delta
+		p["y"] += p["vy"] * delta
+		p["vy"] += 80.0 * delta  # 轻微下落
+		p["life"] -= delta
+		if p["life"] <= 0:
+			_victory_particles.remove_at(i)
+
+func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
+	# 生成 8-12 个粒子向外散射
+	var count: int = 8 + randi() % 5
+	for i in range(count):
+		var angle: float = randf() * TAU
+		var speed: float = 80.0 + randf() * 120.0
+		_defeat_explosions.append({
+			"x": cx,
+			"y": cy,
+			"vx": cos(angle) * speed,
+			"vy": sin(angle) * speed - 50.0,
+			"life": 0.4 + randf() * 0.2,
+			"max_life": 0.4 + randf() * 0.2,
+			"color": color,
+			"size": 4.0 + randf() * 4.0
+		})
+
+func _spawn_victory_particles() -> void:
+	# 全屏胜利粒子爆发
+	var colors: Array[Color] = [C["gold"], C["success"], Color(1.0, 1.0, 1.0), C["primary"]]
+	for i in range(30):
+		var x: float = randf() * DESIGN_W
+		var y: float = DESIGN_H + 20.0  # 从底部开始
+		var vx: float = (randf() - 0.5) * 60.0
+		var vy: float = -120.0 - randf() * 80.0  # 向上飞
+		var color: Color = colors[randi() % colors.size()]
+		_victory_particles.append({
+			"x": x,
+			"y": y,
+			"vx": vx,
+			"vy": vy,
+			"life": 1.0 + randf() * 0.5,
+			"max_life": 1.0 + randf() * 0.5,
+			"color": color,
+			"size": 3.0 + randf() * 3.0
+		})
+
 func _draw_gem_particles() -> void:
 	for p: Dictionary in _gem_particles:
 		var progress: float = 1.0 - p["life"] / p["max_life"]
@@ -1934,6 +2097,22 @@ func _draw_obstacle_particles() -> void:
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
 		var half_size: float = size / 2.0
 		_draw_rounded_rect(p["x"] - half_size, p["y"] - half_size, size, size, 1.0, color)
+
+func _draw_defeat_particles() -> void:
+	for p: Dictionary in _defeat_explosions:
+		var progress: float = 1.0 - p["life"] / p["max_life"]
+		var alpha: float = 1.0 - progress
+		var size: float = p["size"] * (1.0 - progress * 0.5)
+		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
+		_draw_circle(p["x"], p["y"], size, color)
+
+func _draw_victory_particles() -> void:
+	for p: Dictionary in _victory_particles:
+		var progress: float = 1.0 - p["life"] / p["max_life"]
+		var alpha: float = 1.0 - progress
+		var size: float = p["size"] * (1.0 - progress * 0.4)
+		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
+		_draw_circle(p["x"], p["y"], size, color)
 
 ## ============================================
 # 辅助绘制方法
@@ -1987,6 +2166,69 @@ func _draw_element_glow() -> void:
 	glow_color.a = alpha
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), glow_color)
 
+func _draw_element_ripple() -> void:
+	if not _element_ripple.get("active", false) or _element_ripple.get("timer", 0.0) <= 0:
+		return
+	var duration: float = _element_ripple.get("duration", 0.6)
+	var timer: float = _element_ripple.get("timer", 0.0)
+	var progress: float = 1.0 - timer / duration
+	var alpha: float = 0.4 * (1.0 - progress)
+	var edge_width: float = 30.0 * (1.0 - progress)
+	
+	var ripple_color: Color = Color(
+		_element_ripple.get("color", Color.WHITE).r,
+		_element_ripple.get("color", Color.WHITE).g,
+		_element_ripple.get("color", Color.WHITE).b,
+		alpha
+	)
+	# 上边
+	draw_rect(Rect2(0, 0, DESIGN_W, edge_width), ripple_color)
+	# 下边
+	draw_rect(Rect2(0, DESIGN_H - edge_width, DESIGN_W, edge_width), ripple_color)
+	# 左边
+	draw_rect(Rect2(0, 0, edge_width, DESIGN_H), ripple_color)
+	# 右边
+	draw_rect(Rect2(DESIGN_W - edge_width, 0, edge_width, DESIGN_H), ripple_color)
+
+func _draw_special_transform() -> void:
+	if _special_transform_anim.get("timer", 0.0) <= 0 or _special_transform_anim.get("triggered", false):
+		return
+	var anim: Dictionary = _special_transform_anim
+	var duration: float = anim.get("duration", 0.5)
+	var timer: float = anim.get("timer", 0.0)
+	var progress: float = 1.0 - timer / duration
+	
+	# 计算位置
+	var cell_size: float = float(_board.cell_size) if _board != null else 42.0
+	var board_x: float = float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y: float = float(_board.offset_y) if _board != null else 280.0
+	var row: int = anim.get("row", -1)
+	var col: int = anim.get("col", -1)
+	if row < 0 or col < 0:
+		return
+	
+	var cx: float = board_x + col * cell_size + cell_size / 2.0
+	var cy: float = board_y + row * cell_size + cell_size / 2.0
+	
+	# 闪光特效：白色圆形扩散
+	if progress < 0.3:
+		var flash_progress: float = progress / 0.3
+		var flash_size: float = cell_size * 1.5 * flash_progress
+		var flash_alpha: float = 0.8 * (1.0 - flash_progress)
+		_draw_circle(cx, cy, flash_size, Color(1.0, 1.0, 1.0, flash_alpha))
+	
+	# 特殊宝石缩放动画（progress 0→0.4：0.5→1.2，0.4→1.0：1.2→1.0）
+	var gem_scale: float = 1.0
+	if progress < 0.4:
+		gem_scale = lerp(0.5, 1.2, progress / 0.4)
+	else:
+		gem_scale = lerp(1.2, 1.0, (progress - 0.4) / 0.6)
+	
+	# 重新绘制该位置的宝石（带缩放）
+	var gem_type: String = anim.get("type", "fire")
+	var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
+	_draw_gem_animated(cx, cy, gem_type, gem_color, gem_scale, 1.0)
+
 func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: float = 1.0) -> void:
 	var panel_tex := _get_texture("res://assets/images/battle/ui/ui_panel_dark_large.png")
 	if panel_tex:
@@ -2017,6 +2259,11 @@ func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximu
 
 func _go_to_result() -> void:
 	print("[SceneBattle] 进入结算画面")
+	# 触发战斗结束慢动作效果
+	_slowmotion_timer = 0.5  # 0.5s 慢动作（0.3x 速度）
+	# 延迟进入结算，等待慢动作和粒子效果完成
+	await get_tree().create_timer(0.6).timeout
+	
 	var result: Dictionary = _battle.get_battle_result() if _battle != null else {"result": "win"}
 	if has_node("/root/SceneManager"):
 		get_node("/root/SceneManager").switch_scene("result", result)
@@ -2039,6 +2286,15 @@ func destroy() -> void:
 	_gem_particles.clear()
 	_obstacle_particles.clear()
 	_special_elim_phases.clear()
+	_defeat_explosions.clear()
+	_victory_particles.clear()
+	_defeated_enemies.clear()
+	_special_transform_anim = {"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false}
+	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
+	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
+	_combo_popup = {"combo": 0, "timer": 0.0, "phase": "", "scale": 0.5, "opacity": 0.0}
+	_drag_preview = {"active": false, "direction": Vector2i.ZERO, "from_pos": Vector2.ZERO}
+	_swipe_trail.clear()
 
 ## ============================================
 # 宝石消除动画更新
