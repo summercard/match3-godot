@@ -72,6 +72,14 @@ var _idle_time: float = 0.0
 var _enemy_display_hp: Array[Dictionary] = []
 var _player_display_hp: Array[Dictionary] = []
 
+## 宝石消除动画
+var _eliminating_gems: Array[Dictionary] = []  # [{row, col, timer, duration}]
+const ELIMINATE_DURATION: float = 0.3
+
+## 宝石下落动画
+var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
+const FALL_DURATION: float = 0.25
+
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
 
@@ -439,6 +447,22 @@ func _process_matches() -> void:
 	
 	_state = BattleState.MATCHING
 	_board.cascade_count += 1
+	
+	# 记录消除的宝石位置（动画用）
+	_eliminating_gems.clear()
+	for m in matches:
+		if m is Dictionary and m.has("row") and m.has("col"):
+			_eliminating_gems.append({
+				"row": m["row"],
+				"col": m["col"],
+				"timer": 0.0,
+				"duration": ELIMINATE_DURATION
+			})
+	
+	# 等消除动画播放
+	await get_tree().create_timer(ELIMINATE_DURATION).timeout
+	_eliminating_gems.clear()
+	
 	var gem_counts: Dictionary = _board.remove_matches(matches)
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
 	for log: Dictionary in result.get("damage_log", []):
@@ -453,11 +477,13 @@ func _process_matches() -> void:
 		})
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
 	
-	await get_tree().create_timer(0.3).timeout
+	# 触发攻击震动
+	_trigger_attack_shake()
+	
 	_apply_gravity()
 	_state = BattleState.FALLING
 	
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(FALL_DURATION).timeout
 	_process_matches()
 
 func _apply_gravity() -> void:
@@ -558,6 +584,15 @@ func _process(delta: float) -> void:
 	
 	# 更新浮动文字
 	_update_floating_texts(delta)
+	
+	# 更新宝石消除动画
+	_update_gem_animations(delta)
+	
+	# 更新下落动画
+	_update_fall_animations(delta)
+	
+	# 每帧重绘
+	queue_redraw()
 
 func _update_combo_popup(dt: float) -> void:
 	_combo_popup["timer"] += dt
@@ -844,21 +879,47 @@ func _draw_board() -> void:
 			var gem_type: String = _board.grid[row][col]
 			if gem_type == "":
 				continue
+			
+			# 检查是否在消除动画中
+			var is_eliminating := false
+			var elim_progress := 0.0
+			for eg in _eliminating_gems:
+				if eg["row"] == row and eg["col"] == col:
+					is_eliminating = true
+					elim_progress = eg["timer"] / eg["duration"]
+					break
+			
 			var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
-			_draw_gem(x + cell_size / 2.0, y + cell_size / 2.0, gem_type, gem_color)
+			var cx := x + cell_size / 2.0
+			var cy := y + cell_size / 2.0
+			
+			if is_eliminating:
+				# 消除动画：放大+淡出
+				var scale := 1.0 + 0.5 * elim_progress
+				var alpha := 1.0 - elim_progress
+				_draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha)
+			else:
+				# idle 状态下轻微呼吸
+				var idle_scale := 1.0 + 0.02 * sin(_idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
+				_draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, 1.0)
 
 func _draw_gem(cx: float, cy: float, gem_type: String, color: Color) -> void:
+	_draw_gem_animated(cx, cy, gem_type, color, 1.0, 1.0)
+
+func _draw_gem_animated(cx: float, cy: float, gem_type: String, color: Color, scale: float, alpha: float) -> void:
 	var gem_tex := _get_texture(GEM_IMAGE_PATHS.get(gem_type, ""))
+	var draw_size := 36.0 * scale
+	
 	if gem_tex:
-		_draw_texture_fit(gem_tex, Rect2(cx - 18.0, cy - 18.0, 36.0, 36.0))
+		_draw_texture_fit(gem_tex, Rect2(cx - draw_size / 2.0, cy - draw_size / 2.0, draw_size, draw_size), alpha)
 		return
 	
-	var radius := 15.0
+	var radius := 15.0 * scale
 	# 圆形宝石
-	_draw_circle(cx, cy, radius, color)
+	_draw_circle(cx, cy, radius, Color(color.r, color.g, color.b, alpha))
 	
 	# 高光
-	_draw_circle(cx - 2, cy - 2, radius * 0.5, Color(1.0, 1.0, 1.0, 0.3))
+	_draw_circle(cx - 2.0 * scale, cy - 2.0 * scale, radius * 0.5, Color(1.0, 1.0, 1.0, 0.3 * alpha))
 	
 	# Emoji
 	var emoji: String = GEM_EMOJI.get(gem_type, "💎")
@@ -1053,3 +1114,26 @@ func destroy() -> void:
 	_hit_flashes.clear()
 	_fall_messages.clear()
 	_eliminating_gems.clear()
+	_falling_gems.clear()
+
+## ============================================
+# 宝石消除动画更新
+## ============================================
+
+func _update_gem_animations(delta: float) -> void:
+	for i in range(_eliminating_gems.size() - 1, -1, -1):
+		var eg: Dictionary = _eliminating_gems[i]
+		eg["timer"] += delta
+		if eg["timer"] >= eg["duration"]:
+			_eliminating_gems.remove_at(i)
+
+## ============================================
+# 宝石下落动画更新
+## ============================================
+
+func _update_fall_animations(delta: float) -> void:
+	for i in range(_falling_gems.size() - 1, -1, -1):
+		var fg: Dictionary = _falling_gems[i]
+		fg["timer"] += delta
+		if fg["timer"] >= fg["duration"]:
+			_falling_gems.remove_at(i)

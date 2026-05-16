@@ -78,8 +78,8 @@ static func get_status_def(status_type: String) -> Dictionary:
 func is_enemy_stunned(enemy_index: int) -> bool:
 	if enemy_index < 0 or enemy_index >= _effects.size():
 		return false
-	var effect: Dictionary = _effects[enemy_index]
-	if effect == null or effect.get("type", "") != "stun":
+	var effect = _effects[enemy_index]
+	if effect == null or not effect is Dictionary or effect.get("type", "") != "stun":
 		return false
 	var skip_chance: float = STATUS_DEFS["stun"].get("skip_chance", 0.50)
 	return randf() < skip_chance
@@ -89,8 +89,8 @@ func is_enemy_stunned(enemy_index: int) -> bool:
 func get_freeze_atk_multiplier(enemy_index: int) -> float:
 	if enemy_index < 0 or enemy_index >= _effects.size():
 		return 1.0
-	var effect: Dictionary = _effects[enemy_index]
-	if effect == null or effect.get("type", "") != "freeze":
+	var effect = _effects[enemy_index]
+	if effect == null or not effect is Dictionary or effect.get("type", "") != "freeze":
 		return 1.0
 	var reduction: float = STATUS_DEFS["freeze"].get("atk_reduction", 0.30)
 	return 1.0 - reduction
@@ -156,8 +156,8 @@ func process_status_effects(enemies: Array) -> Array:
 		var enemy: Dictionary = enemies[i]
 		if enemy == null or enemy.get("hp", 0) <= 0:
 			continue
-		var effect: Dictionary = _effects[i]
-		if effect == null:
+		var effect = _effects[i]
+		if effect == null or not effect is Dictionary:
 			continue
 
 		var def: Dictionary = STATUS_DEFS.get(effect.get("type", ""), {})
@@ -219,13 +219,18 @@ func get_effect_log() -> Array:
 func _get_weakest_enemy(enemies: Array) -> Dictionary:
 	var weakest: Dictionary = {}
 	var min_hp: int = 999999999
+	var found: bool = false
 
 	for enemy in enemies:
-		if enemy == null or enemy.get("hp", 0) <= 0:
+		if enemy == null or not enemy is Dictionary or enemy.get("hp", 0) <= 0:
 			continue
 		var hp: int = enemy.get("hp", 0)
 		if hp < min_hp:
 			min_hp = hp
 			weakest = enemy
+			found = true
+
+	if not found:
+		return {}
 
 	return weakest

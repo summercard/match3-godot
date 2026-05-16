@@ -24,8 +24,8 @@ GameManager="*res://src/core/game_manager.gd"
 
 window/size/viewport_width=375
 window/size/viewport_height=667
-window/size/window_width_override=450
-window/size/window_height_override=800
+window/size/window_width_override=540
+window/size/window_height_override=960
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 window/handheld/orientation=1
