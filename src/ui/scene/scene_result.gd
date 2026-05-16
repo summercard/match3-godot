@@ -73,6 +73,7 @@ var _has_next_stage: bool = false
 # 收服特效
 var _shake_offset_x: float = 0.0
 var _capture_anim_timer: float = 0.0
+var _capture_effect_node: CaptureEffect = null
 
 # ==================== 生命周期 ====================
 
@@ -354,8 +355,8 @@ func _process_capture() -> void:
 			player_data["captureFails"] = 0 if _captured else (consecutive_fails + 1)
 			_storage.save_player(player_data)
 		
-		if not _captured:
-			_start_shake_animation()
+		# 播放收服特效（CaptureEffect 闪白+弹跳+GET! / 震动+MISS）
+		_play_capture_effect()
 
 func _calc_capture_probability(hp: float, max_hp: float, player_level: int, enemy_level: int, rarity: int, consecutive_fails: int) -> float:
 	var hp_ratio: float = hp / max_hp if max_hp > 0.0 else 0.0
@@ -391,6 +392,23 @@ func _get_capture_result_text(prob: float, captured: bool) -> Dictionary:
 
 func _start_shake_animation() -> void:
 	_capture_anim_timer = 0.5
+
+func _play_capture_effect() -> void:
+	# 计算收服目标怪物在屏幕上的中心位置（敌方区域 y≈80-170）
+	var center_pos := Vector2(DESIGN_W / 2.0, 125.0)
+	if not _capture_target.is_empty():
+		var enemies: Array = _battle_result.get("enemies", [])
+		var idx: int = enemies.find(_capture_target)
+		if idx < 0:
+			# 回退：在 enemies 数组中查找 id 匹配的
+			for i: int in range(enemies.size()):
+				if enemies[i] and enemies[i].get("id", "") == _capture_target.get("id", ""):
+					idx = i
+					break
+		if idx >= 0:
+			center_pos = Vector2(15.0 + idx * 120.0 + 55.0, 125.0)
+	
+	_capture_effect_node = CaptureEffect.play_capture(self, _captured, center_pos)
 
 func _calc_rewards() -> void:
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
@@ -755,6 +773,9 @@ func _go_to_scene(scene_name: String, params: Dictionary = {}) -> void:
 		push_error("SceneManager not found — pure code architecture requires SceneManager autoload")
 
 func destroy() -> void:
+	if _capture_effect_node and is_instance_valid(_capture_effect_node):
+		_capture_effect_node.queue_free()
+		_capture_effect_node = null
 	_game = null
 	_storage = null
 	_achievement_manager = null

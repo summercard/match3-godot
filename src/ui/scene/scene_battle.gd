@@ -89,6 +89,12 @@ var _poison_fog_spread_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}
 ## 毒雾清除动画队列
 var _poison_fog_clear_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}]
 
+## 特殊消除动画队列
+var _special_elim_phases: Array = []  # [{type, gems, delay, timer, triggered}]
+var _special_elim_timer: float = 0.0
+var _rainbow_flash: float = 0.0       # 全屏闪光倒计时
+const RAINBOW_FLASH_DURATION: float = 0.4
+
 ## 宝石消除粒子系统
 var _gem_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size}]
 
@@ -140,7 +146,10 @@ const C := {
 	"white": Color(1.0, 1.0, 1.0),
 	"text_primary": Color(1.0, 1.0, 1.0),
 	"text_secondary": Color(0.7, 0.75, 0.85),
-	"text_muted": Color(0.5, 0.55, 0.65)
+	"text_muted": Color(0.5, 0.55, 0.65),
+	"shield": Color(0.314, 0.706, 1.0),
+	"heal_green": Color(0.0, 1.0, 0.533),
+	"charged_attack": Color(1.0, 0.267, 0.267)
 }
 
 ## 宝石颜色映射
@@ -246,6 +255,9 @@ func init(data: Dictionary = {}) -> void:
 	_poison_fog_clear_anims = []
 	_gem_particles = []
 	_obstacle_particles = []
+	_special_elim_phases = []
+	_special_elim_timer = 0.0
+	_rainbow_flash = 0.0
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -294,6 +306,10 @@ func _init_battle() -> void:
 	_battle = BattleManager.new()
 	add_child(_battle)
 	_battle.init(player_team_ids, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
+	
+	# 连接 BOSS 技能信号
+	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
+		_battle.enemy_skill_action.connect(_on_enemy_skill_action)
 	
 	_show_message(_stage_data.get("name", "战斗开始！"))
 
@@ -476,7 +492,11 @@ func _process_matches() -> void:
 	
 	var match_result: Dictionary = _board.find_matches()
 	var matches: Array = match_result.get("gems", [])
-	if matches.is_empty():
+	var enhanced_matches: Array = match_result.get("enhanced", [])
+	var bomb_matches: Array = match_result.get("bomb", [])
+	var rainbow_matches: Array = match_result.get("rainbow", [])
+	
+	if matches.is_empty() and enhanced_matches.is_empty() and bomb_matches.is_empty() and rainbow_matches.is_empty():
 		if _board.cascade_count >= 2:
 			_show_combo_popup(_board.cascade_count)
 		if _check_battle_end():
@@ -487,25 +507,100 @@ func _process_matches() -> void:
 	_state = BattleState.MATCHING
 	_board.cascade_count += 1
 	
-	# 记录消除的宝石位置（动画用）
+	# ===== 第1步：记录普通消除宝石（动画用）=====
 	_eliminating_gems.clear()
 	for m in matches:
 		if m is Dictionary and m.has("row") and m.has("col"):
-			_eliminating_gems.append({
-				"row": m["row"],
-				"col": m["col"],
-				"timer": 0.0,
-				"duration": ELIMINATE_DURATION
-			})
-			# 触发宝石消除粒子
+			_eliminating_gems.append({"row": m["row"], "col": m["col"], "timer": 0.0, "duration": ELIMINATE_DURATION})
 			if m.has("type"):
 				spawn_eliminate_particles(m["row"], m["col"], m["type"])
 	
-	# 等消除动画播放
+	# ===== 第2步：收集特殊消除宝石 =====
+	var explosion_gems: Array = _collect_explosion_gems(enhanced_matches, matches)
+	var all_excluded: Array = matches + explosion_gems
+	var bomb_gems: Array = _collect_bomb_gems(bomb_matches, all_excluded)
+	var all_excluded_2: Array = all_excluded + bomb_gems
+	var rainbow_gems: Array = _collect_rainbow_gems(rainbow_matches, all_excluded_2)
+	
+	# ===== 第3步：构建分时消除动画队列 =====
+	_special_elim_phases.clear()
+	if explosion_gems.size() > 0:
+		_special_elim_phases.append({"type": "explosion", "gems": explosion_gems, "delay": 0.1, "timer": 0.0, "triggered": false})
+	if bomb_gems.size() > 0:
+		_special_elim_phases.append({"type": "bomb", "gems": bomb_gems, "delay": 0.15, "timer": 0.0, "triggered": false})
+	if rainbow_gems.size() > 0:
+		_special_elim_phases.append({"type": "rainbow", "gems": rainbow_gems, "delay": 0.2, "timer": 0.0, "triggered": false})
+	_special_elim_timer = 0.0
+	
+	# ===== 第4步：特殊消除的视觉提示 =====
+	# 十字爆炸 emoji
+	for enh in enhanced_matches:
+		var cell_size: float = float(_board.cell_size)
+		var cx: float = float(_board.offset_x + enh["col"] * cell_size + cell_size / 2.0)
+		var cy: float = float(_board.offset_y + enh["row"] * cell_size + cell_size / 2.0)
+		_floating_texts.append({"text": "💥", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 22.0, "timer": 0.0, "duration": 0.8})
+		_show_message("💥 十字爆炸！")
+	
+	# 炸弹 emoji + 震动
+	for bomb in bomb_matches:
+		var cell_size: float = float(_board.cell_size)
+		var cx: float = float(_board.offset_x + bomb["col"] * cell_size + cell_size / 2.0)
+		var cy: float = float(_board.offset_y + bomb["row"] * cell_size + cell_size / 2.0)
+		var shape: String = bomb.get("shape", "?")
+		_floating_texts.append({"text": "💣", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 24.0, "timer": 0.0, "duration": 0.8})
+		_show_message("💣 %s形炸弹爆炸！" % shape)
+		_trigger_attack_shake()
+	
+	# 彩虹 emoji + 全屏闪光 + 震动
+	for rainbow in rainbow_matches:
+		_rainbow_flash = RAINBOW_FLASH_DURATION
+		_show_message("🌈 彩虹消除！清除全部%s！" % GEM_EMOJI.get(rainbow["type"], "💎"))
+		_trigger_attack_shake()
+		var match_cells: Array = rainbow.get("matchCells", rainbow.get("cells", []))
+		if match_cells.size() > 0:
+			var cell_size: float = float(_board.cell_size)
+			var cx: float = float(_board.offset_x + match_cells[0]["col"] * cell_size + cell_size / 2.0)
+			var cy: float = float(_board.offset_y + match_cells[0]["row"] * cell_size + cell_size / 2.0)
+			_floating_texts.append({"text": "🌈", "x": cx, "y": cy - 15.0, "color": C["white"], "size": 28.0, "timer": 0.0, "duration": 1.0})
+	
+	# ===== 第5步：播放普通消除动画 =====
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
 	_eliminating_gems.clear()
 	
+	# ===== 第6步：执行消除（普通 + 特殊）=====
 	var gem_counts: Dictionary = _board.remove_matches(matches)
+	
+	# 十字爆炸消除
+	for enh in enhanced_matches:
+		var positions: Array = _board.get_cross_explosion_positions(enh["row"], enh["col"])
+		var e_counts: Dictionary = _board.remove_explosion_gems(positions)
+		for type_key in e_counts:
+			gem_counts[type_key] = gem_counts.get(type_key, 0) + e_counts[type_key]
+	
+	# 炸弹消除
+	for bomb in bomb_matches:
+		var positions: Array = _board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
+		var b_counts: Dictionary = _board.remove_explosion_gems(positions)
+		for type_key in b_counts:
+			gem_counts[type_key] = gem_counts.get(type_key, 0) + b_counts[type_key]
+	
+	# 彩虹消除
+	var rainbow_removed_set: Array = []
+	for m in matches:
+		rainbow_removed_set.append("%d,%d" % [m["row"], m["col"]])
+	for g in explosion_gems:
+		rainbow_removed_set.append("%d,%d" % [g["row"], g["col"]])
+	for g in bomb_gems:
+		rainbow_removed_set.append("%d,%d" % [g["row"], g["col"]])
+	for rainbow in rainbow_matches:
+		var positions: Array = _board.get_rainbow_positions(rainbow["type"], rainbow_removed_set)
+		var r_counts: Dictionary = _board.remove_explosion_gems(positions)
+		for type_key in r_counts:
+			gem_counts[type_key] = gem_counts.get(type_key, 0) + r_counts[type_key]
+		for p in positions:
+			rainbow_removed_set.append("%d,%d" % [p["row"], p["col"]])
+	
+	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
 	for log: Dictionary in result.get("damage_log", []):
 		_floating_texts.append({
@@ -518,19 +613,115 @@ func _process_matches() -> void:
 			"duration": 0.8
 		})
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
-	
-	# 触发攻击震动
 	_trigger_attack_shake()
 	
+	# 等待所有特殊消除动画完成（最大延迟 0.2 + 消除时间 0.3）
+	var special_wait: float = 0.0
+	if _special_elim_phases.size() > 0:
+		special_wait = 0.5
+	await get_tree().create_timer(maxf(FALL_DURATION, special_wait)).timeout
+	_special_elim_phases.clear()
+	
+	# ===== 第8步：下落 + 递归 =====
 	_apply_gravity()
 	_state = BattleState.FALLING
-	
 	await get_tree().create_timer(FALL_DURATION).timeout
 	_process_matches()
 
 func _apply_gravity() -> void:
 	if _board:
 		_board.apply_gravity()
+
+## 收集十字爆炸宝石（去重）
+func _collect_explosion_gems(enhanced_matches: Array, normal_gems: Array) -> Array:
+	var gems: Array = []
+	var normal_set: Dictionary = {}
+	for m in normal_gems:
+		normal_set["%d,%d" % [m["row"], m["col"]]] = true
+	for enh in enhanced_matches:
+		var positions: Array = _board.get_cross_explosion_positions(enh["row"], enh["col"])
+		for p in positions:
+			var key: String = "%d,%d" % [p["row"], p["col"]]
+			if not normal_set.has(key):
+				normal_set[key] = true
+				var cell_size: float = float(_board.cell_size)
+				gems.append({
+					"row": p["row"],
+					"col": p["col"],
+					"type": p["type"],
+					"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
+					"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
+					"is_explosion": true
+				})
+	return gems
+
+## 收集炸弹消除宝石（去重，排除普通+爆炸已消除）
+func _collect_bomb_gems(bomb_matches: Array, excluded_gems: Array) -> Array:
+	var gems: Array = []
+	var removed_set: Dictionary = {}
+	for g in excluded_gems:
+		removed_set["%d,%d" % [g.get("row", -1), g.get("col", -1)]] = true
+	for bomb in bomb_matches:
+		var positions: Array = _board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
+		for p in positions:
+			var key: String = "%d,%d" % [p["row"], p["col"]]
+			if not removed_set.has(key):
+				removed_set[key] = true
+				var cell_size: float = float(_board.cell_size)
+				gems.append({
+					"row": p["row"],
+					"col": p["col"],
+					"type": p["type"],
+					"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
+					"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
+					"is_bomb": true
+				})
+	return gems
+
+## 收集彩虹消除宝石（去重，排除之前所有已消除）
+func _collect_rainbow_gems(rainbow_matches: Array, all_removed: Array) -> Array:
+	var gems: Array = []
+	var removed_set: Dictionary = {}
+	for g in all_removed:
+		removed_set["%d,%d" % [g.get("row", -1), g.get("col", -1)]] = true
+	for rainbow in rainbow_matches:
+		var positions: Array = _board.get_rainbow_positions(rainbow["type"], removed_set.keys())
+		for p in positions:
+			var key: String = "%d,%d" % [p["row"], p["col"]]
+			removed_set[key] = true
+			var cell_size: float = float(_board.cell_size)
+			gems.append({
+				"row": p["row"],
+				"col": p["col"],
+				"type": p["type"],
+				"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
+				"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
+				"is_rainbow": true
+			})
+	return gems
+
+## 触发特殊消除动画
+func _trigger_special_elim(phase: Dictionary) -> void:
+	var type: String = phase["type"]
+	var gems: Array = phase["gems"]
+	
+	for g in gems:
+		var gem_type: String = g.get("type", "")
+		spawn_eliminate_particles(g["row"], g["col"], gem_type)
+		
+		_eliminating_gems.append({"row": g["row"], "col": g["col"], "timer": 0.0, "duration": ELIMINATE_DURATION})
+		
+		var emoji: String = "💥" if type == "explosion" else ("💣" if type == "bomb" else "🌈")
+		var emoji_size: float = 14.0 if type == "explosion" else (13.0 if type == "bomb" else 12.0)
+		_floating_texts.append({
+			"text": GEM_EMOJI.get(gem_type, emoji),
+			"x": g["x"],
+			"y": g["y"] - float(_board.cell_size) / 2.0,
+			"color": GEM_COLORS.get(gem_type, C["white"]),
+			"size": emoji_size,
+			"timer": 0.0,
+			"duration": 0.8
+		})
 
 func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
@@ -541,15 +732,32 @@ func _start_enemy_turn() -> void:
 		return
 	var result: Dictionary = _battle.enemy_action()
 	for action: Dictionary in result.get("actions", []):
+		# 蓄力回合：只显示蓄力提示，不显示伤害
+		if action.get("is_charging", false):
+			_show_message("⚡ %s 正在蓄力..." % action.get("attacker", ""))
+			var attacker_idx := _find_enemy_index(action.get("attacker", ""))
+			if attacker_idx >= 0:
+				if not _boss_skill_visuals.has(attacker_idx):
+					_boss_skill_visuals[attacker_idx] = {
+						"charge_timer": 0.0,
+						"shield_hp": 0.0,
+						"shield_max_hp": 0.0
+					}
+				_boss_skill_visuals[attacker_idx]["charge_timer"] = 999.0
+			continue
+		
 		if action.get("damage", 0) > 0:
+			var dmg_size := 28.0 if action.get("is_charged", false) else 16.0
+			var dmg_color := C["charged_attack"] if action.get("is_charged", false) else C["danger"]
 			_floating_texts.append({
 				"text": "-%d" % action.get("damage", 0),
 				"x": 80.0,
 				"y": 225.0,
-				"color": C["danger"],
-				"size": 16.0,
+				"color": dmg_color,
+				"size": dmg_size,
 				"timer": 0.0,
-				"duration": 0.8
+				"duration": 0.8,
+				"critical": action.get("is_charged", false)
 			})
 	
 	await get_tree().create_timer(0.8).timeout
@@ -588,6 +796,83 @@ func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.2
 	_attack_flash_timer = 0.1
 	_attack_shake_offset_x = 0.0
+
+## ============================================
+# BOSS 技能视觉
+## ============================================
+
+func _on_enemy_skill_action(event: Dictionary) -> void:
+	var idx: int = event.get("enemy_index", -1)
+	if idx < 0:
+		return
+	if not _boss_skill_visuals.has(idx):
+		_boss_skill_visuals[idx] = {
+			"charge_timer": 0.0,
+			"shield_hp": 0.0,
+			"shield_max_hp": 0.0
+		}
+	var vis: Dictionary = _boss_skill_visuals[idx]
+	var event_type: String = event.get("type", "")
+	var enemy: Dictionary = event.get("enemy", {})
+	var enemy_name: String = enemy.get("name", "???")
+	match event_type:
+		"charge_start":
+			vis["charge_timer"] = 999.0
+			_show_message("⚡ %s 正在蓄力..." % enemy_name)
+		"charge_release":
+			vis["charge_timer"] = 0.0
+			var dmg_mult: float = event.get("damage_multiplier", 2.0)
+			_show_message("💥 %s 蓄力攻击！×%.1f" % [enemy_name, dmg_mult])
+			_trigger_attack_shake()
+			_screen_flash_timer = 0.3
+		"shield_appear":
+			vis["shield_hp"] = float(event.get("shield_hp", 0))
+			vis["shield_max_hp"] = float(event.get("shield_max_hp", 0))
+			_show_message("🛡️ %s 生成了护盾！" % enemy_name)
+		"heal":
+			var heal_amount: int = event.get("heal_amount", 0)
+			var ex: float = 15.0 + idx * 120.0 + 55.0
+			var ey: float = 80.0
+			_floating_texts.append({
+				"text": "+%d" % heal_amount,
+				"x": ex,
+				"y": ey,
+				"color": C["heal_green"],
+				"size": 22.0,
+				"timer": 0.0,
+				"duration": 1.0,
+				"critical": true
+			})
+			_show_message("💚 %s 回复了 %d HP！" % [enemy_name, heal_amount])
+
+func _sync_boss_skill_visuals() -> void:
+	if _battle == null:
+		return
+	var skill_states: Dictionary = _battle.enemy_skill_states
+	for idx in skill_states.keys():
+		var skill_state: Dictionary = skill_states[idx]
+		if not _boss_skill_visuals.has(idx):
+			_boss_skill_visuals[idx] = {
+				"charge_timer": 0.0,
+				"shield_hp": 0.0,
+				"shield_max_hp": 0.0
+			}
+		var vis: Dictionary = _boss_skill_visuals[idx]
+		if skill_state.has("shield"):
+			vis["shield_hp"] = float(skill_state["shield"].get("current_hp", 0))
+			vis["shield_max_hp"] = float(skill_state["shield"].get("max_hp", 0))
+		if skill_state.has("charge"):
+			if skill_state["charge"].get("is_charging", false):
+				vis["charge_timer"] = 999.0
+
+func _find_enemy_index(name: String) -> int:
+	if _battle == null:
+		return -1
+	var enemies: Array = _battle.enemies
+	for i in range(enemies.size()):
+		if enemies[i] != null and enemies[i].get("name", "") == name:
+			return i
+	return -1
 
 ## ============================================
 # 更新逻辑
@@ -630,6 +915,20 @@ func _process(delta: float) -> void:
 	# 更新宝石消除动画
 	_update_gem_animations(delta)
 	
+	# 更新特殊消除分时动画
+	_special_elim_timer += delta
+	for phase in _special_elim_phases:
+		if phase["triggered"]:
+			continue
+		phase["timer"] += delta
+		if phase["timer"] >= phase["delay"]:
+			phase["triggered"] = true
+			_trigger_special_elim(phase)
+	
+	# 更新彩虹全屏闪光
+	if _rainbow_flash > 0:
+		_rainbow_flash -= delta
+	
 	# 更新下落动画
 	_update_fall_animations(delta)
 	
@@ -644,6 +943,9 @@ func _process(delta: float) -> void:
 	
 	# 更新障碍物破坏粒子
 	_update_obstacle_particles(delta)
+	
+	# 同步 BOSS 技能视觉状态
+	_sync_boss_skill_visuals()
 	
 	# 每帧重绘
 	queue_redraw()
@@ -790,6 +1092,12 @@ func _draw() -> void:
 		var alpha: float = _screen_flash_timer / 0.3 * 0.5
 		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(1.0, 1.0, 1.0, alpha))
 	
+	# 彩虹全屏闪光
+	if _rainbow_flash > 0:
+		var rainbow_alpha: float = (_rainbow_flash / RAINBOW_FLASH_DURATION) * 0.4
+		var rainbow_color := Color(1.0, 0.9, 0.95, rainbow_alpha)
+		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), rainbow_color)
+	
 	# 阶段切换提示
 	_draw_phase_transition()
 	
@@ -868,6 +1176,26 @@ func _draw_enemy_card(x: float, y: float, index: int, name: String, hp: int, max
 	
 	# HP 数值
 	_draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 82, C["text_muted"], 9.0)
+	
+	# ===== BOSS 技能视觉反馈 =====
+	if _boss_skill_visuals.has(index) and hp > 0:
+		var vis: Dictionary = _boss_skill_visuals[index]
+		
+		# 护盾光圈 + HP 条
+		if vis.get("shield_hp", 0.0) > 0.0:
+			var shield_hp: float = vis["shield_hp"]
+			var shield_max: float = vis["shield_max_hp"]
+			var shield_ratio: float = shield_hp / shield_max if shield_max > 0 else 0.0
+			var shield_color := Color(0.314, 0.706, 1.0, 0.3 + shield_ratio * 0.4)
+			draw_arc(Vector2(x + 55.0, y + 28.0), 36.0, 0.0, TAU, 32, shield_color, 2.0, true)
+			_draw_hp_bar(x + 12.0, y + 75.0, 96.0, 4.0, shield_hp, shield_max, C["shield"])
+			_draw_text_with_shadow("🛡️%d" % int(shield_hp), x + 55.0, y + 81.0, C["shield"], 8.0)
+		
+		# 蓄力中闪烁文字
+		if vis.get("charge_timer", 0.0) > 0.0:
+			var blink_alpha: float = 0.5 + 0.5 * sin(_idle_time * PI * 4.0)
+			var charge_color := Color(1.0, 0.784, 0.196, blink_alpha)
+			_draw_text_with_shadow("⚡蓄力中...", x + 55.0, y - 2.0, charge_color, 10.0)
 
 func _draw_team() -> void:
 	_draw_text_with_shadow("— 我方 —", DESIGN_W / 2.0, 180.0, C["success"], 12.0)
@@ -1472,6 +1800,7 @@ func destroy() -> void:
 	_poison_fog_clear_anims.clear()
 	_gem_particles.clear()
 	_obstacle_particles.clear()
+	_special_elim_phases.clear()
 
 ## ============================================
 # 宝石消除动画更新
