@@ -39,6 +39,15 @@ var _state: BattleState = BattleState.IDLE
 ## 选中宝石
 var _selected_gem: Vector2i = Vector2i(-1, -1)
 
+## 选中光环脉冲动画
+var _selection_pulse: float = 0.0
+
+## 拖拽预览
+var _drag_preview: Dictionary = {"active": false, "direction": Vector2i.ZERO}
+
+## 滑动轨迹
+var _swipe_trail: Array[Dictionary] = []
+
 ## 浮动文字管理器
 var _floating_texts: Array[Dictionary] = []
 
@@ -266,6 +275,9 @@ func init(data: Dictionary = {}) -> void:
 	_rainbow_flash = 0.0
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_damage_popup_queue = []
+	_selection_pulse = 0.0
+	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
+	_swipe_trail = []
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -364,6 +376,18 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 		var drag_pos: Vector2 = _get_pointer_position(event, already_local)
 		var drag_delta: Vector2 = event.relative
 		
+		# 记录滑动轨迹
+		_swipe_trail.append({
+			"x": drag_pos.x,
+			"y": drag_pos.y,
+			"timer": 0.2,
+			"maxTimer": 0.2
+		})
+		
+		# 限制轨迹长度
+		if _swipe_trail.size() > 20:
+			_swipe_trail.remove_at(0)
+		
 		if drag_delta.length() > 20:
 			var direction := ""
 			if abs(drag_delta.x) > abs(drag_delta.y):
@@ -372,6 +396,22 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 				direction = "up" if drag_delta.y < 0 else "down"
 			_on_swipe(drag_pos.x, drag_pos.y, direction)
 			get_viewport().set_input_as_handled()
+			
+			# 更新交换预览方向
+			if _selected_gem.x >= 0 and _selected_gem.y >= 0:
+				var cell_size := float(_board.cell_size) if _board != null else 42.0
+				var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+				var board_y := float(_board.offset_y) if _board != null else 280.0
+				var gem_cx: float = board_x + _selected_gem.x * cell_size + cell_size / 2.0
+				var gem_cy: float = board_y + _selected_gem.y * cell_size + cell_size / 2.0
+				var dx: float = drag_pos.x - gem_cx
+				var dy: float = drag_pos.y - gem_cy
+				var drag_dir := Vector2i.ZERO
+				if abs(dx) > abs(dy):
+					drag_dir = Vector2i(1 if dx > 0 else -1, 0)
+				else:
+					drag_dir = Vector2i(0, 1 if dy > 0 else -1)
+				_drag_preview = {"active": true, "direction": drag_dir}
 
 func _get_pointer_position(event: InputEvent, already_local: bool) -> Vector2:
 	var raw_pos: Vector2 = event.position
@@ -981,6 +1021,10 @@ func _process(delta: float) -> void:
 	if _state == BattleState.IDLE or _state == BattleState.ENEMY_TURN:
 		_idle_time += delta
 	
+	# 更新选中光环脉冲
+	if _selected_gem.x >= 0 and _selected_gem.y >= 0:
+		_selection_pulse += delta
+	
 	# 更新攻击震动
 	_update_attack_shake(delta)
 	
@@ -1128,6 +1172,12 @@ func _update_floating_texts(dt: float) -> void:
 	# 更新元素连锁光晕
 	if _element_glow.get("timer", 0.0) > 0.0:
 		_element_glow["timer"] -= dt
+	
+	# 更新滑动轨迹
+	for i in range(_swipe_trail.size() - 1, -1, -1):
+		_swipe_trail[i]["timer"] -= dt
+		if _swipe_trail[i]["timer"] <= 0:
+			_swipe_trail.remove_at(i)
 
 ## ============================================
 # 渲染
@@ -1169,6 +1219,12 @@ func _draw() -> void:
 	
 	# 选中高亮
 	_draw_selection()
+	
+	# 拖拽预览箭头
+	_draw_drag_preview()
+	
+	# 滑动轨迹
+	_draw_swipe_trail()
 	
 	# 浮动文字
 	_draw_floating_texts()
@@ -1356,6 +1412,18 @@ func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, ma
 	
 	# HP 数值
 	_draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w - 28, y + 31, C["text_muted"], 8.0)
+	
+	# 技能充能条（玩家卡片才有）
+	if monster.has("skill"):
+		var skill_cost: int = monster.get("skill", {}).get("cost", 10)
+		var charge: int = 0
+		if _battle != null and _battle.skill_charges.has(monster.get("id", "")):
+			charge = _battle.skill_charges[monster.get("id", "")]
+		var charge_ratio: float = clamp(float(charge) / float(skill_cost) if skill_cost > 0 else 0.0, 0.0, 1.0)
+		if charge_ratio >= 1.0:
+			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["gold"], C["gold"])
+		else:
+			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["bg_card"], C["gold"])
 
 func _draw_board_background() -> void:
 	# 棋盘区域背景
@@ -1449,6 +1517,13 @@ func _draw_selection() -> void:
 		var sx := board_x + _selected_gem.x * cell_size
 		var sy := board_y + _selected_gem.y * cell_size
 		
+		# 选中光环（脉冲动画）
+		var pulse_alpha := 0.3 + 0.5 * (sin(_selection_pulse * TAU / 0.6) + 1.0) / 2.0
+		var glow_color := Color(1.0, 0.85, 0.2, pulse_alpha)
+		var glow_size := 4.0
+		_draw_rounded_rect(sx - glow_size, sy - glow_size, cell_size + glow_size * 2, cell_size + glow_size * 2, 6.0, glow_color)
+		
+		# 原有的选择框
 		_draw_stroke_rect(sx, sy, cell_size, cell_size, 3.0, C["white"])
 
 func _draw_floating_texts() -> void:
@@ -1485,6 +1560,41 @@ func _draw_fall_messages() -> void:
 		var alpha: float = mini(1.0, fm["timer"])
 		var text_color := Color(1.0, 0.4, 0.4, alpha)
 		_draw_text_with_shadow(fm["text"], DESIGN_W / 2.0, 300.0 + i * 25.0, text_color, 14.0)
+
+func _draw_drag_preview() -> void:
+	if not _drag_preview.get("active", false) or _selected_gem.x < 0:
+		return
+	var dir: Vector2i = _drag_preview.get("direction", Vector2i.ZERO)
+	if dir == Vector2i.ZERO:
+		return
+	var cell_size := float(_board.cell_size) if _board != null else 42.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else 280.0
+	var sx: float = board_x + _selected_gem.x * cell_size + cell_size / 2.0
+	var sy: float = board_y + _selected_gem.y * cell_size + cell_size / 2.0
+	
+	# 绘制箭头（从选中位置到目标位置）
+	var target_x: float = sx + dir.x * cell_size
+	var target_y: float = sy + dir.y * cell_size
+	var preview_color := Color(0.3, 0.8, 1.0, 0.5)
+	draw_line(Vector2(sx, sy), Vector2(target_x, target_y), preview_color, 3.0)
+	
+	# 箭头头部
+	var angle: float = atan2(dir.y, dir.x)
+	var arrow_size: float = 10.0
+	var arrow_color := preview_color
+	# 左箭头翼
+	draw_line(Vector2(target_x, target_y), Vector2(target_x - cos(angle - 0.4) * arrow_size, target_y - sin(angle - 0.4) * arrow_size), arrow_color, 3.0)
+	# 右箭头翼
+	draw_line(Vector2(target_x, target_y), Vector2(target_x - cos(angle + 0.4) * arrow_size, target_y - sin(angle + 0.4) * arrow_size), arrow_color, 3.0)
+
+func _draw_swipe_trail() -> void:
+	for trail in _swipe_trail:
+		var progress: float = 1.0 - trail["timer"] / trail["maxTimer"]
+		var alpha: float = (1.0 - progress) * 0.7
+		var size: float = 6.0 - progress * 4.0
+		var trail_color := Color(0.3, 0.8, 1.0, alpha)
+		_draw_circle(trail["x"], trail["y"], size, trail_color)
 
 func _draw_bottom_bar() -> void:
 	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 15.0) if _board != null else 586.0
