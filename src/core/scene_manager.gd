@@ -20,6 +20,7 @@ func _setup_transition_overlay() -> void:
 	_transition_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
 	_transition_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_transition_overlay.z_index = 1000  # 最顶层
+	_transition_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE  # 不拦截点击
 	get_tree().root.add_child(_transition_overlay)
 
 ## 切换场景（带淡入淡出效果）
