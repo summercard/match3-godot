@@ -148,6 +148,16 @@ var _slowmotion_timer: float = 0.0
 var _board_shake_timer: float = 0.0
 var _board_shake_offset: Vector2 = Vector2.ZERO
 
+## 收服特效（inline 播放，Phase 4）
+var _capture_effect_node: CaptureEffect = null
+var _capture_pending: bool = false          # 是否有待播放的收服特效
+var _capture_success: bool = false           # 收服是否成功
+var _capture_target: Dictionary = {}         # 收服目标怪物
+var _capture_result_text: Dictionary = {}    # 收服结果文本
+var _capture_item_used: Dictionary = {}      # 使用的捕获道具
+var _capture_waiting_for_effect: bool = false # 等待收服特效播放完成
+var _capture_phase: String = ""              # "", "playing", "done"
+
 ## 特殊宝石激活动画（4-match 生成强化宝石时）
 var _special_transform_anim: Dictionary = {
 	"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false
@@ -371,6 +381,10 @@ func _gui_input(event: InputEvent) -> void:
 
 func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 	if _state == BattleState.BATTLE_END:
+		# 收服特效播放中不允许点击跳转
+		if _capture_waiting_for_effect:
+			get_viewport().set_input_as_handled()
+			return
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			_go_to_result()
 			get_viewport().set_input_as_handled()
@@ -1004,8 +1018,109 @@ func _start_enemy_turn() -> void:
 func _check_battle_end() -> bool:
 	if _battle and _battle.check_battle_end():
 		_state = BattleState.BATTLE_END
+		# 战斗胜利时 inline 播放收服特效（Phase 4）
+		if _battle.battle_result == "win":
+			_trigger_inline_capture()
 		return true
 	return false
+
+## ============================================
+# 收服特效 inline 播放（Phase 4: 移回 battle inline）
+## ============================================
+
+func _trigger_inline_capture() -> void:
+	"""战斗胜利时，在 scene_battle 中直接触发收服特效"""
+	if _battle == null:
+		return
+	
+	var enemies: Array = _battle.enemies
+	if enemies.is_empty():
+		_capture_phase = "done"
+		return
+	
+	# 选择收服目标：优先存活的，否则随机一个被击败的
+	var target_enemy: Dictionary = {}
+	for e in enemies:
+		if e != null and e.get("hp", 0) > 0:
+			target_enemy = e
+			break
+	if target_enemy.is_empty():
+		var valid_enemies: Array = enemies.filter(func(e): return e != null and e.has("id"))
+		if not valid_enemies.is_empty():
+			target_enemy = valid_enemies[randi() % valid_enemies.size()]
+	
+	if target_enemy.is_empty():
+		_capture_phase = "done"
+		return
+	
+	_capture_target = target_enemy
+	var enemy_rarity: int = target_enemy.get("rarity", 1)
+	
+	# 读取连续失败计数
+	var consecutive_fails: int = 0
+	if _storage and _storage.has_method("load_player"):
+		var player: Dictionary = _storage.load_player()
+		consecutive_fails = player.get("captureFails", 0)
+	
+	# 计算收服概率
+	var prob: float = CaptureSystem.calc_capture_probability(
+		target_enemy.get("hp", 0), target_enemy.get("maxHP", 1),
+		_battle.player_level if _battle else 1,
+		_battle.enemy_level if _battle else 1,
+		enemy_rarity,
+		{"stage_id": _stage_id, "consecutive_fails": consecutive_fails}
+	)
+	
+	# 消耗最佳捕获道具
+	var bonus: float = _consume_best_capture_item()
+	if bonus > 0.0:
+		prob = minf(0.95, prob + bonus)
+	
+	# 执行收服判定
+	_capture_success = CaptureSystem.attempt_capture(prob)
+	_capture_result_text = CaptureSystem.get_capture_result_text(prob, _capture_success)
+	
+	# 更新连续失败计数
+	if _storage and _storage.has_method("load_player") and _storage.has_method("save_player"):
+		var player: Dictionary = _storage.load_player()
+		if _capture_success:
+			player["captureFails"] = 0
+		else:
+			player["captureFails"] = consecutive_fails + 1
+		_storage.save_player(player)
+	
+	# 计算怪物在屏幕上的位置（敌方区域）
+	var target_idx: int = enemies.find(target_enemy)
+	if target_idx < 0:
+		for i in range(enemies.size()):
+			if enemies[i] != null and enemies[i].get("id", "") == target_enemy.get("id", ""):
+				target_idx = i
+				break
+	var center_pos := Vector2(DESIGN_W / 2.0, 125.0)
+	if target_idx >= 0:
+		center_pos = Vector2(15.0 + target_idx * 120.0 + 55.0, 125.0)
+	
+	# 播放 CaptureEffect
+	_capture_effect_node = CaptureEffect.play_capture(self, _capture_success, center_pos)
+	_capture_phase = "playing"
+	_capture_waiting_for_effect = true
+	_show_message(_capture_result_text.get("title", ""))
+
+func _consume_best_capture_item() -> float:
+	"""消耗最佳捕获道具，返回概率加成"""
+	if not _storage or not _storage.has_method("load_inventory") or not _storage.has_method("use_item"):
+		return 0.0
+	var inventory: Dictionary = _storage.load_inventory()
+	var candidates: Array[Dictionary] = [
+		{"id": "capture_ball_plus", "bonus": 0.30, "name": "超级捕获球"},
+		{"id": "capture_ball", "bonus": 0.15, "name": "捕获球"}
+	]
+	for candidate: Dictionary in candidates:
+		if inventory.get(candidate["id"], 0) > 0:
+			if _storage.use_item(candidate["id"], 1):
+				_capture_item_used = candidate
+				return candidate["bonus"]
+	return 0.0
 
 ## ============================================
 # 消息与弹窗
@@ -1231,6 +1346,12 @@ func _process(delta: float) -> void:
 	
 	# 同步 BOSS 技能视觉状态
 	_sync_boss_skill_visuals()
+	
+	# 检查收服特效是否播放完成（Phase 4）
+	if _capture_waiting_for_effect and _capture_phase == "playing":
+		if _capture_effect_node == null or not is_instance_valid(_capture_effect_node) or not _capture_effect_node.is_active():
+			_capture_waiting_for_effect = false
+			_capture_phase = "done"
 	
 	# 每帧重绘
 	queue_redraw()
@@ -1855,10 +1976,19 @@ func _draw_message() -> void:
 func _draw_battle_end_overlay() -> void:
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.6))
 	
-	var result_text := "🎉 胜利！"
+	var result_text := "🎉 胜利！" if (_battle != null and _battle.battle_result == "win") else "💀 失败..."
 	var result_color := C["white"]
 	_draw_text_with_shadow(result_text, DESIGN_W / 2.0, DESIGN_H / 2.0 - 30, result_color, 22.0, true)
-	_draw_text_with_shadow("点击查看结算", DESIGN_W / 2.0, DESIGN_H / 2.0 + 20, C["text_muted"], 14.0)
+	
+	# 收服结果提示（Phase 4: inline 显示）
+	if _battle != null and _battle.battle_result == "win" and not _capture_result_text.is_empty():
+		var cap_color := C["success"] if _capture_success else C["text_muted"]
+		_draw_text_with_shadow(_capture_result_text.get("title", ""), DESIGN_W / 2.0, DESIGN_H / 2.0 + 5, cap_color, 16.0, true)
+	
+	if _capture_phase == "done" or _capture_phase == "":
+		_draw_text_with_shadow("点击查看结算", DESIGN_W / 2.0, DESIGN_H / 2.0 + 35, C["text_muted"], 14.0)
+	else:
+		_draw_text_with_shadow("收服判定中...", DESIGN_W / 2.0, DESIGN_H / 2.0 + 35, C["gold"], 14.0)
 
 func _draw_phase_transition() -> void:
 	if _phase_transition_state.is_empty():
@@ -2376,6 +2506,10 @@ func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximu
 ## ============================================
 
 func _go_to_result() -> void:
+	# 如果收服特效还在播放，等待完成
+	if _capture_waiting_for_effect:
+		return
+	
 	print("[SceneBattle] 进入结算画面")
 	# 触发战斗结束慢动作效果
 	_slowmotion_timer = 0.5  # 0.5s 慢动作（0.3x 速度）
@@ -2383,6 +2517,14 @@ func _go_to_result() -> void:
 	await get_tree().create_timer(0.6).timeout
 	
 	var result: Dictionary = _battle.get_battle_result() if _battle != null else {"result": "win"}
+	
+	# 传递 inline 收服结果给 scene_result（避免重复播放）
+	result["capture_played_inline"] = true
+	result["captured"] = _capture_success
+	result["capture_target"] = _capture_target
+	result["capture_result_text"] = _capture_result_text
+	result["capture_item_used"] = _capture_item_used
+	
 	if has_node("/root/SceneManager"):
 		get_node("/root/SceneManager").switch_scene("result", result)
 	else:
@@ -2413,6 +2555,12 @@ func destroy() -> void:
 	_combo_popup = {"combo": 0, "timer": 0.0, "phase": "", "scale": 0.5, "opacity": 0.0}
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO, "from_pos": Vector2.ZERO}
 	_swipe_trail.clear()
+	# Phase 4: 清理收服特效
+	if _capture_effect_node and is_instance_valid(_capture_effect_node):
+		_capture_effect_node.queue_free()
+		_capture_effect_node = null
+	_capture_phase = ""
+	_capture_waiting_for_effect = false
 
 ## ============================================
 # 宝石消除动画更新

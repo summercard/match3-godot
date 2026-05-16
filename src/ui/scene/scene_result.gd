@@ -276,18 +276,37 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 	
 	_calc_stars()
 	
-	if _is_win:
-		_process_capture()
+	# Phase 4: 检查收服特效是否已在 scene_battle 中 inline 播放
+	var capture_played_inline: bool = battle_result.get("capture_played_inline", false)
+	if capture_played_inline:
+		# 直接使用 battle 传来的收服结果，不再重播特效
+		_captured = battle_result.get("captured", false)
+		_capture_target = battle_result.get("capture_target", {})
+		_capture_result = battle_result.get("capture_result_text", {})
+		_capture_item_used = battle_result.get("capture_item_used", {})
+		# 跳过收服计算和特效播放，直接进入后续流程
+		_save_rewards()
+	else:
+		if _is_win:
+			_process_capture()
 	
-	_calc_rewards()
-	_setup_buttons()
-	_save_rewards()
+	if not capture_played_inline:
+		_calc_rewards()
+		_setup_buttons()
+		_save_rewards()
+	else:
+		_calc_rewards()
+		_setup_buttons()
 	
 	if _is_win and _battle_result.has("stageId"):
 		if _storage and _storage.has_method("save_stage_stars"):
 			_storage.save_stage_stars(_battle_result["stageId"], _stars)
 	
-	_trigger_achievements()
+	if not capture_played_inline:
+		_trigger_achievements()
+	else:
+		_trigger_achievements()
+	
 	_update_ui()
 
 func init(data: Dictionary = {}) -> void:
