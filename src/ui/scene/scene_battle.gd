@@ -119,6 +119,12 @@ var _attack_shake_timer: float = 0.0
 var _attack_flash_timer: float = 0.0
 var _attack_shake_offset_x: float = 0.0
 
+## 元素连锁光晕
+var _element_glow: Dictionary = {"type": "", "timer": 0.0, "color": Color()}
+
+## 伤害数字弹出队列
+var _damage_popup_queue: Array[Dictionary] = []
+
 ## 关卡数据
 var _stage_data: Dictionary = {}
 var _stage_id: String = ""
@@ -258,6 +264,8 @@ func init(data: Dictionary = {}) -> void:
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
+	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
+	_damage_popup_queue = []
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -540,6 +548,8 @@ func _process_matches() -> void:
 		var cy: float = float(_board.offset_y + enh["row"] * cell_size + cell_size / 2.0)
 		_floating_texts.append({"text": "💥", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 22.0, "timer": 0.0, "duration": 0.8})
 		_show_message("💥 十字爆炸！")
+		# 触发火焰连锁光晕
+		_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
 	
 	# 炸弹 emoji + 震动
 	for bomb in bomb_matches:
@@ -550,12 +560,16 @@ func _process_matches() -> void:
 		_floating_texts.append({"text": "💣", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 24.0, "timer": 0.0, "duration": 0.8})
 		_show_message("💣 %s形炸弹爆炸！" % shape)
 		_trigger_attack_shake()
+		# 触发爆炸连锁光晕（橙色）
+		_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
 	
 	# 彩虹 emoji + 全屏闪光 + 震动
 	for rainbow in rainbow_matches:
 		_rainbow_flash = RAINBOW_FLASH_DURATION
 		_show_message("🌈 彩虹消除！清除全部%s！" % GEM_EMOJI.get(rainbow["type"], "💎"))
 		_trigger_attack_shake()
+		# 触发彩虹连锁光晕（明亮多色）
+		_trigger_element_glow("rainbow", Color(1.0, 0.95, 0.9, 0.2))
 		var match_cells: Array = rainbow.get("matchCells", rainbow.get("cells", []))
 		if match_cells.size() > 0:
 			var cell_size: float = float(_board.cell_size)
@@ -723,6 +737,17 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 			"duration": 0.8
 		})
 
+## 状态效果Emoji映射
+const STATUS_EMOJI := {"burn": "🔥", "freeze": "❄️", "poison": "☠️", "stun": "⚡"}
+
+## 状态效果颜色
+const STATUS_COLORS := {
+	"burn": Color(1.0, 0.4, 0.1),
+	"poison": Color(0.6, 0.2, 0.8),
+	"freeze": Color(0.3, 0.7, 1.0),
+	"stun": Color(1.0, 0.85, 0.2)
+}
+
 func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
 	_show_message("敌方回合")
@@ -731,6 +756,47 @@ func _start_enemy_turn() -> void:
 		_state = BattleState.IDLE
 		return
 	var result: Dictionary = _battle.enemy_action()
+	
+	# 处理状态效果日志（DoT弹出、stun提示、效果消失）
+	for log in result.get("status_logs", []):
+		var log_type: String = log.get("type", "")
+		var enemy_idx: int = log.get("enemy_index", -1)
+		var enemy_name: String = log.get("enemy_name", "???")
+		
+		if log_type == "burn" or log_type == "poison":
+			# DoT伤害浮动文字
+			var dmg: int = log.get("damage", 0)
+			var emoji: String = STATUS_EMOJI.get(log_type, "")
+			var color: Color = STATUS_COLORS.get(log_type, C["danger"])
+			var ex: float = 15.0 + enemy_idx * 120.0 + 55.0
+			var ey: float = 80.0
+			_floating_texts.append({
+				"text": "-%d%s" % [dmg, emoji],
+				"x": ex,
+				"y": ey,
+				"color": color,
+				"size": 16.0,
+				"timer": 0.0,
+				"duration": 0.8
+			})
+			# 受击闪烁
+			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.25, "maxTimer": 0.25})
+		
+		elif log_type == "stun":
+			_show_message("⚡ %s 眩晕了，无法行动！" % enemy_name)
+		
+		elif log_type == "freeze":
+			_show_message("❄️ %s 冰冻中，ATK降低30%%！" % enemy_name)
+		
+		elif log_type.ends_with("_end"):
+			_show_message(log.get("message", ""))
+	
+	# 处理DoT击杀提示
+	for kill in result.get("dot_kills", []):
+		var idx: int = kill.get("enemy_index", -1)
+		var name: String = kill.get("enemy_name", "???")
+		_fall_messages.append({"text": "☠️ %s 被状态效果击杀！" % name, "timer": 1.5})
+	
 	for action: Dictionary in result.get("actions", []):
 		# 蓄力回合：只显示蓄力提示，不显示伤害
 		if action.get("is_charging", false):
@@ -749,16 +815,21 @@ func _start_enemy_turn() -> void:
 		if action.get("damage", 0) > 0:
 			var dmg_size := 28.0 if action.get("is_charged", false) else 16.0
 			var dmg_color := C["charged_attack"] if action.get("is_charged", false) else C["danger"]
-			_floating_texts.append({
+			# 伤害数字加入队列（依次弹出，延迟编排）
+			var base_y: float = 225.0 + _damage_popup_queue.size() * 20.0
+			var entry: Dictionary = {
 				"text": "-%d" % action.get("damage", 0),
 				"x": 80.0,
-				"y": 225.0,
+				"y": base_y,
 				"color": dmg_color,
 				"size": dmg_size,
-				"timer": 0.0,
+				"delay": _damage_popup_queue.size() * 0.1,
+				"elapsed": 0.0,
 				"duration": 0.8,
 				"critical": action.get("is_charged", false)
-			})
+			}
+			if _damage_popup_queue.size() < 5:
+				_damage_popup_queue.append(entry)
 	
 	await get_tree().create_timer(0.8).timeout
 	_enemy_attacks = []
@@ -791,11 +862,18 @@ func _show_combo_popup(combo: int) -> void:
 		"scale": 0.5,
 		"opacity": 0.0
 	}
+	# Burst Combo 增强视觉：cascade 3次以上触发屏幕闪白
+	if combo >= 3:
+		_screen_flash_timer = 0.15 if combo == 3 else 0.25
+		_trigger_attack_shake()
 
 func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.2
 	_attack_flash_timer = 0.1
 	_attack_shake_offset_x = 0.0
+
+func _trigger_element_glow(element_type: String, glow_color: Color) -> void:
+	_element_glow = {"type": element_type, "timer": 0.5, "color": glow_color}
 
 ## ============================================
 # BOSS 技能视觉
@@ -1021,11 +1099,35 @@ func _update_hp_display(dt: float) -> void:
 			h["displayHP"] = h["displayHP"] - (h["displayHP"] - h["targetHP"]) * eased
 
 func _update_floating_texts(dt: float) -> void:
+	# 处理伤害数字弹出队列
+	for i in range(_damage_popup_queue.size() - 1, -1, -1):
+		var entry: Dictionary = _damage_popup_queue[i]
+		entry["elapsed"] += dt
+		if entry["elapsed"] >= entry["delay"]:
+			# 延迟到达，将伤害数字加入 _floating_texts
+			var text_entry: Dictionary = {
+				"text": entry["text"],
+				"x": entry["x"],
+				"y": entry["y"],
+				"color": entry["color"],
+				"size": entry["size"],
+				"timer": entry["elapsed"] - entry["delay"],
+				"duration": entry["duration"],
+				"critical": entry.get("critical", false)
+			}
+			_floating_texts.append(text_entry)
+			_damage_popup_queue.remove_at(i)
+	
+	# 更新浮动文字
 	for i in range(_floating_texts.size() - 1, -1, -1):
 		var ft: Dictionary = _floating_texts[i]
 		ft["timer"] += dt
 		if ft["timer"] >= ft.get("duration", 1.0):
 			_floating_texts.remove_at(i)
+	
+	# 更新元素连锁光晕
+	if _element_glow.get("timer", 0.0) > 0.0:
+		_element_glow["timer"] -= dt
 
 ## ============================================
 # 渲染
@@ -1100,6 +1202,9 @@ func _draw() -> void:
 	
 	# 阶段切换提示
 	_draw_phase_transition()
+	
+	# 元素连锁光晕
+	_draw_element_glow()
 	
 	# 关闭震动
 	if _attack_shake_timer > 0:
@@ -1196,6 +1301,19 @@ func _draw_enemy_card(x: float, y: float, index: int, name: String, hp: int, max
 			var blink_alpha: float = 0.5 + 0.5 * sin(_idle_time * PI * 4.0)
 			var charge_color := Color(1.0, 0.784, 0.196, blink_alpha)
 			_draw_text_with_shadow("⚡蓄力中...", x + 55.0, y - 2.0, charge_color, 10.0)
+	
+	# ===== 状态效果图标 =====
+	if _battle != null and hp > 0:
+		var effects: Array = _battle._status_effect.get_effects_snapshot()
+		if index < effects.size() and effects[index] != null:
+			var effect: Dictionary = effects[index]
+			var status_type: String = effect.get("type", "")
+			var emoji: String = STATUS_EMOJI.get(status_type, "?")
+			var turns: int = effect.get("turns_left", 1)
+			var blink_alpha: float = 0.7 + 0.3 * sin(_idle_time * PI * 3.0)
+			var status_color: Color = STATUS_COLORS.get(status_type, C["text_muted"])
+			status_color.a = blink_alpha
+			_draw_text_with_shadow("%s%d" % [emoji, turns], x + card_w - 10.0, y - 2.0, status_color, 11.0)
 
 func _draw_team() -> void:
 	_draw_text_with_shadow("— 我方 —", DESIGN_W / 2.0, 180.0, C["success"], 12.0)
@@ -1748,6 +1866,16 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 	if tex == null:
 		return
 	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+func _draw_element_glow() -> void:
+	if _element_glow.get("timer", 0.0) <= 0.0:
+		return
+	var remaining: float = _element_glow["timer"]
+	var max_time: float = 0.5
+	var alpha: float = (remaining / max_time) * 0.15 if remaining <= max_time else 0.0
+	var glow_color: Color = _element_glow.get("color", Color.WHITE)
+	glow_color.a = alpha
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), glow_color)
 
 func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: float = 1.0) -> void:
 	var panel_tex := _get_texture("res://assets/images/battle/ui/ui_panel_dark_large.png")
