@@ -668,6 +668,9 @@ func _process_matches() -> void:
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
 	_eliminating_gems.clear()
 	
+	# ===== 第5.5步：毒雾清除 & 锁定宝石解锁检查 =====
+	_check_poison_fog_clears(matches)
+	
 	# ===== 第6步：执行消除（普通 + 特殊）=====
 	var gem_counts: Dictionary = _board.remove_matches(matches)
 	
@@ -704,17 +707,57 @@ func _process_matches() -> void:
 	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
 	for log: Dictionary in result.get("damage_log", []):
-		_floating_texts.append({
-			"text": "-%d" % log.get("damage", 0),
-			"x": DESIGN_W / 2.0,
-			"y": 95.0,
-			"color": C["gold"],
-			"size": 18.0,
-			"timer": 0.0,
-			"duration": 0.8
-		})
-		_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
-	_trigger_attack_shake()
+		var log_damage: int = log.get("damage", 0)
+		var log_effective: bool = log.get("isEffective", false)
+		var log_weak: bool = log.get("isWeak", false)
+		var log_target: String = log.get("target", "")
+		var log_died: bool = log.get("targetDied", false)
+		
+		# 克制提示
+		if log_effective:
+			_show_message("效果拔群！")
+		elif log_weak:
+			_show_message("效果不佳...")
+		
+		# 克制伤害颜色/大小
+		var popup_color: Color = C["fire"] if log_effective else (C["text_muted"] if log_weak else C["gold"])
+		var popup_size: float = 24.0 if log_effective else (12.0 if log_weak else 18.0)
+		
+		var target_idx := _find_enemy_index(log_target)
+		if target_idx >= 0:
+			var ex := 25.0 + target_idx * 120.0 + 55.0
+			var ey := 80.0
+			_floating_texts.append({
+				"text": "-%d" % log_damage,
+				"x": ex, "y": ey,
+				"color": popup_color,
+				"size": popup_size,
+				"timer": 0.0,
+				"duration": 0.8,
+				"critical": log_effective
+			})
+			if not log_died:
+				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+				_trigger_attack_shake()
+			if log_died:
+				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
+		else:
+			# 找不到目标敌人在敌方列表，显示到中央
+			_floating_texts.append({
+				"text": "-%d" % log_damage,
+				"x": DESIGN_W / 2.0, "y": 95.0,
+				"color": popup_color,
+				"size": popup_size,
+				"timer": 0.0,
+				"duration": 0.8
+			})
+			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
+			_trigger_attack_shake()
+	
+	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
+	var all_special_gems := explosion_gems + bomb_gems + rainbow_gems
+	_check_explosion_poison_fog(all_special_gems)
+	_check_unlock_results(matches, all_special_gems)
 	
 	# 等待所有特殊消除动画完成（最大延迟 0.2 + 消除时间 0.3）
 	var special_wait: float = 0.0
@@ -837,6 +880,10 @@ const STATUS_COLORS := {
 
 func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
+	
+	# ===== 毒雾回合逻辑 =====
+	_process_poison_fog_turn()
+	
 	_show_message("敌方回合")
 	
 	if _battle == null:
@@ -1385,6 +1432,37 @@ func _draw_title_bar() -> void:
 	var title_color := C["white"]
 	_draw_rounded_rect(0, 0, DESIGN_W, 50, 0.0, C["bg_card"])
 	_draw_text_with_shadow("三消宝可梦 ⚔️", DESIGN_W / 2.0, 25, title_color, 16.0)
+	
+	# BOSS阶段指示器
+	if _battle != null:
+		var status: Dictionary = _battle.get_status()
+		if status.get("is_boss_battle", false):
+			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
+			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 60.0, 25.0, phase_color, 10.0)
+	
+	# 队长技能信息条（标题栏下方）
+	if _battle != null:
+		var ls_info = _battle.get_status().get("leader_skill_info", null)
+		if ls_info != null:
+			var ls_bar_y := 42.0
+			_draw_rounded_rect(5, ls_bar_y, DESIGN_W - 10, 16, 3.0, Color(1.0, 0.84, 0.0, 0.15))
+			var ls_dict: Dictionary = ls_info if ls_info is Dictionary else {}
+			var ls_name: String = ls_dict.get("name", "")
+			var ls_desc: String = ls_dict.get("desc", "")
+			var ls_icon: String = ls_dict.get("icon", "👑")
+			_draw_text_with_shadow("👑 队长技能: %s %s — %s" % [ls_icon, ls_name, ls_desc], DESIGN_W / 2.0, ls_bar_y + 10, C["gold"], 9.0)
+		
+		# 属性协同信息条
+		var syn_info: Array = _battle.get_status().get("synergy_info", [])
+		if syn_info.size() > 0:
+			var syn_bar_y := 60.0 if ls_info != null else 42.0
+			_draw_rounded_rect(5, syn_bar_y, DESIGN_W - 10, 14.0 + syn_info.size() * 2.0, 3.0, Color(0.4, 0.8, 0.4, 0.12))
+			var syn_labels: Array = []
+			for s in syn_info:
+				if s is Dictionary:
+					syn_labels.append(s.get("label", ""))
+			var syn_text: String = "🤝 " + " | ".join(syn_labels)
+			_draw_text_with_shadow(syn_text, DESIGN_W / 2.0, syn_bar_y + 9.0, C["success"], 8.0)
 
 func _draw_enemies() -> void:
 	_draw_text_with_shadow("— 敌方 —", DESIGN_W / 2.0, 65.0, C["danger"], 12.0)
@@ -1582,9 +1660,22 @@ func _draw_board() -> void:
 				var alpha := 1.0 - elim_progress
 				_draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha)
 			else:
-				# idle 状态下轻微呼吸
+				# 脉动透明度：选中宝石周期1s(0.95↔1.0)，未选中周期2s(0.85↔1.0)
+				var is_selected := _selected_gem.x == col and _selected_gem.y == row
+				var pulse_opacity := 1.0
+				if is_selected:
+					var sel_period := 1.0
+					var t_sel: float = fmod(_idle_time, sel_period) / sel_period
+					var sine_sel: float = sin(t_sel * TAU)
+					pulse_opacity = 0.95 + 0.05 * (sine_sel + 1.0) / 2.0
+				else:
+					var unsel_period := 2.0
+					var t_unsel: float = fmod(_idle_time, unsel_period) / unsel_period
+					var sine_unsel: float = sin(t_unsel * TAU + row * 0.5 + col * 0.3)
+					pulse_opacity = 0.85 + 0.15 * (sine_unsel + 1.0) / 2.0
+				# idle 状态下轻微呼吸缩放
 				var idle_scale := 1.0 + 0.02 * sin(_idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
-				_draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, 1.0)
+				_draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, pulse_opacity)
 	
 	# 渲染特殊元素（锁定宝石、障碍物、毒雾）
 	_draw_locked_gems(_board)
@@ -2340,3 +2431,148 @@ func _update_poison_fog_anims(delta: float) -> void:
 		anim["timer"] += delta
 		if anim["timer"] >= 0.5:
 			_poison_fog_clear_anims.remove_at(i)
+
+## ============================================
+# 毒雾回合逻辑
+## ============================================
+
+func _process_poison_fog_turn() -> void:
+	if _board == null:
+		return
+	
+	# 检查棋盘是否有毒雾
+	var has_any_fog := false
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			if _board.is_poison_fog(row, col):
+				has_any_fog = true
+				break
+		if has_any_fog:
+			break
+	if not has_any_fog:
+		return
+	
+	# 1. 扩散毒雾
+	var new_tiles: Array = _board.spread_poison_fog()
+	if new_tiles.size() > 0:
+		for t in new_tiles:
+			var cell_size := float(_board.cell_size)
+			var cx: float = float(_board.offset_x) + t["col"] * cell_size + cell_size / 2.0
+			var cy: float = float(_board.offset_y) + t["row"] * cell_size + cell_size / 2.0
+			_poison_fog_spread_anims.append({"row": t["row"], "col": t["col"], "x": cx, "y": cy, "timer": 0.0})
+		_show_message("☠️ 毒雾扩散了！+%d格" % new_tiles.size())
+	
+	# 2. 计算毒雾伤害
+	var fog_count: int = _board.get_poison_fog_damage_count()
+	if fog_count <= 0:
+		return
+	
+	var damage_per_tile := 0.03  # 3% 最大HP
+	var alive_team: Array = []
+	if _battle != null:
+		for m in _battle.player_team:
+			if m != null and m.get("hp", 0) > 0:
+				alive_team.append(m)
+	if alive_team.is_empty():
+		return
+	
+	var avg_max_hp: float = 0.0
+	for m in alive_team:
+		avg_max_hp += float(m.get("maxHP", 1))
+	avg_max_hp /= alive_team.size()
+	var total_fog_damage: int = int(avg_max_hp * damage_per_tile * fog_count)
+	
+	if total_fog_damage <= 0:
+		return
+	
+	var damage_per_member: int = total_fog_damage / alive_team.size()
+	for member in alive_team:
+		member["hp"] = maxi(member.get("hp", 0) - damage_per_member, 0)
+	
+	# 显示毒雾伤害浮动文字
+	for idx in range(alive_team.size()):
+		var member: Dictionary = alive_team[idx]
+		var mx := 15.0 + _battle.player_team.find(member) * 120.0 + 55.0
+		var my := 195.0
+		_floating_texts.append({
+			"text": "-%d☠️" % damage_per_member,
+			"x": mx, "y": my,
+			"color": STATUS_COLORS.get("poison", C["danger"]),
+			"size": 16.0,
+			"timer": 0.0,
+			"duration": 0.8
+		})
+	
+	_show_message("☠️ 毒雾伤害！%d格 × 3%% = %d" % [fog_count, total_fog_damage])
+	
+	# 检查玩家是否因毒雾全灭
+	if _battle != null:
+		var all_dead := true
+		for m in _battle.player_team:
+			if m != null and m.get("hp", 0) > 0:
+				all_dead = false
+				break
+		if all_dead:
+			_battle.battle_over = true
+			_battle.battle_result = "lose"
+
+## ============================================
+# 消除时的毒雾清除 & 锁定宝石解锁
+## ============================================
+
+func _check_poison_fog_clears(matches: Array) -> void:
+	"""消除宝石时检查是否清除了毒雾格子"""
+	var clears: Array = []
+	for m in matches:
+		if m is Dictionary and m.has("row") and m.has("col"):
+			if _board.is_poison_fog(m["row"], m["col"]):
+				_board.clear_poison_fog(m["row"], m["col"])
+				var cell_size := float(_board.cell_size)
+				var cx: float = float(_board.offset_x) + m["col"] * cell_size + cell_size / 2.0
+				var cy: float = float(_board.offset_y) + m["row"] * cell_size + cell_size / 2.0
+				clears.append({"row": m["row"], "col": m["col"], "x": cx, "y": cy, "timer": 0.0})
+				_floating_texts.append({"text": "🧹清除!", "x": cx, "y": cy - 15.0, "color": C["success"], "size": 14.0, "timer": 0.0, "duration": 0.8})
+	if clears.size() > 0:
+		_poison_fog_clear_anims.append_array(clears)
+		_show_message("🧹 毒雾被清除了！")
+
+func _check_explosion_poison_fog(gems: Array) -> void:
+	"""特殊消除（爆炸/炸弹/彩虹）也检查毒雾清除"""
+	for g in gems:
+		if g is Dictionary and g.has("row") and g.has("col"):
+			if _board.is_poison_fog(g["row"], g["col"]):
+				_board.clear_poison_fog(g["row"], g["col"])
+				var cell_size := float(_board.cell_size)
+				var cx: float = float(_board.offset_x) + g["col"] * cell_size + cell_size / 2.0
+				var cy: float = float(_board.offset_y) + g["row"] * cell_size + cell_size / 2.0
+				_floating_texts.append({"text": "🧹", "x": cx, "y": cy - 10.0, "color": C["success"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+
+func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
+	"""消除后检查相邻锁定宝石解锁"""
+	var unlock_results: Array = []
+	var checked := {}
+	
+	var all_gems := matches + extra_gems
+	
+	for m in all_gems:
+		if not m is Dictionary or not m.has("row"):
+			continue
+		var results: Array = _board.check_adjacent_unlocks(m["row"], m["col"], m.get("type", ""))
+		for r in results:
+			var key: String = "%d,%d" % [r["row"], r["col"]]
+			if not checked.has(key):
+				checked[key] = true
+				unlock_results.append(r)
+	
+	for ur in unlock_results:
+		var cell_size := float(_board.cell_size)
+		var ux: float = float(_board.offset_x) + ur["col"] * cell_size + cell_size / 2.0
+		var uy: float = float(_board.offset_y) + ur["row"] * cell_size + cell_size / 2.0
+		if ur.get("fullyUnlocked", false):
+			_unlock_animations.append({"row": ur["row"], "col": ur["col"], "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
+			_floating_texts.append({"text": "🔓解锁!", "x": ux, "y": uy - 15.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8})
+		else:
+			_floating_texts.append({"text": "⛓️×%d" % ur.get("remainingHP", 1), "x": ux, "y": uy - 10.0, "color": C["text_muted"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+	
+	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
+		_show_message("🔓 宝石解锁！")
