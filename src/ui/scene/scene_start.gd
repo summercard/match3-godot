@@ -3,11 +3,12 @@ class_name SceneStart
 
 # ============================================
 # ui/scene/scene_start.gd - 启动/欢迎画面
+# Phase 5.1: 开屏视觉还原
 # 来源: js/ui/sceneStart.js
-# 全图片渲染：bg/logo/怪物立绘/宝石/按钮/提示条/版本牌
 # ============================================
 
-const START_ASSETS := {
+# ---- 资源路径 ----
+const ASSET_PATHS := {
 	"bg": "res://assets/images/start/start_bg_grassland.png",
 	"logo": "res://assets/images/start/start_title_logo.png",
 	"fire_monster": "res://assets/images/start/monster_fire_lizard.png",
@@ -18,32 +19,46 @@ const START_ASSETS := {
 	"gem_grass": "res://assets/images/start/gem_grass.png",
 	"gem_thunder": "res://assets/images/start/gem_thunder.png",
 	"gem_light": "res://assets/images/start/gem_light.png",
-	"btn_start": "res://assets/images/start/ui_btn_start.png",
-	"btn_start_normal": "res://assets/images/start/ui_btn_start_normal.png",
-	"btn_start_pressed": "res://assets/images/start/ui_btn_start_pressed.png",
-	"btn_start_disabled": "res://assets/images/start/ui_btn_start_disabled.png",
+	"btn_normal": "res://assets/images/start/ui_btn_start_normal.png",
+	"btn_pressed": "res://assets/images/start/ui_btn_start_pressed.png",
 	"hint_ribbon": "res://assets/images/start/ui_hint_ribbon.png",
 	"version_plaque": "res://assets/images/start/ui_version_plaque.png",
 }
 
-# ---- 状态 ----
-var _art_assets: Dictionary = {}   # { key: { texture: Texture2D, loaded: bool } }
-var _opacity: float = 0.0
-var _is_ready: bool = false
-var _pulse: float = 0.0           # 按钮呼吸脉动 0~1
-var _pulse_dir: int = 1
-var _idle_time: float = 0.0       # 累计时间（怪物/宝石浮动）
-var _touched_btn: String = ""     # "enterBtn" or ""
-var _is_pressed: bool = false     # 按钮是否被按下
-var _long_press_time: float = 0.0 # 长按计时
-var _long_press_glow: float = 0.0 # 长按光晕 0~1
-var _long_press_triggered: bool = false  # 长按是否已触发
-var _fade_tween: Tween = null
-var _particles: Array = []
+# ---- 颜色常量（对齐微信 THEME/COLORS）----
+const C_PRIMARY := Color(0.35, 0.55, 1.0)
+const C_GOLD := Color(1.0, 0.84, 0.0)
+const C_WHITE := Color(1.0, 1.0, 1.0)
+const C_BG_DARK := Color(0.08, 0.15, 0.18)
+const C_BG_PANEL := Color(0.1, 0.12, 0.2)
+const C_TEXT_MUTED := Color(0.6, 0.6, 0.7)
+const C_TEXT_SECONDARY := Color(0.7, 0.75, 0.85)
 
-const DESIGN_W: float = 375.0
-const DESIGN_H: float = 667.0
-const LONG_PRESS_DURATION: float = 0.5  # 长按触发时间（秒）
+# ---- 设计分辨率 ----
+const DW := 375.0
+const DH := 667.0
+
+# ---- 长按阈值（秒）----
+const LONG_PRESS_SEC := 0.5
+
+# ---- 状态 ----
+var _opacity: float = 0.0
+var _ready_flag: bool = false
+var _pulse: float = 0.0
+var _pulse_dir: int = 1
+var _touching: bool = false
+var _lp_glow: float = 0.0
+var _hold_time: float = 0.0
+var _lp_done: bool = false
+var _assets: Dictionary = {}
+var _particles: Array = []
+var _has_bg: bool = false
+var _font: Font
+
+# ---- 缩放（每帧更新）----
+var _sx: float = 1.0
+var _sy: float = 1.0
+var _sc: float = 1.0
 
 # ============================================
 # 生命周期
@@ -53,88 +68,21 @@ func _ready() -> void:
 	name = "SceneStart"
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_font = ThemeDB.fallback_font
+	_load_assets()
 	_init_particles()
-	_load_art_assets()
-	_fade_in()
+	_opacity = 0.0
+	_ready_flag = false
 
 
 func _process(delta: float) -> void:
-	_idle_time += delta
-	_update_pulse(delta)
-	_update_long_press(delta)
-	_update_particles(delta)
-	queue_redraw()
+	# 淡入动画
+	if _opacity < 1.0:
+		_opacity = minf(_opacity + delta * 1.5, 1.0)
+		if _opacity >= 1.0:
+			_ready_flag = true
 
-
-# ============================================
-# 资产加载
-# ============================================
-
-func _load_art_assets() -> void:
-	_art_assets.clear()
-	for key in START_ASSETS.keys():
-		var path: String = START_ASSETS[key]
-		var tex: Texture2D = load(path) if ResourceLoader.exists(path) else null
-		_art_assets[key] = { "texture": tex, "loaded": tex != null }
-
-
-func _get_tex(key: String) -> Texture2D:
-	var item: Dictionary = _art_assets.get(key, {})
-	if item.get("loaded", false):
-		return item["texture"]
-	return null
-
-
-# ============================================
-# 淡入
-# ============================================
-
-func _fade_in() -> void:
-	_opacity = 0.0
-	modulate = Color(1, 1, 1, 0)
-	_fade_tween = create_tween()
-	_fade_tween.tween_property(self, "modulate:a", 1.0, 1.2).from(0.0)
-	await _fade_tween.finished
-	_is_ready = true
-
-
-# ============================================
-# 粒子
-# ============================================
-
-func _init_particles() -> void:
-	_particles.clear()
-	for i in range(25):
-		_particles.append({
-			"x": randf() * DESIGN_W,
-			"y": randf() * DESIGN_H,
-			"size": 1.5 + randf() * 2.5,
-			"speed_y": 8.0 + randf() * 15.0,
-			"speed_x": -2.0 + randf() * 4.0,
-			"alpha": 0.3 + randf() * 0.5,
-			"twinkle": randf() * TAU,
-		})
-
-
-func _update_particles(delta: float) -> void:
-	for p in _particles:
-		p["y"] = p["y"] + p["speed_y"] * delta
-		p["x"] = p["x"] + p["speed_x"] * delta
-		p["twinkle"] = float(p["twinkle"]) + delta * 2.0
-		if float(p["y"]) > DESIGN_H + 5:
-			p["y"] = -5.0
-			p["x"] = randf() * DESIGN_W
-		if float(p["x"]) < -5:
-			p["x"] = DESIGN_W + 5
-		elif float(p["x"]) > DESIGN_W + 5:
-			p["x"] = -5.0
-
-
-# ============================================
-# 动画更新
-# ============================================
-
-func _update_pulse(delta: float) -> void:
+	# 呼吸脉冲
 	_pulse += delta * 2.0 * _pulse_dir
 	if _pulse > 1.0:
 		_pulse = 1.0
@@ -143,229 +91,490 @@ func _update_pulse(delta: float) -> void:
 		_pulse = 0.0
 		_pulse_dir = 1
 
+	# 长按光晕衰减（未按住时渐消）
+	if _lp_glow > 0.0 and not _touching:
+		_lp_glow = maxf(0.0, _lp_glow - delta * 2.0)
 
-func _update_long_press(delta: float) -> void:
-	if _is_pressed and not _long_press_triggered:
-		_long_press_time += delta
-		_long_press_glow = minf(1.0, _long_press_time / LONG_PRESS_DURATION)
-		if _long_press_time >= LONG_PRESS_DURATION:
-			_long_press_triggered = true
-			_on_enter()
-	elif not _is_pressed:
-		if _long_press_glow > 0 and not _long_press_triggered:
-			_long_press_glow = maxf(0.0, _long_press_glow - delta * 2.0)
+	# 长按检测
+	if _touching and _ready_flag and not _lp_done:
+		_hold_time += delta
+		_lp_glow = minf(_hold_time / LONG_PRESS_SEC, 1.0)
+		if _hold_time >= LONG_PRESS_SEC:
+			_lp_done = true
+			_do_enter()
+
+	# 粒子更新
+	_update_particles(delta)
+
+	# 缩放因子
+	_sx = size.x / DW
+	_sy = size.y / DH
+	_sc = minf(_sx, _sy)
+
+	queue_redraw()
 
 
 # ============================================
-# 输入（长按交互）
+# 输入处理（长按交互）
 # ============================================
 
 func _gui_input(event: InputEvent) -> void:
-	if not _is_ready:
-		return
-	
-	var btn_rect := _get_btn_rect()
-	
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
-				if btn_rect.has_point(event.position):
-					_is_pressed = true
-					_touched_btn = "enterBtn"
-					_long_press_time = 0.0
-					_long_press_triggered = false
-			else:
-				_is_pressed = false
-				_touched_btn = ""
-				_long_press_time = 0.0
-				_long_press_triggered = false
-	
-	elif event is InputEventScreenTouch:
+	if event is InputEventScreenTouch:
 		if event.pressed:
-			if btn_rect.has_point(event.position):
-				_is_pressed = true
-				_touched_btn = "enterBtn"
-				_long_press_time = 0.0
-				_long_press_triggered = false
+			if _in_btn(event.position):
+				_begin_hold()
 		else:
-			_is_pressed = false
-			_touched_btn = ""
-			_long_press_time = 0.0
-			_long_press_triggered = false
+			_end_hold()
+		accept_event()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			if _in_btn(event.position):
+				_begin_hold()
+		else:
+			_end_hold()
+		accept_event()
 
 
-func _on_enter() -> void:
-	if not _is_ready:
-		return
-	_is_ready = false
-	
-	# 淡出
+func _begin_hold() -> void:
+	_touching = true
+	_hold_time = 0.0
+	_lp_done = false
+
+
+func _end_hold() -> void:
+	_touching = false
+	_hold_time = 0.0
+
+
+func _in_btn(pos: Vector2) -> bool:
+	return _btn_rect().has_point(pos)
+
+
+## 获取按钮区域（设计坐标 → 屏幕坐标）
+func _btn_rect(press_scale: float = 1.0) -> Rect2:
+	var bw = 280.0 * press_scale
+	var bh = 72.0 * press_scale
+	var sw = bw * _sx
+	var sh = bh * _sy
+	return Rect2(
+		(size.x - sw) / 2.0,
+		size.y * 0.78 + (72.0 * _sy - sh) / 2.0,
+		sw, sh
+	)
+
+
+func _do_enter() -> void:
+	_ready_flag = false
+	_touching = false
+	_lp_glow = 0.0
+
+	# 淡出后切换场景
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.4)
 	await tween.finished
-	
-	# 跳转
-	var tutorial_completed = true
+
 	var sm := get_node_or_null("/root/SceneManager")
 	if sm:
-		sm.switch_scene("main" if tutorial_completed else "tutorial")
+		# TODO: 接入新手引导检测
+		sm.switch_scene("main")
 
 
 # ============================================
-# 按钮区域
+# 资源加载
 # ============================================
 
-func _get_btn_rect() -> Rect2:
-	var sx: float = size.x / DESIGN_W
-	var sy: float = size.y / DESIGN_H
-	var s: float = minf(sx, sy)
-	# 微信版按钮位置：居中，y ≈ 0.78
-	var btn_w: float = 265.0 * s
-	var btn_h: float = 72.0 * s
-	var btn_x: float = (size.x - btn_w) / 2.0
-	var btn_y: float = size.y * 0.78
-	return Rect2(btn_x, btn_y, btn_w, btn_h)
+func _load_assets() -> void:
+	_assets.clear()
+	for key in ASSET_PATHS:
+		var path: String = ASSET_PATHS[key]
+		if ResourceLoader.exists(path):
+			var tex = load(path)
+			_assets[key] = {"tex": tex, "ok": tex != null}
+		else:
+			_assets[key] = {"tex": null, "ok": false}
+	_has_bg = _assets.get("bg", {}).get("ok", false)
+
+
+func _tex(key: String) -> Texture2D:
+	var d = _assets.get(key, {})
+	return d.get("tex") as Texture2D if d.get("ok", false) else null
 
 
 # ============================================
-# 绘制
+# 粒子系统（菱形星星飘落）
+# ============================================
+
+class Star:
+	var x: float = 0.0
+	var y: float = 0.0
+	var sz: float = 0.0
+	var vy: float = 0.0
+	var vx: float = 0.0
+	var a: float = 0.0
+	var tw: float = 0.0
+
+
+func _init_particles() -> void:
+	_particles.clear()
+	for _i in range(25):
+		var p := Star.new()
+		p.x = randf() * DW
+		p.y = randf() * DH
+		p.sz = 1.5 + randf() * 2.5
+		p.vy = 8.0 + randf() * 15.0
+		p.vx = -2.0 + randf() * 4.0
+		p.a = 0.3 + randf() * 0.5
+		p.tw = randf() * TAU
+		_particles.append(p)
+
+
+func _update_particles(dt: float) -> void:
+	for p in _particles:
+		p.y += p.vy * dt
+		p.x += p.vx * dt
+		p.tw += dt * 2.0
+		if p.y > DH + 5.0:
+			p.y = -5.0
+			p.x = randf() * DW
+		if p.x < -5.0:
+			p.x = DW + 5.0
+		elif p.x > DW + 5.0:
+			p.x = -5.0
+
+
+# ============================================
+# _draw 主入口
 # ============================================
 
 func _draw() -> void:
-	var sx: float = size.x / DESIGN_W
-	var sy: float = size.y / DESIGN_H
-	var s: float = minf(sx, sy)
-	var ox: float = (size.x - DESIGN_W * s) / 2.0
-	var oy: float = (size.y - DESIGN_H * s) / 2.0
-	var a: float = _opacity
-	
-	# 1. 背景
-	var bg_tex := _get_tex("bg")
-	if bg_tex:
-		var tex_size := bg_tex.get_size()
-		var scale_cover_x := size.x / tex_size.x
-		var scale_cover_y := size.y / tex_size.y
-		var cover_scale := maxf(scale_cover_x, scale_cover_y)
-		var final_size := tex_size * cover_scale
-		var offset := (size - final_size) / 2.0
-		draw_texture_rect(bg_tex, Rect2(offset, final_size), false)
+	_draw_bg()
+	_draw_stars()
+	if _has_bg:
+		_draw_art_content()
 	else:
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.08, 0.15, 0.18))
-	
-	# 2. 粒子
+		_draw_fallback_content()
+	if _ready_flag:
+		_draw_glow_button()
+
+
+# ============================================
+# 背景
+# ============================================
+
+func _draw_bg() -> void:
+	var tex := _tex("bg")
+	if tex:
+		var ts := tex.get_size()
+		var s := maxf(size.x / ts.x, size.y / ts.y)
+		var fs := ts * s
+		var off := (size - fs) / 2.0
+		draw_texture_rect(tex, Rect2(off, fs), false)
+	else:
+		draw_rect(Rect2(Vector2.ZERO, size), C_BG_DARK)
+
+
+# ============================================
+# 粒子绘制
+# ============================================
+
+func _draw_stars() -> void:
 	for p in _particles:
-		var px: float = ox + float(p["x"]) * s
-		var py: float = oy + float(p["y"]) * s
-		var twinkle_alpha: float = 0.7 + 0.3 * sin(float(p["twinkle"]))
-		var final_alpha: float = float(p["alpha"]) * twinkle_alpha * a
-		var dsize: float = float(p["size"]) * s
-		var pts := [
-			Vector2(px, py - dsize),
-			Vector2(px + dsize * 0.6, py),
-			Vector2(px, py + dsize),
-			Vector2(px - dsize * 0.6, py),
-		]
-		draw_colored_polygon(pts, Color(1, 1, 1, final_alpha))
-	
-	# 3. Logo（标题图片）
-	var logo_tex := _get_tex("logo")
-	if logo_tex:
-		var logo_w: float = 335.0 * s
-		var logo_h: float = 178.0 * s
-		var logo_x: float = ox + 20.0 * s
-		var logo_y: float = oy + 20.0 * s
-		draw_texture_rect(logo_tex, Rect2(logo_x, logo_y, logo_w, logo_h), false, Color(1, 1, 1, a))
-	
-	# 4. 三只怪物立绘浮动
-	_draw_monster("fire_monster", ox + 38.0 * s, oy + 270.0 * s, 140.0 * s, a, -2.0)
-	_draw_monster("water_monster", ox + 118.0 * s, oy + 252.0 * s, 144.0 * s, a, 0.0)
-	_draw_monster("grass_monster", ox + 205.0 * s, oy + 274.0 * s, 138.0 * s, a, 2.0)
-	
-	# 5. 五颗宝石浮动
-	var gem_y_base: float = 424.0
-	_draw_gem("gem_fire", ox + 112.0 * s, oy + gem_y_base * s, 48.0 * s, a)
-	_draw_gem("gem_water", ox + 164.0 * s, oy + (gem_y_base - 16.0) * s, 52.0 * s, a)
-	_draw_gem("gem_grass", ox + 218.0 * s, oy + gem_y_base * s, 48.0 * s, a)
-	_draw_gem("gem_thunder", ox + 140.0 * s, oy + (gem_y_base + 42.0) * s, 46.0 * s, a)
-	_draw_gem("gem_light", ox + 194.0 * s, oy + (gem_y_base + 42.0) * s, 46.0 * s, a)
-	
-	# 6. 开始按钮（图片 + 光晕 + 按压缩放）
-	if _is_ready:
-		_draw_enter_button(ox, oy, s, a)
-	
-	# 7. 提示条（图片）
-	var hint_tex := _get_tex("hint_ribbon")
-	if hint_tex:
-		var hint_w: float = 265.0 * s
-		var hint_h: float = hint_w * (float(hint_tex.get_height()) / float(hint_tex.get_width()))
-		var hint_x: float = ox + 55.0 * s
-		var hint_y: float = oy + DESIGN_H * 0.887 * s
-		var hint_alpha: float = (0.58 + _pulse * 0.25) * a
-		draw_texture_rect(hint_tex, Rect2(hint_x, hint_y, hint_w, hint_h), false, Color(1, 1, 1, hint_alpha))
-	
-	# 8. 版本牌（图片）
-	var ver_tex := _get_tex("version_plaque")
-	if ver_tex:
-		var ver_w: float = 80.0 * s
-		var ver_h: float = ver_w * (float(ver_tex.get_height()) / float(ver_tex.get_width()))
-		var ver_x: float = (size.x - ver_w) / 2.0
-		var ver_y: float = oy + (DESIGN_H - 40.0) * s
-		draw_texture_rect(ver_tex, Rect2(ver_x, ver_y, ver_w, ver_h), false, Color(1, 1, 1, 0.7 * a))
+		var px: float = p.x * _sx
+		var py: float = p.y * _sy
+		var ta: float = 0.7 + 0.3 * sin(p.tw)
+		var fa: float = p.a * ta * _opacity
+		var ss: float = p.sz * _sc
+		draw_colored_polygon(
+			PackedVector2Array([
+				Vector2(px, py - ss),
+				Vector2(px + ss * 0.6, py),
+				Vector2(px, py + ss),
+				Vector2(px - ss * 0.6, py),
+			]),
+			Color(1.0, 1.0, 1.0, fa)
+		)
 
 
 # ============================================
-# 绘制辅助
+# 美术资源模式内容
 # ============================================
 
-func _draw_monster(key: String, x: float, y: float, h: float, alpha: float, phase_offset: float) -> void:
-	var tex := _get_tex(key)
-	if tex == null:
+func _draw_art_content() -> void:
+	var w := size.x
+	var h := size.y
+
+	# ---- Logo 或回退标题 ----
+	var logo := _tex("logo")
+	if logo:
+		var lw := 335.0 * _sx
+		var lh := 178.0 * _sy
+		draw_texture_rect(logo, Rect2(20.0 * _sx, 20.0 * _sy, lw, lh), false,
+			Color(1, 1, 1, _opacity))
+	else:
+		_draw_stroke_text("萌灵消消大冒险", w / 2.0, h * 0.15,
+			C_GOLD, Color(0.04, 0.06, 0.16), 28.0 * _sc, 4.0 * _sc)
+
+	# ---- 三只怪物 sin 浮动 ----
+	_draw_monster("fire_monster",  38.0, 270.0, 140.0, -2.0)
+	_draw_monster("water_monster", 118.0, 252.0, 144.0,  0.0)
+	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
+
+	# ---- 五颗宝石脉冲浮动 ----
+	var gy := 424.0
+	_draw_gem("gem_fire",    112.0, gy,        48.0)
+	_draw_gem("gem_water",   164.0, gy - 16.0, 52.0)
+	_draw_gem("gem_grass",   218.0, gy,        48.0)
+	_draw_gem("gem_thunder", 140.0, gy + 42.0, 46.0)
+	_draw_gem("gem_light",   194.0, gy + 42.0, 46.0)
+
+	# ---- 提示横幅 ----
+	if _ready_flag:
+		_draw_hint_art(w, h)
+
+	# ---- 版本号 ----
+	_draw_version_art(w, h)
+
+
+func _draw_monster(key: String, mx: float, my: float, ms: float, bob_off: float) -> void:
+	var tex := _tex(key)
+	if not tex:
 		return
-	var tex_w: float = float(tex.get_width())
-	var tex_h: float = float(tex.get_height())
-	var draw_h: float = h
-	var draw_w: float = draw_h * (tex_w / tex_h) if tex_h > 0 else draw_h
-	# sin 浮动动画（amplitude 3px，period 1.5s）
-	var float_offset: float = sin(_idle_time * TAU / 1.5 + phase_offset) * 3.0
-	draw_texture_rect(tex, Rect2(x, y + float_offset, draw_w, draw_h), false, Color(1, 1, 1, alpha))
+	var bob := sin(_pulse * PI * 2.0 + bob_off) * 4.0 * _sc
+	var ds := ms * _sc
+	draw_texture_rect(tex,
+		Rect2(mx * _sx, my * _sy + bob, ds, ds),
+		false, Color(1, 1, 1, _opacity))
 
 
-func _draw_gem(key: String, x: float, y: float, size_px: float, alpha: float) -> void:
-	var tex := _get_tex(key)
-	if tex == null:
+func _draw_gem(key: String, gx: float, gy: float, gs: float) -> void:
+	var tex := _tex(key)
+	if not tex:
 		return
-	# sin 浮动（amplitude 4px，period 2s，各宝石有相位差）
-	var phase: float = hash(key) % 100 * 0.0628  # 基于 key 的固定相位差
-	var float_offset: float = sin(_idle_time * TAU / 2.0 + phase) * 4.0
-	draw_texture_rect(tex, Rect2(x, y + float_offset, size_px, size_px), false, Color(1, 1, 1, alpha))
+	var glow := 1.0 + _pulse * 0.08
+	var ds := gs * _sc * glow
+	draw_texture_rect(tex,
+		Rect2(gx * _sx - ds / 2.0, gy * _sy - ds / 2.0, ds, ds),
+		false, Color(1, 1, 1, _opacity))
 
 
-func _draw_enter_button(ox: float, oy: float, s: float, a: float) -> void:
-	# 按钮区域
-	var btn_rect := _get_btn_rect()
-	var is_pressed: bool = _touched_btn == "enterBtn" and _is_pressed
-	var press_scale: float = 0.95 if is_pressed else 1.0
-	
-	# 光晕强度 = 脉动 + 长按加成
-	var glow_intensity: float = _pulse + _long_press_glow * 0.5
-	
-	# 光晕效果（径向渐变圆）
-	if glow_intensity > 0.1:
-		var glow_alpha: float = glow_intensity * 0.35 * a
-		var glow_color := Color(0.2, 0.6, 1.0, glow_alpha)
-		var center := btn_rect.position + btn_rect.size / 2.0
-		var glow_r: float = btn_rect.size.x * 0.7
-		draw_circle(center, glow_r, Color(glow_color.r, glow_color.g, glow_color.b, glow_alpha * 0.3))
-		draw_circle(center, glow_r * 0.6, glow_color)
-	
-	# 按钮图片
-	var btn_key: String = "btn_start_pressed" if is_pressed else "btn_start_normal"
-	var btn_tex := _get_tex(btn_key)
-	if btn_tex == null:
-		btn_tex = _get_tex("btn_start")
-	if btn_tex:
-		var scaled_w: float = btn_rect.size.x * press_scale
-		var scaled_h: float = btn_rect.size.y * press_scale
-		var draw_x: float = btn_rect.position.x + (btn_rect.size.x - scaled_w) / 2.0
-		var draw_y: float = btn_rect.position.y + (btn_rect.size.y - scaled_h) / 2.0
-		draw_texture_rect(btn_tex, Rect2(draw_x, draw_y, scaled_w, scaled_h), false, Color(1, 1, 1, a if not is_pressed else a * 0.86))
+func _draw_hint_art(w: float, h: float) -> void:
+	var ha := 0.58 + _pulse * 0.25
+	var ribbon := _tex("hint_ribbon")
+	var rx := 55.0 * _sx
+	var ry := h * 0.887
+	var rw := 265.0 * _sx
+	var rh := 42.0 * _sy
+
+	if ribbon:
+		draw_texture_rect(ribbon, Rect2(rx, ry, rw, rh), false,
+			Color(1, 1, 1, _opacity * ha))
+	else:
+		draw_rect(Rect2(rx, ry + 4.0 * _sc, rw, 30.0 * _sc),
+			Color(C_BG_PANEL, _opacity * ha))
+
+	var hfs := 16.0 * _sc
+	_draw_centered_text("点击开始你的冒险之旅",
+		w / 2.0 + 10.0 * _sx, ry + rh / 2.0, hfs,
+		Color(1, 1, 1, _opacity * ha))
+
+
+func _draw_version_art(w: float, h: float) -> void:
+	var plaque := _tex("version_plaque")
+	var pw := 82.0 * _sx
+	var ph := 30.0 * _sy
+	var px := (w - pw) / 2.0
+	var py := h * 0.952
+
+	if plaque:
+		draw_texture_rect(plaque, Rect2(px, py, pw, ph), false,
+			Color(1, 1, 1, _opacity * 0.72))
+
+	var vfs := 12.0 * _sc
+	_draw_centered_text("v0.1.0", w / 2.0, py + ph / 2.0, vfs,
+		Color(1, 1, 1, _opacity * 0.72))
+
+
+# ============================================
+# 回退模式内容（无美术资源）
+# ============================================
+
+func _draw_fallback_content() -> void:
+	var w := size.x
+	var h := size.y
+
+	# ---- 装饰星点 ----
+	var dots := [
+		[0.15, 0.12, 2.0, 0.4],
+		[0.75, 0.18, 1.5, 0.3],
+		[0.55, 0.08, 1.0, 0.5],
+		[0.85, 0.35, 2.0, 0.2],
+		[0.25, 0.45, 1.5, 0.3],
+	]
+	for d in dots:
+		draw_circle(Vector2(w * d[0], h * d[1]), d[2] * _sc,
+			Color(1, 1, 1, d[3] * _opacity))
+
+	# ---- 主标题（描边 + 渐变）----
+	var ty := h * 0.32
+	var title_fs := 44.0 * _sc
+	_draw_stroke_text("三消宝可梦", w / 2.0, ty,
+		C_WHITE, Color.BLACK, title_fs, 4.0 * _sc)
+	_draw_gradient_text("三消宝可梦", w / 2.0, ty,
+		title_fs, C_PRIMARY, C_GOLD, _opacity)
+
+	# ---- 副标题 ----
+	var sty := h * 0.42
+	_draw_stroke_text("✦ 三消冒险 ✦", w / 2.0, sty,
+		C_GOLD, Color.BLACK, 20.0 * _sc, 2.0 * _sc)
+
+	# ---- 装饰星 emoji（上排）----
+	var efs := 16.0 * _sc
+	_draw_centered_text("✨ ⭐ ✨ ⭐ ✨", w / 2.0, h * 0.86, efs,
+		Color(C_GOLD, 0.5 * _opacity))
+
+	# ---- ◈ 两侧装饰 ----
+	_draw_centered_text("◈", w * 0.15, h * 0.88, 16.0 * _sc,
+		Color(C_GOLD, _opacity * 0.6))
+	_draw_centered_text("◈", w * 0.85, h * 0.88, 16.0 * _sc,
+		Color(C_GOLD, _opacity * 0.6))
+
+	# ---- 装饰横线 ----
+	var line_w := 60.0 * _sc
+	var line_cx := w / 2.0
+	draw_line(
+		Vector2(line_cx - line_w / 2.0, h * 0.88),
+		Vector2(line_cx + line_w / 2.0, h * 0.88),
+		Color(C_GOLD, 0.3 * _opacity), 1.0)
+
+	# ---- 版本号 ----
+	_draw_centered_text("v0.1.0", w / 2.0, h * 0.93, 12.0 * _sc,
+		Color(C_TEXT_MUTED, _opacity))
+
+	# ---- 底部星 emoji ----
+	_draw_centered_text("✨ ⭐ ✨ ⭐ ✨", w / 2.0, h * 0.96, 12.0 * _sc,
+		Color(C_GOLD, 0.5 * _opacity))
+
+	# ---- 提示文字（动态透明度）----
+	if _ready_flag:
+		var ha := 0.4 + _pulse * 0.3
+		_draw_centered_text("点击开始你的冒险之旅",
+			w / 2.0, size.y * 0.82 + 8.0 * _sc, 16.0 * _sc,
+			Color(C_TEXT_SECONDARY, ha * _opacity))
+
+
+# ============================================
+# 光晕按钮绘制
+# ============================================
+
+func _draw_glow_button() -> void:
+	var pressed := _touching and not _lp_done
+	var ps := 0.95 if pressed else 1.0
+	var btn := _btn_rect(ps)
+	var center := btn.position + btn.size / 2.0
+
+	# ---- 发光光晕（多层径向渐变模拟）----
+	var glow_i := _pulse + _lp_glow * 0.5
+	var glow_a := 0.3 + glow_i * 0.4
+	var radius := maxf(btn.size.x, btn.size.y) * 0.8
+
+	for i in range(6):
+		var t := float(i) / 6.0
+		var r := radius * (1.0 - t * 0.4)
+		var a := glow_a * (1.0 - t) * 0.12 * _opacity
+		draw_circle(center, r,
+			Color(C_PRIMARY.r, C_PRIMARY.g, C_PRIMARY.b, a))
+
+	# ---- 按钮背景 ----
+	var tex_key := "btn_pressed" if pressed else "btn_normal"
+	var tex := _tex(tex_key)
+	if not tex:
+		tex = _tex("btn_normal")
+
+	if tex:
+		draw_texture_rect(tex, btn, false, Color(1, 1, 1, _opacity))
+	else:
+		# 回退：纯色圆角矩形
+		draw_rect(btn, Color(0.25, 0.45, 0.85, _opacity))
+		if pressed:
+			draw_rect(btn, Color(0, 0, 0, 0.15))
+
+	# ---- 按钮文字（阴影 + 正文）----
+	var label := "开 始 冒 险" if _has_bg else "进 入 游 戏"
+	var bfs := 24.0 * _sc
+	var ty := center.y + bfs * 0.35
+
+	# 阴影
+	_draw_centered_text(label, center.x + 1.0 * _sc, ty + 2.0 * _sc, bfs,
+		Color(0, 0, 0, 0.45 * _opacity))
+	# 正文
+	_draw_centered_text(label, center.x, ty, bfs,
+		Color(1, 1, 1, _opacity))
+
+
+# ============================================
+# 绘制辅助：居中文字
+# ============================================
+
+func _draw_centered_text(text: String, cx: float, y: float, fs: float, color: Color) -> void:
+	var tw := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	draw_string(_font, Vector2(cx - tw / 2.0, y), text,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)
+
+
+# ============================================
+# 绘制辅助：渐变文字（逐字符着色）
+# ============================================
+
+func _draw_gradient_text(text: String, cx: float, cy: float, fs: float,
+		from: Color, to: Color, alpha: float) -> void:
+	var n := text.length()
+	if n == 0:
+		return
+
+	# 测量各字符宽度
+	var widths := []
+	var total_w := 0.0
+	for i in range(n):
+		var cw := _font.get_string_size(text.substr(i, 1), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		widths.append(cw)
+		total_w += cw
+
+	var x := cx - total_w / 2.0
+	var y := cy + fs * 0.35  # baseline 近似
+
+	for i in range(n):
+		var t := float(i) / maxf(float(n - 1), 1.0)
+		# from → to → from（对称渐变）
+		var ct := t * 2.0
+		if ct > 1.0:
+			ct = 2.0 - ct
+		var c := from.lerp(to, ct)
+		c.a = alpha
+		draw_string(_font, Vector2(x, y), text.substr(i, 1),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, fs, c)
+		x += widths[i]
+
+
+# ============================================
+# 绘制辅助：描边文字
+# ============================================
+
+func _draw_stroke_text(text: String, cx: float, cy: float,
+		fill: Color, stroke: Color, fs: float, sw: float) -> void:
+	var tw := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var x := cx - tw / 2.0
+	var y := cy + fs * 0.35
+	var sc := Color(stroke.r, stroke.g, stroke.b, _opacity)
+
+	# 8 方向描边
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
+			if dx == 0 and dy == 0:
+				continue
+			draw_string(_font, Vector2(x + dx * sw, y + dy * sw), text,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, fs, sc)
+
+	# 填充
+	var fc := Color(fill.r, fill.g, fill.b, _opacity)
+	draw_string(_font, Vector2(x, y), text,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, fs, fc)
