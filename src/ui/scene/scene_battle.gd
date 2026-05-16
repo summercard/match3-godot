@@ -1171,7 +1171,8 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 		_boss_skill_visuals[idx] = {
 			"charge_timer": 0.0,
 			"shield_hp": 0.0,
-			"shield_max_hp": 0.0
+			"shield_max_hp": 0.0,
+			"heal_floats": []
 		}
 	var vis: Dictionary = _boss_skill_visuals[idx]
 	var event_type: String = event.get("type", "")
@@ -1180,6 +1181,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 	match event_type:
 		"charge_start":
 			vis["charge_timer"] = 999.0
+			vis["heal_floats"] = []  # 蓄力时清空治疗浮动记录
 			_show_message("⚡ %s 正在蓄力..." % enemy_name)
 		"charge_release":
 			vis["charge_timer"] = 0.0
@@ -1217,7 +1219,8 @@ func _sync_boss_skill_visuals() -> void:
 			_boss_skill_visuals[idx] = {
 				"charge_timer": 0.0,
 				"shield_hp": 0.0,
-				"shield_max_hp": 0.0
+				"shield_max_hp": 0.0,
+				"heal_floats": []
 			}
 		var vis: Dictionary = _boss_skill_visuals[idx]
 		if skill_state.has("shield"):
@@ -2751,3 +2754,8 @@ func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
 	
 	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
 		_show_message("🔓 宝石解锁！")
+ize": 12.0, "timer": 0.0, "duration": 0.8})
+	
+	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
+		_show_message("🔓 宝石解锁！")
+)
