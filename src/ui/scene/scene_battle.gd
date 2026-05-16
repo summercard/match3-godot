@@ -80,6 +80,21 @@ const ELIMINATE_DURATION: float = 0.3
 var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
 const FALL_DURATION: float = 0.25
 
+## 锁定宝石解锁动画队列
+var _unlock_animations: Array[Dictionary] = []  # [{row, col, x, y, timer, phase, maxTimer}]
+
+## 毒雾扩散动画队列
+var _poison_fog_spread_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}]
+
+## 毒雾清除动画队列
+var _poison_fog_clear_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}]
+
+## 宝石消除粒子系统
+var _gem_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size}]
+
+## 障碍物破坏粒子
+var _obstacle_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size, gravity}]
+
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
 
@@ -97,9 +112,6 @@ var _shake_timer: float = 0.0
 var _attack_shake_timer: float = 0.0
 var _attack_flash_timer: float = 0.0
 var _attack_shake_offset_x: float = 0.0
-
-## 消除中宝石特效
-var _eliminating_gems: Array[Dictionary] = []
 
 ## 关卡数据
 var _stage_data: Dictionary = {}
@@ -138,6 +150,27 @@ const GEM_COLORS := {
 	"grass": Color(0.1, 0.8, 0.2),
 	"thunder": Color(0.9, 0.8, 0.1),
 	"light": Color(1.0, 0.9, 0.2)
+}
+
+## 锁定宝石颜色
+const LOCK_COLORS := {
+	"chain": Color(0.6, 0.6, 0.7, 0.9),
+	"chain_weak": Color(0.5, 0.5, 0.55, 0.7),
+	"lock_icon": Color(0.78, 0.78, 0.86, 0.7)
+}
+
+## 障碍物颜色
+const OBSTACLE_COLORS := {
+	"rock": Color(0.35, 0.3, 0.25, 1.0),
+	"rock_solid": Color(0.42, 0.38, 0.32, 1.0),
+	"rock_cracked": Color(0.28, 0.24, 0.2, 1.0),
+	"crack_line": Color(0.2, 0.18, 0.15, 0.9),
+	"highlight": Color(1.0, 1.0, 1.0, 0.15)
+}
+
+## 毒雾颜色
+const POISON_FOG_COLORS := {
+	"overlay": Color(0.31, 0.78, 0.31)
 }
 
 ## 宝石 Emoji
@@ -207,6 +240,12 @@ func init(data: Dictionary = {}) -> void:
 	_player_display_hp = []
 	_boss_skill_visuals = {}
 	_eliminating_gems = []
+	_falling_gems = []
+	_unlock_animations = []
+	_poison_fog_spread_anims = []
+	_poison_fog_clear_anims = []
+	_gem_particles = []
+	_obstacle_particles = []
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -458,6 +497,9 @@ func _process_matches() -> void:
 				"timer": 0.0,
 				"duration": ELIMINATE_DURATION
 			})
+			# 触发宝石消除粒子
+			if m.has("type"):
+				spawn_eliminate_particles(m["row"], m["col"], m["type"])
 	
 	# 等消除动画播放
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
@@ -591,6 +633,18 @@ func _process(delta: float) -> void:
 	# 更新下落动画
 	_update_fall_animations(delta)
 	
+	# 更新解锁碎裂动画
+	_update_unlock_animations(delta)
+	
+	# 更新毒雾扩散动画
+	_update_poison_fog_anims(delta)
+	
+	# 更新宝石消除粒子
+	_update_gem_particles(delta)
+	
+	# 更新障碍物破坏粒子
+	_update_obstacle_particles(delta)
+	
 	# 每帧重绘
 	queue_redraw()
 
@@ -702,6 +756,12 @@ func _draw() -> void:
 	
 	# 绘制棋盘
 	_draw_board()
+	
+	# 渲染宝石消除粒子
+	_draw_gem_particles()
+	
+	# 渲染障碍物破坏粒子
+	_draw_obstacle_particles()
 	
 	# 选中高亮
 	_draw_selection()
@@ -874,7 +934,10 @@ func _draw_board() -> void:
 			var x := board_x + col * cell_size
 			var y := board_y + row * cell_size
 			_draw_rounded_rect(x + 1, y + 1, cell_size - 2, cell_size - 2, 4.0, Color(0.02, 0.07, 0.16, 0.66))
-			if _board == null or _board.is_obstacle(row, col):
+			if _board == null:
+				continue
+			# 障碍物格子：保留格子底色，跳过宝石渲染
+			if _board.is_obstacle(row, col):
 				continue
 			var gem_type: String = _board.grid[row][col]
 			if gem_type == "":
@@ -902,6 +965,13 @@ func _draw_board() -> void:
 				# idle 状态下轻微呼吸
 				var idle_scale := 1.0 + 0.02 * sin(_idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
 				_draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, 1.0)
+	
+	# 渲染特殊元素（锁定宝石、障碍物、毒雾）
+	_draw_locked_gems(_board)
+	_draw_obstacles(_board)
+	_draw_poison_fog(_board)
+	_draw_unlock_animations()
+	_draw_poison_fog_anims()
 
 func _draw_gem(cx: float, cy: float, gem_type: String, color: Color) -> void:
 	_draw_gem_animated(cx, cy, gem_type, color, 1.0, 1.0)
@@ -1028,6 +1098,288 @@ func _draw_phase_transition() -> void:
 	_draw_text_with_shadow("进入激战状态！", DESIGN_W / 2.0, DESIGN_H / 2.0 + 20, C["white"], 14.0)
 
 ## ============================================
+# 特殊元素渲染（锁定宝石、障碍物、毒雾）
+## ============================================
+
+func _draw_locked_gems(b) -> void:
+	if b == null:
+		return
+	for row in range(b.rows):
+		for col in range(b.cols):
+			if not b.is_locked(row, col):
+				continue
+			# 跳过正在播放碎裂动画的锁定宝石
+			var is_shattering := false
+			for anim in _unlock_animations:
+				if anim.get("row") == row and anim.get("col") == col and anim.get("phase") == "shatter":
+					is_shattering = true
+					break
+			if is_shattering:
+				continue
+			
+			var lock: Dictionary = b.locked_gems[row][col]
+			var x := float(b.offset_x + col * b.cell_size)
+			var y := float(b.offset_y + row * b.cell_size)
+			var size := float(b.cell_size)
+			var cx := x + size / 2.0
+			var cy := y + size / 2.0
+			
+			# 锁链边框
+			var chain_color: Color = LOCK_COLORS.chain if lock.get("hp", 1) >= 2 else LOCK_COLORS.chain_weak
+			var corners := [
+				Vector2(x + 3, y + 3), Vector2(x + size - 3, y + 3),
+				Vector2(x + 3, y + size - 3), Vector2(x + size - 3, y + size - 3)
+			]
+			for i in range(4):
+				draw_line(corners[i], corners[(i + 1) % 4], chain_color, 2.5)
+			
+			# 四角锁链emoji
+			var icon_color := Color(0.78, 0.78, 0.86, 0.9)
+			_draw_text_with_shadow("⛓", corners[0].x, corners[0].y, icon_color, 8.0)
+			_draw_text_with_shadow("⛓", corners[1].x, corners[1].y, icon_color, 8.0)
+			_draw_text_with_shadow("⛓", corners[2].x, corners[2].y, icon_color, 8.0)
+			_draw_text_with_shadow("⛓", corners[3].x, corners[3].y, icon_color, 8.0)
+			
+			# 中心锁标记
+			if lock.get("hp", 1) >= 2:
+				_draw_text_with_shadow("🔒", cx, cy - 4, Color(1.0, 1.0, 1.0, 0.7), 8.0)
+			else:
+				_draw_text_with_shadow("×1", cx, cy + 4, Color(1.0, 1.0, 1.0, 0.8), 8.0)
+
+func _draw_obstacles(b) -> void:
+	if b == null:
+		return
+	for row in range(b.rows):
+		for col in range(b.cols):
+			if not b.is_obstacle(row, col):
+				continue
+			var ob: Dictionary = b.obstacles[row][col]
+			var x := float(b.offset_x + col * b.cell_size)
+			var y := float(b.offset_y + row * b.cell_size)
+			var size := float(b.cell_size)
+			var cx := x + size / 2.0
+			var cy := y + size / 2.0
+			
+			if ob.get("hp", 2) >= 2:
+				# 完好石块
+				_draw_rounded_rect(x + 2, y + 2, size - 4, size - 4, 4.0, OBSTACLE_COLORS.rock)
+				_draw_rounded_rect(x + 4, y + 4, size - 8, size - 8, 3.0, OBSTACLE_COLORS.rock_solid)
+				_draw_rounded_rect(x + 6, y + 6, size - 16, (size - 8) / 3, 2.0, OBSTACLE_COLORS.highlight)
+				_draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.7), 12.0)
+			else:
+				# 裂纹石块
+				_draw_rounded_rect(x + 2, y + 2, size - 4, size - 4, 4.0, OBSTACLE_COLORS.rock)
+				_draw_rounded_rect(x + 4, y + 4, size - 8, size - 8, 3.0, OBSTACLE_COLORS.rock_cracked)
+				_draw_stroke_rect(x + 4, y + 4, size - 8, size - 8, 1.0, OBSTACLE_COLORS.crack_line)
+				# 裂纹线条
+				draw_line(Vector2(cx - 6, cy - 4), Vector2(cx, cy + 2), OBSTACLE_COLORS.crack_line, 1.5)
+				draw_line(Vector2(cx, cy + 2), Vector2(cx + 5, cy - 6), OBSTACLE_COLORS.crack_line, 1.5)
+				draw_line(Vector2(cx - 3, cy + 1), Vector2(cx + 2, cy + 6), OBSTACLE_COLORS.crack_line, 1.5)
+				_draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.5), 14.0)
+
+func _draw_poison_fog(b) -> void:
+	if b == null:
+		return
+	var pulse_period := 1.5
+	var pulse_min := 0.2
+	var pulse_max := 0.4
+	var t := fmod(_idle_time, pulse_period) / pulse_period
+	var pulse_opacity := pulse_min + (pulse_max - pulse_min) * (sin(t * TAU) + 1.0) / 2.0
+	
+	for row in range(b.rows):
+		for col in range(b.cols):
+			if not b.is_poison_fog(row, col):
+				continue
+			var x := float(b.offset_x + col * b.cell_size)
+			var y := float(b.offset_y + row * b.cell_size)
+			var size := float(b.cell_size)
+			var cx := x + size / 2.0
+			var cy := y + size / 2.0
+			
+			# 绿色半透明覆盖
+			draw_rect(Rect2(x + 1, y + 1, size - 2, size - 2), Color(0.31, 0.78, 0.31, pulse_opacity))
+			# 骷髅图标
+			var icon_alpha := 0.5 + pulse_opacity
+			_draw_text_with_shadow("💀", cx, cy, Color(1.0, 1.0, 1.0, icon_alpha), 10.0)
+
+func _draw_unlock_animations() -> void:
+	for i in range(_unlock_animations.size() - 1, -1, -1):
+		var anim: Dictionary = _unlock_animations[i]
+		var progress: float = anim["timer"] / anim.get("maxTimer", 0.6)
+		if progress >= 1.0:
+			continue
+		var alpha: float = 1.0 - progress
+		var dist: float = progress * 20.0
+		var row: int = anim["row"]
+		var col: int = anim["col"]
+		var cell_size := 42.0
+		var board_x := (DESIGN_W - 336.0) / 2.0
+		var board_y := 280.0
+		if _board != null:
+			cell_size = float(_board.cell_size)
+			board_x = float(_board.offset_x)
+			board_y = float(_board.offset_y)
+		var cx: float = board_x + col * cell_size + cell_size / 2.0
+		var cy: float = board_y + row * cell_size + cell_size / 2.0
+		var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1]]
+		for d: Array in dirs:
+			var px: float = cx + d[0] * dist
+			var py: float = cy + d[1] * dist
+			_draw_text_with_shadow("⛓", px, py, Color(0.6, 0.6, 0.7, alpha), 10.0)
+
+func _draw_poison_fog_anims() -> void:
+	# 扩散动画
+	for i in range(_poison_fog_spread_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _poison_fog_spread_anims[i]
+		var progress: float = anim["timer"] / 0.6
+		if progress >= 1.0:
+			continue
+		var alpha: float = (1.0 - progress) * 0.6
+		var radius: float = 42.0 * 0.3 * progress * 2.0
+		var cx: float = anim["x"] + 21.0
+		var cy: float = anim["y"] + 21.0
+		var ring_color := Color(0.31, 0.78, 0.31, alpha)
+		# 绘制圆弧
+		var points := maxi(32, radius * 2)
+		for p in range(points):
+			var angle1: float = TAU * p / points
+			var angle2: float = TAU * (p + 1) / points
+			var p1 := Vector2(cx + cos(angle1) * radius, cy + sin(angle1) * radius)
+			var p2 := Vector2(cx + cos(angle2) * radius, cy + sin(angle2) * radius)
+			draw_line(p1, p2, ring_color, 2.0)
+	
+	# 清除动画
+	for i in range(_poison_fog_clear_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _poison_fog_clear_anims[i]
+		var progress: float = anim["timer"] / 0.5
+		if progress >= 1.0:
+			continue
+		var alpha: float = 1.0 - progress
+		var dist: float = progress * 15.0
+		var cx: float = anim["x"] + 21.0
+		var cy: float = anim["y"] + 21.0
+		var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1]]
+		for d: Array in dirs:
+			var px: float = cx + d[0] * dist
+			var py: float = cy + d[1] * dist
+			_draw_text_with_shadow("☁️", px, py, Color(0.31, 0.78, 0.31, alpha), 10.0)
+
+## ============================================
+# 粒子特效系统
+## ============================================
+
+func spawn_eliminate_particles(row: int, col: int, gem_type: String) -> void:
+	var cell_size := float(_board.cell_size) if _board != null else 42.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else 280.0
+	
+	var cx: float = board_x + col * cell_size + cell_size / 2.0
+	var cy: float = board_y + row * cell_size + cell_size / 2.0
+	
+	var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
+	var particle_count := 8
+	var speed_base := 80.0
+	
+	for i in range(particle_count):
+		var angle: float = TAU * i / particle_count + randf() * 0.3
+		var speed: float = speed_base * (0.6 + randf() * 0.8)
+		_gem_particles.append({
+			"x": cx,
+			"y": cy,
+			"vx": cos(angle) * speed,
+			"vy": sin(angle) * speed,
+			"life": 0.3,
+			"max_life": 0.3,
+			"color": gem_color,
+			"size": 4.0 + randf() * 3.0
+		})
+
+func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
+	var cell_size := float(_board.cell_size) if _board != null else 42.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else 280.0
+	
+	var cx: float = board_x + col * cell_size + cell_size / 2.0
+	var cy: float = board_y + row * cell_size + cell_size / 2.0
+	
+	var particle_count := 12
+	var speed_base := 100.0
+	
+	for i in range(particle_count):
+		var angle: float = TAU * i / particle_count + randf() * 0.4
+		var speed: float = speed_base * (0.4 + randf() * 1.2)
+		_obstacle_particles.append({
+			"x": cx,
+			"y": cy,
+			"vx": cos(angle) * speed,
+			"vy": sin(angle) * speed - 50.0,
+			"life": 0.5,
+			"max_life": 0.5,
+			"color": OBSTACLE_COLORS.rock,
+			"size": 5.0 + randf() * 4.0,
+			"gravity": 300.0
+		})
+
+func spawn_unlock_particles(row: int, col: int) -> void:
+	var cell_size := float(_board.cell_size) if _board != null else 42.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else 280.0
+	
+	var cx: float = board_x + col * cell_size + cell_size / 2.0
+	var cy: float = board_y + row * cell_size + cell_size / 2.0
+	
+	var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]
+	for d: Array in dirs:
+		var dist: float = 15.0 + randf() * 10.0
+		var angle: float = atan2(d[1], d[0]) + randf() * 0.5 - 0.25
+		_unlock_animations.append({
+			"row": row,
+			"col": col,
+			"x": cx + d[0] * dist,
+			"y": cy + d[1] * dist,
+			"timer": 0.0,
+			"maxTimer": 0.4,
+			"phase": "shatter"
+		})
+
+func _update_gem_particles(delta: float) -> void:
+	for i in range(_gem_particles.size() - 1, -1, -1):
+		var p: Dictionary = _gem_particles[i]
+		p["x"] += p["vx"] * delta
+		p["y"] += p["vy"] * delta
+		p["vy"] += 200.0 * delta
+		p["life"] -= delta
+		if p["life"] <= 0:
+			_gem_particles.remove_at(i)
+
+func _update_obstacle_particles(delta: float) -> void:
+	for i in range(_obstacle_particles.size() - 1, -1, -1):
+		var p: Dictionary = _obstacle_particles[i]
+		p["x"] += p["vx"] * delta
+		p["y"] += p["vy"] * delta
+		p["vy"] += p.get("gravity", 300.0) * delta
+		p["life"] -= delta
+		if p["life"] <= 0:
+			_obstacle_particles.remove_at(i)
+
+func _draw_gem_particles() -> void:
+	for p: Dictionary in _gem_particles:
+		var progress: float = 1.0 - p["life"] / p["max_life"]
+		var alpha: float = 1.0 - progress
+		var size: float = p["size"] * (1.0 - progress * 0.5)
+		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
+		_draw_circle(p["x"], p["y"], size, color)
+
+func _draw_obstacle_particles() -> void:
+	for p: Dictionary in _obstacle_particles:
+		var progress: float = 1.0 - p["life"] / p["max_life"]
+		var alpha: float = 1.0 - progress
+		var size: float = p["size"] * (1.0 - progress * 0.3)
+		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
+		var half_size: float = size / 2.0
+		_draw_rounded_rect(p["x"] - half_size, p["y"] - half_size, size, size, 1.0, color)
+
+## ============================================
 # 辅助绘制方法
 ## ============================================
 
@@ -1115,6 +1467,11 @@ func destroy() -> void:
 	_fall_messages.clear()
 	_eliminating_gems.clear()
 	_falling_gems.clear()
+	_unlock_animations.clear()
+	_poison_fog_spread_anims.clear()
+	_poison_fog_clear_anims.clear()
+	_gem_particles.clear()
+	_obstacle_particles.clear()
 
 ## ============================================
 # 宝石消除动画更新
@@ -1137,3 +1494,26 @@ func _update_fall_animations(delta: float) -> void:
 		fg["timer"] += delta
 		if fg["timer"] >= fg["duration"]:
 			_falling_gems.remove_at(i)
+
+func _update_unlock_animations(delta: float) -> void:
+	for i in range(_unlock_animations.size() - 1, -1, -1):
+		var anim: Dictionary = _unlock_animations[i]
+		anim["timer"] += delta
+		var progress: float = anim["timer"] / anim.get("maxTimer", 0.6)
+		if progress >= 1.0:
+			_unlock_animations.remove_at(i)
+
+func _update_poison_fog_anims(delta: float) -> void:
+	# 扩散动画
+	for i in range(_poison_fog_spread_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _poison_fog_spread_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.6:
+			_poison_fog_spread_anims.remove_at(i)
+	
+	# 清除动画
+	for i in range(_poison_fog_clear_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _poison_fog_clear_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.5:
+			_poison_fog_clear_anims.remove_at(i)

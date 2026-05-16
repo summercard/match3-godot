@@ -155,14 +155,19 @@ func is_obstacle(row: int, col: int) -> bool:
 func is_locked(row: int, col: int) -> bool:
 	if row < 0 or row >= rows or col < 0 or col >= cols:
 		return false
-	return locked_gems[row][col] != null and locked_gems[row][col].get("hp", 0) > 0
+	var lock = locked_gems[row][col]
+	if lock == null or not lock is Dictionary:
+		return false
+	return lock.get("hp", 0) > 0
 
 ## 检查某个格子是否有毒雾
 func is_poison_fog(row: int, col: int) -> bool:
 	if row < 0 or row >= rows or col < 0 or col >= cols:
 		return false
-	var fog: Dictionary = poison_fog[row][col]
-	return fog != null and fog.get("active", false)
+	var fog = poison_fog[row][col]
+	if fog == null or not fog is Dictionary:
+		return false
+	return fog.get("active", false)
 
 ## 检查放置 type 在 (r,c) 是否会立即形成匹配
 func _would_match(row: int, col: int, type: String) -> bool:
