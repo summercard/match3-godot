@@ -599,32 +599,39 @@ func _process_matches() -> void:
 	var all_excluded_2: Array = all_excluded + bomb_gems
 	var rainbow_gems: Array = _collect_rainbow_gems(rainbow_matches, all_excluded_2)
 	
-	# ===== 第3步：构建分时消除动画队列 =====
+	# ===== 第3步：构建分时消除动画队列（四段 setTimeout 链，匹配微信版 804-830 行时序）=====
 	_special_elim_phases.clear()
 	if explosion_gems.size() > 0:
-		_special_elim_phases.append({"type": "explosion", "gems": explosion_gems, "delay": 0.1, "timer": 0.0, "triggered": false})
+		_special_elim_phases.append({
+			"type": "explosion",
+			"gems": explosion_gems,
+			"matches": enhanced_matches,
+			"delay": 0.1,
+			"timer": 0.0,
+			"triggered": false
+		})
 	if bomb_gems.size() > 0:
-		_special_elim_phases.append({"type": "bomb", "gems": bomb_gems, "delay": 0.15, "timer": 0.0, "triggered": false})
+		_special_elim_phases.append({
+			"type": "bomb",
+			"gems": bomb_gems,
+			"matches": bomb_matches,
+			"delay": 0.15,
+			"timer": 0.0,
+			"triggered": false
+		})
 	if rainbow_gems.size() > 0:
-		_special_elim_phases.append({"type": "rainbow", "gems": rainbow_gems, "delay": 0.2, "timer": 0.0, "triggered": false})
+		_special_elim_phases.append({
+			"type": "rainbow",
+			"gems": rainbow_gems,
+			"matches": rainbow_matches,
+			"delay": 0.2,
+			"timer": 0.0,
+			"triggered": false
+		})
 	_special_elim_timer = 0.0
 	
-	# ===== 第4步：特殊消除的视觉提示 =====
-	# 十字爆炸 emoji
-	for enh in enhanced_matches:
-		var cell_size: float = float(_board.cell_size)
-		var cx: float = float(_board.offset_x + enh["col"] * cell_size + cell_size / 2.0)
-		var cy: float = float(_board.offset_y + enh["row"] * cell_size + cell_size / 2.0)
-		_floating_texts.append({"text": "💥", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 22.0, "timer": 0.0, "duration": 0.8})
-		_show_message("💥 十字爆炸！")
-		# 触发火焰连锁光晕
-		_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
-		# 触发元素连锁全屏波纹（cross型）
-		_trigger_element_ripple("fire", Color(1.0, 0.4, 0.0))
-	
-	# 特殊宝石激活动画（4-match 生成强化宝石时的转换特效）
+	# ===== 第4步：特殊宝石激活动画（4-match 生成强化宝石时的转换特效）=====
 	if enhanced_matches.size() > 0:
-		# 只对第一个强化宝石播放激活动画（避免动画过多）
 		var first_enh: Dictionary = enhanced_matches[0]
 		var gem_type: String = "fire"
 		if _board != null and first_enh["row"] >= 0 and first_enh["row"] < _board.rows and first_enh["col"] >= 0 and first_enh["col"] < _board.cols:
@@ -638,31 +645,8 @@ func _process_matches() -> void:
 			"triggered": false
 		}
 	
-	# 炸弹 emoji + 震动
-	for bomb in bomb_matches:
-		var cell_size: float = float(_board.cell_size)
-		var cx: float = float(_board.offset_x + bomb["col"] * cell_size + cell_size / 2.0)
-		var cy: float = float(_board.offset_y + bomb["row"] * cell_size + cell_size / 2.0)
-		var shape: String = bomb.get("shape", "?")
-		_floating_texts.append({"text": "💣", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 24.0, "timer": 0.0, "duration": 0.8})
-		_show_message("💣 %s形炸弹爆炸！" % shape)
-		_trigger_attack_shake()
-		# 触发爆炸连锁光晕（橙色）
-		_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
-	
-	# 彩虹 emoji + 全屏闪光 + 震动
-	for rainbow in rainbow_matches:
-		_rainbow_flash = RAINBOW_FLASH_DURATION
-		_show_message("🌈 彩虹消除！清除全部%s！" % GEM_EMOJI.get(rainbow["type"], "💎"))
-		_trigger_attack_shake()
-		# 触发彩虹连锁光晕（明亮多色）
-		_trigger_element_glow("rainbow", Color(1.0, 0.95, 0.9, 0.2))
-		var match_cells: Array = rainbow.get("matchCells", rainbow.get("cells", []))
-		if match_cells.size() > 0:
-			var cell_size: float = float(_board.cell_size)
-			var cx: float = float(_board.offset_x + match_cells[0]["col"] * cell_size + cell_size / 2.0)
-			var cy: float = float(_board.offset_y + match_cells[0]["row"] * cell_size + cell_size / 2.0)
-			_floating_texts.append({"text": "🌈", "x": cx, "y": cy - 15.0, "color": C["white"], "size": 28.0, "timer": 0.0, "duration": 1.0})
+	# ===== 第4.5步：特殊消除视觉提示存储（延迟触发，由 _trigger_special_elim 在对应延迟时执行）=====
+	# 匹配数据已存入 _special_elim_phases[].matches，供分时触发使用
 	
 	# ===== 第5步：播放普通消除动画 =====
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
@@ -759,10 +743,13 @@ func _process_matches() -> void:
 	_check_explosion_poison_fog(all_special_gems)
 	_check_unlock_results(matches, all_special_gems)
 	
-	# 等待所有特殊消除动画完成（最大延迟 0.2 + 消除时间 0.3）
+	# 等待所有特殊消除动画完成（最大延迟 + 消除动画时长）
+	# 微信版时序：explosion 100ms, bomb 150ms, rainbow 200ms, 每段动画 ~300ms
 	var special_wait: float = 0.0
 	if _special_elim_phases.size() > 0:
-		special_wait = 0.5
+		# 取最后一个阶段的延迟 + 动画时长
+		var last_phase: Dictionary = _special_elim_phases[_special_elim_phases.size() - 1]
+		special_wait = last_phase["delay"] + ELIMINATE_DURATION
 	await get_tree().create_timer(maxf(FALL_DURATION, special_wait)).timeout
 	_special_elim_phases.clear()
 	
@@ -844,11 +831,50 @@ func _collect_rainbow_gems(rainbow_matches: Array, all_removed: Array) -> Array:
 			})
 	return gems
 
-## 触发特殊消除动画
+## 触发特殊消除动画（在对应延迟时调用，匹配微信版 setTimeout 链时序）
 func _trigger_special_elim(phase: Dictionary) -> void:
 	var type: String = phase["type"]
 	var gems: Array = phase["gems"]
+	var matches: Array = phase.get("matches", [])
+	var cell_size: float = float(_board.cell_size) if _board != null else 42.0
 	
+	match type:
+		"explosion":
+			# 十字爆炸：延迟 100ms 后播放
+			_show_message("💥 十字爆炸！")
+			_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
+			_trigger_element_ripple("fire", Color(1.0, 0.4, 0.0))
+			for enh in matches:
+				var cx: float = float(_board.offset_x + enh["col"] * cell_size + cell_size / 2.0)
+				var cy: float = float(_board.offset_y + enh["row"] * cell_size + cell_size / 2.0)
+				_floating_texts.append({"text": "💥", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 22.0, "timer": 0.0, "duration": 0.8})
+		
+		"bomb":
+			# 炸弹消除：延迟 150ms 后播放
+			_trigger_attack_shake()
+			_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
+			for bomb in matches:
+				var cx: float = float(_board.offset_x + bomb["col"] * cell_size + cell_size / 2.0)
+				var cy: float = float(_board.offset_y + bomb["row"] * cell_size + cell_size / 2.0)
+				var shape: String = bomb.get("shape", "?")
+				_floating_texts.append({"text": "💣", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 24.0, "timer": 0.0, "duration": 0.8})
+				_show_message("💣 %s形炸弹爆炸！" % shape)
+		
+		"rainbow":
+			# 彩虹消除：延迟 200ms 后播放，全屏闪光 0.4s
+			_rainbow_flash = RAINBOW_FLASH_DURATION
+			_trigger_attack_shake()
+			_trigger_element_glow("rainbow", Color(1.0, 0.95, 0.9, 0.2))
+			for rainbow in matches:
+				_show_message("🌈 彩虹消除！清除全部%s！" % GEM_EMOJI.get(rainbow["type"], "💎"))
+				var match_cells: Array = rainbow.get("matchCells", rainbow.get("cells", []))
+				if match_cells.size() > 0:
+					var cx: float = float(_board.offset_x + match_cells[0]["col"] * cell_size + cell_size / 2.0)
+					var cy: float = float(_board.offset_y + match_cells[0]["row"] * cell_size + cell_size / 2.0)
+					_floating_texts.append({"text": "🌈", "x": cx, "y": cy - 15.0, "color": C["white"], "size": 28.0, "timer": 0.0, "duration": 1.0})
+	
+	# 通用：每个受影响宝石的粒子 + 消除动画
+	var half_cell: float = float(_board.cell_size) / 2.0 if _board != null else 21.0
 	for g in gems:
 		var gem_type: String = g.get("type", "")
 		spawn_eliminate_particles(g["row"], g["col"], gem_type)
@@ -857,10 +883,11 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 		
 		var emoji: String = "💥" if type == "explosion" else ("💣" if type == "bomb" else "🌈")
 		var emoji_size: float = 14.0 if type == "explosion" else (13.0 if type == "bomb" else 12.0)
+		var gem_y: float = g.get("y", half_cell)
 		_floating_texts.append({
 			"text": GEM_EMOJI.get(gem_type, emoji),
-			"x": g["x"],
-			"y": g["y"] - float(_board.cell_size) / 2.0,
+			"x": g.get("x", 0.0),
+			"y": gem_y - half_cell,
 			"color": GEM_COLORS.get(gem_type, C["white"]),
 			"size": emoji_size,
 			"timer": 0.0,

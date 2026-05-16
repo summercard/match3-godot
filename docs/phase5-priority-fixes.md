@@ -29,13 +29,14 @@
 - **源参考**: 微信 `sceneBattle.js` render 中 leaderSkillInfo / synergyInfo 渲染
 
 ### Phase 3: 特殊消除动画链时序修正
-- [ ] explosionGems（十字爆炸）：延迟 100ms 后播放，十字方向闪光
-- [ ] bombGems（炸弹消除）：延迟 150ms 后播放，3×3 范围闪光
-- [ ] rainbowGems（彩虹消除）：延迟 200ms 后播放，全屏闪光 0.4s
-- [ ] 四阶段分时播放，每阶段有独立消除动画 + 浮动文字（💥💣🌈）
-- [ ] 确保在 _process_matches 中按序触发，不并行
+- [x] explosionGems（十字爆炸）：延迟 100ms 后播放，十字方向闪光
+- [x] bombGems（炸弹消除）：延迟 150ms 后播放，3×3 范围闪光
+- [x] rainbowGems（彩虹消除）：延迟 200ms 后播放，全屏闪光 0.4s
+- [x] 四阶段分时播放，每阶段有独立消除动画 + 浮动文字（💥💣🌈）
+- [x] 确保在 _process_matches 中按序触发，不并行
 - **涉及文件**: `src/ui/scene/scene_battle.gd`
 - **源参考**: 微信 `sceneBattle.js` _processMatches 中 804-830 行的四段 setTimeout 链
+- **修改摘要**: 将特殊消除视觉特效（emoji浮动、消息提示、震屏、彩虹闪光）从 _process_matches 第4步的立即触发改为由 _trigger_special_elim 在正确延迟时触发，匹配微信版 setTimeout(0/100/150/200ms) 时序
 
 ### Phase 4: 收服特效移回 battle inline
 - [ ] 战斗胜利时在 scene_battle 中直接触发 CaptureEffect（而非跳转到 result 后才播放）
