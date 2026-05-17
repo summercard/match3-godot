@@ -702,7 +702,7 @@ func _update_detail_panel() -> void:
 # ============================================
 
 func _on_back_pressed() -> void:
-	SceneManager.switch_scene("start")
+	SceneManager.switch_scene("main")
 
 func _on_evolve_pressed() -> void:
 	if not _selected_monster.is_empty():

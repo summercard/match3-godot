@@ -92,7 +92,7 @@ func _process(delta: float) -> void:
 		_pulse_dir = 1
 
 	# 长按光晕衰减（未按住时渐消）
-	if _lp_glow > 0.0 and not _touching:
+	if _lp_glow > 0.0:
 		_lp_glow = maxf(0.0, _lp_glow - delta * 2.0)
 
 	# 长按检测
@@ -122,16 +122,12 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			if _in_btn(event.position):
-				_begin_hold()
-		else:
-			_end_hold()
+				_do_enter()
 		accept_event()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if _in_btn(event.position):
-				_begin_hold()
-		else:
-			_end_hold()
+				_do_enter()
 		accept_event()
 
 
