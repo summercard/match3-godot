@@ -524,7 +524,7 @@ func _update_particles() -> void:
 		var label := Label.new()
 		label.text = "✨"
 		label.global_position = Vector2(p["x"], p["y"])
-			var alpha: float = p["life"]
+		var alpha: float = p["life"]
 		label.modulate = Color(1, 1, 1, alpha)
 		_particle_container.add_child(label)
 

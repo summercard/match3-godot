@@ -1034,5 +1034,8 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 static func get_monster(monster_id: String) -> Dictionary:
 	return MONSTER_DB.get(monster_id, {})
 
+static func get_all() -> Array:
+	return MONSTER_DB.values()
+
 static func has_monster(monster_id: String) -> bool:
 	return MONSTER_DB.has(monster_id)

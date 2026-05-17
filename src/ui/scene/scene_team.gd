@@ -837,7 +837,10 @@ func _get_monster_data(monster_id: String) -> Dictionary:
 		return {}
 	var MonsterDB = load("res://src/data/monster_db.gd")
 	if MonsterDB:
-		return MonsterDB.get_monster(monster_id) or {}
+		var result: Dictionary = MonsterDB.get_monster(monster_id)
+		if result.is_empty():
+			return {}
+		return result
 	return {}
 
 func _calc_team_power() -> int:
