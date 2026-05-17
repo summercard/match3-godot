@@ -365,6 +365,16 @@ func _init_battle() -> void:
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
 		_battle.enemy_skill_action.connect(_on_enemy_skill_action)
 	
+	# 精英关卡：应用eliteMultiplier加成敌人属性
+	var elite_mult: float = _stage_data.get("eliteMultiplier", 0.0)
+	if elite_mult > 0.0:
+		for enemy: Dictionary in _battle.enemies:
+			if enemy and not enemy.is_empty():
+				enemy["maxHP"] = int(enemy.get("maxHP", 0) * elite_mult)
+				enemy["hp"] = enemy["maxHP"]
+				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
+				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
+	
 	_show_message(_stage_data.get("name", "战斗开始！"))
 
 ## ============================================
@@ -757,6 +767,54 @@ func _process_matches() -> void:
 	_check_explosion_poison_fog(all_special_gems)
 	_check_unlock_results(matches, all_special_gems)
 	
+	# ===== 第7.6步：状态效果附加视觉反馈 =====
+	var status_effect_log: Array = result.get("status_effect_log", [])
+	for log: Dictionary in status_effect_log:
+		var se_idx: int = log.get("enemy_index", -1)
+		var se_type: String = log.get("type", "")
+		if se_idx >= 0:
+			var se_emoji: String = STATUS_EMOJI.get(se_type, "")
+			var se_name: String = STATUS_LABEL.get(se_type, se_type)
+			var se_color: Color = STATUS_COLORS.get(se_type, C["danger"])
+			var se_ex: float = 15.0 + se_idx * 120.0 + 55.0
+			var se_ey: float = 65.0
+			_floating_texts.append({
+				"text": "%s%s" % [se_emoji, se_name],
+				"x": se_ex, "y": se_ey,
+				"color": se_color,
+				"size": 18.0,
+				"timer": 0.0,
+				"duration": 0.8,
+				"critical": true
+			})
+	
+	# ===== 第7.7步：BOSS阶段转换 =====
+	var phase_transition: Dictionary = result.get("phase_transition", {})
+	if not phase_transition.is_empty() and _battle != null:
+		var new_enemies: Array = _battle._phase_handler.execute_phase_transition(phase_transition, _battle.enemy_level)
+		if not new_enemies.is_empty():
+			var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
+			_show_message("⚡ %s 进入激战状态！" % boss_name)
+			_phase_transition_state = {
+				"phase": phase_transition.get("phase", 1),
+				"enemies": new_enemies,
+				"timer": 1.5,
+				"boss_name": boss_name
+			}
+			_screen_flash_timer = 0.3
+			_shake_timer = 0.3
+			_battle.enemies = new_enemies
+			_enemy_display_hp.clear()
+			_boss_skill_visuals.clear()
+			# 延迟清空棋盘
+			await get_tree().create_timer(0.1).timeout
+			for r in range(_board.rows):
+				for c in range(_board.cols):
+					_board.grid[r][c] = ""
+			# 延迟后重置棋盘
+			await get_tree().create_timer(1.0).timeout
+			_board.init_board()
+	
 	# 等待所有特殊消除动画完成（最大延迟 + 消除动画时长）
 	# 微信版时序：explosion 100ms, bomb 150ms, rainbow 200ms, 每段动画 ~300ms
 	var special_wait: float = 0.0
@@ -910,6 +968,9 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 
 ## 状态效果Emoji映射
 const STATUS_EMOJI := {"burn": "🔥", "freeze": "❄️", "poison": "☠️", "stun": "⚡"}
+
+## 状态效果名称
+const STATUS_LABEL := {"burn": "灼烧!", "freeze": "冰冻!", "poison": "中毒!", "stun": "眩晕!"}
 
 ## 状态效果颜色
 const STATUS_COLORS := {
@@ -2765,8 +2826,3 @@ func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
 	
 	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
 		_show_message("🔓 宝石解锁！")
-ize": 12.0, "timer": 0.0, "duration": 0.8})
-	
-	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
-		_show_message("🔓 宝石解锁！")
-)
