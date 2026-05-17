@@ -982,7 +982,8 @@ func _start_enemy_turn() -> void:
 					_boss_skill_visuals[attacker_idx] = {
 						"charge_timer": 0.0,
 						"shield_hp": 0.0,
-						"shield_max_hp": 0.0
+						"shield_max_hp": 0.0,
+						"heal_floats": []
 					}
 				_boss_skill_visuals[attacker_idx]["charge_timer"] = 999.0
 			continue
