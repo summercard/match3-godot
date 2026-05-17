@@ -118,10 +118,11 @@ func _on_tap(x: float, y: float) -> void:
 func _get_last_7_days() -> Array:
 	var days := []
 	var now: Dictionary = Time.get_datetime_dict_from_system()
+	# 当天0点的 unix timestamp
+	var today_unix: int = Time.get_unix_time_from_datetime_dict(now) - (now["hour"] * 3600 + now["minute"] * 60 + now["second"])
 	for i in range(6, -1, -1):
-		var unix := Time.get_unix_time_from_datetime_string("%04d-%02d-%02d 00:00:00" % [now["year"], now["month"], now["day"]])
-		unix -= i * 86400
-		var d: Dictionary = Time.get_datetime_dict_from_unix_time(int(unix))
+		var unix := today_unix - (i * 86400)
+		var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix)
 		days.append({
 			"date": d["day"],
 			"month": d["month"],
@@ -134,7 +135,11 @@ func _get_last_7_days() -> Array:
 func _check_day_signed(date_dict: Dictionary) -> bool:
 	if _sign_in_data.is_empty():
 		return false
-	var last_sign: String = _sign_in_data.get("lastSignInDate", "")
+	var last_sign_raw = _sign_in_data.get("lastSignInDate", "")
+	# lastSignInDate 可能是 null 或空字符串
+	if last_sign_raw == null or str(last_sign_raw).is_empty():
+		return false
+	var last_sign: String = str(last_sign_raw)
 	if last_sign.is_empty():
 		return false
 	var parts: PackedStringArray = last_sign.split("-")
