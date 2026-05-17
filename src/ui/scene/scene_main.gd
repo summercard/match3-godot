@@ -26,7 +26,44 @@ const GRID_START_Y := 200.0
 
 const SECONDARY_BTN_W := 70.0
 const SECONDARY_BTN_H := 65.0
-const SECONDARY_GAP := 14.0
+const SECONDARY_GAP := 4.0
+
+## 大厅美术资产
+const MAIN_ASSETS := {
+	"bg": "res://assets/images/main/main_lobby_bg.png",
+	"title_plaque": "res://assets/images/main/ui_title_plaque.png",
+	"player_panel": "res://assets/images/main/ui_player_panel.png",
+	"currency_capsule": "res://assets/images/main/ui_currency_capsule.png",
+	"card_primary": "res://assets/images/main/ui_card_primary.png",
+	"card_primary_pressed": "res://assets/images/main/ui_card_primary_pressed.png",
+	"nav_frame": "res://assets/images/main/ui_nav_frame.png",
+	"nav_frame_pressed": "res://assets/images/main/ui_nav_frame_pressed.png",
+	"icon_start": "res://assets/images/main/icon_start_adventure.png",
+	"icon_team": "res://assets/images/main/icon_team.png",
+	"icon_album": "res://assets/images/main/icon_album.png",
+	"icon_signin": "res://assets/images/main/icon_signin.png",
+	"icon_shop": "res://assets/images/main/icon_shop.png",
+	"icon_inventory": "res://assets/images/main/icon_inventory.png",
+	"icon_ranch": "res://assets/images/main/icon_ranch.png",
+	"icon_achievement": "res://assets/images/main/icon_achievement.png",
+	"icon_settings": "res://assets/images/main/icon_settings.png",
+	"icon_avatar": "res://assets/images/main/icon_avatar.png",
+	"icon_gold": "res://assets/images/main/icon_gold.png",
+	"icon_diamond": "res://assets/images/main/icon_diamond.png",
+	"icon_exp": "res://assets/images/main/icon_exp_star.png",
+}
+
+const BUTTON_ICON_KEYS := {
+	"start": "icon_start",
+	"team": "icon_team",
+	"album": "icon_album",
+	"signin": "icon_signin",
+	"shop": "icon_shop",
+	"inventory": "icon_inventory",
+	"ranch": "icon_ranch",
+	"achievement": "icon_achievement",
+	"settings": "icon_settings",
+}
 
 ## 按钮数据结构
 class LobbyButton:
@@ -164,14 +201,14 @@ func _add_button_icons() -> void:
 
 func _ready() -> void:
 	instance = self
-	_add_background("res://assets/images/main/main_lobby_bg.png")
+	_load_art_assets()
 	_build_buttons()
-	_add_button_icons()
 	_init_particles()
 
 func init(data: Dictionary = {}) -> void:
 	print("[SceneMain] 主菜单初始化")
 	_load_player_data()
+	_load_art_assets()
 	_build_bg_cache()
 
 ## ============================================
@@ -191,7 +228,6 @@ func _load_player_data() -> void:
 
 func _build_buttons() -> void:
 	var w := DESIGN_WIDTH
-	var h := DESIGN_HEIGHT
 	
 	# 计算网格居中起始 X
 	var grid_total_w := PRIMARY_BTN_W * 2 + PRIMARY_GAP_X
@@ -252,6 +288,15 @@ func _build_buttons() -> void:
 		btn.primary = false
 		btn.is_grid = false
 		_buttons.append(btn)
+
+func _load_art_assets() -> void:
+	if _art_ready:
+		return
+	_art_loading_started = true
+	for key in MAIN_ASSETS.keys():
+		var path: String = MAIN_ASSETS[key]
+		_art_assets[key] = load(path) if ResourceLoader.exists(path) else null
+	_art_ready = true
 
 func _init_particles() -> void:
 	var particle_count := 18
@@ -328,13 +373,16 @@ func _on_touch_start(x: float, y: float) -> void:
 	for btn in _buttons:
 		if _is_point_in_button(x, y, btn):
 			_touched_btn = btn
+			queue_redraw()
 			return
 	_touched_btn = null
+	queue_redraw()
 
 func _on_touch_end(x: float, y: float) -> void:
 	if _touched_btn != null and _is_point_in_button(x, y, _touched_btn):
 		_touched_btn.action.call()
 	_touched_btn = null
+	queue_redraw()
 
 func _on_tap(x: float, y: float) -> void:
 	for btn in _buttons:
@@ -391,6 +439,8 @@ func _process(delta: float) -> void:
 		_tooltip["opacity"] -= 0.05
 		if _tooltip["opacity"] <= 0.0:
 			_tooltip.clear()
+	
+	queue_redraw()
 
 func _update_particles(dt: float) -> void:
 	var w := DESIGN_WIDTH
@@ -415,10 +465,14 @@ func _update_particles(dt: float) -> void:
 
 func _draw() -> void:
 	var c := C
-	var font_size := FONT_SIZES
 	
 	# === 背景 ===
-	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), c["bg_medium"])
+	var bg := _tex("bg")
+	if bg != null:
+		_draw_texture_cover(bg, Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT))
+		draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.02, 0.04, 0.1, 0.18))
+	else:
+		draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), c["bg_medium"])
 	
 	# === 粒子背景 ===
 	for p in _particles:
@@ -427,6 +481,7 @@ func _draw() -> void:
 			_draw_circle(p["x"], p["y"], p["size"], particle_color)
 	
 	# === 玩家信息栏 ===
+	_draw_lobby_title()
 	_draw_info_bar()
 	
 	# === 绘制按钮 ===
@@ -437,7 +492,7 @@ func _draw() -> void:
 			_draw_nav_button(btn)
 	
 	# === Tooltip ===
-	if _tooltip.has("text"):
+	if _tooltip.has("text") and String(_tooltip.get("text", "")) != "":
 		_draw_tooltip()
 
 ## ============================================
@@ -447,36 +502,40 @@ func _draw() -> void:
 func _draw_info_bar() -> void:
 	var c := C
 	var font_size := FONT_SIZES
-	var avatar_x := 30.0
-	var avatar_y := 50.0
+	var panel_rect := Rect2(6.0, 14.0, 226.0, 72.0)
 	
 	# 背景面板
-	_draw_rounded_rect(0, 20, DESIGN_WIDTH, 60, 8.0, Color(c["bg_card"].r, c["bg_card"].g, c["bg_card"].b, 0.9))
+	if _tex("player_panel") != null:
+		_draw_texture_fit(_tex("player_panel"), panel_rect)
+	else:
+		_draw_rounded_rect(panel_rect.position.x, panel_rect.position.y, panel_rect.size.x, panel_rect.size.y, 8.0, Color(c["bg_card"].r, c["bg_card"].g, c["bg_card"].b, 0.9))
 	
 	# 头像
-	_draw_text_with_shadow("🎮", avatar_x, avatar_y, c["text_primary"], font_size["icon"])
+	_draw_texture_fit(_tex("icon_avatar"), Rect2(15.0, 26.0, 48.0, 48.0))
 	
 	# 名称等级
-	_draw_text_with_shadow("冒险家  Lv.%d" % _player["level"], avatar_x + 60, avatar_y - 4, c["text_primary"], font_size["body"], true)
-	
-	# 金币
-	_draw_text_with_shadow("💰 " + _format_number(_player["gold"]), DESIGN_WIDTH - 120, avatar_y - 4, c["gold"], font_size["number"], true)
+	_draw_text_with_shadow("冒险家", 118.0, 39.0, c["text_primary"], font_size["body"], true)
+	_draw_text_with_shadow("Lv.%d" % _player["level"], 196.0, 39.0, Color(0.95, 0.98, 1.0), font_size["small"], true)
 	
 	# 经验条
-	var exp_bar_x := 30.0
-	var exp_bar_y := 65.0
-	var exp_bar_w := DESIGN_WIDTH - 160.0
+	var exp_bar_x := 76.0
+	var exp_bar_y := 62.0
+	var exp_bar_w := 112.0
 	var exp_bar_h := 8.0
 	
-	_draw_rounded_rect(exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h, 4.0, Color(0.1, 0.15, 0.3, 0.9))
+	_draw_texture_fit(_tex("icon_exp"), Rect2(52.0, 52.0, 24.0, 24.0))
+	_draw_rounded_rect(exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h, 4.0, Color(0.08, 0.12, 0.24, 0.92))
 	
-	var exp_progress: float = mini(float(_player["exp"]) / float(_player["exp_to_level"]), 1.0) as float
+	var exp_progress: float = minf(float(_player["exp"]) / float(_player["exp_to_level"]), 1.0)
 	if exp_progress > 0.0:
 		var fill_w: float = floor((exp_bar_w - 4.0) * exp_progress)
 		_draw_rounded_rect(exp_bar_x + 2, exp_bar_y + 2, fill_w, exp_bar_h - 4, 3.0, c["primary"])
 	
 	# 经验文字
-	_draw_text_with_shadow("%d/%d" % [_player["exp"], _player["exp_to_level"]], exp_bar_x + exp_bar_w + 8, exp_bar_y, c["text_muted"], font_size["small"])
+	_draw_text_with_shadow("%d/%d" % [_player["exp"], _player["exp_to_level"]], 212.0, 66.0, c["text_muted"], font_size["tiny"])
+	
+	_draw_currency(248.0, 28.0, "icon_gold", _format_number(_player["gold"]), c["gold"])
+	_draw_currency(248.0, 56.0, "icon_diamond", _format_number(_player["gems"]), Color(0.55, 0.88, 1.0))
 
 func _draw_grid_button(btn: LobbyButton) -> void:
 	var c := C
@@ -491,16 +550,25 @@ func _draw_grid_button(btn: LobbyButton) -> void:
 	var cy := btn.y + btn.h / 2.0
 	
 	# 按钮背景
-	_draw_rounded_rect(draw_x, draw_y, draw_w, draw_h, 12.0, c["bg_card"], 0.95)
+	var frame_key := "card_primary_pressed" if is_pressed else "card_primary"
+	if _tex(frame_key) != null:
+		_draw_texture_fit(_tex(frame_key), Rect2(draw_x, draw_y, draw_w, draw_h))
+	else:
+		_draw_rounded_rect(draw_x, draw_y, draw_w, draw_h, 12.0, c["bg_card"], 0.95)
 	
 	if is_pressed:
 		_draw_rounded_rect(draw_x, draw_y, draw_w, draw_h, 12.0, c["primary"], 0.13)
 	
-	# Emoji 图标
-	_draw_text_with_shadow(btn.emoji, cx, cy - 22, c["primary"], font_size["display"])
+	# 功能图标
+	var icon_key: String = BUTTON_ICON_KEYS.get(btn.id, "")
+	var icon := _tex(icon_key)
+	if icon != null:
+		_draw_texture_fit(icon, Rect2(cx - 34.0, cy - 48.0, 68.0, 68.0))
+	else:
+		_draw_text_with_shadow(btn.emoji, cx, cy - 22, c["primary"], font_size["display"])
 	
 	# 标签文字
-	_draw_text_with_shadow(btn.text, cx, cy + 35, c["text_primary"], font_size["small"], true)
+	_draw_text_with_shadow(btn.text, cx, cy + 35, c["text_primary"], font_size["body"], true)
 
 func _draw_nav_button(btn: LobbyButton) -> void:
 	var c := C
@@ -514,13 +582,58 @@ func _draw_nav_button(btn: LobbyButton) -> void:
 	var cx := btn.x + btn.w / 2.0
 	
 	# 按钮背景
-	_draw_rounded_rect(draw_x, draw_y, draw_w, draw_h, 8.0, c["bg_card"], 0.9)
+	var frame_key := "nav_frame_pressed" if is_pressed else "nav_frame"
+	if _tex(frame_key) != null:
+		_draw_texture_fit(_tex(frame_key), Rect2(draw_x, draw_y, draw_w, draw_h))
+	else:
+		_draw_rounded_rect(draw_x, draw_y, draw_w, draw_h, 8.0, c["bg_card"], 0.9)
 	
-	# Emoji 图标
-	_draw_text_with_shadow(btn.emoji, cx, btn.y + 28, c["primary"], font_size["icon"])
+	# 功能图标
+	var icon_key: String = BUTTON_ICON_KEYS.get(btn.id, "")
+	var icon := _tex(icon_key)
+	if icon != null:
+		_draw_texture_fit(icon, Rect2(cx - 18.0, btn.y + 7.0, 36.0, 36.0))
+	else:
+		_draw_text_with_shadow(btn.emoji, cx, btn.y + 28, c["primary"], font_size["icon"])
 	
 	# 标签文字
 	_draw_text_with_shadow(btn.text, cx, btn.y + 54, c["text_primary"], font_size["tiny"], true)
+
+func _draw_lobby_title() -> void:
+	var title_rect := Rect2(55.0, 104.0, 265.0, 72.0)
+	if _tex("title_plaque") != null:
+		_draw_texture_fit(_tex("title_plaque"), title_rect)
+	else:
+		_draw_rounded_rect(title_rect.position.x, title_rect.position.y, title_rect.size.x, title_rect.size.y, 10.0, Color(0.08, 0.14, 0.28, 0.88))
+	_draw_text_with_shadow("冒 险 大 厅", DESIGN_WIDTH / 2.0, 139.0, Color(1.0, 0.96, 0.72), FONT_SIZES["title"], true)
+	_draw_text_with_shadow("Monster Match Hub", DESIGN_WIDTH / 2.0, 163.0, Color(0.72, 0.86, 1.0), FONT_SIZES["tiny"])
+
+func _draw_currency(x: float, y: float, icon_key: String, value: String, color: Color) -> void:
+	_draw_texture_fit(_tex("currency_capsule"), Rect2(x, y - 13.0, 112.0, 26.0))
+	_draw_texture_fit(_tex(icon_key), Rect2(x + 5.0, y - 14.0, 26.0, 26.0))
+	_draw_text_with_shadow(value, x + 72.0, y + 5.0, color, FONT_SIZES["small"], true)
+
+func _tex(key: String) -> Texture2D:
+	var tex = _art_assets.get(key)
+	if tex is Texture2D:
+		return tex
+	return null
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale := maxf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var source_size := rect.size / scale
+	var source_pos := (tex_size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 func _draw_tooltip() -> void:
 	var text: String = _tooltip["text"]
