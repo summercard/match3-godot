@@ -268,6 +268,122 @@ func _process(dt: float) -> void:
 		_toast_timer -= dt
 		if _toast_timer <= 0.0:
 			_toast_text = ""
+	queue_redraw()
+
+# ============================================
+# 绘制
+# ============================================
+func _draw() -> void:
+	var font := ThemeDB.fallback_font
+	var font_sm := font
+	var font_title := font
+	
+	# 背景
+	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.06, 0.08, 0.16))
+	
+	# 顶栏
+	draw_rect(Rect2(0, 0, DESIGN_WIDTH, 60), Color(0.10, 0.12, 0.20))
+	
+	# 返回按钮
+	draw_rect(Rect2(10, 12, 60, 36), Color(0.18, 0.20, 0.30))
+	draw_rect(Rect2(10, 12, 60, 36), Color(0.30, 0.35, 0.50), false)
+	draw_string(font_sm, Vector2(20, 36), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
+	
+	# 标题
+	draw_string(font_title, Vector2(DESIGN_WIDTH / 2 - 20, 40), "背包", HORIZONTAL_ALIGNMENT_CENTER, -1, 22, Color.WHITE)
+	
+	# 货币
+	var gold: int = _player.get("gold", 0)
+	var gems: int = _player.get("gems", 0)
+	draw_string(font_sm, Vector2(30, 130), "💰 %d" % gold, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 0.84, 0.0))
+	draw_string(font_sm, Vector2(DESIGN_WIDTH - 80, 130), "💎 %d" % gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.4, 0.6, 1.0))
+	
+	# 分割线
+	draw_line(Vector2(10, 150), Vector2(DESIGN_WIDTH - 10, 150), Color(0.3, 0.3, 0.4), 1.0)
+	
+	# 道具标签
+	draw_string(font_sm, Vector2(20, 185), "道具", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
+	draw_string(font_sm, Vector2(DESIGN_WIDTH - 80, 185), "共 %d 件" % _item_list.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.3, 0.3, 0.4))
+	
+	# 道具网格
+	var grid_top: float = _grid_top
+	var grid_bottom: float = DESIGN_HEIGHT - 24.0
+	
+	if _item_list.is_empty():
+		# 空状态
+		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 100, grid_top + 80), "还没有道具，赶快去战斗获取吧！", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.4, 0.4, 0.5))
+		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 15, grid_top + 120), "💪", HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.WHITE)
+	else:
+		# 绘制道具格子
+		for idx in range(_item_list.size()):
+			var row: int = idx / COLS
+			var col: int = idx % COLS
+			var gx: float = _grid_start_x + col * (CELL_SIZE + CELL_GAP)
+			var gy: float = grid_top + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
+			
+			# 裁剪超出可视区域的
+			if gy + CELL_SIZE < grid_top or gy > grid_bottom:
+				continue
+			
+			# 格子背景
+			var cell_color := Color(0.12, 0.14, 0.22)
+			if _selected_item.get("id", "") == _item_list[idx].get("id", ""):
+				cell_color = Color(0.18, 0.22, 0.35)
+			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), cell_color)
+			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), Color(0.25, 0.28, 0.40), false)
+			
+			var item: Dictionary = _item_list[idx]
+			var item_data: Dictionary = item.get("data", {})
+			
+			# emoji 图标
+			var emoji: String = item_data.get("emoji", "🎁")
+			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 12, gy + 42), emoji, HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color.WHITE)
+			
+			# 名称
+			var item_name: String = item_data.get("name", "未知道具")
+			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 20, gy + 66), item_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.9))
+			
+			# 数量
+			var count: int = item.get("count", 0)
+			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 15, gy + 85), "×%d" % count, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.84, 0.0))
+	
+	# 弹窗
+	if not _popup.is_empty():
+		var px: float = _popup.get("x", 0.0)
+		var py: float = _popup.get("y", 0.0)
+		var pw: float = _popup.get("w", 0.0)
+		var ph: float = _popup.get("h", 0.0)
+		
+		# 遮罩
+		draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0, 0, 0, 0.7))
+		
+		# 弹窗面板
+		draw_rect(Rect2(px, py, pw, ph), Color(0.14, 0.16, 0.26))
+		draw_rect(Rect2(px, py, pw, ph), Color(0.30, 0.35, 0.50), false)
+		
+		# 顶部装饰线
+		draw_rect(Rect2(px + 20, py + 10, pw - 40, 3), Color(0.35, 0.55, 1.0))
+		
+		# 弹窗内容
+		var popup_data: Dictionary = _popup.get("data", {})
+		var popup_id: String = _popup.get("id", "")
+		var popup_count: int = _popup.get("count", 0)
+		
+		draw_string(font_sm, Vector2(px + pw / 2 - 16, py + 55), popup_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color.WHITE)
+		draw_string(font_sm, Vector2(px + pw / 2 - 30, py + 95), popup_data.get("name", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+		draw_string(font_sm, Vector2(px + pw / 2 - 50, py + 120), popup_data.get("desc", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.7))
+		draw_string(font_sm, Vector2(px + pw / 2 - 25, py + 145), "拥有: ×%d" % popup_count, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1.0, 0.84, 0.0))
+		
+		# 使用按钮
+		var btn_x: float = px + (pw - 120) / 2.0
+		var btn_y: float = py + ph - 60.0
+		draw_rect(Rect2(btn_x, btn_y, 120, 40), Color(0.35, 0.55, 1.0))
+		draw_string(font_sm, Vector2(btn_x + 35, btn_y + 27), "使 用", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+	
+	# Toast
+	if _toast_text != "" and _toast_timer > 0.0:
+		var alpha: float = minf(_toast_timer / 0.5, 1.0)
+		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 50, 606), _toast_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, alpha))
 
 # 主渲染函数（从 draw_tree 调用）
 # 注意：Godot 4.x 使用 _draw() 配合 CustomCanvasItem 或直接控制子节点

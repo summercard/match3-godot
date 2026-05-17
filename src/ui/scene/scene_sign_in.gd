@@ -184,6 +184,108 @@ func _go_back() -> void:
 func _process(dt: float) -> void:
 	_update_particles(dt)
 	_update_floating_rewards(dt)
+	queue_redraw()
+
+# ============================================
+# 绘制
+# ============================================
+func _draw() -> void:
+	var font := ThemeDB.fallback_font
+	var w := DESIGN_WIDTH
+	var h := DESIGN_HEIGHT
+	
+	# 背景
+	draw_rect(Rect2(0, 0, w, h), Color(0.06, 0.08, 0.16))
+	
+	# 返回按钮
+	draw_rect(Rect2(15, 15, 60, 35), Color(0.18, 0.20, 0.30))
+	draw_rect(Rect2(15, 15, 60, 35), Color(0.30, 0.35, 0.50), false)
+	draw_string(font, Vector2(22, 38), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
+	
+	# 标题
+	draw_string(font, Vector2(w / 2 - 55, 70), "📅 每日签到", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color.WHITE)
+	
+	# 统计数据
+	var total: int = _sign_in_data.get("totalDays", 0)
+	var consecutive: int = _sign_in_data.get("consecutiveDays", 0)
+	var stats_y := 100.0
+	
+	draw_string(font, Vector2(60, stats_y + 25), "累计签到", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
+	draw_string(font, Vector2(60, stats_y + 55), "%d 天" % total, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color(1.0, 0.84, 0.0))
+	
+	draw_string(font, Vector2(230, stats_y + 25), "连续签到", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
+	draw_string(font, Vector2(230, stats_y + 55), "%d 天" % consecutive, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color(0.9, 0.3, 0.3))
+	
+	# 近7天日历
+	var calendar_y := 185.0
+	draw_string(font, Vector2(w / 2 - 50, calendar_y + 20), "近7天签到记录", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.5, 0.5, 0.6))
+	
+	var days := _get_last_7_days()
+	var cell_w := 44.0
+	var cell_h := 44.0
+	var cal_start_x := (w - 7 * cell_w) / 2.0
+	
+	for i in range(days.size()):
+		var day: Dictionary = days[i]
+		var cx: float = cal_start_x + i * cell_w
+		var cy: float = calendar_y + 35
+		
+		# 格子背景
+		if day.is_today:
+			draw_rect(Rect2(cx + 2, cy, cell_w - 4, cell_h), Color(0.15, 0.20, 0.35))
+			draw_rect(Rect2(cx + 2, cy, cell_w - 4, cell_h), Color(0.35, 0.55, 1.0), false)
+		else:
+			draw_rect(Rect2(cx + 2, cy, cell_w - 4, cell_h), Color(0.10, 0.12, 0.20))
+			draw_rect(Rect2(cx + 2, cy, cell_w - 4, cell_h), Color(0.22, 0.25, 0.35), false)
+		
+		# 日期数字
+		var date_str: String = str(day.get("date", ""))
+		draw_string(font, Vector2(cx + cell_w / 2 - 5, cy + 18), date_str, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.9) if day.signed else Color(0.4, 0.4, 0.5))
+		
+		# 状态标记
+		if day.signed:
+			draw_string(font, Vector2(cx + cell_w / 2 - 5, cy + 34), "✓", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.3, 0.8, 0.3))
+		elif day.is_today and _can_sign_in:
+			draw_string(font, Vector2(cx + cell_w / 2 - 5, cy + 34), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.4, 0.4, 0.5))
+	
+	# 今日奖励预览
+	var reward_y := 310.0
+	draw_string(font, Vector2(w / 2 - 55, reward_y + 20), "🎁 今日签到奖励", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+	
+	var today_reward := get_today_reward()
+	var reward_gold: int = today_reward.get("gold", 50)
+	var reward_exp: int = today_reward.get("exp", 30)
+	draw_string(font, Vector2(50, reward_y + 50), "💰 金币: +%d" % reward_gold, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 0.84, 0.0))
+	draw_string(font, Vector2(200, reward_y + 50), "✨ 经验: +%d" % reward_exp, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.3, 0.8, 0.3))
+	
+	# 签到按钮
+	var sign_btn := _get_sign_in_button()
+	if _can_sign_in:
+		draw_rect(Rect2(sign_btn.position.x, sign_btn.position.y, sign_btn.size.x, sign_btn.size.y), Color(1.0, 0.84, 0.0))
+		draw_string(font, Vector2(sign_btn.position.x + 35, sign_btn.position.y + 38), "🎊 签到领奖", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.1, 0.1, 0.15))
+	else:
+		draw_rect(Rect2(sign_btn.position.x, sign_btn.position.y, sign_btn.size.x, sign_btn.size.y), Color(0.18, 0.20, 0.30))
+		draw_string(font, Vector2(sign_btn.position.x + 40, sign_btn.position.y + 38), "✅ 今日已签到", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.5, 0.5, 0.6))
+	
+	# 粒子
+	for p in _particles:
+		var alpha: float = clampf(p.get("life", 0.0), 0.0, 1.0)
+		var c: Color = p.get("color", Color.WHITE)
+		c.a = alpha
+		var sz: float = p.get("size", 4.0)
+		draw_rect(Rect2(p.get("x", 0.0) - sz / 2.0, p.get("y", 0.0) - sz / 2.0, sz, sz), c)
+	
+	# 飘字奖励
+	for r in _floating_rewards:
+		var alpha: float = clampf(r.get("life", 0.0) / 1.5, 0.0, 1.0)
+		var c: Color = r.get("color", Color.WHITE)
+		c.a = alpha
+		draw_string(font, Vector2(r.get("x", 0.0), r.get("y", 0.0)), r.get("text", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, c)
+	
+	# 签到成功提示
+	if _has_signed_in and _animation_complete and _particles.is_empty():
+		draw_string(font, Vector2(w / 2 - 80, 480), "🎉 签到成功！奖励已发放", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(1.0, 0.84, 0.0))
+		draw_string(font, Vector2(w / 2 - 55, 510), "点击任意区域继续", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.5, 0.5, 0.6))
 
 # 更新粒子
 func _update_particles(dt: float) -> void:
