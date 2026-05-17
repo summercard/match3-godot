@@ -302,7 +302,9 @@ func _gui_input(event: InputEvent) -> void:
 
 func initialize(game: Node, data: Dictionary = {}) -> void:
 	_game = game
-	_storage = game.storage if game else null
+	_storage = get_node_or_null("/root/SaveManager")
+	if _storage == null and game and game.get("storage"):
+		_storage = game.storage
 	_load_stage_data()
 	
 	if data.has("chapterIndex") and typeof(data.chapterIndex) == TYPE_INT:

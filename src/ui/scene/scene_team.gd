@@ -214,7 +214,7 @@ func _create_ui() -> void:
 	monster_list_grid.columns = 4
 	monster_list_grid.add_theme_constant_override("h_separation", 10)
 	monster_list_grid.add_theme_constant_override("v_separation", 10)
-	monster_list_grid.add_theme_size_override("min_width", DESIGN_W)
+	monster_list_grid.custom_minimum_size.x = DESIGN_W
 	monster_list_scroll.add_child(monster_list_grid)
 	
 	# ===== 底部按钮区域 =====

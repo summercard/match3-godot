@@ -26,26 +26,30 @@ func _ready() -> void:
 	print("[GameManager] 初始化")
 	# 等待场景树就绪
 	await get_tree().process_frame
-	
+
 	# 获取主场景引用（用于场景切换分发）
 	var root := get_tree().root
 	scene_manager_node = root.get_node_or_null("Main")
-	
+
 	# 获取 SceneManager 引用（供其他场景使用）
 	scene_manager = root.get_node_or_null("SceneManager")
 	storage = root.get_node_or_null("SaveManager")
-	
+
 	print("[GameManager] 初始化完成")
 
 # ====== 场景切换 ======
 func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:
+	if scene_manager == null:
+		scene_manager = get_tree().root.get_node_or_null("SceneManager")
+	if scene_manager and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene(scene_name, data, mode)
+		emit_signal("scene_changed", scene_name)
+		return
+
 	if scene_manager_node == null:
 		scene_manager_node = get_tree().root.get_node_or_null("Main")
 	if scene_manager_node and scene_manager_node.has_method("switch_scene"):
 		scene_manager_node.switch_scene(scene_name, data, mode)
-		emit_signal("scene_changed", scene_name)
-	elif scene_manager and scene_manager.has_method("switch_scene"):
-		scene_manager.switch_scene(scene_name, data, mode)
 		emit_signal("scene_changed", scene_name)
 	else:
 		push_warning("[GameManager] 无法切换场景: " + scene_name)
