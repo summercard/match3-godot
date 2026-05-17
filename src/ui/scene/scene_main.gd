@@ -81,6 +81,9 @@ class LobbyButton:
 ## 单例
 static var instance: SceneMain
 
+## 存档引用
+var _storage: Node = null
+
 ## 内部变量
 var _buttons: Array[LobbyButton] = []
 var _touched_btn: LobbyButton = null
@@ -216,15 +219,30 @@ func init(data: Dictionary = {}) -> void:
 ## ============================================
 
 func _load_player_data() -> void:
-	# TODO: 从 GameManager 获取玩家数据
-	_player = {
-		"name": "冒险家",
-		"level": 1,
-		"gold": 0,
-		"gems": 0,
-		"exp": 0,
-		"exp_to_level": 100
-	}
+	# 从 SaveManager 读取真实存档数据
+	if _storage == null:
+		_storage = get_node_or_null("/root/SaveManager")
+	
+	if _storage != null and _storage.has_method("get_player"):
+		var player: Dictionary = _storage.get_player()
+		var level: int = player.get("level", 1)
+		_player = {
+			"name": player.get("name", "冒险家"),
+			"level": level,
+			"gold": player.get("gold", 0),
+			"gems": player.get("gems", 0),
+			"exp": player.get("exp", 0),
+			"exp_to_level": SaveManager.get_exp_for_level(level)
+		}
+	else:
+		_player = {
+			"name": "冒险家",
+			"level": 1,
+			"gold": 0,
+			"gems": 0,
+			"exp": 0,
+			"exp_to_level": 100
+		}
 
 func _build_buttons() -> void:
 	var w := DESIGN_WIDTH
