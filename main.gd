@@ -121,7 +121,14 @@ func _initialize_scene(scene_node: Control, scene_name: String, data: Dictionary
 	if scene_node.has_signal("battle_started"):
 		scene_node.battle_started.connect(_on_battle_started)
 	if scene_node.has_signal("back_pressed"):
-		scene_node.back_pressed.connect(func(): switch_scene("main"))
+		scene_node.back_pressed.connect(func(): _request_scene_switch("main"))
+
+func _request_scene_switch(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene(scene_name, data, mode)
+	else:
+		switch_scene(scene_name, data, mode)
 
 func _on_scene_button_pressed(btn_id: String) -> void:
 	var targets: Dictionary = {
@@ -136,17 +143,17 @@ func _on_scene_button_pressed(btn_id: String) -> void:
 		"settings": "settings"
 	}
 	if targets.has(btn_id):
-		switch_scene(targets[btn_id])
+		_request_scene_switch(targets[btn_id])
 
 func _on_stage_selected(stage_id: String, stage_data: Dictionary, chapter_index: int) -> void:
-	switch_scene("battle_prepare", {
+	_request_scene_switch("battle_prepare", {
 		"stageId": stage_id,
 		"stageData": stage_data,
 		"chapterIndex": chapter_index
 	})
 
 func _on_battle_started(stage_id: String, stage_data: Dictionary) -> void:
-	switch_scene("battle", {
+	_request_scene_switch("battle", {
 		"stageId": stage_id,
 		"stageData": stage_data
 	})

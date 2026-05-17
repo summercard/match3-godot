@@ -268,7 +268,9 @@ func _create_exp_panel() -> PanelContainer:
 
 func initialize(game: Node, battle_result: Dictionary) -> void:
 	_game = game
-	_storage = game.storage if game and "storage" in game else get_node_or_null("/root/SaveManager")
+	_storage = get_node_or_null("/root/SaveManager")
+	if _storage == null and game and game.get("storage"):
+		_storage = game.storage
 	if _game and _game.has_node("AchievementManager"):
 		_achievement_manager = _game.get_node("AchievementManager")
 	_battle_result = battle_result

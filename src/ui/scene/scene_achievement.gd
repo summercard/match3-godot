@@ -72,6 +72,10 @@ func _ready() -> void:
 	_create_ui()
 	_init_data()
 
+func init(data: Dictionary = {}) -> void:
+	# 兼容 main.gd 的 init(data) 调用，_ready 已经初始化过了
+	pass
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventMouseButton:
 		if event is InputEventScreenTouch:

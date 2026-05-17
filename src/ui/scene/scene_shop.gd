@@ -27,6 +27,7 @@ var popup: Dictionary = {}
 var scroll_offset: float = 0.0
 var tap_handler: Callable
 var swipe_handler: Callable
+var _storage: Node = null
 
 var _bg_texture: ColorRect
 
@@ -66,6 +67,7 @@ func init(data: Dictionary = {}) -> void:
 	print("[SceneShop] 商店初始化")
 	if game == null:
 		game = get_node_or_null("/root/GameManager")
+	_storage = _get_storage()
 	_load_player()
 	selected_item = {}
 	popup = {}
@@ -88,9 +90,17 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _load_player() -> void:
-	var storage = preload("res://src/core/save_manager.gd").new()
-	player_data = storage.load_player()
-	storage.free()
+	var storage := _get_storage()
+	player_data = storage.load_player() if storage and storage.has_method("load_player") else {}
+
+
+func _get_storage() -> Node:
+	if _storage and is_instance_valid(_storage):
+		return _storage
+	_storage = get_node_or_null("/root/SaveManager")
+	if _storage == null and game and game.get("storage"):
+		_storage = game.storage
+	return _storage
 
 
 func _build_shop_list() -> void:
@@ -234,23 +244,21 @@ func _confirm_purchase(item_id: String) -> void:
 
 
 func _load_player_data() -> Dictionary:
-	var storage = preload("res://src/core/save_manager.gd").new()
-	var data: Dictionary = storage.load_player()
-	storage.free()
-	return data
+	var storage := _get_storage()
+	return storage.load_player() if storage and storage.has_method("load_player") else {}
 
 
 func _save_player_data(player: Dictionary) -> void:
-	var storage = preload("res://src/core/save_manager.gd").new()
-	storage.save_player(player)
-	storage.free()
+	var storage := _get_storage()
+	if storage and storage.has_method("save_player"):
+		storage.save_player(player)
 
 
 func _add_item(item_id: String, count: int) -> void:
 	# 通过 storage 系统添加道具
-	var storage = preload("res://src/core/save_manager.gd").new()
-	storage.add_item(item_id, count)
-	storage.free()
+	var storage := _get_storage()
+	if storage and storage.has_method("add_item"):
+		storage.add_item(item_id, count)
 
 
 func _get_item_price(item_id: String) -> float:

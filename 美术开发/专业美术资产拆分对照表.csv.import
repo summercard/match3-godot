@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://edvdh1jln0vv"
+
+[deps]
+
+files=["res://美术开发/专业美术资产拆分对照表.asset.translation", "res://美术开发/专业美术资产拆分对照表.asset.translation", "res://美术开发/专业美术资产拆分对照表.element.translation", "res://美术开发/专业美术资产拆分对照表.game.translation", "res://美术开发/专业美术资产拆分对照表.file.translation", "res://美术开发/专业美术资产拆分对照表.size.translation", "res://美术开发/专业美术资产拆分对照表.source.translation", "res://美术开发/专业美术资产拆分对照表.source.translation", "res://美术开发/专业美术资产拆分对照表.code.translation", "res://美术开发/专业美术资产拆分对照表.usage.translation", "res://美术开发/专业美术资产拆分对照表.status.translation", "res://美术开发/专业美术资产拆分对照表.note.translation", "res://美术开发/专业美术资产拆分对照表.variants.translation"]
+
+source_file="res://美术开发/专业美术资产拆分对照表.csv"
+dest_files=["res://美术开发/专业美术资产拆分对照表.asset.translation", "res://美术开发/专业美术资产拆分对照表.asset.translation", "res://美术开发/专业美术资产拆分对照表.element.translation", "res://美术开发/专业美术资产拆分对照表.game.translation", "res://美术开发/专业美术资产拆分对照表.file.translation", "res://美术开发/专业美术资产拆分对照表.size.translation", "res://美术开发/专业美术资产拆分对照表.source.translation", "res://美术开发/专业美术资产拆分对照表.source.translation", "res://美术开发/专业美术资产拆分对照表.code.translation", "res://美术开发/专业美术资产拆分对照表.usage.translation", "res://美术开发/专业美术资产拆分对照表.status.translation", "res://美术开发/专业美术资产拆分对照表.note.translation", "res://美术开发/专业美术资产拆分对照表.variants.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

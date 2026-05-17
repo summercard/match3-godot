@@ -18,6 +18,7 @@ var ui: Dictionary = {}
 var confirm_dialog: Dictionary = {}
 var reset_success: bool = false
 var tap_handler: Callable
+var _storage: Node = null
 
 var _bg_texture: ColorRect
 
@@ -38,6 +39,7 @@ func init(data: Dictionary = {}) -> void:
 	print("[SceneSettings] 设置场景初始化")
 	if game == null:
 		game = get_node_or_null("/root/GameManager")
+	_storage = _get_storage()
 	_load_settings()
 	_build_ui()
 	tap_handler = Callable(self, "_on_tap")
@@ -54,9 +56,21 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _load_settings() -> void:
-	var storage = preload("res://src/core/save_manager.gd").new()
-	settings_data = storage.load_settings()
-	storage.free()
+	var storage := _get_storage()
+	settings_data = storage.load_settings() if storage and storage.has_method("load_settings") else {
+		"soundOn": true,
+		"musicOn": true,
+		"version": "v0.1.0"
+	}
+
+
+func _get_storage() -> Node:
+	if _storage and is_instance_valid(_storage):
+		return _storage
+	_storage = get_node_or_null("/root/SaveManager")
+	if _storage == null and game and game.get("storage"):
+		_storage = game.storage
+	return _storage
 
 
 func _build_ui() -> void:
@@ -170,9 +184,9 @@ func _toggle_setting(id: String) -> void:
 
 
 func _save_settings() -> void:
-	var storage = preload("res://src/core/save_manager.gd").new()
-	storage.save_settings(settings_data)
-	storage.free()
+	var storage := _get_storage()
+	if storage and storage.has_method("save_settings"):
+		storage.save_settings(settings_data)
 
 
 func _show_reset_confirm() -> void:
@@ -197,9 +211,9 @@ func _show_reset_confirm() -> void:
 func _do_reset_data() -> void:
 	confirm_dialog = {}
 	# 清除所有存档
-	var storage = preload("res://src/core/save_manager.gd").new()
-	storage.clear_all_data()
-	storage.free()
+	var storage := _get_storage()
+	if storage and storage.has_method("clear_all_data"):
+		storage.clear_all_data()
 	print("[SceneSettings] 游戏数据已重置")
 	_show_reset_success()
 
