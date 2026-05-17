@@ -159,7 +159,7 @@ func process_status_effects(enemies: Array) -> Array:
 		var effect = _effects[i]
 		if effect == null or not effect is Dictionary:
 			continue
-
+			
 		var def: Dictionary = STATUS_DEFS.get(effect.get("type", ""), {})
 
 		if effect.get("type") == "burn" or effect.get("type") == "poison":

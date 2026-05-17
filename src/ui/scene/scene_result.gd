@@ -9,6 +9,47 @@ const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 const STAR_MULTIPLIERS: Array[float] = [0.0, 0.6, 0.8, 1.0, 1.2, 1.5]
 
+const RESULT_ASSETS := {
+	"bg": "res://assets/images/battle/battle_bg_forest_ruins.png",
+	"victory_banner": "res://assets/images/result/ui_victory_banner.png",
+	"defeat_banner": "res://assets/images/result/ui_defeat_banner.png",
+	"reward_panel": "res://assets/images/result/ui_reward_panel.png",
+	"team_exp_panel": "res://assets/images/result/ui_team_exp_panel.png",
+	"reward_slot": "res://assets/images/result/ui_reward_slot.png",
+	"monster_exp_card": "res://assets/images/result/ui_monster_exp_card.png",
+	"btn_next": "res://assets/images/result/ui_btn_next.png",
+	"btn_secondary": "res://assets/images/result/ui_btn_secondary.png",
+	"btn_retry": "res://assets/images/result/ui_btn_retry.png",
+	"capture_plaque": "res://assets/images/result/ui_capture_plaque.png",
+	"info_chip": "res://assets/images/result/ui_info_chip.png",
+	"star_lit": "res://assets/images/result/icon_star_lit_large.png",
+	"star_dim": "res://assets/images/result/icon_star_dim_large.png",
+	"sweep_badge": "res://assets/images/result/icon_sweep_badge.png",
+	"fx_burst": "res://assets/images/result/fx_victory_burst.png",
+	"fx_confetti": "res://assets/images/result/fx_confetti_cluster.png",
+	"fx_capture_ring": "res://assets/images/result/fx_capture_ring.png",
+	"fx_levelup_glow": "res://assets/images/result/fx_levelup_glow.png",
+}
+
+const COMMON_ASSETS := {
+	"gold": "res://assets/images/stage/icon_gold_coin.png",
+	"exp": "res://assets/images/stage/icon_exp_badge.png",
+	"capture_ball": "res://assets/images/stage/icon_capture_ball.png",
+	"gem_fire": "res://assets/images/stage/icon_gem_fire.png",
+	"gem_grass": "res://assets/images/stage/icon_gem_grass.png",
+	"gem_water": "res://assets/images/stage/icon_gem_water.png",
+}
+
+const MONSTER_ASSETS := {
+	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
+	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
+	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
+	"enemy_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
+	"enemy_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
+	"enemy_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
+	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png",
+}
+
 # === 颜色常量 ===
 const C := {
 	"bg_medium": Color(0.04, 0.07, 0.15),
@@ -67,6 +108,8 @@ const ENTRY_DURATION: float = 0.4
 # 按钮缓存区域
 var _next_btn_rect := Rect2()
 var _back_btn_rect := Rect2()
+var _retry_btn_rect := Rect2()
+var _texture_cache: Dictionary = {}
 
 # ==================== 生命周期 ====================
 
@@ -422,6 +465,10 @@ func _on_tap(x: float, y: float) -> void:
 		_on_back_btn_pressed()
 		return
 
+	if _retry_btn_rect.has_point(Vector2(x, y)):
+		_on_retry_btn_pressed()
+		return
+
 # ==================== 按钮回调 ====================
 
 func _on_next_btn_pressed() -> void:
@@ -444,17 +491,20 @@ func _on_back_btn_pressed() -> void:
 	if _is_win:
 		_go_to_scene("stage_select", {"chapter_index": chapter_index})
 	else:
-		var stage_id: String = _battle_result.get("stageId", "stage_1_1")
-		var chapters: Array = []
-		if _storage and _storage.has_method("get_stage_chapters"):
-			chapters = _storage.get_stage_chapters()
-		var stage_data: Dictionary = {}
-		for chapter: Dictionary in chapters:
-			for stage: Dictionary in chapter.get("stages", []):
-				if stage.get("id") == stage_id:
-					stage_data = stage
-					break
-		_go_to_scene("battle_prepare", {"stageId": stage_id, "stageData": stage_data})
+		_on_retry_btn_pressed()
+
+func _on_retry_btn_pressed() -> void:
+	var stage_id: String = _battle_result.get("stageId", "stage_1_1")
+	var chapters: Array = []
+	if _storage and _storage.has_method("get_stage_chapters"):
+		chapters = _storage.get_stage_chapters()
+	var stage_data: Dictionary = {}
+	for chapter: Dictionary in chapters:
+		for stage: Dictionary in chapter.get("stages", []):
+			if stage.get("id") == stage_id:
+				stage_data = stage
+				break
+	_go_to_scene("battle_prepare", {"stageId": stage_id, "stageData": stage_data})
 
 func _go_to_scene(scene_name: String, params: Dictionary = {}) -> void:
 	if has_node("/root/SceneManager"):
@@ -480,91 +530,98 @@ func _draw() -> void:
 	var oy := _entry_offset_y  # 入场偏移
 	
 	# 背景
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), C["bg_medium"])
+	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.12, 0.34))
+	if _is_win:
+		var burst_alpha := 0.52 + sin(_time_acc * 2.0) * 0.08
+		_draw_texture_fit(_tex("fx_burst"), Rect2(52, -28 + oy * 0.25, 270, 176), burst_alpha)
+		_draw_texture_fit(_tex("fx_confetti"), Rect2(8, 34, 92, 84), 0.78)
+		_draw_texture_fit(_tex("fx_confetti"), Rect2(276, 36, 92, 84), 0.68)
 	
 	# 标题
-	var title_text := "🎉 战斗胜利!" if _is_win else "💀 战斗失败"
+	var title_text := "战斗胜利" if _is_win else "战斗失败"
 	var title_color := C["gold"] if _is_win else C["danger_light"]
-	_draw_centered_text(font, title_text, DESIGN_W / 2.0, 35.0 + oy, title_color, 24.0)
+	var banner_key := "victory_banner" if _is_win else "defeat_banner"
+	_draw_texture_fit(_tex(banner_key), Rect2(18.0, 10.0 + oy, DESIGN_W - 36.0, 110.0))
+	_draw_centered_text(font, title_text, DESIGN_W / 2.0, 70.0 + oy, title_color, 28.0)
 	
 	# === 星级区域 ===
-	_draw_stars_section(font, 70.0 + oy)
+	_draw_stars_section(font, 134.0 + oy)
 	
 	# === 战斗信息 ===
 	if _star_anim_progress >= 1.0:
-		_draw_battle_info(font, 135.0 + oy)
+		_draw_battle_info(font, 174.0 + oy)
 	
 	# === 收服结果 ===
 	if _reward_anim_progress >= 1.0 and _is_win:
-		_draw_capture_section(font, 235.0 + oy + _shake_offset_x)
+		_draw_capture_section(font, 218.0 + oy + _shake_offset_x)
 	
 	# === 奖励 ===
 	if _reward_anim_progress >= 1.0:
-		_draw_rewards_section(font, 332.0 + oy)
+		_draw_rewards_section(font, 308.0 + oy)
 	
 	# === 经验 ===
 	if _reward_anim_progress >= 1.0:
-		_draw_exp_section(font, 446.0 + oy)
+		_draw_exp_section(font, 426.0 + oy)
 	
 	# === 升级 ===
 	if _exp_anim_progress >= 1.0:
-		_draw_levelups_section(font, 536.0 + oy)
+		_draw_levelups_section(font, 544.0 + oy)
 	
 	# === 扫荡解锁 ===
-	if _button_anim_progress >= 1.0 and _stars >= 3:
+	if _button_anim_progress >= 1.0 and _stars >= 3 and _level_ups.is_empty():
 		var pulse := sin(_time_acc * 3.0) * 0.2 + 0.8
-		_draw_centered_text(font, "⚡ 已解锁扫荡功能！", DESIGN_W / 2.0, 548.0 + oy, Color(1.0, 0.8, 0.2, pulse), 14.0)
+		_draw_texture_fit(_tex("sweep_badge"), Rect2(117.0, 532.0 + oy, 34.0, 34.0), pulse)
+		_draw_centered_text(font, "已解锁扫荡功能", DESIGN_W / 2.0 + 24.0, 555.0 + oy, Color(1.0, 0.8, 0.2, pulse), 13.0)
 	
 	# === 按钮 ===
 	if _button_anim_progress >= 1.0:
-		_draw_buttons(font, 570.0 + oy)
+		_draw_buttons(font, 586.0 + oy)
 
 func _draw_stars_section(font: Font, y: float) -> void:
 	var progress := _star_anim_progress
-	var display_stars: int = int(progress * _stars)
+	var display_stars: int = clampi(ceili(progress * _stars), 0, _stars)
 	var spacing := 48.0
 	var start_x := DESIGN_W / 2.0 - spacing
 	
 	for i in range(3):
 		var x := start_x + i * spacing
 		var is_lit := i < display_stars
-		var alpha := 1.0 if is_lit else 0.3
-		
-		# 发光效果 ✨
-		if is_lit:
-			_draw_centered_text(font, "✨", x - 2.0, y, Color(1.0, 0.84, 0.0, 0.3), 24.0)
-		
-		var emoji := "⭐" if is_lit else "☆"
-		_draw_centered_text(font, emoji, x, y, Color(1.0, 0.84, 0.0, alpha), 32.0)
+		var alpha := 1.0 if is_lit else 0.42
+		var pop := 1.0 + maxf(0.0, sin(progress * PI * 3.0 - i * 0.8)) * 0.10 if is_lit else 1.0
+		var size := 54.0 * pop
+		var key := "star_lit" if is_lit else "star_dim"
+		_draw_texture_fit(_tex(key), Rect2(x - size / 2.0, y - size / 2.0, size, size), alpha)
 
 func _draw_battle_info(font: Font, y: float) -> void:
-	_rounded_rect(20.0, y, DESIGN_W - 40.0, 90.0, 8.0, C["bg_card"])
-	
-	_draw_centered_text(font, "战斗信息", DESIGN_W / 2.0, y + 20.0, C["text_primary"], 14.0)
+	_draw_texture_fit(_tex("info_chip"), Rect2(28.0, y, DESIGN_W - 56.0, 40.0), 0.94)
 	
 	var turn_count: int = _battle_result.get("turnCount", 0)
 	var max_turns: int = _battle_result.get("maxTurns", 20)
-	draw_string(font, Vector2(40, y + 45), "回合: %d" % turn_count, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, C["text_primary"])
-	draw_string(font, Vector2(200, y + 45), "最大回合: %d" % max_turns, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C["text_muted"])
+	_draw_centered_text(font, "回合 %d / %d" % [turn_count, max_turns], DESIGN_W / 2.0, y + 25.0, C["text_primary"], 13.0)
 	
 	var enemies: Array = _battle_result.get("enemies", [])
 	var defeated: Array = enemies.filter(func(e): return e and e.get("hp", 0) <= 0)
 	var alive: Array = enemies.filter(func(e): return e and e.get("hp", 0) > 0)
 	
 	if not defeated.is_empty():
-		var names := " ".join(defeated.map(func(e): return e.get("emoji", "")))
-		draw_string(font, Vector2(40, y + 70), "击败: %s" % names, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C["danger_light"])
-	if not alive.is_empty():
-		var names := " ".join(alive.map(func(e): return e.get("emoji", "")))
-		draw_string(font, Vector2(200, y + 70), "存活: %s" % names, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.3, 0.5, 1.0))
+		var names := " / ".join(defeated.map(func(e): return e.get("name", e.get("emoji", ""))))
+		_draw_centered_text(font, "击败：%s" % names, DESIGN_W / 2.0, y + 58.0, C["danger_light"], 11.0)
+	elif not alive.is_empty():
+		var names := " / ".join(alive.map(func(e): return e.get("name", e.get("emoji", ""))))
+		_draw_centered_text(font, "仍在场：%s" % names, DESIGN_W / 2.0, y + 58.0, Color(0.5, 0.7, 1.0), 11.0)
 
 func _draw_capture_section(font: Font, y: float) -> void:
 	if _capture_result.is_empty():
 		return
 	
-	_rounded_rect(20.0, y, DESIGN_W - 40.0, 82.0, 8.0, C["bg_panel"])
+	var center_x := DESIGN_W / 2.0
+	_draw_texture_fit(_tex("fx_capture_ring"), Rect2(center_x - 84.0, y - 32.0, 168.0, 92.0), 0.72)
+	if not _capture_target.is_empty():
+		_draw_monster_portrait(_capture_target, Rect2(center_x - 44.0, y - 38.0, 88.0, 88.0))
 	
-	_draw_centered_text(font, _capture_result.get("title", ""), DESIGN_W / 2.0, y + 25.0, C["success"], 18.0)
+	_draw_texture_fit(_tex("capture_plaque"), Rect2(63.0, y + 48.0, 250.0, 56.0))
+	_draw_centered_text(font, _capture_result.get("title", ""), DESIGN_W / 2.0, y + 72.0, C["success"] if _captured else C["danger_light"], 15.0)
 	
 	var lines: Array = []
 	if not _capture_target.is_empty():
@@ -573,44 +630,65 @@ func _draw_capture_section(font: Font, y: float) -> void:
 		lines.append("消耗: %s" % _capture_item_used.get("name", ""))
 	lines.append(_capture_result.get("desc", ""))
 	
-	for i in range(mini(lines.size(), 3)):
-		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 48.0 + i * 14.0, C["text_secondary"], 10.0)
+	for i in range(mini(lines.size(), 2)):
+		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 91.0 + i * 13.0, C["text_secondary"], 9.5)
 
 func _draw_rewards_section(font: Font, y: float) -> void:
 	var progress := _reward_anim_progress
 	
-	_rounded_rect(20.0, y, DESIGN_W - 40.0, 100.0, 8.0, C["bg_panel"])
+	_draw_texture_fit(_tex("reward_panel"), Rect2(16.0, y, DESIGN_W - 32.0, 110.0), 0.96)
 	
 	_draw_centered_text(font, "获得奖励", DESIGN_W / 2.0, y + 18.0, C["text_primary"], 14.0)
 	
-	# 金币弹跳动画
-	var gold_bounce := sin(progress * PI * 2.0) * 5.0 * (1.0 - progress)
-	_draw_centered_text(font, "💰", 50.0, y + 52.0 + gold_bounce, C["gold"], 20.0)
-	draw_string(font, Vector2(75, y + 55), "+%d 金币" % _rewards["gold"], HORIZONTAL_ALIGNMENT_LEFT, -1, 14.0, C["gold"])
-	
-	# 道具闪光动画
+	var reward_items: Array[Dictionary] = [
+		{"icon": "gold", "amount": "+%d" % _rewards["gold"], "color": C["gold"]},
+		{"icon": "exp", "amount": "+%d" % _rewards["exp"], "color": C["thunder"]},
+	]
 	if _rewards["item"]:
-		var sparkle := sin(progress * PI * 4.0) * 0.5 + 0.5
-		var item_alpha := 0.5 + sparkle * 0.5
-		_draw_centered_text(font, "🎁", 50.0, y + 82.0, Color(1, 1, 1, item_alpha), 16.0)
-		draw_string(font, Vector2(75, y + 85), "+1 %s" % _rewards["item_name"], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, C["text_primary"])
-	else:
-		draw_string(font, Vector2(75, y + 85), "(无道具)", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, C["text_muted"])
+		reward_items.append({"icon": "capture_ball", "amount": "x1", "color": C["text_primary"]})
+	elif _is_win:
+		reward_items.append({"icon": "gem_grass", "amount": "x2", "color": Color(0.65, 1.0, 0.45)})
+	
+	var slot_w := 54.0
+	var gap := 13.0
+	var total_w := reward_items.size() * slot_w + (reward_items.size() - 1) * gap
+	var start_x := (DESIGN_W - total_w) / 2.0
+	for i in range(reward_items.size()):
+		var item := reward_items[i]
+		var bounce := sin(progress * PI * 2.0 + i * 0.5) * 4.0 * (1.0 - progress)
+		var x := start_x + i * (slot_w + gap)
+		_draw_texture_fit(_tex("reward_slot"), Rect2(x, y + 34.0 + bounce, slot_w, 56.0))
+		_draw_texture_fit(_tex(item["icon"]), Rect2(x + 13.0, y + 43.0 + bounce, 28.0, 28.0))
+		_draw_centered_text(font, item["amount"], x + slot_w / 2.0, y + 91.0, item["color"], 11.0)
 
 func _draw_exp_section(font: Font, y: float) -> void:
-	_rounded_rect(20.0, y, DESIGN_W - 40.0, 80.0, 8.0, C["bg_card"])
-	
-	_draw_centered_text(font, "获得经验", DESIGN_W / 2.0, y + 20.0, C["text_primary"], 14.0)
-	_draw_centered_text(font, "+%d 经验" % _rewards["exp"], DESIGN_W / 2.0, y + 48.0, C["thunder"], 16.0)
-	
+	_draw_texture_fit(_tex("team_exp_panel"), Rect2(16.0, y, DESIGN_W - 32.0, 116.0), 0.95)
+	_draw_centered_text(font, "队伍经验", DESIGN_W / 2.0, y + 18.0, C["text_primary"], 14.0)
+
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
+	var desc := ""
 	if stage_rewards.has("exp"):
 		var mult := STAR_MULTIPLIERS[_stars] if _stars < STAR_MULTIPLIERS.size() else 1.0
-		_draw_centered_text(font, "(关卡基础 %d × %.1fx 星级系数)" % [stage_rewards["exp"], mult], DESIGN_W / 2.0, y + 70.0, C["text_muted"], 10.0)
+		desc = "基础 %d × %.1fx 星级系数" % [stage_rewards["exp"], mult]
 	else:
 		var base_exp: int = 100 if _is_win else 30
 		var star_bonus: int = _stars * 20
-		_draw_centered_text(font, "(基础 %d + 星级加成 %d)" % [base_exp, star_bonus], DESIGN_W / 2.0, y + 70.0, C["text_muted"], 10.0)
+		desc = "基础 %d + 星级加成 %d" % [base_exp, star_bonus]
+	_draw_centered_text(font, desc, DESIGN_W / 2.0, y + 106.0, C["text_muted"], 9.5)
+
+	var team: Array = _battle_result.get("playerTeam", [])
+	var display_team: Array = team.filter(func(m): return m != null).slice(0, 5)
+	var card_w := 54.0
+	var gap := 10.0
+	var total_w: float = float(display_team.size()) * card_w + float(max(0, display_team.size() - 1)) * gap
+	var start_x: float = (DESIGN_W - total_w) / 2.0
+	for i in range(display_team.size()):
+		var monster: Dictionary = display_team[i]
+		var x: float = start_x + float(i) * (card_w + gap)
+		_draw_texture_fit(_tex("monster_exp_card"), Rect2(x, y + 30.0, card_w, 68.0))
+		_draw_monster_portrait(monster, Rect2(x + 6.0, y + 35.0, 42.0, 42.0))
+		_draw_centered_text(font, "Lv.%d" % monster.get("level", 1), x + card_w / 2.0, y + 84.0, C["white"], 8.0)
+		_draw_centered_text(font, "+%d" % _rewards["exp"], x + card_w / 2.0, y + 101.0, Color(0.78, 1.0, 0.45), 8.0)
 
 func _draw_levelups_section(font: Font, y: float) -> void:
 	if _level_ups.is_empty():
@@ -622,41 +700,38 @@ func _draw_levelups_section(font: Font, y: float) -> void:
 		var up: Dictionary = display_ups[i]
 		var item_y := y + i * 28.0
 		
-		# 金色发光背景
-		_rounded_rect(DESIGN_W / 2.0 - 120.0, item_y, 240.0, 24.0, 8.0, Color(1.0, 0.84, 0.0, 0.2 * pulse))
-		
-		# 升级图标
-		draw_string(font, Vector2(DESIGN_W / 2.0 - 100.0, item_y + 17), "⬆️", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1.0, 0.84, 0.0, pulse))
-		
-		# 怪物名
-		draw_string(font, Vector2(DESIGN_W / 2.0 - 70.0, item_y + 17), str(up.get("monsterId", "?")), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, C["gold"])
-		
-		# 等级变化
-		draw_string(font, Vector2(DESIGN_W / 2.0 + 50.0, item_y + 17), "Lv.%d → Lv.%d" % [up.get("oldLevel", 0), up.get("newLevel", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, C["success"])
+		_draw_texture_fit(_tex("fx_levelup_glow"), Rect2(DESIGN_W / 2.0 - 130.0, item_y - 2.0, 260.0, 28.0), 0.38 * pulse)
+		draw_string(font, Vector2(DESIGN_W / 2.0 - 105.0, item_y + 17), "UP", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.84, 0.0, pulse))
+		draw_string(font, Vector2(DESIGN_W / 2.0 - 62.0, item_y + 17), str(up.get("monsterId", "?")), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, C["gold"])
+		draw_string(font, Vector2(DESIGN_W / 2.0 + 56.0, item_y + 17), "Lv.%d -> Lv.%d" % [up.get("oldLevel", 0), up.get("newLevel", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, C["success"])
 
 func _draw_buttons(font: Font, y: float) -> void:
 	var progress := _button_anim_progress
 	var base_scale := 0.8 + progress * 0.2
 	
-	var btn_w := 140.0
-	var btn_h := 42.0
+	var btn_w := 112.0
+	var btn_h := 46.0
 	
 	if _has_next_stage:
-		# 下一关按钮
-		var next_x := DESIGN_W / 2.0 - btn_w - 10.0
 		var scaled_w := btn_w * base_scale
 		var scaled_h := btn_h * base_scale
-		var draw_x := next_x + (btn_w - scaled_w) / 2.0
 		var draw_y := y + (btn_h - scaled_h) / 2.0
-		_rounded_rect(draw_x, draw_y, scaled_w, scaled_h, 12.0, C["primary"])
-		_draw_centered_text(font, "下一关 ▶", next_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
-		_next_btn_rect = Rect2(next_x, y, btn_w, btn_h)
-		
-		# 返回关卡按钮
-		var back_x := DESIGN_W / 2.0 + 10.0
-		_rounded_rect(back_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h, 12.0, C["bg_card"])
-		_draw_centered_text(font, "返回关卡", back_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["text_primary"], 14.0)
+		var back_x := 24.0
+		var next_x := DESIGN_W / 2.0 - btn_w / 2.0
+		var retry_x := DESIGN_W - btn_w - 24.0
+
+		_draw_texture_fit(_tex("btn_secondary"), Rect2(back_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h))
+		_draw_centered_text(font, "返回", back_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["text_primary"], 13.0)
 		_back_btn_rect = Rect2(back_x, y, btn_w, btn_h)
+
+		var next_scaled_w := btn_w * 1.25 * base_scale
+		_draw_texture_fit(_tex("btn_next"), Rect2(next_x - (next_scaled_w - btn_w) / 2.0, draw_y, next_scaled_w, scaled_h))
+		_draw_centered_text(font, "下一关", next_x + btn_w / 2.0, y + btn_h / 2.0 + 6, C["white"], 16.0)
+		_next_btn_rect = Rect2(next_x, y, btn_w, btn_h)
+
+		_draw_texture_fit(_tex("btn_secondary"), Rect2(retry_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h))
+		_draw_centered_text(font, "再来一次", retry_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["text_primary"], 12.0)
+		_retry_btn_rect = Rect2(retry_x, y, btn_w, btn_h)
 	else:
 		var btn_x := (DESIGN_W - btn_w) / 2.0
 		var scaled_w := btn_w * base_scale
@@ -665,12 +740,14 @@ func _draw_buttons(font: Font, y: float) -> void:
 		var draw_y := y + (btn_h - scaled_h) / 2.0
 		
 		if _is_win:
-			_rounded_rect(draw_x, draw_y, scaled_w, scaled_h, 12.0, C["primary"])
-			_draw_centered_text(font, "返回关卡", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
+			_draw_texture_fit(_tex("btn_secondary"), Rect2(draw_x, draw_y, scaled_w, scaled_h))
+			_draw_centered_text(font, "返回关卡", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 15.0)
 		else:
-			_rounded_rect(draw_x, draw_y, scaled_w, scaled_h, 12.0, C["danger"])
+			_draw_texture_fit(_tex("btn_retry"), Rect2(draw_x, draw_y, scaled_w, scaled_h))
 			_draw_centered_text(font, "重试", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
 		_back_btn_rect = Rect2(btn_x, y, btn_w, btn_h)
+		_next_btn_rect = Rect2()
+		_retry_btn_rect = Rect2()
 
 # ==================== 绘制辅助 ====================
 
@@ -692,3 +769,59 @@ func _rounded_rect(x: float, y: float, w: float, h: float, r: float, color: Colo
 		draw_circle(Vector2(x + w - rr, y + h - rr), rr, color)
 	else:
 		draw_rect(Rect2(x, y, w, h), color)
+
+func _tex(key: String) -> Texture2D:
+	var path: String = RESULT_ASSETS.get(key, "")
+	if path.is_empty():
+		path = COMMON_ASSETS.get(key, "")
+	if path.is_empty():
+		return null
+	return _get_texture(path)
+
+func _get_texture(path: String) -> Texture2D:
+	if path.is_empty():
+		return null
+	if _texture_cache.has(path):
+		return _texture_cache[path]
+	var tex := load(path) as Texture2D
+	_texture_cache[path] = tex
+	return tex
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		draw_rect(rect, C["bg_medium"])
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var src_aspect := tex_size.x / tex_size.y
+	var dst_aspect := rect.size.x / rect.size.y
+	var src_rect := Rect2(Vector2.ZERO, tex_size)
+	if src_aspect > dst_aspect:
+		var crop_w := tex_size.y * dst_aspect
+		src_rect.position.x = (tex_size.x - crop_w) / 2.0
+		src_rect.size.x = crop_w
+	else:
+		var crop_h := tex_size.x / dst_aspect
+		src_rect.position.y = (tex_size.y - crop_h) / 2.0
+		src_rect.size.y = crop_h
+	draw_texture_rect_region(tex, rect, src_rect, Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
+	var monster_id: String = monster.get("id", "")
+	var path: String = MONSTER_ASSETS.get(monster_id, "")
+	if path.is_empty() and monster_id.begins_with("enemy_"):
+		path = MONSTER_ASSETS.get(monster_id.replace("enemy", "monster"), "")
+	var tex := _get_texture(path)
+	if tex:
+		_draw_texture_fit(tex, rect)
+		return
+	var font := ThemeDB.fallback_font
+	_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.05, 0.08, 0.16, 0.78))
+	var fallback := str(monster.get("emoji", "?"))
+	_draw_centered_text(font, fallback, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y * 0.62, C["white"], minf(rect.size.x * 0.45, 20.0))

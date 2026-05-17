@@ -5,9 +5,10 @@
 ## 总览
 
 - Godot 运行入口登记界面：16 个。
-- 已完成第一版美术代入：4 个。
-- 有概念图但尚未完成 Godot 代入：3 个，其中队伍编成和怪物进化共用一张概念图。
-- 暂无独立概念图：9 个。
+- 已完成第一版美术代入：5 个。
+- 有概念图但尚未完成 Godot 代入：11 个，其中队伍编成和怪物进化共用一张概念图。
+- 暂无独立概念图：0 个。
+- 完整执行清单见：`美术开发/界面美术资产提取制作代入总List.md`。
 
 ## 状态表
 
@@ -20,15 +21,15 @@
 | 5 | album | 怪物图鉴 | `src/ui/scene/scene_album.gd` | 未包装，仍以 Godot 控件/emoji 为主 | 有：`美术开发/概念图/05_怪物图鉴_monster_album.png` | 有概念拆分草稿：`美术开发/资产拆分/05_monster_album_contact_sheet.png` | 可进入专业拆分并代入 |
 | 6 | team | 队伍编成 | `src/ui/scene/scene_team.gd` | 未包装，仍以控件样式/emoji 为主 | 有：`美术开发/概念图/06_队伍进化_team_evolve.png` | 有概念拆分草稿：`美术开发/legacy_concept_crops/资产拆分/06_team_evolve/` | 可进入专业拆分并代入 |
 | 7 | evolve | 怪物进化 | `src/ui/scene/scene_evolve.gd` | 未包装，仍以控件样式/emoji 为主 | 共用：`美术开发/概念图/06_队伍进化_team_evolve.png` | 有概念拆分草稿，可复用队伍/怪物资产 | 队伍完成后接着做进化 |
-| 8 | battle_prepare | 战斗准备 | `src/ui/scene/scene_battle_prepare.gd` | 仅接入战斗背景，主体仍为色块/emoji | 无独立概念图 | 无独立拆分包，可复用 battle/team/ui | 需要补战前确认概念图或先用通用 UI 包制作 |
-| 9 | result | 战斗结算 | `src/ui/scene/scene_result.gd` | 未包装 | 无独立概念图 | 无独立拆分包，可复用奖励/星级/按钮 | 需要制作胜负结算概念图 |
-| 10 | ranch | 牧场 | `src/ui/scene/scene_ranch.gd` | 未包装 | 无独立概念图 | 无独立拆分包，可复用怪物小头像 | 需要制作牧场放置页概念图 |
-| 11 | shop | 商店 | `src/ui/scene/scene_shop.gd` | 仅接入金币/钻石小图标，主体未包装 | 无独立概念图 | 无独立拆分包，可复用货币/按钮/道具 | 需要制作商店概念图或套用通用商店 UI |
-| 12 | inventory | 背包 | `src/ui/scene/scene_inventory.gd` | 未包装 | 无独立概念图 | 无独立拆分包，需要道具图标体系 | 需要制作背包概念图和道具图标包 |
-| 13 | achievement | 成就 | `src/ui/scene/scene_achievement.gd` | 未包装 | 无独立概念图 | 无独立拆分包，可复用徽章/奖励资产 | 需要制作成就列表概念图 |
-| 14 | settings | 设置 | `src/ui/scene/scene_settings.gd` | 未包装 | 无独立概念图 | 无独立拆分包，可复用通用 UI | 低优先级，后置包装 |
-| 15 | sign_in | 每日签到 | `src/ui/scene/scene_sign_in.gd` | 未包装 | 无独立概念图 | 无独立拆分包，可复用奖励资产 | 需要制作签到日历概念图 |
-| 16 | tutorial | 新手教程 | `src/ui/scene/scene_tutorial.gd` | 未包装 | 无独立概念图 | 无独立拆分包，依赖主流程资产 | 主流程稳定后制作引导资产 |
+| 8 | battle_prepare | 战斗准备 | `src/ui/scene/scene_battle_prepare.gd` | 已完成第一版 image-2 UI 代入，怪物/宝石复用通用资产 | 有：`美术开发/概念图/07_战斗准备_battle_prepare.png` | 已拆分：`美术开发/正式拆分/battle_prepare/`；运行目录：`assets/images/battle_prepare/` | 进入 Godot 运行窗口做视觉验收和布局微调 |
+| 9 | result | 战斗结算 | `src/ui/scene/scene_result.gd` | 已完成第一版 image-2 UI/星级/特效代入，怪物/奖励图标复用通用资产 | 有：`美术开发/概念图/08_战斗结算_result.png` | 已拆分：`美术开发/正式拆分/result/`；运行目录：`assets/images/result/` | 进入 Godot 运行窗口做真实胜负结算视觉验收 |
+| 10 | ranch | 牧场 | `src/ui/scene/scene_ranch.gd` | 未包装 | 有：`美术开发/概念图/09_怪物牧场_ranch.png` | 待专业拆分，可复用怪物小头像 | 拆分牧场背景、放置槽、收益状态 |
+| 11 | shop | 商店 | `src/ui/scene/scene_shop.gd` | 仅接入金币/钻石小图标，主体未包装 | 有：`美术开发/概念图/10_商店_shop.png` | 待专业拆分，可复用货币/按钮/道具 | 与背包一起建立商品/道具体系 |
+| 12 | inventory | 背包 | `src/ui/scene/scene_inventory.gd` | 未包装 | 有：`美术开发/概念图/11_背包_inventory.png` | 待专业拆分，需要道具图标体系 | 拆分背包格、分类标签、详情面板 |
+| 13 | achievement | 成就 | `src/ui/scene/scene_achievement.gd` | 未包装 | 有：`美术开发/概念图/12_成就_achievement.png` | 待专业拆分，可复用徽章/奖励资产 | 拆分成就卡、进度条、徽章、领取状态 |
+| 14 | settings | 设置 | `src/ui/scene/scene_settings.gd` | 未包装 | 有：`美术开发/概念图/13_设置_settings.png` | 待专业拆分，可复用通用 UI | 低优先级，后置包装 |
+| 15 | sign_in | 每日签到 | `src/ui/scene/scene_sign_in.gd` | 未包装 | 有：`美术开发/概念图/14_每日签到_sign_in.png` | 待专业拆分，可复用奖励资产 | 拆分签到日历、今日高亮、领取状态 |
+| 16 | tutorial | 新手教程 | `src/ui/scene/scene_tutorial.gd` | 未包装 | 有：`美术开发/概念图/15_新手教程_tutorial.png` | 待专业拆分，依赖主流程资产 | 主流程稳定后拆分引导资产 |
 
 ## 按状态归类
 
@@ -38,24 +39,25 @@
 2. 大厅 main
 3. 关卡选择 stage_select
 4. 三消战斗 battle
+5. 战斗结算 result
 
 ### 有概念图，可继续专业拆分/代入
 
 1. 怪物图鉴 album
 2. 队伍编成 team
 3. 怪物进化 evolve
+4. 战斗准备 battle_prepare
+5. 牧场 ranch
+6. 商店 shop
+7. 背包 inventory
+8. 成就 achievement
+9. 设置 settings
+10. 每日签到 sign_in
+11. 新手教程 tutorial
 
 ### 暂无独立概念图
 
-1. 战斗准备 battle_prepare
-2. 战斗结算 result
-3. 牧场 ranch
-4. 商店 shop
-5. 背包 inventory
-6. 成就 achievement
-7. 设置 settings
-8. 每日签到 sign_in
-9. 新手教程 tutorial
+无。当前 16 个 Godot 界面均已有概念图覆盖，其中 team 和 evolve 共用 `06_队伍进化_team_evolve.png`。
 
 ## 建议优先级
 
