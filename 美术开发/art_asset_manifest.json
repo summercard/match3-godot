@@ -1,0 +1,586 @@
+{
+  "01_start_screen": {
+    "start_bg_full": {
+      "name": "全屏启动页背景参考",
+      "file": "美术开发/资产拆分/01_start_screen/01_start_bg_full.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "0,0,941,1672",
+      "size": "941x1672",
+      "usage": "启动页整屏背景/气氛参考",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "可作为重绘背景或首屏静态底图"
+    },
+    "start_logo_title": {
+      "name": "标题Logo区",
+      "file": "美术开发/资产拆分/01_start_screen/02_start_logo_title.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "70,55,805,470",
+      "size": "805x470",
+      "usage": "标题/Logo",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "后续建议重绘为透明PNG或矢量化字形"
+    },
+    "start_monster_trio": {
+      "name": "三只初始怪物组合",
+      "file": "美术开发/资产拆分/01_start_screen/03_start_monster_trio.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "70,640,825,430",
+      "size": "825x430",
+      "usage": "初始怪物展示",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "拆正式资源时再分火/水/草三只透明立绘"
+    },
+    "start_element_gems": {
+      "name": "五元素宝石组合",
+      "file": "美术开发/资产拆分/01_start_screen/04_start_element_gems.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "245,1000,450,240",
+      "size": "450x240",
+      "usage": "三消元素展示",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "和board宝石资源保持同一造型"
+    },
+    "start_primary_button": {
+      "name": "开始冒险主按钮",
+      "file": "美术开发/资产拆分/01_start_screen/05_start_primary_button.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "185,1300,575,175",
+      "size": "575x175",
+      "usage": "进入游戏按钮",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "可拆九宫格按钮底+文字层"
+    },
+    "start_bottom_version_panel": {
+      "name": "底部版本栏",
+      "file": "美术开发/资产拆分/01_start_screen/06_start_bottom_version_panel.png",
+      "source": "美术开发/概念图/01_启动欢迎页_start_screen.png",
+      "bbox": "0,1510,941,162",
+      "size": "941x162",
+      "usage": "版本信息/装饰底栏",
+      "codeEntry": "js/ui/sceneStart.js",
+      "status": "concept_crop_v1",
+      "note": "可复用为深色底部装饰条"
+    }
+  },
+  "02_main_lobby": {
+    "main_top_player_bar": {
+      "name": "顶部玩家信息栏",
+      "file": "美术开发/资产拆分/02_main_lobby/01_main_top_player_bar.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "20,15,900,185",
+      "size": "900x185",
+      "usage": "玩家头像/等级/货币区",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "对应SceneMain信息栏，可拆头像框/经验条/货币按钮"
+    },
+    "main_card_adventure": {
+      "name": "冒险入口卡片",
+      "file": "美术开发/资产拆分/02_main_lobby/02_main_card_adventure.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "30,270,420,365",
+      "size": "420x365",
+      "usage": "开始冒险按钮",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "sceneMain start按钮视觉升级"
+    },
+    "main_card_team": {
+      "name": "队伍编成卡片",
+      "file": "美术开发/资产拆分/02_main_lobby/03_main_card_team.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "470,270,435,365",
+      "size": "435x365",
+      "usage": "队伍编成入口",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "sceneMain team按钮视觉升级"
+    },
+    "main_card_album": {
+      "name": "怪物图鉴卡片",
+      "file": "美术开发/资产拆分/02_main_lobby/04_main_card_album.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "30,645,420,365",
+      "size": "420x365",
+      "usage": "怪物图鉴入口",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "sceneMain album按钮视觉升级"
+    },
+    "main_card_signin": {
+      "name": "每日签到卡片",
+      "file": "美术开发/资产拆分/02_main_lobby/05_main_card_signin.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "470,645,435,365",
+      "size": "435x365",
+      "usage": "每日签到入口",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "sceneMain signIn按钮视觉升级"
+    },
+    "main_current_team_strip": {
+      "name": "当前队伍面板",
+      "file": "美术开发/资产拆分/02_main_lobby/06_main_current_team_strip.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "30,1010,885,340",
+      "size": "885x340",
+      "usage": "当前队伍展示",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "可拆队伍槽/怪物卡/调整按钮"
+    },
+    "main_bottom_nav": {
+      "name": "底部功能导航",
+      "file": "美术开发/资产拆分/02_main_lobby/07_main_bottom_nav.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "35,1360,875,210",
+      "size": "875x210",
+      "usage": "商店/背包/成就/设置",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "替换底部小按钮emoji"
+    },
+    "main_element_footer": {
+      "name": "底部元素装饰条",
+      "file": "美术开发/资产拆分/02_main_lobby/08_main_element_footer.png",
+      "source": "美术开发/概念图/02_主界面_main_lobby.png",
+      "bbox": "70,1570,800,90",
+      "size": "800x90",
+      "usage": "元素图标装饰",
+      "codeEntry": "js/ui/sceneMain.js",
+      "status": "concept_crop_v1",
+      "note": "可拆五元素小图标"
+    }
+  },
+  "03_stage_select": {
+    "stage_top_header": {
+      "name": "章节顶部栏",
+      "file": "美术开发/资产拆分/03_stage_select/01_stage_top_header.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "0,0,941,165",
+      "size": "941x165",
+      "usage": "章节标题/返回/星数",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "替换当前简单标题栏"
+    },
+    "stage_map_full": {
+      "name": "草原章节地图",
+      "file": "美术开发/资产拆分/03_stage_select/02_stage_map_full.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "0,150,941,1185",
+      "size": "941x1185",
+      "usage": "章节地图底图",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "后续按章节出多张地图背景"
+    },
+    "stage_boss_node": {
+      "name": "Boss关卡节点",
+      "file": "美术开发/资产拆分/03_stage_select/03_stage_boss_node.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "645,185,270,290",
+      "size": "270x290",
+      "usage": "Boss关卡入口",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "可拆Boss章节点徽章"
+    },
+    "stage_treasure_node": {
+      "name": "宝箱关卡节点",
+      "file": "美术开发/资产拆分/03_stage_select/04_stage_treasure_node.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "465,180,170,175",
+      "size": "170x175",
+      "usage": "宝箱关卡入口",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "奖励关卡节点"
+    },
+    "stage_elite_crystal_node": {
+      "name": "精英水晶节点",
+      "file": "美术开发/资产拆分/03_stage_select/05_stage_elite_crystal_node.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "355,625,170,210",
+      "size": "170x210",
+      "usage": "精英关卡入口",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "elite关卡节点"
+    },
+    "stage_normal_node_sample": {
+      "name": "普通关卡节点样例",
+      "file": "美术开发/资产拆分/03_stage_select/06_stage_normal_node_sample.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "70,1010,145,155",
+      "size": "145x155",
+      "usage": "普通关卡入口",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "普通节点/星级样式"
+    },
+    "stage_reward_panel": {
+      "name": "通关奖励面板",
+      "file": "美术开发/资产拆分/03_stage_select/07_stage_reward_panel.png",
+      "source": "美术开发/概念图/03_关卡地图_stage_select.png",
+      "bbox": "15,1335,910,305",
+      "size": "910x305",
+      "usage": "关卡奖励预览",
+      "codeEntry": "js/ui/sceneStageSelect.js",
+      "status": "concept_crop_v1",
+      "note": "可拆奖励卡槽和物品图标"
+    }
+  },
+  "04_battle_match3": {
+    "battle_top_status": {
+      "name": "顶部战斗状态栏",
+      "file": "美术开发/资产拆分/04_battle_match3/01_battle_top_status.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "15,20,910,210",
+      "size": "910x210",
+      "usage": "回合/敌方HP/设置",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应SceneBattle顶部UI"
+    },
+    "battle_enemy_area": {
+      "name": "敌方Boss战斗区",
+      "file": "美术开发/资产拆分/04_battle_match3/02_battle_enemy_area.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "145,120,660,390",
+      "size": "660x390",
+      "usage": "敌方怪物展示",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "Boss立绘需重绘透明Sprite"
+    },
+    "battle_player_cards": {
+      "name": "我方队伍状态卡",
+      "file": "美术开发/资产拆分/04_battle_match3/03_battle_player_cards.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "20,515,900,230",
+      "size": "900x230",
+      "usage": "我方怪物HP/技能",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "替换队伍卡片emoji"
+    },
+    "battle_board_full": {
+      "name": "8x8三消棋盘",
+      "file": "美术开发/资产拆分/04_battle_match3/04_battle_board_full.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "20,740,900,670",
+      "size": "900x670",
+      "usage": "三消棋盘整体",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应Board渲染区；后续拆格子/宝石/特效"
+    },
+    "battle_combo_effect": {
+      "name": "连击消除特效",
+      "file": "美术开发/资产拆分/04_battle_match3/05_battle_combo_effect.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "255,845,265,465",
+      "size": "265x465",
+      "usage": "消除特效",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "可作为火属性连击动效参考"
+    },
+    "battle_locked_gem": {
+      "name": "锁定宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/06_battle_locked_gem.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "140,1200,110,110",
+      "size": "110x110",
+      "usage": "锁定宝石",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应Board lockedGems"
+    },
+    "battle_rock_obstacle": {
+      "name": "石块障碍样例",
+      "file": "美术开发/资产拆分/04_battle_match3/07_battle_rock_obstacle.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "690,980,110,110",
+      "size": "110x110",
+      "usage": "障碍物",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应Board obstacles"
+    },
+    "battle_footer_score": {
+      "name": "底部得分能量栏",
+      "file": "美术开发/资产拆分/04_battle_match3/08_battle_footer_score.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "20,1425,900,215",
+      "size": "900x215",
+      "usage": "奖励/得分/能量",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "战斗底部信息区"
+    },
+    "gem_fire_sample": {
+      "name": "火宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/09_gem_fire_sample.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "30,760,100,100",
+      "size": "100x100",
+      "usage": "fire gem",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应GEM_TYPES fire"
+    },
+    "gem_water_sample": {
+      "name": "水宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/10_gem_water_sample.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "140,760,100,100",
+      "size": "100x100",
+      "usage": "water gem",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应GEM_TYPES water"
+    },
+    "gem_grass_sample": {
+      "name": "草宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/11_gem_grass_sample.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "250,760,100,100",
+      "size": "100x100",
+      "usage": "grass gem",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应GEM_TYPES grass"
+    },
+    "gem_thunder_sample": {
+      "name": "雷宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/12_gem_thunder_sample.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "360,760,100,100",
+      "size": "100x100",
+      "usage": "thunder gem",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应GEM_TYPES thunder"
+    },
+    "gem_light_sample": {
+      "name": "光宝石样例",
+      "file": "美术开发/资产拆分/04_battle_match3/13_gem_light_sample.png",
+      "source": "美术开发/概念图/04_三消战斗_battle_match3.png",
+      "bbox": "580,760,100,100",
+      "size": "100x100",
+      "usage": "light gem",
+      "codeEntry": "js/ui/sceneBattle.js + js/match3/board.js",
+      "status": "concept_crop_v1",
+      "note": "对应GEM_TYPES light"
+    }
+  },
+  "05_monster_album": {
+    "album_top_tabs": {
+      "name": "标题与属性筛选栏",
+      "file": "美术开发/资产拆分/05_monster_album/01_album_top_tabs.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "20,15,900,175",
+      "size": "900x175",
+      "usage": "图鉴标题/属性筛选",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "替换当前筛选标签"
+    },
+    "album_monster_grid": {
+      "name": "怪物卡片网格",
+      "file": "美术开发/资产拆分/05_monster_album/02_album_monster_grid.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "25,180,890,730",
+      "size": "890x730",
+      "usage": "怪物列表",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "3列卡片布局参考"
+    },
+    "album_card_grass_sample": {
+      "name": "草系怪物卡样例",
+      "file": "美术开发/资产拆分/05_monster_album/03_album_card_grass_sample.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "30,190,280,230",
+      "size": "280x230",
+      "usage": "怪物卡",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "可作为怪物卡模板"
+    },
+    "album_card_locked_sample": {
+      "name": "锁定怪物卡样例",
+      "file": "美术开发/资产拆分/05_monster_album/04_album_card_locked_sample.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "610,685,285,230",
+      "size": "285x230",
+      "usage": "未解锁怪物卡",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "锁定态样式"
+    },
+    "album_detail_panel": {
+      "name": "怪物详情面板",
+      "file": "美术开发/资产拆分/05_monster_album/05_album_detail_panel.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "20,915,900,585",
+      "size": "900x585",
+      "usage": "详情弹层",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "对应state=detail"
+    },
+    "album_selected_portrait": {
+      "name": "选中怪物立绘区",
+      "file": "美术开发/资产拆分/05_monster_album/06_album_selected_portrait.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "50,990,355,345",
+      "size": "355x345",
+      "usage": "怪物立绘",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "后续需透明立绘"
+    },
+    "album_stats_block": {
+      "name": "属性数值条区域",
+      "file": "美术开发/资产拆分/05_monster_album/07_album_stats_block.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "430,1010,430,310",
+      "size": "430x310",
+      "usage": "HP/ATK/DEF/SPD",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "对应怪物详情数值"
+    },
+    "album_evolution_preview": {
+      "name": "进化预览条",
+      "file": "美术开发/资产拆分/05_monster_album/08_album_evolution_preview.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "425,1340,430,130",
+      "size": "430x130",
+      "usage": "进化链预览",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "对应sceneEvolve入口"
+    },
+    "album_bottom_nav": {
+      "name": "底部页签栏",
+      "file": "美术开发/资产拆分/05_monster_album/09_album_bottom_nav.png",
+      "source": "美术开发/概念图/05_怪物图鉴_monster_album.png",
+      "bbox": "20,1510,900,135",
+      "size": "900x135",
+      "usage": "图鉴/羁绊/收藏",
+      "codeEntry": "js/ui/sceneAlbum.js",
+      "status": "concept_crop_v1",
+      "note": "后续如保留多页签使用"
+    }
+  },
+  "06_team_evolve": {
+    "team_top_header": {
+      "name": "队伍标题栏",
+      "file": "美术开发/资产拆分/06_team_evolve/01_team_top_header.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "20,20,900,95",
+      "size": "900x95",
+      "usage": "返回/标题/帮助",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "队伍页标题"
+    },
+    "team_leader_card": {
+      "name": "队长卡",
+      "file": "美术开发/资产拆分/06_team_evolve/02_team_leader_card.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "25,105,305,505",
+      "size": "305x505",
+      "usage": "队长槽位",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "对应leader slot"
+    },
+    "team_member1_card": {
+      "name": "成员1卡",
+      "file": "美术开发/资产拆分/06_team_evolve/03_team_member1_card.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "350,130,265,480",
+      "size": "265x480",
+      "usage": "成员槽位1",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "对应member1 slot"
+    },
+    "team_member2_card": {
+      "name": "成员2卡",
+      "file": "美术开发/资产拆分/06_team_evolve/04_team_member2_card.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "630,130,280,480",
+      "size": "280x480",
+      "usage": "成员槽位2",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "对应member2 slot"
+    },
+    "team_power_banner": {
+      "name": "队伍战力与队长技能栏",
+      "file": "美术开发/资产拆分/06_team_evolve/05_team_power_banner.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "25,620,895,120",
+      "size": "895x120",
+      "usage": "队伍总战力/队长技能",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "对应_calcTeamPower与leaderSkill"
+    },
+    "team_evolution_preview": {
+      "name": "进化预览区域",
+      "file": "美术开发/资产拆分/06_team_evolve/06_team_evolution_preview.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "20,735,900,365",
+      "size": "900x365",
+      "usage": "进化预览",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "对应sceneEvolve主视觉"
+    },
+    "team_roster_filter": {
+      "name": "属性筛选与排序栏",
+      "file": "美术开发/资产拆分/06_team_evolve/07_team_roster_filter.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "20,1110,900,100",
+      "size": "900x100",
+      "usage": "怪物筛选",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "可扩展sceneTeamSetup"
+    },
+    "team_roster_grid": {
+      "name": "怪物列表网格",
+      "file": "美术开发/资产拆分/06_team_evolve/08_team_roster_grid.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "20,1200,900,330",
+      "size": "900x330",
+      "usage": "已收服怪物列表",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "替换emoji列表卡片"
+    },
+    "team_bottom_buttons": {
+      "name": "底部操作按钮",
+      "file": "美术开发/资产拆分/06_team_evolve/09_team_bottom_buttons.png",
+      "source": "美术开发/概念图/06_队伍进化_team_evolve.png",
+      "bbox": "20,1535,900,125",
+      "size": "900x125",
+      "usage": "取消/保存/分解",
+      "codeEntry": "js/ui/sceneTeamSetup.js + js/ui/sceneEvolve.js",
+      "status": "concept_crop_v1",
+      "note": "保存/取消按钮样式参考"
+    }
+  }
+}

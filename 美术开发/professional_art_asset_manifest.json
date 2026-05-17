@@ -1,0 +1,310 @@
+{
+  "monster_001_fire_lizard": {
+    "category": "monster",
+    "name": "小火龙/火系初始怪",
+    "element": "fire",
+    "gameId": "monster_001",
+    "file": "美术开发/正式拆分/monsters/monster_001_fire_lizard_battle.png",
+    "variants": [
+      "美术开发/正式拆分/monsters/monster_001_fire_lizard_battle_512.png",
+      "美术开发/正式拆分/monsters/monster_001_fire_lizard_battle_256.png",
+      "美术开发/正式拆分/monsters/monster_001_fire_lizard_battle_128.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/monster_fire_lizard_source.png",
+    "codeEntry": "js/battle/monsterData.js",
+    "usage": "怪物战斗立绘/图鉴立绘/队伍卡头像源",
+    "status": "image2_extracted_alpha_v1",
+    "note": "image-2根据概念图重绘提取，已透明化；建议后续补idle/attack/hit序列帧。"
+  },
+  "monster_002_water_cub": {
+    "category": "monster",
+    "name": "水龟仔/水系初始怪",
+    "element": "water",
+    "gameId": "monster_002",
+    "file": "美术开发/正式拆分/monsters/monster_002_water_cub_battle.png",
+    "variants": [
+      "美术开发/正式拆分/monsters/monster_002_water_cub_battle_512.png",
+      "美术开发/正式拆分/monsters/monster_002_water_cub_battle_256.png",
+      "美术开发/正式拆分/monsters/monster_002_water_cub_battle_128.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/monster_water_cub_source.png",
+    "codeEntry": "js/battle/monsterData.js",
+    "usage": "怪物战斗立绘/图鉴立绘/队伍卡头像源",
+    "status": "image2_extracted_alpha_v1",
+    "note": "image-2根据概念图重绘提取，已透明化；建议后续补idle/attack/hit序列帧。"
+  },
+  "monster_003_grass_leaf": {
+    "category": "monster",
+    "name": "草苗儿/草系初始怪",
+    "element": "grass",
+    "gameId": "monster_003",
+    "file": "美术开发/正式拆分/monsters/monster_003_grass_leaf_battle.png",
+    "variants": [
+      "美术开发/正式拆分/monsters/monster_003_grass_leaf_battle_512.png",
+      "美术开发/正式拆分/monsters/monster_003_grass_leaf_battle_256.png",
+      "美术开发/正式拆分/monsters/monster_003_grass_leaf_battle_128.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/monster_grass_leaf_source.png",
+    "codeEntry": "js/battle/monsterData.js",
+    "usage": "怪物战斗立绘/图鉴立绘/队伍卡头像源",
+    "status": "image2_extracted_alpha_v1",
+    "note": "image-2根据概念图重绘提取，已透明化；建议后续补idle/attack/hit序列帧。"
+  },
+  "gem_fire": {
+    "category": "gem",
+    "name": "火宝石",
+    "element": "fire",
+    "gameId": "GEM_TYPES fire",
+    "file": "美术开发/正式拆分/gems/gem_fire.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_fire_256.png",
+      "美术开发/正式拆分/gems/gem_fire_128.png",
+      "美术开发/正式拆分/gems/gem_fire_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_element_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "三消棋盘普通宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "替换GEM_EMOJI；运行时建议绘制为cellSize内80%-90%。"
+  },
+  "gem_water": {
+    "category": "gem",
+    "name": "水宝石",
+    "element": "water",
+    "gameId": "GEM_TYPES water",
+    "file": "美术开发/正式拆分/gems/gem_water.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_water_256.png",
+      "美术开发/正式拆分/gems/gem_water_128.png",
+      "美术开发/正式拆分/gems/gem_water_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_element_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "三消棋盘普通宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "替换GEM_EMOJI；运行时建议绘制为cellSize内80%-90%。"
+  },
+  "gem_grass": {
+    "category": "gem",
+    "name": "草宝石",
+    "element": "grass",
+    "gameId": "GEM_TYPES grass",
+    "file": "美术开发/正式拆分/gems/gem_grass.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_grass_256.png",
+      "美术开发/正式拆分/gems/gem_grass_128.png",
+      "美术开发/正式拆分/gems/gem_grass_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_element_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "三消棋盘普通宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "替换GEM_EMOJI；运行时建议绘制为cellSize内80%-90%。"
+  },
+  "gem_thunder": {
+    "category": "gem",
+    "name": "雷宝石",
+    "element": "thunder",
+    "gameId": "GEM_TYPES thunder",
+    "file": "美术开发/正式拆分/gems/gem_thunder.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_thunder_256.png",
+      "美术开发/正式拆分/gems/gem_thunder_128.png",
+      "美术开发/正式拆分/gems/gem_thunder_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_element_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "三消棋盘普通宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "替换GEM_EMOJI；运行时建议绘制为cellSize内80%-90%。"
+  },
+  "gem_light": {
+    "category": "gem",
+    "name": "光宝石",
+    "element": "light",
+    "gameId": "GEM_TYPES light",
+    "file": "美术开发/正式拆分/gems/gem_light.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_light_256.png",
+      "美术开发/正式拆分/gems/gem_light_128.png",
+      "美术开发/正式拆分/gems/gem_light_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_element_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "三消棋盘普通宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "替换GEM_EMOJI；运行时建议绘制为cellSize内80%-90%。"
+  },
+  "gem_locked_tile": {
+    "category": "gem",
+    "name": "锁定宝石底",
+    "element": "none",
+    "gameId": "Board lockedGems",
+    "file": "美术开发/正式拆分/gems/gem_locked_tile.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_locked_tile_256.png",
+      "美术开发/正式拆分/gems/gem_locked_tile_128.png",
+      "美术开发/正式拆分/gems/gem_locked_tile_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_obstacle_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "棋盘特殊格/障碍物/特殊宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "透明独立资产；锁定层建议作为叠加层覆盖普通宝石。"
+  },
+  "obstacle_rock_full": {
+    "category": "gem",
+    "name": "石块障碍完整",
+    "element": "none",
+    "gameId": "Board obstacles hp=2",
+    "file": "美术开发/正式拆分/gems/obstacle_rock_full.png",
+    "variants": [
+      "美术开发/正式拆分/gems/obstacle_rock_full_256.png",
+      "美术开发/正式拆分/gems/obstacle_rock_full_128.png",
+      "美术开发/正式拆分/gems/obstacle_rock_full_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_obstacle_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "棋盘特殊格/障碍物/特殊宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "透明独立资产；锁定层建议作为叠加层覆盖普通宝石。"
+  },
+  "obstacle_rock_cracked": {
+    "category": "gem",
+    "name": "石块障碍破损",
+    "element": "none",
+    "gameId": "Board obstacles hp=1",
+    "file": "美术开发/正式拆分/gems/obstacle_rock_cracked.png",
+    "variants": [
+      "美术开发/正式拆分/gems/obstacle_rock_cracked_256.png",
+      "美术开发/正式拆分/gems/obstacle_rock_cracked_128.png",
+      "美术开发/正式拆分/gems/obstacle_rock_cracked_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_obstacle_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "棋盘特殊格/障碍物/特殊宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "透明独立资产；锁定层建议作为叠加层覆盖普通宝石。"
+  },
+  "gem_rainbow_special": {
+    "category": "gem",
+    "name": "彩虹特殊宝石",
+    "element": "rainbow",
+    "gameId": "enhanced/special gem",
+    "file": "美术开发/正式拆分/gems/gem_rainbow_special.png",
+    "variants": [
+      "美术开发/正式拆分/gems/gem_rainbow_special_256.png",
+      "美术开发/正式拆分/gems/gem_rainbow_special_128.png",
+      "美术开发/正式拆分/gems/gem_rainbow_special_96.png"
+    ],
+    "source": "美术开发/元素提取/image2_source/gems_obstacle_sheet_source.png",
+    "codeEntry": "js/match3/board.js",
+    "usage": "棋盘特殊格/障碍物/特殊宝石sprite",
+    "status": "image2_extracted_alpha_v1",
+    "note": "透明独立资产；锁定层建议作为叠加层覆盖普通宝石。"
+  },
+  "ui_btn_blue_primary": {
+    "category": "ui",
+    "name": "蓝色主按钮底",
+    "element": "ui",
+    "gameId": "ui_btn_blue_primary",
+    "file": "美术开发/正式拆分/ui/ui_btn_blue_primary.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "THEME.buttons.primary / sceneStart / sceneMain",
+    "usage": "通用主按钮 normal",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_btn_gold_action": {
+    "category": "ui",
+    "name": "金色行动按钮底",
+    "element": "ui",
+    "gameId": "ui_btn_gold_action",
+    "file": "美术开发/正式拆分/ui/ui_btn_gold_action.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneTeamSetup / sceneEvolve / sceneResult",
+    "usage": "保存/进化/确认按钮",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_panel_dark_large": {
+    "category": "ui",
+    "name": "深蓝大面板",
+    "element": "ui",
+    "gameId": "ui_panel_dark_large",
+    "file": "美术开发/正式拆分/ui/ui_panel_dark_large.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "THEME.colors.bgCard/bgPanel",
+    "usage": "通用面板背景",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_icon_frame_square": {
+    "category": "ui",
+    "name": "方形图标框",
+    "element": "ui",
+    "gameId": "ui_icon_frame_square",
+    "file": "美术开发/正式拆分/ui/ui_icon_frame_square.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneMain / sceneShop / sceneSettings",
+    "usage": "底部导航/图标按钮",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_monster_card_frame": {
+    "category": "ui",
+    "name": "怪物卡框",
+    "element": "ui",
+    "gameId": "ui_monster_card_frame",
+    "file": "美术开发/正式拆分/ui/ui_monster_card_frame.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneAlbum / sceneTeamSetup",
+    "usage": "图鉴/队伍怪物卡",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_header_bar": {
+    "category": "ui",
+    "name": "顶部标题条",
+    "element": "ui",
+    "gameId": "ui_header_bar",
+    "file": "美术开发/正式拆分/ui/ui_header_bar.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneStageSelect / sceneBattle",
+    "usage": "标题栏/章节栏",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_hp_bar_green": {
+    "category": "ui",
+    "name": "HP条组件",
+    "element": "ui",
+    "gameId": "ui_hp_bar_green",
+    "file": "美术开发/正式拆分/ui/ui_hp_bar_green.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneBattle / sceneTeamSetup",
+    "usage": "HP/经验/技能充能条",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  },
+  "ui_reward_slot_frame": {
+    "category": "ui",
+    "name": "奖励槽框",
+    "element": "ui",
+    "gameId": "ui_reward_slot_frame",
+    "file": "美术开发/正式拆分/ui/ui_reward_slot_frame.png",
+    "variants": [],
+    "source": "美术开发/元素提取/image2_source/ui_component_sheet_source.png",
+    "codeEntry": "sceneResult / sceneInventory / sceneShop",
+    "usage": "奖励/物品格",
+    "status": "image2_extracted_alpha_v1",
+    "note": "UI组件已去绿幕；正式接入建议进一步拆九宫格和normal/pressed/disabled状态。"
+  }
+}

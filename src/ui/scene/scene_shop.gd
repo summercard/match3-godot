@@ -2,6 +2,8 @@
 # 翻译来源: js/ui/sceneShop.js
 class_name SceneShop extends Control
 
+const ItemDB = preload("res://src/data/item_db.gd")
+
 ## 信号
 signal purchase_completed(item_id: String, quantity: int)
 
@@ -94,27 +96,16 @@ func _load_player() -> void:
 func _build_shop_list() -> void:
 	shop_list = []
 	# SHOP_ITEMS 和 ITEMS_DB 需在对应数据模块中定义
-	var shop_items: Array = []
-	var items_db: Dictionary = {}
-	if ResourceLoader.exists("res://src/data/item_db.gd"):
-		var item_db_res = load("res://src/data/item_db.gd")
-		if item_db_res:
-			var instance = item_db_res.new()
-			if instance.has("SHOP_ITEMS"):
-				shop_items = instance.SHOP_ITEMS
-			if instance.has("ITEMS_DB"):
-				items_db = instance.ITEMS_DB
-			instance.free()
+	var shop_items: Array = ItemDB.get_shop_items()
 
 	for entry in shop_items:
-		var item_data: Dictionary = {}
-		if items_db.has(entry.id):
-			item_data = items_db[entry.id]
+		var item_id: String = entry.get("id", "")
+		var item_data: Dictionary = ItemDB.get_item(item_id)
 		shop_list.append({
-			"id": entry.id,
-			"price": entry.price,
-			"currency": entry.currency,
-			"label": entry.label if entry.has("label") else "",
+			"id": item_id,
+			"price": entry.get("price", 0),
+			"currency": entry.get("currency", "gold"),
+			"label": entry.get("label", ""),
 			"data": item_data
 		})
 
@@ -214,19 +205,10 @@ func _show_purchase_popup(item: Dictionary) -> void:
 
 
 func _confirm_purchase(item_id: String) -> void:
-	var items_db: Dictionary = {}
-	if ResourceLoader.exists("res://src/data/item_db.gd"):
-		var item_db_res = load("res://src/data/item_db.gd")
-		if item_db_res:
-			var instance = item_db_res.new()
-			if instance.has("ITEMS_DB"):
-				items_db = instance.ITEMS_DB
-			instance.free()
-
-	if not items_db.has(item_id):
+	var item_data: Dictionary = ItemDB.get_item(item_id)
+	if item_data.is_empty():
 		return
 
-	var item_data: Dictionary = items_db[item_id]
 	var player: Dictionary = _load_player_data()
 	var price: float = _get_item_price(item_id)
 	var currency: String = _get_item_currency(item_id)

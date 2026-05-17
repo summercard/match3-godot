@@ -566,9 +566,8 @@ func _execute_evolution() -> void:
 
 	print("[SceneEvolve] %s 进化为 %s" % [monster_data.get("name", "?"), evolved_monster.get("name", "?")])
 
-	# 触发成就检查
-	if _game and _game.has("achievement_manager"):
-		_game.achievement_manager.check_achievements("evolve", 1)
+	if SaveManager and SaveManager.instance and SaveManager.instance.has_method("add_achievement_progress"):
+		SaveManager.instance.add_achievement_progress("evolveCount", 1)
 
 	anim_state["evolve_complete"] = true
 	_update_complete_ui()

@@ -13,6 +13,7 @@ extends Node
 
 const ItemDB = preload("res://src/data/item_db.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
+const AchievementDBScript = preload("res://src/data/achievement_db.gd")
 
 # ========== 单例模式 ==========
 static var instance: Node
@@ -153,7 +154,7 @@ func init_monster_pokedex(monster_id: String, nature_id: String = "") -> Diction
 	var player: Dictionary = get_player()
 	if not player.has("pokedex"):
 		player["pokedex"] = {}
-	
+
 	if not player["pokedex"].has(monster_id):
 		player["pokedex"][monster_id] = {
 			"level": 1,
@@ -165,7 +166,7 @@ func init_monster_pokedex(monster_id: String, nature_id: String = "") -> Diction
 		# 补丁：为旧数据补充性格
 		player["pokedex"][monster_id]["nature"] = nature_id
 		save_player(player)
-	
+
 	return player["pokedex"][monster_id]
 
 ## 获取怪物当前等级
@@ -225,13 +226,13 @@ func add_monster_exp(monster_id: String, exp_gained: int) -> Dictionary:
 		player["pokedex"] = {}
 	if not player["pokedex"].has(monster_id):
 		player["pokedex"][monster_id] = { "level": 1, "exp": 0 }
-	
+
 	var entry: Dictionary = player["pokedex"][monster_id]
 	var old_level: int = entry.get("level", 1)
 	var old_exp: int = entry.get("exp", 0)
-	
+
 	entry["exp"] = old_exp + exp_gained
-	
+
 	# 检查升级
 	while true:
 		var needed: int = get_exp_for_level(entry.get("level", 1))
@@ -240,9 +241,9 @@ func add_monster_exp(monster_id: String, exp_gained: int) -> Dictionary:
 			entry["level"] = entry.get("level", 1) + 1
 		else:
 			break
-	
+
 	save_player(player)
-	
+
 	return {
 		"leveledUp": entry.get("level", 1) > old_level,
 		"newLevel": entry.get("level", 1),
@@ -294,7 +295,7 @@ func is_monster_in_team(monster_id: String) -> bool:
 func calc_team_power() -> int:
 	var team: Dictionary = load_team()
 	var power: int = 0
-	
+
 	for slot: String in ["leader", "member1", "member2"]:
 		var id: String = team.get(slot, "")
 		if id != "" and MonsterDb.has_monster(id):
@@ -302,7 +303,7 @@ func calc_team_power() -> int:
 			var stats: Dictionary = MonsterDb.get_monster_stats(id, level)
 			if not stats.is_empty():
 				power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0) + stats.get("spd", 0)
-	
+
 	return power
 
 # ========== 道具背包（section: inventory） ==========
@@ -401,17 +402,17 @@ func get_sweep_reward(_stage_id: String) -> Dictionary:
 func do_sweep(stage_id: String) -> Dictionary:
 	if not can_sweep(stage_id):
 		return {}
-	
+
 	var reward: Dictionary = get_sweep_reward(stage_id)
 	add_gold(reward["gold"])
 	add_player_exp(reward["exp"])
-	
+
 	# 更新奖励统计
 	var rewards: Dictionary = load_rewards()
 	rewards["totalGoldEarned"] = rewards.get("totalGoldEarned", 0) + reward["gold"]
 	rewards["totalItemsGained"] = rewards.get("totalItemsGained", 0)
 	save_rewards(rewards)
-	
+
 	return reward
 
 func get_stage_chapters() -> Array:
@@ -464,6 +465,43 @@ func load_achievements() -> Dictionary:
 		"stats": {}
 	})
 
+func add_achievement_progress(progress_key: String, amount: int = 1) -> Dictionary:
+	var data: Dictionary = load_achievements()
+	var stats: Dictionary = data.get("stats", {})
+	stats[progress_key] = int(stats.get(progress_key, 0)) + amount
+	data["stats"] = stats
+	_refresh_achievement_unlocks(data)
+	save_achievements(data)
+	return data
+
+func set_achievement_stat(progress_key: String, value: int) -> Dictionary:
+	var data: Dictionary = load_achievements()
+	var stats: Dictionary = data.get("stats", {})
+	stats[progress_key] = maxi(int(stats.get(progress_key, 0)), value)
+	data["stats"] = stats
+	_refresh_achievement_unlocks(data)
+	save_achievements(data)
+	return data
+
+func _refresh_achievement_unlocks(data: Dictionary) -> void:
+	var stats: Dictionary = data.get("stats", {})
+	var unlocked_ids: Array = data.get("unlockedIds", [])
+	var unlocked_dates: Dictionary = data.get("unlockedDates", {})
+	var today := Time.get_date_string_from_system()
+
+	for ach: Dictionary in AchievementDBScript.ACHIEVEMENTS:
+		var ach_id: String = ach.get("id", "")
+		var progress_key: String = ach.get("progressKey", "")
+		var target: int = int(ach.get("target", 1))
+		if ach_id.is_empty() or progress_key.is_empty():
+			continue
+		if int(stats.get(progress_key, 0)) >= target and not unlocked_ids.has(ach_id):
+			unlocked_ids.append(ach_id)
+			unlocked_dates[ach_id] = today
+
+	data["unlockedIds"] = unlocked_ids
+	data["unlockedDates"] = unlocked_dates
+
 # ========== 每日签到（section: signIn） ==========
 ## 签到数据结构: { lastSignInDate: '2026-05-13', consecutiveDays: 3, totalDays: 10 }
 
@@ -497,26 +535,26 @@ func can_sign_in_today() -> bool:
 func do_sign_in() -> Dictionary:
 	if not can_sign_in_today():
 		return {}
-	
+
 	var data: Dictionary = load_sign_in_data()
 	var today: String = _get_date_string(Time.get_date_string_from_system())
 	var yesterday: String = _get_date_string(_get_date_minus_days(1))
-	
+
 	# 检查是否连续
 	if data.get("lastSignInDate", "") == yesterday:
 		data["consecutiveDays"] = data.get("consecutiveDays", 0) + 1
 	else:
 		data["consecutiveDays"] = 1
-	
+
 	data["lastSignInDate"] = today
 	data["totalDays"] = data.get("totalDays", 0) + 1
 	save_sign_in_data(data)
-	
+
 	# 发放奖励
 	var reward: Dictionary = get_sign_in_reward(data["consecutiveDays"])
 	add_gold(reward["gold"])
 	add_player_exp(reward["exp"])
-	
+
 	return reward
 
 ## 获取签到奖励（根据连续签到天数）
@@ -525,14 +563,14 @@ func do_sign_in() -> Dictionary:
 func get_sign_in_reward(consecutive_days: int) -> Dictionary:
 	var base_gold: int = 50
 	var base_exp: int = 30
-	
+
 	# 连续7天重置循环，但给予额外奖励
 	if consecutive_days > 7:
 		return {
 			"gold": base_gold + consecutive_days * 5 + 20,
 			"exp": base_exp + consecutive_days * 2 + 10
 		}
-	
+
 	return {
 		"gold": base_gold + consecutive_days * 5,
 		"exp": base_exp + consecutive_days * 2
@@ -608,31 +646,31 @@ func get_idle_exp_rate(monster_id: String) -> float:
 func collect_idle_exp(monster_id: String) -> float:
 	var ranch: Dictionary = get_ranch_state()
 	var slot: Variant = null
-	
+
 	for s: Dictionary in ranch.get("slots", []):
 		if s.get("monsterId") == monster_id:
 			slot = s
 			break
-	
+
 	if slot == null or slot.get("placedAt", 0.0) == 0.0:
 		return 0.0
-	
+
 	var now_ts: float = Time.get_unix_time_from_system()
 	var elapsed_sec: float = now_ts - slot.get("placedAt", 0.0)
 	var intervals: int = int(elapsed_sec / (5.0 * 60.0))
 	if intervals <= 0:
 		return 0.0
-	
+
 	var rate: float = get_idle_exp_rate(monster_id)
 	var exp: float = intervals * rate
-	
+
 	# 增加经验
 	add_monster_exp(monster_id, int(exp))
-	
+
 	# 重置放置时间（使用 Unix 时间戳）
 	slot["placedAt"] = now_ts
 	set_ranch_state(ranch)
-	
+
 	return exp
 
 # ========== 新手引导（section: tutorial） ==========

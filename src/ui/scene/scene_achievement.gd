@@ -4,6 +4,8 @@
 class_name SceneAchievement
 extends Control
 
+const AchievementDB = preload("res://src/data/achievement_db.gd")
+
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
@@ -270,18 +272,60 @@ func _make_dialog(type: String) -> PanelContainer:
 # ==================== 数据初始化 ====================
 
 func _init_data() -> void:
-	_game = get_node_or_null("/root/Game")
-	_storage = _game.storage if _game else null
+	_game = get_node_or_null("/root/GameManager")
+	_storage = get_node_or_null("/root/SaveManager")
+	if _storage == null and _game and _game.get("storage"):
+		_storage = _game.storage
 
-	# 加载成就数据
-	if _game and _game.has("achievementManager"):
-		var am = _game.achievementManager
-		_all_achievements = am.get_all_achievements() if am.has_method("get_all_achievements") else []
-	else:
-		_all_achievements = []
+	_all_achievements = _build_achievement_view_models()
 
 	_filter_by_category("all")
 	_update_ui()
+
+func _build_achievement_view_models() -> Array:
+	var save_data: Dictionary = _storage.load_achievements() if _storage and _storage.has_method("load_achievements") else {}
+	var unlocked_ids: Array = save_data.get("unlockedIds", [])
+	var stats: Dictionary = save_data.get("stats", {}).duplicate(true)
+	_apply_derived_stats(stats)
+
+	var achievements: Array = []
+	for ach: Dictionary in AchievementDB.ACHIEVEMENTS:
+		var item: Dictionary = ach.duplicate(true)
+		var progress_key: String = item.get("progressKey", "")
+		var progress: int = int(stats.get(progress_key, 0))
+		var target: int = int(item.get("target", 1))
+		var unlocked: bool = unlocked_ids.has(item.get("id", "")) or progress >= target
+		item["progress"] = progress
+		item["unlocked"] = unlocked
+		achievements.append(item)
+	return achievements
+
+func _apply_derived_stats(stats: Dictionary) -> void:
+	if not _storage:
+		return
+
+	if _storage.has_method("load_rewards"):
+		var rewards: Dictionary = _storage.load_rewards()
+		for key: String in ["battleCount", "captureCount", "totalGoldEarned", "totalItemsGained"]:
+			stats[key] = maxi(int(stats.get(key, 0)), int(rewards.get(key, 0)))
+
+	if _storage.has_method("load_player"):
+		var player: Dictionary = _storage.load_player()
+		stats["captureCount"] = maxi(int(stats.get("captureCount", 0)), player.get("captured", []).size())
+
+	if _storage.has_method("load_stage_progress"):
+		var cleared_count: int = 0
+		var progress_data: Dictionary = _storage.load_stage_progress()
+		for stage_id: String in progress_data.keys():
+			var stage_state: Dictionary = progress_data.get(stage_id, {})
+			if stage_state.get("cleared", false):
+				cleared_count += 1
+		stats["stageClearedCount"] = maxi(int(stats.get("stageClearedCount", 0)), cleared_count)
+
+	if _storage.has_method("load_sign_in_data"):
+		var sign_in_data: Dictionary = _storage.load_sign_in_data()
+		stats["maxConsecutiveSignIn"] = maxi(int(stats.get("maxConsecutiveSignIn", 0)), int(sign_in_data.get("consecutiveDays", 0)))
+		stats["totalSignInDays"] = maxi(int(stats.get("totalSignInDays", 0)), int(sign_in_data.get("totalDays", 0)))
 
 # ==================== 分类筛选 ====================
 
