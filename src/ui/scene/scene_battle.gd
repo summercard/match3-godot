@@ -83,7 +83,10 @@ var _player_display_hp: Array[Dictionary] = []
 
 ## 宝石消除动画
 var _eliminating_gems: Array[Dictionary] = []  # [{row, col, timer, duration}]
-const ELIMINATE_DURATION: float = 0.3
+## 宝石消除动画常量（匹配微信版两段式）
+const ELIMINATE_PHASE1: float = 0.1   # 阶段1：放大+闪白（100ms）
+const ELIMINATE_PHASE2: float = 0.15  # 阶段2：缩小+消失（150ms）
+const ELIMINATE_DURATION: float = ELIMINATE_PHASE1 + ELIMINATE_PHASE2  # 总时长 0.25s
 
 ## 宝石下落动画
 var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
@@ -1873,10 +1876,22 @@ func _draw_board() -> void:
 			var cy := y + cell_size / 2.0
 			
 			if is_eliminating:
-				# 消除动画：放大+淡出
-				var scale := 1.0 + 0.5 * elim_progress
-				var alpha := 1.0 - elim_progress
-				_draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha)
+				# 消除动画（两段式，匹配微信版）
+				var scale := 1.0
+				var alpha := 1.0
+				var brightness := 0.0
+				if elim_progress * ELIMINATE_DURATION <= ELIMINATE_PHASE1:
+					# 阶段1：放大 1→1.2 + 闪白 0→1
+					var p1: float = (elim_progress * ELIMINATE_DURATION) / ELIMINATE_PHASE1
+					scale = 1.0 + 0.2 * p1
+					brightness = p1
+				else:
+					# 阶段2：缩小 1.2→0 + 消失 + 闪白回归 1→0
+					var p2: float = ((elim_progress * ELIMINATE_DURATION) - ELIMINATE_PHASE1) / ELIMINATE_PHASE2
+					scale = 1.2 * (1.0 - p2)
+					alpha = 1.0 - p2
+					brightness = 1.0 - p2
+				_draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha, brightness)
 			else:
 				# 脉动透明度：选中宝石周期1s(0.95↔1.0)，未选中周期2s(0.85↔1.0)
 				var is_selected := _selected_gem.x == col and _selected_gem.y == row
@@ -1905,24 +1920,35 @@ func _draw_board() -> void:
 func _draw_gem(cx: float, cy: float, gem_type: String, color: Color) -> void:
 	_draw_gem_animated(cx, cy, gem_type, color, 1.0, 1.0)
 
-func _draw_gem_animated(cx: float, cy: float, gem_type: String, color: Color, scale: float, alpha: float) -> void:
+func _draw_gem_animated(cx: float, cy: float, gem_type: String, color: Color, scale: float, alpha: float, brightness: float = 0.0) -> void:
 	var gem_tex := _get_texture(GEM_IMAGE_PATHS.get(gem_type, ""))
 	var draw_size := 36.0 * scale
+	
+	# 闪白效果：先画一个更大的白色光圈
+	if brightness > 0.0 and alpha > 0.0:
+		var glow_radius := 20.0 * scale * (1.0 + brightness * 0.3)
+		_draw_circle(cx, cy, glow_radius, Color(1.0, 1.0, 1.0, brightness * 0.6 * alpha))
 	
 	if gem_tex:
 		_draw_texture_fit(gem_tex, Rect2(cx - draw_size / 2.0, cy - draw_size / 2.0, draw_size, draw_size), alpha)
 		return
 	
 	var radius := 15.0 * scale
-	# 圆形宝石
-	_draw_circle(cx, cy, radius, Color(color.r, color.g, color.b, alpha))
+	# 圆形宝石（亮度混合：向白色靠拢）
+	var draw_color := Color(
+		color.r + (1.0 - color.r) * brightness,
+		color.g + (1.0 - color.g) * brightness,
+		color.b + (1.0 - color.b) * brightness,
+		alpha
+	)
+	_draw_circle(cx, cy, radius, draw_color)
 	
 	# 高光
 	_draw_circle(cx - 2.0 * scale, cy - 2.0 * scale, radius * 0.5, Color(1.0, 1.0, 1.0, 0.3 * alpha))
 	
 	# Emoji
 	var emoji: String = GEM_EMOJI.get(gem_type, "💎")
-	_draw_text_with_shadow(emoji, cx, cy, Color(1.0, 1.0, 1.0, 1.0), 14.0)
+	_draw_text_with_shadow(emoji, cx, cy, Color(1.0, 1.0, 1.0, alpha), 14.0)
 
 func _draw_selection() -> void:
 	if _selected_gem.x >= 0 and _selected_gem.y >= 0:
