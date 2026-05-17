@@ -1018,8 +1018,13 @@ func _start_enemy_turn() -> void:
 func _check_battle_end() -> bool:
 	if _battle and _battle.check_battle_end():
 		_state = BattleState.BATTLE_END
-		# 战斗胜利时 inline 播放收服特效（Phase 4）
+		# Phase 4: 战斗结束时 inline 播放收服特效
+		# 成功序列：闪白→弹跳→GET! 文字（win）
+		# 失败序列：震动→MISS 文字（lose）
 		if _battle.battle_result == "win":
+			_trigger_inline_capture()
+		else:
+			# 失败时也要播放 MISS 特效
 			_trigger_inline_capture()
 		return true
 	return false
@@ -1984,9 +1989,14 @@ func _draw_battle_end_overlay() -> void:
 	_draw_text_with_shadow(result_text, DESIGN_W / 2.0, DESIGN_H / 2.0 - 30, result_color, 22.0, true)
 	
 	# 收服结果提示（Phase 4: inline 显示）
+	# 成功：闪白→弹跳→GET! 文字；失败：震动→MISS 文字
 	if _battle != null and _battle.battle_result == "win" and not _capture_result_text.is_empty():
 		var cap_color := C["success"] if _capture_success else C["text_muted"]
 		_draw_text_with_shadow(_capture_result_text.get("title", ""), DESIGN_W / 2.0, DESIGN_H / 2.0 + 5, cap_color, 16.0, true)
+	elif _battle != null and _battle.battle_result == "lose" and not _capture_result_text.is_empty():
+		# 失败时显示 MISS 文字
+		var miss_color := C["text_muted"]
+		_draw_text_with_shadow(_capture_result_text.get("title", ""), DESIGN_W / 2.0, DESIGN_H / 2.0 + 5, miss_color, 16.0, true)
 	
 	if _capture_phase == "done" or _capture_phase == "":
 		_draw_text_with_shadow("点击查看结算", DESIGN_W / 2.0, DESIGN_H / 2.0 + 35, C["text_muted"], 14.0)
