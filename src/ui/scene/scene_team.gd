@@ -8,11 +8,59 @@ extends Control
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const MARGIN := 15.0
-const LIST_START_Y := 200.0
+const LIST_START_Y := 322.0
 const LIST_ITEM_W := 85.0
 const LIST_ITEM_H := 95.0
 const LIST_GAP := 10.0
 const LIST_COLS := 4
+
+const TEAM_ASSETS := {
+	"bg": "res://assets/images/main/main_lobby_bg.png",
+	"back_button": "res://assets/images/team/ui_back_button.png",
+	"header": "res://assets/images/team/ui_header_bar.png",
+	"help_button": "res://assets/images/team/ui_help_button.png",
+	"leader_card": "res://assets/images/team/ui_leader_card.png",
+	"member_card": "res://assets/images/team/ui_member_card.png",
+	"member_card_alt": "res://assets/images/team/ui_member_card_alt.png",
+	"power_banner": "res://assets/images/team/ui_power_banner.png",
+	"leader_skill_banner": "res://assets/images/team/ui_leader_skill_banner.png",
+	"filter_tab_selected": "res://assets/images/team/ui_filter_tab_selected.png",
+	"filter_tab_normal": "res://assets/images/team/ui_filter_tab_normal.png",
+	"sort_dropdown": "res://assets/images/team/ui_sort_dropdown.png",
+	"roster_card": "res://assets/images/team/ui_roster_card.png",
+	"roster_card_selected": "res://assets/images/team/ui_roster_card_selected.png",
+	"empty_slot": "res://assets/images/team/ui_empty_slot.png",
+	"btn_cancel": "res://assets/images/team/ui_btn_cancel.png",
+	"btn_save": "res://assets/images/team/ui_btn_save.png",
+	"btn_disassemble": "res://assets/images/team/ui_btn_disassemble.png",
+	"icon_power": "res://assets/images/team/icon_power_swords.png",
+	"icon_leader": "res://assets/images/team/icon_leader_crown.png",
+	"icon_hp": "res://assets/images/team/icon_stat_hp.png",
+	"icon_atk": "res://assets/images/team/icon_stat_atk.png",
+	"icon_def": "res://assets/images/team/icon_stat_def.png",
+	"icon_spd": "res://assets/images/team/icon_stat_spd.png",
+	"icon_check": "res://assets/images/team/icon_check.png",
+}
+
+const ELEMENT_ICON_ASSETS := {
+	"fire": "res://assets/images/stage/icon_gem_fire.png",
+	"water": "res://assets/images/stage/icon_gem_water.png",
+	"grass": "res://assets/images/stage/icon_gem_grass.png",
+	"thunder": "res://assets/images/stage/icon_gem_thunder.png",
+	"light": "res://assets/images/stage/icon_gem_light.png",
+}
+
+const MONSTER_ASSETS := {
+	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
+	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
+	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
+	"monster_004": "res://assets/images/battle/monsters/monster_004_thunder_rodent.png",
+	"monster_005": "res://assets/images/battle/monsters/monster_005_light_sprite.png",
+	"monster_006": "res://assets/images/battle/monsters/monster_006_fire_dragon.png",
+	"monster_007": "res://assets/images/battle/monsters/monster_007_water_dragon.png",
+	"monster_017": "res://assets/images/battle/monsters/monster_017_dark_cat.png",
+	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png",
+}
 
 # 颜色
 const C := {
@@ -60,12 +108,14 @@ var _show_confirm: bool = false
 var _back_btn: Rect2 = Rect2(15, 10, 60, 35)
 var _save_btn: Rect2 = Rect2()
 var _cancel_btn: Rect2 = Rect2()
+var _disassemble_btn: Rect2 = Rect2()
 
 # 槽位区域（动态计算）
 var _slots: Array = []  # [{key, x, y, w, h, label}]
 
 # 时间累计
 var _time_acc: float = 0.0
+var _texture_cache: Dictionary = {}
 
 # ==================== 生命周期 ====================
 
@@ -115,12 +165,12 @@ func init(data: Dictionary = {}) -> void:
 	
 	# 加载队伍
 	if _storage:
-		var saved: Dictionary = _storage.load_team()
-		_team = {
-			"leader": saved.get("leader", null),
-			""member1"": saved.get("member1", null),
-			"member2": saved.get("member2", null)
-		}
+			var saved: Dictionary = _storage.load_team()
+			_team = {
+				"leader": saved.get("leader", null),
+				"member1": saved.get("member1", null),
+				"member2": saved.get("member2", null)
+			}
 	else:
 		_team = {"leader": null, "member1": null, "member2": null}
 	
@@ -165,7 +215,7 @@ func _get_nature(monster_id: String) -> String:
 	return ""
 
 func _get_element_name(elem: String) -> String:
-	var m := {"fire": "火", "water": "水", "grass": "草", "thunder": "雷", "light": "光"}
+	var m := {"fire": "火", "water": "水", "grass": "草", "thunder": "雷", "light": "光", "dark": "暗", "earth": "土", "wind": "风", "ice": "冰"}
 	return m.get(elem, elem)
 
 func _get_element_color(elem: String) -> Color:
@@ -174,14 +224,19 @@ func _get_element_color(elem: String) -> Color:
 		"water": Color(0.1, 0.4, 1.0),
 		"grass": Color(0.1, 0.8, 0.2),
 		"thunder": Color(0.9, 0.8, 0.1),
-		"light": Color(1.0, 0.9, 0.2)
+		"light": Color(1.0, 0.9, 0.2),
+		"dark": Color(0.55, 0.25, 0.85),
+		"earth": Color(0.65, 0.45, 0.25),
+		"wind": Color(0.45, 0.95, 0.72),
+		"ice": Color(0.55, 0.88, 1.0)
 	}
 	return m.get(elem, C["text_muted"])
 
 func _calc_team_power() -> int:
 	var total := 0
 	for key in ["leader", "member1", "member2"]:
-		var mid: String = _team.get(key, "")
+		var value: Variant = _team.get(key, null)
+		var mid := "" if value == null else str(value)
 		if mid.is_empty():
 			continue
 		var md: Dictionary = _get_monster_data(mid)
@@ -219,14 +274,14 @@ func _trigger_assign_pop(slot_key: String) -> void:
 
 func _update_slots_layout() -> void:
 	var center_x := DESIGN_W / 2.0
-	var start_y := 70.0
+	var start_y := 78.0
 	
 	# 队长槽
-	var leader_rect := Rect2(center_x - 50.0, start_y, 100.0, 120.0)
+	var leader_rect := Rect2(center_x - 50.0, start_y, 100.0, 132.0)
 	# 成员1槽
-	var member1_rect := Rect2(center_x - 50.0 - 90.0, start_y + 10.0, 80.0, 100.0)
+	var member1_rect := Rect2(center_x - 50.0 - 92.0, start_y + 12.0, 82.0, 112.0)
 	# 成员2槽
-	var member2_rect := Rect2(center_x + 50.0 + 10.0, start_y + 10.0, 80.0, 100.0)
+	var member2_rect := Rect2(center_x + 50.0 + 10.0, start_y + 12.0, 82.0, 112.0)
 	
 	_slots = [
 		{"key": "leader", "rect": leader_rect, "label": "队长"},
@@ -235,8 +290,9 @@ func _update_slots_layout() -> void:
 	]
 	
 	# 按钮区域
-	_cancel_btn = Rect2(MARGIN, DESIGN_H - 75.0, 100.0, 45.0)
-	_save_btn = Rect2(DESIGN_W - MARGIN - 140.0, DESIGN_H - 75.0, 140.0, 45.0)
+	_disassemble_btn = Rect2(MARGIN, DESIGN_H - 64.0, 46.0, 46.0)
+	_cancel_btn = Rect2(72.0, DESIGN_H - 64.0, 118.0, 46.0)
+	_save_btn = Rect2(205.0, DESIGN_H - 64.0, 146.0, 46.0)
 
 func _point_in_rect(pos: Vector2, rect: Rect2) -> bool:
 	return rect.has_point(pos)
@@ -376,43 +432,37 @@ func _draw() -> void:
 	var t := _time_acc
 	
 	# 背景
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), C["bg_medium"])
+	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.12, 0.45))
 	
 	# 标题
-	_draw_text(font, "⚙️ 队伍编成", DESIGN_W / 2.0, 40.0, C["text_primary"], 22.0)
+	_draw_texture_fit(_tex("header"), Rect2(82.0, 18.0, 210.0, 38.0))
+	_draw_text(font, "队伍编成", DESIGN_W / 2.0, 44.0, C["text_primary"], 22.0)
 	
 	# 返回按钮
-	_draw_rounded_rect(_back_btn.position.x, _back_btn.position.y, _back_btn.size.x, _back_btn.size.y, 6.0, C["bg_card"])
-	_draw_text(font, "← 返回", _back_btn.position.x + 8.0, _back_btn.position.y + 22.0, C["text_secondary"], 14.0)
+	_draw_texture_fit(_tex("back_button"), _back_btn)
+	_draw_text(font, "←", _back_btn.position.x + _back_btn.size.x / 2.0, _back_btn.position.y + 25.0, C["text_secondary"], 24.0)
+	_draw_texture_fit(_tex("help_button"), Rect2(DESIGN_W - 58.0, 10.0, 43.0, 43.0))
 	
 	# 空引导提示
 	if _anim_state["show_guide"]:
 		var alpha := 0.6 + sin(t * 3.0) * 0.4
-		_draw_text(font, "💡 点击开始冒险，赢取你的第一只怪物！", DESIGN_W / 2.0, 55.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 10.0)
-	
-	# 战力显示
-	var power := _calc_team_power()
-	var power_color := C["text_secondary"]
-	if power > 0:
-		power_color = C["success"]
-	_draw_text(font, "队伍总战力: %d" % power, DESIGN_W / 2.0, 155.0, power_color, 14.0)
-	
-	# 分隔线
-	draw_rect(Rect2(MARGIN, 170.0, DESIGN_W - MARGIN * 2.0, 1.0), C["disabled_bg"])
-	
-	# 怪物列表标题
-	_draw_text(font, "📋 已收服怪物", DESIGN_W / 2.0, 195.0, C["text_secondary"], 12.0)
+		_draw_text(font, "点击开始冒险，赢取你的第一只怪物", DESIGN_W / 2.0, 63.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 10.0)
 	
 	# 渲染槽位
 	for s: Dictionary in _slots:
 		_draw_slot(font, s, t)
+
+	_draw_team_summary(font)
+	_draw_roster_toolbar(font)
 	
 	# 渲染怪物列表
 	_draw_monster_list(font, t)
 	
 	# 底部按钮
-	_draw_button(_cancel_btn, "取消", C["danger"])
-	_draw_button(_save_btn, "💾 保存", C["slot_border"])
+	_draw_icon_button(_disassemble_btn, "btn_disassemble")
+	_draw_button(_cancel_btn, "取消", "btn_cancel")
+	_draw_button(_save_btn, "保存队伍", "btn_save")
 	
 	# 确认弹窗
 	if _show_confirm:
@@ -433,16 +483,59 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 	else:
 		draw_rect(Rect2(x, y, w, h), color)
 
-func _draw_button(rect: Rect2, text: String, color: Color) -> void:
-	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, color)
-	var text_color := C["text_primary"] if color != C["danger"] else C["white"]
-	_draw_text(ThemeDB.fallback_font, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 5.0, text_color, 14.0)
+func _draw_button(rect: Rect2, text: String, asset_key: String) -> void:
+	_draw_texture_fit(_tex(asset_key), rect)
+	_draw_text(ThemeDB.fallback_font, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 6.0, C["white"], 16.0)
+
+func _draw_icon_button(rect: Rect2, asset_key: String) -> void:
+	_draw_texture_fit(_tex(asset_key), rect)
+
+func _draw_team_summary(font: Font) -> void:
+	var power := _calc_team_power()
+	_draw_texture_fit(_tex("power_banner"), Rect2(18.0, 224.0, 155.0, 42.0))
+	_draw_texture_fit(_tex("icon_power"), Rect2(33.0, 230.0, 28.0, 28.0))
+	_draw_text(font, "队伍战力", 101.0, 240.0, C["text_secondary"], 10.0)
+	_draw_text(font, "%d" % power, 106.0, 259.0, C["gold"] if power > 0 else C["text_muted"], 17.0)
+
+	_draw_texture_fit(_tex("leader_skill_banner"), Rect2(175.0, 224.0, 184.0, 42.0))
+	_draw_texture_fit(_tex("icon_leader"), Rect2(184.0, 230.0, 29.0, 26.0))
+	var leader_value: Variant = _team.get("leader", null)
+	var leader_id := "" if leader_value == null else str(leader_value)
+	var skill_text := "未设置队长技能"
+	var skill_color := C["text_muted"]
+	if not leader_id.is_empty():
+		var md := _get_monster_data(leader_id)
+		var skill_id: String = md.get("leaderSkill", md.get("leader_skill", ""))
+		if not skill_id.is_empty():
+			var LeaderSkillDB = load("res://src/data/leader_skill_db.gd")
+			if LeaderSkillDB:
+				var skill = LeaderSkillDB.get_skill(skill_id)
+				if skill:
+					skill_text = "%s：%s" % [skill.get("name", "队长技"), skill.get("desc", "")]
+					skill_color = C["gold"]
+	_draw_text(font, skill_text, 279.0, 250.0, skill_color, 10.0)
+
+func _draw_roster_toolbar(font: Font) -> void:
+	var y := LIST_START_Y - 44.0
+	_draw_texture_fit(_tex("filter_tab_selected"), Rect2(16.0, y, 58.0, 28.0))
+	_draw_text(font, "全部", 45.0, y + 19.0, C["white"], 11.0)
+	var tabs := [
+		{"label": "火", "elem": "fire", "x": 82.0},
+		{"label": "水", "elem": "water", "x": 125.0},
+		{"label": "草", "elem": "grass", "x": 168.0},
+	]
+	for tab in tabs:
+		_draw_texture_fit(_tex("filter_tab_normal"), Rect2(tab["x"], y + 2.0, 36.0, 25.0))
+		_draw_element_icon(tab["elem"], Rect2(tab["x"] + 8.0, y + 5.0, 20.0, 20.0))
+	_draw_texture_fit(_tex("sort_dropdown"), Rect2(254.0, y, 96.0, 30.0))
+	_draw_text(font, "等级", 299.0, y + 20.0, C["text_secondary"], 11.0)
 
 func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 	var rect: Rect2 = slot["rect"]
 	var key: String = slot["key"]
 	var label: String = slot["label"]
-	var monster_id: String = _team.get(key, "")
+	var monster_value: Variant = _team.get(key, null)
+	var monster_id := "" if monster_value == null else str(monster_value)
 	var is_selected := _selected_slot == key
 	var is_hovered := _hovered_slot == key
 	
@@ -460,25 +553,12 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 	var scaled_rect := Rect2(new_x, new_y, new_w, new_h)
 	
 	# 悬停外发光
-	if is_hovered:
+	if is_hovered or is_selected:
 		var glow_alpha := 0.3 + sin(t * 4.0) * 0.15
 		_draw_rounded_rect(new_x - 4.0, new_y - 4.0, new_w + 8.0, new_h + 8.0, 8.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, glow_alpha))
 	
-	var bg_color := C["bg_card"]
-	var border_color := C["slot_border"]
-	var border_w := 2.0
-	
-	if is_selected:
-		border_color = C["gold"]
-		border_w = 3.0
-	if not monster_id.is_empty():
-		bg_color = C["in_team_bg"]
-		var md: Dictionary = _get_monster_data(monster_id)
-		if not md.is_empty():
-			border_color = _get_element_color(md.get("element", ""))
-	
-	_draw_rounded_rect(new_x, new_y, new_w, new_h, 8.0, bg_color)
-	_draw_rounded_rect_outline(new_x, new_y, new_w, new_h, 8.0, border_color, border_w)
+	var frame_key := "leader_card" if key == "leader" else ("member_card" if key == "member1" else "member_card_alt")
+	_draw_texture_fit(_tex(frame_key), scaled_rect)
 	
 	# 选中闪烁
 	if is_selected:
@@ -488,45 +568,28 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 	if not monster_id.is_empty():
 		var md: Dictionary = _get_monster_data(monster_id)
 		if not md.is_empty():
-			_draw_text(font, md.get("emoji", "❓"), cx, new_y + 35.0, C["text_primary"], 28.0)
-			_draw_text(font, md.get("name", "未知"), cx, new_y + 55.0, C["text_primary"], 11.0)
+			var face_size := 60.0 if key == "leader" else 48.0
+			_draw_monster_portrait(monster_id, Rect2(cx - face_size / 2.0, new_y + 22.0, face_size, face_size))
+			_draw_text(font, md.get("name", "未知"), cx, new_y + (88.0 if key == "leader" else 78.0), C["text_primary"], 11.0)
 			
 			var lvl: int = _get_real_level(monster_id)
-			_draw_text(font, "Lv.%d" % lvl, cx, new_y + 68.0, C["text_muted"], 9.0)
-			
-			var nature: String = _get_nature(monster_id)
-			if not nature.is_empty():
-				_draw_text(font, nature, cx, new_y + 80.0, C["gold"], 9.0)
+			_draw_text(font, "Lv.%d" % lvl, cx, new_y + new_h - 33.0, C["white"], 10.0)
 			
 			var elem: String = md.get("element", "fire")
-			var elem_color: Color = _get_element_color(elem)
-			_draw_rounded_rect(new_x + 5.0, new_y + 5.0, 28.0, 14.0, 4.0, elem_color)
-			_draw_text(font, _get_element_name(elem), new_x + 19.0, new_y + 14.0, C["white"], 9.0)
+			_draw_element_icon(elem, Rect2(new_x + 8.0, new_y + 9.0, 22.0, 22.0))
 			
-			_draw_text(font, label, cx, new_y + new_h - 12.0, C["text_muted"], 9.0)
-			
-			# 队长技能（仅队长槽）
-			if key == "leader" and md.has("leader_skill"):
-				var LeaderSkillDB = load("res://src/data/leader_skill_db.gd")
-				if LeaderSkillDB:
-					var skill = LeaderSkillDB.get_skill(md["leader_skill"])
-					if skill:
-						_draw_text(font, "%s %s" % [skill.get("icon", "⭐"), skill.get("name", "队长技")], cx, new_y + new_h + 10.0, C["gold"], 9.0)
-						_draw_text(font, skill.get("desc", ""), cx, new_y + new_h + 22.0, C["text_secondary"], 9.0)
-					else:
-						_draw_text(font, "(无队长技能)", cx, new_y + new_h + 10.0, C["text_muted"], 9.0)
+			var stats: Dictionary = _calc_stats(monster_id, lvl)
+			_draw_stat_pair(font, "hp", int(stats.get("hp", 0)), new_x + 10.0, new_y + new_h - 25.0)
+			_draw_stat_pair(font, "atk", int(stats.get("atk", 0)), new_x + new_w * 0.52, new_y + new_h - 25.0)
 		else:
 			_draw_text(font, label, cx, new_y + new_h / 2.0, C["text_muted"], 9.0)
 	else:
 		# 空槽位
-		var emoji := "👑" if key == "leader" else "⚔️"
 		var slot_label_text := "选择怪物" if is_selected else label
 		var text_color := C["gold"] if is_selected else C["text_muted"]
-		_draw_text(font, emoji, cx, new_y + 30.0, text_color, 28.0)
-		_draw_text(font, slot_label_text, cx, new_y + 50.0, text_color, 11.0)
-		if key == "leader":
-			_draw_text(font, "点击后将填入此处", cx, new_y + 65.0, C["text_muted"], 9.0)
-		_draw_text(font, label, cx, new_y + new_h - 12.0, C["text_muted"], 9.0)
+		_draw_texture_fit(_tex("empty_slot"), Rect2(cx - 25.0, new_y + 25.0, 50.0, 58.0), 0.55)
+		_draw_text(font, slot_label_text, cx, new_y + 92.0, text_color, 11.0)
+	_draw_text(font, label, cx, new_y + new_h - 9.0, C["text_muted"], 8.5)
 
 func _draw_rounded_rect_outline(x: float, y: float, w: float, h: float, r: float, color: Color, line_w: float) -> void:
 	# 用粗线模拟 strokeRect
@@ -544,7 +607,7 @@ func _draw_monster_list(font: Font, t: float) -> void:
 	# 不做裁剪，直接绘制所有卡片
 	
 	for i in range(_captured_monsters.size()):
-		var row := i / LIST_COLS
+		var row := int(i / LIST_COLS)
 		var col := i % LIST_COLS
 		var card_x := list_x + col * (LIST_ITEM_W + LIST_GAP)
 		var card_y := list_y + row * (LIST_ITEM_H + LIST_GAP) - _list_scroll_y
@@ -559,36 +622,33 @@ func _draw_monster_list(font: Font, t: float) -> void:
 			continue
 		
 		var is_hovered := (_hovered_monster_index == i)
+		var in_team := _team.values().has(monster_id)
+		var card_key := "roster_card_selected" if in_team or is_hovered else "roster_card"
+		_draw_texture_fit(_tex(card_key), Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
+		if in_team:
+			_draw_texture_fit(_tex("icon_check"), Rect2(card_x + LIST_ITEM_W - 21.0, card_y - 4.0, 22.0, 20.0))
 		
-		# 背景
-		var elem_color: Color = _get_element_color(md.get("element", ""))
-		var bg_color := C["bg_card"]
-		var border_color := elem_color
-		if is_hovered:
-			bg_color = C["in_team_bg"]
-			border_color = C["gold"]
-		
-		_draw_rounded_rect(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H, 6.0, bg_color)
-		_draw_rounded_rect_outline(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H, 6.0, border_color, 2.0)
-		
-		# 怪物图标
-		_draw_text(font, md.get("emoji", "?"), card_x + LIST_ITEM_W / 2.0, card_y + 30.0, C["text_primary"], 24.0)
+		# 怪物头像
+		_draw_monster_portrait(monster_id, Rect2(card_x + 17.0, card_y + 10.0, 51.0, 48.0))
 		
 		# 名字
 		var name: String = md.get("name", "?")
 		if name.length() > 5:
 			name = name.substr(0, 5)
-		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 50.0, C["text_primary"], 10.0)
+		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 62.0, C["text_primary"], 9.5)
 		
 		# 等级
 		var lvl: int = _get_real_level(monster_id)
-		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 63.0, C["text_muted"], 9.0)
+		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 75.0, C["white"], 8.5)
 		
-		# 属性标签
+		# 属性角标
 		var elem: String = md.get("element", "fire")
-		var elem_color_bg: Color = _get_element_color(elem)
-		_draw_rounded_rect(card_x + 5.0, card_y + 73.0, 24.0, 12.0, 3.0, elem_color_bg)
-		_draw_text(font, _get_element_name(elem), card_x + 17.0, card_y + 80.0, C["white"], 8.0)
+		_draw_element_icon(elem, Rect2(card_x + 5.0, card_y + 5.0, 18.0, 18.0))
+		var rarity := int(md.get("rarity", 1))
+		var stars := ""
+		for s in range(mini(rarity, 5)):
+			stars += "★"
+		_draw_text(font, stars, card_x + LIST_ITEM_W / 2.0, card_y + 90.0, C["gold"], 8.0)
 
 func _draw_confirm_dialog(font: Font) -> void:
 	var cx := DESIGN_W / 2.0
@@ -618,6 +678,68 @@ func _draw_confirm_dialog(font: Font) -> void:
 	
 	_draw_rounded_rect(continue_btn.position.x, continue_btn.position.y, continue_btn.size.x, continue_btn.size.y, 8.0, C["bg_card"])
 	_draw_text(font, "继续编辑", continue_btn.position.x + 50.0, continue_btn.position.y + 24.0, C["text_primary"], 14.0)
+
+func _draw_stat_pair(font: Font, stat_key: String, value: int, x: float, y: float) -> void:
+	var icon_key := "icon_%s" % stat_key
+	_draw_texture_fit(_tex(icon_key), Rect2(x, y - 10.0, 13.0, 13.0))
+	draw_string(font, Vector2(x + 15.0, y), "%d" % value, HORIZONTAL_ALIGNMENT_LEFT, 44.0, 8.5, C["text_secondary"])
+
+func _draw_element_icon(element: String, rect: Rect2) -> void:
+	var path: String = ELEMENT_ICON_ASSETS.get(element, "")
+	if path.is_empty():
+		_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, rect.size.x / 2.0, _get_element_color(element))
+		return
+	_draw_texture_fit(_get_texture(path), rect)
+
+func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
+	var path: String = MONSTER_ASSETS.get(monster_id, "")
+	var tex := _get_texture(path)
+	if tex:
+		_draw_texture_fit(tex, rect)
+		return
+	var md := _get_monster_data(monster_id)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.04, 0.07, 0.15, 0.82))
+	_draw_text(ThemeDB.fallback_font, md.get("emoji", "?"), rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y * 0.60, C["white"], minf(rect.size.x * 0.45, 22.0))
+
+func _tex(key: String) -> Texture2D:
+	var path: String = TEAM_ASSETS.get(key, "")
+	if path.is_empty():
+		return null
+	return _get_texture(path)
+
+func _get_texture(path: String) -> Texture2D:
+	if path.is_empty():
+		return null
+	if _texture_cache.has(path):
+		return _texture_cache[path]
+	var tex := load(path) as Texture2D
+	_texture_cache[path] = tex
+	return tex
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		draw_rect(rect, C["bg_medium"])
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var src_aspect := tex_size.x / tex_size.y
+	var dst_aspect := rect.size.x / rect.size.y
+	var src_rect := Rect2(Vector2.ZERO, tex_size)
+	if src_aspect > dst_aspect:
+		var crop_w := tex_size.y * dst_aspect
+		src_rect.position.x = (tex_size.x - crop_w) / 2.0
+		src_rect.size.x = crop_w
+	else:
+		var crop_h := tex_size.x / dst_aspect
+		src_rect.position.y = (tex_size.y - crop_h) / 2.0
+		src_rect.size.y = crop_h
+	draw_texture_rect_region(tex, rect, src_rect, Color(1.0, 1.0, 1.0, opacity))
 
 # ==================== 操作 ====================
 
