@@ -415,12 +415,11 @@ func _draw_text(text: String, pos: Vector2, color: Color, size: float = 16, weig
 func _get_theme():
 	# 加载 theme.gd 作为颜色/字体配置
 	if ResourceLoader.exists("res://src/core/theme.gd"):
-		var theme_res = load("res://src/core/theme.gd")
-		if theme_res:
-			var inst = theme_res.new()
-			var result = inst.get_theme_data()
-			inst.free()
-			return result
+			var theme_res = load("res://src/core/theme.gd")
+			if theme_res:
+				var inst = theme_res.new()
+				var result = inst.get_theme_data()
+				return result
 	return _get_default_theme()
 
 

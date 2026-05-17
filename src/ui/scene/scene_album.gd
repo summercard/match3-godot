@@ -429,11 +429,9 @@ func init(_data: Dictionary = {}) -> void:
 func _build_monster_list() -> void:
 	_all_monsters = []
 
-	# 从 MONSTER_DB 加载（通过 game.monster_db）
-	if _game and _game.has("monster_db"):
-		var db = _game.monster_db
-		if db.has_method("get_all"):
-			_all_monsters = db.get_all()
+	var db = load("res://src/data/monster_db.gd")
+	if db and db.has_method("get_all"):
+		_all_monsters = db.get_all()
 
 	_apply_element_filter()
 

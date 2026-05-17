@@ -97,13 +97,7 @@ func _ready() -> void:
 func init(data: Dictionary = {}) -> void:
 	# 兼容 main.gd 的 init(data) 调用
 	if _game == null:
-		var save_mgr = get_node_or_null("/root/SaveManager")
-		if save_mgr:
-			var adapter := Node.new()
-			adapter.name = "_GameAdapter"
-			adapter.storage = save_mgr
-			add_child(adapter)
-			_game = adapter
+		_game = get_node_or_null("/root/GameManager")
 	_load_data()
 	_calc_idle_exp()
 	_init_bubbles()
