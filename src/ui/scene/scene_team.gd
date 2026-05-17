@@ -88,6 +88,7 @@ func _ready() -> void:
 	_add_dark_background()
 	_create_ui()
 	_setup_ui()
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	back_button.pressed.connect(_on_back_pressed)
 	save_button.pressed.connect(_on_save_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
@@ -476,21 +477,28 @@ func _get_assign_pop_elapsed() -> float:
 # ============ 事件处理 ============
 func _gui_input(event: InputEvent) -> void:
 	if _confirm_dialog_visible:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_handle_confirm_dialog_tap(event.position)
+			accept_event()
+		elif event is InputEventScreenTouch and event.pressed:
+			_handle_confirm_dialog_tap(event.position)
+			accept_event()
 		return
 	
-	if event is InputEventScreenDrag or event is InputEventScreenTouch:
-		var pos: Vector2
-		
-		if event is InputEventScreenDrag:
-			pos = event.position
-			if event.relative.y < -10:
-				_scroll_list(1)
-			elif event.relative.y > 10:
-				_scroll_list(-1)
-		elif event is InputEventScreenTouch:
-			pos = event.position
-			if event.pressed:
-				_handle_tap(pos)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_handle_tap(event.position)
+		accept_event()
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_handle_tap(event.position)
+		accept_event()
+	elif event is InputEventScreenDrag:
+		if event.relative.y < -10:
+			_scroll_list(1)
+		elif event.relative.y > 10:
+			_scroll_list(-1)
+		accept_event()
 
 func _handle_tap(pos: Vector2) -> void:
 	if _confirm_dialog_visible:
@@ -548,15 +556,26 @@ func _get_max_list_scroll() -> float:
 	return maxf(0.0, content_h - view_h)
 
 func _get_monster_index_at_pos(pos: Vector2) -> int:
-	var list_x := (DESIGN_W - (4 * 85 + 3 * 10)) / 2.0
-	var list_y := 200.0
-	var list_bottom_y := DESIGN_H - 95.0
+	# 用 ScrollContainer 和 GridContainer 的实际位置
+	if not monster_list_grid or not monster_list_scroll:
+		return -1
 	
-	if pos.x < list_x or pos.y < list_y or pos.y > list_bottom_y:
+	# 计算网格相对场景的位置
+	var node := monster_list_grid as Control
+	var accum_pos := Vector2.ZERO
+	while node and node != self:
+		accum_pos += node.position
+		node = node.get_parent() as Control
+	
+	var list_x := accum_pos.x
+	var list_y := accum_pos.y - list_scroll_y
+	var list_bottom_y := accum_pos.y + monster_list_scroll.size.y
+	
+	if pos.y < accum_pos.y or pos.y > list_bottom_y:
 		return -1
 	
 	var rel_x := pos.x - list_x
-	var rel_y := pos.y - list_y + list_scroll_y
+	var rel_y := pos.y - list_y
 	
 	var col := int(floor(rel_x / 95.0))
 	var row := int(floor(rel_y / 105.0))
@@ -604,13 +623,23 @@ func _hide_confirm_dialog() -> void:
 	confirm_dialog.visible = false
 
 func _handle_confirm_dialog_tap(pos: Vector2) -> void:
-	var confirm_btn_rect := Rect2(DESIGN_W / 2.0 - 110, DESIGN_H / 2.0 + 30, 100, 40)
-	var continue_btn_rect := Rect2(DESIGN_W / 2.0 + 10, DESIGN_H / 2.0 + 30, 100, 40)
+	if not confirm_dialog:
+		return
+	# 简单检测：确认弹窗在场景中心
+	var dialog_size := Vector2(250, 150)
+	var dialog_pos := (Vector2(DESIGN_W, DESIGN_H) - dialog_size) / 2.0
+	var confirm_btn_rect := Rect2(dialog_pos.x + 15, dialog_pos.y + 100, 100, 40)
+	var continue_btn_rect := Rect2(dialog_pos.x + 135, dialog_pos.y + 100, 100, 40)
 	
 	if confirm_btn_rect.has_point(pos):
 		_hide_confirm_dialog()
 		game_manager.scene_manager.change_scene("main", {}, "slide")
 	elif continue_btn_rect.has_point(pos):
+		_hide_confirm_dialog()
+	elif Rect2(dialog_pos, dialog_size).has_point(pos):
+		pass  # 点击弹窗内部但不按钮，不做处理
+	else:
+		# 点击弹窗外部也关闭
 		_hide_confirm_dialog()
 
 func _on_confirm_cancel() -> void:
@@ -791,17 +820,33 @@ func _is_monster_in_team(monster_id: String) -> bool:
 	return team.values().has(monster_id)
 
 func _get_slot_rect(slot_key: String) -> Rect2:
-	var leader_rect := Rect2(DESIGN_W / 2.0 - 50, 70, 100, 120)
-	var member1_rect := Rect2(DESIGN_W / 2.0 - 50 - 90, 80, 80, 100)
-	var member2_rect := Rect2(DESIGN_W / 2.0 + 50 + 10, 80, 80, 100)
+	# 用实际节点位置
+	var slot_container: HBoxContainer
+	if slot_key == "leader":
+		slot_container = leader_slot_container
+	else:
+		slot_container = member_slots_container
 	
+	var slot_node: Control = slot_container.get_node_or_null("Slot_%s" % slot_key)
+	if slot_node:
+		# _gui_input 坐标是相对于当前 Control 的
+		# slot_node 的 position 是相对于父容器
+		# 用 get_rect() 获取在父容器中的位置，再累计到场景坐标
+		var node := slot_node
+		var accum_pos := Vector2.ZERO
+		while node and node != self:
+			accum_pos += node.position
+			node = node.get_parent() as Control
+		return Rect2(accum_pos, slot_node.size)
+	
+	# fallback
 	match slot_key:
 		"leader":
-			return leader_rect
+			return Rect2(DESIGN_W / 2.0 - 50, 85, 100, 120)
 		"member1":
-			return member1_rect
+			return Rect2(DESIGN_W / 2.0 - 140, 210, 80, 100)
 		"member2":
-			return member2_rect
+			return Rect2(DESIGN_W / 2.0 + 60, 210, 80, 100)
 	return Rect2()
 
 func _get_slot_key_for_monster(monster_id: String) -> String:

@@ -1,11 +1,7 @@
 # ============================================
 # scene_inventory.gd - 背包场景
 # 翻译来源: js/ui/sceneInventory.js
-# ============================================
-# 使用说明：
-# - 继承 Control，作为场景根节点
-# - 通过 SaveManager 读写存档
-# - 道具数据来自 ItemDB
+# 重构版本: _draw() 绘制 + _gui_input 交互
 # ============================================
 
 class_name SceneInventory
@@ -13,25 +9,16 @@ extends Control
 
 const ItemDB = preload("res://src/data/item_db.gd")
 
-# 信号
 signal back_pressed()
 
-# 道具数据引用
-const ITEMS_DB_KEY = "items_db"
-
 # 布局常量
+const DESIGN_WIDTH := 375.0
+const DESIGN_HEIGHT := 667.0
 const COLS := 3
 const CELL_SIZE := 100
 const CELL_GAP := 10
 
-# UI 区域坐标
-const BACK_BTN := Rect2(10, 10, 60, 36)
-const TITLE_Y := 60
-const CURRENCY_Y := 110
-const GRID_Y := 160
-
 # 内部状态
-var _game: Node = null
 var _inventory: Dictionary = {}
 var _player: Dictionary = {}
 var _item_list: Array = []
@@ -41,16 +28,8 @@ var _toast_text: String = ""
 var _toast_timer: float = 0.0
 var _scroll_offset: float = 0.0
 var _storage: Node = null
-
-# UI 节点引用（Build 时赋值）
-var _back_btn_rect: Rect2
 var _grid_start_x: float = 0.0
 var _grid_top: float = 0.0
-
-# 设计分辨率（参考值）
-const DESIGN_WIDTH := 375.0
-const DESIGN_HEIGHT := 667.0
-
 var _bg_texture: ColorRect
 
 func _add_dark_background() -> void:
@@ -63,19 +42,14 @@ func _add_dark_background() -> void:
 
 func _ready() -> void:
 	_add_dark_background()
-	# 从游戏管理器获取引用
-	_game = get_node_or_null("/root/Game")
 	_storage = get_node_or_null("/root/SaveManager")
-	
-	# 计算网格起始 X 坐标（居中）
 	var grid_w := COLS * CELL_SIZE + (COLS - 1) * CELL_GAP
 	_grid_start_x = (DESIGN_WIDTH - grid_w) / 2.0
-	_grid_top = GRID_Y + 45.0
+	_grid_top = 160.0 + 45.0  # gridY + 标题行高
+	mouse_filter = Control.MOUSE_FILTER_STOP
 
-# 初始化入口（由 SceneManager 调用）
 func init(_data: Dictionary = {}) -> void:
 	print("[SceneInventory] 背包初始化")
-	
 	_storage = get_node_or_null("/root/SaveManager")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
@@ -84,71 +58,65 @@ func init(_data: Dictionary = {}) -> void:
 	_toast_text = ""
 	_toast_timer = 0.0
 	_scroll_offset = 0.0
-	
 	_build_item_list()
-	_update_layout()
 
-# 构建道具列表
 func _build_item_list() -> void:
 	_item_list.clear()
 	for item_id in _inventory:
 		var count: int = _inventory[item_id]
 		if count > 0 and ItemDB.has_item(item_id):
 			var item_data: Dictionary = ItemDB.get_item(item_id)
-			_item_list.append({
-				"id": item_id,
-				"count": count,
-				"data": item_data
-			})
+			_item_list.append({"id": item_id, "count": count, "data": item_data})
 
-# 更新布局计算
-func _update_layout() -> void:
-	_back_btn_rect = Rect2(10.0, 10.0, 60.0, 36.0)
-
-# 输入处理
-func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		var pos: Vector2 = event.position
+# ============ 输入 ============
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			_on_tap(pos.x, pos.y)
+			_on_tap(event.position.x, event.position.y)
+		elif event is InputEventMouseButton:
+			pass  # mouse up
+		accept_event()
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_on_tap(event.position.x, event.position.y)
+		accept_event()
 	elif event is InputEventScreenDrag:
-		var pos: Vector2 = event.position
-		var direction: String = ""
-		var drag_vec: Vector2 = event.relative
-		if abs(drag_vec.y) > abs(drag_vec.x):
-			if drag_vec.y < -10:
-				direction = "up"
-			elif drag_vec.y > 10:
-				direction = "down"
-		if direction:
-			_on_swipe(pos.x, pos.y, direction)
+		var drag_y: float = event.relative.y
+		if abs(drag_y) > 10:
+			var step: float = CELL_SIZE + CELL_GAP
+			var max_offset := _get_max_scroll_offset()
+			if drag_y < 0:
+				_scroll_offset = min(max_offset, _scroll_offset + step)
+			else:
+				_scroll_offset = max(0.0, _scroll_offset - step)
+			queue_redraw()
+		accept_event()
 
-# 点击处理
 func _on_tap(x: float, y: float) -> void:
-	# 关闭弹窗
+	# 弹窗打开时
 	if not _popup.is_empty():
 		var px: float = _popup.get("x", 0.0)
 		var py: float = _popup.get("y", 0.0)
 		var pw: float = _popup.get("w", 0.0)
 		var ph: float = _popup.get("h", 0.0)
-		
-		# 遮罩点击关闭
+		# 点击弹窗外关闭
 		if not (x >= px and x <= px + pw and y >= py and y <= py + ph):
 			_popup = {}
+			queue_redraw()
 			return
-		
-		# 按钮区域
+		# 使用按钮
 		var bx: float = px + (pw - 120.0) / 2.0
 		var by: float = py + ph - 60.0
 		if x >= bx and x <= bx + 120.0 and y >= by and y <= by + 40.0:
 			var item_id: String = _popup.get("id", "")
 			_use_item(item_id)
 			_popup = {}
+			queue_redraw()
 			return
 		return
 	
-	# 返回按钮
-	if _in_rect(x, y, _back_btn_rect):
+	# 返回按钮 (10, 12, 60, 36)
+	if x >= 10 and x <= 70 and y >= 12 and y <= 48:
 		back_pressed.emit()
 		return
 	
@@ -157,75 +125,45 @@ func _on_tap(x: float, y: float) -> void:
 	if idx != -1 and idx < _item_list.size():
 		_selected_item = _item_list[idx]
 		_show_item_popup(_selected_item)
+		queue_redraw()
 
-# 判断点是否在矩形内
-func _in_rect(x: float, y: float, rect: Rect2) -> bool:
-	return x >= rect.position.x and x <= rect.position.x + rect.size.x and y >= rect.position.y and y <= rect.position.y + rect.size.y
-
-# 获取点击的道具索引
 func _get_item_index_at(x: float, y: float) -> int:
 	var rel_x: float = x - _grid_start_x
 	var rel_y: float = y - _grid_top + _scroll_offset
-	
 	if y < _grid_top or y > DESIGN_HEIGHT - 24.0:
 		return -1
 	if rel_x < 0.0 or rel_y < 0.0:
 		return -1
-	
 	var col: int = int(rel_x / (CELL_SIZE + CELL_GAP))
 	var row: int = int(rel_y / (CELL_SIZE + CELL_GAP))
-	
 	if col >= COLS:
 		return -1
-	
-	var idx: int = row * COLS + col
-	return idx
+	return row * COLS + col
 
-# 滑动处理
-func _on_swipe(_x: float, _y: float, direction: String) -> void:
-	if not _popup.is_empty():
-		return
-	if _y < _grid_top + 45.0:
-		return
-	
-	var step: float = CELL_SIZE + CELL_GAP
-	var max_offset: float = _get_max_scroll_offset()
-	
-	if direction == "up":
-		_scroll_offset = min(max_offset, _scroll_offset + step)
-	elif direction == "down":
-		_scroll_offset = max(0.0, _scroll_offset - step)
-
-# 获取最大滚动偏移
 func _get_max_scroll_offset() -> float:
 	var rows: int = ceili(float(_item_list.size()) / float(COLS))
 	var content_h: float = rows * (CELL_SIZE + CELL_GAP) - CELL_GAP
 	var view_h: float = DESIGN_HEIGHT - 24.0 - _grid_top
 	return maxf(0.0, content_h - view_h)
 
-# 显示道具弹窗
 func _show_item_popup(item: Dictionary) -> void:
-	var pw: float = 280.0
-	var ph: float = 220.0
-	var px: float = (DESIGN_WIDTH - pw) / 2.0
-	var py: float = (DESIGN_HEIGHT - ph) / 2.0
-	
+	var pw := 280.0
+	var ph := 220.0
 	_popup = {
-		"x": px, "y": py, "w": pw, "h": ph,
+		"x": (DESIGN_WIDTH - pw) / 2.0,
+		"y": (DESIGN_HEIGHT - ph) / 2.0,
+		"w": pw, "h": ph,
 		"id": item.get("id", ""),
 		"data": item.get("data", {}),
 		"count": item.get("count", 0)
 	}
 
-# 使用道具
 func _use_item(item_id: String) -> void:
-	if item_id.is_empty():
+	if item_id.is_empty() or not _storage:
 		return
-	
 	var item_data: Dictionary = ItemDB.get_item(item_id)
 	if item_data.is_empty():
 		return
-	
 	var item_type: String = item_data.get("type", "")
 	var effect: Dictionary = item_data.get("effect", {})
 	
@@ -233,7 +171,7 @@ func _use_item(item_id: String) -> void:
 		"exp":
 			var exp_gain: int = effect.get("expGain", 0)
 			if exp_gain > 0:
-				if _storage and _storage.use_item(item_id, 1):
+				if _storage.use_item(item_id, 1):
 					_storage.add_player_exp(exp_gain)
 					_player = _storage.load_player()
 					_show_toast("获得 %d 经验" % exp_gain)
@@ -242,7 +180,7 @@ func _use_item(item_id: String) -> void:
 		"gold":
 			var gold_gain: int = effect.get("goldGain", 0)
 			if gold_gain > 0:
-				if _storage and _storage.use_item(item_id, 1):
+				if _storage.use_item(item_id, 1):
 					_storage.add_gold(gold_gain)
 					_player = _storage.load_player()
 					_show_toast("获得 %d 金币" % gold_gain)
@@ -256,13 +194,18 @@ func _use_item(item_id: String) -> void:
 			_show_toast("进化石请在怪物进化中使用")
 		_:
 			_show_toast("该道具暂时无法使用")
+	
+	# 刷新列表
+	_inventory = _storage.load_inventory() if _storage else {}
+	_build_item_list()
+	_scroll_offset = min(_scroll_offset, _get_max_scroll_offset())
+	queue_redraw()
 
-# 显示 Toast 提示
 func _show_toast(text: String) -> void:
 	_toast_text = text
 	_toast_timer = 1.8
 
-# 帧更新
+# ============ 帧更新 ============
 func _process(dt: float) -> void:
 	if _toast_timer > 0.0:
 		_toast_timer -= dt
@@ -270,13 +213,9 @@ func _process(dt: float) -> void:
 			_toast_text = ""
 	queue_redraw()
 
-# ============================================
-# 绘制
-# ============================================
+# ============ 绘制 ============
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
-	var font_sm := font
-	var font_title := font
 	
 	# 背景
 	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.06, 0.08, 0.16))
@@ -287,65 +226,61 @@ func _draw() -> void:
 	# 返回按钮
 	draw_rect(Rect2(10, 12, 60, 36), Color(0.18, 0.20, 0.30))
 	draw_rect(Rect2(10, 12, 60, 36), Color(0.30, 0.35, 0.50), false)
-	draw_string(font_sm, Vector2(20, 36), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
+	draw_string(font, Vector2(20, 36), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
 	
 	# 标题
-	draw_string(font_title, Vector2(DESIGN_WIDTH / 2 - 20, 40), "背包", HORIZONTAL_ALIGNMENT_CENTER, -1, 22, Color.WHITE)
+	draw_string(font, Vector2(DESIGN_WIDTH / 2, 40), "背包", HORIZONTAL_ALIGNMENT_CENTER, -1, 22, Color.WHITE)
 	
 	# 货币
 	var gold: int = _player.get("gold", 0)
 	var gems: int = _player.get("gems", 0)
-	draw_string(font_sm, Vector2(30, 130), "💰 %d" % gold, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 0.84, 0.0))
-	draw_string(font_sm, Vector2(DESIGN_WIDTH - 80, 130), "💎 %d" % gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.4, 0.6, 1.0))
+	draw_string(font, Vector2(30, 130), "💰 %d" % gold, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 0.84, 0.0))
+	draw_string(font, Vector2(DESIGN_WIDTH - 80, 130), "💎 %d" % gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.4, 0.6, 1.0))
 	
 	# 分割线
 	draw_line(Vector2(10, 150), Vector2(DESIGN_WIDTH - 10, 150), Color(0.3, 0.3, 0.4), 1.0)
 	
 	# 道具标签
-	draw_string(font_sm, Vector2(20, 185), "道具", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
-	draw_string(font_sm, Vector2(DESIGN_WIDTH - 80, 185), "共 %d 件" % _item_list.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.3, 0.3, 0.4))
+	draw_string(font, Vector2(20, 185), "道具", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
+	draw_string(font, Vector2(DESIGN_WIDTH - 80, 185), "共 %d 件" % _item_list.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.3, 0.3, 0.4))
 	
-	# 道具网格
-	var grid_top: float = _grid_top
 	var grid_bottom: float = DESIGN_HEIGHT - 24.0
 	
 	if _item_list.is_empty():
-		# 空状态
-		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 100, grid_top + 80), "还没有道具，赶快去战斗获取吧！", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.4, 0.4, 0.5))
-		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 15, grid_top + 120), "💪", HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.WHITE)
+		draw_string(font, Vector2(DESIGN_WIDTH / 2 - 100, _grid_top + 80), "还没有道具，赶快去战斗获取吧！", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.4, 0.4, 0.5))
+		draw_string(font, Vector2(DESIGN_WIDTH / 2 - 15, _grid_top + 120), "💪", HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.WHITE)
 	else:
-		# 绘制道具格子
 		for idx in range(_item_list.size()):
 			var row: int = idx / COLS
 			var col: int = idx % COLS
 			var gx: float = _grid_start_x + col * (CELL_SIZE + CELL_GAP)
-			var gy: float = grid_top + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
+			var gy: float = _grid_top + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
 			
-			# 裁剪超出可视区域的
-			if gy + CELL_SIZE < grid_top or gy > grid_bottom:
+			if gy + CELL_SIZE < _grid_top or gy > grid_bottom:
 				continue
 			
-			# 格子背景
-			var cell_color := Color(0.12, 0.14, 0.22)
-			if _selected_item.get("id", "") == _item_list[idx].get("id", ""):
-				cell_color = Color(0.18, 0.22, 0.35)
+			var cell_color := Color(0.10, 0.12, 0.20)
 			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), cell_color)
-			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), Color(0.25, 0.28, 0.40), false)
+			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), Color(0.22, 0.25, 0.35), false)
 			
 			var item: Dictionary = _item_list[idx]
 			var item_data: Dictionary = item.get("data", {})
 			
-			# emoji 图标
-			var emoji: String = item_data.get("emoji", "🎁")
-			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 12, gy + 42), emoji, HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color.WHITE)
-			
+			# emoji
+			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 12, gy + 42), item_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color.WHITE)
 			# 名称
-			var item_name: String = item_data.get("name", "未知道具")
-			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 20, gy + 66), item_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.9))
-			
+			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 20, gy + 66), item_data.get("name", "?"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.9))
 			# 数量
-			var count: int = item.get("count", 0)
-			draw_string(font_sm, Vector2(gx + CELL_SIZE / 2 - 15, gy + 85), "×%d" % count, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.84, 0.0))
+			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 15, gy + 85), "×%d" % item.get("count", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.84, 0.0))
+		
+		# 滚动条
+		var max_off := _get_max_scroll_offset()
+		if max_off > 0:
+			var track_h := grid_bottom - _grid_top
+			var thumb_h := maxf(34.0, track_h * (track_h / (track_h + max_off)))
+			var thumb_y := _grid_top + (track_h - thumb_h) * (_scroll_offset / max_off)
+			draw_rect(Rect2(368, _grid_top, 3, track_h), Color(1, 1, 1, 0.12))
+			draw_rect(Rect2(367, thumb_y, 5, thumb_h), Color(1, 1, 1, 0.45))
 	
 	# 弹窗
 	if not _popup.is_empty():
@@ -354,56 +289,26 @@ func _draw() -> void:
 		var pw: float = _popup.get("w", 0.0)
 		var ph: float = _popup.get("h", 0.0)
 		
-		# 遮罩
 		draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0, 0, 0, 0.7))
-		
-		# 弹窗面板
 		draw_rect(Rect2(px, py, pw, ph), Color(0.14, 0.16, 0.26))
 		draw_rect(Rect2(px, py, pw, ph), Color(0.30, 0.35, 0.50), false)
-		
-		# 顶部装饰线
 		draw_rect(Rect2(px + 20, py + 10, pw - 40, 3), Color(0.35, 0.55, 1.0))
 		
-		# 弹窗内容
 		var popup_data: Dictionary = _popup.get("data", {})
-		var popup_id: String = _popup.get("id", "")
 		var popup_count: int = _popup.get("count", 0)
 		
-		draw_string(font_sm, Vector2(px + pw / 2 - 16, py + 55), popup_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color.WHITE)
-		draw_string(font_sm, Vector2(px + pw / 2 - 30, py + 95), popup_data.get("name", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
-		draw_string(font_sm, Vector2(px + pw / 2 - 50, py + 120), popup_data.get("desc", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.7))
-		draw_string(font_sm, Vector2(px + pw / 2 - 25, py + 145), "拥有: ×%d" % popup_count, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1.0, 0.84, 0.0))
+		draw_string(font, Vector2(px + pw / 2 - 16, py + 55), popup_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color.WHITE)
+		draw_string(font, Vector2(px + pw / 2 - 30, py + 95), popup_data.get("name", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+		draw_string(font, Vector2(px + pw / 2 - 50, py + 120), popup_data.get("desc", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.7))
+		draw_string(font, Vector2(px + pw / 2 - 25, py + 145), "拥有: ×%d" % popup_count, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1.0, 0.84, 0.0))
 		
-		# 使用按钮
-		var btn_x: float = px + (pw - 120) / 2.0
+		var btn_x: float = px + (pw - 120.0) / 2.0
 		var btn_y: float = py + ph - 60.0
 		draw_rect(Rect2(btn_x, btn_y, 120, 40), Color(0.35, 0.55, 1.0))
-		draw_string(font_sm, Vector2(btn_x + 35, btn_y + 27), "使 用", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+		draw_string(font, Vector2(btn_x + 35, btn_y + 27), "使 用", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
 	
 	# Toast
 	if _toast_text != "" and _toast_timer > 0.0:
 		var alpha: float = minf(_toast_timer / 0.5, 1.0)
-		draw_string(font_sm, Vector2(DESIGN_WIDTH / 2 - 50, 606), _toast_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, alpha))
-
-# 主渲染函数（从 draw_tree 调用）
-# 注意：Godot 4.x 使用 _draw() 配合 CustomCanvasItem 或直接控制子节点
-# 此处通过子节点方式来构建 UI（推荐模式）
-func setup_ui() -> void:
-	# UI 节点已在 _ready 中准备好
-	# 如需动态创建请重写此方法
-	pass
-
-# 获取道具图标（用于 Grid 单元格）
-static func get_item_emoji(item_data: Dictionary) -> String:
-	return item_data.get("emoji", "🎁")
-
-# 获取道具名称
-static func get_item_name(item_data: Dictionary) -> String:
-	return item_data.get("name", "未知道具")
-
-# 清理资源
-func destroy() -> void:
-	_toast_text = ""
-	_item_list.clear()
-	_popup = {}
-	_selected_item = {}
+		draw_rect(Rect2(55, 585, 265, 42), Color(0, 0, 0, 0.72 * alpha))
+		draw_string(font, Vector2(DESIGN_WIDTH / 2, 610), _toast_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(1, 1, 1, alpha))
