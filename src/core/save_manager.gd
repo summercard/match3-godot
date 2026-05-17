@@ -110,8 +110,11 @@ func save_player(player_data: Dictionary) -> bool:
 ## 增加金币
 ## JS: addGold(amount)
 func add_gold(amount: int) -> bool:
+	print("[SaveManager] add_gold called: amount=", amount)
 	var player: Dictionary = get_player()
+	print("[SaveManager] player before: gold=", player.get("gold", 0))
 	player["gold"] = player.get("gold", 0) + amount
+	print("[SaveManager] player after: gold=", player.get("gold", 0))
 	save_player(player)
 	return true
 
