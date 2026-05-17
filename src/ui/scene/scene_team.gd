@@ -91,7 +91,7 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	save_button.pressed.connect(_on_save_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	monster_list_scroll.scrollVertical = 0
+	monster_list_scroll.scroll_vertical = 0
 	
 	# 确认弹窗按钮
 	var confirm_btn: Button = confirm_dialog.get_node_or_null("VBox/ConfirmBtn")
@@ -414,7 +414,7 @@ func init(data: Dictionary = {}) -> void:
 		team = {"leader": null, "member1": null, "member2": null}
 	
 	list_scroll_y = 0.0
-	monster_list_scroll.scrollVertical = 0
+	monster_list_scroll.scroll_vertical = 0
 	selected_slot = ""
 	hovered_slot = ""
 	hovered_monster_index = -1
@@ -539,7 +539,7 @@ func _scroll_list(direction: int) -> void:
 	var step := 105.0
 	var max_scroll := _get_max_list_scroll()
 	list_scroll_y = clamp(list_scroll_y + direction * step, 0.0, max_scroll)
-	monster_list_scroll.scrollVertical = int(list_scroll_y)
+	monster_list_scroll.scroll_vertical = int(list_scroll_y)
 
 func _get_max_list_scroll() -> float:
 	var rows: float = ceil(captured_monsters.size() / 4.0)
