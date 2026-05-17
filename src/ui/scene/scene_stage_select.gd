@@ -946,7 +946,7 @@ func _create_normal_style(can_sweep: bool) -> StyleBoxFlat:
 # ==================== 按钮信号 ====================
 
 func _on_back_btn_pressed() -> void:
-	_go_to_scene("start")
+	_go_to_scene("main")
 
 func _on_prev_chapter_btn_pressed() -> void:
 	_switch_chapter(-1)

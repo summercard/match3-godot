@@ -219,11 +219,20 @@ func _load_data() -> void:
 		if ranch_state and ranch_state.has("slots"):
 			var saved_slots = ranch_state["slots"]
 			for i in range(min(saved_slots.size(), SLOT_COUNT)):
-				_slots_data[i] = saved_slots[i]
+				_slots_data[i] = _normalize_slot(saved_slots[i])
 
 		_captured_monsters = _game.storage.get_captured_monsters()
 
 	_select_slot(0)
+
+func _normalize_slot(slot_data: Variant) -> Dictionary:
+	if not slot_data is Dictionary:
+		return {"monster_id": null, "placed_at": null}
+	var slot: Dictionary = slot_data
+	return {
+		"monster_id": slot.get("monster_id", slot.get("monsterId", null)),
+		"placed_at": slot.get("placed_at", slot.get("placedAt", null))
+	}
 
 func _save_ranch_state() -> void:
 	if _game and _game.storage:
@@ -444,8 +453,9 @@ func _update_slot_button(btn: Button, index: int) -> void:
 		name_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6, 1.0))
 		exp_label.visible = false
 
-	btn.add_theme_stylebox_override("normal", _create_slot_style(index, slot["monster_id"], false))
-	btn.add_theme_stylebox_override("pressed", _create_slot_style(index, slot["monster_id"], true))
+	var has_monster := slot.get("monster_id", null) != null
+	btn.add_theme_stylebox_override("normal", _create_slot_style(index, has_monster, false))
+	btn.add_theme_stylebox_override("pressed", _create_slot_style(index, has_monster, true))
 
 func _build_picker_buttons() -> void:
 	# 清除旧按钮
@@ -519,7 +529,7 @@ func _create_picker_item_style(in_use: bool, pressed: bool = false) -> StyleBoxF
 # 详情面板更新
 # ============================================
 func _update_detail_panel() -> void:
-	var detail_vbox: VBoxContainer = _detail_panel.get_child_or_null(0)
+	var detail_vbox: VBoxContainer = _detail_panel.get_child(0) if _detail_panel.get_child_count() > 0 else null
 	if not detail_vbox:
 		return
 
