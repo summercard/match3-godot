@@ -90,11 +90,9 @@ func do_sign_in() -> void:
 	# 更新本地显示数据
 	_sign_in_data = _storage.load_sign_in_data()
 	
-	# 触发成就检查
-	var achievement_manager = _game.get_node_or_null("AchievementManager") if _game else null
-	if achievement_manager:
-		var consecutive: int = _sign_in_data.get("consecutiveDays", 1)
-		achievement_manager.check_achievements("signIn", consecutive)
+	if _storage and _storage.has_method("set_achievement_stat"):
+		_storage.set_achievement_stat("maxConsecutiveSignIn", int(_sign_in_data.get("consecutiveDays", 1)))
+		_storage.set_achievement_stat("totalSignInDays", int(_sign_in_data.get("totalDays", 1)))
 	
 	# 播放金色撒花动画
 	_play_sign_in_effect(reward)
