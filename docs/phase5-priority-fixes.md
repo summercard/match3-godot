@@ -1,7 +1,8 @@
-# Phase 5 优先修复计划
+# Phase 5 修复完成 → Phase 6 开始
 
-## 创建时间
-2026-05-17 00:41
+## 当前状态
+- **Phase 5**: ✅ 已完成 (commit 8985ae7)
+- **Phase 6**: `docs/game-quality-phases.md`
 
 ## 背景
 深度检查发现 5 项 P0/P1 优先修复，需逐一完成。
@@ -47,13 +48,15 @@
 - **源参考**: 微信 `sceneBattle.js` 战斗结束时调用 CaptureEffectManager
 
 ### Phase 5: BOSS 蓄力系统与 battle_manager 联动
-- [ ] battle_manager.enemy_action() 中识别蓄力回合（isCharging）
-- [ ] 蓄力时更新 _boss_skill_visuals[attackerIdx].chargeTimer
-- [ ] 蓄力完成后 isCharged=true，伤害翻倍+特殊颜色
-- [ ] Boss 护盾系统：shield_hp 在 enemy_card 上渲染
-- [ ] Boss 治疗浮动文字
-- **涉及文件**: `src/ui/scene/scene_battle.gd`, `src/battle/battle_manager.gd`
-- **源参考**: 微信 `sceneBattle.js` _startEnemyTurn 中蓄力/护盾/治疗逻辑
+- [x] battle_manager.enemy_action() 中识别蓄力回合（isCharging）
+- [x] 蓄力时更新 _boss_skill_visuals[attackerIdx].chargeTimer
+- [x] 蓄力完成后 isCharged=true，伤害翻倍+特殊颜色
+- [x] Boss 护盾系统：shield_hp 在 enemy_card 上渲染
+- [x] Boss 治疗浮动文字
+**状态**: ✅ 已完成 (commit 8985ae7)
+
+## Phase 6: 游戏质量打磨
+详见 `docs/game-quality-phases.md`（交互手感优化、视觉打磨、战斗体验优化等）
 
 ## 验收标准
 - 开屏视觉效果与微信版接近（渐变文字+装饰+怪物浮动）
