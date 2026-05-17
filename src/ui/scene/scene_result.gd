@@ -321,10 +321,14 @@ func _setup_buttons() -> void:
 		_has_next_stage = false
 
 func _save_rewards() -> void:
+	print("[SceneResult] _save_rewards called. storage=", _storage != null, " rewards=", _rewards)
 	if not _storage:
+		print("[SceneResult] _storage is null, returning")
 		return
+	print("[SceneResult] calling add_gold ", _rewards["gold"])
 	if _rewards["gold"] > 0 and _storage.has_method("add_gold"):
 		_storage.add_gold(_rewards["gold"])
+		print("[SceneResult] add_gold done")
 	if _rewards["exp"] > 0 and _storage.has_method("add_player_exp"):
 		_storage.add_player_exp(_rewards["exp"])
 	_add_monster_exp_from_battle()
