@@ -2220,7 +2220,7 @@ func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximu
 	draw_rect(Rect2(x, y, w, h), bg_color)
 	
 	if current > 0 and maximum > 0:
-		var ratio: float = mini(current / maximum, 1.0)
+		var ratio: float = clampf(current / maximum, 0.0, 1.0)
 		var fill_w: float = floor((w - 2) * ratio)
 		draw_rect(Rect2(x + 1, y + 1, fill_w, h - 2), color)
 
