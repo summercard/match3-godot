@@ -175,9 +175,14 @@ const DROP_TABLE: Array = [
 	{"id": "capture_ball_plus", "weight": 5},
 	{"id": "exp_crystal", "weight": 3},
 	{"id": "gold_chest", "weight": 2},
-	{"id": "evolution_stone_earth", "weight": 2},
-	{"id": "evolution_stone_wind", "weight": 2},
-	{"id": "evolution_stone_dark", "weight": 2}
+	{"id": "evolution_stone_fire", "weight": 2},
+	{"id": "evolution_stone_water", "weight": 2},
+	{"id": "evolution_stone_grass", "weight": 2},
+	{"id": "evolution_stone_thunder", "weight": 1},
+	{"id": "evolution_stone_light", "weight": 1},
+	{"id": "evolution_stone_earth", "weight": 1},
+	{"id": "evolution_stone_wind", "weight": 1},
+	{"id": "evolution_stone_dark", "weight": 1}
 ]
 
 # 商店商品列表
@@ -186,8 +191,6 @@ const SHOP_ITEMS: Array = [
 	{"id": "capture_ball_plus", "price": 250, "currency": "gold", "label": "金币"},
 	{"id": "exp_potion", "price": 80, "currency": "gold", "label": "金币"},
 	{"id": "exp_crystal", "price": 200, "currency": "gold", "label": "金币"},
-	{"id": "gold_bag", "price": 60, "currency": "gold", "label": "金币"},
-	{"id": "gold_chest", "price": 150, "currency": "gold", "label": "金币"},
 	{"id": "evolution_stone_fire", "price": 300, "currency": "gold", "label": "金币"},
 	{"id": "evolution_stone_water", "price": 300, "currency": "gold", "label": "金币"},
 	{"id": "evolution_stone_grass", "price": 300, "currency": "gold", "label": "金币"},

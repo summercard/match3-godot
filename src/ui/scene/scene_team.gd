@@ -4,6 +4,8 @@
 class_name SceneTeam
 extends Control
 
+const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+
 # === 常量 ===
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
@@ -48,18 +50,6 @@ const ELEMENT_ICON_ASSETS := {
 	"grass": "res://assets/images/stage/icon_gem_grass.png",
 	"thunder": "res://assets/images/stage/icon_gem_thunder.png",
 	"light": "res://assets/images/stage/icon_gem_light.png",
-}
-
-const MONSTER_ASSETS := {
-	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"monster_004": "res://assets/images/battle/monsters/monster_004_thunder_rodent.png",
-	"monster_005": "res://assets/images/battle/monsters/monster_005_light_sprite.png",
-	"monster_006": "res://assets/images/battle/monsters/monster_006_fire_dragon.png",
-	"monster_007": "res://assets/images/battle/monsters/monster_007_water_dragon.png",
-	"monster_017": "res://assets/images/battle/monsters/monster_017_dark_cat.png",
-	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png",
 }
 
 # 颜色
@@ -692,7 +682,7 @@ func _draw_element_icon(element: String, rect: Rect2) -> void:
 	_draw_texture_fit(_get_texture(path), rect)
 
 func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
-	var path: String = MONSTER_ASSETS.get(monster_id, "")
+	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
 	var tex := _get_texture(path)
 	if tex:
 		_draw_texture_fit(tex, rect)

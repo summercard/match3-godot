@@ -171,8 +171,17 @@ func _do_enter() -> void:
 
 	var sm := get_node_or_null("/root/SceneManager")
 	if sm:
-		# TODO: 接入新手引导检测
-		sm.switch_scene("main")
+		sm.switch_scene(_get_entry_scene())
+
+func _get_entry_scene() -> String:
+	var save_manager := get_node_or_null("/root/SaveManager")
+	if save_manager != null and save_manager.has_method("load_tutorial_progress"):
+		if save_manager.has_method("has_tutorial_progress") and not save_manager.has_tutorial_progress():
+			return "main"
+		var progress: Dictionary = save_manager.load_tutorial_progress()
+		if not progress.get("completed", false):
+			return "tutorial"
+	return "main"
 
 
 # ============================================
@@ -315,13 +324,16 @@ func _draw_art_content() -> void:
 	_draw_monster("water_monster", 118.0, 252.0, 144.0,  0.0)
 	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
 
-	# ---- 五颗宝石脉冲浮动 ----
+	# ---- 五颗宝石脉冲浮动（居中排列）----
 	var gy := 424.0
-	_draw_gem("gem_fire",    112.0, gy,        48.0)
-	_draw_gem("gem_water",   164.0, gy - 16.0, 52.0)
-	_draw_gem("gem_grass",   218.0, gy,        48.0)
-	_draw_gem("gem_thunder", 140.0, gy + 42.0, 46.0)
-	_draw_gem("gem_light",   194.0, gy + 42.0, 46.0)
+	# 以设计宽度 DW=375 为基准，五个宝石水平均匀分布
+	# 五个宝石总占宽约 220px（间距+宝石），居中需要整体左移
+	var gem_base_x := (DW - 220.0) / 2.0  # 居中起点 ≈ 77.5
+	_draw_gem("gem_fire",    gem_base_x + 0.0,   gy,        48.0)
+	_draw_gem("gem_water",   gem_base_x + 52.0,  gy - 16.0, 52.0)
+	_draw_gem("gem_grass",   gem_base_x + 106.0, gy,        48.0)
+	_draw_gem("gem_thunder", gem_base_x + 26.0, gy + 42.0, 46.0)
+	_draw_gem("gem_light",   gem_base_x + 80.0, gy + 42.0, 46.0)
 
 	# ---- 提示横幅 ----
 	if _ready_flag:
@@ -355,23 +367,10 @@ func _draw_gem(key: String, gx: float, gy: float, gs: float) -> void:
 
 func _draw_hint_art(w: float, h: float) -> void:
 	var ha := 0.58 + _pulse * 0.25
-	var ribbon := _tex("hint_ribbon")
-	var rx := 55.0 * _sx
-	var ry := h * 0.887
-	var rw := 265.0 * _sx
-	var rh := 42.0 * _sy
-
-	if ribbon:
-		draw_texture_rect(ribbon, Rect2(rx, ry, rw, rh), false,
-			Color(1, 1, 1, _opacity * ha))
-	else:
-		draw_rect(Rect2(rx, ry + 4.0 * _sc, rw, 30.0 * _sc),
-			Color(C_BG_PANEL, _opacity * ha))
-
 	var hfs := 16.0 * _sc
 	_draw_centered_text("点击开始你的冒险之旅",
-		w / 2.0 + 10.0 * _sx, ry + rh / 2.0, hfs,
-		Color(1, 1, 1, _opacity * ha))
+		w / 2.0, h * 0.887 + 4.0 * _sc, hfs,
+		Color(1, 1, 1, _opacity * ha * 0.85))
 
 
 func _draw_version_art(w: float, h: float) -> void:
@@ -487,7 +486,14 @@ func _draw_glow_button() -> void:
 		tex = _tex("btn_normal")
 
 	if tex:
-		draw_texture_rect(tex, btn, false, Color(1, 1, 1, _opacity))
+		# 使用原始纹理尺寸居中绘制（避免 draw_texture_rect 拉伸变形）
+		var ts := tex.get_size()
+		var scale2 := minf(btn.size.x / ts.x, btn.size.y / ts.y)
+		var dw := ts.x * scale2
+		var dh := ts.y * scale2
+		var dx := btn.position.x + (btn.size.x - dw) / 2.0
+		var dy := btn.position.y + (btn.size.y - dh) / 2.0
+		draw_texture_rect(tex, Rect2(dx, dy, dw, dh), false, Color(1, 1, 1, _opacity))
 	else:
 		# 回退：纯色圆角矩形
 		draw_rect(btn, Color(0.25, 0.45, 0.85, _opacity))

@@ -1,12 +1,12 @@
 # Godot界面美术包装状态对照表
 
-更新时间：2026-05-17
+更新时间：2026-05-18
 
 ## 总览
 
 - Godot 运行入口登记界面：16 个。
-- 已完成第一版美术代入：5 个。
-- 有概念图但尚未完成 Godot 代入：11 个，其中队伍编成和怪物进化共用一张概念图。
+- 已完成第一版美术代入：7 个。
+- 有概念图但尚未完成 Godot 代入：9 个，其中队伍编成和怪物进化共用一张概念图。
 - 暂无独立概念图：0 个。
 - 完整执行清单见：`美术开发/界面美术资产提取制作代入总List.md`。
 
@@ -18,11 +18,11 @@
 | 2 | main | 大厅/主界面 | `src/ui/scene/scene_main.gd` | 已完成第一版包装 | 有：`美术开发/概念图/02_主界面_main_lobby.png` | 已拆分，已导入 `assets/images/main/` | 精修队伍展示条、活动入口 |
 | 3 | stage_select | 关卡选择/章节地图 | `src/ui/scene/scene_stage_select.gd` | 已完成第一版包装 | 有：`美术开发/概念图/03_关卡地图_stage_select.png` | 已拆分，已导入 `assets/images/stage/` | 精修多章节地图和 Boss 表现 |
 | 4 | battle | 三消战斗 | `src/ui/scene/scene_battle.gd` | 已完成核心资产代入，局部仍为色块/emoji | 有：`美术开发/概念图/04_三消战斗_battle_match3.png` | 怪物、宝石、障碍、背景已拆分并导入 `assets/images/battle/` | 补状态图标、技能特效、完整 UI 面板 |
-| 5 | album | 怪物图鉴 | `src/ui/scene/scene_album.gd` | 未包装，仍以 Godot 控件/emoji 为主 | 有：`美术开发/概念图/05_怪物图鉴_monster_album.png` | 有概念拆分草稿：`美术开发/资产拆分/05_monster_album_contact_sheet.png` | 可进入专业拆分并代入 |
-| 6 | team | 队伍编成 | `src/ui/scene/scene_team.gd` | 未包装，仍以控件样式/emoji 为主 | 有：`美术开发/概念图/06_队伍进化_team_evolve.png` | 有概念拆分草稿：`美术开发/legacy_concept_crops/资产拆分/06_team_evolve/` | 可进入专业拆分并代入 |
+| 5 | album | 怪物图鉴 | `src/ui/scene/scene_album.gd` | 已完成第一版 image-2 UI/属性图标代入；列表、筛选、详情、锁定态、进化入口已改为 Canvas 绘制资产 | 有：`美术开发/概念图/05_怪物图鉴_monster_album.png` | 已拆分：`美术开发/正式拆分/album/`；运行目录：`assets/images/album/` | 进入 Godot 运行窗口做真实图鉴视觉验收 |
+| 6 | team | 队伍编成 | `src/ui/scene/scene_team.gd` | 已完成第一版 image-2 UI/图标代入，怪物头像复用/补入通用怪物目录 | 有：`美术开发/概念图/06_队伍进化_team_evolve.png` | 已拆分：`美术开发/正式拆分/team/`；运行目录：`assets/images/team/` | 进入 Godot 运行窗口做真实队伍编成视觉验收 |
 | 7 | evolve | 怪物进化 | `src/ui/scene/scene_evolve.gd` | 未包装，仍以控件样式/emoji 为主 | 共用：`美术开发/概念图/06_队伍进化_team_evolve.png` | 有概念拆分草稿，可复用队伍/怪物资产 | 队伍完成后接着做进化 |
 | 8 | battle_prepare | 战斗准备 | `src/ui/scene/scene_battle_prepare.gd` | 已完成第一版 image-2 UI 代入，怪物/宝石复用通用资产 | 有：`美术开发/概念图/07_战斗准备_battle_prepare.png` | 已拆分：`美术开发/正式拆分/battle_prepare/`；运行目录：`assets/images/battle_prepare/` | 进入 Godot 运行窗口做视觉验收和布局微调 |
-| 9 | result | 战斗结算 | `src/ui/scene/scene_result.gd` | 已完成第一版 image-2 UI/星级/特效代入，怪物/奖励图标复用通用资产 | 有：`美术开发/概念图/08_战斗结算_result.png` | 已拆分：`美术开发/正式拆分/result/`；运行目录：`assets/images/result/` | 进入 Godot 运行窗口做真实胜负结算视觉验收 |
+| 9 | result | 战斗结算 | `src/ui/scene/scene_result.gd`, `src/ui/scene/scene_battle.gd` | 已完成完整结算页和战斗内胜负过场 image-2 拆分、运行目录导入、代码代入；过场动画已改为独立计时并加跳转锁 | 有：`美术开发/概念图/08_战斗结算_result.png`；过场源：`美术开发/元素提取/battle_result_overlay/battle_result_overlay_ui_effects_image2_sheet.png` | 已拆分：`美术开发/正式拆分/result/`, `美术开发/正式拆分/battle_result_overlay/`；运行目录：`assets/images/result/`, `assets/images/battle/result_overlay/` | 进入 Godot 运行窗口做真实胜负流程视觉验收 |
 | 10 | ranch | 牧场 | `src/ui/scene/scene_ranch.gd` | 未包装 | 有：`美术开发/概念图/09_怪物牧场_ranch.png` | 待专业拆分，可复用怪物小头像 | 拆分牧场背景、放置槽、收益状态 |
 | 11 | shop | 商店 | `src/ui/scene/scene_shop.gd` | 仅接入金币/钻石小图标，主体未包装 | 有：`美术开发/概念图/10_商店_shop.png` | 待专业拆分，可复用货币/按钮/道具 | 与背包一起建立商品/道具体系 |
 | 12 | inventory | 背包 | `src/ui/scene/scene_inventory.gd` | 未包装 | 有：`美术开发/概念图/11_背包_inventory.png` | 待专业拆分，需要道具图标体系 | 拆分背包格、分类标签、详情面板 |
@@ -40,20 +40,20 @@
 3. 关卡选择 stage_select
 4. 三消战斗 battle
 5. 战斗结算 result
+6. 队伍编成 team
+7. 怪物图鉴 album
 
 ### 有概念图，可继续专业拆分/代入
 
-1. 怪物图鉴 album
-2. 队伍编成 team
-3. 怪物进化 evolve
-4. 战斗准备 battle_prepare
-5. 牧场 ranch
-6. 商店 shop
-7. 背包 inventory
-8. 成就 achievement
-9. 设置 settings
-10. 每日签到 sign_in
-11. 新手教程 tutorial
+1. 怪物进化 evolve
+2. 战斗准备 battle_prepare
+3. 牧场 ranch
+4. 商店 shop
+5. 背包 inventory
+6. 成就 achievement
+7. 设置 settings
+8. 每日签到 sign_in
+9. 新手教程 tutorial
 
 ### 暂无独立概念图
 

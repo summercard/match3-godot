@@ -115,13 +115,8 @@ func _play_success() -> void:
 	tween.tween_property(_flash_rect, "modulate:a", 0.8, 0.075)
 	tween.tween_property(_flash_rect, "modulate:a", 0.0, 0.075)
 
-	# 阶段2：怪物弹跳 1→1.3→0.8→1.05→1 (150-550ms)
-	tween.parallel().tween_property(_parent, "scale", Vector2(1.3, 1.3), 0.1).set_ease(Tween.EASE_OUT).set_delay(0.15)
-	tween.tween_property(_parent, "scale", Vector2(0.8, 0.8), 0.1).set_ease(Tween.EASE_IN)
-	tween.tween_property(_parent, "scale", Vector2(1.05, 1.05), 0.05).set_ease(Tween.EASE_OUT)
-	tween.tween_property(_parent, "scale", Vector2.ONE, 0.05)
-
-	# 阶段3：GET! 文字弹出 (400-1200ms)
+	# 阶段2：GET! 文字弹出。不要 tween parent.scale，
+	# parent 是当前场景节点，缩放它会破坏主入口的适配比例。
 	tween.tween_callback(_show_get_text).set_delay(0.4)
 
 func _show_get_text() -> void:
@@ -141,14 +136,8 @@ func _show_get_text() -> void:
 func _play_fail() -> void:
 	var tween = get_tree().create_tween()
 
-	# 阶段1：屏幕震动 (0-200ms)
-	var original_pos = _parent.position
-	for i in range(6):
-		var offset = Vector2(randf_range(-3.0, 3.0), 0.0)
-		tween.tween_property(_parent, "position", original_pos + offset, 0.033)
-	tween.tween_property(_parent, "position", original_pos, 0.033)
-
-	# 阶段2：MISS 文字 (200-800ms)
+	# 失败只播放局部 MISS，不移动 parent.position，
+	# parent 位置由 main.gd 用于统一居中适配。
 	tween.tween_callback(_show_miss_text).set_delay(0.2)
 
 func _show_miss_text() -> void:

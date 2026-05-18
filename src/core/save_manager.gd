@@ -6,9 +6,9 @@ extends Node
 ## 翻译要点：
 ## - 使用 ConfigFile 进行持久化存储（微信用 wx.setStorageSync JSON序列化）
 ## - ConfigFile 有多个 section：player/team/inventory/stageProgress/achievements/signIn/settings/ranch/tutorial/rewards
-## - 经验公式：每级所需 = 100 + level * 20，总经验需计算到 level-1
+## - 经验公式：每级所需 = 80 + level * 10，总经验需计算到 level-1
 ## - 扫荡奖励 = (100 + 3*50)*0.8 = 160 金币，(100 + 3*20)*0.8 = 72 经验
-## - 牧场挂机经验速率 = 2 + level * 0.5 每5分钟
+## - 牧场挂机经验速率 = 5 + level 每5分钟
 ## - 签到连续天数超过7天额外奖励 +20金币 +10经验
 
 const ItemDB = preload("res://src/data/item_db.gd")
@@ -27,6 +27,7 @@ func _exit_tree() -> void:
 # ========== ConfigFile 持久化 ==========
 ## 存储文件路径（相对于用户数据目录）
 const SAVE_PATH: String = "user://save_game.cfg"
+const RANCH_IDLE_INTERVAL_MS: float = 5.0 * 60.0 * 1000.0
 
 var _config: ConfigFile = null
 var _dirty: bool = false
@@ -37,7 +38,7 @@ func _init() -> void:
 
 ## 加载存档文件
 func _load_config() -> void:
-	var err: int = _config.load(SAVE_PATH)
+	var err: int = _config.load(_get_save_path())
 	if err != OK:
 		# 文件不存在或读取失败，使用默认空配置
 		_config = ConfigFile.new()
@@ -45,11 +46,20 @@ func _load_config() -> void:
 ## 保存到文件
 func _save_config() -> void:
 	if _dirty:
-		var err: int = _config.save(SAVE_PATH)
+		var err: int = _config.save(_get_save_path())
 		if err == OK:
 			_dirty = false
 		else:
 			push_warning("[SaveManager] 保存失败: %d" % err)
+
+func _get_save_path() -> String:
+	var test_path := OS.get_environment("MATCH3_SAVE_PATH")
+	if not test_path.is_empty():
+		return test_path
+	for arg: String in OS.get_cmdline_args():
+		if arg.begins_with("res://tests/") or arg.contains("/tests/"):
+			return "user://test_save_game.cfg"
+	return SAVE_PATH
 
 ## 标记为脏，等待批量保存
 func _mark_dirty() -> void:
@@ -110,11 +120,8 @@ func save_player(player_data: Dictionary) -> bool:
 ## 增加金币
 ## JS: addGold(amount)
 func add_gold(amount: int) -> bool:
-	print("[SaveManager] add_gold called: amount=", amount)
 	var player: Dictionary = get_player()
-	print("[SaveManager] player before: gold=", player.get("gold", 0))
 	player["gold"] = player.get("gold", 0) + amount
-	print("[SaveManager] player after: gold=", player.get("gold", 0))
 	save_player(player)
 	return true
 
@@ -128,7 +135,7 @@ func spend_gold(amount: int) -> bool:
 	save_player(player)
 	return true
 
-## 增加玩家经验（使用 get_exp_for_level 递增公式：100 + level * 20）
+## 增加玩家经验（使用 get_exp_for_level 递增公式：80 + level * 10）
 ## JS: addPlayerExp(amount)
 func add_player_exp(amount: int) -> bool:
 	var player: Dictionary = get_player()
@@ -208,9 +215,9 @@ func get_captured_monsters() -> Array:
 
 ## 计算升级所需经验（每级所需经验递增）
 ## JS: _getExpForLevel(level)
-## 公式: 100 + level * 20
+## 公式: 80 + level * 10
 static func get_exp_for_level(level: int) -> int:
-	return 100 + level * 20
+	return 80 + level * 10
 
 ## 获取当前等级总经验要求（用于经验条显示）
 ## JS: _getTotalExpForLevel(level)
@@ -393,11 +400,23 @@ func can_sweep(stage_id: String) -> bool:
 ## 获取扫荡奖励（金币+经验）
 ## JS: getSweepReward(stageId)
 ## 扫荡奖励 = 正常战斗胜利奖励的80%
-## 基础金币100 + 3星加成150，金币: (100 + 3*50) * 0.8 = 160
-## 基础经验100 + 3星加成60，经验: (100 + 3*20) * 0.8 = 72
-func get_sweep_reward(_stage_id: String) -> Dictionary:
-	var gold: int = int((100 + 3 * 50) * 0.8)
-	var exp: int = int((100 + 3 * 20) * 0.8)
+func get_sweep_reward(stage_id: String) -> Dictionary:
+	var stage: Dictionary = get_stage(stage_id)
+	var stage_rewards: Dictionary = stage.get("rewards", {})
+	var base_gold: int = int(stage_rewards.get("gold", 0))
+	var base_exp: int = int(stage_rewards.get("exp", 0))
+	if base_gold <= 0 and base_exp <= 0:
+		base_gold = 100
+		base_exp = 60
+	var stars: int = clampi(get_stage_stars(stage_id), 1, 3)
+	var star_multiplier: float = 1.0
+	if stars == 1:
+		star_multiplier = 0.6
+	elif stars == 2:
+		star_multiplier = 0.8
+	var sweep_ratio: float = 0.8
+	var gold: int = maxi(1, int(round(base_gold * star_multiplier * sweep_ratio)))
+	var exp: int = maxi(1, int(round(base_exp * star_multiplier * sweep_ratio)))
 	return { "gold": gold, "exp": exp }
 
 ## 执行扫荡
@@ -616,33 +635,68 @@ func load_settings() -> Dictionary:
 	})
 
 # ========== 牧场系统（section: ranch） ==========
-## 牧场数据结构: { slots: [{ monsterId, placedAt }, ...], unlockedSlots: 3 }
+## 牧场数据结构: { slots: [{ monster_id, placed_at }, ...], unlocked_slots: 3 }
 
 ## 获取牧场状态
 ## JS: getRanchState()
 func get_ranch_state() -> Dictionary:
-	return _get_value("ranch", "data", {
+	var state: Dictionary = _get_value("ranch", "data", {
 		"slots": [
-			{ "monsterId": null, "placedAt": null },
-			{ "monsterId": null, "placedAt": null },
-			{ "monsterId": null, "placedAt": null }
+			{ "monster_id": null, "placed_at": null },
+			{ "monster_id": null, "placed_at": null },
+			{ "monster_id": null, "placed_at": null }
 		],
-		"unlockedSlots": 3
+		"unlocked_slots": 3
 	})
+	var normalized := _normalize_ranch_state(state)
+	if normalized != state:
+		set_ranch_state(normalized)
+	return normalized
 
 ## 设置牧场状态
 ## JS: setRanchState(state)
 func set_ranch_state(state: Dictionary) -> bool:
-	_set_value("ranch", "data", state)
+	_set_value("ranch", "data", _normalize_ranch_state(state))
 	_save_config()
 	return true
 
+func _normalize_ranch_state(state: Dictionary) -> Dictionary:
+	var normalized: Dictionary = {
+		"slots": [],
+		"unlocked_slots": int(state.get("unlocked_slots", state.get("unlockedSlots", 3)))
+	}
+	var slots: Array = state.get("slots", [])
+	for slot_data in slots:
+		normalized["slots"].append(_normalize_ranch_slot(slot_data))
+	while normalized["slots"].size() < normalized["unlocked_slots"]:
+		normalized["slots"].append({ "monster_id": null, "placed_at": null })
+	return normalized
+
+func _normalize_ranch_slot(slot_data: Variant) -> Dictionary:
+	if not slot_data is Dictionary:
+		return { "monster_id": null, "placed_at": null }
+	var slot: Dictionary = slot_data
+	return {
+		"monster_id": slot.get("monster_id", slot.get("monsterId", null)),
+		"placed_at": _normalize_ranch_timestamp_ms(slot.get("placed_at", slot.get("placedAt", null)))
+	}
+
+func _normalize_ranch_timestamp_ms(value: Variant) -> Variant:
+	if value == null:
+		return null
+	var timestamp := float(value)
+	if timestamp <= 0.0:
+		return null
+	if timestamp < 100000000000.0:
+		return timestamp * 1000.0
+	return timestamp
+
 ## 计算挂机经验速率（每5分钟）
 ## JS: getIdleExpRate(monsterId)
-## 公式: 2 + level * 0.5
+## 公式: 5 + level，保证前期挂机也有可见成长反馈
 func get_idle_exp_rate(monster_id: String) -> float:
 	var level: int = get_monster_level(monster_id) if get_monster_pokedex(monster_id).size() > 0 else 1
-	return 2.0 + level * 0.5
+	return 5.0 + level
 
 ## 收取单只怪物的挂机经验
 ## JS: collectIdleExp(monsterId)
@@ -651,16 +705,16 @@ func collect_idle_exp(monster_id: String) -> float:
 	var slot: Variant = null
 
 	for s: Dictionary in ranch.get("slots", []):
-		if s.get("monsterId") == monster_id:
+		if s.get("monster_id") == monster_id:
 			slot = s
 			break
 
-	if slot == null or slot.get("placedAt", 0.0) == 0.0:
+	if slot == null or slot.get("placed_at", 0.0) == 0.0:
 		return 0.0
 
-	var now_ts: float = Time.get_unix_time_from_system()
-	var elapsed_sec: float = now_ts - slot.get("placedAt", 0.0)
-	var intervals: int = int(elapsed_sec / (5.0 * 60.0))
+	var now_ms: float = Time.get_unix_time_from_system() * 1000.0
+	var elapsed_ms: float = now_ms - float(slot.get("placed_at", 0.0))
+	var intervals: int = int(elapsed_ms / RANCH_IDLE_INTERVAL_MS)
 	if intervals <= 0:
 		return 0.0
 
@@ -670,8 +724,8 @@ func collect_idle_exp(monster_id: String) -> float:
 	# 增加经验
 	add_monster_exp(monster_id, int(exp))
 
-	# 重置放置时间（使用 Unix 时间戳）
-	slot["placedAt"] = now_ts
+	# 重置放置时间（毫秒时间戳）
+	slot["placed_at"] = now_ms
 	set_ranch_state(ranch)
 
 	return exp
@@ -696,6 +750,9 @@ func load_tutorial_progress() -> Dictionary:
 		"completed": false,
 		"currentStep": 0
 	})
+
+func has_tutorial_progress() -> bool:
+	return _config.has_section_key("tutorial", "data")
 
 # ========== 静态工具方法 ==========
 

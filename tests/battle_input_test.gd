@@ -1,10 +1,13 @@
 extends SceneTree
 
+var _main: Control = null
+
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
 	var main: Control = load("res://main.tscn").instantiate()
+	_main = main
 	root.add_child(main)
 	await process_frame
 	await process_frame
@@ -18,7 +21,7 @@ func _run() -> void:
 	var move := _find_valid_move(board)
 	if move.is_empty():
 		push_error("[BattleInput] no valid move found")
-		quit(1)
+		await _finish(1)
 		return
 	
 	var start := _cell_center(board, move["r1"], move["c1"])
@@ -26,10 +29,11 @@ func _run() -> void:
 	battle_scene.call("_begin_pointer", start)
 	battle_scene.call("_end_pointer", end)
 	await process_frame
+	await _wait_for_idle(battle_scene)
 	
 	if battle.turn_count <= 0:
 		push_error("[BattleInput] drag did not trigger a valid swap")
-		quit(1)
+		await _finish(1)
 		return
 
 	battle_scene = await _load_battle(main, stage_data)
@@ -38,17 +42,18 @@ func _run() -> void:
 	move = _find_valid_move(board)
 	if move.is_empty():
 		push_error("[BattleInput] no valid move found for event path")
-		quit(1)
+		await _finish(1)
 		return
 
 	start = _cell_center(board, move["r1"], move["c1"])
 	end = _cell_center(board, move["r2"], move["c2"])
 	_send_mouse_drag(battle_scene, start, end)
 	await process_frame
+	await _wait_for_idle(battle_scene)
 
 	if battle.turn_count <= 0:
 		push_error("[BattleInput] scaled mouse event did not trigger a valid swap")
-		quit(1)
+		await _finish(1)
 		return
 
 	battle_scene = await _load_battle(main, stage_data)
@@ -57,29 +62,51 @@ func _run() -> void:
 	move = _find_valid_move(board)
 	if move.is_empty():
 		push_error("[BattleInput] no valid move found for viewport dispatch")
-		quit(1)
+		await _finish(1)
 		return
 
 	start = _cell_center(board, move["r1"], move["c1"])
 	end = _cell_center(board, move["r2"], move["c2"])
 	await _dispatch_mouse_drag(battle_scene, start, end)
 	await process_frame
+	await _wait_for_idle(battle_scene)
 
 	if battle.turn_count <= 0:
 		push_error("[BattleInput] viewport mouse dispatch did not trigger a valid swap")
-		quit(1)
+		await _finish(1)
 		return
 	
-	print("[BattleInput] OK")
-	quit(0)
+	await _finish(0)
+
+func _finish(exit_code: int) -> void:
+	for _i in range(120):
+		await process_frame
+	if is_instance_valid(_main):
+		_main.queue_free()
+		_main = null
+	await process_frame
+	await process_frame
+	if exit_code == 0:
+		print("[BattleInput] OK")
+	quit(exit_code)
 
 func _load_battle(main: Control, stage_data: Dictionary) -> Control:
 	main.switch_scene("battle", {
 		"stageId": "stage_1_1",
-		"stageData": stage_data
+		"stageData": stage_data,
+		"inputTestOnly": true
 	})
 	await process_frame
 	return main.get_current_scene()
+
+func _wait_for_idle(battle_scene: Control) -> void:
+	for _i in range(180):
+		await process_frame
+		if not is_instance_valid(battle_scene):
+			return
+		var state: int = int(battle_scene.get("_state"))
+		if state == 0 or state == 5:
+			return
 
 func _find_valid_move(board) -> Dictionary:
 	for r in range(board.rows):

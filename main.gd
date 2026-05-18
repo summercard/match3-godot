@@ -122,6 +122,8 @@ func _initialize_scene(scene_node: Control, scene_name: String, data: Dictionary
 		scene_node.battle_started.connect(_on_battle_started)
 	if scene_node.has_signal("back_pressed"):
 		scene_node.back_pressed.connect(func(): _request_scene_switch("main"))
+	if scene_node.has_signal("tutorial_completed"):
+		scene_node.tutorial_completed.connect(func(): _request_scene_switch("main"))
 
 func _request_scene_switch(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:
 	var scene_manager := get_node_or_null("/root/SceneManager")

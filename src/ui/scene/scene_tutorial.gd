@@ -125,24 +125,26 @@ func _init_steps() -> void:
 	]
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneTutorial] 新手引导初始化")
 	_opacity = 0.0
 	_tutorial_ready = false
 	
-	# 从保存的进度恢复（最多从步骤3开始，避免跳过太多）
+	var replay: bool = data.get("replay", false)
 	var progress := _load_tutorial_progress()
-	if progress.get("completed", false) and progress.get("currentStep", 0) > 0:
-		_current_step = mini(progress["currentStep"], _total_steps - 2)
-	else:
+	if progress.get("completed", false) or replay:
 		_current_step = 0
+	else:
+		_current_step = clampi(int(progress.get("currentStep", 0)), 0, _total_steps - 1)
 
 func _load_tutorial_progress() -> Dictionary:
-	# TODO: 从 SaveManager 加载引导进度
+	var save_manager := get_node_or_null("/root/SaveManager")
+	if save_manager != null and save_manager.has_method("load_tutorial_progress"):
+		return save_manager.load_tutorial_progress()
 	return { "completed": false, "currentStep": 0 }
 
 func _save_tutorial_progress(step: int) -> void:
-	# TODO: 保存引导进度到 SaveManager
-	pass
+	var save_manager := get_node_or_null("/root/SaveManager")
+	if save_manager != null and save_manager.has_method("save_tutorial_progress"):
+		save_manager.save_tutorial_progress(step)
 
 ## ============================================
 # 输入处理
@@ -155,6 +157,11 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			_on_tap(event.position.x, event.position.y)
+			accept_event()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_on_tap(event.position.x, event.position.y)
+			accept_event()
 
 func _on_tap(x: float, y: float) -> void:
 	if not _tutorial_ready:
@@ -184,7 +191,6 @@ func _next_step() -> void:
 		_save_tutorial_progress(_current_step)
 
 func _skip_tutorial() -> void:
-	print("[SceneTutorial] 跳过引导")
 	_complete_tutorial()
 
 func _complete_tutorial() -> void:
@@ -195,10 +201,6 @@ func _complete_tutorial() -> void:
 	_tutorial_ready = false
 	
 	emit_signal("tutorial_completed")
-	
-	# 延迟进入主菜单
-	await get_tree().create_timer(0.5).timeout
-	# TODO: 切换到主菜单场景
 
 ## ============================================
 # 更新逻辑
