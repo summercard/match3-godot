@@ -13,6 +13,7 @@ extends Control
 
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const MonsterDBScript = preload("res://src/data/monster_db.gd")
+const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 
 ## 信号定义
 signal battle_started(stage_id: String, stage_data: Dictionary)
@@ -65,16 +66,6 @@ const ELEMENT_ICON_ASSETS := {
 	"grass": "res://assets/images/stage/icon_gem_grass.png",
 	"thunder": "res://assets/images/stage/icon_gem_thunder.png",
 	"light": "res://assets/images/stage/icon_gem_light.png",
-}
-
-const MONSTER_ASSETS := {
-	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"enemy_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"enemy_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"enemy_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png",
 }
 
 ## 单例
@@ -169,8 +160,6 @@ func _ready() -> void:
 	instance = self
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneBattlePrepare] 战斗准备初始化")
-	
 	# 接收关卡数据
 	_stage_id = data.get("stageId", "stage_1_1")
 	
@@ -315,7 +304,6 @@ func _back_button_pressed() -> void:
 
 func _start_battle() -> void:
 	if _is_player_team_empty():
-		print("[SceneBattlePrepare] 队伍为空，跳转队伍编成")
 		_show_empty_team_alert = true
 		_alert_show_time = Time.get_ticks_msec() / 1000.0
 		
@@ -326,7 +314,6 @@ func _start_battle() -> void:
 			sm.switch_scene("team")
 		return
 	
-	print("[SceneBattlePrepare] 开始战斗: %s" % _stage_id)
 	emit_signal("battle_started", _stage_id, _stage_data)
 
 ## ============================================
@@ -711,7 +698,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
 	var monster_id: String = monster.get("id", "")
-	var path: String = MONSTER_ASSETS.get(monster_id, "")
+	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
 	var tex := _get_texture(path)
 	if tex != null:
 		_draw_texture_fit(tex, rect)

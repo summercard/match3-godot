@@ -15,25 +15,25 @@ const STAGES_DATA: Dictionary = {
 					"id": "stage_1_1", "name": "新手训练", "type": "normal",
 					"enemies": ["enemy_001"],
 					"enemyLevel": 1,
-					"rewards": {"gold": 30, "exp": 15}
+					"rewards": {"gold": 45, "exp": 45}
 				},
 				{
 					"id": "stage_1_2", "name": "草原小径", "type": "normal",
 					"enemies": ["enemy_003", "enemy_003"],
 					"enemyLevel": 2,
-					"rewards": {"gold": 50, "exp": 25}
+					"rewards": {"gold": 65, "exp": 60}
 				},
 				{
 					"id": "stage_1_3", "name": "草原深处", "type": "normal",
 					"enemies": ["enemy_001", "enemy_003"],
 					"enemyLevel": 3,
-					"rewards": {"gold": 70, "exp": 38}
+					"rewards": {"gold": 85, "exp": 75}
 				},
 				{
 					"id": "stage_1_4", "name": "灌木迷宫", "type": "normal",
 					"enemies": ["enemy_002", "enemy_003"],
 					"enemyLevel": 3,
-					"rewards": {"gold": 85, "exp": 45}
+					"rewards": {"gold": 105, "exp": 90}
 				},
 				{
 					"id": "stage_1_5", "name": "花叶兽的领地", "type": "boss",
@@ -42,7 +42,7 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_001"], "trigger": "hp_50", "hpMultiplier": 1.3}
 					],
 					"enemyLevel": 3,
-					"rewards": {"gold": 100, "exp": 50}
+					"rewards": {"gold": 150, "exp": 120}
 				}
 			]
 		},

@@ -262,7 +262,7 @@ func _calc_idle_exp() -> void:
 			if _game and _game.storage:
 				level = _game.storage.get_monster_level(slot["monster_id"])
 
-			var rate = 2.0 + level * 0.5
+			var rate = 5.0 + level
 			if _game and _game.storage:
 				rate = _game.storage.get_idle_exp_rate(slot["monster_id"])
 
@@ -278,7 +278,7 @@ func _init_bubbles() -> void:
 		if slot["monster_id"]:
 			_add_bubble(i, slot["monster_id"])
 
-func _add_bubble(slot_index: int, monster_id: int) -> void:
+func _add_bubble(slot_index: int, _monster_id: String) -> void:
 	var type_idx = randi() % BUBBLE_TYPES.size()
 	var life = BUBBLE_LIFE_MIN + randf() * (BUBBLE_LIFE_MAX - BUBBLE_LIFE_MIN)
 
@@ -637,15 +637,14 @@ func _on_slot_pressed(index: int) -> void:
 	_build_slot_buttons()
 	_update_detail_panel()
 
-func _on_picker_item_pressed(monster_id: int) -> void:
+func _on_picker_item_pressed(monster_id: String) -> void:
 	# 检查是否已在其他槽位
 	for i in range(_slots_data.size()):
 		if _slots_data[i]["monster_id"] == monster_id:
 			# 移除
 			_slots_data[i] = {"monster_id": null, "placed_at": null}
 			_save_ranch_state()
-			_build_slot_buttons()
-			_select_slot(_selected_slot)
+			_refresh_ranch_view()
 			return
 
 	# 放入当前选中槽位
@@ -664,10 +663,7 @@ func _on_picker_item_pressed(monster_id: int) -> void:
 	_slots_data[_selected_slot] = {"monster_id": monster_id, "placed_at": now_ms}
 
 	_save_ranch_state()
-	_build_slot_buttons()
-	_select_slot(_selected_slot)
-	_calc_idle_exp()
-	_init_bubbles()
+	_refresh_ranch_view()
 
 func _on_collect_pressed() -> void:
 	var total_collected = 0
@@ -688,13 +684,19 @@ func _on_collect_pressed() -> void:
 
 	_save_ranch_state()
 	_idle_exp_map = {}
-	_calc_idle_exp()
-	_build_slot_buttons()
-	_select_slot(_selected_slot)
+	_refresh_ranch_view()
 
 	if total_collected > 0:
-		print("[SceneRanch] 收取挂机经验: %d EXP" % total_collected)
 		exp_collected.emit(total_collected)
+
+func _refresh_ranch_view() -> void:
+	_calc_idle_exp()
+	_init_bubbles()
+	_build_slot_buttons()
+	_build_picker_buttons()
+	_select_slot(_selected_slot)
+	_update_detail_panel()
+	_update_collect_button()
 
 func _on_back_pressed() -> void:
 	_go_to_scene("main")

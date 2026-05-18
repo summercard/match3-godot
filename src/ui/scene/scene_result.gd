@@ -4,6 +4,8 @@
 class_name SceneResult
 extends Control
 
+const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
@@ -38,16 +40,6 @@ const COMMON_ASSETS := {
 	"gem_fire": "res://assets/images/stage/icon_gem_fire.png",
 	"gem_grass": "res://assets/images/stage/icon_gem_grass.png",
 	"gem_water": "res://assets/images/stage/icon_gem_water.png",
-}
-
-const MONSTER_ASSETS := {
-	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"enemy_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"enemy_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"enemy_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png",
 }
 
 # === 颜色常量 ===
@@ -166,30 +158,49 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		_storage = game.storage
 	if _game and _game.has_node("AchievementManager"):
 		_achievement_manager = _game.get_node("AchievementManager")
-	_battle_result = battle_result
-	_is_win = battle_result.get("result", "") == "win"
+	_battle_result = _normalize_battle_result(battle_result)
+	_is_win = _battle_result.get("result", "") == "win"
 	_calc_stars()
-	var capture_played_inline: bool = battle_result.get("capture_played_inline", false)
+	var capture_played_inline: bool = _battle_result.get("capture_played_inline", false)
 	if capture_played_inline:
-		_captured = battle_result.get("captured", false)
-		_capture_target = battle_result.get("capture_target", {})
-		_capture_result = battle_result.get("capture_result_text", {})
-		_capture_item_used = battle_result.get("capture_item_used", {})
-		_save_rewards()
+		_captured = _battle_result.get("captured", false)
+		_capture_target = _battle_result.get("capture_target", {})
+		_capture_result = _battle_result.get("capture_result_text", {})
+		_capture_item_used = _battle_result.get("capture_item_used", {})
 	else:
 		if _is_win:
 			_process_capture()
-	if not capture_played_inline:
-		_calc_rewards()
-		_setup_buttons()
-		_save_rewards()
-	else:
-		_calc_rewards()
-		_setup_buttons()
+	_calc_rewards()
+	_setup_buttons()
+	_save_rewards()
 	if _is_win and _battle_result.has("stageId"):
 		if _storage and _storage.has_method("save_stage_stars"):
 			_storage.save_stage_stars(_battle_result["stageId"], _stars)
 	_trigger_achievements()
+
+func _normalize_battle_result(result: Dictionary) -> Dictionary:
+	var normalized := result.duplicate(true)
+	if not normalized.has("stageId") and normalized.has("stage_id"):
+		normalized["stageId"] = normalized["stage_id"]
+	if not normalized.has("stage_id") and normalized.has("stageId"):
+		normalized["stage_id"] = normalized["stageId"]
+	if not normalized.has("playerTeam") and normalized.has("player_team"):
+		normalized["playerTeam"] = normalized["player_team"]
+	if not normalized.has("player_team") and normalized.has("playerTeam"):
+		normalized["player_team"] = normalized["playerTeam"]
+	if not normalized.has("turnCount") and normalized.has("turn_count"):
+		normalized["turnCount"] = normalized["turn_count"]
+	if not normalized.has("maxTurns") and normalized.has("max_turns"):
+		normalized["maxTurns"] = normalized["max_turns"]
+	if not normalized.has("stageRewards") and normalized.has("stage_rewards"):
+		normalized["stageRewards"] = normalized["stage_rewards"]
+	if not normalized.has("totalDamageDealt") and normalized.has("total_damage_dealt"):
+		normalized["totalDamageDealt"] = normalized["total_damage_dealt"]
+	if not normalized.has("playerLevel") and normalized.has("player_level"):
+		normalized["playerLevel"] = normalized["player_level"]
+	if not normalized.has("enemyLevel") and normalized.has("enemy_level"):
+		normalized["enemyLevel"] = normalized["enemy_level"]
+	return normalized
 
 func init(data: Dictionary = {}) -> void:
 	var game := get_node_or_null("/root/GameManager")
@@ -321,14 +332,10 @@ func _setup_buttons() -> void:
 		_has_next_stage = false
 
 func _save_rewards() -> void:
-	print("[SceneResult] _save_rewards called. storage=", _storage != null, " rewards=", _rewards)
 	if not _storage:
-		print("[SceneResult] _storage is null, returning")
 		return
-	print("[SceneResult] calling add_gold ", _rewards["gold"])
 	if _rewards["gold"] > 0 and _storage.has_method("add_gold"):
 		_storage.add_gold(_rewards["gold"])
-		print("[SceneResult] add_gold done")
 	if _rewards["exp"] > 0 and _storage.has_method("add_player_exp"):
 		_storage.add_player_exp(_rewards["exp"])
 	_add_monster_exp_from_battle()
@@ -380,7 +387,7 @@ func _add_monster_exp_from_battle() -> void:
 		return
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
 	var base_exp: int = stage_rewards.get("exp", 100) if stage_rewards else 100
-	var exp_to_add: int = int(round(base_exp * 0.5))
+	var exp_to_add: int = int(round(base_exp))
 	var player_team: Array = _battle_result.get("playerTeam", [])
 	for monster_id: String in team_members:
 		var battle_monster: Dictionary = {}
@@ -818,9 +825,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
 	var monster_id: String = monster.get("id", "")
-	var path: String = MONSTER_ASSETS.get(monster_id, "")
-	if path.is_empty() and monster_id.begins_with("enemy_"):
-		path = MONSTER_ASSETS.get(monster_id.replace("enemy", "monster"), "")
+	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
 	var tex := _get_texture(path)
 	if tex:
 		_draw_texture_fit(tex, rect)

@@ -14,9 +14,9 @@ func _init() -> void:
 # ============================================
 # 经验需求计算
 # ============================================
-# 每级基础100 + 等级×20
+# 每级基础80 + 等级×10
 static func get_exp_for_level(level: int) -> int:
-	return 100 + level * 20
+	return 80 + level * 10
 
 # 获取升到指定等级所需总经验
 static func get_total_exp_for_level(level: int) -> int:

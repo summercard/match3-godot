@@ -244,7 +244,12 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		)
 
 		var mon_id = monster.get("id", "")
-		skill_charges[mon_id] = skill_charges.get(mon_id, 0) + gem_count
+		var skill_cost: int = int(monster.get("skill", {}).get("cost", 999))
+		var prev_charge: int = int(skill_charges.get(mon_id, 0))
+		var next_charge: int = mini(prev_charge + gem_count, skill_cost)
+		skill_charges[mon_id] = next_charge
+		if prev_charge < skill_cost and next_charge >= skill_cost:
+			skill_ready.emit(monster)
 
 		var target_idx = enemies.find(target)
 		var skill_state = enemy_skill_states.get(target_idx, {})
@@ -283,16 +288,110 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 	# 状态效果（委托给 BattleStatusEffect）
 	_status_effect.try_apply_status_effects(gem_counts, player_team, enemies)
 
-	for monster in player_team:
-		if monster == null or monster.get("hp", 0) <= 0:
-			continue
-		var charge = skill_charges.get(monster.get("id", ""), 0)
-		var skill_cost = monster.get("skill", {}).get("cost", 999)
-		if charge >= skill_cost:
-			skill_ready.emit(monster)
-			skill_charges[monster.get("id", "")] = 0
-
 	return { "damage_log": damage_log, "status_effect_log": _status_effect.get_effect_log() }
+
+
+func use_active_skill(monster_id: String) -> Dictionary:
+	if battle_over:
+		return { "success": false, "reason": "battle_over" }
+
+	var monster: Dictionary = _get_player_monster(monster_id)
+	if monster.is_empty() or monster.get("hp", 0) <= 0:
+		return { "success": false, "reason": "monster_unavailable" }
+
+	var skill: Dictionary = monster.get("skill", {})
+	if skill.is_empty():
+		return { "success": false, "reason": "no_skill" }
+
+	var cost: int = int(skill.get("cost", 999))
+	var charge: int = int(skill_charges.get(monster_id, 0))
+	if charge < cost:
+		return {
+			"success": false,
+			"reason": "not_ready",
+			"charge": charge,
+			"cost": cost
+		}
+
+	var target = _get_weakest_enemy()
+	if target == null:
+		return { "success": false, "reason": "no_target" }
+
+	var element: String = monster.get("element", "")
+	var target_idx: int = enemies.find(target)
+	var element_mult: float = MonsterDb.get_element_multiplier(element, target.get("element", ""))
+	var leader_atk_boost: float = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, element)
+	var synergy_atk_mult: float = get_synergy_atk_mult(element)
+	var skill_mult: float = float(skill.get("multiplier", 1.0))
+	var total_damage: int = _damage_calc.calc_player_damage(
+		monster.get("atk", 10),
+		element,
+		target.get("def", 0),
+		3,
+		1,
+		element_mult,
+		leader_atk_boost,
+		synergy_atk_mult
+	)
+	total_damage = maxi(1, int(round(total_damage * skill_mult)))
+
+	var shield_absorbed: int = 0
+	var remaining_damage: int = total_damage
+	var skill_state = enemy_skill_states.get(target_idx, {})
+	if skill_state is Dictionary and skill_state.has("shield") and skill_state["shield"].get("current_hp", 0) > 0:
+		var shield_result: Dictionary = _damage_calc.apply_shield(total_damage, skill_state["shield"]["current_hp"])
+		shield_absorbed = shield_result.get("absorbed", 0)
+		remaining_damage = shield_result.get("remaining", 0)
+		skill_state["shield"]["current_hp"] -= shield_absorbed
+
+	target["hp"] = target.get("hp", 0) - remaining_damage
+	skill_charges[monster_id] = maxi(0, charge - cost)
+	total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + total_damage
+
+	var target_died: bool = target.get("hp", 0) <= 0
+	var result := {
+		"success": true,
+		"type": "active_skill",
+		"attacker": monster.get("name", ""),
+		"attacker_id": monster_id,
+		"attackerId": monster_id,
+		"attacker_emoji": monster.get("emoji", ""),
+		"skill": skill.duplicate(true),
+		"skill_name": skill.get("name", "技能"),
+		"skillName": skill.get("name", "技能"),
+		"target": target.get("name", ""),
+		"target_emoji": target.get("emoji", ""),
+		"target_index": target_idx,
+		"targetIndex": target_idx,
+		"damage": total_damage,
+		"remaining_damage": remaining_damage,
+		"remainingDamage": remaining_damage,
+		"shield_absorbed": shield_absorbed,
+		"shieldAbsorbed": shield_absorbed,
+		"element": element,
+		"is_effective": element_mult > 1.0,
+		"isEffective": element_mult > 1.0,
+		"is_weak": element_mult < 1.0,
+		"isWeak": element_mult < 1.0,
+		"target_died": target_died,
+		"targetDied": target_died,
+		"battle_ended": false,
+		"battleEnded": false
+	}
+	damage_dealt.emit(result)
+
+	if check_battle_end():
+		result["battle_ended"] = true
+		result["battleEnded"] = true
+
+	return result
+
+
+func _get_player_monster(monster_id: String) -> Dictionary:
+	for monster in player_team:
+		if monster != null and monster.get("id", "") == monster_id:
+			return monster
+	return {}
 
 
 # ========== 敌方行动 ==========
@@ -530,8 +629,11 @@ func get_battle_result() -> Dictionary:
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"total_damage_dealt": total_damage_dealt.duplicate(),
+		"totalDamageDealt": total_damage_dealt.duplicate(),
 		"player_level": player_level,
+		"playerLevel": player_level,
 		"enemy_level": enemy_level,
+		"enemyLevel": enemy_level,
 		"stage_id": stage_id,
 		"stageId": stage_id,
 		"turnCount": turn_count,

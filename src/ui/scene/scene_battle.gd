@@ -11,6 +11,16 @@
 class_name SceneBattle
 extends Control
 
+const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const BattleUIFeedbackScript = preload("res://src/ui/components/battle_ui_feedback.gd")
+const BattleInputMapperScript = preload("res://src/ui/components/battle_input_mapper.gd")
+const BattleAnimationControllerScript = preload("res://src/ui/components/battle_animation_controller.gd")
+const BattleBoardRendererScript = preload("res://src/ui/components/battle_board_renderer.gd")
+const BattleCombatantRendererScript = preload("res://src/ui/components/battle_combatant_renderer.gd")
+const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
+const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
+const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
+
 ## 设计尺寸
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
@@ -27,6 +37,7 @@ enum BattleState {
 
 ## 信号
 signal battle_ended(result: String)
+signal battle_fx_requested(event: Dictionary)
 
 ## 单例
 static var instance: SceneBattle
@@ -146,6 +157,10 @@ var _victory_particles: Array[Dictionary] = []
 
 ## 战斗结束慢动作
 var _slowmotion_timer: float = 0.0
+var _battle_end_overlay_timer: float = 0.0
+var _battle_end_overlay_started: bool = false
+var _battle_end_particles_spawned: bool = false
+var _result_transitioning: bool = false
 
 ## 棋盘屏幕震动（大量消除时）
 var _board_shake_timer: float = 0.0
@@ -174,6 +189,7 @@ var _element_ripple: Dictionary = {
 ## 关卡数据
 var _stage_data: Dictionary = {}
 var _stage_id: String = ""
+var _input_test_only: bool = false
 
 ## 美术资源
 var _art_assets: Dictionary = {}
@@ -269,14 +285,19 @@ const GEM_IMAGE_PATHS := {
 	"light": "res://assets/images/battle/gems/gem_light.png"
 }
 
-const MONSTER_IMAGE_PATHS := {
-	"monster_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"monster_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"monster_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"enemy_001": "res://assets/images/battle/monsters/monster_001_fire_lizard.png",
-	"enemy_002": "res://assets/images/battle/monsters/monster_002_water_cub.png",
-	"enemy_003": "res://assets/images/battle/monsters/monster_003_grass_leaf.png",
-	"monster_boss_001": "res://assets/images/battle/monsters/monster_boss_001_grass_flower_512.png"
+const BATTLE_BG_PATH := "res://assets/images/battle/battle_bg_forest_ruins.png"
+
+const BATTLE_RESULT_OVERLAY_ASSETS := {
+	"victory_banner": "res://assets/images/battle/result_overlay/ui_overlay_victory_banner.png",
+	"defeat_banner": "res://assets/images/battle/result_overlay/ui_overlay_defeat_banner.png",
+	"panel": "res://assets/images/battle/result_overlay/ui_overlay_panel.png",
+	"button_continue": "res://assets/images/battle/result_overlay/ui_overlay_button_continue.png",
+	"capture_plaque": "res://assets/images/battle/result_overlay/ui_overlay_capture_plaque.png",
+	"tap_strip": "res://assets/images/battle/result_overlay/ui_overlay_tap_strip.png",
+	"victory_burst": "res://assets/images/battle/result_overlay/fx_overlay_victory_burst.png",
+	"confetti": "res://assets/images/battle/result_overlay/fx_overlay_confetti.png",
+	"defeat_smoke": "res://assets/images/battle/result_overlay/fx_overlay_defeat_smoke.png",
+	"underline": "res://assets/images/battle/result_overlay/fx_overlay_underline.png"
 }
 
 ## 宝石 TextureRect 缓存
@@ -286,13 +307,12 @@ func _ready() -> void:
 	instance = self
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_add_background("res://assets/images/battle/battle_bg_forest_ruins.png")
+	_add_background(BATTLE_BG_PATH)
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneBattle] 战斗场景初始化")
-	
 	var stage_data = data.get("stageData", null)
 	var stage_id = data.get("stageId", "stage_1_1")
+	_input_test_only = data.get("inputTestOnly", false)
 	
 	_selected_gem = Vector2i(-1, -1)
 	_hit_flashes = []
@@ -310,11 +330,17 @@ func init(data: Dictionary = {}) -> void:
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
+	_screen_flash_timer = 0.0
+	_attack_flash_timer = 0.0
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_damage_popup_queue = []
 	_selection_pulse = 0.0
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail = []
+	_battle_end_overlay_timer = 0.0
+	_battle_end_overlay_started = false
+	_battle_end_particles_spawned = false
+	_result_transitioning = false
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -389,6 +415,11 @@ func _input(event: InputEvent) -> void:
 		return
 	_handle_input_event(event, false)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_inside_tree():
+		return
+	_handle_input_event(event, false)
+
 func _gui_input(event: InputEvent) -> void:
 	_handle_input_event(event, true)
 
@@ -412,6 +443,9 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var pos: Vector2 = _get_pointer_position(event, already_local)
 		if event.pressed:
+			if _try_use_skill_at_position(pos):
+				get_viewport().set_input_as_handled()
+				return
 			_begin_pointer(pos)
 		else:
 			_end_pointer(pos)
@@ -419,6 +453,9 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 	elif event is InputEventScreenTouch:
 		var pos: Vector2 = _get_pointer_position(event, already_local)
 		if event.pressed:
+			if _try_use_skill_at_position(pos):
+				get_viewport().set_input_as_handled()
+				return
 			_begin_pointer(pos)
 		else:
 			_end_pointer(pos)
@@ -466,17 +503,13 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 
 func _get_pointer_position(event: InputEvent, already_local: bool) -> Vector2:
 	var raw_pos: Vector2 = event.position
-	if already_local:
-		return raw_pos
-
-	var local_event := make_input_local(event)
-	var local_pos: Vector2 = local_event.position
-	if _is_board_point(local_pos):
-		return local_pos
-	if _is_board_point(raw_pos):
-		return raw_pos
-	if _is_design_point(local_pos):
-		return local_pos
+	var candidates: Array[Vector2] = BattleInputMapperScript.pointer_candidates(self, event, already_local)
+	for pos: Vector2 in candidates:
+		if _is_board_point(pos):
+			return pos
+	for pos: Vector2 in candidates:
+		if _is_design_point(pos):
+			return pos
 	return raw_pos
 
 func _is_board_point(pos: Vector2) -> bool:
@@ -498,16 +531,56 @@ func _end_pointer(pos: Vector2) -> void:
 		return
 	_pointer_down = false
 	var delta := pos - _pointer_start_pos
+	if _pointer_start_grid.is_empty() and (not _is_design_point(_pointer_start_pos) or not _is_design_point(pos)):
+		var fallback_direction := _direction_from_delta(delta)
+		if not fallback_direction.is_empty() and _try_first_valid_swipe(fallback_direction):
+			_pointer_start_grid = {}
+			return
 	if delta.length() >= DRAG_SWAP_THRESHOLD and not _pointer_start_grid.is_empty():
-		var direction := ""
-		if abs(delta.x) > abs(delta.y):
-			direction = "left" if delta.x < 0 else "right"
-		else:
-			direction = "up" if delta.y < 0 else "down"
+		var direction := _direction_from_delta(delta)
 		_on_swipe(_pointer_start_pos.x, _pointer_start_pos.y, direction)
 	else:
 		_on_tap(pos.x, pos.y)
 	_pointer_start_grid = {}
+
+func _direction_from_delta(delta: Vector2) -> String:
+	return BattleInputMapperScript.direction_from_delta(delta, DRAG_SWAP_THRESHOLD)
+
+func _try_first_valid_swipe(direction: String) -> bool:
+	if _board == null:
+		return false
+	var delta := Vector2i.ZERO
+	match direction:
+		"left":
+			delta = Vector2i(-1, 0)
+		"right":
+			delta = Vector2i(1, 0)
+		"up":
+			delta = Vector2i(0, -1)
+		"down":
+			delta = Vector2i(0, 1)
+		_:
+			return false
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			var row2: int = row + delta.y
+			var col2: int = col + delta.x
+			if row2 < 0 or row2 >= _board.rows or col2 < 0 or col2 >= _board.cols:
+				continue
+			if _board.is_obstacle(row, col) or _board.is_obstacle(row2, col2):
+				continue
+			if _board.is_locked(row, col) or _board.is_locked(row2, col2):
+				continue
+			if not _board.swap(row, col, row2, col2):
+				continue
+			var matched: bool = not _board.find_matches().get("gems", []).is_empty()
+			_board.swap(row, col, row2, col2)
+			if matched:
+				var x: float = _board.offset_x + col * _board.cell_size + _board.cell_size / 2.0
+				var y: float = _board.offset_y + row * _board.cell_size + _board.cell_size / 2.0
+				_on_swipe(x, y, direction)
+				return true
+	return false
 
 func _on_tap(x: float, y: float) -> void:
 	if _state == BattleState.BATTLE_END:
@@ -515,6 +588,9 @@ func _on_tap(x: float, y: float) -> void:
 		return
 	
 	if _state != BattleState.IDLE:
+		return
+
+	if _try_use_skill_at_position(Vector2(x, y)):
 		return
 	
 	if _board == null:
@@ -537,6 +613,82 @@ func _on_tap(x: float, y: float) -> void:
 	if dr + dc == 1:
 		_do_swap(_selected_gem.y, _selected_gem.x, pos["row"], pos["col"])
 	_selected_gem = Vector2i(-1, -1)
+
+func _try_use_skill_at_position(pos: Vector2) -> bool:
+	if _battle == null or _state != BattleState.IDLE:
+		return false
+	for i in range(mini(_battle.player_team.size(), 3)):
+		if not _get_player_card_rect(i).has_point(pos):
+			continue
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null or monster.is_empty() or not monster.has("skill"):
+			return true
+		var skill: Dictionary = monster.get("skill", {})
+		var monster_id: String = monster.get("id", "")
+		var cost: int = int(skill.get("cost", 999))
+		var charge: int = int(_battle.skill_charges.get(monster_id, 0))
+		if monster.get("hp", 0) <= 0:
+			_show_message("%s 已无法行动" % monster.get("name", "伙伴"))
+			return true
+		if charge < cost:
+			_show_message("%s 充能 %d/%d" % [skill.get("name", "技能"), charge, cost])
+			return true
+		var result: Dictionary = _battle.use_active_skill(monster_id)
+		_apply_skill_result_visuals(result)
+		return true
+	return false
+
+func _get_player_card_rect(index: int) -> Rect2:
+	return Rect2(20.0 + index * 120.0, 187.0, 110.0, 58.0)
+
+func _apply_skill_result_visuals(result: Dictionary) -> void:
+	if result.is_empty() or not result.get("success", false):
+		var reason: String = result.get("reason", "")
+		if reason == "not_ready":
+			_show_message("技能充能 %d/%d" % [result.get("charge", 0), result.get("cost", 0)])
+		else:
+			_show_message("技能暂时无法释放")
+		return
+	var skill_name: String = result.get("skill_name", result.get("skillName", "技能"))
+	var attacker: String = result.get("attacker", "伙伴")
+	var damage: int = result.get("remaining_damage", result.get("remainingDamage", result.get("damage", 0)))
+	var shield_absorbed: int = result.get("shield_absorbed", result.get("shieldAbsorbed", 0))
+	var target_idx: int = result.get("target_index", result.get("targetIndex", -1))
+	_show_message("%s 释放 %s！" % [attacker, skill_name])
+	_screen_flash_timer = 0.18
+	_trigger_attack_shake()
+	if target_idx < 0:
+		target_idx = _find_enemy_index(result.get("target", ""))
+	var popup_x: float = DESIGN_W / 2.0
+	var popup_y: float = 95.0
+	if target_idx >= 0:
+		popup_x = 25.0 + target_idx * 120.0 + 55.0
+		popup_y = 80.0
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.3, "maxTimer": 0.3})
+	_floating_texts.append({
+		"text": "-%d" % damage,
+		"x": popup_x,
+		"y": popup_y,
+		"color": C["gold"] if not result.get("isWeak", false) else C["text_muted"],
+		"size": 24.0 if result.get("isEffective", false) else 19.0,
+		"timer": 0.0,
+		"duration": 0.9,
+		"critical": result.get("isEffective", false)
+	})
+	if shield_absorbed > 0:
+		_floating_texts.append({
+			"text": "盾-%d" % shield_absorbed,
+			"x": popup_x,
+			"y": popup_y + 16.0,
+			"color": C["shield"],
+			"size": 13.0,
+			"timer": 0.0,
+			"duration": 0.8
+		})
+	if result.get("targetDied", false):
+		_fall_messages.append({"text": "%s 倒下了！" % result.get("target", "敌人"), "timer": 1.5})
+	if result.get("battleEnded", false):
+		_check_battle_end()
 
 func _on_swipe(x: float, y: float, direction: String) -> void:
 	if _state != BattleState.IDLE:
@@ -577,6 +729,9 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 		_show_message("无效交换")
 		return
 	_battle.turn_count += 1
+	if _input_test_only:
+		_state = BattleState.IDLE
+		return
 	_board.cascade_count = 0
 	_process_matches()
 
@@ -590,12 +745,10 @@ func _process_matches() -> void:
 		return
 	
 	var match_result: Dictionary = _board.find_matches()
-	var matches: Array = match_result.get("gems", [])
-	var enhanced_matches: Array = match_result.get("enhanced", [])
-	var bomb_matches: Array = match_result.get("bomb", [])
-	var rainbow_matches: Array = match_result.get("rainbow", [])
+	var match_context: Dictionary = BattleMatchRulesScript.build_context(_board, match_result, 0.5)
+	var matches: Array = match_context.get("matches", [])
 	
-	if matches.is_empty() and enhanced_matches.is_empty() and bomb_matches.is_empty() and rainbow_matches.is_empty():
+	if not match_context.get("has_matches", false):
 		if _board.cascade_count >= 2:
 			_show_combo_popup(_board.cascade_count)
 		if _check_battle_end():
@@ -607,7 +760,7 @@ func _process_matches() -> void:
 	_board.cascade_count += 1
 	
 	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
-	var total_elim: int = matches.size() + enhanced_matches.size() + bomb_matches.size() + rainbow_matches.size()
+	var total_elim: int = match_context.get("total_elim", 0)
 	if total_elim >= 5 or _board.cascade_count >= 4:
 		_board_shake_timer = 0.3
 	
@@ -619,58 +772,20 @@ func _process_matches() -> void:
 			if m.has("type"):
 				spawn_eliminate_particles(m["row"], m["col"], m["type"])
 	
-	# ===== 第2步：收集特殊消除宝石 =====
-	var explosion_gems: Array = _collect_explosion_gems(enhanced_matches, matches)
-	var all_excluded: Array = matches + explosion_gems
-	var bomb_gems: Array = _collect_bomb_gems(bomb_matches, all_excluded)
-	var all_excluded_2: Array = all_excluded + bomb_gems
-	var rainbow_gems: Array = _collect_rainbow_gems(rainbow_matches, all_excluded_2)
+	# ===== 第2步：读取特殊消除宝石 =====
+	var explosion_gems: Array = match_context.get("explosion_gems", [])
+	var bomb_gems: Array = match_context.get("bomb_gems", [])
+	var rainbow_gems: Array = match_context.get("rainbow_gems", [])
 	
 	# ===== 第3步：构建分时消除动画队列（四段 setTimeout 链，匹配微信版 804-830 行时序）=====
 	_special_elim_phases.clear()
-	if explosion_gems.size() > 0:
-		_special_elim_phases.append({
-			"type": "explosion",
-			"gems": explosion_gems,
-			"matches": enhanced_matches,
-			"delay": 0.1,
-			"timer": 0.0,
-			"triggered": false
-		})
-	if bomb_gems.size() > 0:
-		_special_elim_phases.append({
-			"type": "bomb",
-			"gems": bomb_gems,
-			"matches": bomb_matches,
-			"delay": 0.15,
-			"timer": 0.0,
-			"triggered": false
-		})
-	if rainbow_gems.size() > 0:
-		_special_elim_phases.append({
-			"type": "rainbow",
-			"gems": rainbow_gems,
-			"matches": rainbow_matches,
-			"delay": 0.2,
-			"timer": 0.0,
-			"triggered": false
-		})
+	_special_elim_phases.append_array(match_context.get("special_phases", []))
 	_special_elim_timer = 0.0
 	
 	# ===== 第4步：特殊宝石激活动画（4-match 生成强化宝石时的转换特效）=====
-	if enhanced_matches.size() > 0:
-		var first_enh: Dictionary = enhanced_matches[0]
-		var gem_type: String = "fire"
-		if _board != null and first_enh["row"] >= 0 and first_enh["row"] < _board.rows and first_enh["col"] >= 0 and first_enh["col"] < _board.cols:
-			gem_type = _board.grid[first_enh["row"]][first_enh["col"]]
-		_special_transform_anim = {
-			"row": first_enh["row"],
-			"col": first_enh["col"],
-			"type": gem_type,
-			"timer": 0.5,
-			"duration": 0.5,
-			"triggered": false
-		}
+	var special_transform: Dictionary = match_context.get("special_transform", {})
+	if not special_transform.is_empty():
+		_special_transform_anim = special_transform
 	
 	# ===== 第4.5步：特殊消除视觉提示存储（延迟触发，由 _trigger_special_elim 在对应延迟时执行）=====
 	# 匹配数据已存入 _special_elim_phases[].matches，供分时触发使用
@@ -683,37 +798,8 @@ func _process_matches() -> void:
 	_check_poison_fog_clears(matches)
 	
 	# ===== 第6步：执行消除（普通 + 特殊）=====
-	var gem_counts: Dictionary = _board.remove_matches(matches)
-	
-	# 十字爆炸消除
-	for enh in enhanced_matches:
-		var positions: Array = _board.get_cross_explosion_positions(enh["row"], enh["col"])
-		var e_counts: Dictionary = _board.remove_explosion_gems(positions)
-		for type_key in e_counts:
-			gem_counts[type_key] = gem_counts.get(type_key, 0) + e_counts[type_key]
-	
-	# 炸弹消除
-	for bomb in bomb_matches:
-		var positions: Array = _board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
-		var b_counts: Dictionary = _board.remove_explosion_gems(positions)
-		for type_key in b_counts:
-			gem_counts[type_key] = gem_counts.get(type_key, 0) + b_counts[type_key]
-	
-	# 彩虹消除
-	var rainbow_removed_set: Array = []
-	for m in matches:
-		rainbow_removed_set.append("%d,%d" % [m["row"], m["col"]])
-	for g in explosion_gems:
-		rainbow_removed_set.append("%d,%d" % [g["row"], g["col"]])
-	for g in bomb_gems:
-		rainbow_removed_set.append("%d,%d" % [g["row"], g["col"]])
-	for rainbow in rainbow_matches:
-		var positions: Array = _board.get_rainbow_positions(rainbow["type"], rainbow_removed_set)
-		var r_counts: Dictionary = _board.remove_explosion_gems(positions)
-		for type_key in r_counts:
-			gem_counts[type_key] = gem_counts.get(type_key, 0) + r_counts[type_key]
-		for p in positions:
-			rainbow_removed_set.append("%d,%d" % [p["row"], p["col"]])
+	var removal_result: Dictionary = BattleMatchRulesScript.apply_removals(_board, match_context)
+	var gem_counts: Dictionary = removal_result.get("gem_counts", {})
 	
 	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
@@ -766,7 +852,7 @@ func _process_matches() -> void:
 			_trigger_attack_shake()
 	
 	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
-	var all_special_gems := explosion_gems + bomb_gems + rainbow_gems
+	var all_special_gems: Array = removal_result.get("special_gems", explosion_gems + bomb_gems + rainbow_gems)
 	_check_explosion_poison_fog(all_special_gems)
 	_check_unlock_results(matches, all_special_gems)
 	
@@ -820,12 +906,7 @@ func _process_matches() -> void:
 	
 	# 等待所有特殊消除动画完成（最大延迟 + 消除动画时长）
 	# 微信版时序：explosion 100ms, bomb 150ms, rainbow 200ms, 每段动画 ~300ms
-	var special_wait: float = 0.0
-	if _special_elim_phases.size() > 0:
-		# 取最后一个阶段的延迟 + 动画时长
-		var last_phase: Dictionary = _special_elim_phases[_special_elim_phases.size() - 1]
-		special_wait = last_phase["delay"] + ELIMINATE_DURATION
-	await get_tree().create_timer(maxf(FALL_DURATION, special_wait)).timeout
+	await get_tree().create_timer(BattleMatchRulesScript.get_special_wait(_special_elim_phases, ELIMINATE_DURATION, FALL_DURATION)).timeout
 	_special_elim_phases.clear()
 	
 	# ===== 第8步：下落 + 递归 =====
@@ -838,80 +919,13 @@ func _apply_gravity() -> void:
 	if _board:
 		_board.apply_gravity()
 
-## 收集十字爆炸宝石（去重）
-func _collect_explosion_gems(enhanced_matches: Array, normal_gems: Array) -> Array:
-	var gems: Array = []
-	var normal_set: Dictionary = {}
-	for m in normal_gems:
-		normal_set["%d,%d" % [m["row"], m["col"]]] = true
-	for enh in enhanced_matches:
-		var positions: Array = _board.get_cross_explosion_positions(enh["row"], enh["col"])
-		for p in positions:
-			var key: String = "%d,%d" % [p["row"], p["col"]]
-			if not normal_set.has(key):
-				normal_set[key] = true
-				var cell_size: float = float(_board.cell_size)
-				gems.append({
-					"row": p["row"],
-					"col": p["col"],
-					"type": p["type"],
-					"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
-					"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
-					"is_explosion": true
-				})
-	return gems
-
-## 收集炸弹消除宝石（去重，排除普通+爆炸已消除）
-func _collect_bomb_gems(bomb_matches: Array, excluded_gems: Array) -> Array:
-	var gems: Array = []
-	var removed_set: Dictionary = {}
-	for g in excluded_gems:
-		removed_set["%d,%d" % [g.get("row", -1), g.get("col", -1)]] = true
-	for bomb in bomb_matches:
-		var positions: Array = _board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
-		for p in positions:
-			var key: String = "%d,%d" % [p["row"], p["col"]]
-			if not removed_set.has(key):
-				removed_set[key] = true
-				var cell_size: float = float(_board.cell_size)
-				gems.append({
-					"row": p["row"],
-					"col": p["col"],
-					"type": p["type"],
-					"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
-					"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
-					"is_bomb": true
-				})
-	return gems
-
-## 收集彩虹消除宝石（去重，排除之前所有已消除）
-func _collect_rainbow_gems(rainbow_matches: Array, all_removed: Array) -> Array:
-	var gems: Array = []
-	var removed_set: Dictionary = {}
-	for g in all_removed:
-		removed_set["%d,%d" % [g.get("row", -1), g.get("col", -1)]] = true
-	for rainbow in rainbow_matches:
-		var positions: Array = _board.get_rainbow_positions(rainbow["type"], removed_set.keys())
-		for p in positions:
-			var key: String = "%d,%d" % [p["row"], p["col"]]
-			removed_set[key] = true
-			var cell_size: float = float(_board.cell_size)
-			gems.append({
-				"row": p["row"],
-				"col": p["col"],
-				"type": p["type"],
-				"x": float(_board.offset_x + p["col"] * cell_size + cell_size / 2.0),
-				"y": float(_board.offset_y + p["row"] * cell_size + cell_size / 2.0),
-				"is_rainbow": true
-			})
-	return gems
-
 ## 触发特殊消除动画（在对应延迟时调用，匹配微信版 setTimeout 链时序）
 func _trigger_special_elim(phase: Dictionary) -> void:
 	var type: String = phase["type"]
 	var gems: Array = phase["gems"]
 	var matches: Array = phase.get("matches", [])
 	var cell_size: float = float(_board.cell_size) if _board != null else 42.0
+	_request_battle_fx({"type": "special_elim", "special_type": type, "gems": gems, "matches": matches})
 	
 	match type:
 		"explosion":
@@ -1055,12 +1069,18 @@ func _start_enemy_turn() -> void:
 		if action.get("damage", 0) > 0:
 			var dmg_size := 28.0 if action.get("is_charged", false) else 16.0
 			var dmg_color := C["charged_attack"] if action.get("is_charged", false) else C["danger"]
+			var target_idx := _find_player_index(action.get("target", ""))
+			var popup_x: float = 80.0
+			var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
+			if target_idx >= 0:
+				popup_x = 15.0 + target_idx * 120.0 + 55.0
+				popup_y = 218.0
+				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
 			# 伤害数字加入队列（依次弹出，延迟编排）
-			var base_y: float = 225.0 + _damage_popup_queue.size() * 20.0
 			var entry: Dictionary = {
 				"text": "-%d" % action.get("damage", 0),
-				"x": 80.0,
-				"y": base_y,
+				"x": popup_x,
+				"y": popup_y,
 				"color": dmg_color,
 				"size": dmg_size,
 				"delay": _damage_popup_queue.size() * 0.1,
@@ -1073,16 +1093,19 @@ func _start_enemy_turn() -> void:
 	
 	await get_tree().create_timer(0.8).timeout
 	_enemy_attacks = []
-	if _battle.battle_over:
+	var next_state := BattleFlowControllerScript.enemy_turn_end_state(_battle)
+	if next_state.get("state", "") == "battle_end":
 		_state = BattleState.BATTLE_END
-		_show_message("战斗结束")
+		_begin_battle_end_overlay()
+		_show_message(next_state.get("message", "战斗结束"))
 		return
 	_state = BattleState.IDLE
-	_show_message("你的回合")
+	_show_message(next_state.get("message", "你的回合"))
 
 func _check_battle_end() -> bool:
-	if _battle and _battle.check_battle_end():
+	if BattleFlowControllerScript.should_end_battle(_battle):
 		_state = BattleState.BATTLE_END
+		_begin_battle_end_overlay()
 		# Phase 4: 战斗结束时 inline 播放收服特效
 		# 成功序列：闪白→弹跳→GET! 文字（win）
 		# 失败序列：震动→MISS 文字（lose）
@@ -1093,6 +1116,25 @@ func _check_battle_end() -> bool:
 			_trigger_inline_capture()
 		return true
 	return false
+
+func _begin_battle_end_overlay() -> void:
+	if _battle_end_overlay_started:
+		return
+	_battle_end_overlay_started = true
+	_battle_end_overlay_timer = 0.0
+	_battle_end_particles_spawned = false
+	_result_transitioning = false
+	_attack_shake_timer = 0.0
+	_attack_flash_timer = 0.0
+	_board_shake_timer = 0.0
+	_board_shake_offset = Vector2.ZERO
+	_screen_flash_timer = 0.0
+	_rainbow_flash = 0.0
+	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
+	if _battle != null and _battle.battle_result == "win":
+		_slowmotion_timer = 0.5
+	else:
+		_slowmotion_timer = 0.0
 
 ## ============================================
 # 收服特效 inline 播放（Phase 4: 移回 battle inline）
@@ -1199,6 +1241,9 @@ func _consume_best_capture_item() -> float:
 func _show_message(text: String) -> void:
 	_message_text = text
 	_message_timer = 1.5
+
+func _request_battle_fx(event: Dictionary) -> void:
+	emit_signal("battle_fx_requested", event)
 
 func _show_combo_popup(combo: int) -> void:
 	_combo_popup = {
@@ -1309,6 +1354,15 @@ func _find_enemy_index(name: String) -> int:
 			return i
 	return -1
 
+func _find_player_index(name: String) -> int:
+	if _battle == null:
+		return -1
+	var team: Array = _battle.player_team
+	for i in range(team.size()):
+		if team[i] != null and team[i].get("name", "") == name:
+			return i
+	return -1
+
 ## ============================================
 # 更新逻辑
 ## ============================================
@@ -1321,27 +1375,22 @@ func _process(delta: float) -> void:
 		effective_delta = delta * 0.3  # 0.3x 慢动作
 		if _slowmotion_timer <= 0:
 			_slowmotion_timer = 0.0
-			_spawn_victory_particles()  # 慢动作结束后播放胜利粒子
+			if _state == BattleState.BATTLE_END and not _battle_end_particles_spawned:
+				_battle_end_particles_spawned = true
+				_spawn_victory_particles()
 	
 	# 更新消息
-	if _message_timer > 0:
-		_message_timer -= effective_delta
+	_message_timer = BattleAnimationControllerScript.tick_countdown(_message_timer, effective_delta)
 	
 	# 更新连击弹窗
 	if _combo_popup.has("combo"):
 		_update_combo_popup(effective_delta)
 	
 	# 更新受击闪烁
-	for i in range(_hit_flashes.size() - 1, -1, -1):
-		_hit_flashes[i]["timer"] -= effective_delta
-		if _hit_flashes[i]["timer"] <= 0:
-			_hit_flashes.remove_at(i)
+	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, effective_delta)
 	
 	# 更新倒下提示
-	for i in range(_fall_messages.size() - 1, -1, -1):
-		_fall_messages[i]["timer"] -= effective_delta
-		if _fall_messages[i]["timer"] <= 0:
-			_fall_messages.remove_at(i)
+	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, effective_delta)
 	
 	# 更新 idle 动画
 	if _state == BattleState.IDLE or _state == BattleState.ENEMY_TURN:
@@ -1353,6 +1402,7 @@ func _process(delta: float) -> void:
 	
 	# 更新攻击震动
 	_update_attack_shake(effective_delta)
+	_screen_flash_timer = BattleAnimationControllerScript.tick_countdown(_screen_flash_timer, delta)
 	
 	# 更新 HP 渐变动画
 	_update_hp_display(effective_delta)
@@ -1397,25 +1447,24 @@ func _process(delta: float) -> void:
 	
 	# 更新胜利粒子
 	_update_victory_particles(effective_delta)
+
+	if _state == BattleState.BATTLE_END:
+		_battle_end_overlay_timer += delta
+		if _battle != null and _battle.battle_result == "win" and not _battle_end_particles_spawned and _battle_end_overlay_timer >= 0.35:
+			_battle_end_particles_spawned = true
+			_spawn_victory_particles()
 	
 	# 更新棋盘屏幕震动
-	if _board_shake_timer > 0:
-		_board_shake_timer -= effective_delta
-		var intensity: float = maxf(0.0, _board_shake_timer / 0.3)  # 0.3s 时长，逐渐减弱
-		_board_shake_offset.x = (randf() - 0.5) * 6.0 * intensity
-		_board_shake_offset.y = (randf() - 0.5) * 4.0 * intensity
-	else:
-		_board_shake_offset = Vector2.ZERO
+	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, effective_delta)
+	_board_shake_timer = board_shake["timer"]
+	_board_shake_offset = board_shake["offset"]
 	
 	# 更新特殊宝石激活动画
 	if _special_transform_anim.get("timer", 0.0) > 0:
 		_special_transform_anim["timer"] -= effective_delta
 	
 	# 更新元素连锁全屏波纹
-	if _element_ripple.get("active", false):
-		_element_ripple["timer"] -= effective_delta
-		if _element_ripple["timer"] <= 0:
-			_element_ripple["active"] = false
+	BattleAnimationControllerScript.update_element_ripple(_element_ripple, effective_delta)
 	
 	# 同步 BOSS 技能视觉状态
 	_sync_boss_skill_visuals()
@@ -1430,111 +1479,20 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _update_combo_popup(dt: float) -> void:
-	_combo_popup["timer"] += dt
-	var t: float = _combo_popup["timer"]
-	var phase: String = _combo_popup["phase"]
-	
-	if phase == "in":
-		if t < 0.15:
-			var progress: float = t / 0.15
-			_combo_popup["scale"] = 0.5 + 0.7 * progress
-			_combo_popup["opacity"] = progress
-		else:
-			_combo_popup["phase"] = "peak"
-			_combo_popup["timer"] = 0.0
-			_combo_popup["scale"] = 1.2
-			_combo_popup["opacity"] = 1.0
-	
-	elif phase == "peak":
-		if t < 0.15:
-			var progress: float = t / 0.15
-			_combo_popup["scale"] = 1.2 - 0.2 * progress
-		else:
-			_combo_popup["phase"] = "out"
-			_combo_popup["timer"] = 0.0
-			_combo_popup["scale"] = 1.0
-	
-	elif phase == "out":
-		if t < 0.3:
-			var progress: float = t / 0.3
-			_combo_popup["opacity"] = 1.0 - progress
-		else:
-			_combo_popup.clear()
+	BattleAnimationControllerScript.update_combo_popup(_combo_popup, dt)
 
 func _update_attack_shake(dt: float) -> void:
-	if _attack_shake_timer <= 0:
-		_attack_shake_offset_x = 0.0
-		return
-	
-	_attack_shake_timer -= dt
-	var shake_speed := TAU / 0.05
-	var max_offset := 4.0
-	_attack_shake_offset_x = sin(_attack_shake_timer * shake_speed) * max_offset
-	
-	if _attack_flash_timer > 0:
-		_attack_flash_timer -= dt
+	var state := BattleAnimationControllerScript.update_attack_shake(_attack_shake_timer, _attack_flash_timer, dt)
+	_attack_shake_timer = state["timer"]
+	_attack_flash_timer = state["flash_timer"]
+	_attack_shake_offset_x = state["offset_x"]
 
 func _update_hp_display(dt: float) -> void:
-	# 更新敌方 HP 渐变
-	for i in range(_enemy_display_hp.size() - 1, -1, -1):
-		var h: Dictionary = _enemy_display_hp[i]
-		h["timer"] += dt
-		if h["timer"] >= h["maxTimer"]:
-			h["displayHP"] = h["targetHP"]
-			_enemy_display_hp.remove_at(i)
-		else:
-			var progress: float = h["timer"] / h["maxTimer"]
-			var eased: float = 1.0 - pow(1.0 - progress, 2.0)
-			h["displayHP"] = h["displayHP"] - (h["displayHP"] - h["targetHP"]) * eased
-	
-	# 更新我方 HP 渐变
-	for i in range(_player_display_hp.size() - 1, -1, -1):
-		var h: Dictionary = _player_display_hp[i]
-		h["timer"] += dt
-		if h["timer"] >= h["maxTimer"]:
-			h["displayHP"] = h["targetHP"]
-			_player_display_hp.remove_at(i)
-		else:
-			var progress: float = h["timer"] / h["maxTimer"]
-			var eased: float = 1.0 - pow(1.0 - progress, 2.0)
-			h["displayHP"] = h["displayHP"] - (h["displayHP"] - h["targetHP"]) * eased
+	BattleAnimationControllerScript.update_hp_display(_enemy_display_hp, dt)
+	BattleAnimationControllerScript.update_hp_display(_player_display_hp, dt)
 
 func _update_floating_texts(dt: float) -> void:
-	# 处理伤害数字弹出队列
-	for i in range(_damage_popup_queue.size() - 1, -1, -1):
-		var entry: Dictionary = _damage_popup_queue[i]
-		entry["elapsed"] += dt
-		if entry["elapsed"] >= entry["delay"]:
-			# 延迟到达，将伤害数字加入 _floating_texts
-			var text_entry: Dictionary = {
-				"text": entry["text"],
-				"x": entry["x"],
-				"y": entry["y"],
-				"color": entry["color"],
-				"size": entry["size"],
-				"timer": entry["elapsed"] - entry["delay"],
-				"duration": entry["duration"],
-				"critical": entry.get("critical", false)
-			}
-			_floating_texts.append(text_entry)
-			_damage_popup_queue.remove_at(i)
-	
-	# 更新浮动文字
-	for i in range(_floating_texts.size() - 1, -1, -1):
-		var ft: Dictionary = _floating_texts[i]
-		ft["timer"] += dt
-		if ft["timer"] >= ft.get("duration", 1.0):
-			_floating_texts.remove_at(i)
-	
-	# 更新元素连锁光晕
-	if _element_glow.get("timer", 0.0) > 0.0:
-		_element_glow["timer"] -= dt
-	
-	# 更新滑动轨迹
-	for i in range(_swipe_trail.size() - 1, -1, -1):
-		_swipe_trail[i]["timer"] -= dt
-		if _swipe_trail[i]["timer"] <= 0:
-			_swipe_trail.remove_at(i)
+	BattleAnimationControllerScript.update_floating_texts(_floating_texts, _damage_popup_queue, _element_glow, _swipe_trail, dt)
 
 ## ============================================
 # 渲染
@@ -1542,7 +1500,7 @@ func _update_floating_texts(dt: float) -> void:
 
 func _draw() -> void:
 	# 应用攻击震动偏移
-	if _attack_shake_timer > 0:
+	if _attack_shake_timer > 0 and _state != BattleState.BATTLE_END:
 		_draw_apply_shake()
 	
 	# 背景
@@ -1579,6 +1537,9 @@ func _draw() -> void:
 	
 	# 渲染胜利粒子
 	_draw_victory_particles()
+
+	# 全屏白闪只压在战场内容层，避免盖住结算/Boss UI。
+	_draw_screen_flash()
 	
 	# 选中高亮
 	_draw_selection()
@@ -1604,15 +1565,6 @@ func _draw() -> void:
 	# 中间消息
 	_draw_message()
 	
-	# 战斗结束覆盖
-	if _state == BattleState.BATTLE_END:
-		_draw_battle_end_overlay()
-	
-	# 屏幕闪烁
-	if _screen_flash_timer > 0:
-		var alpha: float = _screen_flash_timer / 0.3 * 0.5
-		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(1.0, 1.0, 1.0, alpha))
-	
 	# 彩虹全屏闪光
 	if _rainbow_flash > 0:
 		var rainbow_alpha: float = (_rainbow_flash / RAINBOW_FLASH_DURATION) * 0.4
@@ -1630,7 +1582,12 @@ func _draw() -> void:
 	
 	# 特殊宝石激活动画
 	_draw_special_transform()
-	
+
+	# 战斗结束覆盖必须最后绘制，避免白闪、彩虹闪、波纹盖在胜负 UI 上。
+	if _state == BattleState.BATTLE_END:
+		_draw_restore()
+		_draw_battle_end_overlay()
+		
 	# 关闭震动
 	if _attack_shake_timer > 0:
 		_draw_restore()
@@ -1640,14 +1597,56 @@ func _draw() -> void:
 ## ============================================
 
 func _draw_apply_shake() -> void:
-	# 通过平移 context 实现震动效果
-	pass
+	var offset := BattleUIFeedbackScript.shake_offset(_attack_shake_timer)
+	draw_set_transform(offset, 0.0, Vector2.ONE)
 
 func _draw_restore() -> void:
-	pass
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_screen_flash() -> void:
+	if _screen_flash_timer <= 0.0:
+		return
+	var alpha: float = clampf(_screen_flash_timer / 0.3, 0.0, 1.0) * 0.22
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(1.0, 1.0, 1.0, alpha))
+
+func _combatant_render_state() -> Dictionary:
+	return {
+		"design_w": DESIGN_W,
+		"colors": C,
+		"idle_time": _idle_time,
+		"hit_flashes": _hit_flashes,
+		"defeated_enemies": _defeated_enemies,
+		"boss_skill_visuals": _boss_skill_visuals,
+		"status_emoji": STATUS_EMOJI,
+		"status_colors": STATUS_COLORS
+	}
+
+func _board_render_state() -> Dictionary:
+	return {
+		"design_w": DESIGN_W,
+		"colors": C,
+		"gem_colors": GEM_COLORS,
+		"lock_colors": LOCK_COLORS,
+		"obstacle_colors": OBSTACLE_COLORS,
+		"poison_fog_colors": POISON_FOG_COLORS,
+		"idle_time": _idle_time,
+		"board_shake_offset": _board_shake_offset,
+		"eliminating_gems": _eliminating_gems,
+		"selected_gem": _selected_gem,
+		"unlock_animations": _unlock_animations,
+		"poison_fog_spread_anims": _poison_fog_spread_anims,
+		"poison_fog_clear_anims": _poison_fog_clear_anims,
+		"special_transform_anim": _special_transform_anim,
+		"eliminate_phase1": ELIMINATE_PHASE1,
+		"eliminate_phase2": ELIMINATE_PHASE2,
+		"eliminate_duration": ELIMINATE_DURATION
+	}
 
 func _draw_background() -> void:
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.03, 0.09, 0.18))
+	var bg_tex := _get_texture(BATTLE_BG_PATH)
+	if bg_tex:
+		_draw_texture_cover(bg_tex, Rect2(0, 0, DESIGN_W, DESIGN_H))
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.03, 0.09, 0.34))
 
 func _draw_title_bar() -> void:
 	var title_color := C["white"]
@@ -1686,236 +1685,22 @@ func _draw_title_bar() -> void:
 			_draw_text_with_shadow(syn_text, DESIGN_W / 2.0, syn_bar_y + 9.0, C["success"], 8.0)
 
 func _draw_enemies() -> void:
-	_draw_text_with_shadow("— 敌方 —", DESIGN_W / 2.0, 65.0, C["danger"], 12.0)
-	
-	var start_x := 15.0
-	var start_y := 80.0
-	if _battle == null:
-		return
-	for i in range(mini(_battle.enemies.size(), 3)):
-		var enemy: Dictionary = _battle.enemies[i]
-		if enemy == null:
-			continue
-		_draw_enemy_card(
-			start_x + i * 120.0,
-			start_y,
-			i,
-			enemy.get("name", "敌人"),
-			maxi(enemy.get("hp", 0), 0),
-			maxi(enemy.get("maxHP", 1), 1),
-			enemy
-		)
+	BattleCombatantRendererScript.draw_enemies(self, _battle, _combatant_render_state())
 
 func _draw_enemy_card(x: float, y: float, index: int, name: String, hp: int, max_hp: int, enemy: Dictionary) -> void:
-	var card_w := 110.0
-	var card_h := 92.0
-	
-	# 检查受击闪烁
-	var flash := _hit_flashes.filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == index)
-	var has_flash := flash.size() > 0
-	
-	# 卡片背景
-	var card_color := C["bg_card"]
-	if has_flash:
-		var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.6
-		card_color = Color(1.0, 0.2, 0.2, flash_alpha)
-	
-	_draw_panel(x + 5, y - 5, 110, card_h, card_color, 0.82)
-	
-	var monster_tex := _get_monster_texture(enemy)
-	if monster_tex:
-		var sprite_size := 70.0 if enemy.get("isBoss", false) else 54.0
-		_draw_texture_fit(monster_tex, Rect2(x + 55.0 - sprite_size / 2.0, y - 2.0 + sin(_idle_time * TAU / 1.5) * 3.0, sprite_size, sprite_size), 1.0 if hp > 0 else 0.35)
-	else:
-		_draw_text_with_shadow(enemy.get("emoji", "👾"), x + card_w / 2.0, y + 25.0, C["white"], 32.0)
-	
-	# 名称
-	_draw_text_with_shadow(name, x + card_w / 2.0, y + 55, C["text_primary"], 12.0)
-	
-	# 血条
-	_draw_hp_bar(x + 12, y + 66, 96.0, 8.0, float(hp), float(max_hp), C["danger"])
-	
-	# HP 数值
-	_draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 82, C["text_muted"], 9.0)
-	
-	# 敌人倒下特效：当 HP <= 0 且未被处理过
-	if hp <= 0 and not _defeated_enemies.has(index):
-		_defeated_enemies.append(index)
-		_spawn_defeat_particles(x + card_w / 2.0, y + card_h / 2.0, C["danger"])
-	
-	# ===== BOSS 技能视觉反馈 =====
-	if _boss_skill_visuals.has(index) and hp > 0:
-		var vis: Dictionary = _boss_skill_visuals[index]
-		
-		# 护盾光圈 + HP 条
-		if vis.get("shield_hp", 0.0) > 0.0:
-			var shield_hp: float = vis["shield_hp"]
-			var shield_max: float = vis["shield_max_hp"]
-			var shield_ratio: float = shield_hp / shield_max if shield_max > 0 else 0.0
-			var shield_color := Color(0.314, 0.706, 1.0, 0.3 + shield_ratio * 0.4)
-			draw_arc(Vector2(x + 55.0, y + 28.0), 36.0, 0.0, TAU, 32, shield_color, 2.0, true)
-			_draw_hp_bar(x + 12.0, y + 75.0, 96.0, 4.0, shield_hp, shield_max, C["shield"])
-			_draw_text_with_shadow("🛡️%d" % int(shield_hp), x + 55.0, y + 81.0, C["shield"], 8.0)
-		
-		# 蓄力中闪烁文字
-		if vis.get("charge_timer", 0.0) > 0.0:
-			var blink_alpha: float = 0.5 + 0.5 * sin(_idle_time * PI * 4.0)
-			var charge_color := Color(1.0, 0.784, 0.196, blink_alpha)
-			_draw_text_with_shadow("⚡蓄力中...", x + 55.0, y - 2.0, charge_color, 10.0)
-	
-	# ===== 状态效果图标 =====
-	if _battle != null and hp > 0:
-		var effects: Array = _battle._status_effect.get_effects_snapshot()
-		if index < effects.size() and effects[index] != null:
-			var effect: Dictionary = effects[index]
-			var status_type: String = effect.get("type", "")
-			var emoji: String = STATUS_EMOJI.get(status_type, "?")
-			var turns: int = effect.get("turns_left", 1)
-			var blink_alpha: float = 0.7 + 0.3 * sin(_idle_time * PI * 3.0)
-			var status_color: Color = STATUS_COLORS.get(status_type, C["text_muted"])
-			status_color.a = blink_alpha
-			_draw_text_with_shadow("%s%d" % [emoji, turns], x + card_w - 10.0, y - 2.0, status_color, 11.0)
+	BattleCombatantRendererScript.draw_enemy_card(self, _battle, _combatant_render_state(), x, y, index, name, hp, max_hp, enemy)
 
 func _draw_team() -> void:
-	_draw_text_with_shadow("— 我方 —", DESIGN_W / 2.0, 180.0, C["success"], 12.0)
-	
-	var start_x := 15.0
-	var start_y := 195.0
-	if _battle == null:
-		return
-	for i in range(mini(_battle.player_team.size(), 3)):
-		var monster: Dictionary = _battle.player_team[i]
-		if monster == null:
-			continue
-		_draw_player_card(
-			start_x + i * 120.0,
-			start_y,
-			i,
-			monster.get("name", "伙伴"),
-			maxi(monster.get("hp", 0), 0),
-			maxi(monster.get("maxHP", 1), 1),
-			monster
-		)
+	BattleCombatantRendererScript.draw_team(self, _battle, _combatant_render_state())
 
 func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, max_hp: int, monster: Dictionary) -> void:
-	var card_w := 110.0
-	var card_h := 58.0
-	
-	_draw_panel(x + 5, y - 8, 110, 58, C["bg_card"], 0.78)
-	
-	var monster_tex := _get_monster_texture(monster)
-	if monster_tex:
-		_draw_texture_fit(monster_tex, Rect2(x + 8.0, y - 5.0 + sin(_idle_time * TAU / 1.5) * 1.2, 42, 42), 1.0 if hp > 0 else 0.35)
-	else:
-		_draw_text_with_shadow(monster.get("emoji", "👾"), x + 30.0, y + 16.0, C["white"], 28.0)
-	
-	# 名称
-	_draw_text_with_shadow(name, x + card_w - 55, y + 6, C["text_primary"], 12.0)
-	
-	# 血条
-	_draw_hp_bar(x + 52, y + 16, 58.0, 7.0, float(hp), float(max_hp), C["success"])
-	
-	# HP 数值
-	_draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w - 28, y + 31, C["text_muted"], 8.0)
-	
-	# 技能充能条（玩家卡片才有）
-	if monster.has("skill"):
-		var skill_cost: int = monster.get("skill", {}).get("cost", 10)
-		var charge: int = 0
-		if _battle != null and _battle.skill_charges.has(monster.get("id", "")):
-			charge = _battle.skill_charges[monster.get("id", "")]
-		var charge_ratio: float = clamp(float(charge) / float(skill_cost) if skill_cost > 0 else 0.0, 0.0, 1.0)
-		if charge_ratio >= 1.0:
-			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["gold"])
-		else:
-			_draw_hp_bar(x + 52.0, y + 38.0, 58.0, 5.0, charge_ratio * skill_cost, skill_cost, C["bg_card"])
+	BattleCombatantRendererScript.draw_player_card(self, _battle, _combatant_render_state(), x, y, index, name, hp, max_hp, monster)
 
 func _draw_board_background() -> void:
-	# 棋盘区域背景
-	var board_x := (DESIGN_W - 336.0) / 2.0  # 8 * 42 = 336
-	var board_y := 235.0
-	var board_w := 336.0 + 10.0
-	var board_h := 336.0 + 10.0
-	
-	_draw_rounded_rect(board_x - 5, board_y - 5, board_w, board_h, 8.0, Color(0.06, 0.2, 0.38, 0.88))
+	BattleBoardRendererScript.draw_board_background(self, DESIGN_W)
 
 func _draw_board() -> void:
-	var cell_size := 42.0
-	var board_x := (DESIGN_W - 336.0) / 2.0 + _board_shake_offset.x
-	var board_y := 280.0 + _board_shake_offset.y
-	if _board != null:
-		cell_size = float(_board.cell_size)
-		board_x = float(_board.offset_x) + _board_shake_offset.x
-		board_y = float(_board.offset_y) + _board_shake_offset.y
-	
-	for row in range(8):
-		for col in range(8):
-			var x := board_x + col * cell_size
-			var y := board_y + row * cell_size
-			_draw_rounded_rect(x + 1, y + 1, cell_size - 2, cell_size - 2, 4.0, Color(0.02, 0.07, 0.16, 0.66))
-			if _board == null:
-				continue
-			# 障碍物格子：保留格子底色，跳过宝石渲染
-			if _board.is_obstacle(row, col):
-				continue
-			var gem_type: String = _board.grid[row][col]
-			if gem_type == "":
-				continue
-			
-			# 检查是否在消除动画中
-			var is_eliminating := false
-			var elim_progress := 0.0
-			for eg in _eliminating_gems:
-				if eg["row"] == row and eg["col"] == col:
-					is_eliminating = true
-					elim_progress = eg["timer"] / eg["duration"]
-					break
-			
-			var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
-			var cx := x + cell_size / 2.0
-			var cy := y + cell_size / 2.0
-			
-			if is_eliminating:
-				# 消除动画（两段式，匹配微信版）
-				var scale := 1.0
-				var alpha := 1.0
-				var brightness := 0.0
-				if elim_progress * ELIMINATE_DURATION <= ELIMINATE_PHASE1:
-					# 阶段1：放大 1→1.2 + 闪白 0→1
-					var p1: float = (elim_progress * ELIMINATE_DURATION) / ELIMINATE_PHASE1
-					scale = 1.0 + 0.2 * p1
-					brightness = p1
-				else:
-					# 阶段2：缩小 1.2→0 + 消失 + 闪白回归 1→0
-					var p2: float = ((elim_progress * ELIMINATE_DURATION) - ELIMINATE_PHASE1) / ELIMINATE_PHASE2
-					scale = 1.2 * (1.0 - p2)
-					alpha = 1.0 - p2
-					brightness = 1.0 - p2
-				_draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha, brightness)
-			else:
-				# 脉动透明度：选中宝石周期1s(0.95↔1.0)，未选中周期2s(0.85↔1.0)
-				var is_selected := _selected_gem.x == col and _selected_gem.y == row
-				var pulse_opacity := 1.0
-				if is_selected:
-					var sel_period := 1.0
-					var t_sel: float = fmod(_idle_time, sel_period) / sel_period
-					var sine_sel: float = sin(t_sel * TAU)
-					pulse_opacity = 0.95 + 0.05 * (sine_sel + 1.0) / 2.0
-				else:
-					var unsel_period := 2.0
-					var t_unsel: float = fmod(_idle_time, unsel_period) / unsel_period
-					var sine_unsel: float = sin(t_unsel * TAU + row * 0.5 + col * 0.3)
-					pulse_opacity = 0.85 + 0.15 * (sine_unsel + 1.0) / 2.0
-				# idle 状态下轻微呼吸缩放
-				var idle_scale := 1.0 + 0.02 * sin(_idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
-				_draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, pulse_opacity)
-	
-	# 渲染特殊元素（锁定宝石、障碍物、毒雾）
-	_draw_locked_gems(_board)
-	_draw_obstacles(_board)
-	_draw_poison_fog(_board)
-	_draw_unlock_animations()
-	_draw_poison_fog_anims()
+	BattleBoardRendererScript.draw_board(self, _board, _board_render_state())
 
 func _draw_gem(cx: float, cy: float, gem_type: String, color: Color) -> void:
 	_draw_gem_animated(cx, cy, gem_type, color, 1.0, 1.0)
@@ -2070,26 +1855,62 @@ func _draw_message() -> void:
 	_draw_text_with_shadow(_message_text, DESIGN_W / 2.0, DESIGN_H / 2.0, text_color, 14.0)
 
 func _draw_battle_end_overlay() -> void:
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.6))
+	_draw_restore()
+	var is_win: bool = _battle != null and _battle.battle_result == "win"
+	var t: float = _battle_end_overlay_timer
+	var fade: float = clampf(t / 0.22, 0.0, 1.0)
+	var panel_alpha: float = clampf((t - 0.12) / 0.28, 0.0, 1.0)
+	var banner_y: float = DESIGN_H / 2.0 - 142.0
 	
-	var result_text := "🎉 胜利！" if (_battle != null and _battle.battle_result == "win") else "💀 失败..."
-	var result_color := C["white"]
-	_draw_text_with_shadow(result_text, DESIGN_W / 2.0, DESIGN_H / 2.0 - 30, result_color, 22.0, true)
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66 * fade))
 	
-	# 收服结果提示（Phase 4: inline 显示）
-	# 成功：闪白→弹跳→GET! 文字；失败：震动→MISS 文字
-	if _battle != null and _battle.battle_result == "win" and not _capture_result_text.is_empty():
-		var cap_color := C["success"] if _capture_success else C["text_muted"]
-		_draw_text_with_shadow(_capture_result_text.get("title", ""), DESIGN_W / 2.0, DESIGN_H / 2.0 + 5, cap_color, 16.0, true)
-	elif _battle != null and _battle.battle_result == "lose" and not _capture_result_text.is_empty():
-		# 失败时显示 MISS 文字
-		var miss_color := C["text_muted"]
-		_draw_text_with_shadow(_capture_result_text.get("title", ""), DESIGN_W / 2.0, DESIGN_H / 2.0 + 5, miss_color, 16.0, true)
+	if is_win:
+		var burst_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["victory_burst"])
+		_draw_texture_centered(burst_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 100.0), Vector2(250.0, 176.0), 0.78 * fade)
+		var confetti_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["confetti"])
+		_draw_texture_fit(confetti_tex, Rect2(16.0, 88.0, 343.0, 229.0), 0.78 * fade)
+	else:
+		var smoke_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["defeat_smoke"])
+		_draw_texture_fit(smoke_tex, Rect2(-50.0, DESIGN_H / 2.0 - 55.0, 475.0, 154.0), 0.92 * fade)
+	
+	var panel_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["panel"])
+	_draw_texture_centered(panel_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 34.0), Vector2(306.0, 168.0), panel_alpha)
+	
+	var banner_path: String = BATTLE_RESULT_OVERLAY_ASSETS["victory_banner"] if is_win else BATTLE_RESULT_OVERLAY_ASSETS["defeat_banner"]
+	var banner_tex := _get_texture(banner_path)
+	_draw_texture_centered(banner_tex, Vector2(DESIGN_W / 2.0, banner_y), Vector2(280.0, 130.0), fade)
+	
+	var title_text := "胜利" if is_win else "失败"
+	var title_color: Color = C["gold"] if is_win else Color(0.78, 0.78, 0.86)
+	_draw_text_with_shadow(title_text, DESIGN_W / 2.0, banner_y + 13.0, title_color, 26.0, true)
+	
+	var underline_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["underline"])
+	_draw_texture_centered(underline_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 10.0), Vector2(220.0, 39.0), 0.85 * panel_alpha)
+	
+	var state_text := "点击查看结算"
+	var state_color: Color = C["text_muted"]
+	if _capture_phase != "done" and _capture_phase != "":
+		state_text = "收服判定中..."
+		state_color = C["gold"]
+	elif not _capture_result_text.is_empty():
+		state_text = _capture_result_text.get("title", state_text)
+		state_color = C["success"] if _capture_success else C["text_muted"]
+	
+	if not _capture_result_text.is_empty():
+		var plaque_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["capture_plaque"])
+		_draw_texture_centered(plaque_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 33.0), Vector2(186.0, 66.0), panel_alpha)
+		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 39.0, state_color, 15.0, true)
+	else:
+		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0, state_color, 15.0, true)
 	
 	if _capture_phase == "done" or _capture_phase == "":
-		_draw_text_with_shadow("点击查看结算", DESIGN_W / 2.0, DESIGN_H / 2.0 + 35, C["text_muted"], 14.0)
+		var tap_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["tap_strip"])
+		_draw_texture_centered(tap_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(188.0, 50.0), 0.86 * panel_alpha)
+		_draw_text_with_shadow("点击继续", DESIGN_W / 2.0 + 6.0, DESIGN_H / 2.0 + 96.0, C["white"], 13.0)
 	else:
-		_draw_text_with_shadow("收服判定中...", DESIGN_W / 2.0, DESIGN_H / 2.0 + 35, C["gold"], 14.0)
+		var button_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["button_continue"])
+		_draw_texture_centered(button_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(170.0, 70.0), 0.65 * panel_alpha)
+	_draw_restore()
 
 func _draw_phase_transition() -> void:
 	if _phase_transition_state.is_empty():
@@ -2113,167 +1934,19 @@ func _draw_phase_transition() -> void:
 ## ============================================
 
 func _draw_locked_gems(b) -> void:
-	if b == null:
-		return
-	for row in range(b.rows):
-		for col in range(b.cols):
-			if not b.is_locked(row, col):
-				continue
-			# 跳过正在播放碎裂动画的锁定宝石
-			var is_shattering := false
-			for anim in _unlock_animations:
-				if anim.get("row") == row and anim.get("col") == col and anim.get("phase") == "shatter":
-					is_shattering = true
-					break
-			if is_shattering:
-				continue
-			
-			var lock: Dictionary = b.locked_gems[row][col]
-			var x := float(b.offset_x + col * b.cell_size)
-			var y := float(b.offset_y + row * b.cell_size)
-			var size := float(b.cell_size)
-			var cx := x + size / 2.0
-			var cy := y + size / 2.0
-			
-			# 锁链边框
-			var chain_color: Color = LOCK_COLORS.chain if lock.get("hp", 1) >= 2 else LOCK_COLORS.chain_weak
-			var corners := [
-				Vector2(x + 3, y + 3), Vector2(x + size - 3, y + 3),
-				Vector2(x + 3, y + size - 3), Vector2(x + size - 3, y + size - 3)
-			]
-			for i in range(4):
-				draw_line(corners[i], corners[(i + 1) % 4], chain_color, 2.5)
-			
-			# 四角锁链emoji
-			var icon_color := Color(0.78, 0.78, 0.86, 0.9)
-			_draw_text_with_shadow("⛓", corners[0].x, corners[0].y, icon_color, 8.0)
-			_draw_text_with_shadow("⛓", corners[1].x, corners[1].y, icon_color, 8.0)
-			_draw_text_with_shadow("⛓", corners[2].x, corners[2].y, icon_color, 8.0)
-			_draw_text_with_shadow("⛓", corners[3].x, corners[3].y, icon_color, 8.0)
-			
-			# 中心锁标记
-			if lock.get("hp", 1) >= 2:
-				_draw_text_with_shadow("🔒", cx, cy - 4, Color(1.0, 1.0, 1.0, 0.7), 8.0)
-			else:
-				_draw_text_with_shadow("×1", cx, cy + 4, Color(1.0, 1.0, 1.0, 0.8), 8.0)
+	BattleBoardRendererScript.draw_locked_gems(self, b, _board_render_state())
 
 func _draw_obstacles(b) -> void:
-	if b == null:
-		return
-	for row in range(b.rows):
-		for col in range(b.cols):
-			if not b.is_obstacle(row, col):
-				continue
-			var ob: Dictionary = b.obstacles[row][col]
-			var x := float(b.offset_x + col * b.cell_size)
-			var y := float(b.offset_y + row * b.cell_size)
-			var size := float(b.cell_size)
-			var cx := x + size / 2.0
-			var cy := y + size / 2.0
-			
-			if ob.get("hp", 2) >= 2:
-				# 完好石块
-				_draw_rounded_rect(x + 2, y + 2, size - 4, size - 4, 4.0, OBSTACLE_COLORS.rock)
-				_draw_rounded_rect(x + 4, y + 4, size - 8, size - 8, 3.0, OBSTACLE_COLORS.rock_solid)
-				_draw_rounded_rect(x + 6, y + 6, size - 16, (size - 8) / 3, 2.0, OBSTACLE_COLORS.highlight)
-				_draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.7), 12.0)
-			else:
-				# 裂纹石块
-				_draw_rounded_rect(x + 2, y + 2, size - 4, size - 4, 4.0, OBSTACLE_COLORS.rock)
-				_draw_rounded_rect(x + 4, y + 4, size - 8, size - 8, 3.0, OBSTACLE_COLORS.rock_cracked)
-				_draw_stroke_rect(x + 4, y + 4, size - 8, size - 8, 1.0, OBSTACLE_COLORS.crack_line)
-				# 裂纹线条
-				draw_line(Vector2(cx - 6, cy - 4), Vector2(cx, cy + 2), OBSTACLE_COLORS.crack_line, 1.5)
-				draw_line(Vector2(cx, cy + 2), Vector2(cx + 5, cy - 6), OBSTACLE_COLORS.crack_line, 1.5)
-				draw_line(Vector2(cx - 3, cy + 1), Vector2(cx + 2, cy + 6), OBSTACLE_COLORS.crack_line, 1.5)
-				_draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.5), 14.0)
+	BattleBoardRendererScript.draw_obstacles(self, b, _board_render_state())
 
 func _draw_poison_fog(b) -> void:
-	if b == null:
-		return
-	var pulse_period := 1.5
-	var pulse_min := 0.2
-	var pulse_max := 0.4
-	var t := fmod(_idle_time, pulse_period) / pulse_period
-	var pulse_opacity := pulse_min + (pulse_max - pulse_min) * (sin(t * TAU) + 1.0) / 2.0
-	
-	for row in range(b.rows):
-		for col in range(b.cols):
-			if not b.is_poison_fog(row, col):
-				continue
-			var x := float(b.offset_x + col * b.cell_size)
-			var y := float(b.offset_y + row * b.cell_size)
-			var size := float(b.cell_size)
-			var cx := x + size / 2.0
-			var cy := y + size / 2.0
-			
-			# 绿色半透明覆盖
-			draw_rect(Rect2(x + 1, y + 1, size - 2, size - 2), Color(0.31, 0.78, 0.31, pulse_opacity))
-			# 骷髅图标
-			var icon_alpha := 0.5 + pulse_opacity
-			_draw_text_with_shadow("💀", cx, cy, Color(1.0, 1.0, 1.0, icon_alpha), 10.0)
+	BattleBoardRendererScript.draw_poison_fog(self, b, _board_render_state())
 
 func _draw_unlock_animations() -> void:
-	for i in range(_unlock_animations.size() - 1, -1, -1):
-		var anim: Dictionary = _unlock_animations[i]
-		var progress: float = anim["timer"] / anim.get("maxTimer", 0.6)
-		if progress >= 1.0:
-			continue
-		var alpha: float = 1.0 - progress
-		var dist: float = progress * 20.0
-		var row: int = anim["row"]
-		var col: int = anim["col"]
-		var cell_size := 42.0
-		var board_x := (DESIGN_W - 336.0) / 2.0
-		var board_y := 280.0
-		if _board != null:
-			cell_size = float(_board.cell_size)
-			board_x = float(_board.offset_x)
-			board_y = float(_board.offset_y)
-		var cx: float = board_x + col * cell_size + cell_size / 2.0
-		var cy: float = board_y + row * cell_size + cell_size / 2.0
-		var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1]]
-		for d: Array in dirs:
-			var px: float = cx + d[0] * dist
-			var py: float = cy + d[1] * dist
-			_draw_text_with_shadow("⛓", px, py, Color(0.6, 0.6, 0.7, alpha), 10.0)
+	BattleBoardRendererScript.draw_unlock_animations(self, _board, _board_render_state())
 
 func _draw_poison_fog_anims() -> void:
-	# 扩散动画
-	for i in range(_poison_fog_spread_anims.size() - 1, -1, -1):
-		var anim: Dictionary = _poison_fog_spread_anims[i]
-		var progress: float = anim["timer"] / 0.6
-		if progress >= 1.0:
-			continue
-		var alpha: float = (1.0 - progress) * 0.6
-		var radius: float = 42.0 * 0.3 * progress * 2.0
-		var cx: float = anim["x"] + 21.0
-		var cy: float = anim["y"] + 21.0
-		var ring_color := Color(0.31, 0.78, 0.31, alpha)
-		# 绘制圆弧
-		var points := maxi(32, radius * 2)
-		for p in range(points):
-			var angle1: float = TAU * p / points
-			var angle2: float = TAU * (p + 1) / points
-			var p1 := Vector2(cx + cos(angle1) * radius, cy + sin(angle1) * radius)
-			var p2 := Vector2(cx + cos(angle2) * radius, cy + sin(angle2) * radius)
-			draw_line(p1, p2, ring_color, 2.0)
-	
-	# 清除动画
-	for i in range(_poison_fog_clear_anims.size() - 1, -1, -1):
-		var anim: Dictionary = _poison_fog_clear_anims[i]
-		var progress: float = anim["timer"] / 0.5
-		if progress >= 1.0:
-			continue
-		var alpha: float = 1.0 - progress
-		var dist: float = progress * 15.0
-		var cx: float = anim["x"] + 21.0
-		var cy: float = anim["y"] + 21.0
-		var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1]]
-		for d: Array in dirs:
-			var px: float = cx + d[0] * dist
-			var py: float = cy + d[1] * dist
-			_draw_text_with_shadow("☁️", px, py, Color(0.31, 0.78, 0.31, alpha), 10.0)
+	BattleBoardRendererScript.draw_poison_fog_anims(self, _board_render_state())
 
 ## ============================================
 # 粒子特效系统
@@ -2354,44 +2027,16 @@ func spawn_unlock_particles(row: int, col: int) -> void:
 		})
 
 func _update_gem_particles(delta: float) -> void:
-	for i in range(_gem_particles.size() - 1, -1, -1):
-		var p: Dictionary = _gem_particles[i]
-		p["x"] += p["vx"] * delta
-		p["y"] += p["vy"] * delta
-		p["vy"] += 200.0 * delta
-		p["life"] -= delta
-		if p["life"] <= 0:
-			_gem_particles.remove_at(i)
+	BattleAnimationControllerScript.update_particle_list(_gem_particles, delta, 200.0)
 
 func _update_obstacle_particles(delta: float) -> void:
-	for i in range(_obstacle_particles.size() - 1, -1, -1):
-		var p: Dictionary = _obstacle_particles[i]
-		p["x"] += p["vx"] * delta
-		p["y"] += p["vy"] * delta
-		p["vy"] += p.get("gravity", 300.0) * delta
-		p["life"] -= delta
-		if p["life"] <= 0:
-			_obstacle_particles.remove_at(i)
+	BattleAnimationControllerScript.update_particle_list(_obstacle_particles, delta, 300.0)
 
 func _update_defeat_particles(delta: float) -> void:
-	for i in range(_defeat_explosions.size() - 1, -1, -1):
-		var p: Dictionary = _defeat_explosions[i]
-		p["x"] += p["vx"] * delta
-		p["y"] += p["vy"] * delta
-		p["vy"] += 180.0 * delta  # 下落加速
-		p["life"] -= delta
-		if p["life"] <= 0:
-			_defeat_explosions.remove_at(i)
+	BattleAnimationControllerScript.update_particle_list(_defeat_explosions, delta, 180.0)
 
 func _update_victory_particles(delta: float) -> void:
-	for i in range(_victory_particles.size() - 1, -1, -1):
-		var p: Dictionary = _victory_particles[i]
-		p["x"] += p["vx"] * delta
-		p["y"] += p["vy"] * delta
-		p["vy"] += 80.0 * delta  # 轻微下落
-		p["life"] -= delta
-		if p["life"] <= 0:
-			_victory_particles.remove_at(i)
+	BattleAnimationControllerScript.update_particle_list(_victory_particles, delta, 80.0)
 
 func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
 	# 生成 8-12 个粒子向外散射
@@ -2497,13 +2142,29 @@ func _get_texture(path: String) -> Texture2D:
 
 func _get_monster_texture(monster: Dictionary) -> Texture2D:
 	var monster_id: String = monster.get("id", "")
-	var path: String = MONSTER_IMAGE_PATHS.get(monster_id, "")
+	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
 	return _get_texture(path)
 
 func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
 		return
 	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale: float = maxf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var src_size := rect.size / scale
+	var source_pos := (tex_size - src_size) / 2.0
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, src_size), Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_texture_centered(tex: Texture2D, center: Vector2, size: Vector2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	_draw_texture_fit(tex, Rect2(center - size / 2.0, size), opacity)
 
 func _draw_element_glow() -> void:
 	if _element_glow.get("timer", 0.0) <= 0.0:
@@ -2540,43 +2201,7 @@ func _draw_element_ripple() -> void:
 	draw_rect(Rect2(DESIGN_W - edge_width, 0, edge_width, DESIGN_H), ripple_color)
 
 func _draw_special_transform() -> void:
-	if _special_transform_anim.get("timer", 0.0) <= 0 or _special_transform_anim.get("triggered", false):
-		return
-	var anim: Dictionary = _special_transform_anim
-	var duration: float = anim.get("duration", 0.5)
-	var timer: float = anim.get("timer", 0.0)
-	var progress: float = 1.0 - timer / duration
-	
-	# 计算位置
-	var cell_size: float = float(_board.cell_size) if _board != null else 42.0
-	var board_x: float = float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
-	var board_y: float = float(_board.offset_y) if _board != null else 280.0
-	var row: int = anim.get("row", -1)
-	var col: int = anim.get("col", -1)
-	if row < 0 or col < 0:
-		return
-	
-	var cx: float = board_x + col * cell_size + cell_size / 2.0
-	var cy: float = board_y + row * cell_size + cell_size / 2.0
-	
-	# 闪光特效：白色圆形扩散
-	if progress < 0.3:
-		var flash_progress: float = progress / 0.3
-		var flash_size: float = cell_size * 1.5 * flash_progress
-		var flash_alpha: float = 0.8 * (1.0 - flash_progress)
-		_draw_circle(cx, cy, flash_size, Color(1.0, 1.0, 1.0, flash_alpha))
-	
-	# 特殊宝石缩放动画（progress 0→0.4：0.5→1.2，0.4→1.0：1.2→1.0）
-	var gem_scale: float = 1.0
-	if progress < 0.4:
-		gem_scale = lerp(0.5, 1.2, progress / 0.4)
-	else:
-		gem_scale = lerp(1.2, 1.0, (progress - 0.4) / 0.6)
-	
-	# 重新绘制该位置的宝石（带缩放）
-	var gem_type: String = anim.get("type", "fire")
-	var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
-	_draw_gem_animated(cx, cy, gem_type, gem_color, gem_scale, 1.0)
+	BattleBoardRendererScript.draw_special_transform(self, _board, _board_render_state())
 
 func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: float = 1.0) -> void:
 	var panel_tex := _get_texture("res://assets/images/battle/ui/ui_panel_dark_large.png")
@@ -2588,10 +2213,7 @@ func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: 
 		_draw_rounded_rect(x, y, w, h, 8.0, panel_color)
 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
-	var shadow_color := Color(0.0, 0.0, 0.0, 0.55)
-	var text_w := 200.0
-	draw_string(ThemeDB.fallback_font, Vector2(x - text_w / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, text_w, size, shadow_color)
-	draw_string(ThemeDB.fallback_font, Vector2(x - text_w / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, text_w, size, color)
+	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER)
 
 func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color) -> void:
 	var bg_color := Color(0.2, 0.2, 0.3, 0.8)
@@ -2610,21 +2232,25 @@ func _go_to_result() -> void:
 	# 如果收服特效还在播放，等待完成
 	if _capture_waiting_for_effect:
 		return
+	if _result_transitioning:
+		return
+	_result_transitioning = true
 	
-	print("[SceneBattle] 进入结算画面")
-	# 触发战斗结束慢动作效果
-	_slowmotion_timer = 0.5  # 0.5s 慢动作（0.3x 速度）
-	# 延迟进入结算，等待慢动作和粒子效果完成
-	await get_tree().create_timer(0.6).timeout
+	var remaining: float = maxf(0.0, 0.72 - _battle_end_overlay_timer)
+	if remaining > 0.0:
+		await get_tree().create_timer(remaining).timeout
+	else:
+		await get_tree().create_timer(0.12).timeout
 	
-	var result: Dictionary = _battle.get_battle_result() if _battle != null else {"result": "win"}
+	if not is_inside_tree() or _battle == null:
+		return
 	
-	# 传递 inline 收服结果给 scene_result（避免重复播放）
-	result["capture_played_inline"] = true
-	result["captured"] = _capture_success
-	result["capture_target"] = _capture_target
-	result["capture_result_text"] = _capture_result_text
-	result["capture_item_used"] = _capture_item_used
+	var result: Dictionary = BattleFlowControllerScript.build_result_payload(_battle, {
+		"success": _capture_success,
+		"target": _capture_target,
+		"result_text": _capture_result_text,
+		"item_used": _capture_item_used
+	})
 	
 	if has_node("/root/SceneManager"):
 		get_node("/root/SceneManager").switch_scene("result", result)
@@ -2650,12 +2276,18 @@ func destroy() -> void:
 	_defeat_explosions.clear()
 	_victory_particles.clear()
 	_defeated_enemies.clear()
+	_screen_flash_timer = 0.0
+	_attack_flash_timer = 0.0
 	_special_transform_anim = {"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false}
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_combo_popup = {"combo": 0, "timer": 0.0, "phase": "", "scale": 0.5, "opacity": 0.0}
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO, "from_pos": Vector2.ZERO}
 	_swipe_trail.clear()
+	_battle_end_overlay_timer = 0.0
+	_battle_end_overlay_started = false
+	_battle_end_particles_spawned = false
+	_result_transitioning = false
 	# Phase 4: 清理收服特效
 	if _capture_effect_node and is_instance_valid(_capture_effect_node):
 		_capture_effect_node.queue_free()
@@ -2713,84 +2345,30 @@ func _update_poison_fog_anims(delta: float) -> void:
 ## ============================================
 
 func _process_poison_fog_turn() -> void:
-	if _board == null:
-		return
-	
-	# 检查棋盘是否有毒雾
-	var has_any_fog := false
-	for row in range(_board.rows):
-		for col in range(_board.cols):
-			if _board.is_poison_fog(row, col):
-				has_any_fog = true
-				break
-		if has_any_fog:
-			break
-	if not has_any_fog:
-		return
-	
-	# 1. 扩散毒雾
-	var new_tiles: Array = _board.spread_poison_fog()
-	if new_tiles.size() > 0:
+	var result: Dictionary = BattleHazardRulesScript.process_poison_turn(_board, _battle)
+	var new_tiles: Array = result.get("spread_tiles", [])
+	if not new_tiles.is_empty():
 		for t in new_tiles:
-			var cell_size := float(_board.cell_size)
-			var cx: float = float(_board.offset_x) + t["col"] * cell_size + cell_size / 2.0
-			var cy: float = float(_board.offset_y) + t["row"] * cell_size + cell_size / 2.0
-			_poison_fog_spread_anims.append({"row": t["row"], "col": t["col"], "x": cx, "y": cy, "timer": 0.0})
+			_poison_fog_spread_anims.append({"row": t["row"], "col": t["col"], "x": t["x"], "y": t["y"], "timer": 0.0})
+		_request_battle_fx({"type": "poison_spread", "tiles": new_tiles})
 		_show_message("☠️ 毒雾扩散了！+%d格" % new_tiles.size())
-	
-	# 2. 计算毒雾伤害
-	var fog_count: int = _board.get_poison_fog_damage_count()
-	if fog_count <= 0:
-		return
-	
-	var damage_per_tile := 0.03  # 3% 最大HP
-	var alive_team: Array = []
-	if _battle != null:
-		for m in _battle.player_team:
-			if m != null and m.get("hp", 0) > 0:
-				alive_team.append(m)
-	if alive_team.is_empty():
-		return
-	
-	var avg_max_hp: float = 0.0
-	for m in alive_team:
-		avg_max_hp += float(m.get("maxHP", 1))
-	avg_max_hp /= alive_team.size()
-	var total_fog_damage: int = int(avg_max_hp * damage_per_tile * fog_count)
-	
+
+	var total_fog_damage: int = result.get("total_damage", 0)
 	if total_fog_damage <= 0:
 		return
-	
-	var damage_per_member: int = total_fog_damage / alive_team.size()
-	for member in alive_team:
-		member["hp"] = maxi(member.get("hp", 0) - damage_per_member, 0)
-	
-	# 显示毒雾伤害浮动文字
-	for idx in range(alive_team.size()):
-		var member: Dictionary = alive_team[idx]
-		var mx: float = 15.0 + float(_battle.player_team.find(member)) * 120.0 + 55.0
-		var my := 195.0
+	for hit in result.get("hits", []):
+		var team_index: int = hit.get("team_index", -1)
+		var mx: float = 15.0 + float(team_index) * 120.0 + 55.0
 		_floating_texts.append({
-			"text": "-%d☠️" % damage_per_member,
-			"x": mx, "y": my,
+			"text": "-%d☠️" % hit.get("damage", 0),
+			"x": mx, "y": 195.0,
 			"color": STATUS_COLORS.get("poison", C["danger"]),
 			"size": 16.0,
 			"timer": 0.0,
 			"duration": 0.8
 		})
-	
-	_show_message("☠️ 毒雾伤害！%d格 × 3%% = %d" % [fog_count, total_fog_damage])
-	
-	# 检查玩家是否因毒雾全灭
-	if _battle != null:
-		var all_dead := true
-		for m in _battle.player_team:
-			if m != null and m.get("hp", 0) > 0:
-				all_dead = false
-				break
-		if all_dead:
-			_battle.battle_over = true
-			_battle.battle_result = "lose"
+	_request_battle_fx({"type": "poison_damage", "hits": result.get("hits", []), "total_damage": total_fog_damage})
+	_show_message("☠️ 毒雾伤害！%d格 × 3%% = %d" % [result.get("fog_count", 0), total_fog_damage])
 
 ## ============================================
 # 消除时的毒雾清除 & 锁定宝石解锁
@@ -2798,57 +2376,33 @@ func _process_poison_fog_turn() -> void:
 
 func _check_poison_fog_clears(matches: Array) -> void:
 	"""消除宝石时检查是否清除了毒雾格子"""
-	var clears: Array = []
-	for m in matches:
-		if m is Dictionary and m.has("row") and m.has("col"):
-			if _board.is_poison_fog(m["row"], m["col"]):
-				_board.clear_poison_fog(m["row"], m["col"])
-				var cell_size := float(_board.cell_size)
-				var cx: float = float(_board.offset_x) + m["col"] * cell_size + cell_size / 2.0
-				var cy: float = float(_board.offset_y) + m["row"] * cell_size + cell_size / 2.0
-				clears.append({"row": m["row"], "col": m["col"], "x": cx, "y": cy, "timer": 0.0})
-				_floating_texts.append({"text": "🧹清除!", "x": cx, "y": cy - 15.0, "color": C["success"], "size": 14.0, "timer": 0.0, "duration": 0.8})
+	var clears: Array = BattleHazardRulesScript.clear_poison_for_gems(_board, matches)
+	for clear in clears:
+		clear["timer"] = 0.0
+		_floating_texts.append({"text": "🧹清除!", "x": clear["x"], "y": clear["y"] - 15.0, "color": C["success"], "size": 14.0, "timer": 0.0, "duration": 0.8})
 	if clears.size() > 0:
 		_poison_fog_clear_anims.append_array(clears)
+		_request_battle_fx({"type": "poison_clear", "tiles": clears})
 		_show_message("🧹 毒雾被清除了！")
 
 func _check_explosion_poison_fog(gems: Array) -> void:
 	"""特殊消除（爆炸/炸弹/彩虹）也检查毒雾清除"""
-	for g in gems:
-		if g is Dictionary and g.has("row") and g.has("col"):
-			if _board.is_poison_fog(g["row"], g["col"]):
-				_board.clear_poison_fog(g["row"], g["col"])
-				var cell_size := float(_board.cell_size)
-				var cx: float = float(_board.offset_x) + g["col"] * cell_size + cell_size / 2.0
-				var cy: float = float(_board.offset_y) + g["row"] * cell_size + cell_size / 2.0
-				_floating_texts.append({"text": "🧹", "x": cx, "y": cy - 10.0, "color": C["success"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+	var clears: Array = BattleHazardRulesScript.clear_poison_for_gems(_board, gems)
+	for clear in clears:
+		_floating_texts.append({"text": "🧹", "x": clear["x"], "y": clear["y"] - 10.0, "color": C["success"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+	if not clears.is_empty():
+		_request_battle_fx({"type": "poison_clear_special", "tiles": clears})
 
 func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
 	"""消除后检查相邻锁定宝石解锁"""
-	var unlock_results: Array = []
-	var checked := {}
-	
-	var all_gems := matches + extra_gems
-	
-	for m in all_gems:
-		if not m is Dictionary or not m.has("row"):
-			continue
-		var results: Array = _board.check_adjacent_unlocks(m["row"], m["col"], m.get("type", ""))
-		for r in results:
-			var key: String = "%d,%d" % [r["row"], r["col"]]
-			if not checked.has(key):
-				checked[key] = true
-				unlock_results.append(r)
-	
+	var unlock_results: Array = BattleHazardRulesScript.check_unlocks(_board, matches, extra_gems)
 	for ur in unlock_results:
-		var cell_size := float(_board.cell_size)
-		var ux: float = float(_board.offset_x) + ur["col"] * cell_size + cell_size / 2.0
-		var uy: float = float(_board.offset_y) + ur["row"] * cell_size + cell_size / 2.0
 		if ur.get("fullyUnlocked", false):
 			_unlock_animations.append({"row": ur["row"], "col": ur["col"], "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
-			_floating_texts.append({"text": "🔓解锁!", "x": ux, "y": uy - 15.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8})
+			_floating_texts.append({"text": "🔓解锁!", "x": ur["x"], "y": ur["y"] - 15.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8})
 		else:
-			_floating_texts.append({"text": "⛓️×%d" % ur.get("remainingHP", 1), "x": ux, "y": uy - 10.0, "color": C["text_muted"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+			_floating_texts.append({"text": "⛓️×%d" % ur.get("remainingHP", 1), "x": ur["x"], "y": ur["y"] - 10.0, "color": C["text_muted"], "size": 12.0, "timer": 0.0, "duration": 0.8})
 	
 	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
+		_request_battle_fx({"type": "unlock", "results": unlock_results})
 		_show_message("🔓 宝石解锁！")

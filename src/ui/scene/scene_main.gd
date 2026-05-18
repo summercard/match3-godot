@@ -209,7 +209,6 @@ func _ready() -> void:
 	_init_particles()
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneMain] 主菜单初始化")
 	_load_player_data()
 	_load_art_assets()
 	_build_bg_cache()
@@ -223,10 +222,8 @@ func _load_player_data() -> void:
 	if _storage == null:
 		_storage = get_node_or_null("/root/SaveManager")
 	
-	print("[SceneMain] _load_player_data called. storage=", _storage != null)
 	if _storage != null and _storage.has_method("get_player"):
 		var player: Dictionary = _storage.get_player()
-		print("[SceneMain] player from SaveManager: gold=", player.get("gold", -1), " gems=", player.get("gems", -1))
 		var level: int = player.get("level", 1)
 		_player = {
 			"name": player.get("name", "冒险家"),
@@ -236,9 +233,7 @@ func _load_player_data() -> void:
 			"exp": player.get("exp", 0),
 			"exp_to_level": SaveManager.get_exp_for_level(level)
 		}
-		print("[SceneMain] _player set to: gold=", _player["gold"])
 	else:
-		print("[SceneMain] storage null or no get_player, using defaults")
 		_player = {
 			"name": "冒险家",
 			"level": 1,

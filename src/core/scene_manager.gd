@@ -7,6 +7,9 @@ var _main_node: Control = null  # main.tscn 的根节点引用
 ## 转场特效
 var _transition_overlay: ColorRect = null
 var _is_transitioning: bool = false
+var _pending_scene_name: String = ""
+var _pending_scene_data: Dictionary = {}
+var _pending_scene_mode: String = ""
 const TRANSITION_DURATION: float = 0.3  # 淡入淡出时长（秒）
 
 func _ready() -> void:
@@ -26,7 +29,9 @@ func _setup_transition_overlay() -> void:
 ## 切换场景（带淡入淡出效果）
 func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:
 	if _is_transitioning:
-		push_warning("[SceneManager] 正在转场中，忽略切换请求: " + scene_name)
+		_pending_scene_name = scene_name
+		_pending_scene_data = data
+		_pending_scene_mode = mode
 		return
 	_is_transitioning = true
 	
@@ -40,6 +45,18 @@ func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") 
 	await _fade_in()
 	
 	_is_transitioning = false
+	_flush_pending_scene()
+
+func _flush_pending_scene() -> void:
+	if _pending_scene_name.is_empty():
+		return
+	var scene_name := _pending_scene_name
+	var data := _pending_scene_data
+	var mode := _pending_scene_mode
+	_pending_scene_name = ""
+	_pending_scene_data = {}
+	_pending_scene_mode = ""
+	call_deferred("switch_scene", scene_name, data, mode)
 
 func _fade_out() -> void:
 	if _transition_overlay == null:
