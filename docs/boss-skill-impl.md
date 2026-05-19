@@ -61,6 +61,22 @@
 
 ---
 
+**已确认完成的技能 (2026-05-20)：**
+- Skill 1: burn ✅
+- Skill 4: freeze ✅
+- Skill 6: life_drain ✅
+- Skill 7: surge ✅
+- Skill 8: confuse ✅
+- Skill 9: shield_plus ✅
+- Skill 10: skill_seal ✅
+
+**待实现技能（不在本次10技能范围内）：**
+- Skill 2: thunder_strike（雷击）
+- Skill 3: reflect（反弹）
+- Skill 5: poison（中毒）
+
+---
+
 ## 执行规则
 1. 每次只实现1个技能
 2. 先实现最简再复杂（burn → freeze → thunder_strike → reflect）
