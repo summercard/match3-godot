@@ -255,14 +255,45 @@ func get_shield_cooldown(enemy_idx: int) -> int:
 
 # ==================== 占位符（Phase 4-5） ====================
 
-## 执行治疗技能（Phase 4 实现）
+## 执行治疗技能
+## 在敌人回合结束时调用，检查是否应触发治疗
+## 返回: { "heal_amount": int, "triggered": bool }
 func execute_heal(enemy_idx: int, enemy: Dictionary) -> Dictionary:
 	var state = get_skill_state(enemy_idx, "heal")
 	if state.is_empty():
-		return {}
+		return { "triggered": false, "heal_amount": 0 }
 	
-	# 占位：实际逻辑在 Phase 4
-	return { "triggered": false }
+	var skills: Array = enemy.get("enemySkills", [])
+	var heal_config = skills.filter(func(s): return s.get("type") == "heal")
+	if heal_config.is_empty():
+		return { "triggered": false, "heal_amount": 0 }
+	
+	state["turns_since_last"] += 1
+	var interval: int = state.get("interval", 4)
+	
+	if state["turns_since_last"] >= interval:
+		state["turns_since_last"] = 0
+		
+		var max_hp: int = enemy.get("maxHP", 0)
+		var percent: float = state.get("percent", 0.1)
+		var heal_amount: int = int(max_hp * percent)
+		var current_hp: int = enemy.get("hp", 0)
+		var new_hp: int = mini(max_hp, current_hp + heal_amount)
+		
+		# 更新敌人HP（通过引用）
+		enemy["hp"] = new_hp
+		
+		skill_heal_triggered.emit(enemy_idx, heal_amount)
+		enemy_skill_action.emit({
+			"type": "heal",
+			"enemy_index": enemy_idx,
+			"enemy": enemy,
+			"heal_amount": heal_amount
+		})
+		
+		return { "triggered": true, "heal_amount": heal_amount }
+	
+	return { "triggered": false, "heal_amount": 0 }
 
 
 ## 每个敌人回合开始时调用，更新技能冷却/计时
