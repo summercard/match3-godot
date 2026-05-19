@@ -97,7 +97,7 @@ func _ready() -> void:
 
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneInventory] 背包初始化")
+	# print("[SceneInventory] 背包初始化")
 	_storage = get_node_or_null("/root/SaveManager")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}

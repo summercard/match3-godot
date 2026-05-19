@@ -346,6 +346,9 @@ func _draw_art_content() -> void:
 	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
 
 	# ---- 三颗属性宝石浮动（错相 sin）----
+	# gem_top_y 在 design 坐标中约为 470（下方区域，在怪物下方，按钮上方）
+	var gem_center_x: float = DW * 0.5   # 187.5 design x 居中
+	var gem_top_y: float = 470.0        # design y 坐标（下方区域）
 	_draw_gem("gem_fire",    gem_center_x - 48.0, gem_top_y + 2.0,  46.0,  0.0)
 	_draw_gem("gem_water",   gem_center_x,        gem_top_y - 6.0,  50.0,  PI / 3.0)
 	_draw_gem("gem_grass",   gem_center_x + 48.0, gem_top_y + 2.0,  46.0,  PI * 2.0 / 3.0)

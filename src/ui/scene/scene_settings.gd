@@ -36,7 +36,7 @@ func _init(game_ref: Node = null) -> void:
 
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneSettings] 设置场景初始化")
+	# print("[SceneSettings] 设置场景初始化")
 	if game == null:
 		game = get_node_or_null("/root/GameManager")
 	_storage = _get_storage()
@@ -180,7 +180,7 @@ func _toggle_setting(id: String) -> void:
 	elif id == "music":
 		settings_data["musicOn"] = not settings_data.get("musicOn", true)
 	_save_settings()
-	print("[SceneSettings] " + id + " = " + ("true" if id == "sound" else "false" if id == "music" else ""))
+	# print("[SceneSettings] " + id + " = " + ("true" if id == "sound" else "false" if id == "music" else ""))
 
 
 func _save_settings() -> void:
@@ -214,7 +214,7 @@ func _do_reset_data() -> void:
 	var storage := _get_storage()
 	if storage and storage.has_method("clear_all_data"):
 		storage.clear_all_data()
-	print("[SceneSettings] 游戏数据已重置")
+	# print("[SceneSettings] 游戏数据已重置")
 	_show_reset_success()
 
 
