@@ -23,9 +23,13 @@ M2.7模型每次只做一个小目标，8分钟间隔，循环执行直到完成
 - [ ] 验证战斗失败时 MISS 特效是否正常播放
 
 ### P5-3: 最终收尾
-- [ ] 清理所有 debug print 语句（或标记 TODO）
-- [ ] 确认 scene_battle.gd 的 destroy() 正确释放所有资源
-- [ ] 更新 cycle-state.json 标记 P5 完成
+- [x] 清理所有 debug print 语句（或标记 TODO）✅（commit dfde630）
+- [x] 确认 scene_battle.gd 的 destroy() 正确释放所有资源 ✅（commit dfde630）
+- [x] 更新 cycle-state.json 标记 P5 完成 ✅
+
+---
+
+## ✅ Phase 5 全部完成（2026-05-20T00:29:00Z）
 
 ---
 
