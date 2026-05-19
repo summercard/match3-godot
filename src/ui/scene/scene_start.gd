@@ -153,6 +153,9 @@ func _end_hold() -> void:
 
 
 func _in_btn(pos: Vector2) -> bool:
+	# 实际开始按钮只有下半部分，限制触控范围在 y*0.78 以下
+	if pos.y < size.y * 0.78:
+		return false
 	return _btn_rect().has_point(pos)
 
 
