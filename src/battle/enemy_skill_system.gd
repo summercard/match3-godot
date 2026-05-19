@@ -166,28 +166,94 @@ func is_charging(enemy_idx: int) -> bool:
 	return state.get("is_charging", false)
 
 
-# ==================== Phase 3: 护盾技能解耦（占位符） ====================
+# ==================== Phase 3: 护盾技能解耦 ====================
 
-
-## 执行护盾技能（Phase 3 实现）
-func execute_shield_before_damage(enemy_idx: int) -> Dictionary:
+## 护盾减伤计算
+## 在伤害结算前调用，将伤害分为护盾吸收部分和穿透部分
+## 返回: { "absorbed": int, "remaining": int }
+func execute_shield_before_damage(enemy_idx: int, damage: int) -> Dictionary:
 	var state = get_skill_state(enemy_idx, "shield")
-	if state.is_empty() or state.get("current_hp", 0) <= 0:
-		return { "absorbed": 0, "remaining": 0 }
+	if state.is_empty():
+		return { "absorbed": 0, "remaining": damage }
 	
-	# 占位：实际逻辑在 Phase 3
-	return { "absorbed": 0, "remaining": state.get("current_hp", 0) }
+	var shield_hp: int = state.get("current_hp", 0)
+	if shield_hp <= 0:
+		return { "absorbed": 0, "remaining": damage }
+	
+	# 使用 DamageCalculator 计算护盾吸收
+	var absorbed := mini(shield_hp, damage)
+	var remaining := damage - absorbed
+	state["current_hp"] -= absorbed
+	
+	# 如果护盾被打破，发出信号
+	if state["current_hp"] <= 0:
+		skill_shield_broken.emit(enemy_idx)
+		enemy_skill_action.emit({
+			"type": "shield_broken",
+			"enemy_index": enemy_idx
+		})
+	
+	return { "absorbed": absorbed, "remaining": remaining }
 
 
-## 检查并激活护盾（Phase 3 实现）
+## 检查并激活护盾
+## 在敌人回合开始时调用，检查护盾是否应该激活
+## 返回: bool - 是否成功激活护盾
 func check_and_activate_shield(enemy_idx: int, enemy: Dictionary) -> bool:
 	var state = get_skill_state(enemy_idx, "shield")
 	if state.is_empty():
 		return false
 	
-	# 占位：实际逻辑在 Phase 3
+	var skills: Array = enemy.get("enemySkills", [])
+	var shield_config = skills.filter(func(s): return s.get("type") == "shield")
+	if shield_config.is_empty():
+		return false
+	
+	var shield_hp: int = shield_config[0].get("hp", 0)
+	var cooldown: int = shield_config[0].get("cooldown", 4)
+	
+	# 检查护盾是否需要激活：current_hp <= 0 且 cooldown_left <= 0
+	if state.get("current_hp", 0) <= 0 and state.get("cooldown_left", 0) <= 0:
+		state["current_hp"] = shield_hp
+		state["max_hp"] = shield_hp
+		state["cooldown_left"] = cooldown
+		
+		skill_shield_appear.emit(enemy_idx, shield_hp)
+		enemy_skill_action.emit({
+			"type": "shield_appear",
+			"enemy_index": enemy_idx,
+			"enemy": enemy,
+			"shield_hp": shield_hp,
+			"shield_max_hp": shield_hp
+		})
+		return true
+	
+	# 冷却递减
+	if state.get("cooldown_left", 0) > 0:
+		state["cooldown_left"] -= 1
+	
 	return false
 
+
+## 检查护盾状态（是否有效）
+func is_shield_active(enemy_idx: int) -> bool:
+	var state = get_skill_state(enemy_idx, "shield")
+	return state.get("current_hp", 0) > 0
+
+
+## 获取护盾当前HP
+func get_shield_hp(enemy_idx: int) -> int:
+	var state = get_skill_state(enemy_idx, "shield")
+	return state.get("current_hp", 0)
+
+
+## 获取护盾剩余冷却
+func get_shield_cooldown(enemy_idx: int) -> int:
+	var state = get_skill_state(enemy_idx, "shield")
+	return state.get("cooldown_left", 0)
+
+
+# ==================== 占位符（Phase 4-5） ====================
 
 ## 执行治疗技能（Phase 4 实现）
 func execute_heal(enemy_idx: int, enemy: Dictionary) -> Dictionary:
