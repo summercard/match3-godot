@@ -21,6 +21,7 @@ class_name EnemySkillSystem
 ##   burn:    { "damage": int, "duration_left": int }
 ##   thunder_strike: { "damage": int, "cooldown": int, "turns_since_last": int }
 ##   reflect: { "percent": float, "duration": int, "duration_left": int, "is_active": bool }
+##   freeze:  { "chance": float, "duration": int, "duration_left": int }
 
 
 # 信号定义
@@ -36,6 +37,8 @@ signal skill_reflect_activate(enemy_idx: int, percent: float, duration: int)
 signal skill_reflect_trigger(enemy_idx: int, target_idx: int, reflected_damage: int)
 signal skill_reflect_expire(enemy_idx: int)
 signal skill_thunder_strike_triggered(enemy_idx: int, damage: int)
+signal skill_freeze_activate(enemy_idx: int, target_idx: int, chance: float, duration: int)
+signal skill_freeze_expire(enemy_idx: int, target_idx: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -46,12 +49,14 @@ const SKILL_TYPE_HEAL := "heal"
 const SKILL_TYPE_BURN := "burn"
 const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
 const SKILL_TYPE_REFLECT := "reflect"
+const SKILL_TYPE_FREEZE := "freeze"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...}, "freeze": {...} } }
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
+var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -117,6 +122,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"duration": skill.get("duration", 2),
 						"duration_left": 0,
 						"is_active": false
+					}
+				"freeze":
+					state["freeze"] = {
+						"chance": skill.get("chance", 0.3),
+						"duration": skill.get("duration", 1),
+						"duration_left": 0
 					}
 		
 		if not state.is_empty():
@@ -543,6 +554,99 @@ func has_burn_target(enemy_idx: int) -> bool:
 	return _burn_targets[enemy_idx].get("duration_left", 0) > 0
 
 
+# ==================== Phase 6: 冰封技能 ====================
+
+## 尝试激活冰封效果
+## 在敌人攻击造成伤害后调用（概率触发）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "activated": bool, "chance": float, "duration": int }
+func try_activate_freeze(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "freeze")
+	if state.is_empty():
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	# 如果已经存在冰封效果，不重复激活
+	if _freeze_targets.has(enemy_idx) and _freeze_targets[enemy_idx].get("duration_left", 0) > 0:
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	var freeze_chance: float = state.get("chance", 0.3)
+	var freeze_duration: int = state.get("duration", 1)
+	
+	# 概率判定
+	if randf() > freeze_chance:
+		return { "activated": false, "chance": freeze_chance, "duration": 0 }
+	
+	_freeze_targets[enemy_idx] = {
+		"target_idx": target_idx,
+		"chance": freeze_chance,
+		"duration_left": freeze_duration
+	}
+	
+	skill_freeze_activate.emit(enemy_idx, target_idx, freeze_chance, freeze_duration)
+	enemy_skill_action.emit({
+		"type": "freeze_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": freeze_chance,
+		"duration": freeze_duration
+	})
+	
+	return { "activated": true, "chance": freeze_chance, "duration": freeze_duration }
+
+
+## 检查目标是否处于冰封状态
+## 返回: bool - 是否被冰封
+func is_target_frozen(enemy_idx: int) -> bool:
+	if not _freeze_targets.has(enemy_idx):
+		return false
+	return _freeze_targets[enemy_idx].get("duration_left", 0) > 0
+
+
+## 获取冰封信息
+func get_freeze_info(enemy_idx: int) -> Dictionary:
+	return _freeze_targets.get(enemy_idx, {})
+
+
+## 处理冰封效果持续时间
+## 在玩家回合开始时调用，更新冰封持续时间并返回是否仍处于冰封状态
+## 返回: { "target_idx": int, "is_frozen": bool, "expired": bool }
+func process_freeze_duration(enemy_idx: int) -> Dictionary:
+	if not _freeze_targets.has(enemy_idx):
+		return { "target_idx": -1, "is_frozen": false, "expired": false }
+	
+	var freeze_info: Dictionary = _freeze_targets[enemy_idx]
+	var target_idx: int = freeze_info.get("target_idx", -1)
+	var duration_left: int = freeze_info.get("duration_left", 0)
+	
+	if target_idx < 0:
+		_freeze_targets.erase(enemy_idx)
+		return { "target_idx": -1, "is_frozen": false, "expired": false }
+	
+	var is_frozen: bool = duration_left > 0
+	var expired: bool = false
+	
+	# 持续时间减少
+	duration_left -= 1
+	freeze_info["duration_left"] = duration_left
+	
+	if duration_left <= 0:
+		_freeze_targets.erase(enemy_idx)
+		expired = true
+		skill_freeze_expire.emit(enemy_idx, target_idx)
+		enemy_skill_action.emit({
+			"type": "freeze_expire",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx
+		})
+	
+	return { "target_idx": target_idx, "is_frozen": is_frozen, "expired": expired }
+
+
+## 获取当前冰封目标
+func get_freeze_target(enemy_idx: int) -> Dictionary:
+	return _freeze_targets.get(enemy_idx, {})
+
+
 ## 每个敌人回合开始时调用，更新技能冷却/计时
 func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
 	# 处理反弹效果持续时间（先减少）
@@ -597,3 +701,4 @@ func reset() -> void:
 	_skill_states.clear()
 	_burn_targets.clear()
 	_reflect_targets.clear()
+	_freeze_targets.clear()
