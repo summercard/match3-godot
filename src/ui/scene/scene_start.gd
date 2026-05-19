@@ -50,8 +50,7 @@ var _touching: bool = false
 var _lp_glow: float = 0.0
 var _hold_time: float = 0.0
 var _lp_done: bool = false
-var _btn_press_scale: float = 1.0  # 按钮长按时缩放（0.8s满时1.12）
-var _glow_timer_active: bool = false
+
 var _assets: Dictionary = {}
 var _particles: Array = []
 var _has_bg: bool = false
