@@ -39,7 +39,7 @@ const DW := 375.0
 const DH := 667.0
 
 # ---- 长按阈值（秒）----
-const LONG_PRESS_SEC := 0.5
+const LONG_PRESS_SEC := 0.8
 
 # ---- 状态 ----
 var _opacity: float = 0.0
@@ -50,6 +50,8 @@ var _touching: bool = false
 var _lp_glow: float = 0.0
 var _hold_time: float = 0.0
 var _lp_done: bool = false
+var _btn_press_scale: float = 1.0  # 按钮长按时缩放（0.8s满时1.12）
+var _glow_timer_active: bool = false
 var _assets: Dictionary = {}
 var _particles: Array = []
 var _has_bg: bool = false
@@ -93,15 +95,21 @@ func _process(delta: float) -> void:
 
 	# 长按光晕衰减（未按住时渐消）
 	if _lp_glow > 0.0:
-		_lp_glow = maxf(0.0, _lp_glow - delta * 2.0)
+		_lp_glow = maxf(0.0, _lp_glow - delta * 2.5)
 
 	# 长按检测
 	if _touching and _ready_flag and not _lp_done:
 		_hold_time += delta
-		_lp_glow = minf(_hold_time / LONG_PRESS_SEC, 1.0)
+		var lp_progress := minf(_hold_time / LONG_PRESS_SEC, 1.0)
+		_lp_glow = lp_progress
+		# 缩放：0.8s 满时达到 1.12 倍（稍放大）
+		_btn_press_scale = 1.0 + lp_progress * 0.12
 		if _hold_time >= LONG_PRESS_SEC:
 			_lp_done = true
 			_do_enter()
+	elif not _touching:
+		# 松开时缩放回弹
+		_btn_press_scale = maxf(1.0, _btn_press_scale - delta * 4.0)
 
 	# 粒子更新
 	_update_particles(delta)
@@ -142,8 +150,9 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _begin_hold() -> void:
-	# 点击立即进入（移除长按逻辑）
-	_do_enter()
+	_touching = true
+	_hold_time = 0.0
+	_lp_done = false
 
 
 func _end_hold() -> void:
@@ -175,6 +184,7 @@ func _do_enter() -> void:
 	_ready_flag = false
 	_touching = false
 	_lp_glow = 0.0
+	_btn_press_scale = 1.0
 
 	# 淡出后切换场景
 	var tween = create_tween()
@@ -487,14 +497,19 @@ func _draw_fallback_content() -> void:
 
 func _draw_glow_button() -> void:
 	var pressed := _touching and not _lp_done
+	# 长按时额外缩放（_btn_press_scale 已经包含 pressed 缩放信息）
+	var long_press_scale := _btn_press_scale if _lp_glow > 0.0 else 1.0
 	var ps := 0.95 if pressed else 1.0
+	ps = ps * long_press_scale
 	var btn := _btn_rect(ps)
 	var center := btn.position + btn.size / 2.0
 
 	# ---- 发光光晕（多层径向渐变模拟）----
-	var glow_i := _pulse + _lp_glow * 0.5
+	# 长按满时 glow 更强（×1.6），平时只用 pulse
+	var glow_boost := 1.0 + _lp_glow * 0.6
+	var glow_i := (_pulse + _lp_glow * 0.5) * glow_boost
 	var glow_a := 0.5 + glow_i * 0.5
-	var radius := maxf(btn.size.x, btn.size.y) * 1.0
+	var radius := maxf(btn.size.x, btn.size.y) * 1.2
 
 	for i in range(10):
 		var t := float(i) / 10.0
