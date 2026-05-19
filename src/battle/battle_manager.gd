@@ -557,6 +557,7 @@ func get_status() -> Dictionary:
 			if _enemy_skill_system != null:
 				for idx in range(enemies.size()):
 					result[idx] = _enemy_skill_system.get_enemy_state(idx)
+				return result
 			return result
 		)(),
 		"leader_skill_info": leader_skill_info,
