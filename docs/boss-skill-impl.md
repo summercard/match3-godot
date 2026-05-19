@@ -11,9 +11,9 @@
 ## 待实现技能（按优先级）
 
 ### Skill 1: burn 灼烧
-- [ ] 每回合对攻击者造成固定伤害
-- [ ] 持续3回合
-- [ ] 配置：{ "type": "burn", "damage": 15, "interval": 1, "duration": 3 }
+- [x] 每回合对攻击者造成固定伤害
+- [x] 持续3回合
+- [x] 配置：{ "type": "burn", "damage": 15, "interval": 1, "duration": 3 }
 
 ### Skill 2: thunder_strike 雷击
 - [ ] 周期性高伤害
