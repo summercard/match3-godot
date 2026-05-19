@@ -460,21 +460,9 @@ func enemy_action() -> Dictionary:
 			if skill_state["shield"].get("cooldown_left", 0) > 0:
 				skill_state["shield"]["cooldown_left"] -= 1
 
-		# 回血检查
-		if has_skills and skill_state.has("heal"):
-			var heal_config = skills.filter(func(s): return s.get("type") == "heal")
-			if not heal_config.is_empty():
-				skill_state["heal"]["turns_since_last"] += 1
-				if skill_state["heal"]["turns_since_last"] >= heal_config[0].get("interval", 4):
-					skill_state["heal"]["turns_since_last"] = 0
-					var heal_amount = _damage_calc.calc_heal_amount(enemy.get("maxHP", 0), heal_config[0].get("percent", 0.15))
-					enemy["hp"] = mini(enemy.get("maxHP", 0), enemy.get("hp", 0) + heal_amount)
-					enemy_skill_action.emit({
-							"type": "heal",
-							"enemy_index": i,
-							"enemy": enemy,
-							"heal_amount": heal_amount
-					})
+		# 回血检查（委托给 EnemySkillSystem）
+		if _enemy_skill_system != null and has_skills and skill_state.has("heal"):
+			_enemy_skill_system.execute_heal(i, enemy)
 
 		# 蓄力检查（委托给 EnemySkillSystem）
 		var skip_attack = false
