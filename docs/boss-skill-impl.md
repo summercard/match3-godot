@@ -16,9 +16,9 @@
 - [x] 配置：{ "type": "burn", "damage": 15, "interval": 1, "duration": 3 }
 
 ### Skill 2: thunder_strike 雷击
-- [ ] 周期性高伤害
-- [ ] 冷却3回合
-- [ ] 配置：{ "type": "thunder_strike", "damage": 50, "cooldown": 3 }
+- [x] 周期性高伤害
+- [x] 冷却3回合
+- [x] 配置：{ "type": "thunder_strike", "damage": 50, "cooldown": 3 }
 
 ### Skill 3: reflect 反弹
 - [ ] 反弹部分受到伤害给攻击者
