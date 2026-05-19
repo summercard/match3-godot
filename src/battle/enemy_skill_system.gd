@@ -29,6 +29,9 @@ signal skill_charge_start(enemy_idx: int, damage_multiplier: float)
 signal skill_charge_release(enemy_idx: int, damage_multiplier: float)
 signal skill_shield_appear(enemy_idx: int, shield_hp: int)
 signal skill_shield_broken(enemy_idx: int)
+signal skill_shield_plus_appear(enemy_idx: int, shield_hp: int, reflect_percent: float)
+signal skill_shield_plus_broken(enemy_idx: int)
+signal skill_shield_plus_reflect(enemy_idx: int, target_idx: int, reflected_damage: int)
 signal skill_heal_triggered(enemy_idx: int, heal_amount: int)
 signal skill_burn_apply(enemy_idx: int, target_idx: int, damage: int, duration: int)
 signal skill_burn_damage(enemy_idx: int, target_idx: int, damage: int)
@@ -52,6 +55,7 @@ signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary
 # 常量定义
 const SKILL_TYPE_CHARGE := "charge"
 const SKILL_TYPE_SHIELD := "shield"
+const SKILL_TYPE_SHIELD_PLUS := "shield_plus"
 const SKILL_TYPE_HEAL := "heal"
 const SKILL_TYPE_BURN := "burn"
 const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
@@ -63,7 +67,7 @@ const SKILL_TYPE_SURGE := "surge"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...}, "freeze": {...}, "poison": {...}, "life_drain": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...}, "freeze": {...}, "poison": {...}, "life_drain": {...}, "surge": {...}, "shield_plus": {...} } }
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
 var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
@@ -108,6 +112,15 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"max_hp": skill.get("hp", 50),
 						"cooldown_left": 0,
 						"cooldown": skill.get("cooldown", 4)
+					}
+				"shield_plus":
+					state["shield_plus"] = {
+						"current_hp": 0,
+						"max_hp": skill.get("hp", 100),
+						"cooldown": skill.get("cooldown", 5),
+						"cooldown_left": 0,
+						"reflect_damage": skill.get("reflectDamage", true),
+						"reflect_percent": skill.get("reflectPercent", 0.5)
 					}
 				"heal":
 					state["heal"] = {
@@ -1056,3 +1069,113 @@ func get_surge_current_damage(enemy_idx: int) -> int:
 	if not _surge_targets.has(enemy_idx):
 		return 0
 	return _surge_targets[enemy_idx].get("current_damage", 0)
+
+
+# ==================== Phase 10: shield_plus 强化护盾 ====================
+# 护盾期间反弹近战伤害
+# 配置：{ "type": "shield_plus", "hp": 100, "cooldown": 5, "reflectDamage": true, "reflectPercent": 0.5 }
+
+## 检查并激活强化护盾
+## 在敌人回合开始时调用，检查强化护盾是否应该激活
+## 返回: bool - 是否成功激活护盾
+func check_and_activate_shield_plus(enemy_idx: int, enemy: Dictionary) -> bool:
+	var state = get_skill_state(enemy_idx, "shield_plus")
+	if state.is_empty():
+		return false
+	
+	var skills: Array = enemy.get("enemySkills", [])
+	var shield_config = skills.filter(func(s): return s.get("type") == "shield_plus")
+	if shield_config.is_empty():
+		return false
+	
+	var shield_hp: int = shield_config[0].get("hp", 100)
+	var cooldown: int = shield_config[0].get("cooldown", 5)
+	var reflect_percent: float = shield_config[0].get("reflectPercent", 0.5)
+	
+	# 检查护盾是否需要激活：current_hp <= 0 且 cooldown_left <= 0
+	if state.get("current_hp", 0) <= 0 and state.get("cooldown_left", 0) <= 0:
+		state["current_hp"] = shield_hp
+		state["max_hp"] = shield_hp
+		state["cooldown_left"] = cooldown
+		
+		skill_shield_plus_appear.emit(enemy_idx, shield_hp, reflect_percent)
+		enemy_skill_action.emit({
+			"type": "shield_plus_appear",
+			"enemy_index": enemy_idx,
+			"enemy": enemy,
+			"shield_hp": shield_hp,
+			"shield_max_hp": shield_hp,
+			"reflect_percent": reflect_percent
+		})
+		return true
+	
+	# 冷却递减
+	if state.get("cooldown_left", 0) > 0:
+		state["cooldown_left"] -= 1
+	
+	return false
+
+
+## 强化护盾减伤计算
+## 在伤害结算前调用，将伤害分为护盾吸收部分和穿透部分，并处理反弹
+## 返回: { "absorbed": int, "remaining": int, "reflected": bool, "reflect_damage": int, "reflect_target_idx": int }
+func execute_shield_plus_before_damage(enemy_idx: int, damage: int, attacker_idx: int = -1) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "shield_plus")
+	if state.is_empty():
+		return { "absorbed": 0, "remaining": damage, "reflected": false, "reflect_damage": 0, "reflect_target_idx": -1 }
+	
+	var shield_hp: int = state.get("current_hp", 0)
+	if shield_hp <= 0:
+		return { "absorbed": 0, "remaining": damage, "reflected": false, "reflect_damage": 0, "reflect_target_idx": -1 }
+	
+	# 使用 DamageCalculator 计算护盾吸收
+	var absorbed := mini(shield_hp, damage)
+	var remaining := damage - absorbed
+	state["current_hp"] -= absorbed
+	
+	# 检查是否需要反弹伤害
+	var reflect_damage: int = 0
+	var reflected: bool = false
+	var reflect_target_idx: int = -1
+	if state.get("reflect_damage", true) and attacker_idx >= 0:
+		var reflect_percent: float = state.get("reflect_percent", 0.5)
+		reflect_damage = int(absorbed * reflect_percent)
+		reflected = true
+		reflect_target_idx = attacker_idx
+		
+		skill_shield_plus_reflect.emit(enemy_idx, attacker_idx, reflect_damage)
+		enemy_skill_action.emit({
+			"type": "shield_plus_reflect",
+			"enemy_index": enemy_idx,
+			"target_index": attacker_idx,
+			"reflected_damage": reflect_damage,
+			"reflect_percent": reflect_percent
+		})
+	
+	# 如果护盾被打破，发出信号
+	if state["current_hp"] <= 0:
+		skill_shield_plus_broken.emit(enemy_idx)
+		enemy_skill_action.emit({
+			"type": "shield_plus_broken",
+			"enemy_index": enemy_idx
+		})
+	
+	return { "absorbed": absorbed, "remaining": remaining, "reflected": reflected, "reflect_damage": reflect_damage, "reflect_target_idx": reflect_target_idx }
+
+
+## 检查强化护盾状态（是否有效）
+func is_shield_plus_active(enemy_idx: int) -> bool:
+	var state = get_skill_state(enemy_idx, "shield_plus")
+	return state.get("current_hp", 0) > 0
+
+
+## 获取强化护盾当前HP
+func get_shield_plus_hp(enemy_idx: int) -> int:
+	var state = get_skill_state(enemy_idx, "shield_plus")
+	return state.get("current_hp", 0)
+
+
+## 获取强化护盾剩余冷却
+func get_shield_plus_cooldown(enemy_idx: int) -> int:
+	var state = get_skill_state(enemy_idx, "shield_plus")
+	return state.get("cooldown_left", 0)
