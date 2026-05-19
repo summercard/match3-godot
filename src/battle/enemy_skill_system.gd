@@ -11,12 +11,14 @@ class_name EnemySkillSystem
 ##   shield:  { "type": "shield", "hp": int, "cooldown": int }
 ##   heal:    { "type": "heal", "percent": float, "interval": int }
 ##   burn:    { "type": "burn", "damage": int, "interval": int, "duration": int }
+##   thunder_strike: { "type": "thunder_strike", "damage": int, "cooldown": int }
 ##
 ## 技能状态结构 (skill_state):
 ##   charge:  { "turns_since_last": int, "is_charging": bool }
 ##   shield:  { "current_hp": int, "max_hp": int, "cooldown_left": int }
 ##   heal:    { "turns_since_last": int }
 ##   burn:    { "damage": int, "duration_left": int }
+##   thunder_strike: { "damage": int, "cooldown": int, "turns_since_last": int }
 
 
 # 信号定义
@@ -28,6 +30,7 @@ signal skill_heal_triggered(enemy_idx: int, heal_amount: int)
 signal skill_burn_apply(enemy_idx: int, target_idx: int, damage: int, duration: int)
 signal skill_burn_damage(enemy_idx: int, target_idx: int, damage: int)
 signal skill_burn_expire(enemy_idx: int, target_idx: int)
+signal skill_thunder_strike_triggered(enemy_idx: int, damage: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -36,10 +39,11 @@ const SKILL_TYPE_CHARGE := "charge"
 const SKILL_TYPE_SHIELD := "shield"
 const SKILL_TYPE_HEAL := "heal"
 const SKILL_TYPE_BURN := "burn"
+const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...} } }
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 
 
@@ -92,6 +96,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"damage": skill.get("damage", 15),
 						"interval": skill.get("interval", 1),
 						"duration": skill.get("duration", 3),
+						"turns_since_last": 0
+					}
+				"thunder_strike":
+					state["thunder_strike"] = {
+						"damage": skill.get("damage", 50),
+						"cooldown": skill.get("cooldown", 3),
 						"turns_since_last": 0
 					}
 		
@@ -408,13 +418,45 @@ func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
 	process_burn_damage(enemy_idx)
 
 
+## 处理雷击技能
+## 在敌人回合结束时调用，检查是否应触发雷击
+## 返回: { "triggered": bool, "damage": int }
+func execute_thunder_strike(enemy_idx: int, enemy: Dictionary) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "thunder_strike")
+	if state.is_empty():
+		return { "triggered": false, "damage": 0 }
+	
+	state["turns_since_last"] += 1
+	var cooldown: int = state.get("cooldown", 3)
+	
+	if state["turns_since_last"] >= cooldown:
+		state["turns_since_last"] = 0
+		
+		var damage: int = state.get("damage", 50)
+		
+		skill_thunder_strike_triggered.emit(enemy_idx, damage)
+		enemy_skill_action.emit({
+			"type": "thunder_strike",
+			"enemy_index": enemy_idx,
+			"enemy": enemy,
+			"damage": damage
+		})
+		
+		return { "triggered": true, "damage": damage }
+	
+	return { "triggered": false, "damage": 0 }
+
+
 ## 每个敌人回合结束时调用，处理技能触发
 func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
 	# 检查灼烧是否应该触发（基于interval）
-	var state = get_skill_state(enemy_idx, "burn")
-	if not state.is_empty():
-		state["turns_since_last"] += 1
+	var burn_state = get_skill_state(enemy_idx, "burn")
+	if not burn_state.is_empty():
+		burn_state["turns_since_last"] += 1
 		# interval控制的是"触发灼烧的频率"，目前burn是立即施加，不需要interval检查
+	
+	# 处理雷击
+	execute_thunder_strike(enemy_idx, enemy)
 
 
 ## 重置所有技能状态（战斗重新开始时调用）
