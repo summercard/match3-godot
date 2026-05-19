@@ -119,16 +119,26 @@ func _process(delta: float) -> void:
 # ============================================
 
 func _gui_input(event: InputEvent) -> void:
+	# ---- 触摸：按下开始计时，松开停止 ----
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			if _in_btn(event.position):
-				_do_enter()
+				_begin_hold()
+		else:
+			_end_hold()
 		accept_event()
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed:
-			if _in_btn(event.position):
-				_do_enter()
+		return
+
+	# ---- 鼠标：按下开始计时，松开停止 ----
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				if _in_btn(event.position):
+					_begin_hold()
+			else:
+				_end_hold()
 		accept_event()
+		return
 
 
 func _begin_hold() -> void:
