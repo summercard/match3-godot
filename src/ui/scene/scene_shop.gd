@@ -1,23 +1,82 @@
 # scene_shop.gd - 商店场景
 # 翻译来源: js/ui/sceneShop.js
-class_name SceneShop extends Control
+class_name SceneShop
+extends Control
 
 const ItemDB = preload("res://src/data/item_db.gd")
 
-## 信号
 signal purchase_completed(item_id: String, quantity: int)
 
-## 布局常量
-const BACK_BTN := Rect2(10, 10, 60, 36)
-const CURRENCY_Y := 100
-const LIST_Y := 160
-const ITEM_H := 70
-const ITEM_GAP := 8
-const BTN_X := 280
-const BTN_W := 80
-const BTN_H := 40
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
+
+const BACK_BTN := Rect2(10.0, 8.0, 58.0, 58.0)
+const TAB_Y := 68.0
+const FEATURE_RECT := Rect2(12.0, 112.0, 351.0, 126.0)
+const GRID_Y := 252.0
+const GRID_BOTTOM := 590.0
+const GRID_COLS := 4
+const CARD_W := 82.0
+const CARD_H := 142.0
+const CARD_GAP_X := 8.0
+const CARD_GAP_Y := 12.0
+const CARD_LEFT := 11.0
+const BTN_H := 27.0
+const BOTTOM_NAV_RECT := Rect2(0.0, 596.0, 375.0, 71.0)
+
+const SHOP_ASSETS := {
+	"bg": "res://assets/images/shop/bg_shop_room.png",
+	"top_bar": "res://assets/images/shop/ui_top_bar.png",
+	"back_button": "res://assets/images/shop/ui_back_button.png",
+	"currency_chip": "res://assets/images/shop/ui_currency_chip.png",
+	"tab_active": "res://assets/images/shop/ui_tab_active.png",
+	"tab_inactive": "res://assets/images/shop/ui_tab_inactive.png",
+	"feature_banner": "res://assets/images/shop/ui_feature_banner.png",
+	"product_card": "res://assets/images/shop/ui_product_card.png",
+	"price_plate": "res://assets/images/shop/ui_price_plate.png",
+	"buy_button": "res://assets/images/shop/ui_buy_button.png",
+	"buy_button_disabled": "res://assets/images/shop/ui_buy_button_disabled.png",
+	"popup_panel": "res://assets/images/shop/ui_popup_panel.png",
+	"qty_button": "res://assets/images/shop/ui_qty_button.png",
+	"bottom_nav": "res://assets/images/shop/ui_bottom_nav.png",
+	"gold": "res://assets/images/main/icon_gold.png",
+	"diamond": "res://assets/images/main/icon_diamond.png",
+}
+
+const ITEM_ICON_ASSETS := {
+	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
+	"capture_ball_plus": "res://assets/images/items/icon_item_capture_ball_plus.png",
+	"exp_potion": "res://assets/images/items/icon_item_exp_potion.png",
+	"exp_crystal": "res://assets/images/items/icon_item_exp_potion.png",
+	"hp_potion": "res://assets/images/items/icon_item_hp_potion.png",
+	"gold_bag": "res://assets/images/items/icon_item_gold_bag.png",
+	"gold_chest": "res://assets/images/items/icon_item_gold_chest.png",
+	"evolution_stone_fire": "res://assets/images/items/icon_stone_fire.png",
+	"evolution_stone_water": "res://assets/images/items/icon_stone_water.png",
+	"evolution_stone_grass": "res://assets/images/items/icon_stone_grass.png",
+	"evolution_stone_thunder": "res://assets/images/items/icon_stone_thunder.png",
+	"evolution_stone_light": "res://assets/images/items/icon_stone_light.png",
+	"evolution_stone_earth": "res://assets/images/items/icon_stone_earth.png",
+	"evolution_stone_wind": "res://assets/images/items/icon_stone_wind.png",
+	"evolution_stone_dark": "res://assets/images/items/icon_stone_dark.png",
+}
+
+const TABS := [
+	{"id": "recommend", "label": "推荐", "icon": "★"},
+	{"id": "items", "label": "道具", "icon": "▣"},
+	{"id": "gems", "label": "宝石", "icon": "◆"},
+]
+
+const C := {
+	"white": Color(1.0, 1.0, 1.0),
+	"muted": Color(0.64, 0.70, 0.82),
+	"dim": Color(0.38, 0.45, 0.58),
+	"gold": Color(1.0, 0.78, 0.18),
+	"danger": Color(1.0, 0.28, 0.26),
+	"success": Color(0.30, 0.88, 0.42),
+	"blue": Color(0.34, 0.78, 1.0),
+	"shadow": Color(0.0, 0.0, 0.0, 0.55),
+}
 
 var game: Node
 var player_data: Dictionary = {}
@@ -28,8 +87,16 @@ var scroll_offset: float = 0.0
 var tap_handler: Callable
 var swipe_handler: Callable
 var _storage: Node = null
-
 var _bg_texture: ColorRect
+var _texture_cache: Dictionary = {}
+var _active_tab := "recommend"
+var _popup_quantity := 1
+
+
+func _init(game_ref: Node = null) -> void:
+	game = game_ref
+	_add_dark_background()
+
 
 func _add_dark_background() -> void:
 	_bg_texture = ColorRect.new()
@@ -38,29 +105,6 @@ func _add_dark_background() -> void:
 	_bg_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bg_texture.z_index = -10
 	add_child(_bg_texture)
-
-func _init(game_ref: Node = null) -> void:
-	game = game_ref
-	_add_dark_background()
-	_add_currency_icons()
-
-func _add_currency_icons() -> void:
-	if ResourceLoader.exists("res://assets/images/main/icon_gold.png"):
-		var gold_icon := TextureRect.new()
-		gold_icon.texture = load("res://assets/images/main/icon_gold.png")
-		gold_icon.position = Vector2(58, CURRENCY_Y - 4)
-		gold_icon.size = Vector2(20, 20)
-		gold_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		gold_icon.z_index = -5
-		add_child(gold_icon)
-	if ResourceLoader.exists("res://assets/images/main/icon_diamond.png"):
-		var gem_icon := TextureRect.new()
-		gem_icon.texture = load("res://assets/images/main/icon_diamond.png")
-		gem_icon.position = Vector2(273, CURRENCY_Y - 4)
-		gem_icon.size = Vector2(20, 20)
-		gem_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		gem_icon.z_index = -5
-		add_child(gem_icon)
 
 
 func init(data: Dictionary = {}) -> void:
@@ -72,6 +116,8 @@ func init(data: Dictionary = {}) -> void:
 	selected_item = {}
 	popup = {}
 	scroll_offset = 0.0
+	_popup_quantity = 1
+	_active_tab = data.get("tab", "recommend")
 	_build_shop_list()
 	_set_input_handlers()
 
@@ -105,12 +151,12 @@ func _get_storage() -> Node:
 
 func _build_shop_list() -> void:
 	shop_list = []
-	# SHOP_ITEMS 和 ITEMS_DB 需在对应数据模块中定义
 	var shop_items: Array = ItemDB.get_shop_items()
-
 	for entry in shop_items:
 		var item_id: String = entry.get("id", "")
 		var item_data: Dictionary = ItemDB.get_item(item_id)
+		if item_data.is_empty():
+			continue
 		shop_list.append({
 			"id": item_id,
 			"price": entry.get("price", 0),
@@ -123,74 +169,109 @@ func _build_shop_list() -> void:
 func _set_input_handlers() -> void:
 	tap_handler = Callable(self, "_on_tap")
 	swipe_handler = Callable(self, "_on_swipe")
-	# 连接 game 的输入信号（根据实际输入系统实现）
 
 
 func _on_tap(x: float, y: float) -> void:
-	# 购买确认弹窗
 	if popup.size() > 0:
-		var p: Dictionary = popup
-		var pw: float = p.w
-		var ph: float = p.h
-		var px: float = p.x
-		var py: float = p.y
-		# 遮罩点击关闭
-		if not (x >= px and x <= px + pw and y >= py and y <= py + ph):
-			popup = {}
-			return
-		# 确认按钮
-		var confirm_x: float = px + 20
-		var confirm_y: float = py + ph - 55
-		if x >= confirm_x and x <= confirm_x + 110 and y >= confirm_y and y <= confirm_y + 40:
-			_confirm_purchase(p.id)
-			popup = {}
-			return
-		# 取消按钮
-		var cancel_x: float = px + 150
-		if x >= cancel_x and x <= cancel_x + 110 and y >= confirm_y and y <= confirm_y + 40:
-			popup = {}
-			return
+		_handle_popup_tap(x, y)
 		return
 
-	# 返回按钮
-	if _in_rect(x, y, BACK_BTN):
+	if BACK_BTN.has_point(Vector2(x, y)):
 		_go_main()
 		return
 
-	# 商品购买按钮
-	var list_bottom_y: float = DESIGN_H - 20
-	if y < LIST_Y or y > list_bottom_y:
+	for tab in TABS:
+		var rect := _get_tab_rect(tab["id"])
+		if rect.has_point(Vector2(x, y)):
+			_active_tab = tab["id"]
+			scroll_offset = 0.0
+			return
+
+	_handle_product_tap(x, y)
+
+
+func _handle_popup_tap(x: float, y: float) -> void:
+	var rect := _popup_rect()
+	if not rect.has_point(Vector2(x, y)):
+		popup = {}
 		return
-	for i in range(shop_list.size()):
-		var shop_item: Dictionary = shop_list[i]
-		var item_y: float = LIST_Y + i * (ITEM_H + ITEM_GAP) - scroll_offset
-		if item_y < LIST_Y or item_y + ITEM_H > list_bottom_y:
+
+	if Rect2(rect.position.x + rect.size.x - 34.0, rect.position.y + 10.0, 24.0, 24.0).has_point(Vector2(x, y)):
+		popup = {}
+		return
+
+	if _popup_minus_rect().has_point(Vector2(x, y)):
+		_popup_quantity = maxi(1, _popup_quantity - 1)
+		return
+	if _popup_plus_rect().has_point(Vector2(x, y)):
+		_popup_quantity = mini(99, _popup_quantity + 1)
+		return
+	if _popup_plus_ten_rect().has_point(Vector2(x, y)):
+		_popup_quantity = mini(99, _popup_quantity + 10)
+		return
+	if _popup_cancel_rect().has_point(Vector2(x, y)):
+		popup = {}
+		return
+	if _popup_confirm_rect().has_point(Vector2(x, y)):
+		_confirm_purchase(str(popup.get("id", "")), _popup_quantity)
+		popup = {}
+		return
+
+
+func _handle_product_tap(x: float, y: float) -> void:
+	var items := _get_visible_shop_items()
+	if y < GRID_Y or y > GRID_BOTTOM:
+		return
+	for i in range(items.size()):
+		var card := _get_card_rect(i)
+		if card.position.y + card.size.y < GRID_Y or card.position.y > GRID_BOTTOM:
 			continue
-		var btn_y: float = item_y + (ITEM_H - BTN_H) / 2
-		if x >= BTN_X and x <= BTN_X + BTN_W and y >= btn_y and y <= btn_y + BTN_H:
+		var buy_rect := Rect2(card.position.x + 7.0, card.position.y + 111.0, CARD_W - 14.0, BTN_H)
+		if buy_rect.has_point(Vector2(x, y)):
+			var shop_item: Dictionary = items[i]
 			selected_item = shop_item
 			_show_purchase_popup(shop_item)
 			return
 
 
 func _on_swipe(x: float, y: float, direction: String) -> void:
-	if popup.size() > 0 or y < LIST_Y:
+	if popup.size() > 0 or y < GRID_Y or y > GRID_BOTTOM:
 		return
-	var max_offset: float = _get_max_scroll_offset()
+	var max_offset := _get_max_scroll_offset()
 	if direction == "up":
-		scroll_offset = min(max_offset, scroll_offset + ITEM_H + ITEM_GAP)
+		scroll_offset = minf(max_offset, scroll_offset + 86.0)
 	elif direction == "down":
-		scroll_offset = max(0.0, scroll_offset - ITEM_H - ITEM_GAP)
+		scroll_offset = maxf(0.0, scroll_offset - 86.0)
+
+
+func _get_visible_shop_items() -> Array:
+	var result: Array = []
+	for entry in shop_list:
+		var item: Dictionary = entry.get("data", {})
+		var item_type: String = item.get("type", "")
+		if _active_tab == "items" and item_type == "evolution":
+			continue
+		if _active_tab == "gems" and item_type != "evolution":
+			continue
+		result.append(entry)
+	if _active_tab == "recommend" and result.size() > 8:
+		return result.slice(0, 8)
+	return result
 
 
 func _get_max_scroll_offset() -> float:
-	var list_bottom_y: float = DESIGN_H - 20
-	var content_h: float = shop_list.size() * (ITEM_H + ITEM_GAP) - ITEM_GAP
-	return maxf(0.0, content_h - (list_bottom_y - LIST_Y))
+	var items := _get_visible_shop_items()
+	var rows := ceili(float(items.size()) / float(GRID_COLS))
+	var content_h := rows * (CARD_H + CARD_GAP_Y) - CARD_GAP_Y
+	return maxf(0.0, content_h - (GRID_BOTTOM - GRID_Y))
 
 
-func _in_rect(x: float, y: float, rect: Rect2) -> bool:
-	return x >= rect.position.x and x <= rect.position.x + rect.size.x and y >= rect.position.y and y <= rect.position.y + rect.size.y
+func _get_card_rect(index: int) -> Rect2:
+	var col := index % GRID_COLS
+	var row := index / GRID_COLS
+	var x := CARD_LEFT + col * (CARD_W + CARD_GAP_X)
+	var y := GRID_Y + row * (CARD_H + CARD_GAP_Y) - scroll_offset
+	return Rect2(x, y, CARD_W, CARD_H)
 
 
 func _go_main() -> void:
@@ -201,12 +282,8 @@ func _go_main() -> void:
 
 
 func _show_purchase_popup(item: Dictionary) -> void:
-	var pw: float = 300
-	var ph: float = 200
-	var px: float = (DESIGN_W - pw) / 2
-	var py: float = (DESIGN_H - ph) / 2
+	_popup_quantity = 1
 	popup = {
-		"x": px, "y": py, "w": pw, "h": ph,
 		"id": item.id,
 		"data": item.data,
 		"price": item.price,
@@ -214,33 +291,35 @@ func _show_purchase_popup(item: Dictionary) -> void:
 	}
 
 
-func _confirm_purchase(item_id: String) -> void:
+func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 	var item_data: Dictionary = ItemDB.get_item(item_id)
 	if item_data.is_empty():
 		return
 
+	quantity = maxi(1, quantity)
 	var player: Dictionary = _load_player_data()
-	var price: float = _get_item_price(item_id)
+	var total_price: float = _get_item_price(item_id) * quantity
 	var currency: String = _get_item_currency(item_id)
 
 	if currency == "gold":
-		if (player.get("gold", 0) as float) < price:
-			_show_toast("💰 金币不足", "warning")
+		if (player.get("gold", 0) as float) < total_price:
+			_show_toast("金币不足", "warning")
 			return
-		player["gold"] = (player.get("gold", 0) as float) - price
+		player["gold"] = (player.get("gold", 0) as float) - total_price
 	elif currency == "gems":
-		if (player.get("gems", 0) as float) < price:
-			_show_toast("💎 钻石不足", "warning")
+		if (player.get("gems", 0) as float) < total_price:
+			_show_toast("钻石不足", "warning")
 			return
-		player["gems"] = (player.get("gems", 0) as float) - price
+		player["gems"] = (player.get("gems", 0) as float) - total_price
 
 	_save_player_data(player)
 	player_data["gold"] = player.get("gold", 0)
 	player_data["gems"] = player.get("gems", 0)
 
-	_add_item(item_id, 1)
-	_show_toast("✅ 获得 " + str(item_data.get("name", "")) + "！", "success")
-	print("[Shop] 购买成功: " + str(item_data.get("name", "")))
+	_add_item(item_id, quantity)
+	emit_signal("purchase_completed", item_id, quantity)
+	_show_toast("获得 %s x%d" % [str(item_data.get("name", "")), quantity], "success")
+	print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])
 
 
 func _load_player_data() -> Dictionary:
@@ -255,7 +334,6 @@ func _save_player_data(player: Dictionary) -> void:
 
 
 func _add_item(item_id: String, count: int) -> void:
-	# 通过 storage 系统添加道具
 	var storage := _get_storage()
 	if storage and storage.has_method("add_item"):
 		storage.add_item(item_id, count)
@@ -275,13 +353,12 @@ func _get_item_currency(item_id: String) -> String:
 	return "gold"
 
 
-func _can_afford(item_id: String) -> bool:
-	var price: float = _get_item_price(item_id)
-	var currency: String = _get_item_currency(item_id)
+func _can_afford(item_id: String, quantity: int = 1) -> bool:
+	var price := _get_item_price(item_id) * quantity
+	var currency := _get_item_currency(item_id)
 	if currency == "gold":
 		return (player_data.get("gold", 0) as float) >= price
-	else:
-		return (player_data.get("gems", 0) as float) >= price
+	return (player_data.get("gems", 0) as float) >= price
 
 
 func _show_toast(msg: String, kind: String = "info") -> void:
@@ -292,164 +369,270 @@ func _show_toast(msg: String, kind: String = "info") -> void:
 
 
 func _draw() -> void:
-	# 背景
-	_draw_rect(Rect2(0, 0, size.x, size.y), Color("#1a1a2e"))
-
-	# 顶部标题栏
-	var theme = _get_theme()
-	_draw_rect(Rect2(0, 0, size.x, 60), theme.bg_card)
-
-	# 返回按钮
-	_draw_rect(BACK_BTN, theme.buttons.secondary.bg_color)
-	_draw_text("← 返回", Vector2(BACK_BTN.position.x + 10, BACK_BTN.position.y + 23), theme.text_primary, theme.font.body.size)
-
-	# 标题
-	_draw_text("商店", Vector2(size.x / 2, 35), theme.text_primary, theme.font.subtitle.size, theme.font.subtitle.weight)
-
-	# 货币显示
-	var gold: float = player_data.get("gold", 0)
-	var gems: float = player_data.get("gems", 0)
-	_draw_text("💰 " + str(gold), Vector2(80, CURRENCY_Y), theme.gold, theme.font.subtitle.size, theme.font.subtitle.weight)
-	_draw_text("💎 " + str(gems), Vector2(295, CURRENCY_Y), theme.primary, theme.font.subtitle.size, theme.font.subtitle.weight)
-
-	# 分隔线
-	_draw_rect(Rect2(10, CURRENCY_Y + 25, 355, 1), theme.text_muted)
-
-	# 商品列表标题
-	_draw_text("商品列表", Vector2(20, LIST_Y - 10), theme.text_muted, theme.font.small.size)
-
-	# 绘制商品
-	var list_bottom_y: float = DESIGN_H - 20
-	for i in range(shop_list.size()):
-		var shop_item: Dictionary = shop_list[i]
-		var item_y: float = LIST_Y + i * (ITEM_H + ITEM_GAP) - scroll_offset
-		if item_y < LIST_Y or item_y + ITEM_H > list_bottom_y:
-			continue
-		var item: Dictionary = shop_item.data
-
-		# 商品卡片背景
-		_draw_rect(Rect2(10, item_y, 355, ITEM_H), theme.bg_card)
-
-		# 道具图标
-		_draw_text(item.get("emoji", "📦"), Vector2(30, item_y + ITEM_H / 2 + 8), theme.text_primary, 32)
-
-		# 道具名称
-		_draw_text(item.get("name", ""), Vector2(75, item_y + 22), theme.text_primary, theme.font.body.size, theme.font.body.weight)
-
-		# 道具描述
-		_draw_text(item.get("desc", ""), Vector2(75, item_y + 42), theme.text_muted, theme.font.small.size)
-
-		# 价格标签
-		var price_color: Color = theme.gold if shop_item.currency == "gold" else theme.primary
-		var price_symbol: String = "💰" if shop_item.currency == "gold" else "💎"
-		_draw_text(price_symbol + " " + str(shop_item.price), Vector2(75, item_y + 60), price_color, theme.font.small.size, theme.font.small.weight)
-
-		# 购买按钮
-		var btn_y: float = item_y + (ITEM_H - BTN_H) / 2
-		var can_afford: bool = _can_afford(shop_item.id)
-		if can_afford:
-			_draw_rect(Rect2(BTN_X, btn_y, BTN_W, BTN_H), theme.buttons.primary.bg_color)
-			_draw_text("购买", Vector2(BTN_X + 40, btn_y + 25), theme.buttons.primary.text_color, theme.buttons.primary.font_size, theme.buttons.primary.font_weight)
-		else:
-			_draw_rect(Rect2(BTN_X, btn_y, BTN_W, BTN_H), theme.text_dark)
-			var btn_label = "金币不足" if shop_item.currency == "gold" else "钻石不足"
-			_draw_text(btn_label, Vector2(BTN_X + 40, btn_y + 25), theme.text_muted, theme.font.small.size)
-
-	# 滚动条
-	var max_offset: float = _get_max_scroll_offset()
-	if max_offset > 0:
-		var track_y: float = LIST_Y
-		var track_h: float = DESIGN_H - LIST_Y - 20
-		var thumb_h: float = maxf(36, track_h * (track_h / (track_h + max_offset)))
-		var thumb_y: float = track_y + (track_h - thumb_h) * (scroll_offset / max_offset)
-		_draw_rect(Rect2(368, track_y, 3, track_h), Color(1, 1, 1, 0.12))
-		_draw_rect(Rect2(367, thumb_y, 5, thumb_h), Color(1, 1, 1, 0.45))
-
-	# 购买确认弹窗
+	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
+	_draw_header()
+	_draw_tabs()
+	_draw_feature_banner()
+	_draw_product_grid()
+	_draw_bottom_nav()
 	if popup.size() > 0:
-		var p: Dictionary = popup
-		# 遮罩
-		_draw_rect(Rect2(0, 0, size.x, size.y), Color(0, 0, 0, 0.7))
-		# 弹窗背景
-		_draw_rect(Rect2(p.x, p.y, p.w, p.h), theme.bg_card)
-		# 顶部装饰条
-		_draw_rect(Rect2(p.x + 20, p.y + 10, p.w - 40, 3), theme.buttons.primary.bg_color)
-		# 标题
-		_draw_text("确认购买", Vector2(p.x + p.w / 2, p.y + 40), theme.text_primary, theme.font.subtitle.size, theme.font.subtitle.weight)
-		# 道具图标
-		_draw_text(p.data.get("emoji", "📦"), Vector2(p.x + p.w / 2, p.y + 80), theme.text_primary, 36)
-		_draw_text(p.data.get("name", ""), Vector2(p.x + p.w / 2, p.y + 115), theme.text_primary, theme.font.body.size, theme.font.body.weight)
-		# 价格
-		var price_color: Color = theme.primary if p.currency == "gems" else theme.gold
-		var price_symbol: String = "💎" if p.currency == "gems" else "💰"
-		_draw_text(price_symbol + " " + str(p.price), Vector2(p.x + p.w / 2, p.y + 140), price_color, theme.font.body.size, theme.font.body.weight)
-		# 确认按钮
-		_draw_rect(Rect2(p.x + 20, p.y + p.h - 55, 110, 40), theme.buttons.primary.bg_color)
-		_draw_text("确认购买", Vector2(p.x + 75, p.y + p.h - 28), theme.buttons.primary.text_color, theme.buttons.primary.font_size, theme.buttons.primary.font_weight)
-		# 取消按钮
-		_draw_rect(Rect2(p.x + 150, p.y + p.h - 55, 110, 40), theme.text_dark)
-		_draw_text("取消", Vector2(p.x + 205, p.y + p.h - 28), theme.text_secondary, theme.font.body.size)
+		_draw_popup()
 
 
-func _draw_rect(rect: Rect2, color: Color) -> void:
-	draw_rect(rect, color, true)
+func _draw_header() -> void:
+	_draw_texture_fit(_tex("top_bar"), Rect2(0, 0, DESIGN_W, 60.0))
+	_draw_texture_fit(_tex("back_button"), BACK_BTN)
+	_draw_text_shadow("商店", Vector2(118.0, 39.0), C["white"], 28.0, true, 120.0)
+	_draw_currency_chip(Rect2(178.0, 14.0, 92.0, 32.0), "gold", int(player_data.get("gold", 0)))
+	_draw_currency_chip(Rect2(278.0, 14.0, 92.0, 32.0), "diamond", int(player_data.get("gems", 0)))
 
 
-func _draw_text(text: String, pos: Vector2, color: Color, size: float = 16, weight: int = 0) -> void:
-	var font_normal = ThemeDB.fallback_font
-	var fnt_size = int(size * 2)  # 缩放因子补偿
-	var f = ThemeDB.fallback_font
-	if weight >= 700:
-		f = ThemeDB.fallback_font  # fallback 暂不支持粗体
-	var sp = LabelSettings.new()
-	sp.font = f
-	sp.font_size = fnt_size
-	# 直接用 draw_string 抗锯齿
-	var lines = text.split("\n", false)
-	for idx in range(lines.size()):
-		var line_text = lines[idx]
-		var offset_y = pos.y + idx * (fnt_size + 4)
-		draw_string(ThemeDB.fallback_font, Vector2(pos.x - 100, offset_y), line_text, HORIZONTAL_ALIGNMENT_CENTER, 200, fnt_size, color)
+func _draw_currency_chip(rect: Rect2, icon_key: String, amount: int) -> void:
+	_draw_texture_fit(_tex("currency_chip"), rect)
+	_draw_texture_fit(_tex(icon_key), Rect2(rect.position.x + 5.0, rect.position.y + 4.0, 24.0, 24.0))
+	_draw_text_shadow(_format_number(amount), Vector2(rect.position.x + 58.0, rect.position.y + 22.0), C["white"], 15.0, true, 65.0)
 
 
-func _get_theme():
-	# 加载 theme.gd 作为颜色/字体配置
-	if ResourceLoader.exists("res://src/core/theme.gd"):
-			var theme_res = load("res://src/core/theme.gd")
-			if theme_res:
-				var inst = theme_res.new()
-				var result = inst.get_theme_data()
-				return result
-	return _get_default_theme()
+func _draw_tabs() -> void:
+	for tab in TABS:
+		var rect: Rect2 = _get_tab_rect(str(tab["id"]))
+		var active: bool = str(tab["id"]) == _active_tab
+		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
+		var color: Color = C["gold"] if active else C["muted"]
+		_draw_text_shadow("%s  %s" % [tab["icon"], tab["label"]], rect.get_center() + Vector2(0, 8), color, 17.0, true, rect.size.x)
 
 
-func _get_default_theme():
-	return {
-		"bg_medium": Color("#16213e"),
-		"bg_card": Color("#1a1a2e"),
-		"text_primary": Color("#e8e8e8"),
-		"text_secondary": Color("#a0a0a0"),
-		"text_muted": Color("#6b6b6b"),
-		"text_dark": Color("#2d2d2d"),
-		"primary": Color("#4a90d9"),
-		"gold": Color("#f5c518"),
-		"success": Color("#4caf50"),
-		"danger": Color("#e53935"),
-		"white": Color("#ffffff"),
-		"font": {
-			"title": {"size": 22, "weight": 700},
-			"subtitle": {"size": 18, "weight": 600},
-			"body": {"size": 14, "weight": 400},
-			"small": {"size": 12, "weight": 400},
-			"tiny": {"size": 10, "weight": 400}
-		},
-		"buttons": {
-			"primary": {"bg_color": Color("#4a90d9"), "text_color": Color("#ffffff"), "font_size": 14, "font_weight": 600},
-			"secondary": {"bg_color": Color("#2d2d44"), "text_color": Color("#e8e8e8"), "font_size": 14, "font_weight": 400},
-			"danger": {"bg_color": Color("#e53935"), "text_color": Color("#ffffff"), "font_size": 14, "font_weight": 600}
-		},
-		"radius": {"sm": 4, "md": 8, "lg": 16}
-	}
+func _get_tab_rect(tab_id: String) -> Rect2:
+	var idx := 0
+	for i in range(TABS.size()):
+		if TABS[i]["id"] == tab_id:
+			idx = i
+			break
+	return Rect2(38.0 + idx * 102.0, TAB_Y, 98.0, 42.0)
+
+
+func _draw_feature_banner() -> void:
+	_draw_texture_fit(_tex("feature_banner"), FEATURE_RECT)
+	_draw_texture_fit(_get_texture("res://assets/images/items/icon_item_starter_chest.png"), Rect2(36.0, 130.0, 80.0, 80.0))
+	_draw_text_shadow("新手超值礼包", Vector2(250.0, 143.0), C["gold"], 21.0, true, 190.0)
+	_draw_text_shadow("限时特惠，助力冒险！", Vector2(252.0, 166.0), C["white"], 12.0, true, 170.0)
+	_draw_feature_reward("gold", "x10,000", Vector2(202.0, 195.0))
+	_draw_feature_reward("diamond", "x1,000", Vector2(256.0, 195.0))
+	_draw_texture_fit(_get_texture("res://assets/images/items/icon_stone_fire.png"), Rect2(302.0, 174.0, 32.0, 32.0))
+	_draw_text_shadow("x10", Vector2(319.0, 217.0), C["white"], 9.0, true, 42.0)
+	_draw_texture_fit(_tex("buy_button"), Rect2(224.0, 208.0, 106.0, 29.0))
+	_draw_text_shadow("¥ 30", Vector2(277.0, 229.0), C["white"], 17.0, true, 90.0)
+
+
+func _draw_feature_reward(icon_key: String, label: String, pos: Vector2) -> void:
+	_draw_texture_fit(_tex("price_plate"), Rect2(pos.x - 19.0, pos.y - 22.0, 38.0, 42.0))
+	_draw_texture_fit(_tex(icon_key), Rect2(pos.x - 12.0, pos.y - 16.0, 24.0, 24.0))
+	_draw_text_shadow(label, pos + Vector2(0, 20.0), C["white"], 8.0, true, 48.0)
+
+
+func _draw_product_grid() -> void:
+	var items := _get_visible_shop_items()
+	draw_rect(Rect2(0, GRID_Y - 6.0, DESIGN_W, GRID_BOTTOM - GRID_Y + 8.0), Color(0.02, 0.08, 0.15, 0.18), true)
+	for i in range(items.size()):
+		var card := _get_card_rect(i)
+		if card.position.y + card.size.y < GRID_Y or card.position.y > GRID_BOTTOM:
+			continue
+		_draw_product_card(items[i], card)
+	_draw_scrollbar(items.size())
+
+
+func _draw_product_card(shop_item: Dictionary, rect: Rect2) -> void:
+	var item: Dictionary = shop_item.get("data", {})
+	_draw_texture_fit(_tex("product_card"), rect)
+	_draw_text_shadow(item.get("name", ""), Vector2(rect.get_center().x, rect.position.y + 24.0), C["white"], 11.0, true, rect.size.x - 8.0)
+	_draw_texture_fit(_get_item_texture(shop_item.get("id", "")), Rect2(rect.position.x + 18.0, rect.position.y + 40.0, 46.0, 46.0))
+	_draw_text_shadow(_get_limit_text(shop_item), Vector2(rect.get_center().x, rect.position.y + 89.0), C["muted"], 8.0, true, 68.0)
+	var price_rect := Rect2(rect.position.x + 7.0, rect.position.y + 92.0, 68.0, 24.0)
+	_draw_texture_fit(_tex("price_plate"), price_rect)
+	var currency_key := "diamond" if shop_item.get("currency", "gold") == "gems" else "gold"
+	_draw_texture_fit(_tex(currency_key), Rect2(price_rect.position.x + 8.0, price_rect.position.y + 4.0, 16.0, 16.0))
+	_draw_text_shadow(str(shop_item.get("price", 0)), Vector2(price_rect.position.x + 45.0, price_rect.position.y + 17.0), C["gold"] if currency_key == "gold" else C["blue"], 12.0, true, 42.0)
+	var buy_rect := Rect2(rect.position.x + 7.0, rect.position.y + 111.0, CARD_W - 14.0, BTN_H)
+	var can_afford := _can_afford(shop_item.get("id", ""))
+	_draw_texture_fit(_tex("buy_button" if can_afford else "buy_button_disabled"), buy_rect)
+	_draw_text_shadow("购买" if can_afford else "不足", buy_rect.get_center() + Vector2(0, 6.0), C["white"] if can_afford else C["muted"], 13.0 if can_afford else 10.0, true, buy_rect.size.x)
+
+
+func _draw_scrollbar(item_count: int) -> void:
+	var max_offset := _get_max_scroll_offset()
+	if max_offset <= 0.0:
+		return
+	var track := Rect2(366.0, GRID_Y, 4.0, GRID_BOTTOM - GRID_Y)
+	draw_rect(track, Color(1, 1, 1, 0.12), true)
+	var rows := ceili(float(item_count) / float(GRID_COLS))
+	var content_h := rows * (CARD_H + CARD_GAP_Y) - CARD_GAP_Y
+	var thumb_h := maxf(38.0, track.size.y * (track.size.y / content_h))
+	var thumb_y := track.position.y + (track.size.y - thumb_h) * (scroll_offset / max_offset)
+	draw_rect(Rect2(365.0, thumb_y, 6.0, thumb_h), Color(0.62, 0.82, 1.0, 0.7), true)
+
+
+func _draw_bottom_nav() -> void:
+	_draw_texture_fit(_tex("bottom_nav"), BOTTOM_NAV_RECT)
+	var labels := [
+		{"icon": "▣", "text": "每日特惠"},
+		{"icon": "◆", "text": "限时礼包"},
+		{"icon": "★", "text": "月卡"},
+	]
+	for i in range(labels.size()):
+		var x := 62.0 + i * 125.0
+		_draw_text_shadow(labels[i]["icon"], Vector2(x, 626.0), C["dim"], 25.0, true, 80.0)
+		_draw_text_shadow(labels[i]["text"], Vector2(x, 657.0), C["muted"], 12.0, true, 90.0)
+		if i < labels.size() - 1:
+			draw_rect(Rect2(124.0 + i * 125.0, 618.0, 1.0, 32.0), Color(0.5, 0.62, 0.8, 0.24), true)
+
+
+func _draw_popup() -> void:
+	var rect := _popup_rect()
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0, 0, 0, 0.52), true)
+	_draw_texture_fit(_tex("popup_panel"), rect)
+	_draw_text_shadow("购买确认", Vector2(rect.get_center().x, rect.position.y + 35.0), C["white"], 18.0, true, 160.0)
+	_draw_text_shadow("×", Vector2(rect.position.x + rect.size.x - 22.0, rect.position.y + 29.0), C["white"], 24.0, true, 32.0)
+	var data: Dictionary = popup.get("data", {})
+	var item_id := str(popup.get("id", ""))
+	_draw_texture_fit(_get_item_texture(item_id), Rect2(rect.position.x + 31.0, rect.position.y + 59.0, 72.0, 72.0))
+	_draw_text_left(data.get("name", ""), Vector2(rect.position.x + 122.0, rect.position.y + 82.0), C["white"], 18.0, true, 150.0)
+	_draw_text_left("拥有：%d" % _get_item_count(item_id), Vector2(rect.position.x + 122.0, rect.position.y + 107.0), C["muted"], 13.0, false, 150.0)
+	_draw_quantity_controls(rect)
+	_draw_total_price(rect)
+	_draw_texture_fit(_tex("buy_button_disabled"), _popup_cancel_rect())
+	_draw_text_shadow("取消", _popup_cancel_rect().get_center() + Vector2(0, 7), C["white"], 16.0, true, _popup_cancel_rect().size.x)
+	var can_afford := _can_afford(item_id, _popup_quantity)
+	_draw_texture_fit(_tex("buy_button" if can_afford else "buy_button_disabled"), _popup_confirm_rect())
+	_draw_text_shadow("确认购买", _popup_confirm_rect().get_center() + Vector2(0, 7), C["white"] if can_afford else C["muted"], 16.0, true, _popup_confirm_rect().size.x)
+
+
+func _draw_quantity_controls(rect: Rect2) -> void:
+	_draw_texture_fit(_tex("qty_button"), _popup_minus_rect())
+	_draw_text_shadow("−", _popup_minus_rect().get_center() + Vector2(0, 7), C["white"], 20.0, true, 40.0)
+	draw_rect(Rect2(rect.position.x + 92.0, rect.position.y + 116.0, 116.0, 34.0), Color(0.04, 0.11, 0.20, 0.85), true)
+	draw_rect(Rect2(rect.position.x + 92.0, rect.position.y + 116.0, 116.0, 34.0), Color(0.32, 0.45, 0.65, 0.8), false, 2.0)
+	_draw_text_shadow(str(_popup_quantity), Vector2(rect.position.x + 150.0, rect.position.y + 140.0), C["white"], 18.0, true, 90.0)
+	_draw_texture_fit(_tex("qty_button"), _popup_plus_rect())
+	_draw_text_shadow("+", _popup_plus_rect().get_center() + Vector2(0, 7), C["white"], 18.0, true, 40.0)
+	_draw_texture_fit(_tex("qty_button"), _popup_plus_ten_rect())
+	_draw_text_shadow("+10", _popup_plus_ten_rect().get_center() + Vector2(0, 7), C["white"], 14.0, true, 42.0)
+
+
+func _draw_total_price(rect: Rect2) -> void:
+	var total := int(popup.get("price", 0)) * _popup_quantity
+	var currency_key := "diamond" if popup.get("currency", "gold") == "gems" else "gold"
+	var price_rect := Rect2(rect.position.x + 88.0, rect.position.y + 151.0, 124.0, 29.0)
+	_draw_texture_fit(_tex("price_plate"), price_rect)
+	_draw_text_left("总价:", Vector2(price_rect.position.x + 9.0, price_rect.position.y + 20.0), C["muted"], 12.0, false, 45.0)
+	_draw_texture_fit(_tex(currency_key), Rect2(price_rect.position.x + 56.0, price_rect.position.y + 4.0, 21.0, 21.0))
+	_draw_text_shadow(str(total), Vector2(price_rect.position.x + 96.0, price_rect.position.y + 21.0), C["gold"] if currency_key == "gold" else C["blue"], 15.0, true, 55.0)
+
+
+func _popup_rect() -> Rect2:
+	return Rect2(38.0, 462.0, 300.0, 190.0)
+
+
+func _popup_minus_rect() -> Rect2:
+	var r := _popup_rect()
+	return Rect2(r.position.x + 38.0, r.position.y + 116.0, 42.0, 34.0)
+
+
+func _popup_plus_rect() -> Rect2:
+	var r := _popup_rect()
+	return Rect2(r.position.x + 220.0, r.position.y + 116.0, 42.0, 34.0)
+
+
+func _popup_plus_ten_rect() -> Rect2:
+	var r := _popup_rect()
+	return Rect2(r.position.x + 263.0, r.position.y + 116.0, 42.0, 34.0)
+
+
+func _popup_cancel_rect() -> Rect2:
+	var r := _popup_rect()
+	return Rect2(r.position.x + 18.0, r.position.y + 148.0, 124.0, 36.0)
+
+
+func _popup_confirm_rect() -> Rect2:
+	var r := _popup_rect()
+	return Rect2(r.position.x + 158.0, r.position.y + 148.0, 126.0, 36.0)
+
+
+func _get_limit_text(shop_item: Dictionary) -> String:
+	var item: Dictionary = shop_item.get("data", {})
+	var item_type: String = item.get("type", "")
+	if item_type == "evolution":
+		return "限购 3/3"
+	if item_type == "capture":
+		return "限购 10/10"
+	return "限购 5/5"
+
+
+func _get_item_count(item_id: String) -> int:
+	var storage := _get_storage()
+	if storage and storage.has_method("load_inventory"):
+		var inv: Dictionary = storage.load_inventory()
+		return int(inv.get(item_id, 0))
+	return 0
+
+
+func _format_number(value: int) -> String:
+	var text := str(value)
+	var out := ""
+	var count := 0
+	for i in range(text.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = text[i] + out
+		count += 1
+	return out
+
+
+func _tex(key: String) -> Texture2D:
+	return _get_texture(SHOP_ASSETS.get(key, ""))
+
+
+func _get_item_texture(item_id: String) -> Texture2D:
+	return _get_texture(ITEM_ICON_ASSETS.get(item_id, ""))
+
+
+func _get_texture(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	if not _texture_cache.has(path):
+		_texture_cache[path] = load(path)
+	return _texture_cache[path] as Texture2D
+
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale := maxf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var source_size := rect.size / scale
+	var source_pos := (tex_size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
+
+
+func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	var left := center.x - width / 2.0
+	draw_string(ThemeDB.fallback_font, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+
+
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
 
 
 func _process(_delta: float) -> void:

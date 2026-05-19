@@ -1,293 +1,114 @@
 # scene_achievement.gd - 成就系统场景
 # 源文件: js/ui/sceneAchievement.js
-# 纯代码重构版本（无 .tscn 依赖）
 class_name SceneAchievement
 extends Control
 
 const AchievementDB = preload("res://src/data/achievement_db.gd")
 
-# === 静态常量 ===
-const DESIGN_W: float = 375.0
-const DESIGN_H: float = 667.0
-const LIST_START_Y: float = 160.0
-const LIST_BOTTOM_Y: float = 647.0
-const ITEM_H: float = 70.0
-const TAB_W: float = 62.0
-const TAB_GAP: float = 7.0
-const TAB_START_X: float = 16.0
-const TAB_Y: float = 112.0
-const BACK_BTN: Rect2 = Rect2(15.0, 15.0, 60.0, 35.0)
+const DESIGN_W := 375.0
+const DESIGN_H := 667.0
+const BACK_RECT := Rect2(13.0, 14.0, 58.0, 58.0)
+const HEADER_RECT := Rect2(96.0, 20.0, 205.0, 50.0)
+const SUMMARY_RECT := Rect2(9.0, 84.0, 357.0, 104.0)
+const TAB_Y := 198.0
+const TAB_W := 67.0
+const TAB_H := 42.0
+const TAB_GAP := 5.0
+const TAB_START_X := 8.0
+const LIST_TOP := 248.0
+const LIST_BOTTOM := 650.0
+const CARD_X := 9.0
+const CARD_W := 357.0
+const CARD_H := 92.0
+const CARD_GAP := 8.0
 
-# === 节点引用（纯代码赋值） ===
-var back_btn: Button
-var title_label: Label
-var stat_label: Label
-var tabs_container: HBoxContainer
-var scroll_container: ScrollContainer
-var achievement_list: VBoxContainer
-var claimed_dialog: PanelContainer
-var target_dialog: PanelContainer
-
-# === 成员变量 ===
-var _game: Node = null
-var _storage = null
-
-# 成就数据
-var _all_achievements: Array = []
-var _filtered_achievements: Array = []
-var _current_category: String = "all"
-var _categories: Array = ["all", "battle", "collect", "numeric", "continuous"]
-var _category_labels: Dictionary = {
-	"all": "全部",
-	"battle": "战斗",
-	"collect": "收集",
-	"numeric": "数值",
-	"continuous": "连续"
+const ACHIEVEMENT_ASSETS := {
+	"bg": "res://assets/images/achievement/bg_achievement.png",
+	"back": "res://assets/images/achievement/ui_back_button.png",
+	"header": "res://assets/images/achievement/ui_header_bar.png",
+	"summary": "res://assets/images/achievement/ui_summary_panel.png",
+	"trophy": "res://assets/images/achievement/icon_trophy.png",
+	"tab_all": "res://assets/images/achievement/ui_tab_all.png",
+	"tab_battle": "res://assets/images/achievement/ui_tab_battle.png",
+	"tab_collect": "res://assets/images/achievement/ui_tab_collect.png",
+	"tab_numeric": "res://assets/images/achievement/ui_tab_all.png",
+	"tab_continuous": "res://assets/images/achievement/ui_tab_growth.png",
+	"card": "res://assets/images/achievement/ui_card_frame.png",
+	"ribbon": "res://assets/images/achievement/ui_title_ribbon.png",
+	"progress_empty": "res://assets/images/achievement/ui_progress_empty.png",
+	"progress_fill": "res://assets/images/achievement/ui_progress_fill.png",
+	"claim": "res://assets/images/achievement/ui_btn_claim.png",
+	"disabled": "res://assets/images/achievement/ui_btn_disabled.png",
+	"stamp": "res://assets/images/achievement/ui_stamp_completed.png",
+	"lock": "res://assets/images/achievement/icon_lock.png",
+	"badge_star": "res://assets/images/achievement/badge_star.png",
+	"badge_battle": "res://assets/images/achievement/badge_battle.png",
+	"badge_collect": "res://assets/images/achievement/badge_collect.png",
+	"badge_growth": "res://assets/images/achievement/badge_growth.png",
+	"badge_locked": "res://assets/images/achievement/badge_locked.png",
+	"reward_slot": "res://assets/images/inventory/ui_slot.png",
+	"gold": "res://assets/images/main/icon_gold.png",
+	"diamond": "res://assets/images/main/icon_diamond.png",
+	"exp": "res://assets/images/stage/icon_exp_badge.png",
 }
 
-# 选中/领取状态
-var _selected_ach: Dictionary = {}
-var _claimed_ach: Dictionary = {}
-var _claim_timer: float = 0.0
+const C := {
+	"white": Color(1.0, 1.0, 1.0),
+	"muted": Color(0.66, 0.72, 0.83),
+	"dim": Color(0.42, 0.48, 0.58),
+	"gold": Color(1.0, 0.78, 0.18),
+	"green": Color(0.62, 1.0, 0.36),
+	"blue": Color(0.42, 0.78, 1.0),
+	"shadow": Color(0.0, 0.0, 0.0, 0.58),
+	"locked": Color(0.45, 0.48, 0.53, 0.72),
+}
 
-# 滚动
-var _scroll_offset: float = 0.0
-var _is_dragging: bool = false
-var _last_mouse_y: float = 0.0
+var _game: Node = null
+var _storage: Node = null
+var _all_achievements: Array = []
+var _filtered_achievements: Array = []
+var _current_category := "all"
+var _claimed_ids: Array = []
+var _toast_text := ""
+var _toast_timer := 0.0
+var _scroll_offset := 0.0
+var _dragging := false
+var _drag_start_y := 0.0
+var _last_drag_y := 0.0
+var _texture_cache: Dictionary = {}
 
-# ==================== 生命周期 ====================
+const CATEGORIES := [
+	{"id": "all", "label": "全部"},
+	{"id": "battle", "label": "战斗"},
+	{"id": "collect", "label": "收集"},
+	{"id": "numeric", "label": "数值"},
+	{"id": "continuous", "label": "连续"},
+]
 
-var _bg_texture: ColorRect
-
-func _add_dark_background() -> void:
-	_bg_texture = ColorRect.new()
-	_bg_texture.color = Color(0.04, 0.07, 0.15, 1.0)
-	_bg_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_bg_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg_texture.z_index = -10
-	add_child(_bg_texture)
 
 func _ready() -> void:
-	_add_dark_background()
-	_create_ui()
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	_init_data()
 
+
 func init(data: Dictionary = {}) -> void:
-	# 兼容 main.gd 的 init(data) 调用，_ready 已经初始化过了
-	pass
+	_current_category = data.get("category", _current_category)
+	_init_data()
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch or event is InputEventMouseButton:
-		if event is InputEventScreenTouch:
-			if event.pressed:
-				_last_mouse_y = event.position.y
-				_handle_tap(event.position.x, event.position.y)
-			else:
-				_is_dragging = false
-		elif event is InputEventMouseButton:
-			if event.button_index == MOUSE_BUTTON_LEFT:
-				if event.pressed:
-					_last_mouse_y = event.position.y
-					_handle_tap(event.position.x, event.position.y)
-				else:
-					_is_dragging = false
-	elif event is InputEventScreenDrag or (event is InputEventMouseMotion and _is_dragging):
-		var drag_y: float
-		if event is InputEventScreenDrag:
-			drag_y = event.position.y
-		else:
-			drag_y = event.position.y
-
-		if _is_dragging or abs(drag_y - _last_mouse_y) > 5:
-			_is_dragging = true
-			var direction: int = 0
-			var current_y: float = drag_y if event is InputEventScreenDrag else event.position.y
-			if current_y - _last_mouse_y > 10:
-				direction = -1  # 向下拖（内容向上）
-			elif _last_mouse_y - current_y > 10:
-				direction = 1   # 向上拖（内容向下）
-
-			if direction != 0:
-				_scroll_by_direction(direction)
-			_last_mouse_y = current_y
-
-# ==================== UI 创建 ====================
-
-func _create_ui() -> void:
-	# 背景
-	add_theme_stylebox_override("panel", _make_bg_style())
-
-	# 返回按钮
-	back_btn = Button.new()
-	back_btn.text = "← 返回"
-	back_btn.position = Vector2(15.0, 15.0)
-	back_btn.custom_minimum_size = Vector2(60.0, 35.0)
-	back_btn.pressed.connect(_on_back_pressed)
-	_back_btn_style(back_btn, false)
-	add_child(back_btn)
-
-	# 标题
-	title_label = Label.new()
-	title_label.text = "🏆 成就"
-	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	title_label.position = Vector2(DESIGN_W / 2.0, 70.0)
-	title_label.add_theme_font_size_override("font_size", 18)
-	title_label.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0))  # gold
-	add_child(title_label)
-
-	# 统计标签
-	stat_label = Label.new()
-	stat_label.text = "已解锁 0/0"
-	stat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	stat_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	stat_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	stat_label.position = Vector2(DESIGN_W / 2.0, 94.0)
-	stat_label.add_theme_font_size_override("font_size", 12)
-	stat_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	add_child(stat_label)
-
-	# 分类标签容器
-	tabs_container = HBoxContainer.new()
-	tabs_container.position = Vector2(TAB_START_X, TAB_Y)
-	tabs_container.add_theme_constant_override("separation", TAB_GAP)
-	add_child(tabs_container)
-
-	# 创建分类按钮
-	for cat: String in _categories:
-		var btn: Button = _make_tab_button(cat, _category_labels[cat])
-		tabs_container.add_child(btn)
-
-	# 滚动容器
-	scroll_container = ScrollContainer.new()
-	scroll_container.position = Vector2(0.0, LIST_START_Y)
-	scroll_container.size = Vector2(DESIGN_W, DESIGN_H - LIST_START_Y - 20.0)
-	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll_container.scroll_started.connect(_on_scroll_started)
-	scroll_container.scroll_ended.connect(_on_scroll_ended)
-	add_child(scroll_container)
-
-	# 成就列表
-	achievement_list = VBoxContainer.new()
-	achievement_list.add_theme_constant_override("separation", 10)
-	achievement_list.custom_minimum_size = Vector2(DESIGN_W - 30.0, 0.0)
-	scroll_container.add_child(achievement_list)
-
-	# 已领取弹窗
-	claimed_dialog = _make_dialog("claimed")
-	claimed_dialog.visible = false
-	add_child(claimed_dialog)
-
-	# 目标详情弹窗
-	target_dialog = _make_dialog("target")
-	target_dialog.visible = false
-	add_child(target_dialog)
-
-func _make_bg_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.15, 0.15, 0.20)  # bgMedium
-	style.corner_radius_top_left = 0.0
-	style.corner_radius_top_right = 0.0
-	style.corner_radius_bottom_left = 0.0
-	style.corner_radius_bottom_right = 0.0
-	return style
-
-func _back_btn_style(btn: Button, pressed: bool) -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.22, 0.22, 0.30) if not pressed else Color(0.18, 0.18, 0.24)
-	style.corner_radius_top_left = 6.0
-	style.corner_radius_top_right = 6.0
-	style.corner_radius_bottom_left = 6.0
-	style.corner_radius_bottom_right = 6.0
-	btn.add_theme_stylebox_override("normal", style)
-	btn.add_theme_stylebox_override("pressed", style)
-	btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
-	btn.add_theme_font_size_override("font_size", 12)
-
-func _make_tab_button(category: String, label: String) -> Button:
-	var btn := Button.new()
-	btn.text = label
-	btn.custom_minimum_size = Vector2(TAB_W, 34.0)
-	btn.pressed.connect(_on_tab_pressed.bind(category))
-	_set_tab_style(btn, category == _current_category)
-	return btn
-
-func _set_tab_style(btn: Button, selected: bool) -> void:
-	var style := StyleBoxFlat.new()
-	if selected:
-		style.bg_color = Color(1.0, 0.84, 0.0)  # gold
-		style.corner_radius_top_left = 6.0
-		style.corner_radius_top_right = 6.0
-		style.corner_radius_bottom_left = 6.0
-		style.corner_radius_bottom_right = 6.0
-		btn.add_theme_stylebox_override("normal", style)
-		btn.add_theme_stylebox_override("pressed", style)
-		btn.add_theme_stylebox_override("hover", style)
-		btn.add_theme_color_override("font_color", Color(0.15, 0.15, 0.20))
-	else:
-		style.bg_color = Color(0.20, 0.20, 0.28)  # bgCard
-		style.corner_radius_top_left = 6.0
-		style.corner_radius_top_right = 6.0
-		style.corner_radius_bottom_left = 6.0
-		style.corner_radius_bottom_right = 6.0
-		btn.add_theme_stylebox_override("normal", style)
-		btn.add_theme_stylebox_override("pressed", style)
-		btn.add_theme_stylebox_override("hover", style)
-		btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	btn.add_theme_font_size_override("font_size", 12)
-
-func _make_dialog(type: String) -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(DESIGN_W - 80.0, 80.0)
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.20, 0.20, 0.28)  # bgCard
-	style.corner_radius_top_left = 12.0
-	style.corner_radius_top_right = 12.0
-	style.corner_radius_bottom_left = 12.0
-	style.corner_radius_bottom_right = 12.0
-	panel.add_theme_stylebox_override("panel", style)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	panel.add_child(vbox)
-
-	var title_lbl := Label.new()
-	title_lbl.name = "TitleLabel"
-	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_lbl.add_theme_font_size_override("font_size", 14)
-	if type == "claimed":
-		title_lbl.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0))  # gold
-	else:
-		title_lbl.add_theme_color_override("font_color", Color(0.89, 0.19, 0.19))  # danger
-	vbox.add_child(title_lbl)
-
-	var desc_lbl := Label.new()
-	desc_lbl.name = "DescLabel"
-	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc_lbl.add_theme_font_size_override("font_size", 11)
-	desc_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	vbox.add_child(desc_lbl)
-
-	return panel
-
-# ==================== 数据初始化 ====================
 
 func _init_data() -> void:
 	_game = get_node_or_null("/root/GameManager")
 	_storage = get_node_or_null("/root/SaveManager")
 	if _storage == null and _game and _game.get("storage"):
 		_storage = _game.storage
-
-	_all_achievements = _build_achievement_view_models()
-
-	_filter_by_category("all")
-	_update_ui()
-
-func _build_achievement_view_models() -> Array:
 	var save_data: Dictionary = _storage.load_achievements() if _storage and _storage.has_method("load_achievements") else {}
+	_claimed_ids = save_data.get("claimedIds", [])
+	_all_achievements = _build_achievement_view_models(save_data)
+	_filter_by_category(_current_category)
+	queue_redraw()
+
+
+func _build_achievement_view_models(save_data: Dictionary) -> Array:
 	var unlocked_ids: Array = save_data.get("unlockedIds", [])
 	var stats: Dictionary = save_data.get("stats", {}).duplicate(true)
 	_apply_derived_stats(stats)
@@ -295,304 +116,374 @@ func _build_achievement_view_models() -> Array:
 	var achievements: Array = []
 	for ach: Dictionary in AchievementDB.ACHIEVEMENTS:
 		var item: Dictionary = ach.duplicate(true)
-		var progress_key: String = item.get("progressKey", "")
-		var progress: int = int(stats.get(progress_key, 0))
-		var target: int = int(item.get("target", 1))
-		var unlocked: bool = unlocked_ids.has(item.get("id", "")) or progress >= target
+		var progress_key := str(item.get("progressKey", ""))
+		var progress := int(stats.get(progress_key, 0))
+		var target := maxi(1, int(item.get("target", 1)))
+		var unlocked := unlocked_ids.has(item.get("id", "")) or progress >= target
 		item["progress"] = progress
+		item["target"] = target
 		item["unlocked"] = unlocked
+		item["claimed"] = _claimed_ids.has(item.get("id", ""))
 		achievements.append(item)
 	return achievements
+
 
 func _apply_derived_stats(stats: Dictionary) -> void:
 	if not _storage:
 		return
-
 	if _storage.has_method("load_rewards"):
 		var rewards: Dictionary = _storage.load_rewards()
 		for key: String in ["battleCount", "captureCount", "totalGoldEarned", "totalItemsGained"]:
 			stats[key] = maxi(int(stats.get(key, 0)), int(rewards.get(key, 0)))
-
 	if _storage.has_method("load_player"):
 		var player: Dictionary = _storage.load_player()
 		stats["captureCount"] = maxi(int(stats.get("captureCount", 0)), player.get("captured", []).size())
-
 	if _storage.has_method("load_stage_progress"):
-		var cleared_count: int = 0
+		var cleared_count := 0
 		var progress_data: Dictionary = _storage.load_stage_progress()
 		for stage_id: String in progress_data.keys():
 			var stage_state: Dictionary = progress_data.get(stage_id, {})
 			if stage_state.get("cleared", false):
 				cleared_count += 1
 		stats["stageClearedCount"] = maxi(int(stats.get("stageClearedCount", 0)), cleared_count)
-
 	if _storage.has_method("load_sign_in_data"):
 		var sign_in_data: Dictionary = _storage.load_sign_in_data()
 		stats["maxConsecutiveSignIn"] = maxi(int(stats.get("maxConsecutiveSignIn", 0)), int(sign_in_data.get("consecutiveDays", 0)))
 		stats["totalSignInDays"] = maxi(int(stats.get("totalSignInDays", 0)), int(sign_in_data.get("totalDays", 0)))
 
-# ==================== 分类筛选 ====================
-
-func _on_tab_pressed(category: String) -> void:
-	_filter_by_category(category)
 
 func _filter_by_category(category: String) -> void:
 	_current_category = category
 	if category == "all":
 		_filtered_achievements = _all_achievements.duplicate()
 	else:
-		_filtered_achievements = _all_achievements.filter(
-			func(ach): return ach.get("category", "") == category
-		)
-	_scroll_offset = 0.0
-	if scroll_container:
-		scroll_container.scroll_vertical = 0
-	_rebuild_achievement_list()
-	_update_tabs()
+		_filtered_achievements = _all_achievements.filter(func(ach): return ach.get("category", "") == category)
+	_scroll_offset = minf(_scroll_offset, _get_max_scroll_offset())
+	queue_redraw()
 
-func _rebuild_achievement_list() -> void:
-	if not achievement_list:
-		return
-	# 清除旧列表
-	for child: Node in achievement_list.get_children():
-		child.queue_free()
 
-	# 构建新列表
-	for ach: Dictionary in _filtered_achievements:
-		var item: HBoxContainer = _create_achievement_item(ach)
-		achievement_list.add_child(item)
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_dragging = true
+			_drag_start_y = event.position.y
+			_last_drag_y = event.position.y
+		else:
+			if abs(event.position.y - _drag_start_y) < 8.0:
+				_on_tap(event.position)
+			_dragging = false
+		accept_event()
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_dragging = true
+			_drag_start_y = event.position.y
+			_last_drag_y = event.position.y
+		else:
+			if abs(event.position.y - _drag_start_y) < 8.0:
+				_on_tap(event.position)
+			_dragging = false
+		accept_event()
+	elif event is InputEventMouseMotion and _dragging:
+		_scroll_by_delta(event.position.y - _last_drag_y)
+		_last_drag_y = event.position.y
+		accept_event()
+	elif event is InputEventScreenDrag:
+		_scroll_by_delta(event.relative.y)
+		accept_event()
 
-func _create_achievement_item(ach: Dictionary) -> HBoxContainer:
-	var hbox: HBoxContainer = HBoxContainer.new()
-	hbox.custom_minimum_size = Vector2(DESIGN_W - 30.0, 60.0)
-	hbox.add_theme_constant_override("separation", 10)
 
-	# 背景面板
-	var bg_panel: PanelContainer = PanelContainer.new()
-	bg_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	var bg_color: Color
-	if ach.get("unlocked", false):
-		bg_color = Color(0.29, 0.69, 0.31, 0.15)  # success tint
-	else:
-		bg_color = Color(0.16, 0.16, 0.20)  # bgMedium
-	style.bg_color = bg_color
-	style.corner_radius_top_left = 6.0
-	style.corner_radius_top_right = 6.0
-	style.corner_radius_bottom_left = 6.0
-	style.corner_radius_bottom_right = 6.0
-	bg_panel.add_theme_stylebox_override("panel", style)
-	hbox.add_child(bg_panel)
-
-	# 内部布局
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 4)
-
-	# 第一行：图标 + 名称 + 进度条
-	var top_row: HBoxContainer = HBoxContainer.new()
-	top_row.add_theme_constant_override("separation", 8)
-
-	# 图标
-	var icon_lbl: Label = Label.new()
-	icon_lbl.text = ach.get("icon", "🏆")
-	icon_lbl.add_theme_font_size_override("font_size", 24)
-	top_row.add_child(icon_lbl)
-
-	# 名称
-	var name_lbl: Label = Label.new()
-	name_lbl.text = ach.get("name", "")
-	name_lbl.add_theme_font_size_override("font_size", 14)
-	if ach.get("unlocked", false):
-		name_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-	else:
-		name_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_row.add_child(name_lbl)
-
-	# 进度条（未解锁时）
-	if not ach.get("unlocked", false):
-		var progress: float = ach.get("progress", 0)
-		var target: float = ach.get("target", 1)
-		var ratio: float = clampf(progress / target, 0.0, 1.0)
-
-		var progress_container: HBoxContainer = HBoxContainer.new()
-		progress_container.add_theme_constant_override("separation", 4)
-
-		var bar: ProgressBar = ProgressBar.new()
-		bar.custom_minimum_size = Vector2(80.0, 8.0)
-		bar.max_value = 100.0
-		bar.value = ratio * 100.0
-		bar.add_theme_color_override("fill_color", Color(0.89, 0.19, 0.19))  # danger
-		var bar_style: StyleBoxFlat = StyleBoxFlat.new()
-		bar_style.bg_color = Color(0.15, 0.15, 0.15)
-		bar_style.set_corner_radius_all(4.0)
-		bar.add_theme_stylebox_override("background", bar_style)
-		progress_container.add_child(bar)
-
-		var ratio_lbl: Label = Label.new()
-		ratio_lbl.text = "%d/%d" % [progress, target]
-		ratio_lbl.add_theme_font_size_override("font_size", 10)
-		ratio_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-		progress_container.add_child(ratio_lbl)
-
-		top_row.add_child(progress_container)
-	else:
-		# 已解锁标记
-		var check_lbl: Label = Label.new()
-		check_lbl.text = "✓"
-		check_lbl.add_theme_font_size_override("font_size", 20)
-		check_lbl.add_theme_color_override("font_color", Color(0.30, 0.69, 0.31))  # success green
-		top_row.add_child(check_lbl)
-
-	vbox.add_child(top_row)
-
-	# 第二行：描述 + 奖励
-	var bottom_row: HBoxContainer = HBoxContainer.new()
-	bottom_row.add_theme_constant_override("separation", 8)
-
-	var desc_lbl: Label = Label.new()
-	desc_lbl.text = ach.get("desc", "")
-	desc_lbl.add_theme_font_size_override("font_size", 11)
-	desc_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	desc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom_row.add_child(desc_lbl)
-
-	# 奖励
-	var reward: Dictionary = ach.get("reward", {})
-	if reward.has("gold"):
-		var gold_lbl: Label = Label.new()
-		gold_lbl.text = "💰 %d" % reward["gold"]
-		gold_lbl.add_theme_font_size_override("font_size", 11)
-		gold_lbl.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0))  # gold
-		bottom_row.add_child(gold_lbl)
-
-	vbox.add_child(bottom_row)
-	hbox.add_child(vbox)
-
-	return hbox
-
-# ==================== 点击处理 ====================
-
-func _handle_tap(x: float, y: float) -> void:
-	# 返回按钮
-	if BACK_BTN.has_point(Vector2(x, y)):
+func _on_tap(point: Vector2) -> void:
+	if BACK_RECT.has_point(point):
 		_on_back_pressed()
 		return
-
-	# 分类标签
-	if y >= TAB_Y and y <= TAB_Y + 34.0:
-		for i: int in range(_categories.size()):
-			var btn_rect: Rect2 = _get_category_button(i)
-			if btn_rect.has_point(Vector2(x, y)):
-				_filter_by_category(_categories[i])
-				return
-
-	# 成就列表点击
-	if y >= LIST_START_Y and y <= LIST_BOTTOM_Y:
-		var index: int = int((y - LIST_START_Y + _scroll_offset) / ITEM_H)
-		if index >= 0 and index < _filtered_achievements.size():
-			var ach: Dictionary = _filtered_achievements[index]
-			_on_achievement_tap(ach)
-
-func _on_achievement_tap(ach: Dictionary) -> void:
-	if ach.get("unlocked", false):
-		# 已解锁：显示奖励已领取
-		_claimed_ach = ach
-		_claim_timer = 2.0
-		claimed_dialog.visible = true
-		_update_claimed_dialog()
+	for i in range(CATEGORIES.size()):
+		var tab_rect := _get_tab_rect(i)
+		if tab_rect.has_point(point):
+			_filter_by_category(str(CATEGORIES[i]["id"]))
+			return
+	if point.y < LIST_TOP or point.y > LIST_BOTTOM:
+		return
+	var index := int((point.y - LIST_TOP + _scroll_offset) / (CARD_H + CARD_GAP))
+	if index < 0 or index >= _filtered_achievements.size():
+		return
+	var ach: Dictionary = _filtered_achievements[index]
+	var card_rect := _get_card_rect(index)
+	if not card_rect.has_point(point):
+		return
+	if ach.get("unlocked", false) and not ach.get("claimed", false) and _get_claim_rect(card_rect).has_point(point):
+		_claim_achievement(ach)
+	elif ach.get("unlocked", false):
+		_show_toast("%s 已完成" % ach.get("name", "成就"))
 	else:
-		# 未解锁：高亮该成就目标
-		_selected_ach = ach
-		target_dialog.visible = true
-		_update_target_dialog()
+		_show_toast("目标进度 %d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
 
-func _get_category_button(index: int) -> Rect2:
-	var start_x: float = TAB_START_X + index * (TAB_W + TAB_GAP)
-	return Rect2(start_x, TAB_Y, TAB_W, 34.0)
 
-func _scroll_by_direction(direction: int) -> void:
-	var max_offset: float = _get_max_scroll_offset()
-	_scroll_offset = clampf(_scroll_offset - direction * ITEM_H, 0.0, max_offset)
-	if scroll_container:
-		scroll_container.scroll_vertical = int(_scroll_offset)
+func _scroll_by_delta(delta_y: float) -> void:
+	if _drag_start_y < LIST_TOP or _drag_start_y > LIST_BOTTOM:
+		return
+	_scroll_offset = clampf(_scroll_offset - delta_y, 0.0, _get_max_scroll_offset())
+	queue_redraw()
+
+
+func _claim_achievement(ach: Dictionary) -> void:
+	var ach_id := str(ach.get("id", ""))
+	if ach_id.is_empty() or _claimed_ids.has(ach_id):
+		return
+	var reward: Dictionary = ach.get("reward", {})
+	if _storage and reward.has("gold") and _storage.has_method("add_gold"):
+		_storage.add_gold(int(reward.get("gold", 0)))
+	_claimed_ids.append(ach_id)
+	if _storage and _storage.has_method("load_achievements") and _storage.has_method("save_achievements"):
+		var save_data: Dictionary = _storage.load_achievements()
+		save_data["claimedIds"] = _claimed_ids
+		_storage.save_achievements(save_data)
+	_all_achievements = _build_achievement_view_models(_storage.load_achievements() if _storage and _storage.has_method("load_achievements") else {})
+	_filter_by_category(_current_category)
+	_show_toast("领取成功 +%d 金币" % int(reward.get("gold", 0)))
+
 
 func _get_max_scroll_offset() -> float:
-	var content_h: float = _filtered_achievements.size() * ITEM_H
-	var visible_h: float = LIST_BOTTOM_Y - LIST_START_Y
-	return maxf(0.0, content_h - visible_h)
+	var content_h := _filtered_achievements.size() * (CARD_H + CARD_GAP) - CARD_GAP
+	return maxf(0.0, content_h - (LIST_BOTTOM - LIST_TOP))
 
-func _on_scroll_started() -> void:
-	_is_dragging = true
-
-func _on_scroll_ended() -> void:
-	_is_dragging = false
-
-# ==================== UI 更新 ====================
-
-func _update_ui() -> void:
-	# 标题
-	if title_label:
-		title_label.text = "🏆 成就"
-
-	# 统计
-	var unlocked_count: int = _all_achievements.filter(func(a): return a.get("unlocked", false)).size()
-	var total_count: int = _all_achievements.size()
-	if stat_label:
-		stat_label.text = "已解锁 %d/%d" % [unlocked_count, total_count]
-
-	# Tab高亮
-	_update_tabs()
-
-	# 成就列表
-	_rebuild_achievement_list()
-
-func _update_tabs() -> void:
-	if not tabs_container:
-		return
-	for i: int in range(_categories.size()):
-		var btn: Button = (tabs_container.get_child(i) as Button) if i < tabs_container.get_child_count() else null
-		if btn:
-			var is_selected: bool = _current_category == _categories[i]
-			_set_tab_style(btn, is_selected)
-
-func _update_claimed_dialog() -> void:
-	if _claimed_ach.is_empty() or not claimed_dialog:
-		return
-	var vbox: VBoxContainer = claimed_dialog.get_node_or_null("VBox") as VBoxContainer
-	if vbox:
-		var title_lbl: Label = vbox.get_node_or_null("TitleLabel") as Label
-		var desc_lbl: Label = vbox.get_node_or_null("DescLabel") as Label
-		if title_lbl:
-			title_lbl.text = "✅ %s" % _claimed_ach.get("name", "")
-		if desc_lbl:
-			desc_lbl.text = "奖励已领取"
-
-func _update_target_dialog() -> void:
-	if _selected_ach.is_empty() or not target_dialog:
-		return
-	var vbox: VBoxContainer = target_dialog.get_node_or_null("VBox") as VBoxContainer
-	if vbox:
-		var title_lbl: Label = vbox.get_node_or_null("TitleLabel") as Label
-		var desc_lbl: Label = vbox.get_node_or_null("DescLabel") as Label
-		if title_lbl:
-			title_lbl.text = "🎯 目标: %s" % _selected_ach.get("desc", "")
-		if desc_lbl:
-			var progress: float = _selected_ach.get("progress", 0)
-			var target: float = _selected_ach.get("target", 1)
-			desc_lbl.text = "进度: %d/%d" % [progress, target]
-
-# ==================== 按钮回调 ====================
 
 func _on_back_pressed() -> void:
-	SceneManager.switch_scene("main")
+	var manager := get_node_or_null("/root/SceneManager")
+	if manager and manager.has_method("switch_scene"):
+		manager.switch_scene("main", {}, "slide")
+	else:
+		var game := get_node_or_null("/root/GameManager")
+		if game and game.has_method("switch_scene"):
+			game.switch_scene("main", {}, "slide")
 
-# ==================== 定时器 ====================
 
 func _process(delta: float) -> void:
-	if _claim_timer > 0.0:
-		_claim_timer -= delta
-		if _claim_timer <= 0.0:
-			_claimed_ach = {}
-			if claimed_dialog:
-				claimed_dialog.visible = false
+	if _toast_timer > 0.0:
+		_toast_timer -= delta
+		if _toast_timer <= 0.0:
+			_toast_text = ""
+	queue_redraw()
+
+
+func _draw() -> void:
+	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
+	_draw_header()
+	_draw_summary()
+	_draw_tabs()
+	_draw_list()
+	_draw_toast()
+
+
+func _draw_header() -> void:
+	_draw_texture_fit(_tex("back"), BACK_RECT)
+	_draw_texture_fit(_tex("header"), HEADER_RECT)
+	_draw_centered_text("成就", Vector2(DESIGN_W / 2.0, 55.0), C["white"], 29.0, 116.0)
+
+
+func _draw_summary() -> void:
+	_draw_texture_fit(_tex("summary"), SUMMARY_RECT)
+	_draw_texture_contain(_tex("trophy"), Rect2(30.0, 98.0, 94.0, 74.0))
+	var unlocked_count := _all_achievements.filter(func(a): return a.get("unlocked", false)).size()
+	var total_count: int = maxi(1, _all_achievements.size())
+	var percent := int(round(float(unlocked_count) / float(total_count) * 100.0))
+	var points := unlocked_count * 100 + _claimed_ids.size() * 50
+	_draw_text_left("成就点数", Vector2(145.0, 118.0), C["muted"], 15.0, 86.0)
+	_draw_text_left(_format_number(points), Vector2(145.0, 153.0), C["gold"], 28.0, 110.0)
+	_draw_text_left("完成进度", Vector2(258.0, 118.0), C["muted"], 15.0, 84.0)
+	_draw_text_left("%d%%" % percent, Vector2(266.0, 153.0), C["green"], 28.0, 76.0)
+	_draw_progress_bar(Rect2(142.0, 165.0, 190.0, 15.0), float(unlocked_count) / float(total_count), "%d/%d" % [unlocked_count, total_count])
+
+
+func _draw_tabs() -> void:
+	for i in range(CATEGORIES.size()):
+		var tab: Dictionary = CATEGORIES[i]
+		var rect := _get_tab_rect(i)
+		var id := str(tab["id"])
+		_draw_texture_fit(_tex("tab_%s" % id), rect)
+		if id == _current_category:
+			draw_rect(rect.grow(-2.0), Color(0.45, 0.80, 1.0, 0.85), false, 2.0)
+		_draw_centered_text(str(tab["label"]), rect.get_center() + Vector2(9.0, 8.0), C["white"] if id == _current_category else C["muted"], 14.0, 38.0)
+
+
+func _draw_list() -> void:
+	if _filtered_achievements.is_empty():
+		_draw_centered_text("暂无成就", Vector2(DESIGN_W / 2.0, 420.0), C["muted"], 16.0, 160.0)
+		return
+	for i in range(_filtered_achievements.size()):
+		var rect := _get_card_rect(i)
+		if rect.position.y + rect.size.y < LIST_TOP or rect.position.y > LIST_BOTTOM:
+			continue
+		_draw_achievement_card(_filtered_achievements[i], rect)
+	_draw_scrollbar()
+
+
+func _draw_achievement_card(ach: Dictionary, rect: Rect2) -> void:
+	var unlocked := bool(ach.get("unlocked", false))
+	var claimed := bool(ach.get("claimed", false))
+	_draw_texture_fit(_tex("card"), rect)
+	if not unlocked:
+		draw_rect(rect.grow(-5.0), Color(0, 0, 0, 0.30), true)
+	var badge_key := _get_badge_key(ach)
+	_draw_texture_contain(_tex(badge_key), Rect2(rect.position.x + 12.0, rect.position.y + 10.0, 72.0, 74.0), 1.0 if unlocked else 0.65)
+	if not unlocked:
+		_draw_texture_contain(_tex("lock"), Rect2(rect.position.x + 52.0, rect.position.y + 56.0, 28.0, 30.0))
+	_draw_texture_fit(_tex("ribbon"), Rect2(rect.position.x + 96.0, rect.position.y + 13.0, 126.0, 28.0))
+	_draw_centered_text(_ellipsize(str(ach.get("name", "")), 7), Vector2(rect.position.x + 159.0, rect.position.y + 35.0), C["white"] if unlocked else C["muted"], 16.0, 112.0)
+	_draw_text_left(_ellipsize(str(ach.get("desc", "")), 13), Vector2(rect.position.x + 98.0, rect.position.y + 58.0), C["muted"] if unlocked else C["dim"], 12.0, 146.0)
+	var target: float = maxf(1.0, float(ach.get("target", 1)))
+	var progress: float = clampf(float(ach.get("progress", 0)) / target, 0.0, 1.0)
+	_draw_progress_bar(Rect2(rect.position.x + 98.0, rect.position.y + 72.0, 148.0, 14.0), progress, "%d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
+	_draw_reward(ach, Rect2(rect.position.x + 250.0, rect.position.y + 14.0, 38.0, 38.0), unlocked)
+	if claimed:
+		_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 256.0, rect.position.y + 56.0, 88.0, 31.0))
+	elif unlocked:
+		var claim_rect := _get_claim_rect(rect)
+		_draw_texture_fit(_tex("claim"), claim_rect)
+		_draw_centered_text("领取", claim_rect.get_center() + Vector2(0, 7.0), C["white"], 18.0, claim_rect.size.x)
+	else:
+		var disabled_rect := _get_claim_rect(rect)
+		_draw_texture_fit(_tex("disabled"), disabled_rect)
+		_draw_centered_text("未达成", disabled_rect.get_center() + Vector2(0, 6.0), C["muted"], 14.0, disabled_rect.size.x)
+
+
+func _draw_reward(ach: Dictionary, rect: Rect2, active: bool) -> void:
+	_draw_texture_fit(_tex("reward_slot"), rect)
+	var reward: Dictionary = ach.get("reward", {})
+	var icon_key := "gold"
+	var amount := 0
+	if reward.has("gold"):
+		icon_key = "gold"
+		amount = int(reward.get("gold", 0))
+	_draw_texture_contain(_tex(icon_key), Rect2(rect.position.x + 6.0, rect.position.y + 4.0, 26.0, 24.0), 1.0 if active else 0.55)
+	_draw_centered_text("x%d" % amount, Vector2(rect.get_center().x, rect.position.y + 36.0), C["white"] if active else C["muted"], 9.0, rect.size.x)
+
+
+func _draw_progress_bar(rect: Rect2, ratio: float, label: String) -> void:
+	ratio = clampf(ratio, 0.0, 1.0)
+	_draw_texture_fit(_tex("progress_empty"), rect)
+	if ratio > 0.0:
+		_draw_texture_fit(_tex("progress_fill"), Rect2(rect.position, Vector2(rect.size.x * ratio, rect.size.y)))
+	_draw_centered_text(label, rect.get_center() + Vector2(0, 5.0), C["white"], 11.0, rect.size.x)
+
+
+func _draw_scrollbar() -> void:
+	var max_offset := _get_max_scroll_offset()
+	if max_offset <= 0.0:
+		return
+	var track := Rect2(363.0, LIST_TOP + 6.0, 5.0, LIST_BOTTOM - LIST_TOP - 12.0)
+	draw_rect(track, Color(0.05, 0.09, 0.16, 0.75), true)
+	var thumb_h := maxf(44.0, track.size.y * (track.size.y / (track.size.y + max_offset)))
+	var thumb_y := track.position.y + (track.size.y - thumb_h) * (_scroll_offset / max_offset)
+	draw_rect(Rect2(track.position.x, thumb_y, track.size.x, thumb_h), Color(0.50, 0.72, 0.95, 0.8), true)
+
+
+func _draw_toast() -> void:
+	if _toast_text.is_empty() or _toast_timer <= 0.0:
+		return
+	var alpha := minf(_toast_timer / 0.4, 1.0)
+	var rect := Rect2(56.0, 603.0, 263.0, 38.0)
+	draw_rect(rect, Color(0.03, 0.09, 0.16, 0.88 * alpha), true)
+	draw_rect(rect, Color(0.45, 0.80, 1.0, 0.65 * alpha), false, 2.0)
+	_draw_centered_text(_toast_text, rect.get_center() + Vector2(0, 6.0), Color(1, 1, 1, alpha), 14.0, rect.size.x - 18.0)
+
+
+func _show_toast(text: String) -> void:
+	_toast_text = text
+	_toast_timer = 1.6
+	queue_redraw()
+
+
+func _get_tab_rect(index: int) -> Rect2:
+	return Rect2(TAB_START_X + index * (TAB_W + TAB_GAP), TAB_Y, TAB_W, TAB_H)
+
+
+func _get_card_rect(index: int) -> Rect2:
+	var y := LIST_TOP + index * (CARD_H + CARD_GAP) - _scroll_offset
+	return Rect2(CARD_X, y, CARD_W, CARD_H)
+
+
+func _get_claim_rect(card_rect: Rect2) -> Rect2:
+	return Rect2(card_rect.position.x + 260.0, card_rect.position.y + 54.0, 86.0, 34.0)
+
+
+func _get_badge_key(ach: Dictionary) -> String:
+	if not ach.get("unlocked", false):
+		return "badge_locked"
+	match str(ach.get("category", "")):
+		"battle":
+			return "badge_battle"
+		"collect":
+			return "badge_collect"
+		"continuous":
+			return "badge_growth"
+		_:
+			return "badge_star"
+
+
+func _format_number(value: int) -> String:
+	var text := str(value)
+	var out := ""
+	var count := 0
+	for i in range(text.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = text[i] + out
+		count += 1
+	return out
+
+
+func _ellipsize(text: String, max_chars: int) -> String:
+	if text.length() <= max_chars:
+		return text
+	return text.substr(0, maxi(1, max_chars - 1)) + "..."
+
+
+func _tex(key: String) -> Texture2D:
+	var path := str(ACHIEVEMENT_ASSETS.get(key, ""))
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	if not _texture_cache.has(path):
+		_texture_cache[path] = load(path)
+	return _texture_cache[path] as Texture2D
+
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var size := tex.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var scale := minf(rect.size.x / size.x, rect.size.y / size.y)
+	var draw_size := size * scale
+	var pos := rect.position + (rect.size - draw_size) * 0.5
+	draw_texture_rect(tex, Rect2(pos, draw_size), false, Color(1, 1, 1, opacity))
+
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var size := tex.get_size()
+	var scale := maxf(rect.size.x / size.x, rect.size.y / size.y)
+	var source_size := rect.size / scale
+	var source_pos := (size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
+
+
+func _draw_centered_text(text: String, center: Vector2, color: Color, font_size: float, width: float) -> void:
+	var size_i := int(font_size)
+	var left := center.x - width / 2.0
+	draw_string(ThemeDB.fallback_font, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+
+
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, width: float) -> void:
+	var size_i := int(font_size)
+	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
