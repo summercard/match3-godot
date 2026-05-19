@@ -39,7 +39,7 @@ const DW := 375.0
 const DH := 667.0
 
 # ---- 长按阈值（秒）----
-const LONG_PRESS_SEC := 0.5
+const LONG_PRESS_SEC := 0.8
 
 # ---- 长按触发后的视觉增强系数 ----
 const LP_SCALE_BOOST := 1.12
