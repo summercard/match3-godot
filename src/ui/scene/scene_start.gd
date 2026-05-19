@@ -142,9 +142,8 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _begin_hold() -> void:
-	_touching = true
-	_hold_time = 0.0
-	_lp_done = false
+	# 点击立即进入（移除长按逻辑）
+	_do_enter()
 
 
 func _end_hold() -> void:
