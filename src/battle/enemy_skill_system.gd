@@ -49,6 +49,8 @@ signal skill_poison_stack_increase(enemy_idx: int, target_idx: int, new_stacks: 
 signal skill_life_drain_triggered(enemy_idx: int, target_idx: int, drain_amount: int, heal_amount: int)
 signal skill_surge_damage(enemy_idx: int, target_idx: int, damage: int, turn_number: int)
 signal skill_surge_expire(enemy_idx: int, target_idx: int)
+signal skill_confuse_activate(enemy_idx: int, target_idx: int, chance: float, duration: int)
+signal skill_confuse_expire(enemy_idx: int, target_idx: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -64,6 +66,7 @@ const SKILL_TYPE_FREEZE := "freeze"
 const SKILL_TYPE_POISON := "poison"
 const SKILL_TYPE_LIFE_DRAIN := "life_drain"
 const SKILL_TYPE_SURGE := "surge"
+const SKILL_TYPE_CONFUSE := "confuse"
 
 
 # 内部状态（外部访问通过 getter）
@@ -73,6 +76,7 @@ var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "perc
 var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
 var _poison_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "stacks": int, "max_stacks": int, "damage_per_stack": int, "duration_left": int } }
 var _surge_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "base_damage": int, "increment": int, "current_damage": int, "max_damage": int, "turn_number": int } }
+var _confuse_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -172,6 +176,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"base_damage": skill.get("baseDamage", 30),
 						"increment_per_turn": skill.get("incrementPerTurn", 10),
 						"max_damage": skill.get("maxDamage", 100)
+					}
+				"confuse":
+					state["confuse"] = {
+						"chance": skill.get("chance", 0.2),
+						"duration": skill.get("duration", 1),
+						"duration_left": 0
 					}
 		
 		if not state.is_empty():
@@ -960,6 +970,7 @@ func reset() -> void:
 	_freeze_targets.clear()
 	_poison_targets.clear()
 	_surge_targets.clear()
+	_confuse_targets.clear()
 
 
 # ==================== Phase 9: 浪涌技能 ====================
@@ -1179,3 +1190,98 @@ func get_shield_plus_hp(enemy_idx: int) -> int:
 func get_shield_plus_cooldown(enemy_idx: int) -> int:
 	var state = get_skill_state(enemy_idx, "shield_plus")
 	return state.get("cooldown_left", 0)
+
+
+# ==================== Phase 11: 混乱技能 ====================
+# 概率让玩家攻击自己人，持续1回合
+# 配置：{ "type": "confuse", "chance": 0.2, "duration": 1 }
+
+## 尝试激活混乱效果
+## 在敌人攻击造成伤害后调用（概率触发）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "activated": bool, "chance": float, "duration": int }
+func try_activate_confuse(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "confuse")
+	if state.is_empty():
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	# 如果已经存在混乱效果，不重复激活
+	if _confuse_targets.has(enemy_idx) and _confuse_targets[enemy_idx].get("duration_left", 0) > 0:
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	var confuse_chance: float = state.get("chance", 0.2)
+	var confuse_duration: int = state.get("duration", 1)
+	
+	# 概率判定
+	if randf() > confuse_chance:
+		return { "activated": false, "chance": confuse_chance, "duration": 0 }
+	
+	_confuse_targets[enemy_idx] = {
+		"target_idx": target_idx,
+		"chance": confuse_chance,
+		"duration_left": confuse_duration
+	}
+	
+	skill_confuse_activate.emit(enemy_idx, target_idx, confuse_chance, confuse_duration)
+	enemy_skill_action.emit({
+		"type": "confuse_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": confuse_chance,
+		"duration": confuse_duration
+	})
+	
+	return { "activated": true, "chance": confuse_chance, "duration": confuse_duration }
+
+
+## 检查目标是否处于混乱状态
+## 返回: bool - 是否被混乱
+func is_target_confused(enemy_idx: int) -> bool:
+	if not _confuse_targets.has(enemy_idx):
+		return false
+	return _confuse_targets[enemy_idx].get("duration_left", 0) > 0
+
+
+## 获取混乱信息
+func get_confuse_info(enemy_idx: int) -> Dictionary:
+	return _confuse_targets.get(enemy_idx, {})
+
+
+## 处理混乱效果持续时间
+## 在玩家回合开始时调用，更新混乱持续时间并返回是否仍处于混乱状态
+## 返回: { "target_idx": int, "is_confused": bool, "expired": bool }
+func process_confuse_duration(enemy_idx: int) -> Dictionary:
+	if not _confuse_targets.has(enemy_idx):
+		return { "target_idx": -1, "is_confused": false, "expired": false }
+	
+	var confuse_info: Dictionary = _confuse_targets[enemy_idx]
+	var target_idx: int = confuse_info.get("target_idx", -1)
+	var duration_left: int = confuse_info.get("duration_left", 0)
+	
+	if target_idx < 0:
+		_confuse_targets.erase(enemy_idx)
+		return { "target_idx": -1, "is_confused": false, "expired": false }
+	
+	var is_confused: bool = duration_left > 0
+	var expired: bool = false
+	
+	# 持续时间减少
+	duration_left -= 1
+	confuse_info["duration_left"] = duration_left
+	
+	if duration_left <= 0:
+		_confuse_targets.erase(enemy_idx)
+		expired = true
+		skill_confuse_expire.emit(enemy_idx, target_idx)
+		enemy_skill_action.emit({
+			"type": "confuse_expire",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx
+		})
+	
+	return { "target_idx": target_idx, "is_confused": is_confused, "expired": expired }
+
+
+## 获取当前混乱目标
+func get_confuse_target(enemy_idx: int) -> Dictionary:
+	return _confuse_targets.get(enemy_idx, {})
