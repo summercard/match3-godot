@@ -51,8 +51,8 @@
 - [ ] 配置：{ "type": "confuse", "chance": 0.2, "duration": 1 }
 
 ### Skill 9: shield_plus 强化护盾
-- [ ] 护盾期间反弹近战伤害
-- [ ] 配置：{ "type": "shield_plus", "hp": 100, "cooldown": 5, "reflectDamage": true, "reflectPercent": 0.5 }
+- [x] 护盾期间反弹近战伤害
+- [x] 配置：{ "type": "shield_plus", "hp": 100, "cooldown": 5, "reflectDamage": true, "reflectPercent": 0.5 }
 
 ### Skill 10: skill_seal 技能封印
 - [ ] 概率封印玩家技能
