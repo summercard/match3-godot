@@ -10,11 +10,13 @@ class_name EnemySkillSystem
 ##   charge:  { "type": "charge", "interval": int, "damageMultiplier": float }
 ##   shield:  { "type": "shield", "hp": int, "cooldown": int }
 ##   heal:    { "type": "heal", "percent": float, "interval": int }
+##   burn:    { "type": "burn", "damage": int, "interval": int, "duration": int }
 ##
 ## 技能状态结构 (skill_state):
 ##   charge:  { "turns_since_last": int, "is_charging": bool }
 ##   shield:  { "current_hp": int, "max_hp": int, "cooldown_left": int }
 ##   heal:    { "turns_since_last": int }
+##   burn:    { "damage": int, "duration_left": int }
 
 
 # 信号定义
@@ -23,6 +25,9 @@ signal skill_charge_release(enemy_idx: int, damage_multiplier: float)
 signal skill_shield_appear(enemy_idx: int, shield_hp: int)
 signal skill_shield_broken(enemy_idx: int)
 signal skill_heal_triggered(enemy_idx: int, heal_amount: int)
+signal skill_burn_apply(enemy_idx: int, target_idx: int, damage: int, duration: int)
+signal skill_burn_damage(enemy_idx: int, target_idx: int, damage: int)
+signal skill_burn_expire(enemy_idx: int, target_idx: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -30,10 +35,12 @@ signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary
 const SKILL_TYPE_CHARGE := "charge"
 const SKILL_TYPE_SHIELD := "shield"
 const SKILL_TYPE_HEAL := "heal"
+const SKILL_TYPE_BURN := "burn"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...} } }
+var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -79,6 +86,13 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"turns_since_last": 0,
 						"percent": skill.get("percent", 0.1),
 						"interval": skill.get("interval", 4)
+					}
+				"burn":
+					state["burn"] = {
+						"damage": skill.get("damage", 15),
+						"interval": skill.get("interval", 1),
+						"duration": skill.get("duration", 3),
+						"turns_since_last": 0
 					}
 		
 		if not state.is_empty():
@@ -297,16 +311,113 @@ func execute_heal(enemy_idx: int, enemy: Dictionary) -> Dictionary:
 	return { "triggered": false, "heal_amount": 0 }
 
 
+# ==================== Phase 4: 灼烧技能 ====================
+
+## 尝试对攻击者施加灼烧效果
+## 在敌人攻击造成伤害后调用（check_and_release_charge 之后）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "applied": bool, "damage": int, "duration": int }
+func try_apply_burn(enemy_idx: int, target_idx: int, source_damage: int = 0) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "burn")
+	if state.is_empty():
+		return { "applied": false, "damage": 0, "duration": 0 }
+	
+	# 如果已经有灼烧目标，不重复施加（除非超时或已结束）
+	if _burn_targets.has(enemy_idx) and _burn_targets[enemy_idx].get("duration_left", 0) > 0:
+		return { "applied": false, "damage": 0, "duration": 0 }
+	
+	var burn_damage: int = state.get("damage", 15)
+	var burn_duration: int = state.get("duration", 3)
+	
+	_burn_targets[enemy_idx] = {
+		"target_idx": target_idx,
+		"damage": burn_damage,
+		"duration_left": burn_duration
+	}
+	
+	skill_burn_apply.emit(enemy_idx, target_idx, burn_damage, burn_duration)
+	enemy_skill_action.emit({
+		"type": "burn_apply",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": burn_damage,
+		"duration": burn_duration
+	})
+	
+	return { "applied": true, "damage": burn_damage, "duration": burn_duration }
+
+
+## 处理灼烧伤害
+## 在敌人回合开始时调用，对玩家目标造成灼烧伤害
+## 返回: { "target_idx": int, "damage": int, "expired": bool }
+func process_burn_damage(enemy_idx: int) -> Dictionary:
+	if not _burn_targets.has(enemy_idx):
+		return { "target_idx": -1, "damage": 0, "expired": false }
+	
+	var burn_info: Dictionary = _burn_targets[enemy_idx]
+	var target_idx: int = burn_info.get("target_idx", -1)
+	var damage: int = burn_info.get("damage", 0)
+	var duration_left: int = burn_info.get("duration_left", 0)
+	
+	if target_idx < 0 or duration_left <= 0:
+		_burn_targets.erase(enemy_idx)
+		return { "target_idx": target_idx, "damage": 0, "expired": false }
+	
+	# 造成灼烧伤害
+	skill_burn_damage.emit(enemy_idx, target_idx, damage)
+	enemy_skill_action.emit({
+		"type": "burn_damage",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": damage
+	})
+	
+	# 持续时间减少
+	duration_left -= 1
+	burn_info["duration_left"] = duration_left
+	
+	var expired: bool = false
+	if duration_left <= 0:
+		_burn_targets.erase(enemy_idx)
+		expired = true
+		skill_burn_expire.emit(enemy_idx, target_idx)
+		enemy_skill_action.emit({
+			"type": "burn_expire",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx
+		})
+	
+	return { "target_idx": target_idx, "damage": damage, "expired": expired }
+
+
+## 获取当前灼烧目标
+func get_burn_target(enemy_idx: int) -> Dictionary:
+	return _burn_targets.get(enemy_idx, {})
+
+
+## 检查敌人是否有激活的灼烧效果
+func has_burn_target(enemy_idx: int) -> bool:
+	if not _burn_targets.has(enemy_idx):
+		return false
+	return _burn_targets[enemy_idx].get("duration_left", 0) > 0
+
+
 ## 每个敌人回合开始时调用，更新技能冷却/计时
 func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
-	pass  # 占位
+	# 处理灼烧伤害（对玩家目标）
+	process_burn_damage(enemy_idx)
 
 
 ## 每个敌人回合结束时调用，处理技能触发
 func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
-	pass  # 占位
+	# 检查灼烧是否应该触发（基于interval）
+	var state = get_skill_state(enemy_idx, "burn")
+	if not state.is_empty():
+		state["turns_since_last"] += 1
+		# interval控制的是"触发灼烧的频率"，目前burn是立即施加，不需要interval检查
 
 
 ## 重置所有技能状态（战斗重新开始时调用）
 func reset() -> void:
 	_skill_states.clear()
+	_burn_targets.clear()
