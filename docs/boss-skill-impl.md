@@ -36,9 +36,9 @@
 - [ ] 配置：{ "type": "poison", "maxStacks": 3, "damagePerStack": 10, "interval": 1 }
 
 ### Skill 6: life_drain 灵魂吸取
-- [ ] 吸取玩家当前HP并回复自己
-- [ ] 冷却4回合
-- [ ] 配置：{ "type": "life_drain", "percent": 0.15, "cooldown": 4 }
+- [x] 吸取玩家当前HP并回复自己
+- [x] 冷却4回合
+- [x] 配置：{ "type": "life_drain", "percent": 0.15, "cooldown": 4 }
 
 ### Skill 7: surge 浪涌
 - [ ] 每回合伤害递增
