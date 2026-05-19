@@ -34,8 +34,11 @@ var current_phase: int = 1
 var stage_phases: Array = []       # 关卡阶段配置
 var phase_transition_triggered: Dictionary = {}  # { phaseNum: true }
 
-# 敌人技能状态跟踪
-var enemy_skill_states: Dictionary = {}
+# 敌人技能系统实例
+var _enemy_skill_system: EnemySkillSystem = null
+
+func set_enemy_skill_system(system: EnemySkillSystem) -> void:
+	_enemy_skill_system = system
 
 # 队长技能状态
 var leader_skill_data: Dictionary = {}
@@ -473,33 +476,16 @@ func enemy_action() -> Dictionary:
 							"heal_amount": heal_amount
 					})
 
-		# 蓄力检查
+		# 蓄力检查（委托给 EnemySkillSystem）
 		var skip_attack = false
 		var damage_multiplier = 1.0
 
-		if has_skills and skill_state.has("charge"):
-			var charge_config = skills.filter(func(s): return s.get("type") == "charge")
-			if not charge_config.is_empty():
-				if skill_state["charge"].get("is_charging", false):
-					damage_multiplier = charge_config[0].get("damageMultiplier", 2.0)
-					skill_state["charge"]["is_charging"] = false
-					skill_state["charge"]["turns_since_last"] = 0
-					enemy_skill_action.emit({
-							"type": "charge_release",
-							"enemy_index": i,
-							"enemy": enemy,
-							"damage_multiplier": damage_multiplier
-					})
-				else:
-					skill_state["charge"]["turns_since_last"] += 1
-					if skill_state["charge"].get("turns_since_last", 0) >= charge_config[0].get("interval", 3):
-						skill_state["charge"]["is_charging"] = true
-						skip_attack = true
-						enemy_skill_action.emit({
-								"type": "charge_start",
-								"enemy_index": i,
-								"enemy": enemy
-						})
+		if _enemy_skill_system != null and has_skills and skill_state.has("charge"):
+			damage_multiplier = _enemy_skill_system.check_and_release_charge(i)
+			if _enemy_skill_system.is_charging(i):
+				skip_attack = true
+			else:
+				_enemy_skill_system.update_and_check_charge_start(i)
 
 		if skip_attack:
 			actions.append({
