@@ -43,6 +43,7 @@ signal skill_poison_apply(enemy_idx: int, target_idx: int, stacks: int, damage_p
 signal skill_poison_damage(enemy_idx: int, target_idx: int, total_damage: int, stacks: int)
 signal skill_poison_expire(enemy_idx: int, target_idx: int)
 signal skill_poison_stack_increase(enemy_idx: int, target_idx: int, new_stacks: int, max_stacks: int)
+signal skill_life_drain_triggered(enemy_idx: int, target_idx: int, drain_amount: int, heal_amount: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -55,10 +56,11 @@ const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
 const SKILL_TYPE_REFLECT := "reflect"
 const SKILL_TYPE_FREEZE := "freeze"
 const SKILL_TYPE_POISON := "poison"
+const SKILL_TYPE_LIFE_DRAIN := "life_drain"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...}, "freeze": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...}, "freeze": {...}, "poison": {...}, "life_drain": {...} } }
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
 var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
@@ -140,6 +142,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"max_stacks": skill.get("maxStacks", 3),
 						"damage_per_stack": skill.get("damagePerStack", 10),
 						"interval": skill.get("interval", 1),
+						"turns_since_last": 0
+					}
+				"life_drain":
+					state["life_drain"] = {
+						"percent": skill.get("percent", 0.15),
+						"cooldown": skill.get("cooldown", 4),
 						"turns_since_last": 0
 					}
 		
@@ -856,6 +864,67 @@ func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
 	
 	# 处理雷击
 	execute_thunder_strike(enemy_idx, enemy)
+	# 处理灵魂吸取
+	execute_life_drain(enemy_idx, enemy)
+
+
+# ==================== Phase 8: 灵魂吸取技能 ====================
+
+## 处理灵魂吸取技能
+## 在敌人回合结束时调用，检查是否应触发灵魂吸取
+## 吸取玩家当前HP的一定百分比并回复自己
+## 返回: { "triggered": bool, "drain_amount": int, "heal_amount": int, "target_idx": int }
+func execute_life_drain(enemy_idx: int, enemy: Dictionary) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "life_drain")
+	if state.is_empty():
+		return { "triggered": false, "drain_amount": 0, "heal_amount": 0, "target_idx": -1 }
+	
+	state["turns_since_last"] += 1
+	var cooldown: int = state.get("cooldown", 4)
+	
+	if state["turns_since_last"] >= cooldown:
+		state["turns_since_last"] = 0
+		
+		var percent: float = state.get("percent", 0.15)
+		var target_idx: int = -1
+		
+		# 寻找玩家队伍中HP最高的单位作为吸取目标
+		# 玩家队伍存储在 enemy["player_party"] 中
+		var player_party: Array = enemy.get("player_party", [])
+		if not player_party.is_empty():
+			var max_hp: int = 0
+			for pet in player_party:
+				var hp: int = pet.get("hp", 0)
+				if hp > max_hp:
+					max_hp = hp
+					target_idx = pet.get("idx", -1)
+		
+		if target_idx < 0:
+			return { "triggered": false, "drain_amount": 0, "heal_amount": 0, "target_idx": -1 }
+		
+		# 计算吸取量：基于目标当前HP
+		var target_hp: int = 0
+		for pet in player_party:
+			if pet.get("idx", -1) == target_idx:
+				target_hp = pet.get("hp", 0)
+				break
+		
+		var drain_amount: int = int(target_hp * percent)
+		var heal_amount: int = drain_amount  # 回复量等于吸取量
+		
+		skill_life_drain_triggered.emit(enemy_idx, target_idx, drain_amount, heal_amount)
+		enemy_skill_action.emit({
+			"type": "life_drain",
+			"enemy_index": enemy_idx,
+			"enemy": enemy,
+			"target_index": target_idx,
+			"drain_amount": drain_amount,
+			"heal_amount": heal_amount
+		})
+		
+		return { "triggered": true, "drain_amount": drain_amount, "heal_amount": heal_amount, "target_idx": target_idx }
+	
+	return { "triggered": false, "drain_amount": 0, "heal_amount": 0, "target_idx": -1 }
 
 
 ## 重置所有技能状态（战斗重新开始时调用）
