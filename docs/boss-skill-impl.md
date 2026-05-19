@@ -46,15 +46,18 @@
 - [x] 配置：{ "type": "surge", "baseDamage": 30, "incrementPerTurn": 10, "maxDamage": 100 }
 
 ### Skill 8: confuse 混乱
+- [x] 概率让玩家攻击自己人
+- [x] 持续1回合
+- [x] 配置：{ "type": "confuse", "chance": 0.2, "duration": 1 }
 
 ### Skill 9: shield_plus 强化护盾
 - [x] 护盾期间反弹近战伤害
 - [x] 配置：{ "type": "shield_plus", "hp": 100, "cooldown": 5, "reflectDamage": true, "reflectPercent": 0.5 }
 
 ### Skill 10: skill_seal 技能封印
-- [ ] 概率封印玩家技能
-- [ ] 持续2回合
-- [ ] 配置：{ "type": "skill_seal", "chance": 0.25, "duration": 2 }
+- [x] 概率封印玩家技能
+- [x] 持续2回合
+- [x] 配置：{ "type": "skill_seal", "chance": 0.25, "duration": 2 }
 
 ---
 
