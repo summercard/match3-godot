@@ -318,6 +318,9 @@ func _draw_art_content() -> void:
 		# 渐变标题文字（对齐微信 art 模式）
 		_draw_gradient_text("萌灵消消大冒险", w / 2.0, h * 0.40,
 			28.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
+		# 副标题渐变（✦ 三消冒险 ✦）
+		_draw_gradient_text("✦ 三消冒险 ✦", w / 2.0, h * 0.51,
+			20.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
 	else:
 		_draw_stroke_text("萌灵消消大冒险", w / 2.0, h * 0.15,
 			C_GOLD, Color(0.04, 0.06, 0.16), 28.0 * _sc, 4.0 * _sc)
