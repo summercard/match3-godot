@@ -315,9 +315,14 @@ func _draw_art_content() -> void:
 		var lh := 178.0 * _sy
 		draw_texture_rect(logo, Rect2(20.0 * _sx, 20.0 * _sy, lw, lh), false,
 			Color(1, 1, 1, _opacity))
+		# 渐变标题文字（对齐微信 art 模式）
+		_draw_gradient_text("萌灵消消大冒险", w / 2.0, h * 0.40,
+			28.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
 	else:
 		_draw_stroke_text("萌灵消消大冒险", w / 2.0, h * 0.15,
 			C_GOLD, Color(0.04, 0.06, 0.16), 28.0 * _sc, 4.0 * _sc)
+		_draw_gradient_text("三消宝可梦", w / 2.0, h * 0.32,
+			44.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
 
 	# ---- 三只怪物 sin 浮动 ----
 	_draw_monster("fire_monster",  38.0, 270.0, 140.0, -2.0)
