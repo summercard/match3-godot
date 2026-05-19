@@ -103,17 +103,70 @@ func has_skill_type(enemy_idx: int, skill_type: String) -> bool:
 	return state.has(skill_type)
 
 
-# ==================== Phase 2-4: 技能执行（框架） ====================
-# 以下方法将在后续 Phase 实现，当前为占位符
+# ==================== Phase 2: 蓄力技能解耦 ====================
 
-## 执行蓄力技能（Phase 2 实现）
-func execute_charge(enemy_idx: int, enemy: Dictionary) -> Dictionary:
+## 敌人回合开始时：检查并释放蓄力
+## 调用时机：敌人回合开始时（攻击之前）
+## 返回：如果应该释放蓄力，返回 damage_multiplier；否则返回 null
+func check_and_release_charge(enemy_idx: int) -> float:
 	var state = get_skill_state(enemy_idx, "charge")
-	if state.is_empty():
-		return {}
+	if state.is_empty() or not state.get("is_charging", false):
+		return 1.0
 	
-	# 占位：实际逻辑在 Phase 2
-	return { "triggered": false }
+	var damage_multiplier: float = state.get("damage_multiplier", 2.0)
+	state["is_charging"] = false
+	state["turns_since_last"] = 0
+	
+	skill_charge_release.emit(enemy_idx, damage_multiplier)
+	enemy_skill_action.emit({
+		"type": "charge_release",
+		"enemy_index": enemy_idx,
+		"damage_multiplier": damage_multiplier
+	})
+	
+	return damage_multiplier
+
+
+## 敌人回合结束时：更新蓄力计时器并检查是否应开始蓄力
+## 调用时机：敌人回合结束时（攻击之后）
+## 返回：是否开始了蓄力
+func update_and_check_charge_start(enemy_idx: int) -> bool:
+	var state = get_skill_state(enemy_idx, "charge")
+	if state.is_empty() or state.get("is_charging", false):
+		return false
+	
+	state["turns_since_last"] += 1
+	var interval: int = state.get("interval", 3)
+	
+	if state["turns_since_last"] >= interval:
+		state["is_charging"] = true
+		state["turns_since_last"] = 0
+		
+		skill_charge_start.emit(enemy_idx, state.get("damage_multiplier", 2.0))
+		enemy_skill_action.emit({
+			"type": "charge_start",
+			"enemy_index": enemy_idx
+		})
+		return true
+	
+	return false
+
+
+## 获取蓄力伤害倍率（外部调用，用于伤害计算）
+func get_charge_damage_multiplier(enemy_idx: int) -> float:
+	var state = get_skill_state(enemy_idx, "charge")
+	if state.is_empty() or not state.get("is_charging", false):
+		return 1.0
+	return state.get("damage_multiplier", 2.0)
+
+
+## 检查蓄力状态（是否正在蓄力）
+func is_charging(enemy_idx: int) -> bool:
+	var state = get_skill_state(enemy_idx, "charge")
+	return state.get("is_charging", false)
+
+
+# ==================== Phase 3: 护盾技能解耦（占位符） ====================
 
 
 ## 执行护盾技能（Phase 3 实现）
