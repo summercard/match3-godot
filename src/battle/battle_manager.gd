@@ -538,6 +538,17 @@ func check_battle_end() -> bool:
 	return false
 
 
+# ========== 辅助函数 ==========
+
+func _build_enemy_skill_states_dict() -> Dictionary:
+	var result = {}
+	if _enemy_skill_system == null:
+		return result
+	for idx in range(enemies.size()):
+		result[idx] = _enemy_skill_system.get_enemy_state(idx)
+	return result
+
+
 # ========== 获取状态摘要 ==========
 
 func get_status() -> Dictionary:
@@ -552,14 +563,7 @@ func get_status() -> Dictionary:
 		"current_phase": current_phase,
 		"total_phases": stage_phases.size() if not stage_phases.is_empty() else 1,
 		"is_boss_battle": not stage_phases.is_empty(),
-		"enemy_skill_states": (func():
-			var result = {}
-			if _enemy_skill_system != null:
-				for idx in range(enemies.size()):
-					result[idx] = _enemy_skill_system.get_enemy_state(idx)
-				return result
-			return result
-		)(),
+		"enemy_skill_states": _build_enemy_skill_states_dict(),
 		"leader_skill_info": leader_skill_info,
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
