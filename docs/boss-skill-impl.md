@@ -46,9 +46,6 @@
 - [x] 配置：{ "type": "surge", "baseDamage": 30, "incrementPerTurn": 10, "maxDamage": 100 }
 
 ### Skill 8: confuse 混乱
-- [ ] 概率让玩家攻击自己人
-- [ ] 持续1回合
-- [ ] 配置：{ "type": "confuse", "chance": 0.2, "duration": 1 }
 
 ### Skill 9: shield_plus 强化护盾
 - [x] 护盾期间反弹近战伤害
