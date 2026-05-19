@@ -26,7 +26,7 @@
 - [ ] 配置：{ "type": "reflect", "percent": 0.3, "duration": 2 }
 
 ### Skill 4: freeze 冰封
-- [ ] 概率冻结玩家一回合
+- [x] 概率冻结玩家一回合
 - [ ] 持续1回合
 - [ ] 配置：{ "type": "freeze", "chance": 0.3, "duration": 1 }
 

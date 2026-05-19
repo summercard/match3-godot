@@ -41,6 +41,11 @@ const DH := 667.0
 # ---- 长按阈值（秒）----
 const LONG_PRESS_SEC := 0.8
 
+# ---- 长按触发后的视觉增强系数 ----
+const LP_SCALE_BOOST := 1.12
+const LP_GLOW_MULT := 1.6
+const LP_RADIUS_MULT := 1.2
+
 # ---- 状态 ----
 var _opacity: float = 0.0
 var _ready_flag: bool = false
@@ -50,6 +55,8 @@ var _touching: bool = false
 var _lp_glow: float = 0.0
 var _hold_time: float = 0.0
 var _lp_done: bool = false
+var _btn_press_scale: float = 1.0
+var _lp_triggered: bool = false  # 长按阈值已触发（缩放不再变化）
 
 var _assets: Dictionary = {}
 var _particles: Array = []
@@ -101,10 +108,15 @@ func _process(delta: float) -> void:
 		_hold_time += delta
 		var lp_progress := minf(_hold_time / LONG_PRESS_SEC, 1.0)
 		_lp_glow = lp_progress
-		# 缩放：0.8s 满时达到 1.12 倍（稍放大）
-		_btn_press_scale = 1.0 + lp_progress * 0.12
+		# 缩放：阈值触发前（_lp_triggered=false）缩小到 0.95；触发后缩小到 0.95×LP_SCALE_BOOST
+		if not _lp_triggered:
+			_btn_press_scale = 1.0 - lp_progress * 0.05
 		if _hold_time >= LONG_PRESS_SEC:
 			_lp_done = true
+			_lp_triggered = true
+			# 触发时：额外缩放 + 立即提升 glow
+			_btn_press_scale = 1.0 - (0.05 * LP_SCALE_BOOST)
+			_lp_glow = 1.0
 			_do_enter()
 	elif not _touching:
 		# 松开时缩放回弹
@@ -124,6 +136,15 @@ func _process(delta: float) -> void:
 # ============================================
 # 输入处理（长按交互）
 # ============================================
+
+func _input(event: InputEvent) -> void:
+	_gui_input(event)
+
+
+func _start_glow_timer() -> void:
+	# 公开方法：启动长按 glow 计时器
+	_begin_hold()
+
 
 func _gui_input(event: InputEvent) -> void:
 	# ---- 触摸：按下开始计时，松开停止 ----
@@ -152,11 +173,13 @@ func _begin_hold() -> void:
 	_touching = true
 	_hold_time = 0.0
 	_lp_done = false
+	_lp_triggered = false
 
 
 func _end_hold() -> void:
 	_touching = false
 	_hold_time = 0.0
+	_lp_triggered = false
 
 
 func _in_btn(pos: Vector2) -> bool:
@@ -504,11 +527,13 @@ func _draw_glow_button() -> void:
 	var center := btn.position + btn.size / 2.0
 
 	# ---- 发光光晕（多层径向渐变模拟）----
-	# 长按满时 glow 更强（×1.6），平时只用 pulse
-	var glow_boost := 1.0 + _lp_glow * 0.6
+	# 长按触发后（_lp_triggered）使用更强的 glow 参数
+	var effective_mult := LP_GLOW_MULT if _lp_triggered else 1.0
+	var effective_radius_mult := LP_RADIUS_MULT if _lp_triggered else 1.0
+	var glow_boost := 1.0 + _lp_glow * 0.6 * effective_mult
 	var glow_i := (_pulse + _lp_glow * 0.5) * glow_boost
 	var glow_a := 0.5 + glow_i * 0.5
-	var radius := maxf(btn.size.x, btn.size.y) * 1.2
+	var radius := maxf(btn.size.x, btn.size.y) * 1.2 * effective_radius_mult
 
 	for i in range(10):
 		var t := float(i) / 10.0
