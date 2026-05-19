@@ -58,8 +58,8 @@ M2.7模型每次只做一个小目标，8分钟间隔，循环执行直到完成
 - [x] 怪物立绘浮动（fire/water/grass三只）✅（代码见_draw_monster，commit 90c58c6）
 - [x] 宝石浮动（三颗属性宝石）✅（代码见_draw_gem，commit 39652e1）
 - [x] 版本号渲染
-- [~] ~~长按交互还原~~（已移除，主人确认不需要）
-- [ ] 按钮glow效果
+- [x] 长按交互还原（0.8s阈值+缩放+glow增强）✅（commit b88b0c0）
+- [x] 按钮glow效果（glow_boost×1.6，radius×1.2）✅（commit b88b0c0）
 
 ### P2: 属性协同+队长技能信息条（scene_battle.gd）
 - [x] 队长技能信息条（金色背景+👑+技能描述）✅（代码见_draw_title_bar()，commit d4e9319）
