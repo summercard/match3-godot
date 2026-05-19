@@ -27,8 +27,8 @@
 
 ### Skill 4: freeze 冰封
 - [x] 概率冻结玩家一回合
-- [ ] 持续1回合
-- [ ] 配置：{ "type": "freeze", "chance": 0.3, "duration": 1 }
+- [x] 持续1回合
+- [x] 配置：{ "type": "freeze", "chance": 0.3, "duration": 1 }
 
 ### Skill 5: poison 中毒
 - [ ] 叠层机制，每层掉血
@@ -41,9 +41,9 @@
 - [x] 配置：{ "type": "life_drain", "percent": 0.15, "cooldown": 4 }
 
 ### Skill 7: surge 浪涌
-- [ ] 每回合伤害递增
-- [ ] 上限100
-- [ ] 配置：{ "type": "surge", "baseDamage": 30, "incrementPerTurn": 10, "maxDamage": 100 }
+- [x] 每回合伤害递增
+- [x] 上限100
+- [x] 配置：{ "type": "surge", "baseDamage": 30, "incrementPerTurn": 10, "maxDamage": 100 }
 
 ### Skill 8: confuse 混乱
 - [ ] 概率让玩家攻击自己人
