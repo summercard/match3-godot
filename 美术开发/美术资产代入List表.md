@@ -7,7 +7,7 @@
 | 顺序 | 完成 | 优先级 | 界面/模块 | Godot 入口 | 当前阶段 | 已有资产/概念 | 运行目录 | 通用资产复用 | 当前代入结论 | 下一步 |
 |---:|---|---|---|---|---|---|---|---|---|---|
 | 1 | [x] | P0 | 启动欢迎页 | `src/ui/scene/scene_start.gd` | 5 视觉验收 | `美术开发/正式拆分/start_screen/` | `assets/images/start/` | 初始怪物/宝石可继续并入通用体系 | 已完成第一版代入 | 补标题光效、按钮状态、怪物轻动画 |
-| 2 | [x] | P0 | 大厅/主界面 | `src/ui/scene/scene_main.gd` | 5 视觉验收 | `美术开发/正式拆分/main_lobby/` | `assets/images/main/` | 金币/EXP/功能入口图标与其他界面共享 | 已完成第一版代入 | 精修当前队伍展示条和活动入口 |
+| 2 | [x] | P0 | 大厅/主界面 | `src/ui/scene/scene_main.gd` | 5 待实机视觉验收 | `美术开发/元素提取/main_lobby_v2/`, `美术开发/正式拆分/main_lobby_v2/` | `assets/images/main/` | 主界面专属入口和顶栏资源留在 main；具体功能图标只在大厅入口使用 | 已按新 `大厅.png` 概念图完成 image-2 背景/UI 提取、拆分、导入和 V2 布局代入；4 个建筑入口 + 底部 5 导航已重排 | 真实运行窗口验收按钮贴合、顶部数字、红点和图标清晰度 |
 | 3 | [x] | P0 | 关卡选择 | `src/ui/scene/scene_stage_select.gd` | 5 视觉验收 | `美术开发/正式拆分/stage_select/` | `assets/images/stage/` | 星级、奖励、金币、EXP、捕获球作为通用奖励体系 | 已完成第一版代入 | 补多章节地图、节点状态、Boss 动态 |
 | 4 | [ ] | P0 | 三消战斗 | `src/ui/scene/scene_battle.gd` | 4 代码代入 | `美术开发/正式拆分/battle_screen/`, `gems/`, `monsters/`, `ui/` | `assets/images/battle/` | 怪物头像、棋盘宝石、战斗背景为核心通用资产 | 核心资产已代入，局部仍需精修 | 补技能按钮、状态图标、连击/技能特效 |
 | 5 | [ ] | P0 | 战斗准备 | `src/ui/scene/scene_battle_prepare.gd` | 4 代码代入 | `美术开发/正式拆分/battle_prepare/` | `assets/images/battle_prepare/` | 怪物头像复用 `battle/monsters`；奖励/元素复用 `stage` | 已代入 UI，怪物/宝石走通用目录 | 真实运行窗口验收布局和按钮命中区 |
