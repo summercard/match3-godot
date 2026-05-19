@@ -9,9 +9,9 @@ P2,队伍编成,js/ui/sceneTeamSetup.js,未替换队伍槽和怪物列表仍为 
 P2,怪物图鉴,js/ui/sceneAlbum.js,未替换图鉴格和详情仍为 emoji,替换为收藏图鉴页,"图鉴卡框;锁定遮罩;怪物头像;属性标签;详情面板;稀有度标识",assets/images/album/,需要建立怪物头像通用规范
 P2,怪物进化,js/ui/sceneEvolve.js,未替换进化流程仍为 emoji/文字粒子,替换为进化仪式界面,"进化背景;前后怪物立绘;进化箭头;材料图标;进化按钮;光效序列",assets/images/evolve/,建议在队伍图鉴后做
 P2,牧场,js/ui/sceneRanch.js,未替换放置槽和怪物收益仍为 emoji,替换为怪物放置收益页,"牧场背景;放置槽;怪物小头像;收益图标;状态标识;收获按钮",assets/images/ranch/,养成循环
-P3,背包,js/ui/sceneInventory.js,未替换道具/货币仍为 emoji,替换为道具管理页,"背包格子;分类标签;道具图标;货币图标;详情弹窗;使用按钮",assets/images/inventory/,需要通用道具图标体系
-P3,商店,js/ui/sceneShop.js,未替换商品和货币仍为 emoji,替换为商店购买页,"商店背景;商品卡;金币钻石图标;购买按钮;确认弹窗;限购标识",assets/images/shop/,与背包共享道具货币
+P3,背包,src/ui/scene/scene_inventory.gd,已基于 image-2 完成第一版 Godot 代入,真实运行窗口验收并精修,"背包格子;分类标签;通用道具图标;货币图标;详情面板;使用按钮","assets/images/inventory/;assets/images/items/",道具/进化石已与商店共用通用目录
+P3,商店,src/ui/scene/scene_shop.gd,已基于 image-2 完成第一版 Godot 代入,真实运行窗口验收并精修,"商店背景;商品卡;金币钻石图标;购买按钮;确认弹窗;限购标识","assets/images/shop/;assets/images/items/",与背包共享道具货币
 P3,每日签到,js/ui/sceneSignIn.js,未替换签到日历和奖励仍为 emoji,替换为签到奖励页,"签到日历格;今日高亮;已领印章;奖励图标;领取按钮",assets/images/signin/,可复用奖励图标
-P3,成就,js/ui/sceneAchievement.js,未替换成就标题和奖励仍为 emoji,替换为成就列表页,"成就徽章;进度条;奖励图标;完成印章;分类标签",assets/images/achievement/,可复用奖励和徽章资产
+P3,成就,src/ui/scene/scene_achievement.gd,已基于 image-2 完成第一版 Godot 代入,真实运行窗口验收并精修,"成就徽章;进度条;奖励图标;完成印章;分类标签",assets/images/achievement/,已加入固定坐标等比图标文本截断和点击区一致性约束
 P4,设置,js/ui/sceneSettings.js,未替换纯 Canvas UI,替换为统一设置 UI,"设置面板;开关;滑杆;按钮;返回图标",assets/images/settings/,低频功能页
 P4,新手教程,js/ui/sceneTutorial.js,未接入图片资源,替换为引导层与教学手势,"引导手;提示框;遮罩高亮;步骤箭头;宝石提示图标",assets/images/tutorial/,依赖其他界面资产稳定后再做

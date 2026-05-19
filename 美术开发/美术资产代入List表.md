@@ -1,6 +1,6 @@
 # 美术资产代入 List 表
 
-更新时间：2026-05-18
+更新时间：2026-05-19
 
 本表用于后续逐步推进美术资产制作和 Godot 代入。阶段口径：`0 概念图` -> `1 image-2 提取` -> `2 正式拆分` -> `3 导入工程` -> `4 代码代入` -> `5 视觉验收`。`完成` 列用 `[x]` / `[ ]` 记录是否已完成到可验收口径。
 
@@ -15,11 +15,11 @@
 | 7 | [ ] | P1 | 队伍编成 | `src/ui/scene/scene_team.gd` | 4 代码代入 | `美术开发/正式拆分/team/` | `assets/images/team/` | 怪物头像补入/复用 `battle/monsters`；元素图标复用 `stage` | 已代入三槽队伍卡、战力栏、队长技、筛选条、列表卡、按钮 | 运行窗口验收滚动列表、槽位点击、保存/取消交互 |
 | 8 | [x] | P1 | 怪物图鉴 | `src/ui/scene/scene_album.gd` | 5 待实机视觉验收 | `美术开发/元素提取/album/`, `美术开发/正式拆分/album/` | `assets/images/album/` | 怪物头像复用 `assets/images/battle/monsters/`；属性筛选、星级、图鉴 UI 放入 album 专属目录 | 已完成 image-2 提取、正式拆分、运行目录导入和 Canvas 代码代入 | 真实运行窗口验收列表滚动、详情抽屉、进化入口与锁定态 |
 | 9 | [ ] | P1 | 怪物进化 | `src/ui/scene/scene_evolve.gd` | 1 元素提取草稿 | `美术开发/概念图/06_队伍进化_team_evolve.png` | `assets/images/evolve/` | 复用队伍怪物卡、怪物头像、材料/元素图标 | 未代入 | 从共用概念图提取进化舞台、材料槽、进化按钮、光效 |
-| 10 | [ ] | P2 | 背包 | `src/ui/scene/scene_inventory.gd` | 0 概念图 | `美术开发/概念图/11_背包_inventory.png` | `assets/images/inventory/` | 道具图标需与商店、签到、成就共享 | 未代入 | 建立道具图标体系，先做格子、分类标签、详情弹窗 |
-| 11 | [ ] | P2 | 商店 | `src/ui/scene/scene_shop.gd` | 0 概念图 | `美术开发/概念图/10_商店_shop.png` | `assets/images/shop/` | 复用道具、货币、商品卡、购买按钮体系 | 仅小图标接入 | 与背包成套拆商品卡、价格胶囊、购买弹窗 |
+| 10 | [x] | P2 | 背包 | `src/ui/scene/scene_inventory.gd` | 5 待实机视觉验收 | `美术开发/元素提取/inventory/`, `美术开发/正式拆分/inventory/` | `assets/images/inventory/`, `assets/images/items/` | 道具/进化石图标已提升为 `assets/images/items/`，与商店共用；金币/钻石复用 `assets/images/main/` | 已基于背包概念图用 image-2 生成 UI 提取源，完成拆分、导入和 Canvas 代码代入 | 真实运行窗口验收滚动、分类、选中态、详情面板和使用逻辑 |
+| 11 | [x] | P2 | 商店 | `src/ui/scene/scene_shop.gd` | 5 待实机视觉验收 | `美术开发/元素提取/shop/`, `美术开发/正式拆分/shop/` | `assets/images/shop/`, `assets/images/items/` | 金币/钻石复用 `assets/images/main/`；商品道具/进化石图标与背包共用 `assets/images/items/`；卡框、按钮、弹窗为 shop 专属 | 已基于概念图用 image-2 生成 UI/道具/宝石提取源，再拆分、导入和代码代入；商品区已改成四列结构 | 真实运行窗口验收分页、滚动、购买弹窗和扣款入库 |
 | 12 | [ ] | P2 | 每日签到 | `src/ui/scene/scene_sign_in.gd` | 0 概念图 | `美术开发/概念图/14_每日签到_sign_in.png` | `assets/images/sign_in/` | 复用奖励图标、宝箱、领取按钮状态 | 未代入 | 拆 7 日格、今日高亮、已领印章、领取按钮 |
-| 13 | [ ] | P2 | 成就 | `src/ui/scene/scene_achievement.gd` | 0 概念图 | `美术开发/概念图/12_成就_achievement.png` | `assets/images/achievement/` | 复用奖励图标、徽章、进度条、领取状态 | 未代入 | 拆成就卡、徽章、进度条、完成印章 |
-| 14 | [ ] | P3 | 怪物牧场 | `src/ui/scene/scene_ranch.gd` | 0 概念图 | `美术开发/概念图/09_怪物牧场_ranch.png` | `assets/images/ranch/` | 复用怪物头像、收益图标、进度条 | 未代入 | 拆牧场背景、放置槽、收益状态、收获按钮 |
+| 13 | [x] | P2 | 成就 | `src/ui/scene/scene_achievement.gd` | 5 待实机视觉验收 | `美术开发/元素提取/achievement/`, `美术开发/正式拆分/achievement/` | `assets/images/achievement/`, `assets/images/main/`, `assets/images/inventory/` | 金币复用 `assets/images/main/`；奖励槽复用 `assets/images/inventory/ui_slot.png`；成就徽章/UI 为 achievement 专属 | 已基于成就概念图用 image-2 生成 UI/徽章提取源，完成拆分、导入和 Canvas 代码代入；新增质量约束：等比图标、固定卡片坐标、文字宽度截断、点击区与视觉区一致 | 真实运行窗口验收滚动、领取、长文本和分类切换 |
+| 14 | [x] | P3 | 怪物牧场 | `src/ui/scene/scene_ranch.gd` | 5 待实机视觉验收 | `美术开发/元素提取/ranch/`, `美术开发/正式拆分/ranch/` | `assets/images/ranch/` | 怪物头像复用 `assets/images/battle/monsters/`；收益图标/放置台/背景为牧场专属 | 已按概念图重排并完成 image-2 背景/UI 提取、拆分、导入、代码代入 | 真实运行窗口对照概念图微调 5 个槽位和底部面板 |
 | 15 | [ ] | P4 | 设置 | `src/ui/scene/scene_settings.gd` | 0 概念图 | `美术开发/概念图/13_设置_settings.png` | `assets/images/settings/` | 可沉淀通用开关、滑杆、弹窗按钮 | 未代入 | 建设置 UI 包，后置代入 |
 | 16 | [ ] | P4 | 新手教程 | `src/ui/scene/scene_tutorial.gd` | 0 概念图 | `美术开发/概念图/15_新手教程_tutorial.png` | `assets/images/tutorial/` | 复用主流程按钮/面板，新增遮罩、箭头、手势 | 未代入 | 主流程稳定后拆引导层通用资产 |
 

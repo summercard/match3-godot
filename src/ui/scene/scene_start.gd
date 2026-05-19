@@ -324,18 +324,14 @@ func _draw_art_content() -> void:
 	_draw_monster("water_monster", 118.0, 252.0, 144.0,  0.0)
 	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
 
-	# ---- 五颗宝石脉冲浮动（居中排列）----
-	# 参考图：上行3颗（火水草）下，行2颗（雷光）嵌入上行缝隙下方
-	# 布局：上行水平间距约 34px，下行水平间距约 34px，两行整体居中
-	var gy := 424.0
-	var gem_base_x := 77.5  # 居中起点（微调后）
-	# 上行（y=424）：火 水 草
-	_draw_gem("gem_fire",    gem_base_x + 0.0,  gy,        48.0)
-	_draw_gem("gem_water",   gem_base_x + 38.0, gy - 16.0, 52.0)
-	_draw_gem("gem_grass",   gem_base_x + 76.0, gy,        48.0)
-	# 下行（y=466）：雷 光 — 嵌入上行两个缝隙
-	_draw_gem("gem_thunder", gem_base_x + 19.0, gy + 42.0, 46.0)
-	_draw_gem("gem_light",   gem_base_x + 57.0, gy + 42.0, 46.0)
+	# ---- 五颗宝石脉冲浮动：对齐三只怪物的视觉中心 ----
+	var gem_center_x := 178.0
+	var gem_top_y := 422.0
+	_draw_gem("gem_fire",    gem_center_x - 48.0, gem_top_y + 2.0,  46.0)
+	_draw_gem("gem_water",   gem_center_x,        gem_top_y - 6.0,  50.0)
+	_draw_gem("gem_grass",   gem_center_x + 48.0, gem_top_y + 2.0,  46.0)
+	_draw_gem("gem_thunder", gem_center_x - 24.0, gem_top_y + 42.0, 44.0)
+	_draw_gem("gem_light",   gem_center_x + 24.0, gem_top_y + 42.0, 44.0)
 
 	# ---- 提示横幅 ----
 	if _ready_flag:

@@ -1,7 +1,6 @@
 # ============================================
 # scene_inventory.gd - 背包场景
 # 翻译来源: js/ui/sceneInventory.js
-# 重构版本: _draw() 绘制 + _gui_input 交互
 # ============================================
 
 class_name SceneInventory
@@ -11,54 +10,104 @@ const ItemDB = preload("res://src/data/item_db.gd")
 
 signal back_pressed()
 
-# 布局常量
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
-const COLS := 3
-const CELL_SIZE := 100
-const CELL_GAP := 10
+const COLS := 5
+const CELL_SIZE := 60.0
+const CELL_GAP := 10.0
+const BACK_RECT := Rect2(10.0, 8.0, 58.0, 58.0)
+const TAB_Y := 64.0
+const GRID_PANEL := Rect2(9.0, 104.0, 357.0, 405.0)
+const GRID_TOP := 122.0
+const GRID_BOTTOM := 502.0
+const GRID_LEFT := 18.0
+const DETAIL_RECT := Rect2(9.0, 515.0, 357.0, 136.0)
+const USE_BTN_RECT := Rect2(275.0, 603.0, 78.0, 38.0)
 
-# 内部状态
+const INVENTORY_ASSETS := {
+	"bg": "res://assets/images/inventory/bg_inventory.png",
+	"back": "res://assets/images/inventory/ui_back_button.png",
+	"backpack": "res://assets/images/inventory/icon_backpack.png",
+	"currency_chip": "res://assets/images/inventory/ui_currency_chip.png",
+	"tab_active": "res://assets/images/inventory/ui_tab_active.png",
+	"tab_inactive": "res://assets/images/inventory/ui_tab_inactive.png",
+	"grid_panel": "res://assets/images/inventory/ui_grid_panel.png",
+	"slot": "res://assets/images/inventory/ui_slot.png",
+	"slot_selected": "res://assets/images/inventory/ui_slot_selected.png",
+	"slot_locked": "res://assets/images/inventory/ui_slot_locked.png",
+	"scrollbar": "res://assets/images/inventory/ui_scrollbar.png",
+	"detail_panel": "res://assets/images/inventory/ui_detail_panel.png",
+	"detail_icon_frame": "res://assets/images/inventory/ui_detail_icon_frame.png",
+	"rarity_ribbon": "res://assets/images/inventory/ui_rarity_ribbon.png",
+	"use_button": "res://assets/images/inventory/ui_btn_use.png",
+	"toast": "res://assets/images/inventory/ui_toast_strip.png",
+	"gold": "res://assets/images/main/icon_gold.png",
+	"diamond": "res://assets/images/main/icon_diamond.png",
+}
+
+const ITEM_ICON_ASSETS := {
+	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
+	"capture_ball_plus": "res://assets/images/items/icon_item_capture_ball_plus.png",
+	"exp_potion": "res://assets/images/items/icon_item_exp_potion.png",
+	"exp_crystal": "res://assets/images/items/icon_item_exp_potion.png",
+	"hp_potion": "res://assets/images/items/icon_item_hp_potion.png",
+	"gold_bag": "res://assets/images/items/icon_item_gold_bag.png",
+	"gold_chest": "res://assets/images/items/icon_item_gold_chest.png",
+	"evolution_stone_fire": "res://assets/images/items/icon_stone_fire.png",
+	"evolution_stone_water": "res://assets/images/items/icon_stone_water.png",
+	"evolution_stone_grass": "res://assets/images/items/icon_stone_grass.png",
+	"evolution_stone_thunder": "res://assets/images/items/icon_stone_thunder.png",
+	"evolution_stone_light": "res://assets/images/items/icon_stone_light.png",
+	"evolution_stone_earth": "res://assets/images/items/icon_stone_earth.png",
+	"evolution_stone_wind": "res://assets/images/items/icon_stone_wind.png",
+	"evolution_stone_dark": "res://assets/images/items/icon_stone_dark.png",
+}
+
+const TABS := [
+	{"id": "all", "label": "全部"},
+	{"id": "items", "label": "道具"},
+	{"id": "materials", "label": "材料"},
+	{"id": "gems", "label": "宝石"},
+]
+
+const C := {
+	"white": Color(1.0, 1.0, 1.0),
+	"muted": Color(0.66, 0.72, 0.83),
+	"dim": Color(0.36, 0.44, 0.57),
+	"gold": Color(1.0, 0.78, 0.18),
+	"blue": Color(0.42, 0.78, 1.0),
+	"shadow": Color(0, 0, 0, 0.55),
+}
+
 var _inventory: Dictionary = {}
 var _player: Dictionary = {}
 var _item_list: Array = []
 var _selected_item: Dictionary = {}
-var _popup: Dictionary = {}
 var _toast_text: String = ""
 var _toast_timer: float = 0.0
 var _scroll_offset: float = 0.0
 var _storage: Node = null
-var _grid_start_x: float = 0.0
-var _grid_top: float = 0.0
-var _bg_texture: ColorRect
+var _active_tab := "all"
+var _texture_cache: Dictionary = {}
 
-func _add_dark_background() -> void:
-	_bg_texture = ColorRect.new()
-	_bg_texture.color = Color(0.04, 0.07, 0.15, 1.0)
-	_bg_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_bg_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg_texture.z_index = -10
-	add_child(_bg_texture)
 
 func _ready() -> void:
-	_add_dark_background()
 	_storage = get_node_or_null("/root/SaveManager")
-	var grid_w := COLS * CELL_SIZE + (COLS - 1) * CELL_GAP
-	_grid_start_x = (DESIGN_WIDTH - grid_w) / 2.0
-	_grid_top = 160.0 + 45.0  # gridY + 标题行高
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-func init(_data: Dictionary = {}) -> void:
+
+func init(data: Dictionary = {}) -> void:
 	print("[SceneInventory] 背包初始化")
 	_storage = get_node_or_null("/root/SaveManager")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
+	_active_tab = data.get("tab", "all")
 	_selected_item = {}
-	_popup = {}
 	_toast_text = ""
 	_toast_timer = 0.0
 	_scroll_offset = 0.0
 	_build_item_list()
+
 
 func _build_item_list() -> void:
 	_item_list.clear()
@@ -66,97 +115,101 @@ func _build_item_list() -> void:
 		var count: int = _inventory[item_id]
 		if count > 0 and ItemDB.has_item(item_id):
 			var item_data: Dictionary = ItemDB.get_item(item_id)
-			_item_list.append({"id": item_id, "count": count, "data": item_data})
+			if _matches_tab(item_data):
+				_item_list.append({"id": item_id, "count": count, "data": item_data})
+	_item_list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.get("id", "")) < str(b.get("id", ""))
+	)
+	if _selected_item.is_empty() and not _item_list.is_empty():
+		_selected_item = _item_list[0]
+	elif not _selected_item.is_empty():
+		var selected_id := str(_selected_item.get("id", ""))
+		_selected_item = {}
+		for item in _item_list:
+			if item.get("id", "") == selected_id:
+				_selected_item = item
+				break
+		if _selected_item.is_empty() and not _item_list.is_empty():
+			_selected_item = _item_list[0]
 
-# ============ 输入 ============
+
+func _matches_tab(item_data: Dictionary) -> bool:
+	var item_type := str(item_data.get("type", ""))
+	if _active_tab == "all":
+		return true
+	if _active_tab == "gems":
+		return item_type == "evolution"
+	if _active_tab == "materials":
+		return item_type == "gold"
+	return item_type != "evolution" and item_type != "gold"
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_on_tap(event.position.x, event.position.y)
-		elif event is InputEventMouseButton:
-			pass  # mouse up
 		accept_event()
 	elif event is InputEventScreenTouch:
 		if event.pressed:
 			_on_tap(event.position.x, event.position.y)
 		accept_event()
 	elif event is InputEventScreenDrag:
-		var drag_y: float = event.relative.y
-		if abs(drag_y) > 10:
-			var step: float = CELL_SIZE + CELL_GAP
+		if abs(event.relative.y) > 10.0 and event.position.y >= GRID_TOP and event.position.y <= GRID_BOTTOM:
+			var step := CELL_SIZE + CELL_GAP
 			var max_offset := _get_max_scroll_offset()
-			if drag_y < 0:
-				_scroll_offset = min(max_offset, _scroll_offset + step)
+			if event.relative.y < 0:
+				_scroll_offset = minf(max_offset, _scroll_offset + step)
 			else:
-				_scroll_offset = max(0.0, _scroll_offset - step)
+				_scroll_offset = maxf(0.0, _scroll_offset - step)
 			queue_redraw()
 		accept_event()
 
+
 func _on_tap(x: float, y: float) -> void:
-	# 弹窗打开时
-	if not _popup.is_empty():
-		var px: float = _popup.get("x", 0.0)
-		var py: float = _popup.get("y", 0.0)
-		var pw: float = _popup.get("w", 0.0)
-		var ph: float = _popup.get("h", 0.0)
-		# 点击弹窗外关闭
-		if not (x >= px and x <= px + pw and y >= py and y <= py + ph):
-			_popup = {}
-			queue_redraw()
-			return
-		# 使用按钮
-		var bx: float = px + (pw - 120.0) / 2.0
-		var by: float = py + ph - 60.0
-		if x >= bx and x <= bx + 120.0 and y >= by and y <= by + 40.0:
-			var item_id: String = _popup.get("id", "")
-			_use_item(item_id)
-			_popup = {}
-			queue_redraw()
-			return
-		return
-	
-	# 返回按钮 (10, 12, 60, 36)
-	if x >= 10 and x <= 70 and y >= 12 and y <= 48:
+	var point := Vector2(x, y)
+	if BACK_RECT.has_point(point):
 		back_pressed.emit()
 		return
-	
-	# 道具格子点击
-	var idx: int = _get_item_index_at(x, y)
-	if idx != -1 and idx < _item_list.size():
+	for tab in TABS:
+		var rect := _get_tab_rect(str(tab["id"]))
+		if rect.has_point(point):
+			_active_tab = str(tab["id"])
+			_scroll_offset = 0.0
+			_selected_item = {}
+			_build_item_list()
+			queue_redraw()
+			return
+	if USE_BTN_RECT.has_point(point) and not _selected_item.is_empty():
+		_use_item(str(_selected_item.get("id", "")))
+		return
+	var idx := _get_item_index_at(x, y)
+	if idx >= 0 and idx < _item_list.size():
 		_selected_item = _item_list[idx]
-		_show_item_popup(_selected_item)
 		queue_redraw()
 
+
 func _get_item_index_at(x: float, y: float) -> int:
-	var rel_x: float = x - _grid_start_x
-	var rel_y: float = y - _grid_top + _scroll_offset
-	if y < _grid_top or y > DESIGN_HEIGHT - 24.0:
+	if y < GRID_TOP or y > GRID_BOTTOM:
 		return -1
+	var rel_x := x - GRID_LEFT
+	var rel_y := y - GRID_TOP + _scroll_offset
 	if rel_x < 0.0 or rel_y < 0.0:
 		return -1
-	var col: int = int(rel_x / (CELL_SIZE + CELL_GAP))
-	var row: int = int(rel_y / (CELL_SIZE + CELL_GAP))
-	if col >= COLS:
+	var col := int(rel_x / (CELL_SIZE + CELL_GAP))
+	var row := int(rel_y / (CELL_SIZE + CELL_GAP))
+	var local_x := fmod(rel_x, CELL_SIZE + CELL_GAP)
+	var local_y := fmod(rel_y, CELL_SIZE + CELL_GAP)
+	if col >= COLS or local_x > CELL_SIZE or local_y > CELL_SIZE:
 		return -1
 	return row * COLS + col
 
+
 func _get_max_scroll_offset() -> float:
-	var rows: int = ceili(float(_item_list.size()) / float(COLS))
-	var content_h: float = rows * (CELL_SIZE + CELL_GAP) - CELL_GAP
-	var view_h: float = DESIGN_HEIGHT - 24.0 - _grid_top
+	var rows := ceili(float(_item_list.size()) / float(COLS))
+	var content_h := rows * (CELL_SIZE + CELL_GAP) - CELL_GAP
+	var view_h := GRID_BOTTOM - GRID_TOP
 	return maxf(0.0, content_h - view_h)
 
-func _show_item_popup(item: Dictionary) -> void:
-	var pw := 280.0
-	var ph := 220.0
-	_popup = {
-		"x": (DESIGN_WIDTH - pw) / 2.0,
-		"y": (DESIGN_HEIGHT - ph) / 2.0,
-		"w": pw, "h": ph,
-		"id": item.get("id", ""),
-		"data": item.get("data", {}),
-		"count": item.get("count", 0)
-	}
 
 func _use_item(item_id: String) -> void:
 	if item_id.is_empty() or not _storage:
@@ -164,28 +217,19 @@ func _use_item(item_id: String) -> void:
 	var item_data: Dictionary = ItemDB.get_item(item_id)
 	if item_data.is_empty():
 		return
-	var item_type: String = item_data.get("type", "")
+	var item_type := str(item_data.get("type", ""))
 	var effect: Dictionary = item_data.get("effect", {})
-	
 	match item_type:
 		"exp":
 			var exp_gain: int = effect.get("expGain", 0)
-			if exp_gain > 0:
-				if _storage.use_item(item_id, 1):
-					_storage.add_player_exp(exp_gain)
-					_player = _storage.load_player()
-					_show_toast("获得 %d 经验" % exp_gain)
-				else:
-					_show_toast("道具数量不足")
+			if exp_gain > 0 and _storage.use_item(item_id, 1):
+				_storage.add_player_exp(exp_gain)
+				_show_toast("获得 %d 经验" % exp_gain)
 		"gold":
 			var gold_gain: int = effect.get("goldGain", 0)
-			if gold_gain > 0:
-				if _storage.use_item(item_id, 1):
-					_storage.add_gold(gold_gain)
-					_player = _storage.load_player()
-					_show_toast("获得 %d 金币" % gold_gain)
-				else:
-					_show_toast("道具数量不足")
+			if gold_gain > 0 and _storage.use_item(item_id, 1):
+				_storage.add_gold(gold_gain)
+				_show_toast("获得 %d 金币" % gold_gain)
 		"capture":
 			_show_toast("捕获球会在胜利结算时自动使用")
 		"battle":
@@ -194,18 +238,18 @@ func _use_item(item_id: String) -> void:
 			_show_toast("进化石请在怪物进化中使用")
 		_:
 			_show_toast("该道具暂时无法使用")
-	
-	# 刷新列表
 	_inventory = _storage.load_inventory() if _storage else {}
+	_player = _storage.load_player() if _storage else {}
 	_build_item_list()
-	_scroll_offset = min(_scroll_offset, _get_max_scroll_offset())
+	_scroll_offset = minf(_scroll_offset, _get_max_scroll_offset())
 	queue_redraw()
+
 
 func _show_toast(text: String) -> void:
 	_toast_text = text
 	_toast_timer = 1.8
 
-# ============ 帧更新 ============
+
 func _process(dt: float) -> void:
 	if _toast_timer > 0.0:
 		_toast_timer -= dt
@@ -213,102 +257,203 @@ func _process(dt: float) -> void:
 			_toast_text = ""
 	queue_redraw()
 
-# ============ 绘制 ============
+
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
-	
-	# 背景
-	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.06, 0.08, 0.16))
-	
-	# 顶栏
-	draw_rect(Rect2(0, 0, DESIGN_WIDTH, 60), Color(0.10, 0.12, 0.20))
-	
-	# 返回按钮
-	draw_rect(Rect2(10, 12, 60, 36), Color(0.18, 0.20, 0.30))
-	draw_rect(Rect2(10, 12, 60, 36), Color(0.30, 0.35, 0.50), false)
-	draw_string(font, Vector2(20, 36), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
-	
-	# 标题
-	draw_string(font, Vector2(DESIGN_WIDTH / 2, 40), "背包", HORIZONTAL_ALIGNMENT_CENTER, -1, 22, Color.WHITE)
-	
-	# 货币
-	var gold: int = _player.get("gold", 0)
-	var gems: int = _player.get("gems", 0)
-	draw_string(font, Vector2(30, 130), "💰 %d" % gold, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 0.84, 0.0))
-	draw_string(font, Vector2(DESIGN_WIDTH - 80, 130), "💎 %d" % gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.4, 0.6, 1.0))
-	
-	# 分割线
-	draw_line(Vector2(10, 150), Vector2(DESIGN_WIDTH - 10, 150), Color(0.3, 0.3, 0.4), 1.0)
-	
-	# 道具标签
-	draw_string(font, Vector2(20, 185), "道具", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.5, 0.5, 0.6))
-	draw_string(font, Vector2(DESIGN_WIDTH - 80, 185), "共 %d 件" % _item_list.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.3, 0.3, 0.4))
-	
-	var grid_bottom: float = DESIGN_HEIGHT - 24.0
-	
+	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT))
+	_draw_header()
+	_draw_tabs()
+	_draw_grid()
+	_draw_detail_panel()
+	_draw_toast()
+
+
+func _draw_header() -> void:
+	_draw_texture_fit(_tex("back"), BACK_RECT)
+	_draw_texture_fit(_tex("backpack"), Rect2(78.0, 16.0, 50.0, 46.0))
+	_draw_text_shadow("背包", Vector2(170.0, 45.0), C["white"], 28.0, true, 110.0)
+	_draw_currency_chip(Rect2(184.0, 16.0, 88.0, 32.0), "gold", int(_player.get("gold", 0)))
+	_draw_currency_chip(Rect2(285.0, 16.0, 86.0, 32.0), "diamond", int(_player.get("gems", 0)))
+
+
+func _draw_currency_chip(rect: Rect2, icon_key: String, amount: int) -> void:
+	_draw_texture_fit(_tex("currency_chip"), rect)
+	_draw_texture_fit(_tex(icon_key), Rect2(rect.position.x + 4.0, rect.position.y + 4.0, 24.0, 24.0))
+	_draw_text_shadow(_format_number(amount), Vector2(rect.position.x + 57.0, rect.position.y + 22.0), C["white"], 14.0, true, 58.0)
+
+
+func _draw_tabs() -> void:
+	for tab in TABS:
+		var rect := _get_tab_rect(str(tab["id"]))
+		var active: bool = str(tab["id"]) == _active_tab
+		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
+		_draw_text_shadow(tab["label"], rect.get_center() + Vector2(0, 8.0), C["white"] if active else C["muted"], 17.0, true, rect.size.x)
+
+
+func _get_tab_rect(tab_id: String) -> Rect2:
+	var idx := 0
+	for i in range(TABS.size()):
+		if str(TABS[i]["id"]) == tab_id:
+			idx = i
+			break
+	return Rect2(8.0 + idx * 91.0, TAB_Y, 91.0, 42.0)
+
+
+func _draw_grid() -> void:
+	_draw_texture_fit(_tex("grid_panel"), GRID_PANEL)
 	if _item_list.is_empty():
-		draw_string(font, Vector2(DESIGN_WIDTH / 2 - 100, _grid_top + 80), "还没有道具，赶快去战斗获取吧！", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.4, 0.4, 0.5))
-		draw_string(font, Vector2(DESIGN_WIDTH / 2 - 15, _grid_top + 120), "💪", HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.WHITE)
+		_draw_text_shadow("还没有道具", GRID_PANEL.get_center() + Vector2(0, -18.0), C["muted"], 17.0, true, 160.0)
+		_draw_text_shadow("去战斗或商店获取吧", GRID_PANEL.get_center() + Vector2(0, 12.0), C["dim"], 13.0, false, 180.0)
 	else:
 		for idx in range(_item_list.size()):
-			var row: int = idx / COLS
-			var col: int = idx % COLS
-			var gx: float = _grid_start_x + col * (CELL_SIZE + CELL_GAP)
-			var gy: float = _grid_top + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
-			
-			if gy + CELL_SIZE < _grid_top or gy > grid_bottom:
+			var row := idx / COLS
+			var col := idx % COLS
+			var gx := GRID_LEFT + col * (CELL_SIZE + CELL_GAP)
+			var gy := GRID_TOP + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
+			if gy + CELL_SIZE < GRID_TOP or gy > GRID_BOTTOM:
 				continue
-			
-			var cell_color := Color(0.10, 0.12, 0.20)
-			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), cell_color)
-			draw_rect(Rect2(gx, gy, CELL_SIZE, CELL_SIZE), Color(0.22, 0.25, 0.35), false)
-			
-			var item: Dictionary = _item_list[idx]
-			var item_data: Dictionary = item.get("data", {})
-			
-			# emoji
-			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 12, gy + 42), item_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color.WHITE)
-			# 名称
-			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 20, gy + 66), item_data.get("name", "?"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.9))
-			# 数量
-			draw_string(font, Vector2(gx + CELL_SIZE / 2 - 15, gy + 85), "×%d" % item.get("count", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.84, 0.0))
-		
-		# 滚动条
-		var max_off := _get_max_scroll_offset()
-		if max_off > 0:
-			var track_h := grid_bottom - _grid_top
-			var thumb_h := maxf(34.0, track_h * (track_h / (track_h + max_off)))
-			var thumb_y := _grid_top + (track_h - thumb_h) * (_scroll_offset / max_off)
-			draw_rect(Rect2(368, _grid_top, 3, track_h), Color(1, 1, 1, 0.12))
-			draw_rect(Rect2(367, thumb_y, 5, thumb_h), Color(1, 1, 1, 0.45))
-	
-	# 弹窗
-	if not _popup.is_empty():
-		var px: float = _popup.get("x", 0.0)
-		var py: float = _popup.get("y", 0.0)
-		var pw: float = _popup.get("w", 0.0)
-		var ph: float = _popup.get("h", 0.0)
-		
-		draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0, 0, 0, 0.7))
-		draw_rect(Rect2(px, py, pw, ph), Color(0.14, 0.16, 0.26))
-		draw_rect(Rect2(px, py, pw, ph), Color(0.30, 0.35, 0.50), false)
-		draw_rect(Rect2(px + 20, py + 10, pw - 40, 3), Color(0.35, 0.55, 1.0))
-		
-		var popup_data: Dictionary = _popup.get("data", {})
-		var popup_count: int = _popup.get("count", 0)
-		
-		draw_string(font, Vector2(px + pw / 2 - 16, py + 55), popup_data.get("emoji", "🎁"), HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color.WHITE)
-		draw_string(font, Vector2(px + pw / 2 - 30, py + 95), popup_data.get("name", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
-		draw_string(font, Vector2(px + pw / 2 - 50, py + 120), popup_data.get("desc", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.6, 0.6, 0.7))
-		draw_string(font, Vector2(px + pw / 2 - 25, py + 145), "拥有: ×%d" % popup_count, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1.0, 0.84, 0.0))
-		
-		var btn_x: float = px + (pw - 120.0) / 2.0
-		var btn_y: float = py + ph - 60.0
-		draw_rect(Rect2(btn_x, btn_y, 120, 40), Color(0.35, 0.55, 1.0))
-		draw_string(font, Vector2(btn_x + 35, btn_y + 27), "使 用", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
-	
-	# Toast
-	if _toast_text != "" and _toast_timer > 0.0:
-		var alpha: float = minf(_toast_timer / 0.5, 1.0)
-		draw_rect(Rect2(55, 585, 265, 42), Color(0, 0, 0, 0.72 * alpha))
-		draw_string(font, Vector2(DESIGN_WIDTH / 2, 610), _toast_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(1, 1, 1, alpha))
+			_draw_item_slot(_item_list[idx], Rect2(gx, gy, CELL_SIZE, CELL_SIZE))
+	_draw_locked_slots()
+	_draw_scrollbar()
+
+
+func _draw_item_slot(item: Dictionary, rect: Rect2) -> void:
+	var selected: bool = not _selected_item.is_empty() and item.get("id", "") == _selected_item.get("id", "")
+	_draw_texture_fit(_tex("slot_selected" if selected else "slot"), rect)
+	_draw_texture_fit(_get_item_texture(str(item.get("id", ""))), Rect2(rect.position.x + 8.0, rect.position.y + 7.0, 44.0, 42.0))
+	_draw_text_shadow(str(item.get("count", 0)), rect.position + Vector2(46.0, 52.0), C["white"], 14.0, true, 34.0)
+
+
+func _draw_locked_slots() -> void:
+	var visible_slots := 25
+	var start := _item_list.size()
+	for idx in range(start, mini(visible_slots, start + 5)):
+		var row := idx / COLS
+		var col := idx % COLS
+		var gx := GRID_LEFT + col * (CELL_SIZE + CELL_GAP)
+		var gy := GRID_TOP + row * (CELL_SIZE + CELL_GAP) - _scroll_offset
+		if gy + CELL_SIZE >= GRID_TOP and gy <= GRID_BOTTOM:
+			_draw_texture_fit(_tex("slot_locked"), Rect2(gx, gy, CELL_SIZE, CELL_SIZE))
+
+
+func _draw_scrollbar() -> void:
+	var max_off := _get_max_scroll_offset()
+	if max_off <= 0.0:
+		return
+	var track := Rect2(350.0, GRID_TOP + 8.0, 9.0, GRID_BOTTOM - GRID_TOP - 16.0)
+	_draw_texture_fit(_tex("scrollbar"), track)
+	var thumb_h := maxf(38.0, track.size.y * (track.size.y / (track.size.y + max_off)))
+	var thumb_y := track.position.y + (track.size.y - thumb_h) * (_scroll_offset / max_off)
+	draw_rect(Rect2(track.position.x + 2.0, thumb_y, 5.0, thumb_h), Color(0.85, 0.78, 0.66, 0.9), true)
+
+
+func _draw_detail_panel() -> void:
+	_draw_texture_fit(_tex("detail_panel"), DETAIL_RECT)
+	if _selected_item.is_empty():
+		_draw_text_shadow("选择一个道具查看详情", DETAIL_RECT.get_center(), C["muted"], 15.0, true, 220.0)
+		return
+	var item_data: Dictionary = _selected_item.get("data", {})
+	var item_id := str(_selected_item.get("id", ""))
+	_draw_texture_fit(_tex("detail_icon_frame"), Rect2(20.0, 532.0, 112.0, 96.0))
+	_draw_texture_fit(_get_item_texture(item_id), Rect2(46.0, 550.0, 60.0, 58.0))
+	_draw_texture_fit(_tex("rarity_ribbon"), Rect2(26.0, 617.0, 100.0, 28.0))
+	_draw_text_shadow(_rarity_label(int(item_data.get("rarity", 1))), Vector2(76.0, 636.0), C["muted"], 12.0, true, 80.0)
+	_draw_text_left(item_data.get("name", ""), Vector2(143.0, 549.0), C["blue"], 18.0, true, 160.0)
+	_draw_text_left(_wrap_text(item_data.get("desc", ""), 15), Vector2(143.0, 579.0), C["muted"], 13.0, false, 178.0)
+	_draw_text_left("拥有: %d" % int(_selected_item.get("count", 0)), Vector2(143.0, 630.0), C["gold"], 12.0, true, 100.0)
+	_draw_texture_fit(_tex("use_button"), USE_BTN_RECT)
+	_draw_text_shadow("使用", USE_BTN_RECT.get_center() + Vector2(0, 8.0), C["white"], 20.0, true, USE_BTN_RECT.size.x)
+
+
+func _draw_toast() -> void:
+	if _toast_text == "" or _toast_timer <= 0.0:
+		return
+	var alpha := minf(_toast_timer / 0.5, 1.0)
+	_draw_texture_fit(_tex("toast"), Rect2(62.0, 580.0, 250.0, 42.0), alpha)
+	_draw_text_shadow(_toast_text, Vector2(DESIGN_WIDTH / 2.0, 607.0), Color(1, 1, 1, alpha), 14.0, true, 220.0)
+
+
+func _rarity_label(rarity: int) -> String:
+	match rarity:
+		1:
+			return "普通"
+		2:
+			return "稀有"
+		3:
+			return "史诗"
+		_:
+			return "传说"
+
+
+func _wrap_text(text: String, max_chars: int) -> String:
+	var result := ""
+	var line_len := 0
+	for i in range(text.length()):
+		result += text[i]
+		line_len += 1
+		if line_len >= max_chars and i < text.length() - 1:
+			result += "\n"
+			line_len = 0
+	return result
+
+
+func _format_number(value: int) -> String:
+	var text := str(value)
+	var out := ""
+	var count := 0
+	for i in range(text.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			out = "," + out
+		out = text[i] + out
+		count += 1
+	return out
+
+
+func _tex(key: String) -> Texture2D:
+	return _get_texture(INVENTORY_ASSETS.get(key, ""))
+
+
+func _get_item_texture(item_id: String) -> Texture2D:
+	return _get_texture(ITEM_ICON_ASSETS.get(item_id, ""))
+
+
+func _get_texture(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	if not _texture_cache.has(path):
+		_texture_cache[path] = load(path)
+	return _texture_cache[path] as Texture2D
+
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale := maxf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var source_size := rect.size / scale
+	var source_pos := (tex_size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
+
+
+func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	var left := center.x - width / 2.0
+	draw_string(ThemeDB.fallback_font, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+
+
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	var lines := text.split("\n")
+	for i in range(lines.size()):
+		var y := pos.y + i * (font_size + 4.0)
+		draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, y + 2.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
+		draw_string(ThemeDB.fallback_font, Vector2(pos.x, y), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
