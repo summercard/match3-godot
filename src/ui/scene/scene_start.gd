@@ -332,14 +332,10 @@ func _draw_art_content() -> void:
 	_draw_monster("water_monster", 118.0, 252.0, 144.0,  0.0)
 	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
 
-	# ---- 五颗宝石脉冲浮动：对齐三只怪物的视觉中心 ----
-	var gem_center_x := 178.0
-	var gem_top_y := 422.0
-	_draw_gem("gem_fire",    gem_center_x - 48.0, gem_top_y + 2.0,  46.0)
-	_draw_gem("gem_water",   gem_center_x,        gem_top_y - 6.0,  50.0)
-	_draw_gem("gem_grass",   gem_center_x + 48.0, gem_top_y + 2.0,  46.0)
-	_draw_gem("gem_thunder", gem_center_x - 24.0, gem_top_y + 42.0, 44.0)
-	_draw_gem("gem_light",   gem_center_x + 24.0, gem_top_y + 42.0, 44.0)
+	# ---- 三颗属性宝石浮动（错相 sin）----
+	_draw_gem("gem_fire",    gem_center_x - 48.0, gem_top_y + 2.0,  46.0,  0.0)
+	_draw_gem("gem_water",   gem_center_x,        gem_top_y - 6.0,  50.0,  PI / 3.0)
+	_draw_gem("gem_grass",   gem_center_x + 48.0, gem_top_y + 2.0,  46.0,  PI * 2.0 / 3.0)
 
 	# ---- ◈ 两侧装饰 ----
 	_draw_centered_text("◈", 52.0 * _sx, h * 0.862, 18.0 * _sc,
@@ -366,14 +362,15 @@ func _draw_monster(key: String, mx: float, my: float, ms: float, bob_off: float)
 		false, Color(1, 1, 1, _opacity))
 
 
-func _draw_gem(key: String, gx: float, gy: float, gs: float) -> void:
+func _draw_gem(key: String, gx: float, gy: float, gs: float, bob_off: float = 0.0) -> void:
 	var tex := _tex(key)
 	if not tex:
 		return
+	var bob := sin(_pulse * PI * 2.0 + bob_off) * 4.0 * _sc
 	var glow := 1.0 + _pulse * 0.08
 	var ds := gs * _sc * glow
 	draw_texture_rect(tex,
-		Rect2(gx * _sx - ds / 2.0, gy * _sy - ds / 2.0, ds, ds),
+		Rect2(gx * _sx - ds / 2.0, gy * _sy + bob - ds / 2.0, ds, ds),
 		false, Color(1, 1, 1, _opacity))
 
 
