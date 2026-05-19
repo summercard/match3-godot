@@ -108,7 +108,7 @@ func _add_dark_background() -> void:
 
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneShop] 商店初始化")
+	# print("[SceneShop] 商店初始化")
 	if game == null:
 		game = get_node_or_null("/root/GameManager")
 	_storage = _get_storage()
@@ -319,7 +319,7 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 	_add_item(item_id, quantity)
 	emit_signal("purchase_completed", item_id, quantity)
 	_show_toast("获得 %s x%d" % [str(item_data.get("name", "")), quantity], "success")
-	print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])
+	# print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])
 
 
 func _load_player_data() -> Dictionary:

@@ -23,7 +23,7 @@ func _exit_tree() -> void:
 	instance = null
 
 func _ready() -> void:
-	print("[GameManager] 初始化")
+	# print("[GameManager] 初始化")
 	# 等待场景树就绪
 	await get_tree().process_frame
 
@@ -35,7 +35,7 @@ func _ready() -> void:
 	scene_manager = root.get_node_or_null("SceneManager")
 	storage = root.get_node_or_null("SaveManager")
 
-	print("[GameManager] 初始化完成")
+	# print("[GameManager] 初始化完成")
 
 # ====== 场景切换 ======
 func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:

@@ -20,6 +20,7 @@ const BattleCombatantRendererScript = preload("res://src/ui/components/battle_co
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
+const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 
 ## 设计尺寸
 const DESIGN_W := 375.0
@@ -1213,7 +1214,7 @@ func _trigger_inline_capture() -> void:
 		center_pos = Vector2(15.0 + target_idx * 120.0 + 55.0, 125.0)
 	
 	# 播放 CaptureEffect
-	_capture_effect_node = CaptureEffect.play_capture(self, _capture_success, center_pos)
+	_capture_effect_node = CaptureEffectScript.play_capture(self, _capture_success, center_pos)
 	_capture_phase = "playing"
 	_capture_waiting_for_effect = true
 	_show_message(_capture_result_text.get("title", ""))
@@ -2277,12 +2278,16 @@ func destroy() -> void:
 	_victory_particles.clear()
 	_defeated_enemies.clear()
 	_screen_flash_timer = 0.0
+	_rainbow_flash = 0.0
+	_board_shake_timer = 0.0
+	_board_shake_offset = Vector2.ZERO
+	_attack_shake_timer = 0.0
 	_attack_flash_timer = 0.0
 	_special_transform_anim = {"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false}
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_combo_popup = {"combo": 0, "timer": 0.0, "phase": "", "scale": 0.5, "opacity": 0.0}
-	_drag_preview = {"active": false, "direction": Vector2i.ZERO, "from_pos": Vector2.ZERO}
+	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail.clear()
 	_battle_end_overlay_timer = 0.0
 	_battle_end_overlay_started = false

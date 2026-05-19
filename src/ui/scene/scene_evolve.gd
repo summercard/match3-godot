@@ -247,7 +247,7 @@ func _init_data() -> void:
 	pass
 
 func init(data: Dictionary = {}) -> void:
-	print("[SceneEvolve] 进化场景初始化")
+	# print("[SceneEvolve] 进化场景初始化")
 
 	_game = get_node_or_null("/root/GameManager")
 
@@ -567,7 +567,7 @@ func _execute_evolution() -> void:
 		player["pokedex"].erase(monster_id)
 		SaveManager.instance.save_player(player)
 
-	print("[SceneEvolve] %s 进化为 %s" % [monster_data.get("name", "?"), evolved_monster.get("name", "?")])
+	# print("[SceneEvolve] %s 进化为 %s" % [monster_data.get("name", "?"), evolved_monster.get("name", "?")])
 
 	if SaveManager and SaveManager.instance and SaveManager.instance.has_method("add_achievement_progress"):
 		SaveManager.instance.add_achievement_progress("evolveCount", 1)
