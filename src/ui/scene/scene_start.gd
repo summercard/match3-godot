@@ -491,13 +491,13 @@ func _draw_glow_button() -> void:
 
 	# ---- 发光光晕（多层径向渐变模拟）----
 	var glow_i := _pulse + _lp_glow * 0.5
-	var glow_a := 0.3 + glow_i * 0.4
-	var radius := maxf(btn.size.x, btn.size.y) * 0.8
+	var glow_a := 0.5 + glow_i * 0.5
+	var radius := maxf(btn.size.x, btn.size.y) * 1.0
 
-	for i in range(6):
-		var t := float(i) / 6.0
-		var r := radius * (1.0 - t * 0.4)
-		var a := glow_a * (1.0 - t) * 0.12 * _opacity
+	for i in range(10):
+		var t := float(i) / 10.0
+		var r := radius * (1.0 - t * 0.45)
+		var a := glow_a * (1.0 - t) * 0.14 * _opacity
 		draw_circle(center, r,
 			Color(C_PRIMARY.r, C_PRIMARY.g, C_PRIMARY.b, a))
 
