@@ -39,6 +39,10 @@ signal skill_reflect_expire(enemy_idx: int)
 signal skill_thunder_strike_triggered(enemy_idx: int, damage: int)
 signal skill_freeze_activate(enemy_idx: int, target_idx: int, chance: float, duration: int)
 signal skill_freeze_expire(enemy_idx: int, target_idx: int)
+signal skill_poison_apply(enemy_idx: int, target_idx: int, stacks: int, damage_per_stack: int, max_stacks: int)
+signal skill_poison_damage(enemy_idx: int, target_idx: int, total_damage: int, stacks: int)
+signal skill_poison_expire(enemy_idx: int, target_idx: int)
+signal skill_poison_stack_increase(enemy_idx: int, target_idx: int, new_stacks: int, max_stacks: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -50,6 +54,7 @@ const SKILL_TYPE_BURN := "burn"
 const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
 const SKILL_TYPE_REFLECT := "reflect"
 const SKILL_TYPE_FREEZE := "freeze"
+const SKILL_TYPE_POISON := "poison"
 
 
 # 内部状态（外部访问通过 getter）
@@ -57,6 +62,7 @@ var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": 
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
 var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
 var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
+var _poison_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "stacks": int, "max_stacks": int, "damage_per_stack": int, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -128,6 +134,13 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"chance": skill.get("chance", 0.3),
 						"duration": skill.get("duration", 1),
 						"duration_left": 0
+					}
+				"poison":
+					state["poison"] = {
+						"max_stacks": skill.get("maxStacks", 3),
+						"damage_per_stack": skill.get("damagePerStack", 10),
+						"interval": skill.get("interval", 1),
+						"turns_since_last": 0
 					}
 		
 		if not state.is_empty():
@@ -647,12 +660,161 @@ func get_freeze_target(enemy_idx: int) -> Dictionary:
 	return _freeze_targets.get(enemy_idx, {})
 
 
+# ==================== Phase 7: 中毒技能 ====================
+
+## 尝试对攻击者施加中毒效果
+## 在敌人攻击造成伤害后调用（叠层机制）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "applied": bool, "stacks": int, "max_stacks": int, "damage_per_stack": int }
+func try_apply_poison(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "poison")
+	if state.is_empty():
+		return { "applied": false, "stacks": 0, "max_stacks": 0, "damage_per_stack": 0 }
+	
+	var max_stacks: int = state.get("max_stacks", 3)
+	var damage_per_stack: int = state.get("damage_per_stack", 10)
+	
+	# 如果目标已有中毒效果，增加层数
+	if _poison_targets.has(enemy_idx):
+		var poison_info: Dictionary = _poison_targets[enemy_idx]
+		var current_stacks: int = poison_info.get("stacks", 0)
+		var current_target: int = poison_info.get("target_idx", -1)
+		
+		# 如果是同一个目标，增加层数
+		if current_target == target_idx and current_stacks < max_stacks:
+			current_stacks += 1
+			poison_info["stacks"] = current_stacks
+			poison_info["duration_left"] = state.get("interval", 1)  # 重置持续时间
+			
+			skill_poison_stack_increase.emit(enemy_idx, target_idx, current_stacks, max_stacks)
+			enemy_skill_action.emit({
+				"type": "poison_stack_increase",
+				"enemy_index": enemy_idx,
+				"target_index": target_idx,
+				"stacks": current_stacks,
+				"max_stacks": max_stacks
+			})
+			
+			return { "applied": true, "stacks": current_stacks, "max_stacks": max_stacks, "damage_per_stack": damage_per_stack }
+		# 如果是不同目标，覆盖
+		elif current_target != target_idx:
+			_poison_targets[enemy_idx] = {
+				"target_idx": target_idx,
+				"stacks": 1,
+				"max_stacks": max_stacks,
+				"damage_per_stack": damage_per_stack,
+				"duration_left": state.get("interval", 1)
+			}
+			
+			skill_poison_apply.emit(enemy_idx, target_idx, 1, damage_per_stack, max_stacks)
+			enemy_skill_action.emit({
+				"type": "poison_apply",
+				"enemy_index": enemy_idx,
+				"target_index": target_idx,
+				"stacks": 1,
+				"max_stacks": max_stacks
+			})
+			
+			return { "applied": true, "stacks": 1, "max_stacks": max_stacks, "damage_per_stack": damage_per_stack }
+	# 新目标
+	else:
+		_poison_targets[enemy_idx] = {
+			"target_idx": target_idx,
+			"stacks": 1,
+			"max_stacks": max_stacks,
+			"damage_per_stack": damage_per_stack,
+			"duration_left": state.get("interval", 1)
+		}
+		
+		skill_poison_apply.emit(enemy_idx, target_idx, 1, damage_per_stack, max_stacks)
+		enemy_skill_action.emit({
+			"type": "poison_apply",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx,
+			"stacks": 1,
+			"max_stacks": max_stacks
+		})
+		
+		return { "applied": true, "stacks": 1, "max_stacks": max_stacks, "damage_per_stack": damage_per_stack }
+	
+	return { "applied": false, "stacks": 0, "max_stacks": 0, "damage_per_stack": 0 }
+
+
+## 处理中毒伤害
+## 在敌人回合开始时调用，对玩家目标造成中毒伤害（每层每回合掉血）
+## 返回: { "target_idx": int, "total_damage": int, "stacks": int, "expired": bool }
+func process_poison_damage(enemy_idx: int) -> Dictionary:
+	if not _poison_targets.has(enemy_idx):
+		return { "target_idx": -1, "total_damage": 0, "stacks": 0, "expired": false }
+	
+	var poison_info: Dictionary = _poison_targets[enemy_idx]
+	var target_idx: int = poison_info.get("target_idx", -1)
+	var stacks: int = poison_info.get("stacks", 0)
+	var damage_per_stack: int = poison_info.get("damage_per_stack", 10)
+	var duration_left: int = poison_info.get("duration_left", 0)
+	
+	if target_idx < 0 or stacks <= 0:
+		_poison_targets.erase(enemy_idx)
+		return { "target_idx": target_idx, "total_damage": 0, "stacks": 0, "expired": false }
+	
+	# 计算总伤害 = 层数 * 每层伤害
+	var total_damage: int = stacks * damage_per_stack
+	
+	# 造成中毒伤害
+	skill_poison_damage.emit(enemy_idx, target_idx, total_damage, stacks)
+	enemy_skill_action.emit({
+		"type": "poison_damage",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": total_damage,
+		"stacks": stacks
+	})
+	
+	# 持续时间减少
+	duration_left -= 1
+	poison_info["duration_left"] = duration_left
+	
+	var expired: bool = false
+	if duration_left <= 0:
+		_poison_targets.erase(enemy_idx)
+		expired = true
+		skill_poison_expire.emit(enemy_idx, target_idx)
+		enemy_skill_action.emit({
+			"type": "poison_expire",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx
+		})
+	
+	return { "target_idx": target_idx, "total_damage": total_damage, "stacks": stacks, "expired": expired }
+
+
+## 获取当前中毒目标信息
+func get_poison_target(enemy_idx: int) -> Dictionary:
+	return _poison_targets.get(enemy_idx, {})
+
+
+## 检查敌人是否有激活的中毒效果
+func has_poison_target(enemy_idx: int) -> bool:
+	if not _poison_targets.has(enemy_idx):
+		return false
+	return _poison_targets[enemy_idx].get("stacks", 0) > 0
+
+
+## 获取中毒层数
+func get_poison_stacks(enemy_idx: int) -> int:
+	if not _poison_targets.has(enemy_idx):
+		return 0
+	return _poison_targets[enemy_idx].get("stacks", 0)
+
+
 ## 每个敌人回合开始时调用，更新技能冷却/计时
 func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
 	# 处理反弹效果持续时间（先减少）
 	process_reflect_duration(enemy_idx)
 	# 处理灼烧伤害（对玩家目标）
 	process_burn_damage(enemy_idx)
+	# 处理中毒伤害（叠层机制）
+	process_poison_damage(enemy_idx)
 
 
 ## 处理雷击技能
@@ -702,3 +864,4 @@ func reset() -> void:
 	_burn_targets.clear()
 	_reflect_targets.clear()
 	_freeze_targets.clear()
+	_poison_targets.clear()
