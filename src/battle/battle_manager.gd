@@ -112,22 +112,7 @@ func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1,
 		if m != null:
 			skill_charges[m.get("id", "")] = 0
 
-	enemy_skill_states = {}
-	for i in range(enemies.size()):
-		var enemy = enemies[i]
-		var skills: Array = []
-		if enemy != null and enemy.get("enemySkills", null) is Array:
-			skills = enemy.get("enemySkills", [])
-		if not skills.is_empty():
-			var state: Dictionary = {}
-			for skill in skills:
-				if skill.get("type") == "charge":
-					state["charge"] = { "turns_since_last": 0, "is_charging": false }
-				elif skill.get("type") == "shield":
-					state["shield"] = { "current_hp": 0, "max_hp": skill.get("hp", 0), "cooldown_left": 0 }
-				elif skill.get("type") == "heal":
-					state["heal"] = { "turns_since_last": 0 }
-			enemy_skill_states[i] = state
+	# 敌人技能系统（委托给 EnemySkillSystem，不再手动管理）
 
 	leader_skill_data = {}
 	leader_skill_info = null
@@ -156,6 +141,11 @@ func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1,
 	_calc_and_apply_element_synergy()
 
 	_status_effect.init_effects(enemies.size())
+
+	# 敌人技能系统初始化（委托给 EnemySkillSystem）
+	if _enemy_skill_system == null:
+		_enemy_skill_system = EnemySkillSystem.new()
+	_enemy_skill_system.init_skill_state(enemies)
 
 
 # ========== 属性协同加成 ==========
@@ -255,16 +245,10 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 			skill_ready.emit(monster)
 
 		var target_idx = enemies.find(target)
-		var skill_state = enemy_skill_states.get(target_idx, {})
 
-		# 护盾吸收
-		if skill_state.has("shield") and skill_state["shield"].get("current_hp", 0) > 0:
-			var shield_result = _damage_calc.apply_shield(total_damage, skill_state["shield"]["current_hp"])
-			skill_state["shield"]["current_hp"] -= shield_result["absorbed"]
-			var remaining_damage = shield_result["remaining"]
-			target["hp"] = target.get("hp", 0) - remaining_damage
-		else:
-			target["hp"] = target.get("hp", 0) - total_damage
+		# 护盾减伤（委托给 EnemySkillSystem）
+		var shield_result = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
+		target["hp"] = target.get("hp", 0) - shield_result["remaining"]
 
 		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + total_damage
 
@@ -340,12 +324,11 @@ func use_active_skill(monster_id: String) -> Dictionary:
 
 	var shield_absorbed: int = 0
 	var remaining_damage: int = total_damage
-	var skill_state = enemy_skill_states.get(target_idx, {})
-	if skill_state is Dictionary and skill_state.has("shield") and skill_state["shield"].get("current_hp", 0) > 0:
-		var shield_result: Dictionary = _damage_calc.apply_shield(total_damage, skill_state["shield"]["current_hp"])
+	if _enemy_skill_system != null:
+		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
 		shield_absorbed = shield_result.get("absorbed", 0)
 		remaining_damage = shield_result.get("remaining", 0)
-		skill_state["shield"]["current_hp"] -= shield_absorbed
+		_enemy_skill_system.get_skill_state(target_idx, "shield")  # 调用以更新内部状态
 
 	target["hp"] = target.get("hp", 0) - remaining_damage
 	skill_charges[monster_id] = maxi(0, charge - cost)
@@ -436,39 +419,24 @@ func enemy_action() -> Dictionary:
 			})
 			continue
 
-		var skill_state = enemy_skill_states.get(i, {})
-		var skills: Array = []
-		if enemy.get("enemySkills", null) is Array:
-			skills = enemy.get("enemySkills", [])
-		var has_skills = not skill_state.is_empty() and not skills.is_empty()
+		# 检查敌人是否有技能
+		var has_skills = false
+		if _enemy_skill_system != null:
+			has_skills = _enemy_skill_system.has_skill_type(i, "charge") or _enemy_skill_system.has_skill_type(i, "shield") or _enemy_skill_system.has_skill_type(i, "heal")
 
-		# 护盾检查
-		if has_skills and skill_state.has("shield"):
-			var shield_config = skills.filter(func(s): return s.get("type") == "shield")
-			if not shield_config.is_empty() and skill_state["shield"].get("current_hp", 0) <= 0 and skill_state["shield"].get("cooldown_left", 0) <= 0:
-				var shield_hp = shield_config[0].get("hp", 0)
-				skill_state["shield"]["current_hp"] = shield_hp
-				skill_state["shield"]["max_hp"] = shield_hp
-				skill_state["shield"]["cooldown_left"] = shield_config[0].get("cooldown", 5)
-				enemy_skill_action.emit({
-						"type": "shield_appear",
-						"enemy_index": i,
-						"enemy": enemy,
-						"shield_hp": shield_hp,
-						"shield_max_hp": shield_hp
-				})
-			if skill_state["shield"].get("cooldown_left", 0) > 0:
-				skill_state["shield"]["cooldown_left"] -= 1
+		# 护盾检查（委托给 EnemySkillSystem）
+		if _enemy_skill_system != null and has_skills:
+			_enemy_skill_system.check_and_activate_shield(i, enemy)
 
 		# 回血检查（委托给 EnemySkillSystem）
-		if _enemy_skill_system != null and has_skills and skill_state.has("heal"):
+		if _enemy_skill_system != null and has_skills:
 			_enemy_skill_system.execute_heal(i, enemy)
 
 		# 蓄力检查（委托给 EnemySkillSystem）
 		var skip_attack = false
 		var damage_multiplier = 1.0
 
-		if _enemy_skill_system != null and has_skills and skill_state.has("charge"):
+		if _enemy_skill_system != null:
 			damage_multiplier = _enemy_skill_system.check_and_release_charge(i)
 			if _enemy_skill_system.is_charging(i):
 				skip_attack = true
@@ -584,7 +552,13 @@ func get_status() -> Dictionary:
 		"current_phase": current_phase,
 		"total_phases": stage_phases.size() if not stage_phases.is_empty() else 1,
 		"is_boss_battle": not stage_phases.is_empty(),
-		"enemy_skill_states": enemy_skill_states.duplicate(true),
+		"enemy_skill_states": (func():
+			var result = {}
+			if _enemy_skill_system != null:
+				for idx in range(enemies.size()):
+					result[idx] = _enemy_skill_system.get_enemy_state(idx)
+			return result
+		)(),
 		"leader_skill_info": leader_skill_info,
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
