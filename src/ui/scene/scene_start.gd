@@ -338,6 +338,12 @@ func _draw_art_content() -> void:
 	_draw_gem("gem_thunder", gem_center_x - 24.0, gem_top_y + 42.0, 44.0)
 	_draw_gem("gem_light",   gem_center_x + 24.0, gem_top_y + 42.0, 44.0)
 
+	# ---- ◈ 两侧装饰 ----
+	_draw_centered_text("◈", 52.0 * _sx, h * 0.862, 18.0 * _sc,
+		Color(C_GOLD, _opacity * 0.65))
+	_draw_centered_text("◈", w - 52.0 * _sx, h * 0.862, 18.0 * _sc,
+		Color(C_GOLD, _opacity * 0.65))
+
 	# ---- 提示横幅 ----
 	if _ready_flag:
 		_draw_hint_art(w, h)

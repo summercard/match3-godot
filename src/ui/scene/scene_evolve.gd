@@ -473,9 +473,12 @@ func _get_default_evolution_item(monster_id: String) -> String:
 
 func _get_monster_data_local(monster_id: String) -> Dictionary:
 	var MonsterDB = load("res://src/data/monster_db.gd")
-	if MonsterDB:
-		return MonsterDB.get_monster(monster_id) or {}
-	return {}
+	if MonsterDB == null:
+		return {}
+	var data = MonsterDB.get_monster(monster_id)
+	if data == null:
+		return {}
+	return data
 
 # ============ 进化逻辑 ============
 func _on_evolve_pressed() -> void:

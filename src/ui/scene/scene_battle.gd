@@ -1327,7 +1327,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 func _sync_boss_skill_visuals() -> void:
 	if _battle == null:
 		return
-	var skill_states: Dictionary = _battle.enemy_skill_states
+	var skill_states: Dictionary = _battle.get_status().get("enemy_skill_states", {})
 	for idx in skill_states.keys():
 		var skill_state: Dictionary = skill_states[idx]
 		if not _boss_skill_visuals.has(idx):

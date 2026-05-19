@@ -49,9 +49,10 @@ func init_skill_state(enemies: Array) -> Dictionary:
 		if enemy == null:
 			continue
 		
-		var skills: Array = enemy.get("enemySkills", [])
-		if skills.is_empty():
+		var skills_raw = enemy.get("enemySkills", null)
+		if skills_raw == null or skills_raw.is_empty():
 			continue
+		var skills: Array = skills_raw
 		
 		var state: Dictionary = {}
 		
