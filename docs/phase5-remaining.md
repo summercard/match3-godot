@@ -33,19 +33,19 @@ M2.7模型每次只做一个小目标，8分钟间隔，循环执行直到完成
 
 ---
 
-## 本次循环目标（P1第一项）
+## 本次循环目标（P2第一项）
 
 ### 任务
-审视scene_start.gd的开屏视觉，找出与微信sceneStart.js的差距
+实现队长技能信息条（金色背景+👑+技能描述）
 
 ### 具体步骤
-1. 读取src/ui/scene/scene_start.gd
-2. 读取微信源码js/battle/sceneStart.js（或参考docs/phase5-priority-fixes.md）
-3. 对比第一项：渐变标题文字
-4. 如需修改，只改渐变标题文字一处
+1. 读取src/ui/scene/scene_battle.gd
+2. 找到或创建_draw_leader_skill_bar()方法
+3. 在战斗界面顶部绘制金色背景信息条
+4. 显示👑图标+技能名称+技能描述
 
 ### 验收标准
-- 渐变标题文字显示正常
+- 信息条正常显示
 - Godot编辑器无报错
 
 ---
