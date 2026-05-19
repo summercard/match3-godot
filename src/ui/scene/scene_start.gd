@@ -39,12 +39,15 @@ const DW := 375.0
 const DH := 667.0
 
 # ---- 长按阈值（秒）----
-const LONG_PRESS_SEC := 0.8
+const LONG_PRESS_SEC := 0.5
 
 # ---- 长按触发后的视觉增强系数 ----
 const LP_SCALE_BOOST := 1.12
 const LP_GLOW_MULT := 1.6
 const LP_RADIUS_MULT := 1.2
+
+# ---- 信号 ----
+signal hold_pressed  # 长按阈值触发后松开时发出
 
 # ---- 状态 ----
 var _opacity: float = 0.0
@@ -178,6 +181,9 @@ func _begin_hold() -> void:
 
 func _end_hold() -> void:
 	_touching = false
+	# RELEASE时若超过阈值则触发"hold"信号
+	if _lp_triggered:
+		emit_signal("hold_pressed")
 	_hold_time = 0.0
 	_lp_triggered = false
 
