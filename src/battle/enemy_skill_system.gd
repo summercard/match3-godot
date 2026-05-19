@@ -51,6 +51,8 @@ signal skill_surge_damage(enemy_idx: int, target_idx: int, damage: int, turn_num
 signal skill_surge_expire(enemy_idx: int, target_idx: int)
 signal skill_confuse_activate(enemy_idx: int, target_idx: int, chance: float, duration: int)
 signal skill_confuse_expire(enemy_idx: int, target_idx: int)
+signal skill_skill_seal_activate(enemy_idx: int, target_idx: int, chance: float, duration: int)
+signal skill_skill_seal_expire(enemy_idx: int, target_idx: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -67,6 +69,7 @@ const SKILL_TYPE_POISON := "poison"
 const SKILL_TYPE_LIFE_DRAIN := "life_drain"
 const SKILL_TYPE_SURGE := "surge"
 const SKILL_TYPE_CONFUSE := "confuse"
+const SKILL_TYPE_SKILL_SEAL := "skill_seal"
 
 
 # 内部状态（外部访问通过 getter）
@@ -77,6 +80,7 @@ var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chanc
 var _poison_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "stacks": int, "max_stacks": int, "damage_per_stack": int, "duration_left": int } }
 var _surge_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "base_damage": int, "increment": int, "current_damage": int, "max_damage": int, "turn_number": int } }
 var _confuse_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
+var _skill_seal_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -181,6 +185,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 					state["confuse"] = {
 						"chance": skill.get("chance", 0.2),
 						"duration": skill.get("duration", 1),
+						"duration_left": 0
+					}
+				"skill_seal":
+					state["skill_seal"] = {
+						"chance": skill.get("chance", 0.25),
+						"duration": skill.get("duration", 2),
 						"duration_left": 0
 					}
 		
@@ -971,6 +981,7 @@ func reset() -> void:
 	_poison_targets.clear()
 	_surge_targets.clear()
 	_confuse_targets.clear()
+	_skill_seal_targets.clear()
 
 
 # ==================== Phase 9: 浪涌技能 ====================
@@ -1285,3 +1296,98 @@ func process_confuse_duration(enemy_idx: int) -> Dictionary:
 ## 获取当前混乱目标
 func get_confuse_target(enemy_idx: int) -> Dictionary:
 	return _confuse_targets.get(enemy_idx, {})
+
+
+# ==================== Phase 12: 技能封印技能 ====================
+# 概率封印玩家技能，持续2回合
+# 配置：{ "type": "skill_seal", "chance": 0.25, "duration": 2 }
+
+## 尝试激活技能封印效果
+## 在敌人攻击造成伤害后调用（概率触发）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "activated": bool, "chance": float, "duration": int }
+func try_activate_skill_seal(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "skill_seal")
+	if state.is_empty():
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	# 如果已经存在技能封印效果，不重复激活
+	if _skill_seal_targets.has(enemy_idx) and _skill_seal_targets[enemy_idx].get("duration_left", 0) > 0:
+		return { "activated": false, "chance": 0.0, "duration": 0 }
+	
+	var seal_chance: float = state.get("chance", 0.25)
+	var seal_duration: int = state.get("duration", 2)
+	
+	# 概率判定
+	if randf() > seal_chance:
+		return { "activated": false, "chance": seal_chance, "duration": 0 }
+	
+	_skill_seal_targets[enemy_idx] = {
+		"target_idx": target_idx,
+		"chance": seal_chance,
+		"duration_left": seal_duration
+	}
+	
+	skill_skill_seal_activate.emit(enemy_idx, target_idx, seal_chance, seal_duration)
+	enemy_skill_action.emit({
+		"type": "skill_seal_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": seal_chance,
+		"duration": seal_duration
+	})
+	
+	return { "activated": true, "chance": seal_chance, "duration": seal_duration }
+
+
+## 检查目标是否处于技能封印状态
+## 返回: bool - 是否被封印
+func is_target_sealed(enemy_idx: int) -> bool:
+	if not _skill_seal_targets.has(enemy_idx):
+		return false
+	return _skill_seal_targets[enemy_idx].get("duration_left", 0) > 0
+
+
+## 获取技能封印信息
+func get_skill_seal_info(enemy_idx: int) -> Dictionary:
+	return _skill_seal_targets.get(enemy_idx, {})
+
+
+## 处理技能封印效果持续时间
+## 在玩家回合开始时调用，更新封印持续时间并返回是否仍处于封印状态
+## 返回: { "target_idx": int, "is_sealed": bool, "expired": bool }
+func process_skill_seal_duration(enemy_idx: int) -> Dictionary:
+	if not _skill_seal_targets.has(enemy_idx):
+		return { "target_idx": -1, "is_sealed": false, "expired": false }
+	
+	var seal_info: Dictionary = _skill_seal_targets[enemy_idx]
+	var target_idx: int = seal_info.get("target_idx", -1)
+	var duration_left: int = seal_info.get("duration_left", 0)
+	
+	if target_idx < 0:
+		_skill_seal_targets.erase(enemy_idx)
+		return { "target_idx": -1, "is_sealed": false, "expired": false }
+	
+	var is_sealed: bool = duration_left > 0
+	var expired: bool = false
+	
+	# 持续时间减少
+	duration_left -= 1
+	seal_info["duration_left"] = duration_left
+	
+	if duration_left <= 0:
+		_skill_seal_targets.erase(enemy_idx)
+		expired = true
+		skill_skill_seal_expire.emit(enemy_idx, target_idx)
+		enemy_skill_action.emit({
+			"type": "skill_seal_expire",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx
+		})
+	
+	return { "target_idx": target_idx, "is_sealed": is_sealed, "expired": expired }
+
+
+## 获取当前技能封印目标
+func get_skill_seal_target(enemy_idx: int) -> Dictionary:
+	return _skill_seal_targets.get(enemy_idx, {})
