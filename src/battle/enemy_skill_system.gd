@@ -12,6 +12,7 @@ class_name EnemySkillSystem
 ##   heal:    { "type": "heal", "percent": float, "interval": int }
 ##   burn:    { "type": "burn", "damage": int, "interval": int, "duration": int }
 ##   thunder_strike: { "type": "thunder_strike", "damage": int, "cooldown": int }
+##   reflect: { "type": "reflect", "percent": float, "duration": int }
 ##
 ## 技能状态结构 (skill_state):
 ##   charge:  { "turns_since_last": int, "is_charging": bool }
@@ -19,6 +20,7 @@ class_name EnemySkillSystem
 ##   heal:    { "turns_since_last": int }
 ##   burn:    { "damage": int, "duration_left": int }
 ##   thunder_strike: { "damage": int, "cooldown": int, "turns_since_last": int }
+##   reflect: { "percent": float, "duration": int, "duration_left": int, "is_active": bool }
 
 
 # 信号定义
@@ -30,6 +32,9 @@ signal skill_heal_triggered(enemy_idx: int, heal_amount: int)
 signal skill_burn_apply(enemy_idx: int, target_idx: int, damage: int, duration: int)
 signal skill_burn_damage(enemy_idx: int, target_idx: int, damage: int)
 signal skill_burn_expire(enemy_idx: int, target_idx: int)
+signal skill_reflect_activate(enemy_idx: int, percent: float, duration: int)
+signal skill_reflect_trigger(enemy_idx: int, target_idx: int, reflected_damage: int)
+signal skill_reflect_expire(enemy_idx: int)
 signal skill_thunder_strike_triggered(enemy_idx: int, damage: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
@@ -40,11 +45,13 @@ const SKILL_TYPE_SHIELD := "shield"
 const SKILL_TYPE_HEAL := "heal"
 const SKILL_TYPE_BURN := "burn"
 const SKILL_TYPE_THUNDER_STRIKE := "thunder_strike"
+const SKILL_TYPE_REFLECT := "reflect"
 
 
 # 内部状态（外部访问通过 getter）
-var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...} } }
+var _skill_states: Dictionary = {}  # { enemy_idx: { "charge": {...}, "shield": {...}, "heal": {...}, "burn": {...}, "thunder_strike": {...}, "reflect": {...} } }
 var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage": int, "duration_left": int } }
+var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -103,6 +110,13 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"damage": skill.get("damage", 50),
 						"cooldown": skill.get("cooldown", 3),
 						"turns_since_last": 0
+					}
+				"reflect":
+					state["reflect"] = {
+						"percent": skill.get("percent", 0.3),
+						"duration": skill.get("duration", 2),
+						"duration_left": 0,
+						"is_active": false
 					}
 		
 		if not state.is_empty():
@@ -357,6 +371,123 @@ func try_apply_burn(enemy_idx: int, target_idx: int, source_damage: int = 0) -> 
 	return { "applied": true, "damage": burn_damage, "duration": burn_duration }
 
 
+# ==================== Phase 5: 反弹技能 ====================
+
+## 尝试激活反弹效果
+## 在敌人攻击造成伤害后调用（当敌人被攻击时）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "activated": bool, "percent": float, "duration": int }
+func try_activate_reflect(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "reflect")
+	if state.is_empty():
+		return { "activated": false, "percent": 0.0, "duration": 0 }
+	
+	# 如果反弹已经激活，不重复激活
+	if _reflect_targets.has(enemy_idx) and _reflect_targets[enemy_idx].get("duration_left", 0) > 0:
+		return { "activated": false, "percent": 0.0, "duration": 0 }
+	
+	var reflect_percent: float = state.get("percent", 0.3)
+	var reflect_duration: int = state.get("duration", 2)
+	
+	_reflect_targets[enemy_idx] = {
+		"target_idx": target_idx,
+		"percent": reflect_percent,
+		"duration_left": reflect_duration
+	}
+	
+	# 标记技能状态为激活
+	state["is_active"] = true
+	state["duration_left"] = reflect_duration
+	
+	skill_reflect_activate.emit(enemy_idx, reflect_percent, reflect_duration)
+	enemy_skill_action.emit({
+		"type": "reflect_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"percent": reflect_percent,
+		"duration": reflect_duration
+	})
+	
+	return { "activated": true, "percent": reflect_percent, "duration": reflect_duration }
+
+
+## 计算反弹伤害
+## 在玩家攻击造成伤害后调用，计算并返回应反弹的伤害
+## 返回: { "reflected": bool, "damage": int, "target_idx": int }
+func calculate_reflect_damage(enemy_idx: int, incoming_damage: int) -> Dictionary:
+	if not _reflect_targets.has(enemy_idx):
+		return { "reflected": false, "damage": 0, "target_idx": -1 }
+	
+	var reflect_info: Dictionary = _reflect_targets[enemy_idx]
+	var target_idx: int = reflect_info.get("target_idx", -1)
+	var percent: float = reflect_info.get("percent", 0.3)
+	var duration_left: int = reflect_info.get("duration_left", 0)
+	
+	if target_idx < 0 or duration_left <= 0:
+		_reflect_targets.erase(enemy_idx)
+		return { "reflected": false, "damage": 0, "target_idx": -1 }
+	
+	var reflected_damage: int = int(incoming_damage * percent)
+	
+	skill_reflect_trigger.emit(enemy_idx, target_idx, reflected_damage)
+	enemy_skill_action.emit({
+		"type": "reflect_damage",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": reflected_damage
+	})
+	
+	return { "reflected": true, "damage": reflected_damage, "target_idx": target_idx }
+
+
+## 处理反弹效果持续时间
+## 在敌人回合开始时调用，更新反弹持续时间
+## 返回: { "target_idx": int, "expired": bool }
+func process_reflect_duration(enemy_idx: int) -> Dictionary:
+	if not _reflect_targets.has(enemy_idx):
+		return { "target_idx": -1, "expired": false }
+	
+	var reflect_info: Dictionary = _reflect_targets[enemy_idx]
+	var target_idx: int = reflect_info.get("target_idx", -1)
+	var duration_left: int = reflect_info.get("duration_left", 0)
+	
+	if duration_left <= 0:
+		return { "target_idx": target_idx, "expired": false }
+	
+	# 持续时间减少
+	duration_left -= 1
+	reflect_info["duration_left"] = duration_left
+	
+	var expired: bool = false
+	if duration_left <= 0:
+		_reflect_targets.erase(enemy_idx)
+		expired = true
+		# 重置技能状态
+		var state = get_skill_state(enemy_idx, "reflect")
+		if not state.is_empty():
+			state["is_active"] = false
+			state["duration_left"] = 0
+		skill_reflect_expire.emit(enemy_idx)
+		enemy_skill_action.emit({
+			"type": "reflect_expire",
+			"enemy_index": enemy_idx
+		})
+	
+	return { "target_idx": target_idx, "expired": expired }
+
+
+## 获取当前反弹目标
+func get_reflect_target(enemy_idx: int) -> Dictionary:
+	return _reflect_targets.get(enemy_idx, {})
+
+
+## 检查敌人是否有激活的反弹效果
+func has_reflect_target(enemy_idx: int) -> bool:
+	if not _reflect_targets.has(enemy_idx):
+		return false
+	return _reflect_targets[enemy_idx].get("duration_left", 0) > 0
+
+
 ## 处理灼烧伤害
 ## 在敌人回合开始时调用，对玩家目标造成灼烧伤害
 ## 返回: { "target_idx": int, "damage": int, "expired": bool }
@@ -414,6 +545,8 @@ func has_burn_target(enemy_idx: int) -> bool:
 
 ## 每个敌人回合开始时调用，更新技能冷却/计时
 func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
+	# 处理反弹效果持续时间（先减少）
+	process_reflect_duration(enemy_idx)
 	# 处理灼烧伤害（对玩家目标）
 	process_burn_damage(enemy_idx)
 
@@ -463,3 +596,4 @@ func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
 func reset() -> void:
 	_skill_states.clear()
 	_burn_targets.clear()
+	_reflect_targets.clear()
