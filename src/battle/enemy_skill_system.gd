@@ -44,6 +44,8 @@ signal skill_poison_damage(enemy_idx: int, target_idx: int, total_damage: int, s
 signal skill_poison_expire(enemy_idx: int, target_idx: int)
 signal skill_poison_stack_increase(enemy_idx: int, target_idx: int, new_stacks: int, max_stacks: int)
 signal skill_life_drain_triggered(enemy_idx: int, target_idx: int, drain_amount: int, heal_amount: int)
+signal skill_surge_damage(enemy_idx: int, target_idx: int, damage: int, turn_number: int)
+signal skill_surge_expire(enemy_idx: int, target_idx: int)
 signal enemy_skill_action(enemy_idx: int, skill_type: String, params: Dictionary)
 
 
@@ -57,6 +59,7 @@ const SKILL_TYPE_REFLECT := "reflect"
 const SKILL_TYPE_FREEZE := "freeze"
 const SKILL_TYPE_POISON := "poison"
 const SKILL_TYPE_LIFE_DRAIN := "life_drain"
+const SKILL_TYPE_SURGE := "surge"
 
 
 # 内部状态（外部访问通过 getter）
@@ -65,6 +68,7 @@ var _burn_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "damage"
 var _reflect_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "percent": float, "duration_left": int } }
 var _freeze_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "chance": float, "duration_left": int } }
 var _poison_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "stacks": int, "max_stacks": int, "damage_per_stack": int, "duration_left": int } }
+var _surge_targets: Dictionary = {}  # { enemy_idx: { "target_idx": int, "base_damage": int, "increment": int, "current_damage": int, "max_damage": int, "turn_number": int } }
 
 
 # ==================== Phase 1: 基础框架 ====================
@@ -149,6 +153,12 @@ func init_skill_state(enemies: Array) -> Dictionary:
 						"percent": skill.get("percent", 0.15),
 						"cooldown": skill.get("cooldown", 4),
 						"turns_since_last": 0
+					}
+				"surge":
+					state["surge"] = {
+						"base_damage": skill.get("baseDamage", 30),
+						"increment_per_turn": skill.get("incrementPerTurn", 10),
+						"max_damage": skill.get("maxDamage", 100)
 					}
 		
 		if not state.is_empty():
@@ -823,6 +833,8 @@ func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
 	process_burn_damage(enemy_idx)
 	# 处理中毒伤害（叠层机制）
 	process_poison_damage(enemy_idx)
+	# 处理浪涌伤害（每回合递增）
+	process_surge_damage(enemy_idx)
 
 
 ## 处理雷击技能
@@ -934,3 +946,113 @@ func reset() -> void:
 	_reflect_targets.clear()
 	_freeze_targets.clear()
 	_poison_targets.clear()
+	_surge_targets.clear()
+
+
+# ==================== Phase 9: 浪涌技能 ====================
+
+## 尝试对攻击者施加浪涌效果
+## 在敌人攻击造成伤害后调用（每回合伤害递增）
+## target_idx: 攻击者的索引（通常是玩家队伍中的某个宠物）
+## 返回: { "applied": bool, "base_damage": int, "current_damage": int, "max_damage": int, "increment": int }
+func try_apply_surge(enemy_idx: int, target_idx: int) -> Dictionary:
+	var state = get_skill_state(enemy_idx, "surge")
+	if state.is_empty():
+		return { "applied": false, "base_damage": 0, "current_damage": 0, "max_damage": 0, "increment": 0 }
+	
+	var base_damage: int = state.get("base_damage", 30)
+	var increment: int = state.get("increment_per_turn", 10)
+	var max_damage: int = state.get("max_damage", 100)
+	
+	# 如果目标已有浪涌效果，增加伤害
+	if _surge_targets.has(enemy_idx):
+		var surge_info: Dictionary = _surge_targets[enemy_idx]
+		surge_info["turn_number"] += 1
+		surge_info["current_damage"] = mini(surge_info["current_damage"] + increment, max_damage)
+		
+		skill_surge_damage.emit(enemy_idx, target_idx, surge_info["current_damage"], surge_info["turn_number"])
+		enemy_skill_action.emit({
+			"type": "surge_damage",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx,
+			"damage": surge_info["current_damage"],
+			"turn_number": surge_info["turn_number"]
+		})
+		
+		return { "applied": true, "base_damage": base_damage, "current_damage": surge_info["current_damage"], "max_damage": max_damage, "increment": increment }
+	# 新目标
+	else:
+		_surge_targets[enemy_idx] = {
+			"target_idx": target_idx,
+			"base_damage": base_damage,
+			"increment": increment,
+			"current_damage": base_damage,
+			"max_damage": max_damage,
+			"turn_number": 1
+		}
+		
+		skill_surge_damage.emit(enemy_idx, target_idx, base_damage, 1)
+		enemy_skill_action.emit({
+			"type": "surge_damage",
+			"enemy_index": enemy_idx,
+			"target_index": target_idx,
+			"damage": base_damage,
+			"turn_number": 1
+		})
+		
+		return { "applied": true, "base_damage": base_damage, "current_damage": base_damage, "max_damage": max_damage, "increment": increment }
+
+
+## 处理浪涌伤害
+## 在敌人回合开始时调用，对玩家目标造成浪涌伤害
+## 返回: { "target_idx": int, "damage": int, "turn_number": int, "expired": bool }
+func process_surge_damage(enemy_idx: int) -> Dictionary:
+	if not _surge_targets.has(enemy_idx):
+		return { "target_idx": -1, "damage": 0, "turn_number": 0, "expired": false }
+	
+	var surge_info: Dictionary = _surge_targets[enemy_idx]
+	var target_idx: int = surge_info.get("target_idx", -1)
+	var damage: int = surge_info.get("current_damage", 0)
+	var turn_number: int = surge_info.get("turn_number", 0)
+	
+	if target_idx < 0 or damage <= 0:
+		_surge_targets.erase(enemy_idx)
+		return { "target_idx": target_idx, "damage": 0, "turn_number": 0, "expired": false }
+	
+	# 造成浪涌伤害
+	skill_surge_damage.emit(enemy_idx, target_idx, damage, turn_number)
+	enemy_skill_action.emit({
+		"type": "surge_damage",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": damage,
+		"turn_number": turn_number
+	})
+	
+	# 增加伤害（每回合递增）
+	var increment: int = surge_info.get("increment", 10)
+	var max_damage: int = surge_info.get("max_damage", 100)
+	var current_damage: int = surge_info.get("current_damage", 0)
+	surge_info["current_damage"] = mini(current_damage + increment, max_damage)
+	surge_info["turn_number"] += 1
+	
+	return { "target_idx": target_idx, "damage": damage, "turn_number": turn_number, "expired": false }
+
+
+## 获取当前浪涌目标信息
+func get_surge_target(enemy_idx: int) -> Dictionary:
+	return _surge_targets.get(enemy_idx, {})
+
+
+## 检查敌人是否有激活的浪涌效果
+func has_surge_target(enemy_idx: int) -> bool:
+	if not _surge_targets.has(enemy_idx):
+		return false
+	return _surge_targets[enemy_idx].get("current_damage", 0) > 0
+
+
+## 获取浪涌当前伤害
+func get_surge_current_damage(enemy_idx: int) -> int:
+	if not _surge_targets.has(enemy_idx):
+		return 0
+	return _surge_targets[enemy_idx].get("current_damage", 0)
