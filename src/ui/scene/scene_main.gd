@@ -249,10 +249,10 @@ func _build_buttons() -> void:
 	_buttons = []
 	
 	var scene_entries := [
-		{ "id": "start", "text": "冒险之旅", "emoji": "🐾", "x": 56.0, "y": 280.0, "w": 126.0, "action": Callable(self, "_on_start_pressed"), "notice": true },
+		{ "id": "start", "text": "冒险之旅", "emoji": "🐾", "x": 50.0, "y": 280.0, "w": SCENE_ENTRY_SIZE.x, "action": Callable(self, "_on_start_pressed"), "notice": true },
 		{ "id": "team", "text": "精灵编队", "emoji": "⚔️", "x": 226.0, "y": 280.0, "w": 136.0, "action": Callable(self, "_on_team_pressed"), "notice": true },
-		{ "id": "ranch", "text": "精灵牧场", "emoji": "🍃", "x": 60.0, "y": 516.0, "w": 128.0, "action": Callable(self, "_on_ranch_pressed"), "notice": true },
-		{ "id": "shop", "text": "商店", "emoji": "🛒", "x": 244.0, "y": 516.0, "w": 112.0, "action": Callable(self, "_on_shop_pressed"), "notice": true },
+		{ "id": "ranch", "text": "精灵牧场", "emoji": "🍃", "x": 56.0, "y": 516.0, "w": SCENE_ENTRY_SIZE.x, "action": Callable(self, "_on_ranch_pressed"), "notice": true },
+		{ "id": "shop", "text": "商店", "emoji": "🛒", "x": 220.0, "y": 516.0, "w": SCENE_ENTRY_SIZE.x, "action": Callable(self, "_on_shop_pressed"), "notice": true },
 	]
 	
 	for item in scene_entries:
@@ -551,8 +551,7 @@ func _draw_grid_button(btn: LobbyButton) -> void:
 	else:
 		_draw_text_with_shadow(btn.emoji, draw_x + 26.0, draw_y + 27.0, c["primary"], font_size["body"], true, 30.0)
 	_draw_text_with_shadow(btn.text, draw_x + draw_w / 2.0 + 9.0, draw_y + 28.0, c["text_primary"], font_size["body"], true, draw_w - 45.0)
-	if btn.notice:
-		_draw_notice_dot(draw_x + draw_w - 17.0, draw_y + 4.0)
+	# V2 场景入口按钮资产自身已包含红点角标，避免重复叠加。
 
 func _draw_nav_button(btn: LobbyButton) -> void:
 	var c := C
