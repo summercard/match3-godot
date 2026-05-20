@@ -378,6 +378,9 @@ func _on_touch_start(x: float, y: float) -> void:
 		if _is_point_in_button(x, y, btn):
 			_touched_btn = btn
 			queue_redraw()
+			if btn.id == "start":
+				btn.action.call()
+				_touched_btn = null
 			return
 	_touched_btn = null
 	queue_redraw()

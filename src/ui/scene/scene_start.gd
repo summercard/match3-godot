@@ -47,7 +47,7 @@ const LP_GLOW_MULT := 1.6
 const LP_RADIUS_MULT := 1.2
 
 # ---- 信号 ----
-signal hold_pressed  # 长按阈值触发后松开时发出
+signal hold_pressed  # 旧信号保留兼容
 
 # ---- 状态 ----
 var _opacity: float = 0.0
@@ -60,6 +60,7 @@ var _hold_time: float = 0.0
 var _lp_done: bool = false
 var _btn_press_scale: float = 1.0
 var _lp_triggered: bool = false  # 长按阈值已触发（缩放不再变化）
+var _entering: bool = false
 
 var _assets: Dictionary = {}
 var _particles: Array = []
@@ -150,22 +151,24 @@ func _start_glow_timer() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	# ---- 触摸：按下开始计时，松开停止 ----
+	# ---- 触摸：按下开始按钮即进入 ----
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			if _in_btn(event.position):
 				_begin_hold()
+				_do_enter()
 		else:
 			_end_hold()
 		accept_event()
 		return
 
-	# ---- 鼠标：按下开始计时，松开停止 ----
+	# ---- 鼠标：按下开始按钮即进入 ----
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				if _in_btn(event.position):
 					_begin_hold()
+					_do_enter()
 			else:
 				_end_hold()
 		accept_event()
@@ -209,6 +212,9 @@ func _btn_rect(press_scale: float = 1.0) -> Rect2:
 
 
 func _do_enter() -> void:
+	if _entering:
+		return
+	_entering = true
 	_ready_flag = false
 	_touching = false
 	_lp_glow = 0.0
@@ -220,8 +226,13 @@ func _do_enter() -> void:
 	await tween.finished
 
 	var sm := get_node_or_null("/root/SceneManager")
-	if sm:
-		sm.switch_scene(_get_entry_scene())
+	var entry_scene := _get_entry_scene()
+	if sm and sm.has_method("switch_scene"):
+		sm.switch_scene(entry_scene)
+		return
+	var parent_node := get_parent()
+	if parent_node != null and parent_node.has_method("switch_scene"):
+		parent_node.switch_scene(entry_scene)
 
 func _get_entry_scene() -> String:
 	var save_manager := get_node_or_null("/root/SaveManager")
