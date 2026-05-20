@@ -21,9 +21,9 @@
 - [x] 配置：{ "type": "thunder_strike", "damage": 50, "cooldown": 3 }
 
 ### Skill 3: reflect 反弹
-- [ ] 反弹部分受到伤害给攻击者
-- [ ] 持续2回合
-- [ ] 配置：{ "type": "reflect", "percent": 0.3, "duration": 2 }
+- [x] 反弹部分受到伤害给攻击者
+- [x] 持续2回合
+- [x] 配置：{ "type": "reflect", "percent": 0.3, "duration": 2 } ✅ (已实现)
 
 ### Skill 4: freeze 冰封
 - [x] 概率冻结玩家一回合
