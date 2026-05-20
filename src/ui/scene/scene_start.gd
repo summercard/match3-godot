@@ -220,19 +220,14 @@ func _do_enter() -> void:
 	_lp_glow = 0.0
 	_btn_press_scale = 1.0
 
-	# 淡出后切换场景
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, 0.4)
-	await tween.finished
-
-	var sm := get_node_or_null("/root/SceneManager")
 	var entry_scene := _get_entry_scene()
-	if sm and sm.has_method("switch_scene"):
-		sm.switch_scene(entry_scene)
-		return
 	var parent_node := get_parent()
 	if parent_node != null and parent_node.has_method("switch_scene"):
 		parent_node.switch_scene(entry_scene)
+		return
+	var sm := get_node_or_null("/root/SceneManager")
+	if sm and sm.has_method("switch_scene"):
+		sm.switch_scene(entry_scene)
 
 func _get_entry_scene() -> String:
 	var save_manager := get_node_or_null("/root/SaveManager")
