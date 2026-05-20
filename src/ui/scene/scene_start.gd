@@ -371,12 +371,6 @@ func _draw_art_content() -> void:
 		var lh := 178.0 * _sy
 		draw_texture_rect(logo, Rect2(20.0 * _sx, 20.0 * _sy, lw, lh), false,
 			Color(1, 1, 1, _opacity))
-		# 渐变标题文字（对齐微信 art 模式）
-		_draw_gradient_text("萌灵消消大冒险", w / 2.0, h * 0.40,
-			28.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
-		# 副标题渐变（✦ 三消冒险 ✦）
-		_draw_gradient_text("✦ 三消冒险 ✦", w / 2.0, h * 0.51,
-			20.0 * _sc, C_PRIMARY, C_GOLD, _opacity)
 	else:
 		_draw_stroke_text("萌灵消消大冒险", w / 2.0, h * 0.15,
 			C_GOLD, Color(0.04, 0.06, 0.16), 28.0 * _sc, 4.0 * _sc)
@@ -388,13 +382,15 @@ func _draw_art_content() -> void:
 	_draw_monster("water_monster", 118.0, 252.0, 144.0,  0.0)
 	_draw_monster("grass_monster", 205.0, 274.0, 138.0,  2.0)
 
-	# ---- 三颗属性宝石浮动（错相 sin）----
-	# gem_top_y 在 design 坐标中约为 470（下方区域，在怪物下方，按钮上方）
+	# ---- 五颗属性宝石浮动（错相 sin）----
+	# 位置对齐概念图：居中成浅弧形，避开怪物脚部和开始按钮。
 	var gem_center_x: float = DW * 0.5   # 187.5 design x 居中
-	var gem_top_y: float = 470.0        # design y 坐标（下方区域）
-	_draw_gem("gem_fire",    gem_center_x - 48.0, gem_top_y + 2.0,  46.0,  0.0)
-	_draw_gem("gem_water",   gem_center_x,        gem_top_y - 6.0,  50.0,  PI / 3.0)
-	_draw_gem("gem_grass",   gem_center_x + 48.0, gem_top_y + 2.0,  46.0,  PI * 2.0 / 3.0)
+	var gem_top_y: float = 462.0        # design y 坐标（下方区域）
+	_draw_gem("gem_fire",    gem_center_x - 76.0, gem_top_y + 10.0, 40.0,  0.0)
+	_draw_gem("gem_water",   gem_center_x - 38.0, gem_top_y + 1.0,  46.0,  PI / 5.0)
+	_draw_gem("gem_grass",   gem_center_x,        gem_top_y - 6.0,  50.0,  PI * 2.0 / 5.0)
+	_draw_gem("gem_thunder", gem_center_x + 38.0, gem_top_y + 1.0,  46.0,  PI * 3.0 / 5.0)
+	_draw_gem("gem_light",   gem_center_x + 76.0, gem_top_y + 10.0, 40.0,  PI * 4.0 / 5.0)
 
 	# ---- ◈ 两侧装饰 ----
 	_draw_centered_text("◈", 52.0 * _sx, h * 0.862, 18.0 * _sc,
@@ -437,7 +433,7 @@ func _draw_hint_art(w: float, h: float) -> void:
 	var ha := 0.58 + _pulse * 0.25
 	var hfs := 16.0 * _sc
 	_draw_centered_text("点击开始你的冒险之旅",
-		w / 2.0, h * 0.887 + 4.0 * _sc, hfs,
+		w / 2.0, h * 0.915, hfs,
 		Color(1, 1, 1, _opacity * ha * 0.85))
 
 
