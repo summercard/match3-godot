@@ -30,12 +30,13 @@ var _back_btn_rect: Rect2 = Rect2(15, 15, 60, 35)
 var _start_btn_rect: Rect2 = Rect2(0, 555, 200, 50)
 
 ## 队伍显示区
-const TEAM_Y := 292.0
 const ENEMY_Y := 84.0
-const HINT_Y := 444.0
-const SYNERGY_Y := 504.0
-const REWARD_Y := 552.0
-const BTN_Y := 602.0
+const POWER_Y := 218.0
+const TEAM_Y := 286.0
+const HINT_Y := 430.0
+const SYNERGY_Y := 486.0
+const REWARD_Y := 535.0
+const BTN_Y := 585.0
 
 ## 战斗准备美术资产
 const PREPARE_ASSETS := {
@@ -399,7 +400,7 @@ func _draw() -> void:
 ## ============================================
 
 func _draw_back_button() -> Rect2:
-	var rect := Rect2(10.0, 14.0, 52.0, 52.0)
+	var rect := Rect2(11.0, 16.0, 46.0, 46.0)
 	var pressed := false  # TODO: 检测按下状态
 	
 	var scale := 0.95 if pressed else 1.0
@@ -409,27 +410,26 @@ func _draw_back_button() -> Rect2:
 	var draw_y := rect.position.y + (rect.size.y - draw_h) / 2.0
 	
 	_draw_texture_fit(_tex("back_button"), Rect2(draw_x, draw_y, draw_w, draw_h))
-	_draw_texture_fit(_tex("back_arrow"), Rect2(draw_x + 9.0, draw_y + 9.0, 34.0, 34.0))
+	_draw_texture_contain(_tex("back_arrow"), Rect2(draw_x + 9.0, draw_y + 9.0, 28.0, 28.0))
 	
 	return Rect2(draw_x, draw_y, draw_w, draw_h)
 
 func _draw_header() -> void:
-	_draw_texture_fit(_tex("header"), Rect2(70.0, 13.0, 295.0, 64.0))
-	_draw_texture_fit(_tex("sword"), Rect2(84.0, 23.0, 34.0, 34.0))
-	_draw_text_with_shadow("战斗准备", 190.0, 39.0, C["white"], FONT_SIZES["subtitle"], true)
-	_draw_text_with_shadow(_stage_data.get("name", _stage_id), 232.0, 63.0, C["gold"], FONT_SIZES["small"])
+	_draw_texture_fit(_tex("header"), Rect2(72.0, 15.0, 292.0, 62.0))
+	_draw_text_with_shadow("战斗准备", 198.0, 40.0, C["white"], 17.0, true, 126.0)
+	_draw_text_with_shadow(_stage_data.get("name", _stage_id), 238.0, 63.0, C["gold"], FONT_SIZES["small"], false, 135.0)
 
 func _render_player_team() -> void:
 	var y := TEAM_Y
 	
-	_draw_text_with_shadow("我方队伍", DESIGN_W / 2.0, y + 10.0, C["success"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("我方队伍", DESIGN_W / 2.0, y + 10.0, C["success"], FONT_SIZES["small"], true, 120.0)
 	
-	var card_w := 100.0
-	var card_h := 124.0
-	var gap := 10.0
+	var card_w := 96.0
+	var card_h := 116.0
+	var gap := 14.0
 	var total_w := _player_team.size() * card_w + (_player_team.size() - 1) * gap
 	var start_x := (DESIGN_W - total_w) / 2.0
-	var card_y := y + 25.0
+	var card_y := y + 23.0
 	
 	# 空队伍提示
 	if _player_team.is_empty():
@@ -443,41 +443,40 @@ func _render_player_team() -> void:
 		_draw_texture_fit(_tex("team_card"), Rect2(x, card_y, card_w, card_h))
 		
 		var elem_color := _get_element_color(monster.get("element", ""))
-		_draw_card_border(x, card_y, card_w, card_h, 2.0, elem_color)
+		_draw_card_border(Rect2(x + 2.0, card_y + 2.0, card_w - 4.0, card_h - 4.0), 1.5, Color(elem_color.r, elem_color.g, elem_color.b, 0.85))
 		
-		_draw_monster_portrait(monster, Rect2(x + 23.0, card_y + 9.0, 54.0, 54.0))
-		_draw_text_with_shadow(monster.get("name", "怪物"), x + card_w / 2.0, card_y + 72.0, C["white"], FONT_SIZES["small"], true)
+		_draw_monster_portrait(monster, Rect2(x + 22.0, card_y + 9.0, 52.0, 50.0))
+		_draw_text_with_shadow(monster.get("name", "怪物"), x + card_w / 2.0, card_y + 70.0, C["white"], FONT_SIZES["small"], true, card_w - 12.0)
 		
 		# 属性标签
-		_draw_element_badge(monster.get("element", ""), x + 10.0, card_y + 81.0)
+		_draw_element_badge(monster.get("element", ""), x + 9.0, card_y + 80.0)
 		
-		_draw_text_with_shadow("%d" % monster.get("power", 0), x + card_w / 2.0, card_y + 106.0, C["gold"], FONT_SIZES["small"], true)
+		_draw_text_with_shadow("%d" % monster.get("power", 0), x + card_w / 2.0, card_y + 103.0, C["gold"], FONT_SIZES["small"], true, 62.0)
 		
 		var rarity: int = monster.get("rarity", 1)
 		var stars: String = "★".repeat(rarity)
-		_draw_text_with_shadow(stars, x + card_w / 2.0, card_y + 119.0, C["gold"], 8.0)
+		_draw_text_with_shadow(stars, x + card_w / 2.0, card_y + 115.0, C["gold"], 8.0, false, 62.0)
 
 func _render_power_comparison() -> void:
-	var y := 225.0
+	var y := POWER_Y
 	var player_power := _get_team_total_power(_player_team)
 	var enemy_power := _get_team_total_power(_enemy_team)
 	var is_player_stronger := player_power > enemy_power
 	var is_team_empty := _is_player_team_empty()
 	
-	_draw_texture_fit(_tex("power_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 62.0))
+	_draw_texture_fit(_tex("power_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 57.0))
 	
-	_draw_texture_fit(_tex("sword"), Rect2(DESIGN_W / 2.0 - 16.0, y + 3.0, 32.0, 32.0))
-	_draw_text_with_shadow("战力对比", DESIGN_W / 2.0, y + 21.0, C["white"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("战力对比", DESIGN_W / 2.0, y + 19.0, C["white"], FONT_SIZES["small"], true, 110.0)
 	
 	# 我方战力
 	var player_color: Color = C["text_muted"] if is_team_empty else (C["success"] if is_player_stronger else C["danger"])
-	_draw_text_with_shadow("我方 %d" % player_power, DESIGN_W / 2.0 - 82.0, y + 43.0, player_color, FONT_SIZES["number"], true)
+	_draw_text_with_shadow("我方 %d" % player_power, DESIGN_W / 2.0 - 85.0, y + 43.0, player_color, FONT_SIZES["number"], true, 120.0)
 	
 	# VS
-	_draw_text_with_shadow("VS", DESIGN_W / 2.0, y + 43.0, C["white"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("VS", DESIGN_W / 2.0, y + 43.0, C["white"], FONT_SIZES["small"], true, 42.0)
 	
 	# 敌方战力
-	_draw_text_with_shadow("敌方 %d" % enemy_power, DESIGN_W / 2.0 + 82.0, y + 43.0, C["danger"], FONT_SIZES["number"], true)
+	_draw_text_with_shadow("敌方 %d" % enemy_power, DESIGN_W / 2.0 + 85.0, y + 43.0, C["danger"], FONT_SIZES["number"], true, 120.0)
 	
 	# 差距提示
 	if not is_team_empty:
@@ -495,16 +494,16 @@ func _render_power_comparison() -> void:
 			diff_text = "势均力敌"
 			diff_color = C["gold"]
 		
-		_draw_text_with_shadow(diff_text, DESIGN_W / 2.0, y + 58.0, diff_color, FONT_SIZES["tiny"])
+		_draw_text_with_shadow(diff_text, DESIGN_W / 2.0, y + 57.0, diff_color, FONT_SIZES["tiny"], false, 90.0)
 
 func _render_enemy_team() -> void:
 	var y := ENEMY_Y
 	
-	_draw_text_with_shadow("敌方信息", DESIGN_W / 2.0, y + 10.0, C["danger"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("敌方信息", DESIGN_W / 2.0, y + 10.0, C["danger"], FONT_SIZES["small"], true, 100.0)
 	
-	var card_w := 95.0
-	var card_h := 110.0
-	var gap := 8.0
+	var card_w := 88.0
+	var card_h := 104.0
+	var gap := 12.0
 	var total_w := _enemy_team.size() * card_w + (_enemy_team.size() - 1) * gap
 	var start_x := (DESIGN_W - total_w) / 2.0
 	var card_y := y + 25.0
@@ -519,52 +518,52 @@ func _render_enemy_team() -> void:
 		_draw_texture_fit(_tex("enemy_card"), Rect2(x, card_y, card_w, card_h))
 		
 		var border_color: Color = C["danger"] if is_boss else _get_element_color(enemy.get("element", ""))
-		_draw_card_border(x, card_y, card_w, card_h, 3.0 if is_boss else 2.0, border_color)
+		_draw_card_border(Rect2(x + 2.0, card_y + 2.0, card_w - 4.0, card_h - 4.0), 1.5, Color(border_color.r, border_color.g, border_color.b, 0.82))
 		
-		_draw_monster_portrait(enemy, Rect2(x + 22.0, card_y + 8.0, 51.0, 51.0))
+		_draw_monster_portrait(enemy, Rect2(x + 20.0, card_y + 8.0, 48.0, 46.0))
 		
 		var name_color: Color = C["danger"] if is_boss else C["white"]
-		_draw_text_with_shadow(enemy.get("name", "敌人"), x + card_w / 2.0, card_y + 66.0, name_color, FONT_SIZES["small"], true)
+		_draw_text_with_shadow(enemy.get("name", "敌人"), x + card_w / 2.0, card_y + 63.0, name_color, FONT_SIZES["small"], true, card_w - 10.0)
 		
-		_draw_text_with_shadow("Lv.%d" % enemy.get("level", 1), x + card_w / 2.0, card_y + 80.0, C["text_muted"], 9.0)
+		_draw_text_with_shadow("Lv.%d" % enemy.get("level", 1), x + card_w / 2.0, card_y + 77.0, C["text_muted"], 9.0, false, 52.0)
 		
 		# 属性标签
-		_draw_element_badge(enemy.get("element", ""), x + 8.0, card_y + 86.0, 18.0)
+		_draw_element_badge(enemy.get("element", ""), x + 8.0, card_y + 83.0, 18.0)
 		
-		_draw_text_with_shadow("%d" % enemy.get("power", 0), x + card_w / 2.0, card_y + 103.0, C["gold"], FONT_SIZES["tiny"], true)
+		_draw_text_with_shadow("%d" % enemy.get("power", 0), x + card_w / 2.0, card_y + 100.0, C["gold"], FONT_SIZES["tiny"], true, 50.0)
 
 func _render_element_hint() -> void:
 	var y := HINT_Y
 	
-	_draw_texture_fit(_tex("info_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 52.0))
+	_draw_texture_fit(_tex("info_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 46.0))
 	
-	_draw_text_with_shadow("属性分析", DESIGN_W / 2.0, y + 18.0, C["white"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("属性分析", DESIGN_W / 2.0, y + 17.0, C["white"], FONT_SIZES["small"], true, 100.0)
 	
 	var hint: String = _get_element_hint()
 	var lines: Array = hint.split("\n")
 	
-	var line_y: float = y + 38.0
+	var line_y: float = y + 34.0
 	for line in lines:
 		var color: Color = C["warning"] if "警告" in line else C["text_muted"]
-		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, FONT_SIZES["small"])
-		line_y += 18.0
+		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, FONT_SIZES["small"], false, 260.0)
+		line_y += 15.0
 
 func _render_synergy_preview() -> void:
 	var synergies: Array = _calc_synergy_preview()
 	var y := SYNERGY_Y
 	
-	var card_h: float = 30.0 if synergies.is_empty() else 35.0 + synergies.size() * 20.0
-	_draw_texture_fit(_tex("synergy_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, maxf(card_h, 42.0)))
+	var card_h: float = 38.0 if synergies.is_empty() else 34.0 + synergies.size() * 16.0
+	_draw_texture_fit(_tex("synergy_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, maxf(card_h, 38.0)))
 	
 	if synergies.is_empty():
-		_draw_text_with_shadow("属性协同：无（队伍属性分散）", DESIGN_W / 2.0, y + 22.0, C["text_muted"], FONT_SIZES["small"])
+		_draw_text_with_shadow("属性协同：无（队伍属性分散）", DESIGN_W / 2.0, y + 22.0, C["text_muted"], FONT_SIZES["small"], false, 260.0)
 		return
 	
-	_draw_text_with_shadow("属性协同", DESIGN_W / 2.0, y + 16.0, C["white"], FONT_SIZES["small"], true)
+	_draw_text_with_shadow("属性协同", DESIGN_W / 2.0, y + 15.0, C["white"], FONT_SIZES["small"], true, 100.0)
 	
 	for i in range(synergies.size()):
 		var syn: Dictionary = synergies[i]
-		_draw_text_with_shadow(syn["label"], DESIGN_W / 2.0, y + 34.0 + i * 20.0, syn["color"], FONT_SIZES["small"])
+		_draw_text_with_shadow(syn["label"], DESIGN_W / 2.0, y + 31.0 + i * 16.0, syn["color"], FONT_SIZES["small"], false, 300.0)
 
 func _render_reward_preview() -> void:
 	var rewards := [
@@ -572,18 +571,18 @@ func _render_reward_preview() -> void:
 		{"icon": "exp", "text": "EXP"},
 		{"icon": "capture_ball", "text": "捕获"},
 	]
-	var slot_w := 38.0
-	var gap := 14.0
+	var slot_w := 34.0
+	var gap := 22.0
 	var total_w := rewards.size() * slot_w + (rewards.size() - 1) * gap
-	var start_x := (DESIGN_W - total_w) / 2.0
-	_draw_text_with_shadow("通关奖励", DESIGN_W / 2.0 - 104.0, REWARD_Y + 24.0, C["text_muted"], FONT_SIZES["tiny"])
+	var start_x := (DESIGN_W - total_w) / 2.0 + 22.0
+	_draw_text_with_shadow("通关奖励", 77.0, REWARD_Y + 24.0, C["text_muted"], FONT_SIZES["tiny"], false, 76.0)
 	for i in range(rewards.size()):
 		var x := start_x + i * (slot_w + gap)
 		_draw_texture_fit(_tex("reward_slot"), Rect2(x, REWARD_Y, slot_w, slot_w))
-		_draw_texture_fit(_tex(rewards[i]["icon"]), Rect2(x + 7.0, REWARD_Y + 6.0, 24.0, 24.0))
+		_draw_texture_contain(_tex(rewards[i]["icon"]), Rect2(x + 6.0, REWARD_Y + 5.0, 22.0, 22.0))
 
 func _render_start_button() -> Rect2:
-	var btn_w := 200.0
+	var btn_w := 218.0
 	var btn_h := 50.0
 	var btn_x := (DESIGN_W - btn_w) / 2.0
 	var btn_y := BTN_Y
@@ -609,8 +608,7 @@ func _render_start_button() -> Rect2:
 	
 	var key := "start_button_disabled" if is_team_empty else ("start_button_ready" if is_power_enough else "start_button")
 	_draw_texture_fit(_tex(key), Rect2(btn_x, btn_y, btn_w, btn_h))
-	_draw_texture_fit(_tex("sword"), Rect2(btn_x + 44.0, btn_y + 11.0, 30.0, 30.0), 0.65 if is_team_empty else 1.0)
-	_draw_text_with_shadow(text, btn_x + btn_w / 2.0, btn_y + btn_h / 2.0, C["white"], FONT_SIZES["subtitle"], true)
+	_draw_text_with_shadow(text, btn_x + 132.0, btn_y + 31.0, C["white"], FONT_SIZES["subtitle"], true, 130.0)
 	
 	return rect
 
@@ -646,11 +644,11 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 	draw_rect(Rect2(x, y + h - r, r, r), color)
 	draw_rect(Rect2(x + w - r, y + h - r, r, r), color)
 
-func _draw_card_border(x: float, y: float, w: float, h: float, line_width: float, color: Color) -> void:
-	draw_rect(Rect2(x, y, w, line_width), color)
-	draw_rect(Rect2(x, y + h - line_width, w, line_width), color)
-	draw_rect(Rect2(x, y, line_width, h), color)
-	draw_rect(Rect2(x + w - line_width, y, line_width, h), color)
+func _draw_card_border(rect: Rect2, line_width: float, color: Color) -> void:
+	draw_rect(Rect2(rect.position.x, rect.position.y, rect.size.x, line_width), color)
+	draw_rect(Rect2(rect.position.x, rect.end.y - line_width, rect.size.x, line_width), color)
+	draw_rect(Rect2(rect.position.x, rect.position.y, line_width, rect.size.y), color)
+	draw_rect(Rect2(rect.end.x - line_width, rect.position.y, line_width, rect.size.y), color)
 
 func _draw_circle(cx: float, cy: float, r: float, color: Color) -> void:
 	for dy in range(-int(r), int(r) + 1):
@@ -661,11 +659,10 @@ func _draw_circle(cx: float, cy: float, r: float, color: Color) -> void:
 func _draw_line(x1: float, y1: float, x2: float, y2: float, color: Color) -> void:
 	draw_rect(Rect2(x1, y1, x2 - x1, 1.0), color)
 
-func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
+func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 200.0) -> void:
 	var shadow_color := Color(0.0, 0.0, 0.0, 0.55)
-	var text_w := 200.0
-	draw_string(ThemeDB.fallback_font, Vector2(x - text_w / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, text_w, size, shadow_color)
-	draw_string(ThemeDB.fallback_font, Vector2(x - text_w / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, text_w, size, color)
+	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow_color)
+	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)
 
 func _tex(key: String) -> Texture2D:
 	var path: String = PREPARE_ASSETS.get(key, "")
@@ -685,6 +682,17 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 		return
 	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
 
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var draw_size := tex_size * scale
+	var draw_pos := rect.position + (rect.size - draw_size) * 0.5
+	draw_texture_rect(tex, Rect2(draw_pos, draw_size), false, Color(1.0, 1.0, 1.0, opacity))
+
 func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
 		return
@@ -701,7 +709,7 @@ func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
 	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
 	var tex := _get_texture(path)
 	if tex != null:
-		_draw_texture_fit(tex, rect)
+		_draw_texture_contain(tex, rect)
 	else:
 		_draw_text_with_shadow(monster.get("emoji", "?"), rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0, C["white"], 28.0)
 
@@ -709,7 +717,7 @@ func _draw_element_badge(element: String, x: float, y: float, size: float = 20.0
 	var path: String = ELEMENT_ICON_ASSETS.get(element, "")
 	var tex := _get_texture(path)
 	if tex != null:
-		_draw_texture_fit(tex, Rect2(x, y, size, size))
+		_draw_texture_contain(tex, Rect2(x, y, size, size))
 	else:
 		var elem_color := _get_element_color(element)
 		_draw_rounded_rect(x, y, size, size, 4.0, elem_color)
