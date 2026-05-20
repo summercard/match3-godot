@@ -15,7 +15,7 @@
 | 序号 | Godot 场景 | 功能模块 | 脚本入口 | 运行时资产接入状态 | 概念图状态 | 拆分/资产状态 | 下一步 |
 |---:|---|---|---|---|---|---|---|
 | 1 | start | 启动欢迎页 | `src/ui/scene/scene_start.gd` | 已完成第一版包装 | 有：`美术开发/概念图/01_启动欢迎页_start_screen.png` | 已拆分，已导入 `assets/images/start/` | 后续只做精修和动效 |
-| 2 | main | 大厅/主界面 | `src/ui/scene/scene_main.gd` | 已按新大厅概念图重制 V2；背景、头像框、货币条、段位面板、4 个建筑入口、底部 5 导航和红点提示已改为 Canvas 绘制资产；加入等比图标、固定 Rect、文字截断和点击区同源约束 | 新概念图：`美术开发/概念图/大厅.png`；旧概念图：`美术开发/概念图/02_主界面_main_lobby.png` | 已拆分：`美术开发/正式拆分/main_lobby_v2/`；运行目录：`assets/images/main/` | 进入 Godot 运行窗口对照新概念图做视觉验收 |
+| 2 | main | 大厅/主界面 | `src/ui/scene/scene_main.gd` | 已按新大厅概念图重制 V2；背景、头像框、货币条、段位面板、4 个建筑入口、底部 5 导航和红点提示已改为 Canvas 绘制资产；已修正入口按钮压缩、红点重复叠加和冒险入口点击响应 | 新概念图：`美术开发/概念图/大厅.png`；旧概念图：`美术开发/概念图/02_主界面_main_lobby.png` | 已拆分：`美术开发/正式拆分/main_lobby_v2/`；运行目录：`assets/images/main/` | 进入 Godot 运行窗口对照新概念图做视觉验收 |
 | 3 | stage_select | 关卡选择/章节地图 | `src/ui/scene/scene_stage_select.gd` | 已完成第一版包装 | 有：`美术开发/概念图/03_关卡地图_stage_select.png` | 已拆分，已导入 `assets/images/stage/` | 精修多章节地图和 Boss 表现 |
 | 4 | battle | 三消战斗 | `src/ui/scene/scene_battle.gd` | 已完成核心资产代入，局部仍为色块/emoji | 有：`美术开发/概念图/04_三消战斗_battle_match3.png` | 怪物、宝石、障碍、背景已拆分并导入 `assets/images/battle/` | 补状态图标、技能特效、完整 UI 面板 |
 | 5 | album | 怪物图鉴 | `src/ui/scene/scene_album.gd` | 已完成第一版 image-2 UI/属性图标代入；列表、筛选、详情、锁定态、进化入口已改为 Canvas 绘制资产 | 有：`美术开发/概念图/05_怪物图鉴_monster_album.png` | 已拆分：`美术开发/正式拆分/album/`；运行目录：`assets/images/album/` | 进入 Godot 运行窗口做真实图鉴视觉验收 |

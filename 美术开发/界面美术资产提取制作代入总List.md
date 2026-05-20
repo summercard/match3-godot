@@ -20,7 +20,7 @@
 | 优先级 | 界面 | Godot 入口 | 概念图 | 当前阶段 | 提取/制作分类 | 正式资产目录 | 运行目录 | 代入状态 | 下一步 |
 |---|---|---|---|---|---|---|---|---|---|
 | P0 | 启动欢迎页 | `src/ui/scene/scene_start.gd` | `美术开发/概念图/01_启动欢迎页_start_screen.png` | 5 视觉验收 | 背景、怪物、宝石、Logo、按钮、底栏 UI | `美术开发/正式拆分/start_screen/` | `assets/images/start/` | 已完成第一版代入 | 后续补按钮动效、标题光效、怪物轻动画 |
-| P0 | 大厅/主界面 | `src/ui/scene/scene_main.gd` | `美术开发/概念图/大厅.png` | 5 待实机视觉验收 | 新大厅背景、头像框、玩家名牌、货币条、段位面板、4 个场景入口、底部 5 导航、红点提示 | `美术开发/元素提取/main_lobby_v2/`, `美术开发/正式拆分/main_lobby_v2/` | `assets/images/main/` | 已按新概念图用 image-2 重制背景和 UI 提取源，旧 2x2 卡片布局已改为建筑入口 + 底部五栏；图标等比绘制、按钮点击区与视觉区一致 | 进入 Godot 运行窗口对照新概念图验收按钮贴合、顶部大数字和红点位置 |
+| P0 | 大厅/主界面 | `src/ui/scene/scene_main.gd` | `美术开发/概念图/大厅.png` | 5 待实机视觉验收 | 新大厅背景、头像框、玩家名牌、货币条、段位面板、4 个场景入口、底部 5 导航、红点提示 | `美术开发/元素提取/main_lobby_v2/`, `美术开发/正式拆分/main_lobby_v2/` | `assets/images/main/` | 已按新概念图用 image-2 重制背景和 UI 提取源；2026-05-20 已修正入口按钮压缩、红点重复叠加，并改为冒险入口按下即进入 | 进入 Godot 运行窗口对照新概念图验收按钮贴合、顶部大数字和红点位置 |
 | P0 | 关卡选择 | `src/ui/scene/scene_stage_select.gd` | `美术开发/概念图/03_关卡地图_stage_select.png` | 5 视觉验收 | 地图背景、章节栏、节点、Boss、宝箱、星级、奖励栏 | `美术开发/正式拆分/stage_select/` | `assets/images/stage/` | 已完成第一版代入 | 补多章节地图、节点状态、Boss 动态表现 |
 | P0 | 三消战斗 | `src/ui/scene/scene_battle.gd` | `美术开发/概念图/04_三消战斗_battle_match3.png` | 4 代码代入 | 怪物、宝石、障碍、战斗背景、HP 条、战斗面板、状态/技能特效 | `美术开发/正式拆分/battle_screen/`, `美术开发/正式拆分/gems/`, `美术开发/正式拆分/monsters/`, `美术开发/正式拆分/ui/` | `assets/images/battle/` | 核心资产已代入，局部仍需精修 | 补状态图标、技能按钮、连击特效、完整战斗 UI 面板 |
 | P0 | 战斗准备 | `src/ui/scene/scene_battle_prepare.gd` | `美术开发/概念图/07_战斗准备_battle_prepare.png` | 4 代码代入 | 怪物头像、属性宝石、阵容卡、战力对比、奖励预览、开始按钮 | `美术开发/正式拆分/battle_prepare/` | `assets/images/battle_prepare/` | 已按 image-2 提取 UI 代入；怪物/宝石复用通用资产；2026-05-20 已修正顶栏/按钮重复叠图、卡片描边、图标拉伸和纵向间距 | 进入 Godot 运行窗口做视觉验收和布局微调 |
