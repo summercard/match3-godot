@@ -62,7 +62,7 @@ M2.7模型每次只做一个小目标，8分钟间隔，循环执行直到完成
 - [x] 按钮glow增强（glow_boost×1.6，radius×1.2）✅（commit 3ca19ff）
 - [x] _start_glow_timer()公开方法 ✅（commit 3ca19ff）
 - [x] _input(event)长按检测 ✅（commit 3ca19ff）
-- [x] 触发后跳转scene_main ✅（commit 3ca19ff）
+- [x] 触发后跳转scene_main + _entering防重入 ✅（commit 0aa63eb）
 
 **P1 全部完成 ✅（2026-05-20T06:40 UTC，commit 3ca19ff+4fa67e6）**
 
