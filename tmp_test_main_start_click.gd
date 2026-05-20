@@ -6,7 +6,7 @@ func _init() -> void:
 func _run() -> void:
 	root.size = Vector2i(450, 800)
 	var main := Control.new()
-	main.name = "ClickFlowTest"
+	main.name = "Main"
 	main.set_script(load("res://main.gd"))
 	root.add_child(main)
 	await process_frame
@@ -28,11 +28,13 @@ func _run() -> void:
 
 	var main_scene = main.get("_current_scene")
 	main_scene._on_touch_start(70.0, 290.0)
-	await process_frame
+	for i in range(80):
+		await process_frame
 	var after_lobby: String = main.get("_current_scene_name")
 	if after_lobby != "stage_select":
 		push_error("main adventure press did not enter stage_select, got: " + after_lobby)
 		quit(1)
+		return
 
 	print("[tmp_test_main_start_click] ok")
 	quit()

@@ -31,9 +31,9 @@
 - [x] 配置：{ "type": "freeze", "chance": 0.3, "duration": 1 }
 
 ### Skill 5: poison 中毒
-- [ ] 叠层机制，每层掉血
-- [ ] 最多3层
-- [ ] 配置：{ "type": "poison", "maxStacks": 3, "damagePerStack": 10, "interval": 1 }
+- [x] 叠层机制，每层掉血
+- [x] 最多3层
+- [x] 配置：{ "type": "poison", "maxStacks": 3, "damagePerStack": 10, "interval": 1 }
 
 ### Skill 6: life_drain 灵魂吸取
 - [x] 吸取玩家当前HP并回复自己
@@ -61,19 +61,19 @@
 
 ---
 
-**已确认完成的技能 (2026-05-20)：**
+**已完成技能（2026-05-20 确认）：**
 - Skill 1: burn ✅
+- Skill 2: thunder_strike ✅ (a36dd17)
+- Skill 3: reflect ✅ (2d94715)
 - Skill 4: freeze ✅
+- Skill 5: poison ✅ (本次cycle确认实现)
 - Skill 6: life_drain ✅
 - Skill 7: surge ✅
 - Skill 8: confuse ✅
 - Skill 9: shield_plus ✅
 - Skill 10: skill_seal ✅
 
-**待实现技能（不在本次10技能范围内）：**
-- Skill 2: thunder_strike（雷击）
-- Skill 3: reflect（反弹）
-- Skill 5: poison（中毒）
+**全部10个Boss技能已完成！**
 
 ---
 
