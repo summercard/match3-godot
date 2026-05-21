@@ -40,6 +40,7 @@ static func apply_removals(board, context: Dictionary) -> Dictionary:
 
 	for bomb in bomb_matches:
 		var positions: Array = board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
+		board.damage_bomb_obstacles(bomb["row"], bomb["col"])
 		_merge_counts(gem_counts, board.remove_explosion_gems(positions))
 
 	var rainbow_removed_set: Array = []

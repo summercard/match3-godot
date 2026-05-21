@@ -913,7 +913,7 @@ func _process_matches() -> void:
 	# ===== 第7.7步：BOSS阶段转换 =====
 	var phase_transition: Dictionary = result.get("phase_transition", {})
 	if not phase_transition.is_empty() and _battle != null:
-		var new_enemies: Array = _battle._phase_handler.execute_phase_transition(phase_transition, _battle.enemy_level)
+		var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
 		if not new_enemies.is_empty():
 			var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
 			_show_message("⚡ %s 进入激战状态！" % boss_name)
@@ -925,7 +925,6 @@ func _process_matches() -> void:
 			}
 			_screen_flash_timer = 0.3
 			_shake_timer = 0.3
-			_battle.enemies = new_enemies
 			_enemy_display_hp.clear()
 			_boss_skill_visuals.clear()
 			# 延迟清空棋盘

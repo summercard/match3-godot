@@ -173,6 +173,10 @@ func _complete_tutorial() -> void:
 	tutorial_completed.emit()
 
 
+func _skip_tutorial() -> void:
+	_complete_tutorial()
+
+
 func _process(delta: float) -> void:
 	if _opacity < 1.0:
 		_opacity = minf(1.0, _opacity + delta * 2.3)

@@ -555,6 +555,26 @@ func check_battle_end() -> bool:
 
 # ========== 辅助函数 ==========
 
+func get_enemies() -> Array:
+	return enemies
+
+
+func execute_phase_transition(phase_config: Dictionary) -> Array:
+	var new_enemies: Array = _phase_handler.execute_phase_transition(phase_config, enemy_level)
+	if new_enemies.is_empty():
+		return []
+
+	enemies = new_enemies
+	current_phase = _phase_handler.get_current_phase()
+	_status_effect.init_effects(enemies.size())
+	if _enemy_skill_system == null:
+		_enemy_skill_system = EnemySkillSystem.new()
+	_enemy_skill_system.init_skill_state(enemies)
+	_connect_enemy_skill_signals()
+	phase_transition.emit(current_phase, enemies)
+	return enemies
+
+
 func _build_enemy_skill_states_dict() -> Dictionary:
 	var result = {}
 	if _enemy_skill_system == null:
