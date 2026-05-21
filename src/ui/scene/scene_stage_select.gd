@@ -19,7 +19,9 @@ const MAP_CONTENT_TOP: float = 78.0
 const MAP_REWARD_TOP: float = 566.0
 const HEADER_BAR_RECT: Rect2 = Rect2(76.0, 12.0, 286.0, 66.0)
 const HEADER_BADGE_RECT: Rect2 = Rect2(84.0, 21.0, 38.0, 42.0)
-const HEADER_TITLE_RECT: Rect2 = Rect2(126.0, 23.0, 190.0, 22.0)
+const HEADER_TITLE_RECT: Rect2 = Rect2(126.0, 23.0, 154.0, 22.0)
+const HEADER_CHAPTER_TEXT_RECT: Rect2 = Rect2(126.0, 23.0, 64.0, 22.0)
+const HEADER_NAME_TEXT_RECT: Rect2 = Rect2(190.0, 23.0, 90.0, 22.0)
 const HEADER_STAR_RECT: Rect2 = Rect2(147.0, 52.0, 18.0, 18.0)
 const HEADER_STAR_TEXT_RECT: Rect2 = Rect2(169.0, 50.0, 74.0, 22.0)
 const HEADER_PREV_RECT: Rect2 = Rect2(DESIGN_W - 89.0, 30.0, 34.0, 34.0)
@@ -840,8 +842,8 @@ func _draw_chapter_header() -> void:
 		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), HEADER_NEXT_RECT, 0.82 if _touched_btn == "nextChapter" else 1.0)
 		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_next_arrow.png"), Rect2(HEADER_NEXT_RECT.position.x + 6.0, HEADER_NEXT_RECT.position.y + 6.0, 22, 22))
 	
-	var title_text := "第%d章  %s" % [current_num, chapter.get("name", "")]
-	_draw_text_in_rect(title_text, HEADER_TITLE_RECT, theme_color, 15, true)
+	_draw_text_in_rect("第%d章" % current_num, HEADER_CHAPTER_TEXT_RECT, theme_color, 15, true)
+	_draw_text_in_rect(chapter.get("name", ""), HEADER_NAME_TEXT_RECT, Color.WHITE, 15, true)
 	
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)

@@ -401,7 +401,19 @@ func _init_battle() -> void:
 	# 连接 BOSS 技能信号
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
 		_battle.enemy_skill_action.connect(_on_enemy_skill_action)
-	
+
+	# 连接伤害数字信号
+	if not _battle.damage_dealt.is_connected(_on_damage_dealt):
+		_battle.damage_dealt.connect(_on_damage_dealt)
+
+	# 连接敌人攻击信号（用于伤害数字队列）
+	if not _battle.enemy_attacked.is_connected(_on_enemy_attacked):
+		_battle.enemy_attacked.connect(_on_enemy_attacked)
+
+	# 连接技能就绪信号
+	if not _battle.skill_ready.is_connected(_on_skill_ready):
+		_battle.skill_ready.connect(_on_skill_ready)
+
 	# 精英关卡：应用eliteMultiplier加成敌人属性
 	var elite_mult: float = _stage_data.get("eliteMultiplier", 0.0)
 	if elite_mult > 0.0:
@@ -1281,6 +1293,129 @@ func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
 		"timer": 0.6,
 		"duration": 0.6
 	}
+
+## ============================================
+# 伤害数字信号处理
+## ============================================
+
+func _on_damage_dealt(damage_info: Dictionary) -> void:
+	"""处理 BattleManager.damage_dealt 信号，显示浮动伤害数字"""
+	var damage: int = damage_info.get("damage", 0)
+	if damage <= 0:
+		return
+
+	var info_type: String = damage_info.get("type", "match")
+	var is_critical: bool = damage_info.get("isEffective", false) or damage_info.get("is_effective", false)
+	var is_weak: bool = damage_info.get("isWeak", false) or damage_info.get("is_weak", false)
+	var target_name: String = damage_info.get("target", "")
+	var attacker_name: String = damage_info.get("attacker", "")
+	var target_idx: int = -1
+
+	if info_type == "active_skill":
+		target_idx = damage_info.get("targetIndex", damage_info.get("target_index", -1))
+	else:
+		target_idx = _find_enemy_index(target_name)
+
+	# 颜色与大小分类
+	var popup_color: Color = C["gold"]
+	var popup_size: float = 20.0
+	if is_critical:
+		popup_color = C["fire"]
+		popup_size = 26.0
+	elif is_weak:
+		popup_color = C["text_muted"]
+		popup_size = 14.0
+
+	# 位置计算
+	var popup_x: float = DESIGN_W / 2.0
+	var popup_y: float = 95.0
+	if target_idx >= 0:
+		popup_x = 25.0 + target_idx * 120.0 + 55.0
+		popup_y = 80.0
+
+	_floating_texts.append({
+		"text": "-%d" % damage,
+		"x": popup_x,
+		"y": popup_y,
+		"color": popup_color,
+		"size": popup_size,
+		"timer": 0.0,
+		"duration": 0.9,
+		"critical": is_critical
+	})
+
+	# 护盾吸收显示
+	var shield_absorbed: int = damage_info.get("shieldAbsorbed", damage_info.get("shield_absorbed", 0))
+	if shield_absorbed > 0:
+		_floating_texts.append({
+			"text": "盾-%d" % shield_absorbed,
+			"x": popup_x,
+			"y": popup_y + 18.0,
+			"color": C["shield"],
+			"size": 13.0,
+			"timer": 0.0,
+			"duration": 0.8
+		})
+
+	# 敌人受击闪烁
+	if target_idx >= 0:
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+
+func _on_enemy_attacked(action_info: Dictionary) -> void:
+	"""处理 BattleManager.enemy_attacked 信号，显示敌人攻击伤害"""
+	var damage: int = action_info.get("damage", 0)
+	if damage <= 0:
+		return
+
+	var is_charged: bool = action_info.get("is_charged", false)
+	var dmg_size: float = 28.0 if is_charged else 16.0
+	var dmg_color: Color = C["charged_attack"] if is_charged else C["danger"]
+	var target_name: String = action_info.get("target", "")
+	var target_idx: int = _find_player_index(target_name)
+
+	var popup_x: float = 80.0
+	var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
+	if target_idx >= 0:
+		popup_x = 15.0 + target_idx * 120.0 + 55.0
+		popup_y = 218.0
+		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
+
+	if _damage_popup_queue.size() < 5:
+		_damage_popup_queue.append({
+			"text": "-%d" % damage,
+			"x": popup_x,
+			"y": popup_y,
+			"color": dmg_color,
+			"size": dmg_size,
+			"delay": _damage_popup_queue.size() * 0.1,
+			"elapsed": 0.0,
+			"duration": 0.8,
+			"critical": is_charged
+		})
+
+func _on_skill_ready(monster: Dictionary) -> void:
+	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
+	var monster_name: String = monster.get("name", "伙伴")
+	var skill_name: String = monster.get("skill", {}).get("name", "技能")
+	_show_message("💫 %s 的 %s 充能完毕！" % [monster_name, skill_name])
+
+	# 找到对应的玩家卡片位置
+	var team: Array = _battle.player_team if _battle != null else []
+	for i in range(team.size()):
+		if team[i] != null and team[i].get("id", "") == monster.get("id", ""):
+			var card_x: float = 20.0 + i * 120.0 + 55.0
+			var card_y: float = 215.0
+			_floating_texts.append({
+				"text": "💫%s！" % skill_name,
+				"x": card_x,
+				"y": card_y,
+				"color": C["gold"],
+				"size": 16.0,
+				"timer": 0.0,
+				"duration": 1.2,
+				"critical": true
+			})
+			break
 
 ## ============================================
 # BOSS 技能视觉
