@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dbcdu561skyew"
+
+[deps]
+
+files=["res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.asset.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.is.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.source.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.tile.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.image2.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.final.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.status.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.note.translation"]
+
+source_file="res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv"
+dest_files=["res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.asset.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.csv.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.is.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.source.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.tile.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.image2.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.final.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.status.translation", "res://美术开发/元素提取/monster_catalog/monster_image2_request_manifest.note.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

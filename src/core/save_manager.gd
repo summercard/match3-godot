@@ -103,6 +103,8 @@ func get_player() -> Dictionary:
 		"exp": 0,
 		"team": ["monster_001", "monster_002", "monster_003"],
 		"captured": ["monster_001", "monster_002", "monster_003"],
+		"monster_pool": [],
+		"monsterPoolVersion": 0,
 		"stageProgress": { "chapter": 1, "stage": 1 },
 		"pokedex": {}
 	})
@@ -155,63 +157,264 @@ func add_gems(amount: int) -> bool:
 	save_player(player)
 	return true
 
-# ========== 怪物成长系统 Pokedex（section: player.data.pokedex） ==========
-## pokedex 结构: { [monsterId]: { level: 1, exp: 0, nature: "brave" }, ... }
+# ========== 怪物池与旧 Pokedex 兼容 ==========
 
-## 初始化怪物的pokedex数据（收服/获得新怪物时调用）
-## JS: initMonsterPokedex(monsterId, natureId)
-func init_monster_pokedex(monster_id: String, nature_id: String = "") -> Dictionary:
+func _ensure_monster_pool_migrated() -> void:
 	var player: Dictionary = get_player()
-	if not player.has("pokedex"):
-		player["pokedex"] = {}
+	if int(player.get("monsterPoolVersion", 0)) >= 1 and player.get("monster_pool", []) is Array:
+		var normalized_existing := MonsterPool.normalize_pool(player.get("monster_pool", []))
+		if normalized_existing != player.get("monster_pool", []):
+			player["monster_pool"] = normalized_existing
+			save_player(player)
+		return
 
-	if not player["pokedex"].has(monster_id):
-		player["pokedex"][monster_id] = {
-			"level": 1,
-			"exp": 0,
-			"nature": nature_id if nature_id != "" else NatureDB.random_nature()
-		}
-		save_player(player)
-	elif nature_id != "" and not player["pokedex"][monster_id].has("nature"):
-		# 补丁：为旧数据补充性格
-		player["pokedex"][monster_id]["nature"] = nature_id
-		save_player(player)
-
-	return player["pokedex"][monster_id]
-
-## 获取怪物当前等级
-## JS: getMonsterLevel(monsterId)
-func get_monster_level(monster_id: String) -> int:
-	var player: Dictionary = get_player()
-	var entry: Dictionary = player.get("pokedex", {}).get(monster_id, {})
-	return entry.get("level", 1)
-
-## 获取怪物当前经验值
-## JS: getMonsterExp(monsterId)
-func get_monster_exp(monster_id: String) -> int:
-	var player: Dictionary = get_player()
-	var entry: Dictionary = player.get("pokedex", {}).get(monster_id, {})
-	return entry.get("exp", 0)
-
-## 获取怪物性格ID
-## JS: getMonsterNature(monsterId)
-func get_monster_nature(monster_id: String) -> String:
-	var player: Dictionary = get_player()
-	var entry: Dictionary = player.get("pokedex", {}).get(monster_id, {})
-	return entry.get("nature", "")
-
-## 获取怪物pokedex完整数据
-## JS: getMonsterPokedex(monsterId)
-func get_monster_pokedex(monster_id: String) -> Dictionary:
-	var player: Dictionary = get_player()
+	var pool: Array = []
+	var monster_to_instance := {}
 	var pokedex: Dictionary = player.get("pokedex", {})
-	return pokedex.get(monster_id, {})
+	var captured: Array = player.get("captured", [])
+	if captured.is_empty():
+		captured = MonsterPool.DEFAULT_STARTERS.duplicate()
 
-## 获取已收服的怪物ID列表
-## JS: getCapturedMonsters()
-func get_captured_monsters() -> Array:
+	for raw_id in captured:
+		var monster_id := str(raw_id)
+		if not MonsterDb.has_monster(monster_id):
+			continue
+		var old_entry: Dictionary = pokedex.get(monster_id, {})
+		var instance := MonsterPool.create_instance(monster_id, {
+			"level": int(old_entry.get("level", 1)),
+			"exp": int(old_entry.get("exp", 0)),
+			"nature": str(old_entry.get("nature", NatureDB.random_nature())),
+			"source": "migration",
+		})
+		pool.append(instance)
+		if not monster_to_instance.has(monster_id):
+			monster_to_instance[monster_id] = instance.get("instanceId", "")
+
+	var old_team: Dictionary = _get_value("team", "data", {
+		"leader": "monster_001",
+		"member1": "monster_002",
+		"member2": "monster_003"
+	})
+	var new_team := {}
+	for slot in ["leader", "member1", "member2"]:
+		var ref_id := str(old_team.get(slot, ""))
+		new_team[slot] = _migrate_monster_ref_to_instance(ref_id, pool, monster_to_instance)
+
+	var old_ranch: Dictionary = _get_value("ranch", "data", {})
+	var old_slots: Array = old_ranch.get("slots", [])
+	var new_slots: Array = []
+	for slot_data in old_slots:
+		if not slot_data is Dictionary:
+			new_slots.append({"instance_id": null, "placed_at": null})
+			continue
+		var slot: Dictionary = slot_data
+		var ref_id := str(slot.get("instance_id", slot.get("monster_id", slot.get("monsterId", ""))))
+		var instance_id: Variant = _migrate_monster_ref_to_instance(ref_id, pool, monster_to_instance)
+		new_slots.append({
+			"instance_id": instance_id,
+			"placed_at": _normalize_ranch_timestamp_ms(slot.get("placed_at", slot.get("placedAt", null)))
+		})
+	var unlocked_slots := int(old_ranch.get("unlocked_slots", old_ranch.get("unlockedSlots", 3)))
+	while new_slots.size() < unlocked_slots:
+		new_slots.append({"instance_id": null, "placed_at": null})
+
+	player["monster_pool"] = MonsterPool.normalize_pool(pool)
+	player["monsterPoolVersion"] = 1
+	_set_value("player", "data", player)
+	_set_value("team", "data", new_team)
+	_set_value("ranch", "data", {"slots": new_slots, "unlocked_slots": unlocked_slots})
+	_save_config()
+
+func _migrate_monster_ref_to_instance(ref_id: String, pool: Array, monster_to_instance: Dictionary) -> Variant:
+	if ref_id.is_empty():
+		return null
+	if MonsterPool.find_index(pool, ref_id) >= 0:
+		return ref_id
+	if monster_to_instance.has(ref_id):
+		return monster_to_instance[ref_id]
+	if MonsterDb.has_monster(ref_id):
+		var instance := MonsterPool.create_instance(ref_id, {"source": "migration"})
+		pool.append(instance)
+		monster_to_instance[ref_id] = instance.get("instanceId", "")
+		return instance.get("instanceId", "")
+	return null
+
+func get_monster_pool() -> Array:
+	_ensure_monster_pool_migrated()
 	var player: Dictionary = get_player()
-	return player.get("captured", [])
+	return MonsterPool.normalize_pool(player.get("monster_pool", [])).duplicate(true)
+
+func save_monster_pool(pool: Array) -> bool:
+	var player: Dictionary = get_player()
+	player["monster_pool"] = MonsterPool.normalize_pool(pool)
+	player["monsterPoolVersion"] = 1
+	_sync_legacy_monster_fields(player)
+	return save_player(player)
+
+func add_monster_instance(monster_id: String, options: Dictionary = {}) -> Dictionary:
+	if not MonsterDb.has_monster(monster_id):
+		return {}
+	var pool := get_monster_pool()
+	var instance := MonsterPool.create_instance(monster_id, options)
+	pool.append(instance)
+	save_monster_pool(pool)
+	return instance.duplicate(true)
+
+func get_monster_instance(instance_id: String) -> Dictionary:
+	var pool := get_monster_pool()
+	return MonsterPool.get_instance(pool, instance_id)
+
+func update_monster_instance(instance_id: String, patch: Dictionary) -> bool:
+	var pool := get_monster_pool()
+	if not MonsterPool.update_instance(pool, instance_id, patch):
+		return false
+	return save_monster_pool(pool)
+
+func remove_monster_instance(instance_id: String) -> bool:
+	var pool := get_monster_pool()
+	if not MonsterPool.remove_instance(pool, instance_id):
+		return false
+	var team := load_team()
+	for slot in ["leader", "member1", "member2"]:
+		if team.get(slot) == instance_id:
+			team[slot] = null
+	save_team(team)
+	var ranch := get_ranch_state()
+	for slot: Dictionary in ranch.get("slots", []):
+		if slot.get("instance_id") == instance_id:
+			slot["instance_id"] = null
+			slot["placed_at"] = null
+	set_ranch_state(ranch)
+	return save_monster_pool(pool)
+
+func get_owned_monsters(filters: Dictionary = {}) -> Array:
+	var pool := get_monster_pool()
+	var result: Array = []
+	for instance: Dictionary in pool:
+		if filters.has("monsterId") and str(instance.get("monsterId", "")) != str(filters.get("monsterId", "")):
+			continue
+		if filters.has("nature") and str(instance.get("nature", "")) != str(filters.get("nature", "")):
+			continue
+		if filters.has("minLevel") and int(instance.get("level", 1)) < int(filters.get("minLevel", 1)):
+			continue
+		result.append(instance.duplicate(true))
+	return result
+
+func get_owned_species_ids() -> Array:
+	return MonsterPool.get_owned_species_ids(get_monster_pool())
+
+func get_instances_by_monster_id(monster_id: String) -> Array:
+	return MonsterPool.get_instances_by_monster_id(get_monster_pool(), monster_id)
+
+func get_instance_level(instance_id: String) -> int:
+	return int(get_monster_instance(instance_id).get("level", 1))
+
+func get_instance_exp(instance_id: String) -> int:
+	return int(get_monster_instance(instance_id).get("exp", 0))
+
+func get_instance_nature(instance_id: String) -> String:
+	return str(get_monster_instance(instance_id).get("nature", ""))
+
+func get_instance_stats(instance_id: String) -> Dictionary:
+	return MonsterPool.get_instance_stats(get_monster_instance(instance_id))
+
+func add_instance_exp(instance_id: String, exp_gained: int) -> Dictionary:
+	var pool := get_monster_pool()
+	var idx := MonsterPool.find_index(pool, instance_id)
+	if idx < 0:
+		return {"leveledUp": false, "newLevel": 1, "oldLevel": 1, "expGained": exp_gained, "currentExp": 0}
+	var instance: Dictionary = pool[idx]
+	var result := MonsterPool.add_instance_exp(instance, exp_gained)
+	pool[idx] = instance
+	save_monster_pool(pool)
+	return result
+
+func evolve_instance(instance_id: String) -> Dictionary:
+	var pool := get_monster_pool()
+	var idx := MonsterPool.find_index(pool, instance_id)
+	if idx < 0:
+		return {"ok": false, "reason": "not_found"}
+	var instance: Dictionary = pool[idx]
+	var result := MonsterPool.evolve_instance(instance)
+	pool[idx] = instance
+	save_monster_pool(pool)
+	return result
+
+func get_team_instances() -> Array:
+	var team := load_team()
+	var result: Array = []
+	for slot in ["leader", "member1", "member2"]:
+		var instance_id := str(team.get(slot, ""))
+		if instance_id.is_empty():
+			continue
+		var instance := get_monster_instance(instance_id)
+		if not instance.is_empty():
+			result.append(instance)
+	return result
+
+func get_team_battle_stats() -> Array:
+	var team := load_team()
+	var result: Array = []
+	for slot in ["leader", "member1", "member2"]:
+		var instance_id := str(team.get(slot, ""))
+		if instance_id.is_empty():
+			continue
+		var unit := MonsterService.get_battle_unit_from_instance(instance_id, self)
+		if not unit.is_empty():
+			result.append(unit)
+	return result
+
+func _resolve_instance_id(ref_id: String) -> String:
+	if ref_id.is_empty():
+		return ""
+	var pool := get_monster_pool()
+	if MonsterPool.find_index(pool, ref_id) >= 0:
+		return ref_id
+	var instance := MonsterPool.get_first_instance_by_monster_id(pool, ref_id)
+	return str(instance.get("instanceId", ""))
+
+func _sync_legacy_monster_fields(player: Dictionary) -> void:
+	var pool: Array = player.get("monster_pool", [])
+	var captured := MonsterPool.get_owned_species_ids(pool)
+	var pokedex := {}
+	for monster_id in captured:
+		var instance := MonsterPool.get_first_instance_by_monster_id(pool, str(monster_id))
+		if not instance.is_empty():
+			pokedex[str(monster_id)] = {
+				"level": int(instance.get("level", 1)),
+				"exp": int(instance.get("exp", 0)),
+				"nature": str(instance.get("nature", ""))
+			}
+	player["captured"] = captured
+	player["pokedex"] = pokedex
+
+## 初始化怪物的兼容 pokedex 数据（新逻辑会保证至少有一个实例）
+func init_monster_pokedex(monster_id: String, nature_id: String = "") -> Dictionary:
+	var instance := MonsterPool.get_first_instance_by_monster_id(get_monster_pool(), monster_id)
+	if instance.is_empty():
+		instance = add_monster_instance(monster_id, {"nature": nature_id if nature_id != "" else NatureDB.random_nature(), "source": "legacy"})
+	elif nature_id != "" and str(instance.get("nature", "")).is_empty():
+		update_monster_instance(str(instance.get("instanceId", "")), {"nature": nature_id})
+		instance = get_monster_instance(str(instance.get("instanceId", "")))
+	return {"level": int(instance.get("level", 1)), "exp": int(instance.get("exp", 0)), "nature": str(instance.get("nature", ""))}
+
+func get_monster_level(monster_id: String) -> int:
+	var instance_id := _resolve_instance_id(monster_id)
+	return get_instance_level(instance_id) if not instance_id.is_empty() else 1
+
+func get_monster_exp(monster_id: String) -> int:
+	var instance_id := _resolve_instance_id(monster_id)
+	return get_instance_exp(instance_id) if not instance_id.is_empty() else 0
+
+func get_monster_nature(monster_id: String) -> String:
+	var instance_id := _resolve_instance_id(monster_id)
+	return get_instance_nature(instance_id) if not instance_id.is_empty() else ""
+
+func get_monster_pokedex(monster_id: String) -> Dictionary:
+	return init_monster_pokedex(monster_id) if MonsterDb.has_monster(monster_id) else {}
+
+func get_captured_monsters() -> Array:
+	return get_owned_species_ids()
 
 ## 计算升级所需经验（每级所需经验递增）
 ## JS: _getExpForLevel(level)
@@ -231,55 +434,35 @@ static func get_total_exp_for_level(level: int) -> int:
 ## JS: addMonsterExp(monsterId, expGained)
 ## 返回: { leveledUp: bool, newLevel: int, oldLevel: int, expGained: int, currentExp: int }
 func add_monster_exp(monster_id: String, exp_gained: int) -> Dictionary:
-	var player: Dictionary = get_player()
-	if not player.has("pokedex"):
-		player["pokedex"] = {}
-	if not player["pokedex"].has(monster_id):
-		player["pokedex"][monster_id] = { "level": 1, "exp": 0 }
-
-	var entry: Dictionary = player["pokedex"][monster_id]
-	var old_level: int = entry.get("level", 1)
-	var old_exp: int = entry.get("exp", 0)
-
-	entry["exp"] = old_exp + exp_gained
-
-	# 检查升级
-	while true:
-		var needed: int = get_exp_for_level(entry.get("level", 1))
-		if entry["exp"] >= needed:
-			entry["exp"] -= needed
-			entry["level"] = entry.get("level", 1) + 1
-		else:
-			break
-
-	save_player(player)
-
-	return {
-		"leveledUp": entry.get("level", 1) > old_level,
-		"newLevel": entry.get("level", 1),
-		"oldLevel": old_level,
-		"expGained": exp_gained,
-		"currentExp": entry.get("exp", 0)
-	}
+	var instance_id := _resolve_instance_id(monster_id)
+	if instance_id.is_empty() and MonsterDb.has_monster(monster_id):
+		var instance := add_monster_instance(monster_id, {"source": "legacy"})
+		instance_id = str(instance.get("instanceId", ""))
+	if instance_id.is_empty():
+		return {"leveledUp": false, "newLevel": 1, "oldLevel": 1, "expGained": exp_gained, "currentExp": 0}
+	return add_instance_exp(instance_id, exp_gained)
 
 # ========== 队伍编成（section: team） ==========
 ## 队伍数据结构: { leader: 'monster_001', member1: 'monster_002', member2: 'monster_003' }
 
 ## 默认初始队伍
 func _get_default_team() -> Dictionary:
+	_ensure_monster_pool_migrated()
+	var pool := get_monster_pool()
 	return {
-		"leader": "monster_001",
-		"member1": "monster_002",
-		"member2": "monster_003"
+		"leader": str(pool[0].get("instanceId", "")) if pool.size() > 0 else null,
+		"member1": str(pool[1].get("instanceId", "")) if pool.size() > 1 else null,
+		"member2": str(pool[2].get("instanceId", "")) if pool.size() > 2 else null
 	}
 
 ## 保存队伍
 ## JS: saveTeam(teamData)
 func save_team(team_data: Dictionary) -> bool:
+	_ensure_monster_pool_migrated()
 	_set_value("team", "data", {
-		"leader": team_data.get("leader", null),
-		"member1": team_data.get("member1", null),
-		"member2": team_data.get("member2", null)
+		"leader": _resolve_team_ref(team_data.get("leader", null)),
+		"member1": _resolve_team_ref(team_data.get("member1", null)),
+		"member2": _resolve_team_ref(team_data.get("member2", null))
 	})
 	_save_config()
 	return true
@@ -287,18 +470,46 @@ func save_team(team_data: Dictionary) -> bool:
 ## 加载队伍
 ## JS: loadTeam()
 func load_team() -> Dictionary:
+	_ensure_monster_pool_migrated()
 	var team: Variant = _get_value("team", "data", null)
 	if not (team is Dictionary):
 		var default_team: Dictionary = _get_default_team()
 		save_team(default_team)
 		return default_team.duplicate(true)
-	return (team as Dictionary).duplicate(true)
+	var normalized := {
+		"leader": _resolve_team_ref((team as Dictionary).get("leader", null)),
+		"member1": _resolve_team_ref((team as Dictionary).get("member1", null)),
+		"member2": _resolve_team_ref((team as Dictionary).get("member2", null))
+	}
+	if normalized != team:
+		save_team(normalized)
+	return normalized.duplicate(true)
+
+func _resolve_team_ref(value: Variant) -> Variant:
+	if value == null:
+		return null
+	var ref_id := str(value)
+	if ref_id.is_empty():
+		return null
+	var instance_id := _resolve_instance_id(ref_id)
+	return instance_id if not instance_id.is_empty() else null
 
 ## 检查怪物是否在队伍中
 ## JS: isMonsterInTeam(monsterId)
 func is_monster_in_team(monster_id: String) -> bool:
 	var team: Dictionary = load_team()
-	return team.get("leader") == monster_id or team.get("member1") == monster_id or team.get("member2") == monster_id
+	if team.values().has(monster_id):
+		return true
+	for instance_id in team.values():
+		if instance_id == null:
+			continue
+		var instance := get_monster_instance(str(instance_id))
+		if str(instance.get("monsterId", "")) == monster_id:
+			return true
+	return false
+
+func is_instance_in_team(instance_id: String) -> bool:
+	return load_team().values().has(instance_id)
 
 ## 计算队伍总战力
 ## JS: calcTeamPower()
@@ -307,12 +518,12 @@ func calc_team_power() -> int:
 	var power: int = 0
 
 	for slot: String in ["leader", "member1", "member2"]:
-		var id: String = team.get(slot, "")
-		if id != "" and MonsterDb.has_monster(id):
-			var level: int = get_monster_level(id) if get_monster_pokedex(id).size() > 0 else 1
-			var stats: Dictionary = MonsterDb.get_monster_stats(id, level)
-			if not stats.is_empty():
-				power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0) + stats.get("spd", 0)
+		var id: String = str(team.get(slot, ""))
+		if id.is_empty():
+			continue
+		var stats: Dictionary = get_instance_stats(id)
+		if not stats.is_empty():
+			power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0) + stats.get("spd", 0)
 
 	return power
 
@@ -635,18 +846,21 @@ func load_settings() -> Dictionary:
 	})
 
 # ========== 牧场系统（section: ranch） ==========
-## 牧场数据结构: { slots: [{ monster_id, placed_at }, ...], unlocked_slots: 3 }
+## 牧场数据结构: { slots: [{ instance_id, placed_at }, ...], unlocked_slots: 5 }
 
 ## 获取牧场状态
 ## JS: getRanchState()
 func get_ranch_state() -> Dictionary:
+	_ensure_monster_pool_migrated()
 	var state: Dictionary = _get_value("ranch", "data", {
 		"slots": [
-			{ "monster_id": null, "placed_at": null },
-			{ "monster_id": null, "placed_at": null },
-			{ "monster_id": null, "placed_at": null }
+			{ "instance_id": null, "placed_at": null },
+			{ "instance_id": null, "placed_at": null },
+			{ "instance_id": null, "placed_at": null },
+			{ "instance_id": null, "placed_at": null },
+			{ "instance_id": null, "placed_at": null }
 		],
-		"unlocked_slots": 3
+		"unlocked_slots": 5
 	})
 	var normalized := _normalize_ranch_state(state)
 	if normalized != state:
@@ -656,6 +870,7 @@ func get_ranch_state() -> Dictionary:
 ## 设置牧场状态
 ## JS: setRanchState(state)
 func set_ranch_state(state: Dictionary) -> bool:
+	_ensure_monster_pool_migrated()
 	_set_value("ranch", "data", _normalize_ranch_state(state))
 	_save_config()
 	return true
@@ -669,15 +884,17 @@ func _normalize_ranch_state(state: Dictionary) -> Dictionary:
 	for slot_data in slots:
 		normalized["slots"].append(_normalize_ranch_slot(slot_data))
 	while normalized["slots"].size() < normalized["unlocked_slots"]:
-		normalized["slots"].append({ "monster_id": null, "placed_at": null })
+		normalized["slots"].append({ "instance_id": null, "placed_at": null })
 	return normalized
 
 func _normalize_ranch_slot(slot_data: Variant) -> Dictionary:
 	if not slot_data is Dictionary:
-		return { "monster_id": null, "placed_at": null }
+		return { "instance_id": null, "placed_at": null }
 	var slot: Dictionary = slot_data
+	var ref_id := str(slot.get("instance_id", slot.get("monster_id", slot.get("monsterId", ""))))
+	var instance_id := _resolve_instance_id(ref_id)
 	return {
-		"monster_id": slot.get("monster_id", slot.get("monsterId", null)),
+		"instance_id": instance_id if not instance_id.is_empty() else null,
 		"placed_at": _normalize_ranch_timestamp_ms(slot.get("placed_at", slot.get("placedAt", null)))
 	}
 
@@ -695,17 +912,27 @@ func _normalize_ranch_timestamp_ms(value: Variant) -> Variant:
 ## JS: getIdleExpRate(monsterId)
 ## 公式: 5 + level，保证前期挂机也有可见成长反馈
 func get_idle_exp_rate(monster_id: String) -> float:
-	var level: int = get_monster_level(monster_id) if get_monster_pokedex(monster_id).size() > 0 else 1
+	var instance_id := _resolve_instance_id(monster_id)
+	var level: int = get_instance_level(instance_id) if not instance_id.is_empty() else 1
 	return 5.0 + level
+
+func get_idle_exp_rate_for_instance(instance_id: String) -> float:
+	return get_idle_exp_rate(instance_id)
 
 ## 收取单只怪物的挂机经验
 ## JS: collectIdleExp(monsterId)
 func collect_idle_exp(monster_id: String) -> float:
+	var instance_id := _resolve_instance_id(monster_id)
+	if instance_id.is_empty():
+		return 0.0
+	return collect_idle_exp_for_instance(instance_id)
+
+func collect_idle_exp_for_instance(instance_id: String) -> float:
 	var ranch: Dictionary = get_ranch_state()
 	var slot: Variant = null
 
 	for s: Dictionary in ranch.get("slots", []):
-		if s.get("monster_id") == monster_id:
+		if s.get("instance_id") == instance_id:
 			slot = s
 			break
 
@@ -718,17 +945,42 @@ func collect_idle_exp(monster_id: String) -> float:
 	if intervals <= 0:
 		return 0.0
 
-	var rate: float = get_idle_exp_rate(monster_id)
+	var rate: float = get_idle_exp_rate_for_instance(instance_id)
 	var exp: float = intervals * rate
 
 	# 增加经验
-	add_monster_exp(monster_id, int(exp))
+	add_instance_exp(instance_id, int(exp))
 
 	# 重置放置时间（毫秒时间戳）
 	slot["placed_at"] = now_ms
 	set_ranch_state(ranch)
 
 	return exp
+
+func place_instance_in_ranch(instance_id: String, slot_index: int) -> bool:
+	var ranch := get_ranch_state()
+	var slots: Array = ranch.get("slots", [])
+	if slot_index < 0 or slot_index >= slots.size() or get_monster_instance(instance_id).is_empty():
+		return false
+	for slot: Dictionary in slots:
+		if slot.get("instance_id") == instance_id:
+			slot["instance_id"] = null
+			slot["placed_at"] = null
+	var target: Dictionary = slots[slot_index]
+	target["instance_id"] = instance_id
+	target["placed_at"] = Time.get_unix_time_from_system() * 1000.0
+	ranch["slots"] = slots
+	return set_ranch_state(ranch)
+
+func remove_instance_from_ranch(instance_id: String) -> bool:
+	var ranch := get_ranch_state()
+	var changed := false
+	for slot: Dictionary in ranch.get("slots", []):
+		if slot.get("instance_id") == instance_id:
+			slot["instance_id"] = null
+			slot["placed_at"] = null
+			changed = true
+	return set_ranch_state(ranch) if changed else true
 
 # ========== 新手引导（section: tutorial） ==========
 ## 引导进度数据结构: { completed: bool, currentStep: int }
@@ -742,6 +994,9 @@ func save_tutorial_progress(step: int) -> bool:
 	})
 	_save_config()
 	return true
+
+func reset_tutorial_progress() -> bool:
+	return save_tutorial_progress(0)
 
 ## 加载引导进度
 ## JS: loadTutorialProgress()

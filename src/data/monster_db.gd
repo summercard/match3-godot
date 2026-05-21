@@ -1,6 +1,19 @@
 class_name MonsterDb
 extends RefCounted
 ## 怪物数据库 - 从 js/battle/monsterData.js 翻译
+##
+## ⚠️ 数据修改指引 / DATA EDITOR GUIDE
+## 本文件是代码形式的数据库，与 docs/怪物数据总表.csv 保持同步。
+## 如需新增/修改怪物数据，请：
+##   1. 在 docs/怪物数据总表.csv 中编辑（推荐，结构化）
+##   2. 将 CSV 导出为 JSON 后手动转为 GDScript 常量
+##   3. 或直接在本文件中编辑（需同步更新 CSV）
+##
+## ⚠️ DATA MODIFICATION GUIDE
+## To add/modify monster data:
+##   1. Edit docs/怪物数据总表.csv (preferred — structured format)
+##   2. Export CSV to JSON, then convert to GDScript constants
+##   3. Or edit this file directly (must sync with CSV)
 
 # ========== 怪物数据库 ==========
 const MONSTER_DB: Dictionary = {
@@ -1007,10 +1020,12 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 	var def: int = int(data.get("baseDEF", 0) * mult)
 	var spd: int = int(data.get("baseSPD", 0) * mult)
 
-	# 性格修正（待 nature_db.gd 实现后调用）
+	# 性格修正
 	if nature_id != "":
-		# TODO: 调用 NatureDb.get_stat_multiplier(nature_id, stat_key)
-		pass
+		hp = int(hp * NatureDB.get_nature_stat_mult(nature_id, "hp"))
+		atk = int(atk * NatureDB.get_nature_stat_mult(nature_id, "atk"))
+		def = int(def * NatureDB.get_nature_stat_mult(nature_id, "def"))
+		spd = int(spd * NatureDB.get_nature_stat_mult(nature_id, "spd"))
 
 	return {
 		"id": data.get("id", ""),

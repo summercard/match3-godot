@@ -16,6 +16,7 @@ const GRID_Y: float = 118.0
 const DETAIL_Y: float = 352.0
 const DETAIL_H: float = 242.0
 const BOTTOM_TAB_Y: float = 609.0
+const DEBUG_UNLOCK_ALL_ALBUM_FOR_QA: bool = true
 
 const ALBUM_ASSETS := {
 	"bg": "res://assets/images/main/main_lobby_bg.png",
@@ -77,11 +78,16 @@ const ELEMENT_NAMES := {
 	"light": "光",
 	"earth": "土",
 	"wind": "风",
-	"dark": "暗"
+	"dark": "暗",
+	"ice": "冰",
+	"void": "虚",
+	"temporal": "时",
+	"star": "星",
+	"chaos": "混"
 }
 
 const ELEMENT_ORDER := ["all", "fire", "water", "grass", "thunder", "light", "earth", "wind", "dark"]
-const ELEMENT_SORT_ORDER := ["fire", "water", "grass", "thunder", "light", "earth", "wind", "dark"]
+const ELEMENT_SORT_ORDER := ["fire", "water", "grass", "thunder", "light", "earth", "wind", "dark", "ice", "void", "temporal", "star", "chaos"]
 
 var _storage: Node = null
 var _all_monsters: Array = []
@@ -100,6 +106,7 @@ var _time: float = 0.0
 var _back_rect := Rect2(12.0, 12.0, 52.0, 52.0)
 var _detail_close_rect := Rect2(286.0, DETAIL_Y + 194.0, 72.0, 36.0)
 var _detail_evolve_rect := Rect2(126.0, DETAIL_Y + 194.0, 124.0, 36.0)
+var _pokedex_cache: Dictionary = {}  # 缓存pokedex数据
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -172,9 +179,6 @@ func _handle_tap(pos: Vector2) -> void:
 			_selected_monster_id = ""
 			_apply_filter()
 			return
-		if _detail_evolve_rect.has_point(pos) and _selected_has_evolution():
-			_go_evolve()
-			return
 	var idx := _monster_index_at(pos)
 	if idx >= 0 and idx < _filtered_monsters.size():
 		var monster: Dictionary = _filtered_monsters[idx]
@@ -189,16 +193,31 @@ func _load_data() -> void:
 		return str(a.get("id", "")) < str(b.get("id", ""))
 	)
 	var player: Dictionary = _storage.load_player() if _storage and _storage.has_method("load_player") else {}
-	_captured_ids = player.get("captured", [])
+	if _storage and _storage.has_method("get_owned_species_ids"):
+		_captured_ids = _storage.get_owned_species_ids()
+	else:
+		_captured_ids = player.get("captured", [])
+	if DEBUG_UNLOCK_ALL_ALBUM_FOR_QA:
+		_captured_ids = _all_monsters.map(func(monster: Dictionary) -> String: return str(monster.get("id", "")))
 	_apply_filter()
 
 func _apply_filter() -> void:
 	_filtered_monsters = []
 	if _selected_element == "all":
-		for element: String in ELEMENT_SORT_ORDER:
-			for monster: Dictionary in _all_monsters:
-				if monster.get("element", "") == element:
-					_filtered_monsters.append(monster)
+		_filtered_monsters = _all_monsters.duplicate(true)
+		_filtered_monsters.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			var ea := str(a.get("element", ""))
+			var eb := str(b.get("element", ""))
+			var ia := ELEMENT_SORT_ORDER.find(ea)
+			var ib := ELEMENT_SORT_ORDER.find(eb)
+			if ia < 0:
+				ia = ELEMENT_SORT_ORDER.size()
+			if ib < 0:
+				ib = ELEMENT_SORT_ORDER.size()
+			if ia == ib:
+				return str(a.get("id", "")) < str(b.get("id", ""))
+			return ia < ib
+		)
 	else:
 		for monster: Dictionary in _all_monsters:
 			if monster.get("element", "") == _selected_element:
@@ -282,25 +301,95 @@ func _draw_detail_panel() -> void:
 	_draw_texture_fit(_tex(ALBUM_ASSETS["detail_panel"]), panel_rect)
 	var id := str(monster.get("id", ""))
 	var element := str(monster.get("element", "grass"))
+	var instances := _get_instances_for_species(id)
+	var owned_count := instances.size()
+	var representative := _pick_representative_instance(instances)
 	_draw_texture_fit(_tex(ELEMENT_ICON_ASSETS.get(element, "")), Rect2(25.0, DETAIL_Y + 16.0, 26.0, 26.0))
 	_draw_text("%s  %s" % [id.replace("monster_", ""), monster.get("name", "???")], 108.0, DETAIL_Y + 36.0, C["text"], 17.0, 140.0)
 	_draw_stars(int(monster.get("rarity", 1)), 28.0, DETAIL_Y + 48.0, 16.0, true)
+	var own_text := "未拥有" if owned_count <= 0 else "已拥有 %d 只  代表 Lv.%d" % [owned_count, int(representative.get("level", 1))]
+	_draw_text(own_text, 259.0, DETAIL_Y + 37.0, C["gold"] if owned_count > 0 else C["text_muted"], 10.0, 128.0)
 	_draw_texture_fit(_tex(ALBUM_ASSETS["portrait_stage"]), Rect2(24.0, DETAIL_Y + 70.0, 122.0, 118.0))
 	_draw_monster_portrait(id, Rect2(50.0, DETAIL_Y + 80.0, 74.0, 72.0))
 	_draw_texture_fit(_tex(ALBUM_ASSETS["fx_sparkle"]), Rect2(106.0, DETAIL_Y + 68.0, 34.0, 44.0), 0.45)
+	_draw_detail_nature(id)  # 绘制性格
 	_draw_detail_stats(monster)
 	_draw_detail_skill(monster)
 	_draw_detail_evolution(monster)
 	_draw_detail_buttons(monster)
 
+func _draw_detail_nature(monster_id: String) -> void:
+	# 从SaveManager获取性格数据
+	var nature_id: String = ""
+	var instances := _get_instances_for_species(monster_id)
+	if not instances.is_empty():
+		nature_id = str(_pick_representative_instance(instances).get("nature", ""))
+	elif _storage and _storage.has_method("get_monster_pokedex"):
+		var pokedex: Dictionary = _storage.get_monster_pokedex(monster_id)
+		nature_id = pokedex.get("nature", "")
+	
+	# 如果没有性格（未收服），显示"未收服"
+	if nature_id.is_empty():
+		_draw_text("未收服", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
+		return
+	
+	# 获取性格信息
+	var NatureDB = load("res://src/data/nature_db.gd")
+	var nature: Dictionary = {}
+	if NatureDB and NatureDB.has_method("get_nature"):
+		nature = NatureDB.get_nature(nature_id)
+	
+	if not nature.is_empty():
+		# 显示性格emoji和名称
+		var emoji: String = nature.get("emoji", "🌀")
+		var name: String = nature.get("name", "混沌")
+		_draw_text("%s %s" % [emoji, name], 108.0, DETAIL_Y + 52.0, C["text"], 11.0, 120.0)
+	else:
+		_draw_text("??", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
+
 func _draw_detail_stats(monster: Dictionary) -> void:
 	var x := 154.0
 	var y := DETAIL_Y + 58.0
+	var id := str(monster.get("id", ""))
+	
+	# 获取性格修正后的实际数值（如果已收服）
+	var is_captured := _is_captured(id)
+	var level: int = 1
+	var nature_id: String = ""
+	if is_captured and _storage:
+		var instances := _get_instances_for_species(id)
+		if not instances.is_empty():
+			var representative: Dictionary = _pick_representative_instance(instances)
+			level = int(representative.get("level", 1))
+			nature_id = str(representative.get("nature", ""))
+		else:
+			if _storage.has_method("get_monster_level"):
+				level = _storage.get_monster_level(id)
+			if _storage.has_method("get_monster_nature"):
+				nature_id = _storage.get_monster_nature(id)
+	
+	# 计算带有性格修正的数值
+	var MonsterDB = load("res://src/data/monster_db.gd")
+	var stats_data: Dictionary = {}
+	if MonsterDB and MonsterDB.has_method("get_monster_stats"):
+		stats_data = MonsterDB.get_monster_stats(id, level, nature_id)
+	
+	var base_hp: int = int(monster.get("baseHP", 0))
+	var base_atk: int = int(monster.get("baseATK", 0))
+	var base_def: int = int(monster.get("baseDEF", 0))
+	var base_spd: int = int(monster.get("baseSPD", 0))
+	
+	# 如果有性格修正，使用修正后的数值
+	var final_hp: int = stats_data.get("hp", base_hp) if not stats_data.is_empty() else base_hp
+	var final_atk: int = stats_data.get("atk", base_atk) if not stats_data.is_empty() else base_atk
+	var final_def: int = stats_data.get("def", base_def) if not stats_data.is_empty() else base_def
+	var final_spd: int = stats_data.get("spd", base_spd) if not stats_data.is_empty() else base_spd
+	
 	var stats := [
-		["生命", int(monster.get("baseHP", 0)), Color(0.45, 0.95, 0.30)],
-		["攻击", int(monster.get("baseATK", 0)), Color(1.0, 0.42, 0.25)],
-		["防御", int(monster.get("baseDEF", 0)), Color(0.32, 0.68, 1.0)],
-		["速度", int(monster.get("baseSPD", 0)), Color(0.38, 0.92, 0.94)],
+		["生命", final_hp, Color(0.45, 0.95, 0.30)],
+		["攻击", final_atk, Color(1.0, 0.42, 0.25)],
+		["防御", final_def, Color(0.32, 0.68, 1.0)],
+		["速度", final_spd, Color(0.38, 0.92, 0.94)],
 	]
 	for i in range(stats.size()):
 		var row_y := y + float(i) * 24.0
@@ -331,10 +420,6 @@ func _draw_detail_evolution(monster: Dictionary) -> void:
 		_draw_text("无", 256.0, DETAIL_Y + 207.0, C["text_muted"], 12.0, 50.0)
 
 func _draw_detail_buttons(monster: Dictionary) -> void:
-	var can_evolve := _selected_has_evolution()
-	if can_evolve:
-		_draw_texture_fit(_tex(ALBUM_ASSETS["btn_primary"]), _detail_evolve_rect)
-		_draw_text("进化", _detail_evolve_rect.position.x + _detail_evolve_rect.size.x / 2.0, _detail_evolve_rect.position.y + 25.0, Color(0.18, 0.10, 0.02), 15.0, 110.0)
 	_draw_texture_fit(_tex(ALBUM_ASSETS["btn_secondary"]), _detail_close_rect)
 	_draw_text("关闭", _detail_close_rect.position.x + _detail_close_rect.size.x / 2.0, _detail_close_rect.position.y + 25.0, C["text"], 13.0, 70.0)
 
@@ -396,7 +481,7 @@ func _is_captured(id: String) -> bool:
 	return _captured_ids.has(id)
 
 func _draw_monster_portrait(id: String, rect: Rect2) -> void:
-	var path := MonsterArtDBScript.get_battle_portrait_path(id)
+	var path := MonsterArtDBScript.get_art_path(id, "album")
 	var tex := _tex(path)
 	if tex:
 		_draw_texture_fit(tex, rect)
@@ -465,6 +550,31 @@ func _go_evolve() -> void:
 	var manager := _root_node("SceneManager")
 	if manager and manager.has_method("switch_scene"):
 		manager.switch_scene("evolve", {"monsterId": _selected_monster_id})
+
+func _pick_representative_instance(instances: Array) -> Dictionary:
+	var best: Dictionary = {}
+	for instance: Dictionary in instances:
+		if best.is_empty() or int(instance.get("level", 1)) > int(best.get("level", 1)):
+			best = instance
+	return best
+
+func _get_instances_for_species(monster_id: String) -> Array:
+	if _storage and _storage.has_method("get_instances_by_monster_id"):
+		var instances: Array = _storage.get_instances_by_monster_id(monster_id)
+		if not instances.is_empty():
+			return instances
+	if DEBUG_UNLOCK_ALL_ALBUM_FOR_QA and _is_captured(monster_id):
+		var monster := _get_monster_data(monster_id)
+		return [{
+			"instanceId": "qa_%s" % monster_id,
+			"monsterId": monster_id,
+			"name": str(monster.get("name", monster_id)),
+			"level": 1,
+			"exp": 0,
+			"nature": "",
+			"source": "album_qa"
+		}]
+	return []
 
 func _root_node(node_name: String) -> Node:
 	if not is_inside_tree():

@@ -159,6 +159,7 @@ func _add_background(image_path: String) -> void:
 
 func _ready() -> void:
 	instance = self
+	set_process(false)
 
 func init(data: Dictionary = {}) -> void:
 	# 接收关卡数据
@@ -204,6 +205,11 @@ func _load_player_team() -> void:
 	}
 	var player: Dictionary = storage.load_player() if storage else {"level": 5}
 	var level: int = maxi(player.get("level", 1), 5)
+	if storage and storage.has_method("get_team_battle_stats"):
+		for monster: Dictionary in storage.get_team_battle_stats():
+			monster["power"] = monster.get("hp", 0) + monster.get("atk", 0) + monster.get("def", 0) + monster.get("spd", 0)
+			_player_team.append(monster)
+		return
 	for slot: String in ["leader", "member1", "member2"]:
 		var monster_id: String = team_data.get(slot, "")
 		if monster_id == "":
@@ -307,6 +313,8 @@ func _start_battle() -> void:
 	if _is_player_team_empty():
 		_show_empty_team_alert = true
 		_alert_show_time = Time.get_ticks_msec() / 1000.0
+		set_process(true)
+		queue_redraw()
 		
 		# 1.5秒后自动跳转到队伍编成页面
 		await get_tree().create_timer(1.5).timeout
@@ -349,7 +357,9 @@ func _process(delta: float) -> void:
 		var elapsed := (Time.get_ticks_msec() / 1000.0) - _alert_show_time
 		if elapsed > 2.0:
 			_show_empty_team_alert = false
-	queue_redraw()
+		queue_redraw()
+		if not _show_empty_team_alert:
+			set_process(false)
 
 ## ============================================
 # 渲染
@@ -705,8 +715,8 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
-	var monster_id: String = monster.get("id", "")
-	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
+	var monster_id: String = monster.get("monsterId", monster.get("id", ""))
+	var path: String = MonsterArtDBScript.get_art_path(monster_id, "team")
 	var tex := _get_texture(path)
 	if tex != null:
 		_draw_texture_contain(tex, rect)

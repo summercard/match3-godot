@@ -23,7 +23,7 @@ var enemies: Array = []            # 敌方怪物 [{...stats}]
 var turn: int = 0
 var combo: int = 0                # 当前连锁数
 var total_damage_dealt: Dictionary = {}  # 按属性统计伤害
-var skill_charges: Dictionary = {}       # 技能充能 { monsterId: charge }
+var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: charge }
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
 var turn_count: int = 0
@@ -72,7 +72,14 @@ func _exit_tree() -> void:
 
 # ========== 初始化 ==========
 func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1, e_level: int = 1, s_data: Variant = null, s_id: String = "") -> void:
-	player_team = player_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, p_level))
+	var player_units: Array = player_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, p_level))
+	init_with_player_team(player_units, enemy_monster_ids, p_level, e_level, s_data, s_id)
+
+func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p_level: int = 1, e_level: int = 1, s_data: Variant = null, s_id: String = "") -> void:
+	player_team = []
+	for unit in player_team_stats:
+		if unit is Dictionary and not (unit as Dictionary).is_empty():
+			player_team.append((unit as Dictionary).duplicate(true))
 
 	stage_data = s_data
 	stage_id = s_id
@@ -146,6 +153,9 @@ func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1,
 	if _enemy_skill_system == null:
 		_enemy_skill_system = EnemySkillSystem.new()
 	_enemy_skill_system.init_skill_state(enemies)
+
+	# 连接 EnemySkillSystem 的特定信号到 BattleManager
+	_connect_enemy_skill_signals()
 
 
 # ========== 属性协同加成 ==========
@@ -570,6 +580,207 @@ func get_status() -> Dictionary:
 		"status_effects": _status_effect.get_effects_snapshot(),
 		"status_effect_log": _status_effect.get_effect_log()
 	}
+
+
+# ========== EnemySkillSystem 信号连接 ==========
+
+func _connect_enemy_skill_signals() -> void:
+	if _enemy_skill_system == null:
+		return
+	# 蓄力开始信号
+	if not _enemy_skill_system.skill_charge_start.is_connected(_on_enemy_skill_charge_start):
+		_enemy_skill_system.skill_charge_start.connect(_on_enemy_skill_charge_start)
+	# 蓄力释放信号
+	if not _enemy_skill_system.skill_charge_release.is_connected(_on_enemy_skill_charge_release):
+		_enemy_skill_system.skill_charge_release.connect(_on_enemy_skill_charge_release)
+	# 护盾出现信号
+	if not _enemy_skill_system.skill_shield_appear.is_connected(_on_enemy_skill_shield_appear):
+		_enemy_skill_system.skill_shield_appear.connect(_on_enemy_skill_shield_appear)
+	# 护盾破碎信号
+	if not _enemy_skill_system.skill_shield_broken.is_connected(_on_enemy_skill_shield_broken):
+		_enemy_skill_system.skill_shield_broken.connect(_on_enemy_skill_shield_broken)
+	# 治疗触发信号
+	if not _enemy_skill_system.skill_heal_triggered.is_connected(_on_enemy_skill_heal_triggered):
+		_enemy_skill_system.skill_heal_triggered.connect(_on_enemy_skill_heal_triggered)
+	# 强化护盾出现/破碎/反弹信号
+	if not _enemy_skill_system.skill_shield_plus_appear.is_connected(_on_enemy_skill_shield_plus_appear):
+		_enemy_skill_system.skill_shield_plus_appear.connect(_on_enemy_skill_shield_plus_appear)
+	if not _enemy_skill_system.skill_shield_plus_broken.is_connected(_on_enemy_skill_shield_plus_broken):
+		_enemy_skill_system.skill_shield_plus_broken.connect(_on_enemy_skill_shield_plus_broken)
+	if not _enemy_skill_system.skill_shield_plus_reflect.is_connected(_on_enemy_skill_shield_plus_reflect):
+		_enemy_skill_system.skill_shield_plus_reflect.connect(_on_enemy_skill_shield_plus_reflect)
+	# 灼烧/反弹/冰封/中毒信号
+	if not _enemy_skill_system.skill_burn_apply.is_connected(_on_enemy_skill_burn_apply):
+		_enemy_skill_system.skill_burn_apply.connect(_on_enemy_skill_burn_apply)
+	if not _enemy_skill_system.skill_reflect_activate.is_connected(_on_enemy_skill_reflect_activate):
+		_enemy_skill_system.skill_reflect_activate.connect(_on_enemy_skill_reflect_activate)
+	if not _enemy_skill_system.skill_freeze_activate.is_connected(_on_enemy_skill_freeze_activate):
+		_enemy_skill_system.skill_freeze_activate.connect(_on_enemy_skill_freeze_activate)
+	if not _enemy_skill_system.skill_poison_apply.is_connected(_on_enemy_skill_poison_apply):
+		_enemy_skill_system.skill_poison_apply.connect(_on_enemy_skill_poison_apply)
+	# 雷击/灵魂吸取/浪涌/混乱/技能封印信号
+	if not _enemy_skill_system.skill_thunder_strike_triggered.is_connected(_on_enemy_skill_thunder_strike):
+		_enemy_skill_system.skill_thunder_strike_triggered.connect(_on_enemy_skill_thunder_strike)
+	if not _enemy_skill_system.skill_life_drain_triggered.is_connected(_on_enemy_skill_life_drain):
+		_enemy_skill_system.skill_life_drain_triggered.connect(_on_enemy_skill_life_drain)
+	if not _enemy_skill_system.skill_confuse_activate.is_connected(_on_enemy_skill_confuse):
+		_enemy_skill_system.skill_confuse_activate.connect(_on_enemy_skill_confuse)
+	if not _enemy_skill_system.skill_skill_seal_activate.is_connected(_on_enemy_skill_skill_seal):
+		_enemy_skill_system.skill_skill_seal_activate.connect(_on_enemy_skill_skill_seal)
+
+
+func _on_enemy_skill_charge_start(enemy_idx: int, damage_multiplier: float) -> void:
+	enemy_skill_action.emit({
+		"type": "charge_start",
+		"enemy_index": enemy_idx,
+		"damage_multiplier": damage_multiplier
+	})
+
+
+func _on_enemy_skill_charge_release(enemy_idx: int, damage_multiplier: float) -> void:
+	enemy_skill_action.emit({
+		"type": "charge_release",
+		"enemy_index": enemy_idx,
+		"damage_multiplier": damage_multiplier
+	})
+
+
+func _on_enemy_skill_shield_appear(enemy_idx: int, shield_hp: int) -> void:
+	var enemy = enemies[enemy_idx] if enemy_idx < enemies.size() else {}
+	enemy_skill_action.emit({
+		"type": "shield_appear",
+		"enemy_index": enemy_idx,
+		"enemy": enemy,
+		"shield_hp": shield_hp,
+		"shield_max_hp": shield_hp
+	})
+
+
+func _on_enemy_skill_shield_broken(enemy_idx: int) -> void:
+	enemy_skill_action.emit({
+		"type": "shield_broken",
+		"enemy_index": enemy_idx
+	})
+
+
+func _on_enemy_skill_heal_triggered(enemy_idx: int, heal_amount: int) -> void:
+	var enemy = enemies[enemy_idx] if enemy_idx < enemies.size() else {}
+	enemy_skill_action.emit({
+		"type": "heal",
+		"enemy_index": enemy_idx,
+		"enemy": enemy,
+		"heal_amount": heal_amount
+	})
+
+
+func _on_enemy_skill_shield_plus_appear(enemy_idx: int, shield_hp: int, reflect_percent: float) -> void:
+	var enemy = enemies[enemy_idx] if enemy_idx < enemies.size() else {}
+	enemy_skill_action.emit({
+		"type": "shield_plus_appear",
+		"enemy_index": enemy_idx,
+		"enemy": enemy,
+		"shield_hp": shield_hp,
+		"shield_max_hp": shield_hp,
+		"reflect_percent": reflect_percent
+	})
+
+
+func _on_enemy_skill_shield_plus_broken(enemy_idx: int) -> void:
+	enemy_skill_action.emit({
+		"type": "shield_plus_broken",
+		"enemy_index": enemy_idx
+	})
+
+
+func _on_enemy_skill_shield_plus_reflect(enemy_idx: int, target_idx: int, reflected_damage: int) -> void:
+	enemy_skill_action.emit({
+		"type": "shield_plus_reflect",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"reflected_damage": reflected_damage
+	})
+
+
+func _on_enemy_skill_burn_apply(enemy_idx: int, target_idx: int, damage: int, duration: int) -> void:
+	enemy_skill_action.emit({
+		"type": "burn_apply",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"damage": damage,
+		"duration": duration
+	})
+
+
+func _on_enemy_skill_reflect_activate(enemy_idx: int, percent: float, duration: int) -> void:
+	enemy_skill_action.emit({
+		"type": "reflect_activate",
+		"enemy_index": enemy_idx,
+		"percent": percent,
+		"duration": duration
+	})
+
+
+func _on_enemy_skill_freeze_activate(enemy_idx: int, target_idx: int, chance: float, duration: int) -> void:
+	enemy_skill_action.emit({
+		"type": "freeze_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": chance,
+		"duration": duration
+	})
+
+
+func _on_enemy_skill_poison_apply(enemy_idx: int, target_idx: int, stacks: int, damage_per_stack: int, max_stacks: int) -> void:
+	enemy_skill_action.emit({
+		"type": "poison_apply",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"stacks": stacks,
+		"damage_per_stack": damage_per_stack,
+		"max_stacks": max_stacks
+	})
+
+
+func _on_enemy_skill_thunder_strike(enemy_idx: int, damage: int) -> void:
+	var enemy = enemies[enemy_idx] if enemy_idx < enemies.size() else {}
+	enemy_skill_action.emit({
+		"type": "thunder_strike",
+		"enemy_index": enemy_idx,
+		"enemy": enemy,
+		"damage": damage
+	})
+
+
+func _on_enemy_skill_life_drain(enemy_idx: int, target_idx: int, drain_amount: int, heal_amount: int) -> void:
+	var enemy = enemies[enemy_idx] if enemy_idx < enemies.size() else {}
+	enemy_skill_action.emit({
+		"type": "life_drain",
+		"enemy_index": enemy_idx,
+		"enemy": enemy,
+		"target_index": target_idx,
+		"drain_amount": drain_amount,
+		"heal_amount": heal_amount
+	})
+
+
+func _on_enemy_skill_confuse(enemy_idx: int, target_idx: int, chance: float, duration: int) -> void:
+	enemy_skill_action.emit({
+		"type": "confuse_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": chance,
+		"duration": duration
+	})
+
+
+func _on_enemy_skill_skill_seal(enemy_idx: int, target_idx: int, chance: float, duration: int) -> void:
+	enemy_skill_action.emit({
+		"type": "skill_seal_activate",
+		"enemy_index": enemy_idx,
+		"target_index": target_idx,
+		"chance": chance,
+		"duration": duration
+	})
 
 
 # ========== 获取战斗结果（用于结算） ==========

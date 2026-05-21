@@ -1,6 +1,6 @@
 # 界面美术资产提取制作代入总List
 
-更新时间：2026-05-19
+更新时间：2026-05-20
 
 本表用于统一管理每个 Godot 界面的美术流程：概念图 -> image-2 元素提取 -> 专业资产制作 -> 导入 `assets/images` -> Godot 场景代入 -> 视觉验收。
 
@@ -30,10 +30,10 @@
 | P1 | 怪物进化 | `src/ui/scene/scene_evolve.gd` | `美术开发/概念图/06_队伍进化_team_evolve.png` | 1 元素提取草稿 | 进化舞台、前后怪物、箭头、材料槽、进化按钮、光效 | `美术开发/资产拆分/06_team_evolve/` -> `美术开发/正式拆分/evolve/` | `assets/images/evolve/` | 未代入 | 队伍资产稳定后提取进化专用舞台和特效 |
 | P2 | 背包 | `src/ui/scene/scene_inventory.gd` | `美术开发/概念图/11_背包_inventory.png` | 5 待实机视觉验收 | 背包背景、顶部栏、货币条、分类标签、5 列道具格、选中/锁定态、滚动条、详情面板、使用按钮、Toast | `美术开发/元素提取/inventory/`, `美术开发/正式拆分/inventory/` | `assets/images/inventory/`, `assets/images/items/` | 已基于概念图用 image-2 生成 UI 提取源，再拆分并代入；道具/进化石图标提升到通用 `assets/images/items/`，商店和背包共用 | 进入 Godot 运行窗口验收背包列表滚动、分类切换、详情面板和使用按钮 |
 | P2 | 商店 | `src/ui/scene/scene_shop.gd` | `美术开发/概念图/10_商店_shop.png` | 5 待实机视觉验收 | 商店背景、魔法师/货架氛围、商品卡、价格胶囊、货币、购买按钮、礼包、确认弹窗、分页、底部栏 | `美术开发/正式拆分/shop/` | `assets/images/shop/` | 已基于概念图用 image-2 生成 UI/道具/宝石提取源，再拆分并代入；商品区已调整为概念图四列结构；金币/钻石复用 main 通用资产 | 进入 Godot 运行窗口验收商品列表、分页、购买弹窗和滚动手感 |
-| P2 | 每日签到 | `src/ui/scene/scene_sign_in.gd` | `美术开发/概念图/14_每日签到_sign_in.png` | 0 概念图 | 日历格、今日高亮、已领印章、奖励图标、宝箱、领取按钮 | `美术开发/资产拆分/14_sign_in/` -> `美术开发/正式拆分/sign_in/` | `assets/images/sign_in/` | 未代入 | 复用奖励图标，优先完成 7 日格和领取按钮 |
+| P2 | 每日签到 | `src/ui/scene/scene_sign_in.gd` | `美术开发/概念图/14_每日签到_sign_in.png` | 5 待实机视觉验收 | 日历格、今日高亮、已领印章、奖励图标、宝箱、领取按钮、月累计进度 | `美术开发/元素提取/sign_in/`, `美术开发/正式拆分/sign_in/` | `assets/images/sign_in/` | 已基于概念图用 image-2 生成 UI/奖励提取源，完成拆分、导入和 Canvas 代码代入；保留签到、发奖、成就统计和返回功能 | 真实运行窗口验收 7 日卡密度、月奖励宝箱、领取按钮和成功反馈 |
 | P2 | 成就 | `src/ui/scene/scene_achievement.gd` | `美术开发/概念图/12_成就_achievement.png` | 5 待实机视觉验收 | 成就背景、奖杯总览、分类标签、成就徽章、成就卡、标题飘带、进度条、奖励槽、领取按钮、完成印章、锁定态 | `美术开发/元素提取/achievement/`, `美术开发/正式拆分/achievement/` | `assets/images/achievement/`, `assets/images/main/`, `assets/images/inventory/` | 已基于概念图用 image-2 生成 UI/徽章提取源，再拆分并代入；金币复用 main，奖励槽复用 inventory，界面改为统一 Canvas 绘制以控制重叠/对齐/拉伸 | 进入 Godot 运行窗口验收滚动、领取、文本截断和不同分类下的卡片密度 |
 | P3 | 怪物牧场 | `src/ui/scene/scene_ranch.gd` | `美术开发/概念图/09_怪物牧场_ranch.png` | 5 待实机视觉验收 | 牧场背景、5 个放置台、收益图标、收获按钮、怪物列表、已放置标记、叶片特效 | `美术开发/正式拆分/ranch/` | `assets/images/ranch/` | 已按概念图重排为 Canvas 绘制；完成 image-2 背景/UI 提取、拆分、导入和代码代入 | 进入 Godot 运行窗口对照概念图做槽位、按钮、列表像素级微调 |
-| P4 | 设置 | `src/ui/scene/scene_settings.gd` | `美术开发/概念图/13_设置_settings.png` | 0 概念图 | 设置面板、开关、滑杆、下拉、危险按钮、确认弹窗 | `美术开发/资产拆分/13_settings/` -> `美术开发/正式拆分/settings/` | `assets/images/settings/` | 未代入 | 建通用设置 UI 包，最后代入 |
+| P4 | 设置 | `src/ui/scene/scene_settings.gd` | `美术开发/概念图/13_设置_settings.png` | 5 待实机视觉验收 | 本轮按需求直接复用现有 UI：背景、返回、标题条、面板、设置行、开关、分段标签、按钮、确认弹窗 | 不新增正式拆分目录；详见 `美术开发/设置界面资产代入表.md` | 不新增 `assets/images/settings/`；复用 `achievement/`, `inventory/`, `shop/`, `main/` | 已完成 Canvas 资产拼装代入；音效/音乐/重置功能保留，新增震动、画质、战斗表现、恢复默认 | 进入 Godot 运行窗口验收设置保存、重置确认弹窗、文字对齐和按钮命中区 |
 | P4 | 新手教程 | `src/ui/scene/scene_tutorial.gd` | `美术开发/概念图/15_新手教程_tutorial.png` | 0 概念图 | 遮罩、高亮框、手势、箭头、引导头像、提示气泡、步骤按钮 | `美术开发/资产拆分/15_tutorial/` -> `美术开发/正式拆分/tutorial/` | `assets/images/tutorial/` | 未代入 | 主流程 UI 稳定后，拆引导层通用资产 |
 
 ## 推荐执行顺序

@@ -89,11 +89,13 @@ const CATEGORIES := [
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_init_data()
+	set_process(false)
 
 
 func init(data: Dictionary = {}) -> void:
 	_current_category = data.get("category", _current_category)
 	_init_data()
+	set_process(false)
 
 
 func _init_data() -> void:
@@ -262,7 +264,9 @@ func _process(delta: float) -> void:
 		_toast_timer -= delta
 		if _toast_timer <= 0.0:
 			_toast_text = ""
-	queue_redraw()
+		queue_redraw()
+		if _toast_timer <= 0.0:
+			set_process(false)
 
 
 func _draw() -> void:
@@ -390,6 +394,7 @@ func _draw_toast() -> void:
 func _show_toast(text: String) -> void:
 	_toast_text = text
 	_toast_timer = 1.6
+	set_process(true)
 	queue_redraw()
 
 

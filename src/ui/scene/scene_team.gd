@@ -5,6 +5,7 @@ class_name SceneTeam
 extends Control
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const MonsterServiceScript = preload("res://src/core/monster_service.gd")
 
 # === 常量 ===
 const DESIGN_W := 375.0
@@ -179,29 +180,53 @@ func init(data: Dictionary = {}) -> void:
 func _get_captured_monsters() -> Array:
 	if not _storage:
 		return []
+	if _storage.has_method("get_owned_monsters"):
+		return _storage.get_owned_monsters()
 	var player: Dictionary = _storage.load_player()
-	return player.get("captured", [])
+	var result: Array = []
+	for monster_id in player.get("captured", []):
+		result.append({"instanceId": str(monster_id), "monsterId": str(monster_id), "level": 1, "nature": ""})
+	return result
+
+func _get_instance_id(value: Variant) -> String:
+	if value is Dictionary:
+		return str((value as Dictionary).get("instanceId", ""))
+	return str(value)
+
+func _get_monster_id(value: Variant) -> String:
+	if value is Dictionary:
+		return str((value as Dictionary).get("monsterId", (value as Dictionary).get("id", "")))
+	var ref_id := str(value)
+	if _storage and _storage.has_method("get_monster_instance"):
+		var instance: Dictionary = _storage.get_monster_instance(ref_id)
+		if not instance.is_empty():
+			return str(instance.get("monsterId", ""))
+	return ref_id
 
 func _get_monster_data(monster_id: String) -> Dictionary:
 	if monster_id.is_empty():
 		return {}
 	var MonsterDB = load("res://src/data/monster_db.gd")
 	if MonsterDB:
-		return MonsterDB.get_monster(monster_id)
+		return MonsterDB.get_monster(_get_monster_id(monster_id))
 	return {}
 
-func _get_real_level(monster_id: String) -> int:
+func _get_real_level(ref_id: String) -> int:
 	if not _storage:
 		return 1
+	if _storage.has_method("get_instance_level") and not _storage.get_monster_instance(ref_id).is_empty():
+		return _storage.get_instance_level(ref_id)
 	if _storage.has_method("get_monster_level"):
-		return _storage.get_monster_level(monster_id)
+		return _storage.get_monster_level(ref_id)
 	return 1
 
-func _get_nature(monster_id: String) -> String:
+func _get_nature(ref_id: String) -> String:
 	if not _storage:
 		return ""
+	if _storage.has_method("get_instance_nature") and not _storage.get_monster_instance(ref_id).is_empty():
+		return _storage.get_instance_nature(ref_id)
 	if _storage.has_method("get_monster_nature"):
-		return _storage.get_monster_nature(monster_id)
+		return _storage.get_monster_nature(ref_id)
 	return ""
 
 func _get_element_name(elem: String) -> String:
@@ -238,9 +263,11 @@ func _calc_team_power() -> int:
 	return total
 
 func _calc_stats(monster_id: String, level: int) -> Dictionary:
+	if _storage and _storage.has_method("get_instance_stats") and not _storage.get_monster_instance(monster_id).is_empty():
+		return _storage.get_instance_stats(monster_id)
 	var MonsterDB = load("res://src/data/monster_db.gd")
 	if MonsterDB and MonsterDB.has_method("get_monster_stats"):
-		return MonsterDB.get_monster_stats(monster_id, level)
+		return MonsterDB.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
 	return {"hp": 50, "atk": 10, "def": 10, "spd": 10}
 
 func _get_max_list_scroll() -> float:
@@ -337,7 +364,7 @@ func _on_tap(x: float, y: float) -> void:
 	# 怪物列表点击
 	var monster_idx := _get_monster_index_at_pos(pos)
 	if monster_idx >= 0 and monster_idx < _captured_monsters.size():
-		_assign_to_slot(_captured_monsters[monster_idx])
+		_assign_to_slot(_get_instance_id(_captured_monsters[monster_idx]))
 		return
 
 func _handle_confirm_tap(pos: Vector2) -> void:
@@ -499,7 +526,7 @@ func _draw_team_summary(font: Font) -> void:
 		if not skill_id.is_empty():
 			var LeaderSkillDB = load("res://src/data/leader_skill_db.gd")
 			if LeaderSkillDB:
-				var skill = LeaderSkillDB.get_skill(skill_id)
+				var skill = LeaderSkillDB.get_leader_skill(skill_id)
 				if skill:
 					skill_text = "%s：%s" % [skill.get("name", "队长技"), skill.get("desc", "")]
 					skill_color = C["gold"]
@@ -606,13 +633,15 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		if card_y > list_bottom_y or card_y + LIST_ITEM_H < list_y:
 			continue
 		
-		var monster_id: String = _captured_monsters[i]
+		var instance: Dictionary = _captured_monsters[i]
+		var instance_id := _get_instance_id(instance)
+		var monster_id := _get_monster_id(instance)
 		var md: Dictionary = _get_monster_data(monster_id)
 		if md.is_empty():
 			continue
-		
+
 		var is_hovered := (_hovered_monster_index == i)
-		var in_team := _team.values().has(monster_id)
+		var in_team := _team.values().has(instance_id)
 		var card_key := "roster_card_selected" if in_team or is_hovered else "roster_card"
 		_draw_texture_fit(_tex(card_key), Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
 		if in_team:
@@ -628,7 +657,7 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 62.0, C["text_primary"], 9.5)
 		
 		# 等级
-		var lvl: int = _get_real_level(monster_id)
+		var lvl: int = _get_real_level(instance_id)
 		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 75.0, C["white"], 8.5)
 		
 		# 属性角标
@@ -682,7 +711,7 @@ func _draw_element_icon(element: String, rect: Rect2) -> void:
 	_draw_texture_fit(_get_texture(path), rect)
 
 func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
-	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
+	var path: String = MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team")
 	var tex := _get_texture(path)
 	if tex:
 		_draw_texture_fit(tex, rect)

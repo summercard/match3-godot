@@ -68,7 +68,7 @@ static func process_exp(pokedex_entry: Dictionary, exp_gained: int) -> Dictionar
 # 对应 JS: evolution.level 和 evolution.target
 static func get_evolution_stage(monster_id: String, current_level: int) -> Dictionary:
 	# 获取怪物数据
-	var monster_data = MonsterDB.get_monster(monster_id)
+	var monster_data = MonsterDb.get_monster(monster_id)
 	if not monster_data.has("evolution"):
 		return { "stage": 1, "can_evolve": false, "next_stage": 2, "evolve_level": -1, "target_id": "" }
 	
@@ -94,7 +94,7 @@ static func get_evolution_stage(monster_id: String, current_level: int) -> Dicti
 
 # 获取进化后怪物ID
 static func get_evolution_target(monster_id: String) -> String:
-	var monster_data = MonsterDB.get_monster(monster_id)
+	var monster_data = MonsterDb.get_monster(monster_id)
 	if monster_data.has("evolution"):
 		return monster_data["evolution"].get("target", "")
 	return ""
@@ -134,7 +134,7 @@ static func on_level_up(monster_id: String, new_level: int) -> void:
 # 获取战力估算
 # ============================================
 static func calc_power(monster_id: String, level: int) -> int:
-	var stats = MonsterDB.get_monster_stats(monster_id, level)
+	var stats = MonsterDb.get_monster_stats(monster_id, level)
 	if stats.is_empty():
 		return 0
 	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))

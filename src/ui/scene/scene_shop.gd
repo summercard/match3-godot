@@ -96,6 +96,7 @@ var _popup_quantity := 1
 func _init(game_ref: Node = null) -> void:
 	game = game_ref
 	_add_dark_background()
+	set_process(false)
 
 
 func _add_dark_background() -> void:
@@ -120,6 +121,8 @@ func init(data: Dictionary = {}) -> void:
 	_active_tab = data.get("tab", "recommend")
 	_build_shop_list()
 	_set_input_handlers()
+	set_process(false)
+	queue_redraw()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -636,4 +639,4 @@ func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float,
 
 
 func _process(_delta: float) -> void:
-	queue_redraw()
+	pass

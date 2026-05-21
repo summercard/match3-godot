@@ -94,6 +94,7 @@ var _texture_cache: Dictionary = {}
 func _ready() -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	set_process(false)
 
 
 func init(data: Dictionary = {}) -> void:
@@ -107,6 +108,8 @@ func init(data: Dictionary = {}) -> void:
 	_toast_timer = 0.0
 	_scroll_offset = 0.0
 	_build_item_list()
+	set_process(false)
+	queue_redraw()
 
 
 func _build_item_list() -> void:
@@ -248,6 +251,8 @@ func _use_item(item_id: String) -> void:
 func _show_toast(text: String) -> void:
 	_toast_text = text
 	_toast_timer = 1.8
+	set_process(true)
+	queue_redraw()
 
 
 func _process(dt: float) -> void:
@@ -255,7 +260,9 @@ func _process(dt: float) -> void:
 		_toast_timer -= dt
 		if _toast_timer <= 0.0:
 			_toast_text = ""
-	queue_redraw()
+		queue_redraw()
+		if _toast_timer <= 0.0:
+			set_process(false)
 
 
 func _draw() -> void:

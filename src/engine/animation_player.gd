@@ -29,7 +29,7 @@ func delay_call(duration: float, callback: Callable) -> void:
 
 ## 对节点做属性动画
 func tween_property(node: Node, property: NodePath, from: Variant, to: Variant, duration: float, easing: String = "ease_out", on_complete: Callable = Callable()) -> Tween:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, property, to, duration).from(from)
 	_apply_ease(tween, easing)
 	if on_complete.is_valid():
@@ -41,7 +41,7 @@ func tween_property(node: Node, property: NodePath, from: Variant, to: Variant, 
 func fade_in(node: CanvasItem, duration: float = 0.3, on_complete: Callable = Callable()) -> Tween:
 	node.modulate.a = 0.0
 	node.visible = true
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "modulate:a", 1.0, duration).set_ease(Tween.EASE_OUT)
 	if on_complete.is_valid():
 		tween.tween_callback(on_complete)
@@ -50,7 +50,7 @@ func fade_in(node: CanvasItem, duration: float = 0.3, on_complete: Callable = Ca
 
 ## 淡出
 func fade_out(node: CanvasItem, duration: float = 0.3, on_complete: Callable = Callable()) -> Tween:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "modulate:a", 0.0, duration).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func(): node.visible = false)
 	if on_complete.is_valid():
@@ -62,7 +62,7 @@ func fade_out(node: CanvasItem, duration: float = 0.3, on_complete: Callable = C
 func pop_in(node: Control, duration: float = 0.3, on_complete: Callable = Callable()) -> Tween:
 	node.scale = Vector2.ZERO
 	node.visible = true
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "scale", Vector2(1.1, 1.1), duration * 0.6).set_ease(Tween.EASE_OUT)
 	tween.tween_property(node, "scale", Vector2.ONE, duration * 0.4).set_ease(Tween.EASE_IN_OUT)
 	if on_complete.is_valid():
@@ -72,7 +72,7 @@ func pop_in(node: Control, duration: float = 0.3, on_complete: Callable = Callab
 
 ## 弹跳缩放（1 → 0）
 func pop_out(node: Control, duration: float = 0.2, on_complete: Callable = Callable()) -> Tween:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "scale", Vector2.ZERO, duration).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func(): node.visible = false)
 	if on_complete.is_valid():
@@ -82,7 +82,7 @@ func pop_out(node: Control, duration: float = 0.2, on_complete: Callable = Calla
 
 ## 按钮按下反馈
 func button_press(node: Control) -> Tween:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "scale", Vector2(0.95, 0.95), 0.08).set_ease(Tween.EASE_IN)
 	tween.tween_property(node, "scale", Vector2.ONE, 0.08).set_ease(Tween.EASE_OUT)
 	_track_tween(tween)
@@ -91,7 +91,7 @@ func button_press(node: Control) -> Tween:
 ## 屏幕震动
 func screen_shake(node: Control, amplitude: float = 4.0, duration: float = 0.2) -> Tween:
 	var original_pos = node.position
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	var steps := 6
 	for i in steps:
 		var offset = Vector2(randf_range(-amplitude, amplitude), randf_range(-amplitude, amplitude))
@@ -108,7 +108,7 @@ func screen_shake(node: Control, amplitude: float = 4.0, duration: float = 0.2) 
 func gem_eliminate(node: Control, on_complete: Callable = Callable()) -> void:
 	# 记录原始颜色
 	var original_modulate = node.modulate
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	# 阶段1：放大 + 闪白（100ms）
 	tween.tween_property(node, "scale", Vector2(1.2, 1.2), 0.1).set_ease(Tween.EASE_OUT)
 	tween.parallel().tween_property(node, "modulate", Color.WHITE, 0.1)
@@ -124,7 +124,7 @@ func gem_eliminate(node: Control, on_complete: Callable = Callable()) -> void:
 
 ## 宝石下落弹跳
 func gem_bounce_fall(node: Control, target_y: float, on_complete: Callable = Callable()) -> void:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	# 下落到目标位置
 	tween.tween_property(node, "position:y", target_y, 0.15).set_ease(Tween.EASE_IN)
 	# 弹跳效果：超过目标 → 回弹 → 稳定
@@ -154,7 +154,7 @@ func combo_popup(parent: Control, text: String, position: Vector2, on_complete: 
 	label.z_index = 100
 	parent.add_child(label)
 
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(label)
 	# 弹出
 	tween.tween_property(label, "scale", Vector2(1.3, 1.3), 0.15).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "scale", Vector2.ONE, 0.1)
@@ -176,14 +176,14 @@ func combo_popup(parent: Control, text: String, position: Vector2, on_complete: 
 ## 怪物轻微上下浮动
 func monster_idle(node: Control, amplitude: float = 3.0, period: float = 1.5) -> Tween:
 	var original_y = node.position.y
-	var tween = get_tree().create_tween().set_loops()
+	var tween = get_tree().create_tween().bind_node(node).set_loops()
 	tween.tween_property(node, "position:y", original_y - amplitude, period * 0.5).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(node, "position:y", original_y + amplitude, period * 0.5).set_ease(Tween.EASE_IN_OUT)
 	return tween
 
 ## 宝石微发光脉动
 func gem_idle_glow(node: CanvasItem, period: float = 2.0) -> Tween:
-	var tween = get_tree().create_tween().set_loops()
+	var tween = get_tree().create_tween().bind_node(node).set_loops()
 	tween.tween_property(node, "modulate:a", 0.85, period * 0.5).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(node, "modulate:a", 1.0, period * 0.5).set_ease(Tween.EASE_IN_OUT)
 	return tween
@@ -196,14 +196,14 @@ func gem_idle_glow(node: CanvasItem, period: float = 2.0) -> Tween:
 func scene_transition_in(node: Control, duration: float = 0.3) -> Tween:
 	node.modulate.a = 0.0
 	node.visible = true
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "modulate:a", 1.0, duration).set_ease(Tween.EASE_OUT)
 	_track_tween(tween)
 	return tween
 
 ## 场景淡出
 func scene_transition_out(node: Control, duration: float = 0.2, on_complete: Callable = Callable()) -> Tween:
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	tween.tween_property(node, "modulate:a", 0.0, duration).set_ease(Tween.EASE_IN)
 	if on_complete.is_valid():
 		tween.tween_callback(on_complete)
@@ -225,7 +225,7 @@ func evolve_effect(node: Control, on_complete: Callable = Callable()) -> void:
 	flash.modulate.a = 0.0
 	node.add_child(flash)
 
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(node)
 	# 白光 0→0.8→0
 	tween.tween_property(flash, "modulate:a", 0.8, 0.15)
 	tween.tween_property(flash, "modulate:a", 0.0, 0.3)
@@ -250,7 +250,7 @@ func level_up_popup(parent: Control, level: int, position: Vector2, on_complete:
 	label.z_index = 100
 	parent.add_child(label)
 
-	var tween = get_tree().create_tween()
+	var tween = get_tree().create_tween().bind_node(label)
 	label.scale = Vector2.ZERO
 	tween.tween_property(label, "scale", Vector2(1.2, 1.2), 0.2).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "scale", Vector2.ONE, 0.1)

@@ -4,7 +4,7 @@
 # 重构: 纯代码驱动，删除所有 @onready
 # ============================================
 # 怪物进化界面，支持：
-# - 进化素材选择（通过monsterId传入）
+# - 进化素材选择（优先通过instanceId传入，兼容monsterId）
 # - 进化预览（前后对比）
 # - 进化条件检查（等级+道具）
 # - 进化动画（粒子+淡入淡出）
@@ -35,8 +35,10 @@ var _complete_vbox: VBoxContainer  # complete_panel 内的 VBox
 
 # ============ 游戏引用 ============
 var _game: Node = null
+var _storage: Node = null
 
 # ============ 状态数据 ============
+var instance_id: String = ""
 var monster_id: String = ""
 var monster_data: Dictionary = {}
 var evolve_data: Dictionary = {}
@@ -250,8 +252,18 @@ func init(data: Dictionary = {}) -> void:
 	# print("[SceneEvolve] 进化场景初始化")
 
 	_game = get_node_or_null("/root/GameManager")
+	_storage = get_node_or_null("/root/SaveManager")
 
-	monster_id = data.get("monsterId", "")
+	instance_id = str(data.get("instanceId", ""))
+	monster_id = str(data.get("monsterId", ""))
+	if instance_id.is_empty() and not monster_id.is_empty() and _storage and _storage.has_method("get_instances_by_monster_id"):
+		var instances: Array = _storage.get_instances_by_monster_id(monster_id)
+		if not instances.is_empty():
+			instance_id = str((instances[0] as Dictionary).get("instanceId", ""))
+	if not instance_id.is_empty() and _storage and _storage.has_method("get_monster_instance"):
+		var instance: Dictionary = _storage.get_monster_instance(instance_id)
+		if not instance.is_empty():
+			monster_id = str(instance.get("monsterId", monster_id))
 
 	# 重置动画状态
 	anim_state = {
@@ -418,12 +430,11 @@ func _update_evolve_condition() -> void:
 		return
 
 	# 检查等级条件
-	var SaveManager = load("res://src/core/save_manager.gd")
 	var monster_level := 1
-	if SaveManager and SaveManager.instance:
-		var player = SaveManager.instance.load_player()
-		if player.has("pokedex") and player["pokedex"].has(monster_id):
-			monster_level = player["pokedex"][monster_id].get("level", 1)
+	if _storage and _storage.has_method("get_instance_level") and not instance_id.is_empty():
+		monster_level = _storage.get_instance_level(instance_id)
+	elif _storage and _storage.has_method("get_monster_level"):
+		monster_level = _storage.get_monster_level(monster_id)
 
 	var level_required: int = evolve_data.get("level", 10)
 	var level_ok := monster_level >= level_required
@@ -431,8 +442,8 @@ func _update_evolve_condition() -> void:
 	# 检查道具条件
 	var required_item: String = evolve_data.get("item", _get_default_evolution_item(monster_id))
 	var item_count := 0
-	if SaveManager and SaveManager.instance:
-		item_count = SaveManager.instance.get_item_count(required_item)
+	if _storage and _storage.has_method("get_item_count"):
+		item_count = _storage.get_item_count(required_item)
 	var item_ok := item_count > 0
 
 	can_evolve = level_ok and item_ok
@@ -537,40 +548,25 @@ func _execute_evolution() -> void:
 
 	# 消耗道具
 	var required_item: String = evolve_data.get("item", _get_default_evolution_item(monster_id))
-	var SaveManager = load("res://src/core/save_manager.gd")
-	if SaveManager and SaveManager.instance:
-		SaveManager.instance.use_item(required_item, 1)
+	if _storage and _storage.has_method("use_item"):
+		_storage.use_item(required_item, 1)
 
-	# 更新存档
-	if SaveManager and SaveManager.instance:
-		var player = SaveManager.instance.load_player()
-		var captured: Array = player.get("captured", [])
-		var idx := captured.find(monster_id)
-		if idx != -1:
-			captured[idx] = evolved_monster["id"]
+	if _storage and _storage.has_method("evolve_instance") and not instance_id.is_empty():
+		var result: Dictionary = _storage.evolve_instance(instance_id)
+		if not bool(result.get("ok", false)):
+			can_evolve = false
+			condition_text = "进化失败：%s" % str(result.get("reason", "unknown"))
+			_update_condition()
+			return
+	else:
+		# 兼容旧入口：没有实例时不再直接改写 captured/team/pokedex，避免破坏怪物池。
+		can_evolve = false
+		condition_text = "缺少怪物实例"
+		_update_condition()
+		return
 
-		# 替换队伍中的怪物
-		var team: Dictionary = SaveManager.instance.load_team()
-		if team.get("leader") == monster_id:
-			team["leader"] = evolved_monster["id"]
-		if team.get("member1") == monster_id:
-			team["member1"] = evolved_monster["id"]
-		if team.get("member2") == monster_id:
-			team["member2"] = evolved_monster["id"]
-		SaveManager.instance.save_team(team)
-
-		# 更新图鉴记录
-		if not player.has("pokedex"):
-			player["pokedex"] = {}
-		var old_data: Dictionary = player["pokedex"].get(monster_id, {"level": 1, "exp": 0})
-		player["pokedex"][evolved_monster["id"]] = old_data.duplicate()
-		player["pokedex"].erase(monster_id)
-		SaveManager.instance.save_player(player)
-
-	# print("[SceneEvolve] %s 进化为 %s" % [monster_data.get("name", "?"), evolved_monster.get("name", "?")])
-
-	if SaveManager and SaveManager.instance and SaveManager.instance.has_method("add_achievement_progress"):
-		SaveManager.instance.add_achievement_progress("evolveCount", 1)
+	if _storage and _storage.has_method("add_achievement_progress"):
+		_storage.add_achievement_progress("evolveCount", 1)
 
 	anim_state["evolve_complete"] = true
 	_update_complete_ui()
@@ -653,7 +649,7 @@ func _update_complete_ui() -> void:
 
 	# 返回按钮
 	var return_btn := Button.new()
-	return_btn.text = "返回图鉴"
+	return_btn.text = "返回牧场"
 	return_btn.pressed.connect(_on_return_to_album)
 	_complete_vbox.add_child(return_btn)
 
@@ -725,11 +721,11 @@ func _update_monster_card_to_container(container: VBoxContainer, data: Dictionar
 	container.add_child(card)
 
 func _on_return_to_album() -> void:
-	SceneManager.switch_scene("album", {}, "slide")
+	SceneManager.switch_scene("ranch", {}, "slide")
 
 # ============ 事件处理 ============
 func _on_back_pressed() -> void:
-	SceneManager.switch_scene("album", {}, "slide")
+	SceneManager.switch_scene("ranch", {}, "slide")
 
 # ============ 工具方法 ============
 func _get_element_color(element: String) -> Color:

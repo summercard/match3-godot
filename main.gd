@@ -3,6 +3,7 @@
 extends Control
 
 const DESIGN_SIZE: Vector2 = Vector2(375.0, 667.0)
+const TARGET_FPS: int = 60
 
 # 场景映射：场景名 → 脚本路径
 const SCENE_MAP: Dictionary = {
@@ -29,11 +30,18 @@ var _current_scene_name: String = ""
 var _letterbox_bg: ColorRect = null
 
 func _ready() -> void:
+	_apply_runtime_performance_defaults()
 	_configure_debug_window()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_create_letterbox_background()
 	# 启动时加载开始画面
 	switch_scene("start")
+
+func _apply_runtime_performance_defaults() -> void:
+	if Engine.max_fps <= 0 or Engine.max_fps > TARGET_FPS:
+		Engine.max_fps = TARGET_FPS
+	if DisplayServer.get_name() != "headless":
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 
 func _configure_debug_window() -> void:
 	if DisplayServer.get_name() == "headless" or OS.has_feature("mobile"):
@@ -99,7 +107,10 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 func _layout_current_scene() -> void:
 	if _current_scene == null:
 		return
-	var viewport_size := get_viewport_rect().size
+	var viewport_size := Vector2(
+		float(ProjectSettings.get_setting("display/window/size/viewport_width", DESIGN_SIZE.x)),
+		float(ProjectSettings.get_setting("display/window/size/viewport_height", DESIGN_SIZE.y))
+	)
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
 	var scale_factor: float = minf(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y)

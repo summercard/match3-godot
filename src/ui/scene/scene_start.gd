@@ -95,7 +95,7 @@ func _process(delta: float) -> void:
 			_ready_flag = true
 
 	# 呼吸脉冲
-	_pulse += delta * 2.0 * _pulse_dir
+	_pulse += delta * 1.0 * _pulse_dir  # 速度减半（原2.0 → 1.0）
 	if _pulse > 1.0:
 		_pulse = 1.0
 		_pulse_dir = -1
@@ -140,10 +140,6 @@ func _process(delta: float) -> void:
 # ============================================
 # 输入处理（长按交互）
 # ============================================
-
-func _input(event: InputEvent) -> void:
-	_gui_input(event)
-
 
 func _start_glow_timer() -> void:
 	# 公开方法：启动长按 glow 计时器
@@ -442,14 +438,14 @@ func _draw_version_art(w: float, h: float) -> void:
 	var pw := 82.0 * _sx
 	var ph := 30.0 * _sy
 	var px := (w - pw) / 2.0
-	var py := h * 0.952
+	var py := h * 0.952 - 11.0 * _sy  # 往上移11像素（原10），文字别动
 
 	if plaque:
 		draw_texture_rect(plaque, Rect2(px, py, pw, ph), false,
 			Color(1, 1, 1, _opacity * 0.72))
 
 	var vfs := 12.0 * _sc
-	_draw_centered_text("v0.1.0", w / 2.0, py + ph / 2.0, vfs,
+	_draw_centered_text("v0.1.0", w / 2.0, py + ph / 2.0 - vfs * 0.35 + 10.0 * _sy, vfs,  # 补偿plaque上移，保持文字位置不变
 		Color(1, 1, 1, _opacity * 0.72))
 
 
@@ -542,12 +538,15 @@ func _draw_glow_button() -> void:
 	var glow_i := (_pulse + _lp_glow * 0.5) * glow_boost
 	var glow_a := 0.5 + glow_i * 0.5
 	var radius := maxf(btn.size.x, btn.size.y) * 1.2 * effective_radius_mult
+	# 往下移并降低亮度
+	var glow_center := Vector2(center.x, center.y + 10.0 * _sy)
+	var glow_alpha_mult := 0.08  # 透明度降低（原0.14 → 0.08）
 
 	for i in range(10):
 		var t := float(i) / 10.0
 		var r := radius * (1.0 - t * 0.45)
-		var a := glow_a * (1.0 - t) * 0.14 * _opacity
-		draw_circle(center, r,
+		var a := glow_a * (1.0 - t) * glow_alpha_mult * _opacity
+		draw_circle(glow_center, r,
 			Color(C_PRIMARY.r, C_PRIMARY.g, C_PRIMARY.b, a))
 
 	# ---- 按钮背景 ----

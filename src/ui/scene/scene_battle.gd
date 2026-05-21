@@ -371,17 +371,21 @@ func _init_battle() -> void:
 	
 	var player_level := 5
 	var player_team_ids: Array = ["monster_001", "monster_002", "monster_003"]
+	var player_team_units: Array = []
 	if _storage:
 		var player: Dictionary = _storage.load_player()
 		player_level = maxi(player.get("level", 1), 5)
-		var team: Dictionary = _storage.load_team()
-		player_team_ids = []
-		for slot: String in ["leader", "member1", "member2"]:
-			var monster_id: String = team.get(slot, "")
-			if monster_id != "":
-				player_team_ids.append(monster_id)
-		if player_team_ids.is_empty():
-			player_team_ids = ["monster_001", "monster_002", "monster_003"]
+		if _storage.has_method("get_team_battle_stats"):
+			player_team_units = _storage.get_team_battle_stats()
+		if player_team_units.is_empty():
+			var team: Dictionary = _storage.load_team()
+			player_team_ids = []
+			for slot: String in ["leader", "member1", "member2"]:
+				var monster_id: String = team.get(slot, "")
+				if monster_id != "":
+					player_team_ids.append(monster_id)
+			if player_team_ids.is_empty():
+				player_team_ids = ["monster_001", "monster_002", "monster_003"]
 	
 	var enemy_ids: Array = _stage_data.get("enemies", ["enemy_001"])
 	var enemy_level: int = _stage_data.get("enemyLevel", 1)
@@ -389,7 +393,10 @@ func _init_battle() -> void:
 		_battle.queue_free()
 	_battle = BattleManager.new()
 	add_child(_battle)
-	_battle.init(player_team_ids, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
+	if not player_team_units.is_empty() and _battle.has_method("init_with_player_team"):
+		_battle.init_with_player_team(player_team_units, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
+	else:
+		_battle.init(player_team_ids, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
 	
 	# 连接 BOSS 技能信号
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
@@ -1383,6 +1390,12 @@ func _process(delta: float) -> void:
 	# 更新消息
 	_message_timer = BattleAnimationControllerScript.tick_countdown(_message_timer, effective_delta)
 	
+	# 更新阶段切换状态
+	if not _phase_transition_state.is_empty():
+		var pt_timer: float = _phase_transition_state.get("timer", 0.0)
+		pt_timer = BattleAnimationControllerScript.tick_countdown(pt_timer, effective_delta)
+		_phase_transition_state["timer"] = pt_timer
+	
 	# 更新连击弹窗
 	if _combo_popup.has("combo"):
 		_update_combo_popup(effective_delta)
@@ -1918,6 +1931,9 @@ func _draw_phase_transition() -> void:
 		return
 	
 	var timer: float = _phase_transition_state.get("timer", 0.0)
+	if timer <= 0:
+		_phase_transition_state.clear()  # 状态清空
+		return
 	if timer <= 0.5:
 		return
 	
@@ -2142,8 +2158,8 @@ func _get_texture(path: String) -> Texture2D:
 	return _texture_cache[path]
 
 func _get_monster_texture(monster: Dictionary) -> Texture2D:
-	var monster_id: String = monster.get("id", "")
-	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
+	var monster_id: String = monster.get("monsterId", monster.get("id", ""))
+	var path: String = MonsterArtDBScript.get_art_path(monster_id, "battle")
 	return _get_texture(path)
 
 func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:

@@ -1,12 +1,12 @@
 # Godot界面美术包装状态对照表
 
-更新时间：2026-05-19
+更新时间：2026-05-20
 
 ## 总览
 
 - Godot 运行入口登记界面：16 个。
-- 已完成第一版美术代入：11 个。
-- 有概念图但尚未完成 Godot 代入：5 个，其中队伍编成和怪物进化共用一张概念图。
+- 已完成第一版美术代入：14 个。
+- 有概念图但尚未完成 Godot 代入：2 个，其中怪物进化与队伍编成共用一张概念图。
 - 暂无独立概念图：0 个。
 - 完整执行清单见：`美术开发/界面美术资产提取制作代入总List.md`。
 
@@ -27,8 +27,8 @@
 | 11 | shop | 商店 | `src/ui/scene/scene_shop.gd` | 已基于概念图用 image-2 生成 UI/背景/魔法师、道具、宝石提取源；分页、四列商品卡、礼包横幅、购买确认弹窗已改为 Canvas 绘制资产 | 有：`美术开发/概念图/10_商店_shop.png` | 已拆分：`美术开发/正式拆分/shop/`；运行目录：`assets/images/shop/` | 进入 Godot 运行窗口做真实购买流程和滚动视觉验收 |
 | 12 | inventory | 背包 | `src/ui/scene/scene_inventory.gd` | 已基于概念图用 image-2 生成背包 UI 提取源；顶部栏、四分类、5 列道具格、选中/锁定态、滚动条、底部详情面板和使用按钮已改为 Canvas 绘制资产 | 有：`美术开发/概念图/11_背包_inventory.png` | 已拆分：`美术开发/正式拆分/inventory/`；运行目录：`assets/images/inventory/`；道具/进化石通用目录：`assets/images/items/` | 进入 Godot 运行窗口做真实背包视觉验收 |
 | 13 | achievement | 成就 | `src/ui/scene/scene_achievement.gd` | 已基于概念图用 image-2 生成成就 UI/徽章提取源；奖杯总览、五分类标签、成就卡、徽章、奖励槽、进度条、领取/已完成/锁定态已改为 Canvas 绘制资产，并加入等比图标、固定坐标、文字宽度和点击区一致性约束 | 有：`美术开发/概念图/12_成就_achievement.png` | 已拆分：`美术开发/正式拆分/achievement/`；运行目录：`assets/images/achievement/`；金币复用 `assets/images/main/`；奖励槽复用 `assets/images/inventory/` | 进入 Godot 运行窗口做真实成就视觉验收 |
-| 14 | settings | 设置 | `src/ui/scene/scene_settings.gd` | 未包装 | 有：`美术开发/概念图/13_设置_settings.png` | 待专业拆分，可复用通用 UI | 低优先级，后置包装 |
-| 15 | sign_in | 每日签到 | `src/ui/scene/scene_sign_in.gd` | 未包装 | 有：`美术开发/概念图/14_每日签到_sign_in.png` | 待专业拆分，可复用奖励资产 | 拆分签到日历、今日高亮、领取状态 |
+| 14 | settings | 设置 | `src/ui/scene/scene_settings.gd` | 已按“直接用已有元素拼起来”完成第一版包装；背景、返回、标题、面板、设置行、按钮、弹窗全部复用已有运行资产；保留音效/音乐/重置并新增震动、画质、战斗表现、恢复默认 | 有：`美术开发/概念图/13_设置_settings.png` | 不新增 settings 运行资产；详见 `美术开发/设置界面资产代入表.md` | 进入 Godot 运行窗口验收设置保存、弹窗、命中区和文字对齐 |
+| 15 | sign_in | 每日签到 | `src/ui/scene/scene_sign_in.gd` | 已基于概念图完成 image-2 UI/奖励提取、正式拆分、运行目录导入和 Canvas 代码代入；7 日奖励卡、今日高亮、月累计宝箱、领取按钮和成功反馈已包装 | 有：`美术开发/概念图/14_每日签到_sign_in.png` | 已拆分：`美术开发/正式拆分/sign_in/`；运行目录：`assets/images/sign_in/` | 进入 Godot 运行窗口验收真实签到流程 |
 | 16 | tutorial | 新手教程 | `src/ui/scene/scene_tutorial.gd` | 未包装 | 有：`美术开发/概念图/15_新手教程_tutorial.png` | 待专业拆分，依赖主流程资产 | 主流程稳定后拆分引导资产 |
 
 ## 按状态归类
@@ -42,18 +42,18 @@
 5. 战斗结算 result
 6. 队伍编成 team
 7. 怪物图鉴 album
-8. 怪物牧场 ranch
-9. 商店 shop
-10. 背包 inventory
-11. 成就 achievement
+8. 战斗准备 battle_prepare
+9. 怪物牧场 ranch
+10. 商店 shop
+11. 背包 inventory
+12. 成就 achievement
+13. 每日签到 sign_in
+14. 设置 settings
 
 ### 有概念图，可继续专业拆分/代入
 
 1. 怪物进化 evolve
-2. 战斗准备 battle_prepare
-3. 设置 settings
-4. 每日签到 sign_in
-5. 新手教程 tutorial
+2. 新手教程 tutorial
 
 ### 暂无独立概念图
 
