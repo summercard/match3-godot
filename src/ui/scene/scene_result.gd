@@ -549,9 +549,6 @@ func destroy() -> void:
 	_entry_timer = 0.0
 	_time_acc = 0.0
 	_capture_anim_timer = 0.0
-	_levelup_anim_progress = 0.0
-	_capture_waiting = false
-	_capture_phase = ""
 	_has_next_stage = false
 	_next_btn_rect = Rect2()
 	_back_btn_rect = Rect2()

@@ -415,12 +415,12 @@ func find_matches() -> Dictionary:
 		var c: int = 0
 		while c < cols - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_obstacle(r, c):
+			if gem_type == "" or gem_type == null or is_obstacle(r, c) or is_locked(r, c):
 				c += 1
 				continue
-			if grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
+			if not is_obstacle(r, c + 1) and not is_obstacle(r, c + 2) and not is_locked(r, c + 1) and not is_locked(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
 				var end: int = c + 2
-				while end + 1 < cols and grid[r][end + 1] == gem_type:
+				while end + 1 < cols and not is_obstacle(r, end + 1) and not is_locked(r, end + 1) and grid[r][end + 1] == gem_type:
 					end += 1
 				var length: int = end - c + 1
 				var cells: Array = []
@@ -439,12 +439,12 @@ func find_matches() -> Dictionary:
 		var r: int = 0
 		while r < rows - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_obstacle(r, c):
+			if gem_type == "" or gem_type == null or is_obstacle(r, c) or is_locked(r, c):
 				r += 1
 				continue
-			if grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
+			if not is_obstacle(r + 1, c) and not is_obstacle(r + 2, c) and not is_locked(r + 1, c) and not is_locked(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
 				var end: int = r + 2
-				while end + 1 < rows and grid[end + 1][c] == gem_type:
+				while end + 1 < rows and not is_obstacle(end + 1, c) and not is_locked(end + 1, c) and grid[end + 1][c] == gem_type:
 					end += 1
 				var length: int = end - r + 1
 				var cells: Array = []
@@ -616,7 +616,6 @@ func get_cross_explosion_positions(center_row: int, center_col: int) -> Array:
 
 ## 计算3×3炸弹爆炸范围（以炸弹宝石为中心，不含中心点本身）
 ## 返回 [{ row, col, type }] 会被炸弹波及的格子
-## 同时伤害范围内的障碍物
 func get_bomb_explosion_positions(center_row: int, center_col: int) -> Array:
 	var positions: Array = []
 	for dr: int in range(-1, 2):
@@ -627,13 +626,25 @@ func get_bomb_explosion_positions(center_row: int, center_col: int) -> Array:
 			var nc: int = center_col + dc
 			if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
 				if is_obstacle(nr, nc):
-					# 炸弹爆炸伤害范围内障碍物
-					damage_obstacle(nr, nc)
 					continue
 				var gem_type: String = grid[nr][nc]
 				if gem_type != "" and gem_type != null:
 					positions.append({ "row": nr, "col": nc, "type": gem_type })
 	return positions
+
+## 对炸弹范围内障碍物造成一次伤害
+func damage_bomb_obstacles(center_row: int, center_col: int) -> Array:
+	var destroyed: Array = []
+	for dr: int in range(-1, 2):
+		for dc: int in range(-1, 2):
+			if dr == 0 and dc == 0:
+				continue
+			var nr: int = center_row + dr
+			var nc: int = center_col + dc
+			if nr >= 0 and nr < rows and nc >= 0 and nc < cols and is_obstacle(nr, nc):
+				if damage_obstacle(nr, nc):
+					destroyed.append({ "row": nr, "col": nc })
+	return destroyed
 
 ## 获取棋盘上所有指定类型宝石的位置（用于彩虹消除）
 ## exclude_set: Array of "row,col" 字符串，这些位置的宝石已在普通消除中移除，不再重复
