@@ -1,15 +1,15 @@
 {
   "status": "running",
-  "cycleCount": 5,
-  "currentPhase": 12,
-  "totalPhases": 12,
+  "cycleCount": 6,
+  "currentPhase": 13,
+  "totalPhases": 13,
   "lastTask": "code",
   "project": "match3-godot",
   "projectPath": "/Users/summercards/WeChatProjects/match3-godot",
   "sourcePath": "/Users/summercards/WeChatProjects/minigame-1",
   "startedAt": "2026-05-21T04:48:00Z",
-  "updatedAt": "2026-05-21T03:55:00Z",
-  "completedPhases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  "currentTarget": "Phase 12: 待规划",
-  "notes": "Phase 11 completed: scene_result.gd destroy() 完整清理所有动画状态变量（_exp_anim_progress/_button_anim_progress/_entry_timer/_levelup_anim_progress/_capture_waiting/_capture_phase/_has_next_stage/_next_btn_rect/_back_btn_rect/_retry_btn_rect），scene_battle_prepare.gd destroy() 简化清理。git commit 024eb7f。"
+  "updatedAt": "2026-05-21T04:19:00Z",
+  "completedPhases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  "currentTarget": "Phase 13: 待规划",
+  "notes": "Phase 12 completed: scene_main.gd destroy()清理_particles和_tooltip（无动画状态变量）。scene_shop.gd/scene_sign_in.gd无额外destroy()需求。godot --headless --check_only通过。git commit bd7a876。"
 }

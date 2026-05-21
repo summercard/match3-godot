@@ -9,9 +9,10 @@ MAP_REWARD_TOP = 566
 OUT_DIR = ROOT / "美术开发" / "验收" / "stage_select"
 HEADER_BAR_RECT = (76, 12, 286, 66)
 HEADER_BADGE_RECT = (84, 21, 38, 42)
-HEADER_TITLE_RECT = (126, 23, 154, 22)
+HEADER_TITLE_RECT = (126, 23, 190, 22)
 HEADER_CHAPTER_TEXT_RECT = (126, 23, 64, 22)
-HEADER_NAME_TEXT_RECT = (190, 23, 90, 22)
+HEADER_NAME_TEXT_RECT = (236, 23, 80, 22)
+HEADER_ART_CREST_RECT = (190, 12, 46, 28)
 HEADER_STAR_RECT = (147, 52, 18, 18)
 HEADER_STAR_TEXT_RECT = (169, 50, 74, 22)
 HEADER_PREV_RECT = (DESIGN_W - 89, 30, 34, 34)
@@ -182,6 +183,7 @@ def render_case(case_key: str, bg_name: str, points: list[tuple[int, int]], boss
         checks.append(("顶部左翻页按钮不压标题文字", not overlaps(HEADER_PREV_RECT, HEADER_TITLE_RECT), f"prev={HEADER_PREV_RECT}, title={HEADER_TITLE_RECT}"))
     checks.append(("顶部章节号不压章节徽章", not overlaps(HEADER_CHAPTER_TEXT_RECT, HEADER_BADGE_RECT), f"chapter={HEADER_CHAPTER_TEXT_RECT}, badge={HEADER_BADGE_RECT}"))
     checks.append(("顶部章节名不压章节号", not overlaps(HEADER_NAME_TEXT_RECT, HEADER_CHAPTER_TEXT_RECT), f"name={HEADER_NAME_TEXT_RECT}, chapter={HEADER_CHAPTER_TEXT_RECT}"))
+    checks.append(("顶部章节名避开标题条中央装饰", not overlaps(HEADER_NAME_TEXT_RECT, HEADER_ART_CREST_RECT), f"name={HEADER_NAME_TEXT_RECT}, crest={HEADER_ART_CREST_RECT}"))
     if show_next:
         checks.append(("顶部右翻页按钮不压标题文字", not overlaps(HEADER_NEXT_RECT, HEADER_TITLE_RECT), f"next={HEADER_NEXT_RECT}, title={HEADER_TITLE_RECT}"))
         checks.append(("顶部右翻页按钮在标题条内", rect_bounds(HEADER_NEXT_RECT)[2] <= rect_bounds(HEADER_BAR_RECT)[2], f"next={HEADER_NEXT_RECT}, header={HEADER_BAR_RECT}"))

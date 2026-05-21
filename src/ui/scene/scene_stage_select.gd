@@ -19,9 +19,9 @@ const MAP_CONTENT_TOP: float = 78.0
 const MAP_REWARD_TOP: float = 566.0
 const HEADER_BAR_RECT: Rect2 = Rect2(76.0, 12.0, 286.0, 66.0)
 const HEADER_BADGE_RECT: Rect2 = Rect2(84.0, 21.0, 38.0, 42.0)
-const HEADER_TITLE_RECT: Rect2 = Rect2(126.0, 23.0, 154.0, 22.0)
+const HEADER_TITLE_RECT: Rect2 = Rect2(126.0, 23.0, 190.0, 22.0)
 const HEADER_CHAPTER_TEXT_RECT: Rect2 = Rect2(126.0, 23.0, 64.0, 22.0)
-const HEADER_NAME_TEXT_RECT: Rect2 = Rect2(190.0, 23.0, 90.0, 22.0)
+const HEADER_NAME_TEXT_RECT: Rect2 = Rect2(236.0, 23.0, 80.0, 22.0)
 const HEADER_STAR_RECT: Rect2 = Rect2(147.0, 52.0, 18.0, 18.0)
 const HEADER_STAR_TEXT_RECT: Rect2 = Rect2(169.0, 50.0, 74.0, 22.0)
 const HEADER_PREV_RECT: Rect2 = Rect2(DESIGN_W - 89.0, 30.0, 34.0, 34.0)
@@ -52,6 +52,10 @@ const CHAPTER_THEME_BACKGROUNDS := {
 	"star": "res://assets/images/stage/stage_map_bg_star.png",
 	"chaos": "res://assets/images/stage/stage_map_bg_chaos.png",
 	"light": "res://assets/images/stage/stage_map_bg_light.png"
+}
+
+const CHAPTER_BACKGROUND_OVERRIDES := {
+	"chapter_3": "res://assets/images/stage/stage_map_bg_chapter_03_mystic_forest.png"
 }
 
 const CHAPTER_THEME_TINTS := {
@@ -795,8 +799,7 @@ func _draw() -> void:
 		_draw_sweep_dialog()
 
 func _draw_stage_background() -> void:
-	var element := _current_chapter_element()
-	var bg_path := str(CHAPTER_THEME_BACKGROUNDS.get(element, "res://assets/images/stage/stage_map_bg.png"))
+	var bg_path := _current_chapter_background_path()
 	var tex := _get_texture(bg_path)
 	if tex == null:
 		tex = _get_texture("res://assets/images/stage/stage_map_bg.png")
@@ -814,6 +817,14 @@ func _current_chapter() -> Dictionary:
 func _current_chapter_element() -> String:
 	var chapter := _current_chapter()
 	return str(chapter.get("element", "grass"))
+
+func _current_chapter_background_path() -> String:
+	var chapter := _current_chapter()
+	var chapter_id := str(chapter.get("id", ""))
+	if CHAPTER_BACKGROUND_OVERRIDES.has(chapter_id):
+		return str(CHAPTER_BACKGROUND_OVERRIDES[chapter_id])
+	var element := str(chapter.get("element", "grass"))
+	return str(CHAPTER_THEME_BACKGROUNDS.get(element, "res://assets/images/stage/stage_map_bg.png"))
 
 func _draw_chapter_header() -> void:
 	if _chapters.is_empty() or _current_chapter_index >= _chapters.size():
