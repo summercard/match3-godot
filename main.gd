@@ -111,19 +111,15 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 func _layout_current_scene() -> void:
 	if _current_scene == null:
 		return
-	var viewport_size := Vector2(
-		float(ProjectSettings.get_setting("display/window/size/viewport_width", DESIGN_SIZE.x)),
-		float(ProjectSettings.get_setting("display/window/size/viewport_height", DESIGN_SIZE.y))
-	)
+	var viewport_size := size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
-		return
-	var scale_factor: float = minf(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y)
+		viewport_size = DESIGN_SIZE
 	_current_scene.anchor_left = 0.0
 	_current_scene.anchor_top = 0.0
 	_current_scene.anchor_right = 0.0
 	_current_scene.anchor_bottom = 0.0
-	_current_scene.scale = Vector2.ONE * scale_factor
-	_current_scene.position = (viewport_size - DESIGN_SIZE * scale_factor) * 0.5
+	_current_scene.scale = Vector2.ONE
+	_current_scene.position = (viewport_size - DESIGN_SIZE) * 0.5
 	_current_scene.size = DESIGN_SIZE
 
 func _initialize_scene(scene_node: Control, scene_name: String, data: Dictionary) -> void:
