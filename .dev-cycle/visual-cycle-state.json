@@ -1,15 +1,15 @@
 {
   "status": "running",
-  "cycleCount": 4,
-  "currentPhase": 11,
-  "totalPhases": 11,
+  "cycleCount": 5,
+  "currentPhase": 12,
+  "totalPhases": 12,
   "lastTask": "code",
   "project": "match3-godot",
   "projectPath": "/Users/summercards/WeChatProjects/match3-godot",
   "sourcePath": "/Users/summercards/WeChatProjects/minigame-1",
   "startedAt": "2026-05-21T04:48:00Z",
-  "updatedAt": "2026-05-21T03:28:00Z",
-  "completedPhases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  "currentTarget": "Phase 11: 待规划",
-  "notes": "Phase 10 completed: 补全 damage_dealt/enemy_attacked/skill_ready 信号链路，在 _init_battle() 中连接，新增 _on_damage_dealt()/_on_enemy_attacked()/_on_skill_ready() 三个回调，伤害数字颜色分类（克制/普通/弱效），护盾吸收显示，技能充能完成提示。godot --check_only 通过。"
+  "updatedAt": "2026-05-21T03:55:00Z",
+  "completedPhases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "currentTarget": "Phase 12: 待规划",
+  "notes": "Phase 11 completed: scene_result.gd destroy() 完整清理所有动画状态变量（_exp_anim_progress/_button_anim_progress/_entry_timer/_levelup_anim_progress/_capture_waiting/_capture_phase/_has_next_stage/_next_btn_rect/_back_btn_rect/_retry_btn_rect），scene_battle_prepare.gd destroy() 简化清理。git commit 024eb7f。"
 }
