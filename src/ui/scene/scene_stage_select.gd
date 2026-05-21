@@ -10,13 +10,34 @@ const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 
 const MAP_NODE_POSITIONS: Array[Vector2] = [
-	Vector2(62, 478), Vector2(88, 414), Vector2(132, 356), Vector2(192, 382),
-	Vector2(250, 354), Vector2(253, 286), Vector2(148, 284), Vector2(88, 226),
-	Vector2(96, 166), Vector2(164, 122)
+	Vector2(62, 500), Vector2(96, 420), Vector2(144, 358), Vector2(202, 386),
+	Vector2(276, 350), Vector2(268, 292), Vector2(188, 292), Vector2(106, 238),
+	Vector2(116, 176), Vector2(178, 128)
 ]
-const MAP_BOSS_POSITION: Vector2 = Vector2(292, 162)
+const MAP_BOSS_POSITION: Vector2 = Vector2(292, 158)
 const MAP_CONTENT_TOP: float = 78.0
 const MAP_REWARD_TOP: float = 566.0
+const HEADER_BAR_RECT: Rect2 = Rect2(76.0, 12.0, 286.0, 66.0)
+const HEADER_BADGE_RECT: Rect2 = Rect2(84.0, 21.0, 38.0, 42.0)
+const HEADER_TITLE_RECT: Rect2 = Rect2(126.0, 23.0, 190.0, 22.0)
+const HEADER_STAR_RECT: Rect2 = Rect2(147.0, 52.0, 18.0, 18.0)
+const HEADER_STAR_TEXT_RECT: Rect2 = Rect2(169.0, 50.0, 74.0, 22.0)
+const HEADER_PREV_RECT: Rect2 = Rect2(DESIGN_W - 89.0, 30.0, 34.0, 34.0)
+const HEADER_NEXT_RECT: Rect2 = Rect2(DESIGN_W - 49.0, 30.0, 34.0, 34.0)
+const REWARD_PANEL_RECT: Rect2 = Rect2(17.0, MAP_REWARD_TOP, DESIGN_W - 34.0, 84.0)
+const REWARD_SLOT_SIZE: Vector2 = Vector2(32.0, 34.0)
+const REWARD_SLOT_GAP: float = 7.0
+
+const MAP_STAGE_POSITION_PRESETS := {
+	4: [
+		Vector2(74, 500), Vector2(134, 385), Vector2(278, 366),
+		Vector2(194, 282)
+	],
+	5: [
+		Vector2(78, 500), Vector2(118, 418), Vector2(176, 326),
+		Vector2(276, 346), Vector2(168, 218)
+	]
+}
 
 const CHAPTER_THEME_BACKGROUNDS := {
 	"grass": "res://assets/images/stage/stage_map_bg_grass.png",
@@ -68,6 +89,17 @@ const REWARD_ITEMS: Array[Dictionary] = [
 	{"key": "gem_thunder", "count": "x2"},
 	{"key": "gem_light", "count": "x1"}
 ]
+
+const REWARD_ICON_PATHS := {
+	"gold_coin": "res://assets/images/main/icon_gold_v2.png",
+	"exp_badge": "res://assets/images/main/icon_exp_star.png",
+	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
+	"gem_fire": "res://assets/images/battle/gems/gem_fire.png",
+	"gem_water": "res://assets/images/battle/gems/gem_water.png",
+	"gem_grass": "res://assets/images/battle/gems/gem_grass.png",
+	"gem_thunder": "res://assets/images/battle/gems/gem_thunder.png",
+	"gem_light": "res://assets/images/battle/gems/gem_light.png"
+}
 
 # === 成员变量（替代 @onready）===
 var _back_btn: TextureButton
@@ -455,6 +487,10 @@ func _sample_stage_positions(count: int) -> Array[Vector2]:
 	var result: Array[Vector2] = []
 	if count <= 0:
 		return result
+	if MAP_STAGE_POSITION_PRESETS.has(count):
+		for pos: Vector2 in MAP_STAGE_POSITION_PRESETS[count]:
+			result.append(pos)
+		return result
 	var index_presets := {
 		1: [0],
 		2: [0, 6],
@@ -505,13 +541,13 @@ func _on_touch_start(x: float, y: float) -> void:
 		return
 	
 	# 上一章按钮
-	if _current_chapter_index > 0 and Rect2(72, 30, 34, 34).has_point(Vector2(x, y)):
+	if _current_chapter_index > 0 and HEADER_PREV_RECT.has_point(Vector2(x, y)):
 		_touched_btn = "prevChapter"
 		return
 	
 	# 下一章按钮（标题栏右侧）
 	if _current_chapter_index < _chapters.size() - 1:
-		if Rect2(DESIGN_W - 45, 30, 34, 34).has_point(Vector2(x, y)):
+		if HEADER_NEXT_RECT.has_point(Vector2(x, y)):
 			_touched_btn = "nextChapter"
 		return
 	
@@ -543,13 +579,13 @@ func _on_tap(x: float, y: float) -> void:
 		return
 	
 	# 上一章按钮
-	if _current_chapter_index > 0 and Rect2(72, 30, 34, 34).has_point(Vector2(x, y)):
+	if _current_chapter_index > 0 and HEADER_PREV_RECT.has_point(Vector2(x, y)):
 		_switch_chapter(-1)
 		return
 	
 	# 下一章按钮
 	if _current_chapter_index < _chapters.size() - 1:
-		if Rect2(DESIGN_W - 45, 30, 34, 34).has_point(Vector2(x, y)):
+		if HEADER_NEXT_RECT.has_point(Vector2(x, y)):
 			_switch_chapter(1)
 			return
 	
@@ -782,8 +818,6 @@ func _draw_chapter_header() -> void:
 		return
 	var chapter: Dictionary = _chapters[_current_chapter_index]
 	var current_num := _current_chapter_index + 1
-	var header_y := 12.0
-	var header_h := 66.0
 	var back_pressed: bool = _touched_btn == "backBtn"
 	var theme_color: Color = CHAPTER_THEME_TINTS.get(_current_chapter_element(), Color(0.30, 0.95, 0.34))
 	
@@ -792,28 +826,28 @@ func _draw_chapter_header() -> void:
 	
 	var header := _get_texture("res://assets/images/stage/ui_header_bar.png")
 	if header:
-		_draw_texture_fit(header, Rect2(76, header_y, 286, header_h))
+		_draw_texture_fit(header, HEADER_BAR_RECT)
 	else:
-		_draw_rounded_rect(76, header_y, 286, header_h, 8, Color(0.1, 0.15, 0.25, 0.86))
+		_draw_rounded_rect(HEADER_BAR_RECT.position.x, HEADER_BAR_RECT.position.y, HEADER_BAR_RECT.size.x, HEADER_BAR_RECT.size.y, 8, Color(0.1, 0.15, 0.25, 0.86))
 	
-	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_chapter_badge.png"), Rect2(84, 21, 38, 42))
+	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_chapter_badge.png"), HEADER_BADGE_RECT)
 	_draw_text_center(str(current_num), 103, 41, Color.WHITE, 12, true, 34)
 	
 	if _current_chapter_index > 0:
-		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), Rect2(72, 30, 34, 34), 0.82 if _touched_btn == "prevChapter" else 1.0)
-		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_prev_arrow.png"), Rect2(78, 36, 22, 22))
+		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), HEADER_PREV_RECT, 0.82 if _touched_btn == "prevChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_prev_arrow.png"), Rect2(HEADER_PREV_RECT.position.x + 6.0, HEADER_PREV_RECT.position.y + 6.0, 22, 22))
 	if _current_chapter_index < _chapters.size() - 1:
-		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), Rect2(DESIGN_W - 45, 30, 34, 34), 0.82 if _touched_btn == "nextChapter" else 1.0)
-		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_next_arrow.png"), Rect2(DESIGN_W - 39, 36, 22, 22))
+		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), HEADER_NEXT_RECT, 0.82 if _touched_btn == "nextChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_next_arrow.png"), Rect2(HEADER_NEXT_RECT.position.x + 6.0, HEADER_NEXT_RECT.position.y + 6.0, 22, 22))
 	
-	_draw_text_center("第%d章" % current_num, 154, 36, theme_color, 16, true, 84)
-	_draw_text_center(chapter.get("name", ""), 255, 36, Color.WHITE, 16, true, 124)
+	var title_text := "第%d章  %s" % [current_num, chapter.get("name", "")]
+	_draw_text_in_rect(title_text, HEADER_TITLE_RECT, theme_color, 15, true)
 	
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
-	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_star_lit.png"), Rect2(148, 53, 18, 18))
-	_draw_text_center("%d/%d" % [chapter_stars, total_stars], 202, 65, Color.WHITE, 14, true, 78)
-	_draw_page_dots(DESIGN_W / 2.0, header_y + header_h + 8.0, _chapters.size(), _current_chapter_index)
+	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_star_lit.png"), HEADER_STAR_RECT)
+	_draw_text_in_rect("%d/%d" % [chapter_stars, total_stars], HEADER_STAR_TEXT_RECT, Color.WHITE, 14, true)
+	_draw_page_dots(DESIGN_W / 2.0, HEADER_BAR_RECT.position.y + HEADER_BAR_RECT.size.y + 8.0, _chapters.size(), _current_chapter_index)
 
 func _draw_page_dots(cx: float, cy: float, total: int, current: int) -> void:
 	if total <= 0:
@@ -891,23 +925,21 @@ func _draw_reward_panel() -> void:
 	var panel := _get_texture("res://assets/images/stage/ui_reward_panel_clean.png")
 	if panel == null:
 		return
-	var panel_rect := Rect2(17, MAP_REWARD_TOP, DESIGN_W - 34, 84)
+	var panel_rect := REWARD_PANEL_RECT
 	_draw_texture_fit(panel, panel_rect, 0.98)
-	_draw_text_center("通关奖励", DESIGN_W / 2.0, panel_rect.position.y + 21.0, Color(0.86, 0.92, 1.0), 13, true, 110)
-	var slot_w := 34.0
-	var gap := 7.0
-	var start_x := panel_rect.position.x + 31.0
+	_draw_text_in_rect("通关奖励", Rect2(panel_rect.position.x + 86.0, panel_rect.position.y + 13.0, panel_rect.size.x - 172.0, 20.0), Color(0.86, 0.92, 1.0), 13, true)
+	var total_w := REWARD_SLOT_SIZE.x * float(REWARD_ITEMS.size()) + REWARD_SLOT_GAP * float(REWARD_ITEMS.size() - 1)
+	var start_x := panel_rect.position.x + (panel_rect.size.x - total_w) / 2.0
 	for i in range(REWARD_ITEMS.size()):
 		var item: Dictionary = REWARD_ITEMS[i]
-		var rect := Rect2(start_x + float(i) * (slot_w + gap), panel_rect.position.y + 38.0, slot_w, 34.0)
+		var rect := Rect2(start_x + float(i) * (REWARD_SLOT_SIZE.x + REWARD_SLOT_GAP), panel_rect.position.y + 38.0, REWARD_SLOT_SIZE.x, REWARD_SLOT_SIZE.y)
 		_draw_reward_icon(str(item.get("key", "")), rect)
 
 func _draw_reward_icon(key: String, rect: Rect2) -> void:
-	var asset_key := key
-	if asset_key.begins_with("gem_"):
-		asset_key = "gem_" + asset_key.split("_")[1]
-	var path := "res://assets/images/stage/icon_%s.png" % asset_key
-	_draw_texture_contain(_get_texture(path), rect)
+	_draw_texture_contain(_get_texture("res://assets/images/battle_prepare/ui_reward_slot.png"), rect)
+	var path := str(REWARD_ICON_PATHS.get(key, "res://assets/images/stage/icon_%s.png" % key))
+	var inset := 5.0
+	_draw_texture_contain(_get_texture(path), rect.grow(-inset))
 
 func _draw_sweep_dialog() -> void:
 	var dlg_w := 260.0
@@ -958,6 +990,19 @@ func _draw_text_center(text: String, x: float, y: float, color: Color, font_size
 	var pos := Vector2(x - width / 2.0, y)
 	draw_string(ThemeDB.fallback_font, pos + Vector2(1, 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, Color(0, 0, 0, 0.55))
 	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, color)
+
+func _draw_text_in_rect(text: String, rect: Rect2, color: Color, max_font_size: int, bold: bool = false, min_font_size: int = 10) -> void:
+	var font := ThemeDB.fallback_font
+	var font_size := max_font_size
+	while font_size > min_font_size:
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1.0, font_size)
+		if text_size.x <= rect.size.x:
+			break
+		font_size -= 1
+	var baseline_y := rect.position.y + rect.size.y * 0.5 + float(font_size) * 0.35
+	var pos := Vector2(rect.position.x, baseline_y)
+	draw_string(font, pos + Vector2(1.0, 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, Color(0, 0, 0, 0.58))
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, color)
 
 func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color: Color) -> void:
 	draw_rect(Rect2(x + r, y, w - r * 2.0, h), color)
