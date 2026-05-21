@@ -3,13 +3,13 @@
   "cycleCount": 6,
   "currentPhase": 13,
   "totalPhases": 13,
-  "lastTask": "code",
+  "lastTask": "plan",
   "project": "match3-godot",
   "projectPath": "/Users/summercards/WeChatProjects/match3-godot",
   "sourcePath": "/Users/summercards/WeChatProjects/minigame-1",
   "startedAt": "2026-05-21T04:48:00Z",
-  "updatedAt": "2026-05-21T04:19:00Z",
+  "updatedAt": "2026-05-21T07:20:00Z",
   "completedPhases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-  "currentTarget": "Phase 13: 待规划",
-  "notes": "Phase 12 completed: scene_main.gd destroy()清理_particles和_tooltip（无动画状态变量）。scene_shop.gd/scene_sign_in.gd无额外destroy()需求。godot --headless --check_only通过。git commit bd7a876。"
+  "currentTarget": "Phase 13: Plan 已完成",
+  "notes": "Phase 13 Plan: battle_manager.gd - execute_enemy_turn() 末尾缺少 check_battle_end()。DoT/反射/吸血等技能在敌方回合中途击杀玩家时不会触发 battle_over=true。已在 phase13-plan.md 记录修复方案。git commit 088c75f."
 }
