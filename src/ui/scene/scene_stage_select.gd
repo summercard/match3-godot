@@ -10,11 +10,53 @@ const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 
 const MAP_NODE_POSITIONS: Array[Vector2] = [
-	Vector2(58, 472), Vector2(80, 408), Vector2(132, 354), Vector2(190, 377),
-	Vector2(252, 348), Vector2(250, 282), Vector2(147, 281), Vector2(82, 222),
-	Vector2(90, 166), Vector2(154, 124)
+	Vector2(62, 478), Vector2(88, 414), Vector2(132, 356), Vector2(192, 382),
+	Vector2(250, 354), Vector2(253, 286), Vector2(148, 284), Vector2(88, 226),
+	Vector2(96, 166), Vector2(164, 122)
 ]
-const MAP_BOSS_POSITION: Vector2 = Vector2(296, 164)
+const MAP_BOSS_POSITION: Vector2 = Vector2(292, 162)
+const MAP_CONTENT_TOP: float = 78.0
+const MAP_REWARD_TOP: float = 566.0
+
+const CHAPTER_THEME_BACKGROUNDS := {
+	"grass": "res://assets/images/stage/stage_map_bg_grass.png",
+	"fire": "res://assets/images/stage/stage_map_bg_fire.png",
+	"dark": "res://assets/images/stage/stage_map_bg_dark.png",
+	"thunder": "res://assets/images/stage/stage_map_bg_thunder.png",
+	"ice": "res://assets/images/stage/stage_map_bg_ice.png",
+	"void": "res://assets/images/stage/stage_map_bg_void.png",
+	"temporal": "res://assets/images/stage/stage_map_bg_temporal.png",
+	"star": "res://assets/images/stage/stage_map_bg_star.png",
+	"chaos": "res://assets/images/stage/stage_map_bg_chaos.png",
+	"light": "res://assets/images/stage/stage_map_bg_light.png"
+}
+
+const CHAPTER_THEME_TINTS := {
+	"grass": Color(0.30, 0.95, 0.34),
+	"fire": Color(1.0, 0.45, 0.16),
+	"dark": Color(0.76, 0.44, 1.0),
+	"thunder": Color(1.0, 0.82, 0.15),
+	"ice": Color(0.42, 0.86, 1.0),
+	"void": Color(0.76, 0.34, 1.0),
+	"temporal": Color(0.35, 0.95, 0.95),
+	"star": Color(0.92, 0.82, 1.0),
+	"chaos": Color(1.0, 0.30, 0.22),
+	"light": Color(1.0, 0.92, 0.55)
+}
+
+const CHAPTER_BOSS_ART := {
+	"grass": "res://assets/images/stage/boss_flower.png",
+	"fire": "res://assets/images/battle/monsters/monster_boss_002_fire.png",
+	"water": "res://assets/images/battle/monsters/monster_boss_003_water.png",
+	"dark": "res://assets/images/battle/monsters/monster_boss_004_dark.png",
+	"thunder": "res://assets/images/battle/monsters/monster_boss_005_thunder.png",
+	"ice": "res://assets/images/battle/monsters/monster_boss_006_ice.png",
+	"void": "res://assets/images/battle/monsters/monster_boss_007_void.png",
+	"temporal": "res://assets/images/battle/monsters/monster_boss_008_temporal.png",
+	"star": "res://assets/images/battle/monsters/monster_boss_009_star.png",
+	"chaos": "res://assets/images/battle/monsters/monster_boss_010_chaos.png",
+	"light": "res://assets/images/battle/monsters/monster_boss_011_light.png"
+}
 
 const REWARD_ITEMS: Array[Dictionary] = [
 	{"key": "gold_coin", "count": "x500"},
@@ -112,11 +154,16 @@ func _ready() -> void:
 	_sweep_anim_active = false
 	_chapter_anim_active = false
 	_create_ui()
+	set_process(false)
 
 func _process(delta: float) -> void:
+	var was_animating := _chapter_anim_active or _sweep_anim_active
 	_update_chapter_animation(delta)
 	_update_sweep_animation(delta)
-	queue_redraw()
+	if was_animating:
+		queue_redraw()
+	if not _chapter_anim_active and not _sweep_anim_active:
+		set_process(false)
 
 # ==================== UI 创建 ====================
 
@@ -347,6 +394,7 @@ func _build_cards() -> void:
 		return
 	
 	var stages: Array = chapter["stages"]
+	var normal_positions := _sample_stage_positions(_count_non_boss_stages(stages))
 	var node_index: int = 0
 	
 	for i: int in range(stages.size()):
@@ -364,11 +412,11 @@ func _build_cards() -> void:
 		if is_boss:
 			pos = MAP_BOSS_POSITION
 		else:
-			pos = MAP_NODE_POSITIONS[node_index] if node_index < MAP_NODE_POSITIONS.size() else MAP_NODE_POSITIONS[-1]
+			pos = normal_positions[node_index] if node_index < normal_positions.size() else MAP_NODE_POSITIONS[-1]
 			node_index += 1
 		
-		var node_w: float = 112.0 if is_boss else 58.0
-		var node_h: float = 112.0 if is_boss else 58.0
+		var node_w: float = 118.0 if is_boss else (66.0 if is_elite else 64.0)
+		var node_h: float = 126.0 if is_boss else (76.0 if is_elite else 54.0)
 		
 		var card: Dictionary = {
 			"type": "stage",
@@ -396,6 +444,37 @@ func _build_cards() -> void:
 	_refresh_stage_nodes()
 	queue_redraw()
 
+func _count_non_boss_stages(stages: Array) -> int:
+	var count := 0
+	for stage: Dictionary in stages:
+		if stage.get("type", "normal") != "boss":
+			count += 1
+	return count
+
+func _sample_stage_positions(count: int) -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	if count <= 0:
+		return result
+	var index_presets := {
+		1: [0],
+		2: [0, 6],
+		3: [0, 3, 7],
+		4: [0, 2, 4, 6],
+		5: [0, 2, 4, 6, 8],
+		6: [0, 1, 3, 5, 7, 9],
+		7: [0, 1, 2, 4, 5, 7, 9],
+		8: [0, 1, 2, 3, 5, 6, 8, 9],
+		9: [0, 1, 2, 3, 4, 5, 6, 7, 9],
+		10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	}
+	var indices: Array = index_presets.get(mini(count, 10), [])
+	for idx in indices:
+		result.append(MAP_NODE_POSITIONS[int(idx)])
+	if count > 10:
+		for i in range(10, count):
+			result.append(MAP_NODE_POSITIONS[-1])
+	return result
+
 # ==================== 章节切换 ====================
 
 func _switch_chapter(direction: int) -> void:
@@ -406,6 +485,7 @@ func _switch_chapter(direction: int) -> void:
 	_chapter_anim_active = true
 	_chapter_anim_progress = 0.0
 	_chapter_anim_direction = direction
+	set_process(true)
 	_current_chapter_index = new_index
 	_build_cards()
 	_update_header()
@@ -424,14 +504,14 @@ func _on_touch_start(x: float, y: float) -> void:
 		_touched_btn = "backBtn"
 		return
 	
-	# 上一章按钮（标题栏左侧 76-108, 28-60）
-	if _current_chapter_index > 0 and x >= 76 and x <= 108 and y >= 28 and y <= 60:
+	# 上一章按钮
+	if _current_chapter_index > 0 and Rect2(72, 30, 34, 34).has_point(Vector2(x, y)):
 		_touched_btn = "prevChapter"
 		return
 	
 	# 下一章按钮（标题栏右侧）
 	if _current_chapter_index < _chapters.size() - 1:
-		if x >= DESIGN_W - 46 and x <= DESIGN_W - 14 and y >= 28 and y <= 60:
+		if Rect2(DESIGN_W - 45, 30, 34, 34).has_point(Vector2(x, y)):
 			_touched_btn = "nextChapter"
 		return
 	
@@ -463,13 +543,13 @@ func _on_tap(x: float, y: float) -> void:
 		return
 	
 	# 上一章按钮
-	if _current_chapter_index > 0 and x >= 76 and x <= 108 and y >= 28 and y <= 60:
+	if _current_chapter_index > 0 and Rect2(72, 30, 34, 34).has_point(Vector2(x, y)):
 		_switch_chapter(-1)
 		return
 	
 	# 下一章按钮
 	if _current_chapter_index < _chapters.size() - 1:
-		if x >= DESIGN_W - 46 and x <= DESIGN_W - 14 and y >= 28 and y <= 60:
+		if Rect2(DESIGN_W - 45, 30, 34, 34).has_point(Vector2(x, y)):
 			_switch_chapter(1)
 			return
 	
@@ -493,7 +573,7 @@ func _on_tap(x: float, y: float) -> void:
 	
 	# 返回区域
 	if x >= 10 and x <= 60 and y >= 10 and y <= 60:
-		_go_to_scene("start")
+		_go_to_scene("main")
 
 # ==================== 扫荡功能 ====================
 
@@ -540,6 +620,7 @@ func _do_sweep_confirm() -> void:
 		_sweep_anim_gold = reward.get("gold", 0)
 		_sweep_anim_exp = reward.get("exp", 0)
 		_sweep_anim_overlay.visible = true
+		set_process(true)
 		_refresh_sweep_anim_overlay()
 
 func _refresh_sweep_dialog_content() -> void:
@@ -676,47 +757,63 @@ func _draw() -> void:
 		_draw_sweep_dialog()
 
 func _draw_stage_background() -> void:
-	var tex := _get_texture("res://assets/images/stage/stage_map_bg.png")
+	var element := _current_chapter_element()
+	var bg_path := str(CHAPTER_THEME_BACKGROUNDS.get(element, "res://assets/images/stage/stage_map_bg.png"))
+	var tex := _get_texture(bg_path)
+	if tex == null:
+		tex = _get_texture("res://assets/images/stage/stage_map_bg.png")
 	if tex:
 		_draw_texture_cover(tex, Rect2(0, 0, DESIGN_W, DESIGN_H))
-		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.11, 0.08))
+		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.11, 0.04))
 	else:
 		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.04, 0.07, 0.15, 1.0))
+
+func _current_chapter() -> Dictionary:
+	if _chapters.is_empty() or _current_chapter_index < 0 or _current_chapter_index >= _chapters.size():
+		return {}
+	return _chapters[_current_chapter_index]
+
+func _current_chapter_element() -> String:
+	var chapter := _current_chapter()
+	return str(chapter.get("element", "grass"))
 
 func _draw_chapter_header() -> void:
 	if _chapters.is_empty() or _current_chapter_index >= _chapters.size():
 		return
 	var chapter: Dictionary = _chapters[_current_chapter_index]
 	var current_num := _current_chapter_index + 1
-	var header_y := 11.0
-	var header_h := 64.0
+	var header_y := 12.0
+	var header_h := 66.0
 	var back_pressed: bool = _touched_btn == "backBtn"
+	var theme_color: Color = CHAPTER_THEME_TINTS.get(_current_chapter_element(), Color(0.30, 0.95, 0.34))
 	
-	_draw_texture_fit(_get_texture("res://assets/images/stage/ui_back_button.png"), Rect2(10, 12, 52, 52), 0.82 if back_pressed else 1.0)
-	_draw_texture_fit(_get_texture("res://assets/images/stage/icon_back_arrow.png"), Rect2(19, 21, 34, 34))
+	_draw_texture_contain(_get_texture("res://assets/images/stage/ui_back_button.png"), Rect2(9, 12, 56, 56), 0.82 if back_pressed else 1.0)
+	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_back_arrow.png"), Rect2(21, 24, 32, 32))
 	
 	var header := _get_texture("res://assets/images/stage/ui_header_bar.png")
 	if header:
-		_draw_texture_fit(header, Rect2(69, header_y, 296, header_h))
+		_draw_texture_fit(header, Rect2(76, header_y, 286, header_h))
 	else:
-		_draw_rounded_rect(69, header_y, 296, header_h, 8, Color(0.1, 0.15, 0.25, 0.86))
+		_draw_rounded_rect(76, header_y, 286, header_h, 8, Color(0.1, 0.15, 0.25, 0.86))
 	
-	_draw_texture_fit(_get_texture("res://assets/images/stage/icon_chapter_badge.png"), Rect2(82, 20, 34, 38))
-	_draw_text_center(str(current_num), 99, 39, Color.WHITE, 12, true, 34)
+	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_chapter_badge.png"), Rect2(84, 21, 38, 42))
+	_draw_text_center(str(current_num), 103, 41, Color.WHITE, 12, true, 34)
 	
 	if _current_chapter_index > 0:
-		_draw_texture_fit(_get_texture("res://assets/images/stage/icon_prev_arrow.png"), Rect2(76, 28, 32, 32), 0.8 if _touched_btn == "prevChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), Rect2(72, 30, 34, 34), 0.82 if _touched_btn == "prevChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_prev_arrow.png"), Rect2(78, 36, 22, 22))
 	if _current_chapter_index < _chapters.size() - 1:
-		_draw_texture_fit(_get_texture("res://assets/images/stage/icon_next_arrow.png"), Rect2(DESIGN_W - 46, 28, 32, 32), 0.8 if _touched_btn == "nextChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/ui_arrow_button.png"), Rect2(DESIGN_W - 45, 30, 34, 34), 0.82 if _touched_btn == "nextChapter" else 1.0)
+		_draw_texture_contain(_get_texture("res://assets/images/stage/icon_next_arrow.png"), Rect2(DESIGN_W - 39, 36, 22, 22))
 	
-	_draw_text_center("第%d章" % current_num, 142, 36, Color(0.2, 0.8, 0.3), 16, true, 96)
-	_draw_text_center(chapter.get("name", ""), 255, 36, Color.WHITE, 16, true, 130)
+	_draw_text_center("第%d章" % current_num, 154, 36, theme_color, 16, true, 84)
+	_draw_text_center(chapter.get("name", ""), 255, 36, Color.WHITE, 16, true, 124)
 	
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
-	_draw_texture_fit(_get_texture("res://assets/images/stage/icon_star_lit.png"), Rect2(139, 52, 18, 18))
-	_draw_text_center("%d/%d" % [chapter_stars, total_stars], 191, 63, Color.WHITE, 14, true, 78)
-	_draw_page_dots(DESIGN_W / 2.0, header_y + header_h + 9.0, _chapters.size(), _current_chapter_index)
+	_draw_texture_contain(_get_texture("res://assets/images/stage/icon_star_lit.png"), Rect2(148, 53, 18, 18))
+	_draw_text_center("%d/%d" % [chapter_stars, total_stars], 202, 65, Color.WHITE, 14, true, 78)
+	_draw_page_dots(DESIGN_W / 2.0, header_y + header_h + 8.0, _chapters.size(), _current_chapter_index)
 
 func _draw_page_dots(cx: float, cy: float, total: int, current: int) -> void:
 	if total <= 0:
@@ -758,10 +855,12 @@ func _draw_stage_card(card: Dictionary) -> void:
 	var draw_y: float = card.get("y", 0.0)
 	
 	if is_boss:
-		_draw_texture_fit(_get_texture("res://assets/images/stage/boss_badge.png"), Rect2(card["x"] - 7, draw_y - 18, card["w"] + 22, card["h"] + 45), 0.82 if is_pressed else 1.0)
-		_draw_texture_fit(_get_texture("res://assets/images/stage/boss_flower.png"), Rect2(draw_cx - 49, draw_y - 28, 98, 98), 0.82 if is_pressed else 1.0)
-		_draw_text_center("BOSS", draw_cx, draw_y + card["h"] - 24, Color(1.0, 0.8, 0.0), 14, true, 70)
-		_draw_stars(draw_cx - 23, draw_y + card["h"] - 4, card.get("stars", 0))
+		var boss_alpha := 0.82 if is_pressed else 1.0
+		_draw_texture_contain(_get_texture("res://assets/images/stage/boss_badge.png"), Rect2(draw_cx - 63, draw_y - 11, 126, 142), boss_alpha)
+		var boss_path := str(CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/stage/boss_flower.png"))
+		_draw_texture_contain(_get_texture(boss_path), Rect2(draw_cx - 57, draw_y - 34, 114, 102), boss_alpha)
+		_draw_text_center("BOSS", draw_cx, draw_y + 88, Color(1.0, 0.82, 0.0), 13, true, 70)
+		_draw_stars(draw_cx - 22, draw_y + 108, card.get("stars", 0))
 		return
 	
 	var node_key := "node_crystal" if is_elite else "node_normal"
@@ -770,17 +869,17 @@ func _draw_stage_card(card: Dictionary) -> void:
 	if is_pressed:
 		node_key = "node_selected"
 	var node_path := "res://assets/images/stage/%s.png" % node_key
-	var node_w := 64.0 if is_elite else 58.0
-	var node_h := 70.0 if is_elite else 58.0
+	var node_w := 62.0 if is_elite else 60.0
+	var node_h := 70.0 if is_elite else 50.0
 	var node_x := draw_cx - node_w / 2.0
 	var node_y: float = float(card.get("cy", 0.0)) - node_h / 2.0
 	
 	if _get_texture(node_path):
-		_draw_texture_fit(_get_texture(node_path), Rect2(node_x, node_y, node_w, node_h))
+		_draw_texture_contain(_get_texture(node_path), Rect2(node_x, node_y, node_w, node_h))
 	else:
 		draw_circle(Vector2(draw_cx, card.get("cy", 0.0)), 26, Color(0.1, 0.5, 1.0, 0.95))
-	_draw_text_center(str(card.get("stage_no", 1)), draw_cx, card.get("cy", 0.0) + (2.0 if is_elite else -1.0), Color.WHITE, 16, true, 42)
-	_draw_stars(draw_cx - 22, card.get("cy", 0.0) + 31, card.get("stars", 0))
+	_draw_text_center(str(card.get("stage_no", 1)), draw_cx, card.get("cy", 0.0) + (-1.0 if is_elite else -4.0), Color.WHITE, 15, true, 42)
+	_draw_stars(draw_cx - 21, card.get("cy", 0.0) + 28, card.get("stars", 0))
 
 func _draw_stars(x: float, y: float, count: int) -> void:
 	for i in range(3):
@@ -792,7 +891,23 @@ func _draw_reward_panel() -> void:
 	var panel := _get_texture("res://assets/images/stage/ui_reward_panel_clean.png")
 	if panel == null:
 		return
-	_draw_texture_fit(panel, Rect2(14, DESIGN_H - 92, DESIGN_W - 28, 70), 0.98)
+	var panel_rect := Rect2(17, MAP_REWARD_TOP, DESIGN_W - 34, 84)
+	_draw_texture_fit(panel, panel_rect, 0.98)
+	_draw_text_center("通关奖励", DESIGN_W / 2.0, panel_rect.position.y + 21.0, Color(0.86, 0.92, 1.0), 13, true, 110)
+	var slot_w := 34.0
+	var gap := 7.0
+	var start_x := panel_rect.position.x + 31.0
+	for i in range(REWARD_ITEMS.size()):
+		var item: Dictionary = REWARD_ITEMS[i]
+		var rect := Rect2(start_x + float(i) * (slot_w + gap), panel_rect.position.y + 38.0, slot_w, 34.0)
+		_draw_reward_icon(str(item.get("key", "")), rect)
+
+func _draw_reward_icon(key: String, rect: Rect2) -> void:
+	var asset_key := key
+	if asset_key.begins_with("gem_"):
+		asset_key = "gem_" + asset_key.split("_")[1]
+	var path := "res://assets/images/stage/icon_%s.png" % asset_key
+	_draw_texture_contain(_get_texture(path), rect)
 
 func _draw_sweep_dialog() -> void:
 	var dlg_w := 260.0
@@ -818,6 +933,17 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 	var color := Color(1, 1, 1, opacity)
 	draw_texture_rect(tex, rect, false, color)
 	self_modulate = old_modulate
+
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var draw_size := tex_size * scale
+	var draw_pos := rect.position + (rect.size - draw_size) * 0.5
+	draw_texture_rect(tex, Rect2(draw_pos, draw_size), false, Color(1, 1, 1, opacity))
 
 func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:

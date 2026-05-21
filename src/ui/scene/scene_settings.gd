@@ -1,186 +1,159 @@
 # scene_settings.gd - 设置场景
-# 翻译来源: js/ui/sceneSettings.js
-class_name SceneSettings extends Control
+class_name SceneSettings
+extends Control
 
-## 布局常量
+signal back_pressed()
+
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
-const ITEM_W := 280.0
-const ITEM_H := 56.0
-const TOGGLE_W := 50.0
-const TOGGLE_H := 28.0
-const BTN_W := 100.0
-const BTN_H := 38.0
+const BACK_RECT := Rect2(10.0, 10.0, 58.0, 58.0)
+const HEADER_RECT := Rect2(88.0, 17.0, 232.0, 52.0)
+const MAIN_PANEL_RECT := Rect2(14.0, 86.0, 347.0, 386.0)
+const ABOUT_PANEL_RECT := Rect2(18.0, 486.0, 339.0, 58.0)
+const RESET_RECT := Rect2(34.0, 565.0, 138.0, 46.0)
+const DEFAULT_RECT := Rect2(203.0, 565.0, 138.0, 46.0)
+const ROW_X := 30.0
+const ROW_W := 315.0
+const ROW_H := 54.0
+const ROW_START_Y := 130.0
+const ROW_GAP := 9.0
+const CONFIRM_BOX := Rect2(41.0, 241.0, 293.0, 182.0)
+const CONFIRM_YES := Rect2(64.0, 363.0, 112.0, 42.0)
+const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
 
-var game: Node
+const SETTINGS_ASSETS := {
+	"bg": "res://assets/images/achievement/bg_achievement.png",
+	"back": "res://assets/images/achievement/ui_back_button.png",
+	"header": "res://assets/images/achievement/ui_header_bar.png",
+	"title_ribbon": "res://assets/images/achievement/ui_title_ribbon.png",
+	"panel": "res://assets/images/shop/ui_popup_panel.png",
+	"row": "res://assets/images/inventory/ui_detail_panel.png",
+	"row_alt": "res://assets/images/inventory/ui_grid_panel.png",
+	"tab_active": "res://assets/images/inventory/ui_tab_active.png",
+	"tab_inactive": "res://assets/images/inventory/ui_tab_inactive.png",
+	"button": "res://assets/images/shop/ui_buy_button.png",
+	"button_disabled": "res://assets/images/shop/ui_buy_button_disabled.png",
+	"gear": "res://assets/images/main/icon_settings_gear_v2.png",
+	"notice": "res://assets/images/main/ui_notification_dot_v2.png",
+}
+
+const SETTINGS_ROWS := [
+	{
+		"id": "sound",
+		"label": "游戏音效",
+		"desc": "消除、按钮与奖励反馈",
+		"type": "toggle",
+		"key": "soundOn",
+		"default": true,
+	},
+	{
+		"id": "music",
+		"label": "背景音乐",
+		"desc": "大厅、战斗与结算音乐",
+		"type": "toggle",
+		"key": "musicOn",
+		"default": true,
+	},
+	{
+		"id": "vibration",
+		"label": "震动反馈",
+		"desc": "技能、胜利与按钮触感",
+		"type": "toggle",
+		"key": "vibrationOn",
+		"default": true,
+	},
+	{
+		"id": "quality",
+		"label": "画质等级",
+		"desc": "界面特效与资源清晰度",
+		"type": "segment",
+		"key": "qualityLevel",
+		"default": "high",
+		"options": [
+			{"label": "流畅", "value": "low"},
+			{"label": "标准", "value": "medium"},
+			{"label": "精细", "value": "high"},
+		],
+	},
+	{
+		"id": "performance",
+		"label": "战斗表现",
+		"desc": "动画、粒子和屏幕反馈",
+		"type": "segment",
+		"key": "performanceMode",
+		"default": "balanced",
+		"options": [
+			{"label": "轻量", "value": "lite"},
+			{"label": "均衡", "value": "balanced"},
+			{"label": "华丽", "value": "rich"},
+		],
+	},
+]
+
+const C := {
+	"white": Color(1.0, 1.0, 1.0),
+	"muted": Color(0.66, 0.72, 0.83),
+	"dim": Color(0.42, 0.48, 0.58),
+	"gold": Color(1.0, 0.78, 0.18),
+	"green": Color(0.58, 1.0, 0.35),
+	"blue": Color(0.35, 0.72, 1.0),
+	"red": Color(1.0, 0.30, 0.22),
+	"shadow": Color(0.0, 0.0, 0.0, 0.58),
+	"panel_dark": Color(0.03, 0.08, 0.16, 0.72),
+}
+
+var game: Node = null
 var settings_data: Dictionary = {}
-var ui: Dictionary = {}
-var confirm_dialog: Dictionary = {}
-var reset_success: bool = false
-var tap_handler: Callable
+var confirm_dialog := false
+var reset_success := false
 var _storage: Node = null
+var _texture_cache: Dictionary = {}
 
-var _bg_texture: ColorRect
-
-func _add_dark_background() -> void:
-	_bg_texture = ColorRect.new()
-	_bg_texture.color = Color(0.04, 0.07, 0.15, 1.0)
-	_bg_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_bg_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg_texture.z_index = -10
-	add_child(_bg_texture)
 
 func _init(game_ref: Node = null) -> void:
 	game = game_ref
-	_add_dark_background()
 
 
-func init(data: Dictionary = {}) -> void:
-	# print("[SceneSettings] 设置场景初始化")
+func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func init(_data: Dictionary = {}) -> void:
 	if game == null:
-		game = get_node_or_null("/root/GameManager")
+		game = _get_autoload("GameManager")
 	_storage = _get_storage()
 	_load_settings()
-	_build_ui()
-	tap_handler = Callable(self, "_on_tap")
-	_set_input_handler()
-
-
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_on_tap(event.position.x, event.position.y)
-		accept_event()
-	elif event is InputEventScreenTouch and event.pressed:
-		_on_tap(event.position.x, event.position.y)
-		accept_event()
-
-
-func _load_settings() -> void:
-	var storage := _get_storage()
-	settings_data = storage.load_settings() if storage and storage.has_method("load_settings") else {
-		"soundOn": true,
-		"musicOn": true,
-		"version": "v0.1.0"
-	}
+	confirm_dialog = false
+	reset_success = false
+	queue_redraw()
 
 
 func _get_storage() -> Node:
 	if _storage and is_instance_valid(_storage):
 		return _storage
-	_storage = get_node_or_null("/root/SaveManager")
+	_storage = _get_autoload("SaveManager")
 	if _storage == null and game and game.get("storage"):
 		_storage = game.storage
 	return _storage
 
 
-func _build_ui() -> void:
-	var w: float = DESIGN_W
-	var h: float = DESIGN_H
-	ui = {
-		"title_y": h * 0.08,
-		"items": [],
-		"back_btn": null,
-		"confirm_box": null
-	}
-
-	var item_x: float = (w - ITEM_W) / 2
-	var start_y: float = h * 0.22
-	var gap: float = 14.0
-
-	var sound_on: bool = settings_data.get("soundOn", true)
-	var music_on: bool = settings_data.get("musicOn", true)
-
-	ui.items = [
-		_create_toggle_item("sound", "🔊 游戏音效", start_y, sound_on),
-		_create_toggle_item("music", "🎵 背景音乐", start_y + ITEM_H + gap, music_on)
-	]
-
-	# 重置数据按钮
-	var reset_y: float = start_y + (ITEM_H + gap) * 2 + 20
-	ui.items.append({
-		"id": "reset",
-		"label": "🗑️ 重置游戏数据",
-		"y": reset_y,
-		"x": item_x,
-		"w": ITEM_W,
-		"h": ITEM_H,
-		"is_on": null
-	})
-
-	ui.version_y = h * 0.85
-	ui.version = settings_data.get("version", "v0.1.0")
-
-	ui.back_btn = {
-		"id": "back",
-		"label": "← 返回",
-		"x": 15.0,
-		"y": h * 0.05,
-		"w": 80.0,
-		"h": 36.0
-	}
+func _get_autoload(node_name: String) -> Node:
+	if not is_inside_tree():
+		return null
+	var tree := get_tree()
+	if tree == null or tree.root == null:
+		return null
+	return tree.root.get_node_or_null(node_name)
 
 
-func _create_toggle_item(id: String, label: String, y: float, is_on: bool) -> Dictionary:
-	var w: float = DESIGN_W
-	return {
-		"id": id,
-		"label": label,
-		"y": y,
-		"x": (w - ITEM_W) / 2,
-		"w": ITEM_W,
-		"h": ITEM_H,
-		"is_on": is_on,
-		"toggle_x": (w - ITEM_W) / 2 + ITEM_W - 60,
-		"toggle_w": TOGGLE_W,
-		"toggle_h": TOGGLE_H
-	}
-
-
-func _set_input_handler() -> void:
-	# 连接 game 的输入信号（根据实际输入系统实现）
-	pass
-
-
-func _on_tap(x: float, y: float) -> void:
-	# 确认弹窗
-	if confirm_dialog.size() > 0:
-		var yes_btn: Dictionary = confirm_dialog.yes_btn
-		var no_btn: Dictionary = confirm_dialog.no_btn
-		if x >= yes_btn.x and x <= yes_btn.x + yes_btn.w and y >= yes_btn.y and y <= yes_btn.y + yes_btn.h:
-			_do_reset_data()
-			return
-		if x >= no_btn.x and x <= no_btn.x + no_btn.w and y >= no_btn.y and y <= no_btn.y + no_btn.h:
-			confirm_dialog = {}
-			return
-		return
-
-	# 返回按钮
-	var back: Dictionary = ui.back_btn
-	if x >= back.x and x <= back.x + back.w and y >= back.y and y <= back.y + back.h:
-		_save_and_back()
-		return
-
-	# 设置项点击
-	for item in ui.items:
-		if item.id == "reset":
-			if x >= item.x and x <= item.x + item.w and y >= item.y and y <= item.y + item.h:
-				_show_reset_confirm()
-				return
-		else:
-			var toggle_x: float = item.toggle_x
-			var toggle_y: float = item.y + (item.h - item.toggle_h) / 2
-			if x >= toggle_x and x <= toggle_x + item.toggle_w and y >= toggle_y and y <= toggle_y + item.toggle_h:
-				_toggle_setting(item.id)
-				return
-
-
-func _toggle_setting(id: String) -> void:
-	if id == "sound":
-		settings_data["soundOn"] = not settings_data.get("soundOn", true)
-	elif id == "music":
-		settings_data["musicOn"] = not settings_data.get("musicOn", true)
-	_save_settings()
-	# print("[SceneSettings] " + id + " = " + ("true" if id == "sound" else "false" if id == "music" else ""))
+func _load_settings() -> void:
+	var storage := _get_storage()
+	settings_data = storage.load_settings() if storage and storage.has_method("load_settings") else {}
+	for row: Dictionary in SETTINGS_ROWS:
+		var key := str(row.get("key", ""))
+		if key != "" and not settings_data.has(key):
+			settings_data[key] = row.get("default")
+	settings_data["version"] = settings_data.get("version", "v0.1.0")
 
 
 func _save_settings() -> void:
@@ -189,174 +162,272 @@ func _save_settings() -> void:
 		storage.save_settings(settings_data)
 
 
-func _show_reset_confirm() -> void:
-	var w: float = DESIGN_W
-	var h: float = DESIGN_H
-	var box_w: float = 260
-	var box_h: float = 140
-	var box_x: float = (w - box_w) / 2
-	var box_y: float = (h - box_h) / 2
-	var btn_gap: float = 20
-	var btn_y: float = box_y + box_h - 55
-	var yes_x: float = box_x + (box_w - BTN_W * 2 - btn_gap) / 2
-	var no_x: float = yes_x + BTN_W + btn_gap
-
-	confirm_dialog = {
-		"box": {"x": box_x, "y": box_y, "w": box_w, "h": box_h},
-		"yes_btn": {"id": "yes", "x": yes_x, "y": btn_y, "w": BTN_W, "h": BTN_H},
-		"no_btn": {"id": "no", "x": no_x, "y": btn_y, "w": BTN_W, "h": BTN_H}
-	}
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_tap(event.position)
+		accept_event()
+	elif event is InputEventScreenTouch and event.pressed:
+		_on_tap(event.position)
+		accept_event()
 
 
-func _do_reset_data() -> void:
-	confirm_dialog = {}
-	# 清除所有存档
-	var storage := _get_storage()
-	if storage and storage.has_method("clear_all_data"):
-		storage.clear_all_data()
-	# print("[SceneSettings] 游戏数据已重置")
-	_show_reset_success()
+func _on_tap(point: Vector2) -> void:
+	if confirm_dialog:
+		if CONFIRM_YES.has_point(point):
+			_do_reset_data()
+			return
+		if CONFIRM_NO.has_point(point):
+			confirm_dialog = false
+			queue_redraw()
+			return
+		return
+
+	if BACK_RECT.has_point(point):
+		_save_and_back()
+		return
+	if RESET_RECT.has_point(point):
+		confirm_dialog = true
+		queue_redraw()
+		return
+	if DEFAULT_RECT.has_point(point):
+		_restore_defaults()
+		return
+
+	for i in range(SETTINGS_ROWS.size()):
+		var row: Dictionary = SETTINGS_ROWS[i]
+		var row_rect := _get_row_rect(i)
+		if not row_rect.has_point(point):
+			continue
+		if row.get("type", "") == "toggle":
+			_toggle_bool(str(row.get("key", "")))
+			return
+		if row.get("type", "") == "segment":
+			var hit := _hit_segment(row, row_rect, point)
+			if hit != "":
+				settings_data[str(row.get("key", ""))] = hit
+				_save_settings()
+				queue_redraw()
+			return
+
+
+func _toggle_bool(key: String) -> void:
+	if key.is_empty():
+		return
+	settings_data[key] = not bool(settings_data.get(key, true))
+	_save_settings()
+	queue_redraw()
+
+
+func _restore_defaults() -> void:
+	for row: Dictionary in SETTINGS_ROWS:
+		settings_data[str(row.get("key", ""))] = row.get("default")
+	_save_settings()
+	reset_success = false
+	queue_redraw()
 
 
 func _show_reset_success() -> void:
 	reset_success = true
-	# 延迟返回主菜单（1.5秒后）
-	await get_tree().create_timer(1.5).timeout
+	queue_redraw()
+	await get_tree().create_timer(1.2).timeout
 	_go_main()
+
+
+func _do_reset_data() -> void:
+	confirm_dialog = false
+	var storage := _get_storage()
+	if storage and storage.has_method("clear_all_data"):
+		storage.clear_all_data()
+	if storage and storage.has_method("reset_tutorial_progress"):
+		storage.reset_tutorial_progress()
+	elif storage and storage.has_method("save_tutorial_progress"):
+		storage.save_tutorial_progress(0)
+	_show_reset_success()
 
 
 func _save_and_back() -> void:
 	_save_settings()
-	_go_main()
+	if back_pressed.get_connections().size() > 0:
+		back_pressed.emit()
+	else:
+		_go_main()
 
 
 func _go_main() -> void:
 	if game and game.get("scene_manager") and game.scene_manager.has_method("switch_scene"):
 		game.scene_manager.switch_scene("main", {}, "slide")
-	elif has_node("/root/SceneManager"):
-		get_node("/root/SceneManager").switch_scene("main", {}, "slide")
+	else:
+		var scene_manager := _get_autoload("SceneManager")
+		if scene_manager and scene_manager.has_method("switch_scene"):
+			scene_manager.switch_scene("main", {}, "slide")
+
+
+func _get_row_rect(index: int) -> Rect2:
+	return Rect2(ROW_X, ROW_START_Y + index * (ROW_H + ROW_GAP), ROW_W, ROW_H)
+
+
+func _hit_segment(row: Dictionary, row_rect: Rect2, point: Vector2) -> String:
+	var options: Array = row.get("options", [])
+	if options.is_empty():
+		return ""
+	var total_w := 128.0
+	var seg_w := total_w / float(options.size())
+	var start_x := row_rect.position.x + row_rect.size.x - total_w - 13.0
+	var rect := Rect2(start_x, row_rect.position.y + 13.0, total_w, 28.0)
+	if not rect.has_point(point):
+		return ""
+	var idx := clampi(int((point.x - rect.position.x) / seg_w), 0, options.size() - 1)
+	return str(options[idx].get("value", ""))
 
 
 func _draw() -> void:
-	var theme = _get_theme()
-
-	# 背景
-	_draw_rect(Rect2(0, 0, size.x, size.y), theme.bg_medium)
-
-	# 标题
-	_draw_text("⚙️ 游戏设置", Vector2(size.x / 2, ui.title_y + 30), theme.text_primary, theme.font.title.size, theme.font.title.weight)
-
-	# 返回按钮
-	var back: Dictionary = ui.back_btn
-	_draw_rect(Rect2(back.x, back.y, back.w, back.h), theme.buttons.secondary.bg_color)
-	_draw_text(back.label, Vector2(back.x + 16, back.y + back.h / 2 + 5), theme.buttons.secondary.text_color, theme.font.body.size)
-
-	# 设置项
-	for item in ui.items:
-		if item.id == "reset":
-			_draw_rect(Rect2(item.x, item.y, item.w, item.h), theme.danger)
-			_draw_text(item.label, Vector2(item.x + item.w / 2, item.y + item.h / 2 + 5), theme.white, theme.font.body.size, theme.font.body.weight)
-		else:
-			# 开关设置项背景
-			_draw_rect(Rect2(item.x, item.y, item.w, item.h), theme.bg_card)
-			# 标签
-			_draw_text(item.label, Vector2(item.x + 16, item.y + item.h / 2 + 5), theme.text_secondary, theme.font.body.size, theme.font.body.weight)
-
-			# 开关状态
-			var is_on: bool = true
-			if item.id == "sound":
-				is_on = settings_data.get("soundOn", true)
-			else:
-				is_on = settings_data.get("musicOn", true)
-
-			var toggle_x: float = item.toggle_x
-			var toggle_y: float = item.y + (item.h - item.toggle_h) / 2
-
-			# 开关轨道
-			var track_color: Color = theme.success if is_on else theme.text_dark
-			_draw_rect(Rect2(toggle_x, toggle_y, item.toggle_w, item.toggle_h), track_color)
-			_draw_rect(Rect2(toggle_x, toggle_y, item.toggle_w, item.toggle_h), track_color)
-			_draw_circle(Vector2(toggle_x + item.toggle_h / 2 - 1, toggle_y + item.toggle_h / 2), item.toggle_h / 2 - 3, theme.white)
-			# ON/OFF 文字
-			var label_color: Color = theme.white if is_on else theme.text_muted
-			_draw_text("ON" if is_on else "OFF", Vector2(toggle_x + item.toggle_w / 2, toggle_y + item.toggle_h / 2 + 4), label_color, theme.font.tiny.size, theme.font.tiny.weight)
-
-	# 确认弹窗
-	if confirm_dialog.size() > 0:
-		var d: Dictionary = confirm_dialog
-		# 遮罩
-		_draw_rect(Rect2(0, 0, size.x, size.y), Color(0, 0, 0, 0.7))
-		# 弹窗背景
-		_draw_rect(Rect2(d.box.x, d.box.y, d.box.w, d.box.h), theme.bg_card)
-		# 提示文字
-		_draw_text("确认重置？", Vector2(d.box.x + d.box.w / 2, d.box.y + 40), theme.danger, theme.font.subtitle.size, theme.font.subtitle.weight)
-		_draw_text("所有数据将被清除，无法恢复", Vector2(d.box.x + d.box.w / 2, d.box.y + 65), theme.text_muted, theme.font.small.size)
-		# 按钮
-		_draw_rect(Rect2(d.yes_btn.x, d.yes_btn.y, d.yes_btn.w, d.yes_btn.h), theme.danger)
-		_draw_text("确认", Vector2(d.yes_btn.x + d.yes_btn.w / 2, d.yes_btn.y + d.yes_btn.h / 2 + 5), theme.white, theme.font.body.size, theme.font.body.weight)
-		_draw_rect(Rect2(d.no_btn.x, d.no_btn.y, d.no_btn.w, d.no_btn.h), theme.buttons.secondary.bg_color)
-		_draw_text("取消", Vector2(d.no_btn.x + d.no_btn.w / 2, d.no_btn.y + d.no_btn.h / 2 + 5), theme.buttons.secondary.text_color, theme.font.body.size)
-
-	# 重置成功提示
+	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
+	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.02, 0.08, 0.24), true)
+	_draw_header()
+	_draw_main_panel()
+	_draw_about_panel()
+	_draw_bottom_buttons()
+	if confirm_dialog:
+		_draw_confirm_dialog()
 	if reset_success:
-		_draw_text("✅ 数据已重置", Vector2(size.x / 2, ui.title_y + 80), theme.success, theme.font.subtitle.size, theme.font.subtitle.weight)
-
-	# 版本信息
-	_draw_text(ui.version, Vector2(size.x / 2, ui.version_y), theme.text_dark, theme.font.small.size)
+		_draw_toast("数据已重置")
 
 
-func _draw_rect(rect: Rect2, color: Color) -> void:
-	draw_rect(rect, color, true)
+func _draw_header() -> void:
+	_draw_texture_fit(_tex("back"), BACK_RECT)
+	_draw_text("‹", BACK_RECT.get_center().x, BACK_RECT.position.y + 43.0, Color(1.0, 0.92, 0.78), 42.0, true, 44.0)
+	_draw_texture_fit(_tex("header"), HEADER_RECT)
+	_draw_texture_contain(_tex("gear"), Rect2(105.0, 24.0, 35.0, 35.0))
+	_draw_text("游戏设置", HEADER_RECT.get_center().x + 18.0, HEADER_RECT.position.y + 35.0, C["white"], 24.0, true, 152.0)
 
 
-func _draw_circle(center: Vector2, radius: float, color: Color) -> void:
-	draw_circle(center, radius, color)
+func _draw_main_panel() -> void:
+	_draw_texture_fit(_tex("panel"), MAIN_PANEL_RECT)
+	draw_rect(Rect2(MAIN_PANEL_RECT.position + Vector2(14.0, 13.0), MAIN_PANEL_RECT.size - Vector2(28.0, 26.0)), C["panel_dark"], true)
+	_draw_texture_fit(_tex("title_ribbon"), Rect2(104.0, 96.0, 166.0, 31.0))
+	_draw_text("偏好设置", 187.0, 119.0, Color(1.0, 0.87, 0.38), 16.0, true, 124.0)
+	for i in range(SETTINGS_ROWS.size()):
+		_draw_setting_row(i, SETTINGS_ROWS[i])
 
 
-func _draw_text(text: String, pos: Vector2, color: Color, size: float = 16, weight: int = 0) -> void:
-	var f = ThemeDB.fallback_font
-	var fnt_size = int(size * 2)
-	draw_string(f, Vector2(pos.x - 100, pos.y), text, HORIZONTAL_ALIGNMENT_CENTER, 200, fnt_size, color)
+func _draw_setting_row(index: int, row: Dictionary) -> void:
+	var rect := _get_row_rect(index)
+	_draw_texture_fit(_tex("row" if index % 2 == 0 else "row_alt"), rect, 0.96)
+	var accent := C["blue"] if row.get("type", "") == "segment" else C["green"]
+	draw_rect(Rect2(rect.position.x + 6.0, rect.position.y + 8.0, 3.0, rect.size.y - 16.0), accent, true)
+	_draw_text_left(str(row.get("label", "")), Vector2(rect.position.x + 18.0, rect.position.y + 23.0), C["white"], 17.0, true, 128.0)
+	_draw_text_left(str(row.get("desc", "")), Vector2(rect.position.x + 18.0, rect.position.y + 44.0), C["muted"], 10.0, false, 160.0)
+	if row.get("type", "") == "toggle":
+		_draw_toggle(rect, bool(settings_data.get(str(row.get("key", "")), row.get("default", true))))
+	else:
+		_draw_segments(rect, row)
 
 
-func _get_theme():
-	if ResourceLoader.exists("res://src/core/theme.gd"):
-			var theme_res = load("res://src/core/theme.gd")
-			if theme_res:
-				var inst = theme_res.new()
-				var result = inst.get_theme_data()
-				return result
-	return _get_default_theme()
+func _draw_toggle(row_rect: Rect2, is_on: bool) -> void:
+	var track := Rect2(row_rect.position.x + row_rect.size.x - 74.0, row_rect.position.y + 14.0, 56.0, 27.0)
+	var color := Color(0.18, 0.72, 0.28) if is_on else Color(0.21, 0.27, 0.36)
+	draw_circle(track.position + Vector2(track.size.y * 0.5, track.size.y * 0.5), track.size.y * 0.5, color)
+	draw_circle(track.position + Vector2(track.size.x - track.size.y * 0.5, track.size.y * 0.5), track.size.y * 0.5, color)
+	draw_rect(Rect2(track.position.x + track.size.y * 0.5, track.position.y, track.size.x - track.size.y, track.size.y), color, true)
+	var knob_x := track.position.x + track.size.x - track.size.y * 0.5 if is_on else track.position.x + track.size.y * 0.5
+	draw_circle(Vector2(knob_x, track.position.y + track.size.y * 0.5), 11.0, Color(1.0, 0.95, 0.77))
+	_draw_text("ON" if is_on else "OFF", track.get_center().x, track.position.y + 19.0, C["white"], 10.0, true, 38.0)
 
 
-func _get_default_theme():
-	return {
-		"bg_medium": Color("#16213e"),
-		"bg_card": Color("#1a1a2e"),
-		"text_primary": Color("#e8e8e8"),
-		"text_secondary": Color("#a0a0a0"),
-		"text_muted": Color("#6b6b6b"),
-		"text_dark": Color("#2d2d2d"),
-		"primary": Color("#4a90d9"),
-		"gold": Color("#f5c518"),
-		"success": Color("#4caf50"),
-		"danger": Color("#e53935"),
-		"white": Color("#ffffff"),
-		"font": {
-			"title": {"size": 22, "weight": 700},
-			"subtitle": {"size": 18, "weight": 600},
-			"body": {"size": 14, "weight": 400},
-			"small": {"size": 12, "weight": 400},
-			"tiny": {"size": 10, "weight": 400}
-		},
-		"buttons": {
-			"primary": {"bg_color": Color("#4a90d9"), "text_color": Color("#ffffff"), "font_size": 14, "font_weight": 600},
-			"secondary": {"bg_color": Color("#2d2d44"), "text_color": Color("#e8e8e8"), "font_size": 14, "font_weight": 400},
-			"danger": {"bg_color": Color("#e53935"), "text_color": Color("#ffffff"), "font_size": 14, "font_weight": 600}
-		},
-		"radius": {"sm": 4, "md": 8, "lg": 16}
-	}
+func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
+	var options: Array = row.get("options", [])
+	var current := str(settings_data.get(str(row.get("key", "")), row.get("default", "")))
+	var total_w := 128.0
+	var seg_w := total_w / float(options.size())
+	var start_x := row_rect.position.x + row_rect.size.x - total_w - 13.0
+	for i in range(options.size()):
+		var option: Dictionary = options[i]
+		var active := current == str(option.get("value", ""))
+		var rect := Rect2(start_x + i * seg_w, row_rect.position.y + 13.0, seg_w, 28.0)
+		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
+		_draw_text(str(option.get("label", "")), rect.get_center().x, rect.position.y + 19.0, C["gold"] if active else C["muted"], 11.0, active, seg_w - 2.0)
 
 
-func _process(_delta: float) -> void:
-	queue_redraw()
+func _draw_about_panel() -> void:
+	_draw_texture_fit(_tex("row"), ABOUT_PANEL_RECT, 0.94)
+	_draw_texture_contain(_tex("gear"), Rect2(30.0, 497.0, 34.0, 34.0), 0.92)
+	_draw_text_left("当前版本", Vector2(76.0, 511.0), C["white"], 15.0, true, 88.0)
+	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 532.0), C["muted"], 12.0, false, 90.0)
+	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 522.0), C["dim"], 11.0, false, 168.0)
+
+
+func _draw_bottom_buttons() -> void:
+	_draw_texture_fit(_tex("button_disabled"), RESET_RECT)
+	_draw_text("重置数据", RESET_RECT.get_center().x, RESET_RECT.position.y + 30.0, Color(1.0, 0.36, 0.30), 16.0, true, 100.0)
+	_draw_texture_fit(_tex("button"), DEFAULT_RECT)
+	_draw_text("恢复默认", DEFAULT_RECT.get_center().x, DEFAULT_RECT.position.y + 30.0, C["white"], 16.0, true, 100.0)
+
+
+func _draw_confirm_dialog() -> void:
+	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66), true)
+	_draw_texture_fit(_tex("panel"), CONFIRM_BOX)
+	draw_rect(Rect2(CONFIRM_BOX.position + Vector2(14.0, 14.0), CONFIRM_BOX.size - Vector2(28.0, 28.0)), Color(0.03, 0.06, 0.12, 0.86), true)
+	_draw_texture_contain(_tex("notice"), Rect2(CONFIRM_BOX.position.x + 132.0, CONFIRM_BOX.position.y + 18.0, 28.0, 28.0))
+	_draw_text("确认重置？", CONFIRM_BOX.get_center().x, CONFIRM_BOX.position.y + 62.0, Color(1.0, 0.38, 0.28), 22.0, true, 180.0)
+	_draw_text("所有存档和养成进度会被清除", CONFIRM_BOX.get_center().x, CONFIRM_BOX.position.y + 93.0, C["muted"], 13.0, false, 220.0)
+	_draw_texture_fit(_tex("button_disabled"), CONFIRM_YES)
+	_draw_text("确认", CONFIRM_YES.get_center().x, CONFIRM_YES.position.y + 28.0, Color(1.0, 0.36, 0.30), 15.0, true, 82.0)
+	_draw_texture_fit(_tex("button"), CONFIRM_NO)
+	_draw_text("取消", CONFIRM_NO.get_center().x, CONFIRM_NO.position.y + 28.0, C["white"], 15.0, true, 82.0)
+
+
+func _draw_toast(text: String) -> void:
+	var rect := Rect2(96.0, 620.0, 183.0, 34.0)
+	_draw_texture_fit(_tex("title_ribbon"), rect)
+	_draw_text(text, rect.get_center().x, rect.position.y + 23.0, C["green"], 15.0, true, 150.0)
+
+
+func _tex(key: String) -> Texture2D:
+	if not _texture_cache.has(key):
+		var path := str(SETTINGS_ASSETS.get(key, ""))
+		_texture_cache[key] = load(path) if path != "" and ResourceLoader.exists(path) else null
+	var tex = _texture_cache.get(key)
+	return tex if tex is Texture2D else null
+
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var size := tex.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var scale := minf(rect.size.x / size.x, rect.size.y / size.y)
+	var draw_size := size * scale
+	var draw_pos := rect.position + (rect.size - draw_size) * 0.5
+	draw_texture_rect(tex, Rect2(draw_pos, draw_size), false, Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var size := tex.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var scale := maxf(rect.size.x / size.x, rect.size.y / size.y)
+	var source_size := rect.size / scale
+	var source_pos := (size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, _bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0 + 1.0, y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+
+
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, _bold: bool = false, width: float = 160.0) -> void:
+	var size_i := int(font_size)
+	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)

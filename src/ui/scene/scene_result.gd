@@ -340,13 +340,19 @@ func _save_rewards() -> void:
 		_storage.add_player_exp(_rewards["exp"])
 	_add_monster_exp_from_battle()
 	if _captured and not _capture_target.is_empty() and _capture_target.has("id"):
-		var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
-		var captured_list: Array = player.get("captured", [])
-		if not captured_list.has(_capture_target["id"]):
-			captured_list.append(_capture_target["id"])
-			player["captured"] = captured_list
-			_storage.save_player(player) if _storage.has_method("save_player") else null
-			_storage.init_monster_pokedex(_capture_target["id"]) if _storage.has_method("init_monster_pokedex") else null
+		if _storage.has_method("add_monster_instance"):
+			_storage.add_monster_instance(str(_capture_target["id"]), {
+				"source": "capture",
+				"level": maxi(1, int(_battle_result.get("enemyLevel", 1)))
+			})
+		else:
+			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
+			var captured_list: Array = player.get("captured", [])
+			if not captured_list.has(_capture_target["id"]):
+				captured_list.append(_capture_target["id"])
+				player["captured"] = captured_list
+				_storage.save_player(player) if _storage.has_method("save_player") else null
+				_storage.init_monster_pokedex(_capture_target["id"]) if _storage.has_method("init_monster_pokedex") else null
 	if _rewards["item"] and _storage.has_method("add_item"):
 		_storage.add_item(_rewards["item"], 1)
 	var rewards: Dictionary = _storage.load_rewards() if _storage.has_method("load_rewards") else {}
@@ -389,20 +395,27 @@ func _add_monster_exp_from_battle() -> void:
 	var base_exp: int = stage_rewards.get("exp", 100) if stage_rewards else 100
 	var exp_to_add: int = int(round(base_exp))
 	var player_team: Array = _battle_result.get("playerTeam", [])
-	for monster_id: String in team_members:
+	for monster_id in team_members:
+		var member_id := str(monster_id)
 		var battle_monster: Dictionary = {}
 		for m: Dictionary in player_team:
-			if m and m.get("id") == monster_id:
+			if m and str(m.get("id", "")) == member_id:
 				battle_monster = m
 				break
 		if not battle_monster.is_empty() and battle_monster.get("hp", 0) > 0:
-			if _storage.has_method("init_monster_pokedex"):
-				_storage.init_monster_pokedex(monster_id)
-			if _storage.has_method("add_monster_exp"):
-				var result: Dictionary = _storage.add_monster_exp(monster_id, exp_to_add)
+			var result: Dictionary = {}
+			if _storage.has_method("add_instance_exp") and not _storage.get_monster_instance(member_id).is_empty():
+				result = _storage.add_instance_exp(member_id, exp_to_add)
+			else:
+				if _storage.has_method("init_monster_pokedex"):
+					_storage.init_monster_pokedex(member_id)
+				if _storage.has_method("add_monster_exp"):
+					result = _storage.add_monster_exp(member_id, exp_to_add)
+			if not result.is_empty():
 				if result.get("leveledUp", false):
 					_level_ups.append({
-						"monsterId": monster_id,
+						"monsterId": battle_monster.get("monsterId", member_id),
+						"instanceId": member_id,
 						"oldLevel": result.get("oldLevel", 0),
 						"newLevel": result.get("newLevel", 0),
 						"expGained": result.get("expGained", 0)
@@ -824,8 +837,8 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, src_rect, Color(1.0, 1.0, 1.0, opacity))
 
 func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
-	var monster_id: String = monster.get("id", "")
-	var path: String = MonsterArtDBScript.get_battle_portrait_path(monster_id)
+	var monster_id: String = monster.get("monsterId", monster.get("id", ""))
+	var path: String = MonsterArtDBScript.get_art_path(monster_id, "result")
 	var tex := _get_texture(path)
 	if tex:
 		_draw_texture_fit(tex, rect)

@@ -1,9 +1,4 @@
-# ============================================
 # scene_sign_in.gd - 每日签到场景
-# 翻译来源: js/ui/sceneSignIn.js
-# 重构: _draw() 绘制 + _gui_input 交互
-# ============================================
-
 class_name SceneSignIn
 extends Control
 
@@ -12,43 +7,101 @@ signal sign_in_complete(reward: Dictionary)
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
-const PARTICLE_COUNT := 30
-const PARTICLE_COLORS := [Color("#FFD700"), Color("#FFA500"), Color("#FF6B6B"), Color("#98D8C8")]
+const PARTICLE_COUNT := 34
 
-var _game: Node = null
+const BACK_RECT := Rect2(10.0, 10.0, 58.0, 58.0)
+const HEADER_RECT := Rect2(92.0, 16.0, 220.0, 52.0)
+const HERO_RECT := Rect2(18.0, 82.0, 339.0, 100.0)
+const MONTH_RECT := Rect2(17.0, 462.0, 341.0, 126.0)
+const CLAIM_RECT := Rect2(78.0, 598.0, 220.0, 52.0)
+
+const SIGN_ASSETS := {
+	"bg": "res://assets/images/sign_in/bg_sign_in.png",
+	"back": "res://assets/images/sign_in/back_button.png",
+	"header": "res://assets/images/sign_in/header_bar.png",
+	"day_card": "res://assets/images/sign_in/day_card.png",
+	"day_card_alt": "res://assets/images/sign_in/day_card_alt.png",
+	"day_card_today": "res://assets/images/sign_in/day_card_today.png",
+	"day_card_locked": "res://assets/images/sign_in/day_card_locked.png",
+	"month_panel": "res://assets/images/sign_in/month_panel.png",
+	"month_ribbon": "res://assets/images/sign_in/month_ribbon.png",
+	"claim_button": "res://assets/images/sign_in/claim_button.png",
+	"claim_disabled": "res://assets/images/sign_in/claim_button_disabled.png",
+	"stamp": "res://assets/images/sign_in/stamp_claimed.png",
+	"today_tag": "res://assets/images/sign_in/today_tag.png",
+	"progress": "res://assets/images/sign_in/progress_bar.png",
+	"warning": "res://assets/images/sign_in/warning_badge.png",
+	"calendar": "res://assets/images/sign_in/icon_calendar_star.png",
+	"mascot": "res://assets/images/sign_in/mascot_leaf.png",
+	"check": "res://assets/images/sign_in/icon_check_badge.png",
+	"fx": "res://assets/images/sign_in/fx_sparkles.png",
+	"gold": "res://assets/images/sign_in/icon_gold_coin.png",
+	"exp": "res://assets/images/sign_in/icon_exp_badge.png",
+	"water": "res://assets/images/sign_in/icon_gem_water.png",
+	"fire": "res://assets/images/sign_in/icon_gem_fire.png",
+	"potion": "res://assets/images/sign_in/icon_potion_heart.png",
+	"chest_large": "res://assets/images/sign_in/icon_chest_large.png",
+	"chest_7": "res://assets/images/sign_in/icon_chest_7.png",
+	"chest_14": "res://assets/images/sign_in/icon_chest_14.png",
+	"chest_21": "res://assets/images/sign_in/icon_chest_21.png",
+	"chest_28": "res://assets/images/sign_in/icon_chest_28.png",
+	"diamond": "res://assets/images/sign_in/icon_diamond.png",
+}
+
+const REWARD_SCHEDULE := [
+	{"day": 1, "icon": "gold", "amount": "x500"},
+	{"day": 2, "icon": "exp", "amount": "x200"},
+	{"day": 3, "icon": "water", "amount": "x50"},
+	{"day": 4, "icon": "fire", "amount": "x2"},
+	{"day": 5, "icon": "potion", "amount": "x1"},
+	{"day": 6, "icon": "water", "amount": "x100"},
+	{"day": 7, "icon": "chest_large", "amount": "x1"},
+]
+
+const MILESTONES := [
+	{"day": 7, "icon": "chest_7"},
+	{"day": 14, "icon": "chest_14"},
+	{"day": 21, "icon": "chest_21"},
+	{"day": 28, "icon": "chest_28"},
+]
+
+const C := {
+	"white": Color(1.0, 1.0, 1.0),
+	"muted": Color(0.67, 0.74, 0.84),
+	"dim": Color(0.44, 0.50, 0.60),
+	"gold": Color(1.0, 0.80, 0.22),
+	"green": Color(0.62, 1.0, 0.36),
+	"blue": Color(0.42, 0.78, 1.0),
+	"red": Color(1.0, 0.35, 0.25),
+	"shadow": Color(0.0, 0.0, 0.0, 0.58),
+}
+
 var _storage: Node = null
 var _sign_in_data: Dictionary = {}
-var _can_sign_in: bool = false
-var _has_signed_in: bool = false
-var _animation_complete: bool = false
+var _can_sign_in := false
+var _has_signed_in := false
+var _animation_complete := false
 var _particles: Array = []
 var _floating_rewards: Array = []
-var _bg_texture: ColorRect
+var _texture_cache: Dictionary = {}
 
-func _add_dark_background() -> void:
-	_bg_texture = ColorRect.new()
-	_bg_texture.color = Color(0.04, 0.07, 0.15, 1.0)
-	_bg_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_bg_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bg_texture.z_index = -10
-	add_child(_bg_texture)
 
 func _ready() -> void:
-	_add_dark_background()
-	_storage = get_node_or_null("/root/SaveManager")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_storage = get_node_or_null("/root/SaveManager")
+
 
 func init(_data: Dictionary = {}) -> void:
-	print("[SceneSignIn] 签到场景初始化")
 	_storage = get_node_or_null("/root/SaveManager")
 	_sign_in_data = _storage.load_sign_in_data() if _storage else {}
 	_can_sign_in = _storage.can_sign_in_today() if _storage else false
 	_has_signed_in = not _can_sign_in
+	_animation_complete = false
 	_particles.clear()
 	_floating_rewards.clear()
-	_animation_complete = false
+	queue_redraw()
 
-# ============ 签到逻辑 ============
+
 func do_sign_in() -> void:
 	if not _can_sign_in or not _storage:
 		return
@@ -58,114 +111,66 @@ func do_sign_in() -> void:
 	_can_sign_in = false
 	_has_signed_in = true
 	_sign_in_data = _storage.load_sign_in_data()
-	if _storage and _storage.has_method("set_achievement_stat"):
+	if _storage.has_method("set_achievement_stat"):
 		_storage.set_achievement_stat("maxConsecutiveSignIn", int(_sign_in_data.get("consecutiveDays", 1)))
 		_storage.set_achievement_stat("totalSignInDays", int(_sign_in_data.get("totalDays", 1)))
 	_play_sign_in_effect(reward)
+	sign_in_complete.emit(reward)
+	queue_redraw()
+
 
 func _play_sign_in_effect(reward: Dictionary) -> void:
-	var center_x := DESIGN_WIDTH / 2.0
-	var center_y := DESIGN_HEIGHT / 2.0
+	var center := CLAIM_RECT.get_center()
 	for i in PARTICLE_COUNT:
-		var angle: float = randf() * TAU
-		var speed: float = 2.0 + randf() * 4.0
+		var angle := randf() * TAU
+		var speed := 1.8 + randf() * 4.0
 		_particles.append({
-			"x": center_x + (randf() - 0.5) * 100.0,
-			"y": center_y + (randf() - 0.5) * 60.0,
+			"x": center.x + (randf() - 0.5) * 110.0,
+			"y": center.y + (randf() - 0.5) * 30.0,
 			"vx": cos(angle) * speed,
-			"vy": sin(angle) * speed - 2.0,
+			"vy": sin(angle) * speed - 2.2,
 			"life": 1.0,
-			"color": PARTICLE_COLORS[randi() % PARTICLE_COLORS.size()],
-			"size": 4.0 + randf() * 6.0,
-			"rot": randf() * TAU
+			"size": 3.0 + randf() * 5.0,
+			"color": [C["gold"], C["green"], C["blue"], Color(1.0, 0.36, 0.66)][randi() % 4],
 		})
-	_floating_rewards.append({"text": "💰 +%d" % reward.get("gold", 0), "x": center_x - 50.0, "y": center_y, "vy": -1.5, "life": 1.5, "color": Color("#FFD700")})
-	_floating_rewards.append({"text": "✨ +%d" % reward.get("exp", 0), "x": center_x + 20.0, "y": center_y, "vy": -1.2, "life": 1.5, "color": Color("#4CAF50")})
+	_floating_rewards.append({"text": "+%d 金币" % int(reward.get("gold", 0)), "x": 125.0, "y": 586.0, "vy": -1.35, "life": 1.5, "color": C["gold"]})
+	_floating_rewards.append({"text": "+%d EXP" % int(reward.get("exp", 0)), "x": 210.0, "y": 586.0, "vy": -1.18, "life": 1.5, "color": C["green"]})
 	_animation_complete = true
 
-# ============ 输入 ============
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			_on_tap(event.position.x, event.position.y)
+			_on_tap(event.position)
 		accept_event()
 	elif event is InputEventScreenTouch:
 		if event.pressed:
-			_on_tap(event.position.x, event.position.y)
+			_on_tap(event.position)
 		accept_event()
 
-func _on_tap(x: float, y: float) -> void:
-	# 签到成功后点击任意区域
-	if _animation_complete and _particles.is_empty():
-		var back_rect := Rect2(15, 15, 60, 35)
-		if back_rect.has_point(Vector2(x, y)):
-			back_pressed.emit()
-		return
-	
-	# 返回按钮
-	var back_rect := Rect2(15, 15, 60, 35)
-	if back_rect.has_point(Vector2(x, y)):
+
+func _on_tap(point: Vector2) -> void:
+	if BACK_RECT.has_point(point):
 		back_pressed.emit()
 		return
-	
-	# 签到按钮
-	if not _can_sign_in:
-		return
-	var sign_rect := Rect2(87.5, 400, 200, 60)
-	if sign_rect.has_point(Vector2(x, y)):
+	if CLAIM_RECT.has_point(point) and _can_sign_in:
 		do_sign_in()
 
-func _get_last_7_days() -> Array:
-	var days := []
-	var now: Dictionary = Time.get_datetime_dict_from_system()
-	# 当天0点的 unix timestamp
-	var today_unix: int = Time.get_unix_time_from_datetime_dict(now) - (now["hour"] * 3600 + now["minute"] * 60 + now["second"])
-	for i in range(6, -1, -1):
-		var unix := today_unix - (i * 86400)
-		var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix)
-		days.append({
-			"date": d["day"],
-			"month": d["month"],
-			"year": d["year"],
-			"is_today": i == 0,
-			"signed": _check_day_signed(d)
-		})
-	return days
-
-func _check_day_signed(date_dict: Dictionary) -> bool:
-	if _sign_in_data.is_empty():
-		return false
-	var last_sign_raw = _sign_in_data.get("lastSignInDate", "")
-	# lastSignInDate 可能是 null 或空字符串
-	if last_sign_raw == null or str(last_sign_raw).is_empty():
-		return false
-	var last_sign: String = str(last_sign_raw)
-	if last_sign.is_empty():
-		return false
-	var parts: PackedStringArray = last_sign.split("-")
-	if parts.size() < 3:
-		return false
-	return parts[0].to_int() == date_dict.get("year", 0) and parts[1].to_int() == date_dict.get("month", 0) and parts[2].to_int() == date_dict.get("day", 0)
 
 func get_today_reward() -> Dictionary:
-	var consecutive: int = _sign_in_data.get("consecutiveDays", 0)
+	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
 	return _storage.get_sign_in_reward(consecutive) if _storage and _storage.has_method("get_sign_in_reward") else {"gold": 50, "exp": 30}
 
-func get_stats() -> Dictionary:
-	return {"total_days": _sign_in_data.get("totalDays", 0), "consecutive_days": _sign_in_data.get("consecutiveDays", 0)}
 
-# ============ 帧更新 ============
 func _process(dt: float) -> void:
-	# 粒子
 	for i in range(_particles.size() - 1, -1, -1):
 		var p: Dictionary = _particles[i]
 		p["x"] += p["vx"]
 		p["y"] += p["vy"]
 		p["vy"] += 0.15 * 60.0 * dt
-		p["life"] -= dt * 0.8
+		p["life"] -= dt * 0.82
 		if p["life"] <= 0.0:
 			_particles.remove_at(i)
-	# 飘字
 	for i in range(_floating_rewards.size() - 1, -1, -1):
 		var r: Dictionary = _floating_rewards[i]
 		r["y"] += r["vy"]
@@ -174,104 +179,171 @@ func _process(dt: float) -> void:
 			_floating_rewards.remove_at(i)
 	queue_redraw()
 
-# ============ 绘制 ============
+
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
-	var w := DESIGN_WIDTH
-	var h := DESIGN_HEIGHT
-	
-	# 背景
-	draw_rect(Rect2(0, 0, w, h), Color(0.06, 0.08, 0.16))
-	
-	# 返回按钮
-	draw_rect(Rect2(15, 15, 60, 35), Color(0.18, 0.20, 0.30))
-	draw_rect(Rect2(15, 15, 60, 35), Color(0.30, 0.35, 0.50), false)
-	draw_string(font, Vector2(22, 38), "← 返回", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.8, 0.8, 0.9))
-	
-	# 标题
-	draw_string(font, Vector2(w / 2, 70), "📅 每日签到", HORIZONTAL_ALIGNMENT_CENTER, -1, 22, Color.WHITE)
-	
-	# 统计
-	var total: int = _sign_in_data.get("totalDays", 0)
-	var consecutive: int = _sign_in_data.get("consecutiveDays", 0)
-	var stats_y := 100.0
-	
-	# 累计签到卡片
-	draw_rect(Rect2(30, stats_y, 145, 80), Color(0.10, 0.12, 0.20))
-	draw_rect(Rect2(30, stats_y, 145, 80), Color(0.22, 0.25, 0.35), false)
-	draw_string(font, Vector2(102, stats_y + 25), "累计签到", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.5, 0.5, 0.6))
-	draw_string(font, Vector2(102, stats_y + 58), "%d 天" % total, HORIZONTAL_ALIGNMENT_CENTER, -1, 24, Color(1.0, 0.84, 0.0))
-	
-	# 连续签到卡片
-	draw_rect(Rect2(200, stats_y, 145, 80), Color(0.10, 0.12, 0.20))
-	draw_rect(Rect2(200, stats_y, 145, 80), Color(0.22, 0.25, 0.35), false)
-	draw_string(font, Vector2(272, stats_y + 25), "连续签到", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.5, 0.5, 0.6))
-	draw_string(font, Vector2(272, stats_y + 58), "%d 天" % consecutive, HORIZONTAL_ALIGNMENT_CENTER, -1, 24, Color(0.9, 0.3, 0.3))
-	
-	# 7天日历
-	var calendar_y := 200.0
-	draw_rect(Rect2(30, calendar_y, 315, 75), Color(0.10, 0.12, 0.20))
-	draw_rect(Rect2(30, calendar_y, 315, 75), Color(0.22, 0.25, 0.35), false)
-	draw_string(font, Vector2(w / 2, calendar_y + 20), "近7天签到记录", HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color(0.5, 0.5, 0.6))
-	
-	var days := _get_last_7_days()
-	var cell_w := 40.0
-	var cal_start_x := (w - 7 * cell_w) / 2.0
-	var cell_y := calendar_y + 40.0
-	
-	for i in range(days.size()):
-		var day: Dictionary = days[i]
-		var cx: float = cal_start_x + i * cell_w
-		
-		# 圆圈背景
-		if day.is_today:
-			draw_circle(Vector2(cx + cell_w / 2, cell_y + 14), 16, Color(1.0, 0.84, 0.0))
-			draw_string(font, Vector2(cx + cell_w / 2, cell_y + 18), str(day.get("date", "")), HORIZONTAL_ALIGNMENT_CENTER, -1, 13, Color(0.06, 0.08, 0.16))
-		else:
-			var c := Color(0.3, 0.8, 0.3) if day.signed else Color(0.15, 0.17, 0.25)
-			draw_circle(Vector2(cx + cell_w / 2, cell_y + 14), 16, c)
-			draw_string(font, Vector2(cx + cell_w / 2, cell_y + 18), str(day.get("date", "")), HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color.WHITE if day.signed else Color(0.5, 0.5, 0.6))
-		
-		# 标记
-		if day.signed:
-			draw_string(font, Vector2(cx + cell_w / 2, cell_y + 35), "✓", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.3, 0.8, 0.3))
-		elif day.is_today and _can_sign_in:
-			draw_string(font, Vector2(cx + cell_w / 2, cell_y + 35), "?", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.5, 0.5, 0.6))
-	
-	# 今日奖励
-	var reward_y := 295.0
-	draw_rect(Rect2(30, reward_y, 315, 80), Color(0.10, 0.12, 0.20))
-	draw_rect(Rect2(30, reward_y, 315, 80), Color(0.22, 0.25, 0.35), false)
-	draw_string(font, Vector2(w / 2, reward_y + 20), "🎁 今日签到奖励", HORIZONTAL_ALIGNMENT_CENTER, -1, 15, Color.WHITE)
-	
-	var today_reward := get_today_reward()
-	draw_string(font, Vector2(100, reward_y + 50), "💰 金币: +%d" % today_reward.get("gold", 50), HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color(1.0, 0.84, 0.0))
-	draw_string(font, Vector2(230, reward_y + 50), "✨ 经验: +%d" % today_reward.get("exp", 30), HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color(0.3, 0.8, 0.3))
-	
-	# 签到按钮
-	if _can_sign_in:
-		draw_rect(Rect2(87.5, 400, 200, 60), Color(1.0, 0.84, 0.0))
-		draw_string(font, Vector2(w / 2, 438), "🎊 签到领奖", HORIZONTAL_ALIGNMENT_CENTER, -1, 20, Color(0.1, 0.1, 0.15))
-	else:
-		draw_rect(Rect2(87.5, 400, 200, 60), Color(0.18, 0.20, 0.30))
-		draw_string(font, Vector2(w / 2, 438), "✅ 今日已签到", HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color(0.5, 0.5, 0.6))
-	
-	# 粒子
+	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT))
+	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.0, 0.02, 0.08, 0.10))
+	_draw_header()
+	_draw_hero()
+	_draw_week_rewards()
+	_draw_month_rewards()
+	_draw_claim_area()
+	_draw_effects()
+
+
+func _draw_header() -> void:
+	_draw_texture_fit(_tex("back"), BACK_RECT)
+	_draw_text("‹", BACK_RECT.position.x + 29.0, BACK_RECT.position.y + 43.0, Color(1.0, 0.92, 0.78), 42.0, true, 44.0)
+	_draw_texture_fit(_tex("header"), HEADER_RECT)
+	_draw_text("每日签到", HEADER_RECT.get_center().x, HEADER_RECT.position.y + 34.0, C["white"], 24.0, true, 170.0)
+
+
+func _draw_hero() -> void:
+	_draw_texture_fit(_tex("month_panel"), HERO_RECT)
+	_draw_texture_contain(_tex("calendar"), Rect2(28.0, 88.0, 88.0, 82.0))
+	_draw_texture_contain(_tex("mascot"), Rect2(255.0, 76.0, 88.0, 100.0))
+	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
+	var next_reward := _get_schedule_item(_current_cycle_day())
+	_draw_text("连续签到", 174.0, 112.0, Color(1.0, 0.92, 0.68), 18.0, true, 110.0)
+	_draw_text(str(consecutive), 158.0, 154.0, C["gold"], 42.0, true, 76.0)
+	_draw_text("天", 205.0, 154.0, C["white"], 22.0, true, 28.0)
+	_draw_text("今日奖励", 177.0, 174.0, C["muted"], 12.0, false, 82.0)
+	_draw_texture_contain(_tex(str(next_reward.get("icon", "gold"))), Rect2(217.0, 142.0, 38.0, 38.0))
+
+
+func _draw_week_rewards() -> void:
+	var current_day := _current_cycle_day()
+	var signed_limit := _signed_cycle_limit(current_day)
+	for i in range(REWARD_SCHEDULE.size()):
+		var item: Dictionary = REWARD_SCHEDULE[i]
+		var day := int(item["day"])
+		var today := day == current_day
+		var signed := day <= signed_limit
+		var rect := _day_rect(i)
+		var card_key := "day_card_today" if today else ("day_card" if i % 2 == 0 else "day_card_alt")
+		if day > signed_limit + 1 and not today:
+			card_key = "day_card_locked"
+		_draw_texture_fit(_tex(card_key), rect)
+		_draw_text("第%d天" % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else C["white"], 15.0, true, rect.size.x - 8.0)
+		if today:
+			_draw_texture_fit(_tex("today_tag"), Rect2(rect.position.x + 5.0, rect.position.y + 28.0, 42.0, 23.0))
+			_draw_text("今日", rect.position.x + 26.0, rect.position.y + 45.0, C["white"], 11.0, true, 34.0)
+		_draw_texture_contain(_tex(str(item["icon"])), Rect2(rect.position.x + 16.0, rect.position.y + 42.0, rect.size.x - 32.0, 45.0))
+		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 20.0, C["white"], 17.0, true, rect.size.x - 12.0)
+		if signed:
+			_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 10.0, rect.position.y + rect.size.y - 47.0, rect.size.x - 20.0, 34.0), 0.92)
+
+
+func _draw_month_rewards() -> void:
+	_draw_texture_fit(_tex("month_panel"), MONTH_RECT)
+	_draw_texture_fit(_tex("month_ribbon"), Rect2(74.0, 448.0, 228.0, 40.0))
+	_draw_text("本月累计签到奖励", 188.0, 474.0, Color(1.0, 0.92, 0.65), 15.0, true, 180.0)
+	var total := int(_sign_in_data.get("totalDays", 0))
+	var month_count := clampi(total % 29, 0, 28)
+	if total > 0 and total % 28 == 0:
+		month_count = 28
+	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0, 76.0, 70.0))
+	_draw_text("本月已签到  %d/28 天" % month_count, 205.0, 505.0, C["white"], 14.0, true, 160.0)
+	_draw_texture_fit(_tex("progress"), Rect2(108.0, 548.0, 230.0, 26.0))
+	for i in range(MILESTONES.size()):
+		var m: Dictionary = MILESTONES[i]
+		var x := 128.0 + i * 64.0
+		var reached := month_count >= int(m["day"])
+		_draw_texture_contain(_tex(str(m["icon"])), Rect2(x - 22.0, 518.0, 44.0, 34.0), 1.0 if reached else 0.55)
+		_draw_text("%d天" % int(m["day"]), x, 583.0, C["green"] if reached else C["muted"], 12.0, true, 42.0)
+
+
+func _draw_claim_area() -> void:
+	var key := "claim_button" if _can_sign_in else "claim_disabled"
+	_draw_texture_fit(_tex(key), CLAIM_RECT)
+	var label := "领取奖励" if _can_sign_in else "今日已签到"
+	_draw_text(label, CLAIM_RECT.get_center().x, CLAIM_RECT.position.y + 35.0, C["white"], 24.0 if _can_sign_in else 19.0, true, 170.0)
+	_draw_texture_contain(_tex("warning"), Rect2(77.0, 644.0, 18.0, 18.0))
+	_draw_text("每日 00:00 重置签到进度", 205.0, 658.0, C["muted"], 12.0, true, 205.0)
+
+
+func _draw_effects() -> void:
 	for p in _particles:
-		var alpha: float = clampf(p.get("life", 0.0), 0.0, 1.0)
-		var c: Color = p.get("color", Color.WHITE)
-		c.a = alpha
-		var sz: float = p.get("size", 4.0)
-		draw_rect(Rect2(p.get("x", 0.0) - sz / 2.0, p.get("y", 0.0) - sz / 2.0, sz, sz), c)
-	
-	# 飘字
+		var alpha := clampf(float(p.get("life", 0.0)), 0.0, 1.0)
+		var color: Color = p.get("color", C["gold"])
+		color.a = alpha
+		var sz := float(p.get("size", 4.0))
+		draw_rect(Rect2(float(p.get("x", 0.0)) - sz / 2.0, float(p.get("y", 0.0)) - sz / 2.0, sz, sz), color)
+	if _animation_complete and _particles.is_empty():
+		_draw_texture_contain(_tex("fx"), Rect2(92.0, 520.0, 190.0, 60.0), 0.85)
+		_draw_text("签到成功！奖励已发放", DESIGN_WIDTH / 2.0, 564.0, C["gold"], 15.0, true, 220.0)
 	for r in _floating_rewards:
-		var alpha: float = clampf(r.get("life", 0.0) / 1.5, 0.0, 1.0)
-		var c: Color = r.get("color", Color.WHITE)
-		c.a = alpha
-		draw_string(font, Vector2(r.get("x", 0.0), r.get("y", 0.0)), r.get("text", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, c)
-	
-	# 签到成功提示
-	if _has_signed_in and _animation_complete and _particles.is_empty():
-		draw_string(font, Vector2(w / 2, 480), "🎉 签到成功！奖励已发放", HORIZONTAL_ALIGNMENT_CENTER, -1, 15, Color(1.0, 0.84, 0.0))
-		draw_string(font, Vector2(w / 2, 510), "点击返回按钮回到主界面", HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color(0.5, 0.5, 0.6))
+		var alpha := clampf(float(r.get("life", 0.0)) / 1.5, 0.0, 1.0)
+		var color: Color = r.get("color", C["white"])
+		color.a = alpha
+		_draw_text(str(r.get("text", "")), float(r.get("x", 0.0)), float(r.get("y", 0.0)), color, 16.0, true, 82.0)
+
+
+func _day_rect(index: int) -> Rect2:
+	if index < 4:
+		return Rect2(18.0 + index * 86.0, 194.0, 78.0, 112.0)
+	return Rect2(42.0 + (index - 4) * 102.0, 316.0, 88.0, 124.0)
+
+
+func _current_cycle_day() -> int:
+	var streak := int(_sign_in_data.get("consecutiveDays", 0))
+	if _can_sign_in:
+		return clampi(streak % 7 + 1, 1, 7)
+	return clampi((maxi(streak, 1) - 1) % 7 + 1, 1, 7)
+
+
+func _signed_cycle_limit(current_day: int) -> int:
+	if _can_sign_in:
+		return max(0, current_day - 1)
+	return current_day
+
+
+func _get_schedule_item(day: int) -> Dictionary:
+	for item in REWARD_SCHEDULE:
+		if int(item["day"]) == day:
+			return item
+	return REWARD_SCHEDULE[0]
+
+
+func _tex(key: String) -> Texture2D:
+	if not _texture_cache.has(key):
+		var path: String = SIGN_ASSETS.get(key, "")
+		_texture_cache[key] = load(path) if path != "" and ResourceLoader.exists(path) else null
+	var tex = _texture_cache.get(key)
+	return tex if tex is Texture2D else null
+
+
+func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var size := tex.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var scale := minf(rect.size.x / size.x, rect.size.y / size.y)
+	var draw_size := size * scale
+	var draw_pos := rect.position + (rect.size - draw_size) * 0.5
+	draw_texture_rect(tex, Rect2(draw_pos, draw_size), false, Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15))
+		return
+	var size := tex.get_size()
+	var scale := maxf(rect.size.x / size.x, rect.size.y / size.y)
+	var source_size := rect.size / scale
+	var source_pos := (size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
+
+
+func _draw_text(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 180.0) -> void:
+	var font := ThemeDB.fallback_font
+	var shadow := C["shadow"]
+	draw_string(font, Vector2(x - width / 2.0 + 1.0, y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow)
+	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)

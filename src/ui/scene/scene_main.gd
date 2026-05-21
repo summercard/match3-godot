@@ -22,6 +22,7 @@ const SCENE_ENTRY_SIZE := Vector2(136.0, 42.0)
 const BOTTOM_NAV_Y := 599.0
 const BOTTOM_NAV_W := 75.0
 const BOTTOM_NAV_H := 68.0
+const PARTICLE_REDRAW_INTERVAL := 1.0 / 30.0
 
 ## 大厅美术资产
 const MAIN_ASSETS := {
@@ -101,6 +102,7 @@ var _player: Dictionary = {
 ## 粒子系统
 var _particles: Array[Dictionary] = []
 var _particle_timer: float = 0.0
+var _particle_redraw_accum: float = 0.0
 
 ## Tooltip 状态
 var _tooltip: Dictionary = {
@@ -439,15 +441,18 @@ func _show_button_tooltip(btn: LobbyButton, text: String) -> void:
 ## ============================================
 
 func _process(delta: float) -> void:
-	_update_particles(delta)
+	_particle_redraw_accum += delta
+	if _particle_redraw_accum >= PARTICLE_REDRAW_INTERVAL:
+		_update_particles(_particle_redraw_accum)
+		_particle_redraw_accum = 0.0
+		queue_redraw()
 	
 	# Tooltip 淡出
 	if _tooltip.has("opacity") and _tooltip["opacity"] < 1.0:
 		_tooltip["opacity"] -= 0.05
 		if _tooltip["opacity"] <= 0.0:
 			_tooltip.clear()
-	
-	queue_redraw()
+		queue_redraw()
 
 func _update_particles(dt: float) -> void:
 	var w := DESIGN_WIDTH

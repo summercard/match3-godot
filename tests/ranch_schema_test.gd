@@ -30,9 +30,11 @@ func _run() -> void:
 	_expect(ranch.get("slots", []).size() >= 3, "ranch should keep unlocked slot count")
 
 	var first_slot: Dictionary = ranch.get("slots", [])[0]
-	_expect(first_slot.get("monster_id", "") == "monster_001", "ranch slot should expose snake_case monster_id")
+	var instance_id := str(first_slot.get("instance_id", ""))
+	_expect(not instance_id.is_empty(), "ranch slot should expose snake_case instance_id")
+	_expect(save_manager.get_monster_instance(instance_id).get("monsterId", "") == "monster_001", "ranch slot instance should resolve migrated monster")
 	_expect(first_slot.has("placed_at"), "ranch slot should expose snake_case placed_at")
-	_expect(not first_slot.has("monsterId") and not first_slot.has("placedAt"), "ranch slot should not expose camelCase keys")
+	_expect(not first_slot.has("monster_id") and not first_slot.has("monsterId") and not first_slot.has("placedAt"), "ranch slot should not expose legacy monster keys")
 	_expect(float(first_slot.get("placed_at", 0.0)) > 100000000000.0, "ranch placed_at should be normalized to milliseconds")
 
 	var exp_before: int = save_manager.get_monster_exp("monster_001")
@@ -43,7 +45,7 @@ func _run() -> void:
 
 	ranch = save_manager.get_ranch_state()
 	first_slot = ranch.get("slots", [])[0]
-	_expect(first_slot.get("monster_id", "") == "monster_001", "collect should keep monster in ranch")
+	_expect(first_slot.get("instance_id", "") == instance_id, "collect should keep same instance in ranch")
 	_expect(float(first_slot.get("placed_at", 0.0)) > old_placed_at_seconds * 1000.0, "collect should reset placed_at in milliseconds")
 
 	_finish()
