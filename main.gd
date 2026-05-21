@@ -46,8 +46,12 @@ func _apply_runtime_performance_defaults() -> void:
 func _configure_debug_window() -> void:
 	if DisplayServer.get_name() == "headless" or OS.has_feature("mobile"):
 		return
-	var window_size := Vector2i(450, 800)
-	DisplayServer.window_set_min_size(Vector2i(360, 640))
+	var override_w := int(ProjectSettings.get_setting("display/window/size/window_width_override", 0))
+	var override_h := int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
+	var window_size := Vector2i(override_w, override_h)
+	if window_size.x <= 0 or window_size.y <= 0:
+		window_size = Vector2i(int(DESIGN_SIZE.x), int(DESIGN_SIZE.y))
+	DisplayServer.window_set_min_size(Vector2i(int(DESIGN_SIZE.x), int(DESIGN_SIZE.y)))
 	DisplayServer.window_set_size(window_size)
 	var screen_rect := DisplayServer.screen_get_usable_rect()
 	var centered_pos := screen_rect.position + (screen_rect.size - window_size) / 2

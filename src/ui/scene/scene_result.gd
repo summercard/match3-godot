@@ -539,6 +539,23 @@ func destroy() -> void:
 	if _capture_effect_node and is_instance_valid(_capture_effect_node):
 		_capture_effect_node.queue_free()
 		_capture_effect_node = null
+	# 动画状态清理
+	_star_anim_progress = 0.0
+	_reward_anim_progress = 0.0
+	_exp_anim_progress = 0.0
+	_button_anim_progress = 0.0
+	_shake_offset_x = 0.0
+	_entry_offset_y = 200.0
+	_entry_timer = 0.0
+	_time_acc = 0.0
+	_capture_anim_timer = 0.0
+	_levelup_anim_progress = 0.0
+	_capture_waiting = false
+	_capture_phase = ""
+	_has_next_stage = false
+	_next_btn_rect = Rect2()
+	_back_btn_rect = Rect2()
+	_retry_btn_rect = Rect2()
 	_game = null
 	_storage = null
 	_achievement_manager = null
