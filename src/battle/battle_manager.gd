@@ -519,6 +519,11 @@ func enemy_action() -> Dictionary:
 		battle_over = true
 		battle_result = "draw"
 		battle_ended.emit("draw")
+		return { "actions": actions, "status_logs": status_logs, "dot_kills": dot_kills }
+
+	# 敌方回合结束后检查 — 玩家可能通过 DoT / 反射 / 吸血等在攻击链中全灭
+	if not battle_over:
+		check_battle_end()
 
 	return { "actions": actions, "status_logs": status_logs, "dot_kills": dot_kills }
 
