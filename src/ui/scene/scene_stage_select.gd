@@ -55,7 +55,8 @@ const CHAPTER_THEME_BACKGROUNDS := {
 }
 
 const CHAPTER_BACKGROUND_OVERRIDES := {
-	"chapter_3": "res://assets/images/stage/stage_map_bg_chapter_03_mystic_forest.png"
+	"chapter_3": "res://assets/images/stage/stage_map_bg_chapter_03_mystic_forest.png",
+	"chapter_4": "res://assets/images/stage/stage_map_bg_chapter_04_eclipse_canopy.png"
 }
 
 const CHAPTER_THEME_TINTS := {

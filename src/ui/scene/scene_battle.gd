@@ -21,6 +21,7 @@ const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
+const ItemDBScript = preload("res://src/data/item_db.gd")
 
 ## 设计尺寸
 const DESIGN_W := 375.0
@@ -186,6 +187,10 @@ var _special_transform_anim: Dictionary = {
 var _element_ripple: Dictionary = {
 	"active": false, "color": Color(), "timer": 0.0, "duration": 0.6
 }
+
+## 道具快捷栏（Phase 14）
+var _hotbar_items: Array[Dictionary] = []       # [{id, count}, ...] 最多3个
+var _selected_hotbar_slot: int = -1             # 当前选中的格子索引
 
 ## 关卡数据
 var _stage_data: Dictionary = {}
@@ -425,6 +430,7 @@ func _init_battle() -> void:
 				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
 	
 	_show_message(_stage_data.get("name", "战斗开始！"))
+	_load_hotbar_items()
 
 ## ============================================
 # 输入处理
@@ -610,6 +616,10 @@ func _on_tap(x: float, y: float) -> void:
 	if _state != BattleState.IDLE:
 		return
 
+	# 优先检测道具快捷栏点击
+	if _try_tap_hotbar(x, y):
+		return
+
 	if _try_use_skill_at_position(Vector2(x, y)):
 		return
 	
@@ -635,6 +645,9 @@ func _on_tap(x: float, y: float) -> void:
 	_selected_gem = Vector2i(-1, -1)
 
 func _try_use_skill_at_position(pos: Vector2) -> bool:
+	# 优先检测道具快捷栏点击
+	if _try_tap_hotbar(pos.x, pos.y):
+		return true
 	if _battle == null or _state != BattleState.IDLE:
 		return false
 	for i in range(mini(_battle.player_team.size(), 3)):
@@ -1992,6 +2005,138 @@ func _draw_bottom_bar() -> void:
 		status_text = "处理中..."
 	
 	_draw_text_with_shadow("状态: %s" % status_text, 300.0, bottom_y + 15, state_color, 12.0)
+	_draw_item_hotbar(bottom_y)
+
+func _draw_item_hotbar(base_y: float) -> void:
+	"""绘制底部道具快捷栏（3格）"""
+	var slot_size: float = 50.0
+	var slot_gap: float = 10.0
+	var total_w: float = 3.0 * slot_size + 2.0 * slot_gap
+	var start_x: float = (DESIGN_W - total_w) / 2.0
+	var slot_y: float = base_y + 48.0  # 在状态条下方
+
+	for i in range(3):
+		var slot_x: float = start_x + i * (slot_size + slot_gap)
+		var item: Dictionary = _hotbar_items[i] if i < _hotbar_items.size() else {}
+		var has_item: bool = not item.is_empty() and item.get("count", 0) > 0
+
+		# 格子背景
+		var bg_color := C["bg_medium"]
+		if has_item:
+			bg_color = C["bg_card"]
+		_draw_rounded_rect(slot_x, slot_y, slot_size, slot_size, 6.0, bg_color)
+
+		# 选中边框
+		if _selected_hotbar_slot == i and has_item:
+			var border_color := C["gold"]
+			_draw_rounded_rect_outline(slot_x, slot_y, slot_size, slot_size, 6.0, border_color, 2.0)
+
+		if has_item:
+			# 道具emoji
+			var item_def: Dictionary = ItemDB.get_item(item["id"])
+			var emoji: String = item_def.get("emoji", "❓")
+			_draw_text(emoji, slot_x + slot_size / 2.0, slot_y + slot_size / 2.0, C["white"], 22.0, true)
+
+			# 数量标签
+			var count: int = item["count"]
+			if count > 1:
+				_draw_text("x%d" % count, slot_x + slot_size - 6.0, slot_y + slot_size - 4.0, C["gold"], 10.0, false)
+
+func _load_hotbar_items() -> void:
+	"""从背包加载前3个战斗相关道具到快捷栏"""
+	_hotbar_items.clear()
+	if not _storage or not _storage.has_method("load_inventory"):
+		return
+	var inventory: Dictionary = _storage.load_inventory()
+	# 收集所有 type 为 capture 或 battle 的道具
+	var candidates: Array[Dictionary] = []
+	for item_id in inventory:
+		var count: int = inventory[item_id]
+		if count <= 0:
+			continue
+		var def: Dictionary = ItemDB.get_item(item_id)
+		var item_type: String = def.get("type", "")
+		if item_type == "capture" or item_type == "battle":
+			candidates.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1)})
+	# 按rarity降序（稀有在前）、然后count降序
+	candidates.sort_custom(func(a, b): return a["rarity"] > b["rarity"] or (a["rarity"] == b["rarity"] and a["count"] > b["count"]))
+	for i in range(mini(candidates.size(), 3)):
+		_hotbar_items.append(candidates[i])
+
+func _try_tap_hotbar(x: float, y: float) -> bool:
+	"""检测点击是否命中道具快捷栏，返回是否处理了"""
+	if _hotbar_items.is_empty():
+		return false
+	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 15.0) if _board != null else 586.0
+	var slot_size: float = 50.0
+	var slot_gap: float = 10.0
+	var total_w: float = 3.0 * slot_size + 2.0 * slot_gap
+	var start_x: float = (DESIGN_W - total_w) / 2.0
+	var slot_y: float = bottom_y + 48.0
+
+	for i in range(3):
+		var slot_x: float = start_x + i * (slot_size + slot_gap)
+		if x >= slot_x and x <= slot_x + slot_size and y >= slot_y and y <= slot_y + slot_size:
+			if i >= _hotbar_items.size():
+				return false
+			var item: Dictionary = _hotbar_items[i]
+			if item.is_empty() or item.get("count", 0) <= 0:
+				return false
+			if _selected_hotbar_slot == i:
+				# 再次点击同一格子 → 使用道具
+				_try_use_item_at_slot(i)
+				return true
+			else:
+				# 选中格子
+				_selected_hotbar_slot = i
+				var def: Dictionary = ItemDB.get_item(item["id"])
+				_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
+				return true
+	return false
+
+func _try_use_item_at_slot(slot_idx: int) -> bool:
+	"""尝试使用指定快捷栏格子中的道具，返回是否处理了"""
+	if slot_idx < 0 or slot_idx >= _hotbar_items.size():
+		return false
+	var item: Dictionary = _hotbar_items[slot_idx]
+	if item.is_empty() or item.get("count", 0) <= 0:
+		return false
+	var item_id: String = item["id"]
+	var def: Dictionary = ItemDB.get_item(item_id)
+	var item_type: String = def.get("type", "")
+	if item_type == "capture":
+		# 捕获球 → 使用捕获道具逻辑
+		if _state == BattleState.ENEMY_TURN:
+			_show_message("敌方回合中无法使用道具")
+			return true
+		var bonus: float = _consume_best_capture_item()
+		_show_message("使用 %s，捕获概率 +%.0f%%" % [def.get("name", "捕获球"), bonus * 100.0])
+		return true
+	elif item_type == "battle":
+		# HP药水 → 恢复队伍50%HP
+		if _state != BattleState.IDLE:
+			_show_message("当前无法使用道具")
+			return true
+		var heal_ratio: float = def.get("effect", {}).get("healRatio", 0.5)
+		var healed: int = 0
+		for monster: Dictionary in _battle.player_team:
+			if monster == null or monster.is_empty():
+				continue
+			var max_hp: int = monster.get("maxHP", 100)
+			var cur_hp: int = monster.get("hp", max_hp)
+			var add: int = int(max_hp * heal_ratio)
+			monster["hp"] = mini(cur_hp + add, max_hp)
+			healed += add
+		_show_message("使用 %s，恢复 %d HP" % [def.get("name", "HP药水"), healed])
+		_storage.use_item(item_id, 1) if _storage else null
+		item["count"] -= 1
+		if item["count"] <= 0:
+			_hotbar_items.remove_at(slot_idx)
+		_selected_hotbar_slot = -1
+		return true
+	else:
+		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
+		return true
 
 func _draw_message() -> void:
 	if _message_timer <= 0:
@@ -2271,6 +2416,17 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 	draw_rect(Rect2(x + w - r, y, r, r), color)
 	draw_rect(Rect2(x, y + h - r, r, r), color)
 	draw_rect(Rect2(x + w - r, y + h - r, r, r), color)
+
+func _draw_rounded_rect_outline(x: float, y: float, w: float, h: float, r: float, color: Color, line_width: float = 2.0) -> void:
+	_draw_stroke_rect(x, y, w, h, line_width, color)
+
+func _draw_text(text: String, x: float, y: float, color: Color, size: float, center: bool = false) -> void:
+	var font: Font = ThemeDB.fallback_font
+	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER if center else HORIZONTAL_ALIGNMENT_LEFT
+	if center:
+		draw_string(font, Vector2(x, y + size * 0.75), text, align, -1.0, size, color)
+	else:
+		draw_string(font, Vector2(x, y + size * 0.75), text, align, -1.0, size, color)
 
 func _draw_stroke_rect(x: float, y: float, w: float, h: float, line_width: float, color: Color) -> void:
 	# 简化：使用 4 条线绘制边框
