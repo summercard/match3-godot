@@ -1,0 +1,649 @@
+[gd_scene format=3 uid="uid://dd534byciatmg"]
+
+[ext_resource type="Script" uid="uid://dlvybuxwqe88n" path="res://src/ui/scene/scene_main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://b5cwalievin07" path="res://src/ui/components/lobby_particle_layer.gd" id="2_particles"]
+[ext_resource type="Texture2D" uid="uid://dttc0io5lqong" path="res://assets/images/main/main_lobby_bg_v2.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://d253rc75y2flw" path="res://assets/images/main/ui_avatar_frame_v2.png" id="4_avatar_frame"]
+[ext_resource type="Texture2D" uid="uid://cy1g3m68dg18x" path="res://assets/images/main/icon_avatar.png" id="5_avatar"]
+[ext_resource type="Texture2D" uid="uid://u6bfqatl1vyo" path="res://assets/images/main/ui_player_name_plate_v2.png" id="6_name_plate"]
+[ext_resource type="Texture2D" uid="uid://b5332lfmc4aqg" path="res://assets/images/main/icon_edit_v2.png" id="7_edit"]
+[ext_resource type="Texture2D" uid="uid://w82j6tnwxlca" path="res://assets/images/main/ui_level_shield_v2.png" id="8_level"]
+[ext_resource type="Texture2D" uid="uid://c3cntld4e5ar8" path="res://assets/images/main/ui_exp_bar_empty_v2.png" id="9_exp_empty"]
+[ext_resource type="Texture2D" uid="uid://cp54dxoatdxkc" path="res://assets/images/main/ui_exp_bar_fill_v2.png" id="10_exp_fill"]
+[ext_resource type="Texture2D" uid="uid://bkmp4clvvu417" path="res://assets/images/main/ui_gold_capsule_v2.png" id="11_gold_capsule"]
+[ext_resource type="Texture2D" uid="uid://cegre0vtwf1vr" path="res://assets/images/main/icon_gold_v2.png" id="12_gold"]
+[ext_resource type="Texture2D" uid="uid://de4u6bumadjxd" path="res://assets/images/main/ui_diamond_capsule_v2.png" id="13_diamond_capsule"]
+[ext_resource type="Texture2D" uid="uid://bkicb0a1vmtxm" path="res://assets/images/main/icon_diamond_v2.png" id="14_diamond"]
+[ext_resource type="Texture2D" uid="uid://d3div844dx1uy" path="res://assets/images/main/ui_rank_panel_v2.png" id="15_rank"]
+[ext_resource type="Texture2D" uid="uid://g0edio4hrhbv" path="res://assets/images/main/ui_entry_button_v2.png" id="16_entry"]
+[ext_resource type="Texture2D" uid="uid://c6s5u8tryp2v2" path="res://assets/images/main/ui_bottom_nav_frame_v2.png" id="17_nav"]
+[ext_resource type="Texture2D" uid="uid://dlo6nin2g8wy0" path="res://assets/images/main/ui_bottom_nav_frame_pressed_v2.png" id="18_nav_pressed"]
+[ext_resource type="Texture2D" uid="uid://c68f3npcjpdk7" path="res://assets/images/main/ui_notification_dot_v2.png" id="19_notice"]
+[ext_resource type="Texture2D" uid="uid://cmnrhcuxsdpon" path="res://assets/images/main/icon_paw_v2.png" id="20_start"]
+[ext_resource type="Texture2D" uid="uid://b3d10dxp4btqi" path="res://assets/images/main/icon_swords_v2.png" id="21_team"]
+[ext_resource type="Texture2D" uid="uid://c8nwp5euuudam" path="res://assets/images/main/icon_leaf_v2.png" id="22_ranch"]
+[ext_resource type="Texture2D" uid="uid://chtvmfv6jlpa5" path="res://assets/images/main/icon_cart_v2.png" id="23_shop"]
+[ext_resource type="Texture2D" uid="uid://dc0oaet8mhcge" path="res://assets/images/main/icon_album_book_v2.png" id="24_album"]
+[ext_resource type="Texture2D" uid="uid://boi366mwighos" path="res://assets/images/main/icon_inventory_bag_v2.png" id="25_inventory"]
+[ext_resource type="Texture2D" uid="uid://dnycca83svd5l" path="res://assets/images/main/icon_achievement_medal_v2.png" id="26_achievement"]
+[ext_resource type="Texture2D" uid="uid://cnw4p4vs0gu52" path="res://assets/images/main/icon_settings_gear_v2.png" id="27_settings"]
+[ext_resource type="Texture2D" uid="uid://dke5hi3jv2mup" path="res://assets/images/main/icon_signin_calendar_v2.png" id="28_signin"]
+
+[node name="MainLobby" type="Control" unique_id=776085402]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 1
+script = ExtResource("1_main")
+
+[node name="Background" type="TextureRect" parent="." unique_id=755917836]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+texture = ExtResource("3_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ScreenShade" type="ColorRect" parent="." unique_id=1156092708]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.1, 0.16)
+
+[node name="Particles" type="Control" parent="." unique_id=1519943961]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+script = ExtResource("2_particles")
+
+[node name="Header" type="Control" parent="." unique_id=537363584]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 96.0
+mouse_filter = 2
+
+[node name="AvatarFrame" type="TextureRect" parent="Header" unique_id=1838490819]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 78.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("4_avatar_frame")
+expand_mode = 1
+
+[node name="Avatar" type="TextureRect" parent="Header" unique_id=1204256247]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 16.0
+offset_right = 71.0
+offset_bottom = 72.0
+mouse_filter = 2
+texture = ExtResource("5_avatar")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerNamePlate" type="TextureRect" parent="Header" unique_id=1482723329]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 18.0
+offset_right = 196.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("6_name_plate")
+expand_mode = 1
+
+[node name="PlayerName" type="Label" parent="Header" unique_id=746808738]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 82.0
+offset_top = 16.0
+offset_right = 169.0
+offset_bottom = 43.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "冒险者小帅"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EditIcon" type="TextureRect" parent="Header" unique_id=1004820782]
+layout_mode = 0
+offset_left = 164.0
+offset_top = 20.0
+offset_right = 184.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("7_edit")
+expand_mode = 1
+
+[node name="LevelShield" type="TextureRect" parent="Header" unique_id=1701210718]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 75.0
+offset_right = 64.0
+offset_bottom = 118.0
+mouse_filter = 2
+texture = ExtResource("8_level")
+expand_mode = 1
+
+[node name="LevelValue" type="Label" parent="Header" unique_id=1630931037]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 27.0
+offset_top = 78.0
+offset_right = 63.0
+offset_bottom = 104.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "14"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExperienceEmpty" type="TextureRect" parent="Header" unique_id=300488872]
+layout_mode = 0
+offset_left = 77.0
+offset_top = 45.0
+offset_right = 185.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("9_exp_empty")
+expand_mode = 1
+
+[node name="ExperienceFill" type="TextureRect" parent="Header" unique_id=829886236]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 78.0
+offset_top = 45.0
+offset_right = 186.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("10_exp_fill")
+expand_mode = 1
+
+[node name="ExpValue" type="Label" parent="Header" unique_id=515057656]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 87.0
+offset_top = 43.0
+offset_right = 169.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "36/220"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldCapsule" type="TextureRect" parent="Header" unique_id=153639788]
+layout_mode = 0
+offset_left = 199.0
+offset_top = 17.0
+offset_right = 287.0
+offset_bottom = 37.0
+mouse_filter = 2
+texture = ExtResource("11_gold_capsule")
+expand_mode = 1
+
+[node name="GoldIcon" type="TextureRect" parent="Header" unique_id=608515020]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 13.0
+offset_right = 230.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("12_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoldValue" type="Label" parent="Header" unique_id=1212353042]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 228.0
+offset_top = 13.0
+offset_right = 267.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 13
+text = "3408"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="DiamondCapsule" type="TextureRect" parent="Header" unique_id=88269070]
+layout_mode = 0
+offset_left = 292.0
+offset_top = 11.0
+offset_right = 372.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("13_diamond_capsule")
+expand_mode = 1
+
+[node name="DiamondIcon" type="TextureRect" parent="Header" unique_id=2106521504]
+layout_mode = 0
+offset_left = 295.0
+offset_top = 13.0
+offset_right = 323.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("14_diamond")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondValue" type="Label" parent="Header" unique_id=675792610]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 323.0
+offset_top = 13.0
+offset_right = 354.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="RankPanel" type="TextureRect" parent="Header" unique_id=104438721]
+layout_mode = 0
+offset_left = 246.0
+offset_top = 45.0
+offset_right = 366.0
+offset_bottom = 93.0
+mouse_filter = 2
+texture = ExtResource("15_rank")
+expand_mode = 1
+
+[node name="RankTitle" type="Label" parent="Header" unique_id=945316888]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 49.0
+offset_right = 366.0
+offset_bottom = 67.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "冒险家III"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RankScore" type="Label" parent="Header" unique_id=417789513]
+layout_mode = 0
+offset_left = 311.0
+offset_top = 68.0
+offset_right = 370.0
+offset_bottom = 86.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "3120"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PrimaryButtons" type="Control" parent="." unique_id=694672849]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 599.0
+
+[node name="StartButton" type="TextureButton" parent="PrimaryButtons" unique_id=285203491]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 28.0
+offset_top = 295.0
+offset_right = 164.0
+offset_bottom = 337.0
+texture_normal = ExtResource("16_entry")
+texture_pressed = ExtResource("16_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="PrimaryButtons/StartButton" unique_id=377307943]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 7.0
+offset_right = 38.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("20_start")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PrimaryButtons/StartButton" unique_id=1776157251]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 6.0
+offset_right = 128.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "冒险之旅"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TeamButton" type="TextureButton" parent="PrimaryButtons" unique_id=273604702]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 218.0
+offset_top = 345.0
+offset_right = 354.0
+offset_bottom = 387.0
+texture_normal = ExtResource("16_entry")
+texture_pressed = ExtResource("16_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="PrimaryButtons/TeamButton" unique_id=373233730]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 7.0
+offset_right = 38.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("21_team")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PrimaryButtons/TeamButton" unique_id=934439200]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 6.0
+offset_right = 128.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "精灵编队"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RanchButton" type="TextureButton" parent="PrimaryButtons" unique_id=1959942131]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 508.0
+offset_right = 170.0
+offset_bottom = 550.0
+texture_normal = ExtResource("16_entry")
+texture_pressed = ExtResource("16_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="PrimaryButtons/RanchButton" unique_id=1632483246]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 7.0
+offset_right = 38.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("22_ranch")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PrimaryButtons/RanchButton" unique_id=1145718756]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 6.0
+offset_right = 128.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "精灵牧场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ShopButton" type="TextureButton" parent="PrimaryButtons" unique_id=474192381]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 209.0
+offset_top = 536.0
+offset_right = 345.0
+offset_bottom = 578.0
+texture_normal = ExtResource("16_entry")
+texture_pressed = ExtResource("16_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="PrimaryButtons/ShopButton" unique_id=995616354]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 7.0
+offset_right = 38.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("23_shop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PrimaryButtons/ShopButton" unique_id=64411535]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 6.0
+offset_right = 128.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "商店"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomNav" type="Control" parent="." unique_id=735765179]
+anchors_preset = 0
+offset_top = 599.0
+offset_right = 375.0
+offset_bottom = 667.0
+
+[node name="AlbumButton" type="TextureButton" parent="BottomNav" unique_id=1789242514]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 75.0
+offset_bottom = 68.0
+texture_normal = ExtResource("17_nav")
+texture_pressed = ExtResource("18_nav_pressed")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="BottomNav/AlbumButton" unique_id=375137167]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 5.0
+offset_right = 54.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("24_album")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/AlbumButton" unique_id=469430534]
+layout_mode = 0
+offset_top = 43.0
+offset_right = 75.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "图鉴"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InventoryButton" type="TextureButton" parent="BottomNav" unique_id=1189604405]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 75.0
+offset_right = 150.0
+offset_bottom = 68.0
+texture_normal = ExtResource("17_nav")
+texture_pressed = ExtResource("18_nav_pressed")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=1486735152]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 5.0
+offset_right = 54.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("25_inventory")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/InventoryButton" unique_id=2023881405]
+layout_mode = 0
+offset_top = 43.0
+offset_right = 75.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "背包"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Notice" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=705760752]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 6.0
+offset_right = 69.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("19_notice")
+expand_mode = 1
+
+[node name="AchievementButton" type="TextureButton" parent="BottomNav" unique_id=941286428]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 150.0
+offset_right = 225.0
+offset_bottom = 68.0
+texture_normal = ExtResource("17_nav")
+texture_pressed = ExtResource("18_nav_pressed")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="BottomNav/AchievementButton" unique_id=233499048]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 5.0
+offset_right = 54.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("26_achievement")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/AchievementButton" unique_id=592009227]
+layout_mode = 0
+offset_top = 43.0
+offset_right = 75.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "成就"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingsButton" type="TextureButton" parent="BottomNav" unique_id=1046090328]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 225.0
+offset_right = 300.0
+offset_bottom = 68.0
+texture_normal = ExtResource("17_nav")
+texture_pressed = ExtResource("18_nav_pressed")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="BottomNav/SettingsButton" unique_id=952824793]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 5.0
+offset_right = 54.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("27_settings")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/SettingsButton" unique_id=1725167839]
+layout_mode = 0
+offset_top = 43.0
+offset_right = 75.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "设置"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SigninButton" type="TextureButton" parent="BottomNav" unique_id=1115043872]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 300.0
+offset_right = 375.0
+offset_bottom = 68.0
+texture_normal = ExtResource("17_nav")
+texture_pressed = ExtResource("18_nav_pressed")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Icon" type="TextureRect" parent="BottomNav/SigninButton" unique_id=1064677089]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 5.0
+offset_right = 54.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("28_signin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/SigninButton" unique_id=1933241916]
+layout_mode = 0
+offset_top = 43.0
+offset_right = 75.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "每日签到"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Notice" type="TextureRect" parent="BottomNav/SigninButton" unique_id=637099740]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 6.0
+offset_right = 69.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("19_notice")
+expand_mode = 1

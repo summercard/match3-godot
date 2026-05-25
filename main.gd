@@ -1,5 +1,5 @@
-## main.gd — 项目入口，纯代码驱动
-## 管理场景切换，所有场景由代码动态创建
+## main.gd — 项目入口
+## 管理场景切换；大厅使用可编辑 PackedScene，其余页面维持动态脚本加载。
 extends Control
 
 const DESIGN_SIZE: Vector2 = Vector2(375.0, 667.0)
@@ -23,6 +23,10 @@ const SCENE_MAP: Dictionary = {
 	"settings": "res://src/ui/scene/scene_settings.gd",
 	"sign_in": "res://src/ui/scene/scene_sign_in.gd",
 	"tutorial": "res://src/ui/scene/scene_tutorial.gd",
+}
+
+const PACKED_SCENE_MAP: Dictionary = {
+	"main": "res://src/ui/scenes/main_lobby.tscn",
 }
 
 var _current_scene: Control = null
@@ -77,19 +81,31 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 		_current_scene = null
 	
 	# 加载新场景
-	if not SCENE_MAP.has(scene_name):
+	if not SCENE_MAP.has(scene_name) and not PACKED_SCENE_MAP.has(scene_name):
 		push_error("场景不存在: " + scene_name)
 		return
 	
-	var script_path: String = SCENE_MAP[scene_name]
-	var script: GDScript = load(script_path) as GDScript
-	if script == null:
-		push_error("无法加载脚本: " + script_path)
+	var scene_node: Control = null
+	if PACKED_SCENE_MAP.has(scene_name):
+		var packed_path: String = PACKED_SCENE_MAP[scene_name]
+		var packed_scene: PackedScene = load(packed_path) as PackedScene
+		if packed_scene == null:
+			push_error("无法加载场景: " + packed_path)
+			return
+		scene_node = packed_scene.instantiate() as Control
+	else:
+		var script_path: String = SCENE_MAP[scene_name]
+		var script: GDScript = load(script_path) as GDScript
+		if script == null:
+			push_error("无法加载脚本: " + script_path)
+			return
+		scene_node = Control.new()
+		scene_node.set_script(script)
+
+	if scene_node == null:
+		push_error("无法实例化场景: " + scene_name)
 		return
-	
-	# 创建场景节点
-	var scene_node: Control = Control.new()
-	scene_node.set_script(script)
+
 	scene_node.anchor_left = 0.0
 	scene_node.anchor_top = 0.0
 	scene_node.anchor_right = 0.0
