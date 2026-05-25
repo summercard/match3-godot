@@ -12,8 +12,10 @@ class_name SceneBattlePrepare
 extends Control
 
 const StageDBScript = preload("res://src/data/stage_db.gd")
+const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")
 const MonsterDBScript = preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const ItemDB = preload("res://src/data/item_db.gd")
 
 ## 信号定义
 signal battle_started(stage_id: String, stage_data: Dictionary)
@@ -33,10 +35,10 @@ var _start_btn_rect: Rect2 = Rect2(0, 555, 200, 50)
 const ENEMY_Y := 84.0
 const POWER_Y := 218.0
 const TEAM_Y := 286.0
-const HINT_Y := 430.0
-const SYNERGY_Y := 486.0
-const REWARD_Y := 535.0
-const BTN_Y := 585.0
+const HINT_Y := 424.0
+const SYNERGY_Y := 500.0
+const REWARD_Y := 546.0
+const BTN_Y := 593.0
 
 ## 战斗准备美术资产
 const PREPARE_ASSETS := {
@@ -245,22 +247,48 @@ func _is_player_team_empty() -> bool:
 func _get_element_hint() -> String:
 	if _enemy_team.is_empty():
 		return ""
+	var mechanic_summary := _get_stage_mechanic_summary()
+	if not mechanic_summary.is_empty():
+		var lines := PackedStringArray()
+		lines.append(mechanic_summary)
+		var boss_summary := _get_boss_layer_summary()
+		if not boss_summary.is_empty():
+			lines.append(boss_summary)
+		else:
+			var goal_tip := str(_stage_data.get("stageGoal", {}).get("tip", ""))
+			lines.append(goal_tip if not goal_tip.is_empty() else str(_stage_data.get("prepareHint", "")))
+		return "\n".join(lines)
+	var prepare_hint := str(_stage_data.get("prepareHint", ""))
+	if not prepare_hint.is_empty():
+		return prepare_hint
 	
 	# TODO: 实现属性克制分析
 	return "属性无明显克制关系"
 
+func _get_stage_mechanic_summary() -> String:
+	return ChapterMechanicRulesScript.build_prepare_summary(_stage_data)
+
+func _get_boss_layer_summary() -> String:
+	var layers: Array = _stage_data.get("bossLayers", [])
+	if layers.size() < 3:
+		return ""
+	var parts := PackedStringArray()
+	for layer: Dictionary in layers:
+		parts.append(str(layer.get("text", "")))
+	return "Boss：%s" % " / ".join(parts)
+
 func _calc_synergy_preview() -> Array:
-	# 计算队伍属性协同信息
-	var element_counts: Dictionary = {}
+	# 计算队伍棋盘能量共鸣信息
+	var affinity_counts: Dictionary = {}
 	for monster in _player_team:
 		if monster.is_empty():
 			continue
-		var elem: String = monster.get("element", "")
-		element_counts[elem] = element_counts.get(elem, 0) + 1
+		var affinity: String = MonsterDBScript.get_board_affinity(monster)
+		affinity_counts[affinity] = affinity_counts.get(affinity, 0) + 1
 	
 	var result: Array = []
-	for elem in element_counts:
-		var count: int = element_counts[elem]
+	for affinity in affinity_counts:
+		var count: int = affinity_counts[affinity]
 		if count < 2:
 			continue
 		
@@ -270,13 +298,14 @@ func _calc_synergy_preview() -> Array:
 		else:
 			pct_label = "+30%ATK/+20%DEF/+20%HP"
 		
-		var elem_name: String = ELEMENT_NAMES.get(elem, elem)
-		var elem_color: Color = ELEMENT_COLORS.get(elem, C["text_muted"])
+		var elem_name: String = MonsterDBScript.BOARD_AFFINITY_NAMES.get(affinity, affinity)
+		var elem_color: Color = ELEMENT_COLORS.get(affinity, C["text_muted"])
 		
 		result.append({
-			"element": elem,
+			"element": affinity,
+			"boardAffinity": affinity,
 			"count": count,
-			"label": "×%d %s属性共鸣 %s" % [count, elem_name, pct_label],
+			"label": "×%d %s共鸣 %s" % [count, elem_name, pct_label],
 			"color": elem_color
 		})
 	
@@ -452,14 +481,15 @@ func _render_player_team() -> void:
 		
 		_draw_texture_fit(_tex("team_card"), Rect2(x, card_y, card_w, card_h))
 		
-		var elem_color := _get_element_color(monster.get("element", ""))
+		var board_affinity := MonsterDBScript.get_board_affinity(monster)
+		var elem_color := _get_element_color(board_affinity)
 		_draw_card_border(Rect2(x + 2.0, card_y + 2.0, card_w - 4.0, card_h - 4.0), 1.5, Color(elem_color.r, elem_color.g, elem_color.b, 0.85))
 		
 		_draw_monster_portrait(monster, Rect2(x + 22.0, card_y + 9.0, 52.0, 50.0))
 		_draw_text_with_shadow(monster.get("name", "怪物"), x + card_w / 2.0, card_y + 70.0, C["white"], FONT_SIZES["small"], true, card_w - 12.0)
 		
 		# 属性标签
-		_draw_element_badge(monster.get("element", ""), x + 9.0, card_y + 80.0)
+		_draw_element_badge(board_affinity, x + 9.0, card_y + 80.0)
 		
 		_draw_text_with_shadow("%d" % monster.get("power", 0), x + card_w / 2.0, card_y + 103.0, C["gold"], FONT_SIZES["small"], true, 62.0)
 		
@@ -545,18 +575,18 @@ func _render_enemy_team() -> void:
 func _render_element_hint() -> void:
 	var y := HINT_Y
 	
-	_draw_texture_fit(_tex("info_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 46.0))
+	_draw_texture_fit(_tex("info_panel"), Rect2(MARGIN, y, DESIGN_W - MARGIN * 2.0, 68.0))
 	
-	_draw_text_with_shadow("属性分析", DESIGN_W / 2.0, y + 17.0, C["white"], FONT_SIZES["small"], true, 100.0)
+	_draw_text_with_shadow("关卡机制", DESIGN_W / 2.0, y + 20.0, C["white"], 15.0, true, 120.0)
 	
 	var hint: String = _get_element_hint()
 	var lines: Array = hint.split("\n")
 	
-	var line_y: float = y + 34.0
+	var line_y: float = y + 42.0
 	for line in lines:
 		var color: Color = C["warning"] if "警告" in line else C["text_muted"]
-		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, FONT_SIZES["small"], false, 260.0)
-		line_y += 15.0
+		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, 12.0, false, 304.0)
+		line_y += 17.0
 
 func _render_synergy_preview() -> void:
 	var synergies: Array = _calc_synergy_preview()
@@ -579,8 +609,15 @@ func _render_reward_preview() -> void:
 	var rewards := [
 		{"icon": "gold", "text": "金币"},
 		{"icon": "exp", "text": "EXP"},
-		{"icon": "capture_ball", "text": "捕获"},
 	]
+	var stage_rewards: Dictionary = _stage_data.get("rewards", {})
+	var guaranteed_items: Array = stage_rewards.get("guaranteedItems", [])
+	if not guaranteed_items.is_empty():
+		var first_item: Dictionary = guaranteed_items[0]
+		var item_def := ItemDB.get_item(str(first_item.get("id", "")))
+		rewards.append({"icon": "capture_ball", "text": item_def.get("name", "道具")})
+	else:
+		rewards.append({"icon": "capture_ball", "text": "捕获"})
 	var slot_w := 34.0
 	var gap := 22.0
 	var total_w := rewards.size() * slot_w + (rewards.size() - 1) * gap

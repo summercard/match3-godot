@@ -22,6 +22,9 @@ func _run() -> void:
 	var first: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "brave", "source": "test"})
 	var second: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "cautious", "source": "test"})
 	_expect(str(first.get("instanceId", "")) != str(second.get("instanceId", "")), "same monster species should create distinct instances")
+	_expect(first.get("socialProfile", {}).has("style"), "monster instance should expose social profile")
+	_expect((first.get("bondTraits", []) as Array).size() >= 3, "monster instance should expose bond traits")
+	_expect(first.get("bondMemory", {}).has("partners"), "monster instance should expose bond memory")
 	_expect(save_manager.get_instances_by_monster_id("monster_001").size() >= 3, "monster_001 should allow multiple owned instances")
 
 	save_manager.save_team({"leader": first["instanceId"], "member1": second["instanceId"], "member2": null})
@@ -38,6 +41,9 @@ func _run() -> void:
 	_expect(view.get("monsterId", "") == "monster_001", "MonsterService should resolve instance monsterId")
 	_expect(view.get("stats", {}).has("atk"), "MonsterService should include calculated stats")
 	_expect(view.get("art", {}).has("battle"), "MonsterService should include art bundle")
+	_expect(view.get("socialProfile", {}).has("style"), "MonsterService should include social profile")
+	_expect((view.get("bondTraits", []) as Array).size() >= 3, "MonsterService should include bond traits")
+	_expect(view.get("identity", {}).has("ecology"), "MonsterService should include ecology identity")
 
 	var ranch_scene = load("res://src/ui/scene/scene_ranch.gd").new()
 	root.add_child(ranch_scene)

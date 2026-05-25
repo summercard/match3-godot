@@ -1,12 +1,22 @@
 class_name BattleBoardRenderer
 extends RefCounted
 
-static func draw_board_background(scene, design_w: float) -> void:
-	var board_x: float = (design_w - 336.0) / 2.0
-	var board_y: float = 235.0
-	var board_w: float = 346.0
-	var board_h: float = 346.0
-	scene._draw_rounded_rect(board_x - 5.0, board_y - 5.0, board_w, board_h, 8.0, Color(0.06, 0.2, 0.38, 0.88))
+static func draw_board_background(scene, design_w: float, board = null) -> void:
+	var cell_size: float = 39.0
+	var board_x: float = (design_w - cell_size * 8.0) / 2.0
+	var board_y: float = 296.0
+	if board != null:
+		cell_size = float(board.cell_size)
+		board_x = float(board.offset_x)
+		board_y = float(board.offset_y)
+	var board_w: float = cell_size * 8.0
+	var board_h: float = cell_size * 8.0
+	var frame_tex: Texture2D = scene._get_texture("res://assets/images/battle/ui/ui_board_frame.png")
+	if frame_tex:
+		scene._draw_texture_fit(frame_tex, Rect2(board_x - 12.0, board_y - 12.0, board_w + 24.0, board_h + 24.0), 1.0)
+	else:
+		scene._draw_rounded_rect(board_x - 7.0, board_y - 7.0, board_w + 14.0, board_h + 14.0, 7.0, Color(0.03, 0.10, 0.22, 0.94))
+		scene._draw_stroke_rect(board_x - 5.0, board_y - 5.0, board_w + 10.0, board_h + 10.0, 1.5, Color(0.34, 0.55, 0.86, 0.58))
 
 static func draw_board(scene, board, state: Dictionary) -> void:
 	var design_w: float = state.get("design_w", 375.0)
@@ -18,12 +28,17 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 		cell_size = float(board.cell_size)
 		board_x = float(board.offset_x) + board_shake_offset.x
 		board_y = float(board.offset_y) + board_shake_offset.y
+	var cell_tex: Texture2D = scene._get_texture("res://assets/images/battle/ui/ui_board_cell.png")
 
 	for row in range(8):
 		for col in range(8):
 			var x: float = board_x + col * cell_size
 			var y: float = board_y + row * cell_size
-			scene._draw_rounded_rect(x + 1.0, y + 1.0, cell_size - 2.0, cell_size - 2.0, 4.0, Color(0.02, 0.07, 0.16, 0.66))
+			if cell_tex:
+				scene._draw_texture_fit(cell_tex, Rect2(x + 0.5, y + 0.5, cell_size - 1.0, cell_size - 1.0), 1.0)
+			else:
+				scene._draw_rounded_rect(x + 1.0, y + 1.0, cell_size - 2.0, cell_size - 2.0, 3.0, Color(0.02, 0.07, 0.16, 0.78))
+				scene._draw_stroke_rect(x + 1.0, y + 1.0, cell_size - 2.0, cell_size - 2.0, 1.0, Color(0.10, 0.23, 0.42, 0.82))
 			if board == null:
 				continue
 			if board.is_obstacle(row, col):
@@ -109,6 +124,10 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
+			var lock_tex: Texture2D = scene._get_texture("res://assets/images/battle/gems/gem_locked_tile.png")
+			if lock_tex:
+				scene._draw_texture_fit(lock_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.96)
+				continue
 			var chain_color: Color = lock_colors.get("chain", Color(0.6, 0.6, 0.7, 0.9)) if lock.get("hp", 1) >= 2 else lock_colors.get("chain_weak", Color(0.5, 0.5, 0.55, 0.7))
 			var corners: Array[Vector2] = [
 				Vector2(x + 3.0, y + 3.0), Vector2(x + size - 3.0, y + 3.0),
@@ -138,6 +157,11 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
+			var rock_path := "res://assets/images/battle/gems/obstacle_rock_full.png" if ob.get("hp", 2) >= 2 else "res://assets/images/battle/gems/obstacle_rock_cracked.png"
+			var rock_tex: Texture2D = scene._get_texture(rock_path)
+			if rock_tex:
+				scene._draw_texture_fit(rock_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.98)
+				continue
 			if ob.get("hp", 2) >= 2:
 				scene._draw_rounded_rect(x + 2.0, y + 2.0, size - 4.0, size - 4.0, 4.0, obstacle_colors.get("rock", Color(0.35, 0.3, 0.25, 1.0)))
 				scene._draw_rounded_rect(x + 4.0, y + 4.0, size - 8.0, size - 8.0, 3.0, obstacle_colors.get("rock_solid", Color(0.42, 0.38, 0.32, 1.0)))

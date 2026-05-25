@@ -3,6 +3,8 @@ extends RefCounted
 ## 关卡数据库 - 从 data/stages.js 翻译
 ## 包含所有章节与关卡数据，供 BattleManager、SaveManager 引用
 
+const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")
+
 # ========== 关卡数据库 ==========
 const STAGES_DATA: Dictionary = {
 	"chapters": [
@@ -12,37 +14,57 @@ const STAGES_DATA: Dictionary = {
 			"element": "grass",
 			"stages": [
 				{
-					"id": "stage_1_1", "name": "新手训练", "type": "normal",
+					"id": "stage_1_1", "name": "能量响应训练", "type": "normal",
 					"enemies": ["enemy_001"],
 					"enemyLevel": 1,
-					"rewards": {"gold": 45, "exp": 45}
+					"rewards": {"gold": 45, "exp": 45},
+					"designGoal": "学会棋盘亲和会驱动对应怪物行动与技能充能。",
+					"prepareHint": "消除炽能给小火龙充能；留意队伍卡片上的技能条。",
+					"battleHint": "先消除小火龙亲和的炽能，观察技能充能。",
+					"targetLesson": "board_affinity"
 				},
 				{
-					"id": "stage_1_2", "name": "草原小径", "type": "normal",
-					"enemies": ["enemy_003", "enemy_003"],
+					"id": "stage_1_2", "name": "捕捉窗口练习", "type": "normal",
+					"enemies": ["enemy_003"],
 					"enemyLevel": 2,
-					"rewards": {"gold": 65, "exp": 60}
+					"rewards": {"gold": 65, "exp": 60, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
+					"designGoal": "让玩家第一次看到低血会打开捕捉窗口。",
+					"prepareHint": "把目标压到低血会打开捕捉窗口；自动捕捉开启后胜利会尝试收服。",
+					"battleHint": "观察底部捕捉窗口，目标越虚弱越稳定。",
+					"targetLesson": "capture_window"
 				},
 				{
-					"id": "stage_1_3", "name": "草原深处", "type": "normal",
+					"id": "stage_1_3", "name": "守护与续航", "type": "normal",
 					"enemies": ["enemy_001", "enemy_003"],
 					"enemyLevel": 3,
-					"rewards": {"gold": 85, "exp": 75}
+					"rewards": {"gold": 85, "exp": 75},
+					"designGoal": "让水龟仔的守护技能有明确价值。",
+					"prepareHint": "水龟仔是守护位：潮能充能后可治疗最低血队友并减伤。",
+					"battleHint": "队伍受伤后释放水之护盾，守住下一次攻击。",
+					"targetLesson": "ward_skill"
 				},
 				{
-					"id": "stage_1_4", "name": "灌木迷宫", "type": "normal",
+					"id": "stage_1_4", "name": "藤蔓束缚", "type": "normal",
 					"enemies": ["enemy_002", "enemy_003"],
 					"enemyLevel": 3,
-					"rewards": {"gold": 105, "exp": 90}
+					"rewards": {"gold": 105, "exp": 90},
+					"designGoal": "让草苗儿的控场技能为 Boss 前做铺垫。",
+					"prepareHint": "草苗儿是控场位：生能充能后可束缚敌人，降低下一次攻击。",
+					"battleHint": "在敌人攻击前释放藤蔓束缚，降低压力。",
+					"targetLesson": "tempo_skill"
 				},
 				{
-					"id": "stage_1_5", "name": "花叶兽的领地", "type": "boss",
+					"id": "stage_1_5", "name": "花叶兽的破招", "type": "boss",
 					"phases": [
 						{"phase": 1, "enemies": ["monster_boss_001"], "trigger": "on_enter"},
 						{"phase": 2, "enemies": ["monster_boss_001"], "trigger": "hp_50", "hpMultiplier": 1.3}
 					],
 					"enemyLevel": 3,
-					"rewards": {"gold": 150, "exp": 120}
+					"rewards": {"gold": 150, "exp": 120, "guaranteedItems": [{"id": "capture_ball_plus", "count": 1}]},
+					"designGoal": "首个 Boss 用蓄力和阶段变化检验输出、守护、控场。",
+					"prepareHint": "Boss 会蓄力并在半血进入二阶段；用束缚压低蓄力伤害，用守护保住队伍。",
+					"battleHint": "花叶兽蓄力时优先束缚或守护，半血后准备爆发。",
+					"targetLesson": "boss_break"
 				}
 			]
 		},
@@ -745,7 +767,7 @@ const STAGES_DATA: Dictionary = {
 func get_chapter(chapter_id: String) -> Dictionary:
 	for ch: Dictionary in STAGES_DATA["chapters"]:
 		if ch["id"] == chapter_id:
-			return ch
+			return ChapterMechanicRulesScript.enrich_chapter(ch)
 	return {}
 
 ## 按 stage_id 获取关卡数据（遍历所有章节），未找到返回空字典
@@ -753,7 +775,7 @@ func get_stage(stage_id: String) -> Dictionary:
 	for ch: Dictionary in STAGES_DATA["chapters"]:
 		for st: Dictionary in ch["stages"]:
 			if st["id"] == stage_id:
-				return st
+				return ChapterMechanicRulesScript.enrich_stage(st, ChapterMechanicRulesScript.enrich_chapter(ch))
 	return {}
 
 ## 获取章节总数
@@ -769,4 +791,7 @@ func get_stages_in_chapter(chapter_id: String) -> Array:
 
 ## 获取所有章节（JS: export const chapters = STAGES_DATA.chapters）
 func get_chapters() -> Array:
-	return STAGES_DATA["chapters"]
+	var chapters: Array = []
+	for ch: Dictionary in STAGES_DATA["chapters"]:
+		chapters.append(ChapterMechanicRulesScript.enrich_chapter(ch))
+	return chapters

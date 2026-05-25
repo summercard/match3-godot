@@ -52,7 +52,6 @@ func _configure_debug_window() -> void:
 	if window_size.x <= 0 or window_size.y <= 0:
 		window_size = Vector2i(int(DESIGN_SIZE.x), int(DESIGN_SIZE.y))
 	DisplayServer.window_set_min_size(Vector2i(int(DESIGN_SIZE.x), int(DESIGN_SIZE.y)))
-	DisplayServer.window_set_size(window_size)
 	var screen_rect := DisplayServer.screen_get_usable_rect()
 	var centered_pos := screen_rect.position + (screen_rect.size - window_size) / 2
 	DisplayServer.window_set_position(centered_pos)

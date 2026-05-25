@@ -13,6 +13,8 @@
 class_name SceneEvolve
 extends Control
 
+const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
+
 # ============ 信号 ============
 signal evolution_complete(new_monster_id: String)
 
@@ -45,6 +47,7 @@ var evolve_data: Dictionary = {}
 var evolved_monster: Dictionary = {}
 var can_evolve: bool = false
 var condition_text: String = ""
+var evolution_report: Dictionary = {}
 
 # ============ 动画状态 ============
 var anim_state: Dictionary = {
@@ -194,6 +197,7 @@ func _build_condition(parent: VBoxContainer) -> void:
 	_condition_label.name = "ConditionLabel"
 	_condition_label.text = ""
 	_condition_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_condition_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_condition_label.add_theme_font_size_override("font_size", 14)
 	margin.add_child(_condition_label)
 
@@ -272,6 +276,7 @@ func init(data: Dictionary = {}) -> void:
 		"is_evolving": false,
 		"evolve_complete": false
 	}
+	evolution_report = {}
 
 	# 获取怪物数据
 	var MonsterDB = load("res://src/data/monster_db.gd")
@@ -466,6 +471,13 @@ func _update_evolve_condition() -> void:
 		condition_text = "%s（背包 %d 个）" % [item_req, item_count]
 	else:
 		condition_text = "✅ 满足进化条件！"
+	var preview := _get_evolution_preview()
+	if not preview.is_empty():
+		condition_text += "\n%s\n玩法: %s\n%s" % [
+			str(preview.get("stat_summary", "")),
+			str(preview.get("play_upgrade", "稳定成长")),
+			str(preview.get("social_text", "社交启发: 无"))
+		]
 
 func _get_default_evolution_item(monster_id: String) -> String:
 	var monster_data_local = _get_monster_data_local(monster_id)
@@ -491,10 +503,22 @@ func _get_monster_data_local(monster_id: String) -> Dictionary:
 		return {}
 	return data
 
+func _get_evolution_preview() -> Dictionary:
+	if _storage and _storage.has_method("get_monster_instance") and not instance_id.is_empty():
+		var instance: Dictionary = _storage.get_monster_instance(instance_id)
+		return EvolutionRulesScript.build_preview(instance)
+	return EvolutionRulesScript.build_preview({
+		"instanceId": instance_id,
+		"monsterId": monster_id,
+		"level": 1,
+		"nature": "",
+		"evolutionInsight": {}
+	})
+
 # ============ 进化逻辑 ============
 func _on_evolve_pressed() -> void:
 	if anim_state["evolve_complete"]:
-		SceneManager.switch_scene("album", {}, "slide")
+		_switch_scene("album", {}, "slide")
 		return
 
 	if can_evolve and not anim_state["is_evolving"]:
@@ -558,6 +582,7 @@ func _execute_evolution() -> void:
 			condition_text = "进化失败：%s" % str(result.get("reason", "unknown"))
 			_update_condition()
 			return
+		evolution_report = result.get("evolutionReport", {})
 	else:
 		# 兼容旧入口：没有实例时不再直接改写 captured/team/pokedex，避免破坏怪物池。
 		can_evolve = false
@@ -647,6 +672,21 @@ func _update_complete_ui() -> void:
 
 	_complete_vbox.add_child(stats_panel)
 
+	if not evolution_report.is_empty():
+		var play_lbl := Label.new()
+		play_lbl.text = "玩法变化: %s" % str(evolution_report.get("play_upgrade", "稳定成长"))
+		play_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		play_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		play_lbl.add_theme_color_override("font_color", Color(0.55, 0.90, 1.0, 1.0))
+		_complete_vbox.add_child(play_lbl)
+
+		var social_lbl := Label.new()
+		social_lbl.text = str(evolution_report.get("social_text", "社交启发: 无"))
+		social_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		social_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		social_lbl.add_theme_color_override("font_color", Color(0.92, 0.82, 0.55, 1.0))
+		_complete_vbox.add_child(social_lbl)
+
 	# 返回按钮
 	var return_btn := Button.new()
 	return_btn.text = "返回牧场"
@@ -721,13 +761,18 @@ func _update_monster_card_to_container(container: VBoxContainer, data: Dictionar
 	container.add_child(card)
 
 func _on_return_to_album() -> void:
-	SceneManager.switch_scene("ranch", {}, "slide")
+	_switch_scene("ranch", {}, "slide")
 
 # ============ 事件处理 ============
 func _on_back_pressed() -> void:
-	SceneManager.switch_scene("ranch", {}, "slide")
+	_switch_scene("ranch", {}, "slide")
 
 # ============ 工具方法 ============
+func _switch_scene(scene_name: String, data: Dictionary = {}, transition: String = "fade") -> void:
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager != null and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene(scene_name, data, transition)
+
 func _get_element_color(element: String) -> Color:
 	var colors: Dictionary = {
 		"fire": Color(0.9, 0.3, 0.2, 1.0),

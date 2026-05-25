@@ -26,6 +26,8 @@ const ItemDBScript = preload("res://src/data/item_db.gd")
 ## 设计尺寸
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
+const BATTLE_BOARD_CELL_SIZE := 39
+const BATTLE_BOARD_Y := 300
 
 ## 状态枚举
 enum BattleState {
@@ -175,6 +177,7 @@ var _capture_success: bool = false           # 收服是否成功
 var _capture_target: Dictionary = {}         # 收服目标怪物
 var _capture_result_text: Dictionary = {}    # 收服结果文本
 var _capture_item_used: Dictionary = {}      # 使用的捕获道具
+var _capture_window: Dictionary = {}         # 本场用于结算的捕捉窗口
 var _capture_waiting_for_effect: bool = false # 等待收服特效播放完成
 var _capture_phase: String = ""              # "", "playing", "done"
 
@@ -191,6 +194,8 @@ var _element_ripple: Dictionary = {
 ## 道具快捷栏（Phase 14）
 var _hotbar_items: Array[Dictionary] = []       # [{id, count}, ...] 最多3个
 var _selected_hotbar_slot: int = -1             # 当前选中的格子索引
+var _auto_capture_enabled: bool = false
+var _equipped_capture_item_id: String = ""
 
 ## 关卡数据
 var _stage_data: Dictionary = {}
@@ -293,6 +298,46 @@ const GEM_IMAGE_PATHS := {
 
 const BATTLE_BG_PATH := "res://assets/images/battle/battle_bg_forest_ruins.png"
 
+const BATTLE_UI_ASSETS := {
+	"toast_panel": "res://assets/images/battle/ui/ui_battle_toast_panel.png",
+	"combo_banner": "res://assets/images/battle/ui/ui_combo_banner.png",
+	"top_scrim": "res://assets/images/battle/ui/ui_top_scrim.png",
+	"turn_badge": "res://assets/images/battle/ui/ui_turn_badge.png",
+	"speed_button": "res://assets/images/battle/ui/ui_speed_button.png",
+	"settings_button": "res://assets/images/battle/ui/ui_settings_button.png",
+	"board_frame": "res://assets/images/battle/ui/ui_board_frame.png",
+	"board_cell": "res://assets/images/battle/ui/ui_board_cell.png",
+	"footer_panel": "res://assets/images/battle/ui/ui_footer_panel.png",
+	"capture_toggle_off": "res://assets/images/battle/ui/ui_capture_toggle_off.png",
+	"capture_toggle_on": "res://assets/images/battle/ui/ui_capture_toggle_on.png",
+	"item_slot": "res://assets/images/battle/ui/ui_item_slot.png",
+	"item_slot_selected": "res://assets/images/battle/ui/ui_item_slot_selected.png",
+	"item_capture_ball": "res://assets/images/battle/ui/icon_capture_ball.png",
+	"item_capture_ball_plus": "res://assets/images/battle/ui/icon_capture_ball_plus.png",
+	"item_hp_potion": "res://assets/images/battle/ui/icon_hp_potion.png",
+	"hp_frame": "res://assets/images/battle/ui/ui_hp_frame.png",
+	"hp_fill_green": "res://assets/images/battle/ui/ui_hp_fill_green.png",
+	"hp_fill_red": "res://assets/images/battle/ui/ui_hp_fill_red.png",
+	"hp_fill_blue": "res://assets/images/battle/ui/ui_hp_fill_blue.png",
+	"hp_fill_gold": "res://assets/images/battle/ui/ui_hp_fill_gold.png"
+}
+
+const BATTLE_FX_ASSETS := {
+	"damage_plate": "res://assets/images/battle/fx/fx_damage_plate.png",
+	"critical_plate": "res://assets/images/battle/fx/fx_critical_plate.png",
+	"heal_plate": "res://assets/images/battle/fx/fx_heal_plate.png",
+	"hit_spark": "res://assets/images/battle/fx/fx_hit_spark.png",
+	"shield_ring": "res://assets/images/battle/fx/fx_shield_ring.png",
+	"heal_ring": "res://assets/images/battle/fx/fx_heal_ring.png",
+	"charge_aura": "res://assets/images/battle/fx/fx_charge_aura.png",
+	"stage_ring_cyan": "res://assets/images/battle/fx/fx_stage_ring_cyan.png",
+	"stage_ring_green": "res://assets/images/battle/fx/fx_stage_ring_green.png",
+	"stage_ring_fire": "res://assets/images/battle/fx/fx_stage_ring_fire.png",
+	"stage_ring_void": "res://assets/images/battle/fx/fx_stage_ring_void.png",
+	"selected_cell": "res://assets/images/battle/fx/fx_selected_cell.png",
+	"gem_pop": "res://assets/images/battle/fx/fx_gem_pop.png"
+}
+
 const BATTLE_RESULT_OVERLAY_ASSETS := {
 	"victory_banner": "res://assets/images/battle/result_overlay/ui_overlay_victory_banner.png",
 	"defeat_banner": "res://assets/images/battle/result_overlay/ui_overlay_defeat_banner.png",
@@ -362,9 +407,9 @@ func init(data: Dictionary = {}) -> void:
 func _init_battle() -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_board = Match3Board.new(8, 8)
-	_board.cell_size = 42
+	_board.cell_size = BATTLE_BOARD_CELL_SIZE
 	_board.offset_x = int((DESIGN_W - _board.cols * _board.cell_size) / 2.0)
-	_board.offset_y = 235
+	_board.offset_y = BATTLE_BOARD_Y
 	
 	if _stage_data.has("obstacles"):
 		_board.set_obstacles(_stage_data.get("obstacles", []))
@@ -407,9 +452,7 @@ func _init_battle() -> void:
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
 		_battle.enemy_skill_action.connect(_on_enemy_skill_action)
 
-	# 连接伤害数字信号
-	if not _battle.damage_dealt.is_connected(_on_damage_dealt):
-		_battle.damage_dealt.connect(_on_damage_dealt)
+	# 伤害视觉由消除/技能流程统一渲染，避免 damage_dealt 信号再重复追加浮动数字。
 
 	# 连接敌人攻击信号（用于伤害数字队列）
 	if not _battle.enemy_attacked.is_connected(_on_enemy_attacked):
@@ -429,7 +472,9 @@ func _init_battle() -> void:
 				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
 				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
 	
-	_show_message(_stage_data.get("name", "战斗开始！"))
+	var battle_hint := str(_stage_data.get("battleHint", ""))
+	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
+	_load_capture_preferences()
 	_load_hotbar_items()
 
 ## ============================================
@@ -645,9 +690,6 @@ func _on_tap(x: float, y: float) -> void:
 	_selected_gem = Vector2i(-1, -1)
 
 func _try_use_skill_at_position(pos: Vector2) -> bool:
-	# 优先检测道具快捷栏点击
-	if _try_tap_hotbar(pos.x, pos.y):
-		return true
 	if _battle == null or _state != BattleState.IDLE:
 		return false
 	for i in range(mini(_battle.player_team.size(), 3)):
@@ -698,16 +740,17 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		popup_x = 25.0 + target_idx * 120.0 + 55.0
 		popup_y = 80.0
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.3, "maxTimer": 0.3})
-	_floating_texts.append({
-		"text": "-%d" % damage,
-		"x": popup_x,
-		"y": popup_y,
-		"color": C["gold"] if not result.get("isWeak", false) else C["text_muted"],
-		"size": 24.0 if result.get("isEffective", false) else 19.0,
-		"timer": 0.0,
-		"duration": 0.9,
-		"critical": result.get("isEffective", false)
-	})
+	if damage > 0:
+		_floating_texts.append({
+			"text": "-%d" % damage,
+			"x": popup_x,
+			"y": popup_y,
+			"color": C["gold"] if not result.get("isWeak", false) else C["text_muted"],
+			"size": 24.0 if result.get("isEffective", false) else 19.0,
+			"timer": 0.0,
+			"duration": 0.9,
+			"critical": result.get("isEffective", false)
+		})
 	if shield_absorbed > 0:
 		_floating_texts.append({
 			"text": "盾-%d" % shield_absorbed,
@@ -718,6 +761,33 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			"timer": 0.0,
 			"duration": 0.8
 		})
+	for effect: Dictionary in result.get("effect_logs", result.get("effectLogs", [])):
+		var kind := str(effect.get("kind", ""))
+		if kind == "heal" or kind == "guard":
+			var player_idx := _find_player_index(str(effect.get("target_id", "")), str(effect.get("target", "")))
+			var card_rect := _get_player_card_rect(player_idx) if player_idx >= 0 else Rect2(DESIGN_W / 2.0 - 55.0, 187.0, 110.0, 58.0)
+			var text := "+%d" % int(effect.get("amount", 0)) if kind == "heal" else "护-%d%%" % int(round(float(effect.get("reduction", 0.0)) * 100.0))
+			_floating_texts.append({
+				"text": text,
+				"x": card_rect.position.x + card_rect.size.x / 2.0,
+				"y": card_rect.position.y + 12.0,
+				"color": C["heal_green"] if kind == "heal" else C["shield"],
+				"size": 16.0,
+				"timer": 0.0,
+				"duration": 0.9
+			})
+		elif kind == "weaken":
+			var weaken_idx := int(effect.get("target_index", target_idx))
+			var wx := 25.0 + weaken_idx * 120.0 + 55.0 if weaken_idx >= 0 else popup_x
+			_floating_texts.append({
+				"text": "缚-%d%%" % int(round(float(effect.get("reduction", 0.0)) * 100.0)),
+				"x": wx,
+				"y": 100.0,
+				"color": GEM_COLORS["grass"],
+				"size": 15.0,
+				"timer": 0.0,
+				"duration": 0.9
+			})
 	if result.get("targetDied", false):
 		_fall_messages.append({"text": "%s 倒下了！" % result.get("target", "敌人"), "timer": 1.5})
 	if result.get("battleEnded", false):
@@ -1122,6 +1192,18 @@ func _start_enemy_turn() -> void:
 			}
 			if _damage_popup_queue.size() < 5:
 				_damage_popup_queue.append(entry)
+			if int(action.get("guard_absorbed", 0)) > 0:
+				_floating_texts.append({
+					"text": "护-%d" % int(action.get("guard_absorbed", 0)),
+					"x": popup_x,
+					"y": popup_y + 16.0,
+					"color": C["shield"],
+					"size": 13.0,
+					"timer": 0.0,
+					"duration": 0.8
+				})
+			if action.get("is_weakened", false):
+				_show_message("%s 被束缚，伤害降低" % action.get("attacker", "敌人"))
 	
 	await get_tree().create_timer(0.8).timeout
 	_enemy_attacks = []
@@ -1138,14 +1220,13 @@ func _check_battle_end() -> bool:
 	if BattleFlowControllerScript.should_end_battle(_battle):
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
-		# Phase 4: 战斗结束时 inline 播放收服特效
-		# 成功序列：闪白→弹跳→GET! 文字（win）
-		# 失败序列：震动→MISS 文字（lose）
 		if _battle.battle_result == "win":
-			_trigger_inline_capture()
+			if _auto_capture_enabled:
+				_trigger_inline_capture()
+			else:
+				_skip_inline_capture()
 		else:
-			# 失败时也要播放 MISS 特效
-			_trigger_inline_capture()
+			_trigger_inline_capture_miss()
 		return true
 	return false
 
@@ -1182,22 +1263,31 @@ func _trigger_inline_capture() -> void:
 		_capture_phase = "done"
 		return
 	
-	# 选择收服目标：优先存活的，否则随机一个被击败的
+	# 选择收服目标：优先使用本场创造过的最佳捕捉窗口
 	var target_enemy: Dictionary = {}
-	for e in enemies:
-		if e != null and e.get("hp", 0) > 0:
-			target_enemy = e
-			break
+	var target_window: Dictionary = {}
+	var target_idx: int = -1
+	var candidate: Dictionary = _battle.get_best_capture_candidate() if _battle.has_method("get_best_capture_candidate") else {}
+	if not candidate.is_empty():
+		target_enemy = candidate.get("enemy", {})
+		target_window = candidate.get("window", {})
+		target_idx = int(candidate.get("enemy_index", -1))
 	if target_enemy.is_empty():
 		var valid_enemies: Array = enemies.filter(func(e): return e != null and e.has("id"))
 		if not valid_enemies.is_empty():
 			target_enemy = valid_enemies[randi() % valid_enemies.size()]
+			target_idx = enemies.find(target_enemy)
+			target_window = CaptureSystem.calc_taming_window(
+				float(target_enemy.get("hp", 0)),
+				float(target_enemy.get("maxHP", 1))
+			)
 	
 	if target_enemy.is_empty():
 		_capture_phase = "done"
 		return
 	
 	_capture_target = target_enemy
+	_capture_window = target_window.duplicate(true)
 	var enemy_rarity: int = target_enemy.get("rarity", 1)
 	
 	# 读取连续失败计数
@@ -1212,17 +1302,36 @@ func _trigger_inline_capture() -> void:
 		_battle.player_level if _battle else 1,
 		_battle.enemy_level if _battle else 1,
 		enemy_rarity,
-		{"stage_id": _stage_id, "consecutive_fails": consecutive_fails}
+		{
+			"stage_id": _stage_id,
+			"consecutive_fails": consecutive_fails,
+			"taming_window": target_window
+		}
 	)
 	
-	# 消耗最佳捕获道具
-	var bonus: float = _consume_best_capture_item()
-	if bonus > 0.0:
-		prob = minf(0.95, prob + bonus)
+	# 消耗玩家预选的捕获道具；没有可用捕捉球时不进行空手判定
+	var item_use: Dictionary = _consume_selected_capture_item()
+	if not bool(item_use.get("ok", false)):
+		_capture_success = false
+		_capture_item_used = {}
+		_capture_result_text = CaptureSystem.get_capture_skip_feedback(str(item_use.get("reason", "no_item")), {
+			"target": target_enemy,
+			"item_name": str(item_use.get("item_name", "捕捉球"))
+		})
+		_capture_phase = "done"
+		_capture_waiting_for_effect = false
+		_show_message(_capture_result_text.get("title", "未捕捉"))
+		return
+	var bonus: float = float(item_use.get("bonus", 0.0))
+	prob = minf(0.95, prob + bonus)
 	
 	# 执行收服判定
 	_capture_success = CaptureSystem.attempt_capture(prob)
-	_capture_result_text = CaptureSystem.get_capture_result_text(prob, _capture_success)
+	_capture_result_text = CaptureSystem.get_capture_result_text(prob, _capture_success, target_window, {
+		"target": target_enemy,
+		"item_used": _capture_item_used,
+		"consecutive_fails": consecutive_fails
+	})
 	
 	# 更新连续失败计数
 	if _storage and _storage.has_method("load_player") and _storage.has_method("save_player"):
@@ -1234,7 +1343,6 @@ func _trigger_inline_capture() -> void:
 		_storage.save_player(player)
 	
 	# 计算怪物在屏幕上的位置（敌方区域）
-	var target_idx: int = enemies.find(target_enemy)
 	if target_idx < 0:
 		for i in range(enemies.size()):
 			if enemies[i] != null and enemies[i].get("id", "") == target_enemy.get("id", ""):
@@ -1250,21 +1358,64 @@ func _trigger_inline_capture() -> void:
 	_capture_waiting_for_effect = true
 	_show_message(_capture_result_text.get("title", ""))
 
-func _consume_best_capture_item() -> float:
-	"""消耗最佳捕获道具，返回概率加成"""
+func _skip_inline_capture() -> void:
+	_capture_success = false
+	_capture_target = {}
+	_capture_item_used = {}
+	_capture_window = {}
+	_capture_result_text = CaptureSystem.get_capture_skip_feedback("auto_off")
+	_capture_phase = "done"
+	_capture_waiting_for_effect = false
+	_show_message("未开启自动捕捉")
+
+func _trigger_inline_capture_miss() -> void:
+	if _battle == null:
+		return
+	_capture_success = false
+	_capture_target = {}
+	_capture_item_used = {}
+	_capture_window = {}
+	_capture_result_text = {
+		"title": "MISS",
+		"desc": "战斗失败，无法收服。"
+	}
+
+	var center_pos := Vector2(DESIGN_W / 2.0, 125.0)
+	var enemies: Array = _battle.enemies
+	for i in range(enemies.size()):
+		var enemy: Dictionary = enemies[i]
+		if enemy != null and enemy.get("hp", 0) > 0:
+			center_pos = Vector2(15.0 + i * 120.0 + 55.0, 125.0)
+			break
+
+	_capture_effect_node = CaptureEffectScript.play_capture(self, false, center_pos)
+	_capture_phase = "playing"
+	_capture_waiting_for_effect = true
+	_show_message(_capture_result_text.get("title", ""))
+
+func _consume_selected_capture_item() -> Dictionary:
+	"""消耗玩家预选的捕获道具，返回本次捕捉道具结果"""
 	if not _storage or not _storage.has_method("load_inventory") or not _storage.has_method("use_item"):
-		return 0.0
+		return {"ok": false, "reason": "storage_unavailable"}
+	if _equipped_capture_item_id.is_empty():
+		return {"ok": false, "reason": "no_item"}
 	var inventory: Dictionary = _storage.load_inventory()
-	var candidates: Array[Dictionary] = [
-		{"id": "capture_ball_plus", "bonus": 0.30, "name": "超级捕获球"},
-		{"id": "capture_ball", "bonus": 0.15, "name": "捕获球"}
-	]
-	for candidate: Dictionary in candidates:
-		if inventory.get(candidate["id"], 0) > 0:
-			if _storage.use_item(candidate["id"], 1):
-				_capture_item_used = candidate
-				return candidate["bonus"]
-	return 0.0
+	if int(inventory.get(_equipped_capture_item_id, 0)) <= 0:
+		var empty_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
+		return {"ok": false, "reason": "item_empty", "item_name": str(empty_def.get("name", "捕捉球"))}
+	var item_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
+	if str(item_def.get("type", "")) != "capture":
+		return {"ok": false, "reason": "invalid_item", "item_name": str(item_def.get("name", "道具"))}
+	if _storage.use_item(_equipped_capture_item_id, 1):
+		var bonus: float = float(item_def.get("effect", {}).get("captureBonus", 0.0))
+		_capture_item_used = {
+			"id": _equipped_capture_item_id,
+			"bonus": bonus,
+			"name": str(item_def.get("name", "捕获球"))
+		}
+		_load_hotbar_items()
+		return {"ok": true, "bonus": bonus, "item": _capture_item_used.duplicate(true)}
+	return {"ok": false, "reason": "item_empty", "item_name": str(item_def.get("name", "捕捉球"))}
 
 ## ============================================
 # 消息与弹窗
@@ -1509,12 +1660,16 @@ func _find_enemy_index(name: String) -> int:
 			return i
 	return -1
 
-func _find_player_index(name: String) -> int:
+func _find_player_index(name: String, fallback_name: String = "") -> int:
 	if _battle == null:
 		return -1
 	var team: Array = _battle.player_team
 	for i in range(team.size()):
-		if team[i] != null and team[i].get("name", "") == name:
+		if team[i] == null:
+			continue
+		if not name.is_empty() and (team[i].get("name", "") == name or team[i].get("id", "") == name):
+			return i
+		if not fallback_name.is_empty() and team[i].get("name", "") == fallback_name:
 			return i
 	return -1
 
@@ -1778,6 +1933,7 @@ func _combatant_render_state() -> Dictionary:
 		"hit_flashes": _hit_flashes,
 		"defeated_enemies": _defeated_enemies,
 		"boss_skill_visuals": _boss_skill_visuals,
+		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
 		"status_emoji": STATUS_EMOJI,
 		"status_colors": STATUS_COLORS
 	}
@@ -1807,19 +1963,41 @@ func _draw_background() -> void:
 	var bg_tex := _get_texture(BATTLE_BG_PATH)
 	if bg_tex:
 		_draw_texture_cover(bg_tex, Rect2(0, 0, DESIGN_W, DESIGN_H))
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.03, 0.09, 0.34))
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.04, 0.06, 0.12, 0.14))
+	draw_rect(Rect2(0, 50, DESIGN_W, 210), Color(0.08, 0.24, 0.28, 0.13))
+	draw_rect(Rect2(0, 260, DESIGN_W, DESIGN_H - 260), Color(0.01, 0.04, 0.10, 0.20))
 
 func _draw_title_bar() -> void:
-	var title_color := C["white"]
-	_draw_rounded_rect(0, 0, DESIGN_W, 50, 0.0, C["bg_card"])
-	_draw_text_with_shadow("三消宝可梦 ⚔️", DESIGN_W / 2.0, 25, title_color, 16.0)
+	var turn_count: int = _battle.turn_count if _battle != null else 0
+	var max_turns: int = _battle.max_turns if _battle != null else 20
+	var scrim_tex := _get_texture(BATTLE_UI_ASSETS["top_scrim"])
+	var turn_tex := _get_texture(BATTLE_UI_ASSETS["turn_badge"])
+	var speed_tex := _get_texture(BATTLE_UI_ASSETS["speed_button"])
+	var settings_tex := _get_texture(BATTLE_UI_ASSETS["settings_button"])
+	if scrim_tex:
+		_draw_texture_fit(scrim_tex, Rect2(0, 0, DESIGN_W, 62.0), 1.0)
+	if turn_tex:
+		_draw_texture_fit(turn_tex, Rect2(9.0, 5.0, 72.0, 48.0), 1.0)
+	else:
+		_draw_rounded_rect(12.0, 9.0, 62.0, 42.0, 5.0, Color(0.07, 0.13, 0.26, 0.92))
+	_draw_text_with_shadow("回合", 45.0, 19.0, C["white"], 9.5, true)
+	_draw_text_with_shadow("%d/%d" % [turn_count, max_turns], 45.0, 37.0, C["gold"], 14.0, true)
+	if speed_tex:
+		_draw_texture_fit(speed_tex, Rect2(285.0, 5.0, 42.0, 48.0), 1.0)
+	else:
+		_draw_rounded_rect(287.0, 9.0, 38.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
+	_draw_text_with_shadow("x2", 306.0, 40.0, C["white"], 9.5, true)
+	if settings_tex:
+		_draw_texture_fit(settings_tex, Rect2(330.0, 5.0, 42.0, 48.0), 1.0)
+	else:
+		_draw_rounded_rect(333.0, 9.0, 30.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
 	
 	# BOSS阶段指示器
 	if _battle != null:
 		var status: Dictionary = _battle.get_status()
 		if status.get("is_boss_battle", false):
 			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
-			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 60.0, 25.0, phase_color, 10.0)
+			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
 	
 	# 队长技能信息条（标题栏下方）
 	if _battle != null:
@@ -1858,7 +2036,7 @@ func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, ma
 	BattleCombatantRendererScript.draw_player_card(self, _battle, _combatant_render_state(), x, y, index, name, hp, max_hp, monster)
 
 func _draw_board_background() -> void:
-	BattleBoardRendererScript.draw_board_background(self, DESIGN_W)
+	BattleBoardRendererScript.draw_board_background(self, DESIGN_W, _board)
 
 func _draw_board() -> void:
 	BattleBoardRendererScript.draw_board(self, _board, _board_render_state())
@@ -1872,8 +2050,13 @@ func _draw_gem_animated(cx: float, cy: float, gem_type: String, color: Color, sc
 	
 	# 闪白效果：先画一个更大的白色光圈
 	if brightness > 0.0 and alpha > 0.0:
-		var glow_radius := 20.0 * scale * (1.0 + brightness * 0.3)
-		_draw_circle(cx, cy, glow_radius, Color(1.0, 1.0, 1.0, brightness * 0.6 * alpha))
+		var pop_tex := _get_texture(BATTLE_FX_ASSETS["gem_pop"])
+		if pop_tex:
+			var pop_size := 56.0 * scale * (1.0 + brightness * 0.22)
+			_draw_texture_fit(pop_tex, Rect2(cx - pop_size / 2.0, cy - pop_size / 2.0, pop_size, pop_size), brightness * alpha)
+		else:
+			var glow_radius := 20.0 * scale * (1.0 + brightness * 0.3)
+			_draw_circle(cx, cy, glow_radius, Color(1.0, 1.0, 1.0, brightness * 0.6 * alpha))
 	
 	if gem_tex:
 		_draw_texture_fit(gem_tex, Rect2(cx - draw_size / 2.0, cy - draw_size / 2.0, draw_size, draw_size), alpha)
@@ -1904,6 +2087,11 @@ func _draw_selection() -> void:
 		var sx := board_x + _selected_gem.x * cell_size
 		var sy := board_y + _selected_gem.y * cell_size
 		
+		var select_tex := _get_texture(BATTLE_FX_ASSETS["selected_cell"])
+		if select_tex:
+			var pulse_alpha := 0.62 + 0.30 * (sin(_selection_pulse * TAU / 0.6) + 1.0) / 2.0
+			_draw_texture_fit(select_tex, Rect2(sx - 8.0, sy - 8.0, cell_size + 16.0, cell_size + 16.0), pulse_alpha)
+			return
 		# 选中光环（脉冲动画）
 		var pulse_alpha := 0.3 + 0.5 * (sin(_selection_pulse * TAU / 0.6) + 1.0) / 2.0
 		var glow_color := Color(1.0, 0.85, 0.2, pulse_alpha)
@@ -1920,7 +2108,17 @@ func _draw_floating_texts() -> void:
 		var y: float = ft.get("y", 0.0)
 		var color: Color = ft.get("color", C["white"])
 		var size: float = ft.get("size", 16.0)
-		
+		var duration: float = ft.get("duration", 1.0)
+		var timer: float = ft.get("timer", 0.0)
+		var fade: float = clampf(1.0 - maxf(0.0, timer - duration * 0.62) / maxf(0.01, duration * 0.38), 0.0, 1.0)
+		var plate_path := _floating_text_plate_path(text, ft)
+		if not plate_path.is_empty():
+			var plate_tex := _get_texture(plate_path)
+			if plate_tex:
+				var plate_w: float = clampf(size * 5.5, 82.0, 138.0)
+				var plate_h: float = clampf(size * 2.25, 34.0, 54.0)
+				_draw_texture_fit(plate_tex, Rect2(x - plate_w / 2.0, y - plate_h * 0.62, plate_w, plate_h), 0.92 * fade)
+		color.a *= fade
 		_draw_text_with_shadow(text, x, y, color, size)
 
 func _draw_combo_popup() -> void:
@@ -1928,15 +2126,21 @@ func _draw_combo_popup() -> void:
 		return
 	
 	var cx := DESIGN_W / 2.0
-	var cy := 160.0
+	var cy: float = float(_board.offset_y) + 150.0 if _board != null else 450.0
 	var combo: int = _combo_popup["combo"]
 	var scale: float = _combo_popup["scale"]
 	var opacity: float = _combo_popup["opacity"]
+	if combo <= 0 or opacity <= 0.0:
+		return
 	
-	var box_w := 160.0 * scale
-	var box_h := 60.0 * scale
-	var bg_color := Color(0.0, 0.0, 0.0, 0.7 * opacity)
-	_draw_rounded_rect(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h, 12.0 * scale, bg_color)
+	var box_w := 166.0 * scale
+	var box_h := 62.0 * scale
+	var banner_tex := _get_texture(BATTLE_UI_ASSETS["combo_banner"])
+	if banner_tex:
+		_draw_texture_fit(banner_tex, Rect2(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h), opacity)
+	else:
+		var bg_color := Color(0.0, 0.0, 0.0, 0.7 * opacity)
+		_draw_rounded_rect(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h, 12.0 * scale, bg_color)
 	
 	var text_color := Color(1.0, 0.85, 0.0, opacity)
 	_draw_text_with_shadow("%d连击！" % combo, cx, cy, text_color, 22.0 * scale, true)
@@ -1984,8 +2188,13 @@ func _draw_swipe_trail() -> void:
 		_draw_circle(trail["x"], trail["y"], size, trail_color)
 
 func _draw_bottom_bar() -> void:
-	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 15.0) if _board != null else 586.0
-	_draw_rounded_rect(10, bottom_y, DESIGN_W - 20, 45, 8.0, C["bg_card"])
+	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 614.0
+	var panel_h := 45.0
+	var panel_tex := _get_texture(BATTLE_UI_ASSETS["footer_panel"])
+	if panel_tex:
+		_draw_texture_fit(panel_tex, Rect2(10.0, bottom_y, DESIGN_W - 20.0, panel_h), 1.0)
+	else:
+		_draw_rounded_rect(10, bottom_y, DESIGN_W - 20, panel_h, 7.0, Color(0.06, 0.11, 0.22, 0.94))
 	
 	var state_color := C["text_muted"]
 	if _state == BattleState.ENEMY_TURN:
@@ -1994,8 +2203,6 @@ func _draw_bottom_bar() -> void:
 	var turn_count: int = _battle.turn_count if _battle != null else 0
 	var max_turns: int = _battle.max_turns if _battle != null else 20
 	var combo_count: int = _board.cascade_count if _board != null else 0
-	_draw_text_with_shadow("回合: %d/%d" % [turn_count, max_turns], 80.0, bottom_y + 15, C["text_muted"], 12.0)
-	_draw_text_with_shadow("连锁: %dx" % combo_count, 190.0, bottom_y + 15, C["gold"], 12.0)
 	
 	var status_text := "等待操作"
 	if _state == BattleState.ENEMY_TURN:
@@ -2003,43 +2210,105 @@ func _draw_bottom_bar() -> void:
 	elif _state != BattleState.IDLE:
 		status_text = "处理中..."
 	
-	_draw_text_with_shadow("状态: %s" % status_text, 300.0, bottom_y + 15, state_color, 12.0)
+	_draw_text_with_shadow("回合 %d/%d" % [turn_count, max_turns], 58.0, bottom_y + 16.0, C["text_secondary"], 10.5, true)
+	_draw_text_with_shadow("连锁 %dx" % combo_count, 160.0, bottom_y + 16.0, C["gold"], 12.0, true)
+	_draw_text_with_shadow(status_text, 280.0, bottom_y + 16.0, state_color, 11.0, true)
+	_draw_capture_window_hint(bottom_y)
+	_draw_capture_toggle(bottom_y)
 	_draw_item_hotbar(bottom_y)
+
+func _draw_capture_window_hint(base_y: float) -> void:
+	if _battle == null:
+		return
+	var candidate: Dictionary = _battle.get_best_capture_candidate() if _battle.has_method("get_best_capture_candidate") else {}
+	var window: Dictionary = candidate.get("window", {})
+	if window.is_empty():
+		return
+	var label := str(window.get("label", "未开启"))
+	var stability := int(round(float(window.get("stability", 0.0)) * 100.0))
+	var state := str(window.get("state", "locked"))
+	var color := C["text_muted"]
+	if state == "prime":
+		color = C["gold"]
+	elif state == "open":
+		color = C["success"]
+	elif state == "unstable":
+		color = C["shield"]
+	elif state == "overpowered":
+		color = C["danger"]
+	_draw_text_with_shadow("捕捉 %s %d%%" % [label, stability], 282.0, base_y + 32.0, color, 9.2, true)
+
+func _draw_capture_toggle(base_y: float) -> void:
+	var rect := _get_capture_toggle_rect(base_y)
+	var key := "capture_toggle_on" if _auto_capture_enabled else "capture_toggle_off"
+	var tex := _get_texture(BATTLE_UI_ASSETS[key])
+	if tex:
+		_draw_texture_fit(tex, rect, 1.0)
+	else:
+		var bg := C["success"] if _auto_capture_enabled else C["bg_medium"]
+		_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 6.0, bg)
+	_draw_text_with_shadow("捕捉%s" % ("开" if _auto_capture_enabled else "关"), rect.position.x + rect.size.x / 2.0 + 5.0, rect.position.y + 14.5, C["white"], 8.7, true)
 
 func _draw_item_hotbar(base_y: float) -> void:
 	"""绘制底部道具快捷栏（3格）"""
-	var slot_size: float = 50.0
-	var slot_gap: float = 10.0
-	var total_w: float = 3.0 * slot_size + 2.0 * slot_gap
-	var start_x: float = (DESIGN_W - total_w) / 2.0
-	var slot_y: float = base_y + 48.0  # 在状态条下方
 
 	for i in range(3):
-		var slot_x: float = start_x + i * (slot_size + slot_gap)
+		var slot_rect := _get_hotbar_slot_rect(base_y, i)
 		var item: Dictionary = _hotbar_items[i] if i < _hotbar_items.size() else {}
 		var has_item: bool = not item.is_empty() and item.get("count", 0) > 0
+		if not has_item:
+			continue
 
-		# 格子背景
-		var bg_color := C["bg_medium"]
+		var is_selected := _is_hotbar_item_selected(i, item)
+		var slot_key := "item_slot_selected" if is_selected else "item_slot"
+		var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
+		if slot_tex:
+			_draw_texture_fit(slot_tex, slot_rect, 1.0)
+		else:
+			_draw_rounded_rect(slot_rect.position.x, slot_rect.position.y, slot_rect.size.x, slot_rect.size.y, 6.0, C["bg_card"])
+			if is_selected:
+				_draw_rounded_rect_outline(slot_rect.position.x, slot_rect.position.y, slot_rect.size.x, slot_rect.size.y, 6.0, C["gold"], 2.0)
+
 		if has_item:
-			bg_color = C["bg_card"]
-		_draw_rounded_rect(slot_x, slot_y, slot_size, slot_size, 6.0, bg_color)
-
-		# 选中边框
-		if _selected_hotbar_slot == i and has_item:
-			var border_color := C["gold"]
-			_draw_rounded_rect_outline(slot_x, slot_y, slot_size, slot_size, 6.0, border_color, 2.0)
-
-		if has_item:
-			# 道具emoji
 			var item_def: Dictionary = ItemDB.get_item(item["id"])
-			var emoji: String = item_def.get("emoji", "❓")
-			_draw_text(emoji, slot_x + slot_size / 2.0, slot_y + slot_size / 2.0, C["white"], 22.0, true)
+			var icon_tex := _get_texture(_item_icon_asset_path(str(item["id"])))
+			if icon_tex:
+				_draw_texture_contain(icon_tex, slot_rect.grow(-2.0), 1.0)
+			else:
+				var emoji: String = item_def.get("emoji", "?")
+				_draw_text(emoji, slot_rect.get_center().x, slot_rect.position.y + 13.0, C["white"], 13.5, true)
 
 			# 数量标签
 			var count: int = item["count"]
 			if count > 1:
-				_draw_text("x%d" % count, slot_x + slot_size - 6.0, slot_y + slot_size - 4.0, C["gold"], 10.0, false)
+				_draw_text("x%d" % count, slot_rect.position.x + slot_rect.size.x - 2.0, slot_rect.position.y + slot_rect.size.y - 5.0, C["gold"], 8.0, false)
+
+func _get_capture_toggle_rect(base_y: float) -> Rect2:
+	return Rect2(19.0, base_y + 22.0, 76.0, 19.0)
+
+func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
+	var slot_size: float = 27.0
+	var slot_gap: float = 6.0
+	var start_x: float = 108.0
+	return Rect2(start_x + slot_idx * (slot_size + slot_gap), base_y + 14.0, slot_size, slot_size)
+
+func _item_icon_asset_path(item_id: String) -> String:
+	if item_id == "capture_ball":
+		return BATTLE_UI_ASSETS["item_capture_ball"]
+	if item_id == "capture_ball_plus":
+		return BATTLE_UI_ASSETS["item_capture_ball_plus"]
+	if item_id == "hp_potion":
+		return BATTLE_UI_ASSETS["item_hp_potion"]
+	return ""
+
+func _is_hotbar_item_selected(slot_idx: int, item: Dictionary) -> bool:
+	if item.is_empty() or item.get("count", 0) <= 0:
+		return false
+	var item_id := str(item.get("id", ""))
+	var item_def: Dictionary = ItemDB.get_item(item_id)
+	if str(item_def.get("type", "")) == "capture":
+		return item_id == _equipped_capture_item_id
+	return _selected_hotbar_slot == slot_idx
 
 func _load_hotbar_items() -> void:
 	"""从背包加载前3个战斗相关道具到快捷栏"""
@@ -2056,31 +2325,67 @@ func _load_hotbar_items() -> void:
 		var def: Dictionary = ItemDB.get_item(item_id)
 		var item_type: String = def.get("type", "")
 		if item_type == "capture" or item_type == "battle":
-			candidates.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1)})
+			candidates.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1), "type": item_type})
 	# 按rarity降序（稀有在前）、然后count降序
-	candidates.sort_custom(func(a, b): return a["rarity"] > b["rarity"] or (a["rarity"] == b["rarity"] and a["count"] > b["count"]))
+	candidates.sort_custom(func(a, b):
+		var a_equipped := str(a.get("id", "")) == _equipped_capture_item_id
+		var b_equipped := str(b.get("id", "")) == _equipped_capture_item_id
+		if a_equipped != b_equipped:
+			return a_equipped
+		if str(a.get("type", "")) != str(b.get("type", "")):
+			return str(a.get("type", "")) == "capture"
+		return a["rarity"] > b["rarity"] or (a["rarity"] == b["rarity"] and a["count"] > b["count"])
+	)
 	for i in range(mini(candidates.size(), 3)):
 		_hotbar_items.append(candidates[i])
+	_selected_hotbar_slot = -1
+	for i in range(_hotbar_items.size()):
+		if str(_hotbar_items[i].get("id", "")) == _equipped_capture_item_id:
+			_selected_hotbar_slot = i
+			break
+
+func _load_capture_preferences() -> void:
+	var settings := {"autoCapture": false, "equippedItem": ""}
+	if _storage and _storage.has_method("load_capture_settings"):
+		settings = _storage.load_capture_settings()
+	_auto_capture_enabled = bool(settings.get("autoCapture", false))
+	_equipped_capture_item_id = str(settings.get("equippedItem", ""))
+
+func _save_capture_preferences() -> void:
+	if _storage and _storage.has_method("save_capture_settings"):
+		_storage.save_capture_settings({
+			"autoCapture": _auto_capture_enabled,
+			"equippedItem": _equipped_capture_item_id
+		})
 
 func _try_tap_hotbar(x: float, y: float) -> bool:
 	"""检测点击是否命中道具快捷栏，返回是否处理了"""
-	if _hotbar_items.is_empty():
-		return false
-	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 15.0) if _board != null else 586.0
-	var slot_size: float = 50.0
-	var slot_gap: float = 10.0
-	var total_w: float = 3.0 * slot_size + 2.0 * slot_gap
-	var start_x: float = (DESIGN_W - total_w) / 2.0
-	var slot_y: float = bottom_y + 48.0
+	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 614.0
+	if _get_capture_toggle_rect(bottom_y).has_point(Vector2(x, y)):
+		_auto_capture_enabled = not _auto_capture_enabled
+		_save_capture_preferences()
+		if _auto_capture_enabled and _equipped_capture_item_id.is_empty():
+			_show_message("自动捕捉已开启，请选择捕捉球")
+		elif _auto_capture_enabled:
+			var item_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
+			_show_message("自动捕捉：开启，使用%s" % item_def.get("name", "捕捉球"))
+		else:
+			_show_message("自动捕捉：关闭")
+		queue_redraw()
+		return true
 
 	for i in range(3):
-		var slot_x: float = start_x + i * (slot_size + slot_gap)
-		if x >= slot_x and x <= slot_x + slot_size and y >= slot_y and y <= slot_y + slot_size:
+		var slot_rect := _get_hotbar_slot_rect(bottom_y, i)
+		if slot_rect.has_point(Vector2(x, y)):
 			if i >= _hotbar_items.size():
 				return false
 			var item: Dictionary = _hotbar_items[i]
 			if item.is_empty() or item.get("count", 0) <= 0:
 				return false
+			var def: Dictionary = ItemDB.get_item(item["id"])
+			if str(def.get("type", "")) == "capture":
+				_try_use_item_at_slot(i)
+				return true
 			if _selected_hotbar_slot == i:
 				# 再次点击同一格子 → 使用道具
 				_try_use_item_at_slot(i)
@@ -2088,7 +2393,6 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 			else:
 				# 选中格子
 				_selected_hotbar_slot = i
-				var def: Dictionary = ItemDB.get_item(item["id"])
 				_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
 				return true
 	return false
@@ -2104,12 +2408,12 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 	var def: Dictionary = ItemDB.get_item(item_id)
 	var item_type: String = def.get("type", "")
 	if item_type == "capture":
-		# 捕获球 → 使用捕获道具逻辑
-		if _state == BattleState.ENEMY_TURN:
-			_show_message("敌方回合中无法使用道具")
-			return true
-		var bonus: float = _consume_best_capture_item()
-		_show_message("使用 %s，捕获概率 +%.0f%%" % [def.get("name", "捕获球"), bonus * 100.0])
+		_equipped_capture_item_id = item_id
+		_selected_hotbar_slot = slot_idx
+		_save_capture_preferences()
+		var bonus: float = float(def.get("effect", {}).get("captureBonus", 0.0))
+		_show_message("已选择 %s +%.0f%%" % [def.get("name", "捕获球"), bonus * 100.0])
+		queue_redraw()
 		return true
 	elif item_type == "battle":
 		# HP药水 → 恢复队伍50%HP
@@ -2142,10 +2446,16 @@ func _draw_message() -> void:
 		return
 	
 	var alpha: float = mini(1.0, _message_timer)
-	_draw_rounded_rect(DESIGN_W / 2.0 - 100, DESIGN_H / 2.0 - 20, 200, 40, 12.0, Color(0.0, 0.0, 0.0, 0.7))
+	var toast_y: float = float(_board.offset_y) - 10.0 if _board != null else 290.0
+	var toast_tex := _get_texture(BATTLE_UI_ASSETS["toast_panel"])
+	if toast_tex:
+		_draw_texture_fit(toast_tex, Rect2(DESIGN_W / 2.0 - 112.0, toast_y - 15.0, 224.0, 30.0), 0.96 * alpha)
+	else:
+		_draw_rounded_rect(DESIGN_W / 2.0 - 104.0, toast_y - 13.0, 208.0, 26.0, 7.0, Color(0.03, 0.08, 0.16, 0.78))
+		_draw_stroke_rect(DESIGN_W / 2.0 - 101.0, toast_y - 10.0, 202.0, 20.0, 1.0, Color(0.36, 0.66, 0.95, 0.32))
 	
 	var text_color := Color(1.0, 1.0, 1.0, alpha)
-	_draw_text_with_shadow(_message_text, DESIGN_W / 2.0, DESIGN_H / 2.0, text_color, 14.0)
+	_draw_text_with_shadow(_message_text, DESIGN_W / 2.0, toast_y + 4.0, text_color, 11.2, true)
 
 func _draw_battle_end_overlay() -> void:
 	_draw_restore()
@@ -2457,6 +2767,17 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 		return
 	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
 
+func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale: float = minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var draw_size := tex_size * scale
+	var target := Rect2(rect.position + (rect.size - draw_size) / 2.0, draw_size)
+	draw_texture_rect(tex, target, false, Color(1.0, 1.0, 1.0, opacity))
+
 func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
 		return
@@ -2523,13 +2844,41 @@ func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size
 	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER)
 
 func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color) -> void:
+	var frame_tex := _get_texture(BATTLE_UI_ASSETS["hp_frame"])
+	if frame_tex:
+		_draw_texture_fit(frame_tex, Rect2(x, y, w, h), 1.0)
+		if current > 0 and maximum > 0:
+			var ratio: float = clampf(current / maximum, 0.0, 1.0)
+			var fill_w: float = floor((w - 4.0) * ratio)
+			var fill_tex := _get_texture(_hp_fill_asset_for_color(color))
+			if fill_tex and fill_w > 1.0:
+				_draw_texture_fit(fill_tex, Rect2(x + 2.0, y + 2.0, fill_w, h - 4.0), 1.0)
+		return
 	var bg_color := Color(0.2, 0.2, 0.3, 0.8)
-	draw_rect(Rect2(x, y, w, h), bg_color)
-	
+	_draw_rounded_rect(x, y, w, h, 2.0, bg_color)
 	if current > 0 and maximum > 0:
-		var ratio: float = clampf(current / maximum, 0.0, 1.0)
-		var fill_w: float = floor((w - 2) * ratio)
-		draw_rect(Rect2(x + 1, y + 1, fill_w, h - 2), color)
+		var ratio_fallback: float = clampf(current / maximum, 0.0, 1.0)
+		var fill_w_fallback: float = floor((w - 2) * ratio_fallback)
+		_draw_rounded_rect(x + 1, y + 1, fill_w_fallback, h - 2, 2.0, color)
+	_draw_stroke_rect(x, y, w, h, 1.0, Color(0.86, 0.94, 1.0, 0.28))
+
+func _hp_fill_asset_for_color(color: Color) -> String:
+	if color.r > 0.85 and color.g < 0.35:
+		return BATTLE_UI_ASSETS["hp_fill_red"]
+	if color.r > 0.85 and color.g > 0.55:
+		return BATTLE_UI_ASSETS["hp_fill_gold"]
+	if color.b > 0.75 and color.g > 0.35:
+		return BATTLE_UI_ASSETS["hp_fill_blue"]
+	return BATTLE_UI_ASSETS["hp_fill_green"]
+
+func _floating_text_plate_path(text: String, ft: Dictionary) -> String:
+	if text.begins_with("+"):
+		return BATTLE_FX_ASSETS["heal_plate"]
+	if ft.get("critical", false):
+		return BATTLE_FX_ASSETS["critical_plate"]
+	if text.begins_with("-") or text.begins_with("护") or text.begins_with("缚"):
+		return BATTLE_FX_ASSETS["damage_plate"]
+	return ""
 
 ## ============================================
 # 场景切换
@@ -2556,7 +2905,8 @@ func _go_to_result() -> void:
 		"success": _capture_success,
 		"target": _capture_target,
 		"result_text": _capture_result_text,
-		"item_used": _capture_item_used
+		"item_used": _capture_item_used,
+		"window": _capture_window
 	})
 	
 	if has_node("/root/SceneManager"):
@@ -2605,6 +2955,7 @@ func destroy() -> void:
 		_capture_effect_node = null
 	_capture_phase = ""
 	_capture_waiting_for_effect = false
+	_capture_window = {}
 
 ## ============================================
 # 宝石消除动画更新

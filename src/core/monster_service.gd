@@ -1,6 +1,8 @@
 class_name MonsterService
 extends RefCounted
 
+const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
+
 static func get_template(monster_id: String) -> Dictionary:
 	return MonsterDb.get_monster(monster_id).duplicate(true)
 
@@ -79,17 +81,27 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var nature_id := str(instance.get("nature", ""))
 	var nature := NatureDB.get_nature(nature_id)
 	var level := int(instance.get("level", 1))
+	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(template)
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,
 		"name": str(instance.get("name", template.get("name", monster_id))),
 		"templateName": str(template.get("name", monster_id)),
 		"element": str(template.get("element", "")),
+		"boardAffinity": MonsterDb.get_board_affinity(template),
 		"rarity": int(template.get("rarity", 1)),
 		"level": level,
 		"exp": int(instance.get("exp", 0)),
 		"nature": nature_id,
 		"natureName": str(nature.get("name", "")),
+		"gender": str(instance.get("gender", "")),
+		"socialProfile": instance.get("socialProfile", {}).duplicate(true),
+		"bondTraits": instance.get("bondTraits", []).duplicate(true),
+		"bondMemory": instance.get("bondMemory", {}).duplicate(true),
+		"identity": identity,
+		"bondRole": str(identity.get("role", "")),
+		"roleLabel": str(identity.get("roleLabel", "")),
+		"ecology": identity.get("ecology", {}).duplicate(true),
 		"capturedAt": int(instance.get("capturedAt", 0)),
 		"source": str(instance.get("source", "")),
 		"favorite": bool(instance.get("favorite", false)),
@@ -148,7 +160,7 @@ static func validate_monster_catalog(storage: Node = null) -> Dictionary:
 		"invalidEvolutions": invalid_evolutions,
 		"missingBattleArt": invalid_art,
 		"brokenInstanceRefs": broken_refs,
-		"ok": missing_fields.is_empty() and invalid_evolutions.is_empty() and broken_refs.is_empty(),
+		"ok": missing_fields.is_empty() and invalid_evolutions.is_empty() and invalid_art.is_empty() and broken_refs.is_empty(),
 	}
 
 static func _storage(storage: Node = null) -> Node:

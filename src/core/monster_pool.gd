@@ -16,6 +16,16 @@ static func create_instance(monster_id: String, options: Dictionary = {}) -> Dic
 		"level": int(options.get("level", 1)),
 		"exp": int(options.get("exp", 0)),
 		"nature": str(options.get("nature", NatureDB.random_nature())),
+		"gender": str(options.get("gender", "")),
+		"socialProfile": options.get("socialProfile", {}),
+		"bondTraits": options.get("bondTraits", []),
+		"bondMemory": options.get("bondMemory", {}),
+		"lineage": options.get("lineage", {}),
+		"mutationTraits": options.get("mutationTraits", []),
+		"conditionEffects": options.get("conditionEffects", []),
+		"evolutionInsight": options.get("evolutionInsight", {}),
+		"evolutionHistory": options.get("evolutionHistory", []),
+		"evolutionCount": int(options.get("evolutionCount", 0)),
 		"capturedAt": int(options.get("capturedAt", now_ms)),
 		"source": str(options.get("source", "capture")),
 		"favorite": bool(options.get("favorite", false)),
@@ -33,17 +43,161 @@ static func normalize_instance(value: Variant) -> Dictionary:
 	if instance_id.is_empty():
 		instance_id = generate_instance_id()
 	var captured_at: Variant = data.get("capturedAt", data.get("captured_at", Time.get_unix_time_from_system() * 1000.0))
+	var gender := str(data.get("gender", ""))
+	if not ["male", "female", "neutral"].has(gender):
+		gender = _derive_gender(instance_id, monster_id)
+	var nature_id := str(data.get("nature", NatureDB.random_nature()))
+	var social_profile := _normalize_social_profile(data.get("socialProfile", data.get("social_profile", {})), monster_id, nature_id, gender)
+	var bond_traits := _normalize_bond_traits(data.get("bondTraits", data.get("bond_traits", [])), monster_id, nature_id, gender)
+	var bond_memory := _normalize_bond_memory(data.get("bondMemory", data.get("bond_memory", {})))
+	var raw_lineage: Variant = data.get("lineage", {})
+	var lineage: Dictionary = raw_lineage if raw_lineage is Dictionary else {}
+	var condition_effects := _normalize_dictionary_array(data.get("conditionEffects", data.get("condition_effects", [])))
+	var raw_insight: Variant = data.get("evolutionInsight", data.get("evolution_insight", {}))
+	var insight: Dictionary = raw_insight if raw_insight is Dictionary else {}
+	var raw_history: Variant = data.get("evolutionHistory", data.get("evolution_history", []))
+	var history: Array = raw_history if raw_history is Array else []
 	return {
 		"instanceId": instance_id,
 		"monsterId": monster_id,
 		"name": str(data.get("name", template.get("name", monster_id))),
 		"level": maxi(1, int(data.get("level", 1))),
 		"exp": maxi(0, int(data.get("exp", 0))),
-		"nature": str(data.get("nature", NatureDB.random_nature())),
+		"nature": nature_id,
+		"gender": gender,
+		"socialProfile": social_profile,
+		"bondTraits": bond_traits,
+		"bondMemory": bond_memory,
+		"lineage": lineage.duplicate(true),
+		"mutationTraits": _normalize_string_array(data.get("mutationTraits", data.get("mutation_traits", []))),
+		"conditionEffects": condition_effects,
+		"evolutionInsight": insight.duplicate(true),
+		"evolutionHistory": history.duplicate(true),
+		"evolutionCount": maxi(0, int(data.get("evolutionCount", data.get("evolution_count", 0)))),
 		"capturedAt": _normalize_timestamp_ms(captured_at),
 		"source": str(data.get("source", "migration")),
 		"favorite": bool(data.get("favorite", false)),
 	}
+
+static func _derive_gender(instance_id: String, monster_id: String) -> String:
+	var seed := "%s:%s" % [monster_id, instance_id]
+	var score := 0
+	for i in range(seed.length()):
+		score += seed.unicode_at(i) * (i + 3)
+	var roll := score % 10
+	if roll <= 3:
+		return "male"
+	if roll <= 7:
+		return "female"
+	return "neutral"
+
+static func _normalize_social_profile(value: Variant, monster_id: String, nature_id: String, gender: String) -> Dictionary:
+	var source: Dictionary = value if value is Dictionary else {}
+	var style := str(source.get("style", ""))
+	if style.is_empty():
+		style = _derive_social_style(nature_id, gender)
+	return {
+		"style": style,
+		"socialExp": maxi(0, int(source.get("socialExp", source.get("social_exp", 0)))),
+		"bondExp": maxi(0, int(source.get("bondExp", source.get("bond_exp", 0)))),
+		"lastPartnerId": str(source.get("lastPartnerId", source.get("last_partner_id", ""))),
+		"lastSocialTags": _normalize_string_array(source.get("lastSocialTags", source.get("last_social_tags", []))),
+		"preferredPlace": str(source.get("preferredPlace", source.get("preferred_place", _derive_preferred_place(monster_id))))
+	}
+
+static func _normalize_bond_traits(value: Variant, monster_id: String, nature_id: String, gender: String) -> Array:
+	var traits := _normalize_string_array(value)
+	if traits.is_empty():
+		traits = _derive_bond_traits(monster_id, nature_id, gender)
+	return traits
+
+static func _normalize_bond_memory(value: Variant) -> Dictionary:
+	var source: Dictionary = value if value is Dictionary else {}
+	var partners: Dictionary = source.get("partners", {}) if source.get("partners", {}) is Dictionary else {}
+	return {
+		"partners": partners.duplicate(true),
+		"branches": _normalize_string_array(source.get("branches", []))
+	}
+
+static func _normalize_string_array(value: Variant) -> Array:
+	var result: Array = []
+	if value is Array:
+		for entry in value:
+			var text := str(entry)
+			if not text.is_empty() and not result.has(text):
+				result.append(text)
+	return result
+
+static func _normalize_dictionary_array(value: Variant) -> Array:
+	var result: Array = []
+	if value is Array:
+		for entry in value:
+			if entry is Dictionary:
+				result.append((entry as Dictionary).duplicate(true))
+	return result
+
+static func _derive_social_style(nature_id: String, gender: String) -> String:
+	if nature_id in ["brave", "fierce"]:
+		return "bold"
+	if nature_id in ["cautious", "calm"]:
+		return "steady"
+	if nature_id in ["gentle", "wise"]:
+		return "caring"
+	if nature_id == "agile":
+		return "lively"
+	if gender == "neutral":
+		return "quiet"
+	return "curious"
+
+static func _derive_preferred_place(monster_id: String) -> String:
+	var monster := MonsterDb.get_monster(monster_id)
+	var element := str(monster.get("element", "fire"))
+	var map := {
+		"fire": "sunny_yard",
+		"water": "pond",
+		"grass": "meadow",
+		"thunder": "windmill",
+		"light": "garden",
+		"earth": "rock_field",
+		"wind": "sky_perch",
+		"dark": "shade",
+		"ice": "cool_cave",
+		"void": "quiet_room",
+		"temporal": "clock_room",
+		"star": "observatory",
+		"chaos": "wild_corner"
+	}
+	return str(map.get(element, "meadow"))
+
+static func _derive_bond_traits(monster_id: String, nature_id: String, gender: String) -> Array:
+	var monster := MonsterDb.get_monster(monster_id)
+	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
+	var role := str(skill.get("type", "strike"))
+	var element := str(monster.get("element", "fire"))
+	return [
+		"role_%s" % role,
+		"eco_%s" % _ecology_id_from_element(element),
+		"nature_%s" % nature_id,
+		"social_%s" % _derive_social_style(nature_id, gender)
+	]
+
+static func _ecology_id_from_element(element: String) -> String:
+	var map := {
+		"fire": "volcanic",
+		"water": "shore",
+		"grass": "meadow",
+		"thunder": "storm",
+		"light": "radiant",
+		"earth": "mountain",
+		"wind": "sky",
+		"dark": "shadow",
+		"ice": "shore",
+		"void": "void",
+		"temporal": "time",
+		"star": "star",
+		"chaos": "chaos"
+	}
+	return str(map.get(element, "volcanic"))
 
 static func normalize_pool(pool: Array) -> Array:
 	var normalized: Array = []

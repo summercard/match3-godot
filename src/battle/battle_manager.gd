@@ -5,6 +5,8 @@
 class_name BattleManager
 extends Node
 
+const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
+
 ## 战斗核心逻辑：玩家队伍/敌方怪物初始化、连锁伤害计算、
 ## BOSS多阶段、敌人技能系统、C4状态效果、队长技能、属性协同
 ## 单例模式：通过 static var instance 访问
@@ -47,6 +49,10 @@ var leader_skill_info: Variant = null
 # 属性协同状态
 var synergy_bonuses: Variant = null
 var synergy_info: Array = []
+var player_guards: Dictionary = {}      # { monsterId: { reduction, turns } }
+var enemy_tempo_mods: Dictionary = {}   # { enemyIndex: { reduction, turns } }
+var capture_windows: Dictionary = {}    # { enemyIndex: current tamingWindow }
+var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reached this battle }
 
 # 组件委托（由外部抽取后内联持有）
 var _status_effect: BattleStatusEffect = BattleStatusEffect.new()
@@ -145,9 +151,14 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	synergy_bonuses = null
 	synergy_info = []
+	player_guards = {}
+	enemy_tempo_mods = {}
+	capture_windows = {}
+	capture_window_best = {}
 	_calc_and_apply_element_synergy()
 
 	_status_effect.init_effects(enemies.size())
+	_refresh_capture_windows()
 
 	# 敌人技能系统初始化（委托给 EnemySkillSystem）
 	if _enemy_skill_system == null:
@@ -160,20 +171,28 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 # ========== 属性协同加成 ==========
 
+func _fantasy_element(unit: Dictionary) -> String:
+	return str(unit.get("element", ""))
+
+
+func _board_affinity(unit: Dictionary) -> String:
+	return MonsterDb.get_board_affinity(unit)
+
+
 func _calc_and_apply_element_synergy() -> void:
-	var element_counts: Dictionary = {}
+	var affinity_counts: Dictionary = {}
 	for m in player_team:
 		if m == null:
 			continue
-		var elem = m.get("element", "")
-		element_counts[elem] = element_counts.get(elem, 0) + 1
+		var affinity := _board_affinity(m)
+		affinity_counts[affinity] = affinity_counts.get(affinity, 0) + 1
 
 	synergy_bonuses = {}
-	var elem_names: Dictionary = { "fire": "火", "water": "水", "grass": "草", "thunder": "雷", "light": "光" }
-	var elem_emojis: Dictionary = { "fire": "🔥", "water": "💧", "grass": "🌿", "thunder": "⚡", "light": "✨" }
+	var affinity_names: Dictionary = MonsterDb.BOARD_AFFINITY_NAMES
+	var affinity_emojis: Dictionary = { "fire": "🔥", "water": "💧", "grass": "🌿", "thunder": "⚡", "light": "✨" }
 
-	for elem in element_counts.keys():
-		var count = element_counts[elem]
+	for affinity in affinity_counts.keys():
+		var count = affinity_counts[affinity]
 		if count < 2:
 			continue
 
@@ -181,19 +200,20 @@ func _calc_and_apply_element_synergy() -> void:
 		var def_mult: float = 1.10 if count == 2 else 1.20
 		var hp_mult: float = 1.10 if count == 2 else 1.20
 
-		synergy_bonuses[elem] = { "count": count, "atk_mult": atk_mult, "def_mult": def_mult, "hp_mult": hp_mult }
+		synergy_bonuses[affinity] = { "count": count, "atk_mult": atk_mult, "def_mult": def_mult, "hp_mult": hp_mult }
 
 		var pct_label = "+15%ATK/+10%DEF" if count == 2 else "+30%ATK/+20%DEF"
-		var elem_emoji = elem_emojis.get(elem, "")
-		var elem_name = elem_names.get(elem, elem)
+		var affinity_emoji = affinity_emojis.get(affinity, "")
+		var affinity_name = affinity_names.get(affinity, affinity)
 		synergy_info.append({
-			"element": elem,
+			"element": affinity,
+			"boardAffinity": affinity,
 			"count": count,
-			"label": "%s×%d %s属性共鸣 %s" % [elem_emoji, count, elem_name, pct_label]
+			"label": "%s×%d %s共鸣 %s" % [affinity_emoji, count, affinity_name, pct_label]
 		})
 
 		for m in player_team:
-			if m != null and m.get("element", "") == elem:
+			if m != null and _board_affinity(m) == affinity:
 				m["maxHP"] = int(m.get("maxHP", 0) * hp_mult)
 				m["hp"] = m["maxHP"]
 
@@ -220,7 +240,9 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		if monster == null or monster.get("hp", 0) <= 0:
 			continue
 
-		var gem_count = gem_counts.get(monster.get("element", ""), 0)
+		var board_affinity := _board_affinity(monster)
+		var element := _fantasy_element(monster)
+		var gem_count = gem_counts.get(board_affinity, 0)
 		if gem_count == 0:
 			continue
 
@@ -229,15 +251,15 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		if target == null:
 			continue
 
-		element_mult = MonsterDb.get_element_multiplier(monster.get("element", ""), target.get("element", ""))
+		element_mult = MonsterDb.get_element_multiplier(element, target.get("element", ""))
 
-		var leader_atk_boost = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, monster.get("element", ""))
-		var synergy_atk_mult = get_synergy_atk_mult(monster.get("element", ""))
+		var leader_atk_boost = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, element)
+		var synergy_atk_mult = get_synergy_atk_mult(board_affinity)
 
 		# 委托给 DamageCalculator
 		var total_damage = _damage_calc.calc_player_damage(
 			monster.get("atk", 10),
-			monster.get("element", ""),
+			element,
 			target.get("def", 0),
 			gem_count,
 			combo_count,
@@ -259,6 +281,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		# 护盾减伤（委托给 EnemySkillSystem）
 		var shield_result = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
 		target["hp"] = target.get("hp", 0) - shield_result["remaining"]
+		_update_capture_window(target_idx)
 
 		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + total_damage
 
@@ -268,7 +291,8 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 			"target": target.get("name", ""),
 			"target_emoji": target.get("emoji", ""),
 			"damage": total_damage,
-			"element": monster.get("element", ""),
+			"element": element,
+			"boardAffinity": board_affinity,
 			"combo": combo_count,
 			"is_effective": element_mult > 1.0,
 			"is_weak": element_mult < 1.0,
@@ -284,6 +308,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 
 	# 状态效果（委托给 BattleStatusEffect）
 	_status_effect.try_apply_status_effects(gem_counts, player_team, enemies)
+	_refresh_capture_windows()
 
 	return { "damage_log": damage_log, "status_effect_log": _status_effect.get_effect_log() }
 
@@ -296,7 +321,7 @@ func use_active_skill(monster_id: String) -> Dictionary:
 	if monster.is_empty() or monster.get("hp", 0) <= 0:
 		return { "success": false, "reason": "monster_unavailable" }
 
-	var skill: Dictionary = monster.get("skill", {})
+	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
 	if skill.is_empty():
 		return { "success": false, "reason": "no_skill" }
 
@@ -310,44 +335,121 @@ func use_active_skill(monster_id: String) -> Dictionary:
 			"cost": cost
 		}
 
+	var element := _fantasy_element(monster)
+	var board_affinity := _board_affinity(monster)
+	var skill_type := str(skill.get("type", "strike"))
 	var target = _get_weakest_enemy()
-	if target == null:
-		return { "success": false, "reason": "no_target" }
-
-	var element: String = monster.get("element", "")
-	var target_idx: int = enemies.find(target)
-	var element_mult: float = MonsterDb.get_element_multiplier(element, target.get("element", ""))
-	var leader_atk_boost: float = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, element)
-	var synergy_atk_mult: float = get_synergy_atk_mult(element)
-	var skill_mult: float = float(skill.get("multiplier", 1.0))
-	var total_damage: int = _damage_calc.calc_player_damage(
-		monster.get("atk", 10),
-		element,
-		target.get("def", 0),
-		3,
-		1,
-		element_mult,
-		leader_atk_boost,
-		synergy_atk_mult
-	)
-	total_damage = maxi(1, int(round(total_damage * skill_mult)))
-
+	var target_idx: int = enemies.find(target) if target != null else -1
+	var total_damage: int = 0
+	var remaining_damage: int = 0
 	var shield_absorbed: int = 0
-	var remaining_damage: int = total_damage
-	if _enemy_skill_system != null:
-		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
-		shield_absorbed = shield_result.get("absorbed", 0)
-		remaining_damage = shield_result.get("remaining", 0)
-		_enemy_skill_system.get_skill_state(target_idx, "shield")  # 调用以更新内部状态
+	var element_mult: float = 1.0
+	var effect_logs: Array = []
+	var acted: bool = false
+	var last_ally: Dictionary = {}
 
-	target["hp"] = target.get("hp", 0) - remaining_damage
+	for effect: Dictionary in skill.get("effects", []):
+		var kind := str(effect.get("kind", "damage"))
+		if kind == "damage":
+			if target == null:
+				continue
+			element_mult = MonsterDb.get_element_multiplier(element, target.get("element", ""))
+			var leader_atk_boost: float = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, element)
+			var synergy_atk_mult: float = get_synergy_atk_mult(board_affinity)
+			var effect_mult := float(effect.get("multiplier", skill.get("multiplier", 1.0)))
+			var effect_damage: int = _damage_calc.calc_player_damage(
+				monster.get("atk", 10),
+				element,
+				target.get("def", 0),
+				3,
+				1,
+				element_mult,
+				leader_atk_boost,
+				synergy_atk_mult
+			)
+			effect_damage = maxi(1, int(round(effect_damage * effect_mult)))
+			var effect_remaining := effect_damage
+			var effect_absorbed := 0
+			if _enemy_skill_system != null and target_idx >= 0:
+				var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, effect_damage)
+				effect_absorbed = shield_result.get("absorbed", 0)
+				effect_remaining = shield_result.get("remaining", 0)
+				_enemy_skill_system.get_skill_state(target_idx, "shield")
+			target["hp"] = target.get("hp", 0) - effect_remaining
+			_update_capture_window(target_idx)
+			total_damage += effect_damage
+			remaining_damage += effect_remaining
+			shield_absorbed += effect_absorbed
+			acted = true
+			effect_logs.append({
+				"kind": "damage",
+				"target": target.get("name", ""),
+				"target_index": target_idx,
+				"amount": effect_damage,
+				"remaining": effect_remaining,
+				"shield_absorbed": effect_absorbed
+			})
+		elif kind == "heal":
+			var ally := _get_lowest_hp_ally()
+			if ally.is_empty():
+				continue
+			var heal_ratio := float(effect.get("ratio", 0.25))
+			var min_heal := int(effect.get("min", 0))
+			var heal_amount := maxi(min_heal, int(round(float(ally.get("maxHP", 0)) * heal_ratio)))
+			var prev_hp := int(ally.get("hp", 0))
+			ally["hp"] = mini(int(ally.get("maxHP", prev_hp)), prev_hp + heal_amount)
+			var actual_heal := int(ally.get("hp", 0)) - prev_hp
+			last_ally = ally
+			acted = true
+			effect_logs.append({
+				"kind": "heal",
+				"target": ally.get("name", ""),
+				"target_id": ally.get("id", ""),
+				"amount": actual_heal
+			})
+		elif kind == "guard":
+			var guard_ally := last_ally if not last_ally.is_empty() else _get_lowest_hp_ally()
+			if guard_ally.is_empty():
+				continue
+			var reduction := clampf(float(effect.get("reduction", 0.25)), 0.0, 0.8)
+			var turns := maxi(1, int(effect.get("turns", 1)))
+			_apply_player_guard(guard_ally, reduction, turns)
+			acted = true
+			effect_logs.append({
+				"kind": "guard",
+				"target": guard_ally.get("name", ""),
+				"target_id": guard_ally.get("id", ""),
+				"reduction": reduction,
+				"turns": turns
+			})
+		elif kind == "weaken":
+			if target == null or target_idx < 0:
+				continue
+			var weaken_reduction := clampf(float(effect.get("reduction", 0.35)), 0.0, 0.8)
+			var weaken_turns := maxi(1, int(effect.get("turns", 1)))
+			_apply_enemy_tempo_mod(target_idx, weaken_reduction, weaken_turns)
+			acted = true
+			effect_logs.append({
+				"kind": "weaken",
+				"target": target.get("name", ""),
+				"target_index": target_idx,
+				"reduction": weaken_reduction,
+				"turns": weaken_turns
+			})
+
+	if not acted:
+		return { "success": false, "reason": "no_valid_effect" }
+
 	skill_charges[monster_id] = maxi(0, charge - cost)
-	total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + total_damage
+	if total_damage > 0:
+		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + total_damage
 
-	var target_died: bool = target.get("hp", 0) <= 0
+	var target_died: bool = target != null and target.get("hp", 0) <= 0
 	var result := {
 		"success": true,
 		"type": "active_skill",
+		"skill_type": skill_type,
+		"skillType": skill_type,
 		"attacker": monster.get("name", ""),
 		"attacker_id": monster_id,
 		"attackerId": monster_id,
@@ -355,8 +457,8 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		"skill": skill.duplicate(true),
 		"skill_name": skill.get("name", "技能"),
 		"skillName": skill.get("name", "技能"),
-		"target": target.get("name", ""),
-		"target_emoji": target.get("emoji", ""),
+		"target": target.get("name", "") if target != null else "",
+		"target_emoji": target.get("emoji", "") if target != null else "",
 		"target_index": target_idx,
 		"targetIndex": target_idx,
 		"damage": total_damage,
@@ -365,12 +467,15 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		"shield_absorbed": shield_absorbed,
 		"shieldAbsorbed": shield_absorbed,
 		"element": element,
+		"boardAffinity": board_affinity,
 		"is_effective": element_mult > 1.0,
 		"isEffective": element_mult > 1.0,
 		"is_weak": element_mult < 1.0,
 		"isWeak": element_mult < 1.0,
 		"target_died": target_died,
 		"targetDied": target_died,
+		"effect_logs": effect_logs,
+		"effectLogs": effect_logs,
 		"battle_ended": false,
 		"battleEnded": false
 	}
@@ -381,6 +486,128 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		result["battleEnded"] = true
 
 	return result
+
+
+func _get_lowest_hp_ally() -> Dictionary:
+	var best: Dictionary = {}
+	var best_ratio := 999.0
+	for ally in player_team:
+		if ally == null or ally.get("hp", 0) <= 0:
+			continue
+		var max_hp := maxi(1, int(ally.get("maxHP", 1)))
+		var ratio := float(ally.get("hp", 0)) / float(max_hp)
+		if best.is_empty() or ratio < best_ratio:
+			best = ally
+			best_ratio = ratio
+	return best
+
+
+func _apply_player_guard(ally: Dictionary, reduction: float, turns: int) -> void:
+	var ally_id := str(ally.get("id", ""))
+	if ally_id.is_empty():
+		return
+	player_guards[ally_id] = {
+		"reduction": clampf(reduction, 0.0, 0.8),
+		"turns": maxi(1, turns)
+	}
+
+
+func _apply_guard_to_damage(target: Dictionary, damage: int) -> Dictionary:
+	var target_id := str(target.get("id", ""))
+	if target_id.is_empty() or not player_guards.has(target_id):
+		return { "damage": damage, "guard_absorbed": 0 }
+	var guard: Dictionary = player_guards[target_id]
+	var reduction := clampf(float(guard.get("reduction", 0.0)), 0.0, 0.8)
+	var guard_absorbed := int(round(float(damage) * reduction))
+	var final_damage := maxi(1, damage - guard_absorbed)
+	guard["turns"] = int(guard.get("turns", 1)) - 1
+	if int(guard.get("turns", 0)) <= 0:
+		player_guards.erase(target_id)
+	else:
+		player_guards[target_id] = guard
+	return { "damage": final_damage, "guard_absorbed": guard_absorbed }
+
+
+func _apply_enemy_tempo_mod(enemy_idx: int, reduction: float, turns: int) -> void:
+	if enemy_idx < 0:
+		return
+	enemy_tempo_mods[enemy_idx] = {
+		"reduction": clampf(reduction, 0.0, 0.8),
+		"turns": maxi(1, turns)
+	}
+
+
+func _consume_enemy_tempo_multiplier(enemy_idx: int) -> Dictionary:
+	if not enemy_tempo_mods.has(enemy_idx):
+		return { "multiplier": 1.0, "reduction": 0.0 }
+	var mod: Dictionary = enemy_tempo_mods[enemy_idx]
+	var reduction := clampf(float(mod.get("reduction", 0.0)), 0.0, 0.8)
+	mod["turns"] = int(mod.get("turns", 1)) - 1
+	if int(mod.get("turns", 0)) <= 0:
+		enemy_tempo_mods.erase(enemy_idx)
+	else:
+		enemy_tempo_mods[enemy_idx] = mod
+	return { "multiplier": 1.0 - reduction, "reduction": reduction }
+
+
+func _refresh_capture_windows() -> void:
+	for idx in range(enemies.size()):
+		_update_capture_window(idx)
+
+
+func _is_enemy_suppressed(enemy_idx: int) -> bool:
+	if enemy_tempo_mods.has(enemy_idx):
+		return true
+	var effects := _status_effect.get_effects_snapshot()
+	if enemy_idx < 0 or enemy_idx >= effects.size():
+		return false
+	var effect = effects[enemy_idx]
+	if effect == null or not effect is Dictionary:
+		return false
+	return ["burn", "freeze", "poison", "stun"].has(str(effect.get("type", "")))
+
+
+func _update_capture_window(enemy_idx: int) -> void:
+	if enemy_idx < 0 or enemy_idx >= enemies.size():
+		return
+	var enemy: Dictionary = enemies[enemy_idx]
+	if enemy == null or enemy.is_empty() or not enemy.has("id"):
+		return
+	var window := CaptureSystem.calc_taming_window(
+		float(enemy.get("hp", 0)),
+		float(enemy.get("maxHP", 1)),
+		{"suppressed": _is_enemy_suppressed(enemy_idx)}
+	)
+	window["enemy_index"] = enemy_idx
+	window["enemy_id"] = str(enemy.get("id", ""))
+	window["enemy_name"] = str(enemy.get("name", ""))
+	capture_windows[enemy_idx] = window
+	var best: Dictionary = capture_window_best.get(enemy_idx, {})
+	if best.is_empty() or float(window.get("score", 0.0)) > float(best.get("score", 0.0)):
+		capture_window_best[enemy_idx] = window.duplicate(true)
+
+
+func get_best_capture_candidate() -> Dictionary:
+	_refresh_capture_windows()
+	var best_idx := -1
+	var best_window: Dictionary = {}
+	for idx in range(enemies.size()):
+		var enemy: Dictionary = enemies[idx]
+		if enemy == null or enemy.is_empty() or not enemy.has("id"):
+			continue
+		var window: Dictionary = capture_window_best.get(idx, capture_windows.get(idx, {}))
+		if window.is_empty():
+			continue
+		if best_window.is_empty() or float(window.get("score", 0.0)) > float(best_window.get("score", 0.0)):
+			best_window = window
+			best_idx = idx
+	if best_idx < 0:
+		return {}
+	return {
+		"enemy": enemies[best_idx],
+		"enemy_index": best_idx,
+		"window": best_window
+	}
 
 
 func _get_player_monster(monster_id: String) -> Dictionary:
@@ -471,12 +698,15 @@ func enemy_action() -> Dictionary:
 
 		# 冰冻ATK降低（委托给 BattleStatusEffect）
 		var freeze_mult = _status_effect.get_freeze_atk_multiplier(i)
+		var tempo_mod := _consume_enemy_tempo_multiplier(i)
+		var tempo_mult := float(tempo_mod.get("multiplier", 1.0))
 
 		# 队长DEF加成
 		var leader_def_boost = LeaderSkillDb.get_leader_def_boost(leader_skill_data)
 
 		# 属性协同DEF
-		var synergy_def_mult = get_synergy_def_mult(target.get("element", ""))
+		var target_affinity := _board_affinity(target)
+		var synergy_def_mult = get_synergy_def_mult(target_affinity)
 
 		# 委托给 DamageCalculator
 		var damage = _damage_calc.calc_enemy_damage(
@@ -484,14 +714,18 @@ func enemy_action() -> Dictionary:
 			enemy.get("element", ""),
 			target.get("def", 0),
 			target.get("element", ""),
-			freeze_mult,
+			freeze_mult * tempo_mult,
 			leader_def_boost,
 			synergy_def_mult
 		)
 
 		damage = int(damage * damage_multiplier)
+		var guard_result := _apply_guard_to_damage(target, damage)
+		damage = int(guard_result.get("damage", damage))
+		var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
 
 		target["hp"] = target.get("hp", 0) - damage
+		_refresh_capture_windows()
 
 		actions.append({
 			"attacker": enemy.get("name", ""),
@@ -502,7 +736,10 @@ func enemy_action() -> Dictionary:
 			"element": enemy.get("element", ""),
 			"target_died": target.get("hp", 0) <= 0,
 			"is_charged": damage_multiplier > 1.0,
-			"charge_multiplier": damage_multiplier
+			"charge_multiplier": damage_multiplier,
+			"is_weakened": tempo_mult < 1.0,
+			"weaken_reduction": tempo_mod.get("reduction", 0.0),
+			"guard_absorbed": guard_absorbed
 		})
 
 	for a in actions:
@@ -566,7 +803,11 @@ func execute_phase_transition(phase_config: Dictionary) -> Array:
 
 	enemies = new_enemies
 	current_phase = _phase_handler.get_current_phase()
+	enemy_tempo_mods = {}
+	capture_windows = {}
+	capture_window_best = {}
 	_status_effect.init_effects(enemies.size())
+	_refresh_capture_windows()
 	if _enemy_skill_system == null:
 		_enemy_skill_system = EnemySkillSystem.new()
 	_enemy_skill_system.init_skill_state(enemies)
@@ -582,6 +823,13 @@ func _build_enemy_skill_states_dict() -> Dictionary:
 	for idx in range(enemies.size()):
 		result[idx] = _enemy_skill_system.get_enemy_state(idx)
 	return result
+
+func get_enemy_intents() -> Dictionary:
+	return EnemyIntentRulesScript.build_enemy_intents(
+		enemies,
+		_build_enemy_skill_states_dict(),
+		_status_effect.get_effects_snapshot()
+	)
 
 
 # ========== 获取状态摘要 ==========
@@ -599,9 +847,15 @@ func get_status() -> Dictionary:
 		"total_phases": stage_phases.size() if not stage_phases.is_empty() else 1,
 		"is_boss_battle": not stage_phases.is_empty(),
 		"enemy_skill_states": _build_enemy_skill_states_dict(),
+		"enemy_intents": get_enemy_intents(),
 		"leader_skill_info": leader_skill_info,
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
+		"player_guards": player_guards.duplicate(true),
+		"enemy_tempo_mods": enemy_tempo_mods.duplicate(true),
+		"capture_windows": capture_windows.duplicate(true),
+		"capture_window_best": capture_window_best.duplicate(true),
+		"best_capture_window": get_best_capture_candidate().get("window", {}),
 		"status_effects": _status_effect.get_effects_snapshot(),
 		"status_effect_log": _status_effect.get_effect_log()
 	}
@@ -828,6 +1082,9 @@ func get_battle_result() -> Dictionary:
 		"turnCount": turn_count,
 		"maxTurns": max_turns,
 		"playerTeam": player_team.map(func(m): return m.duplicate(true) if m != null else null),
+		"capture_windows": capture_windows.duplicate(true),
+		"capture_window_best": capture_window_best.duplicate(true),
+		"best_capture_window": get_best_capture_candidate().get("window", {}),
 		"stageRewards": stage_data.get("rewards", null) if stage_data != null else null,
 		"stage_rewards": stage_data.get("rewards", null) if stage_data != null else null
 	}

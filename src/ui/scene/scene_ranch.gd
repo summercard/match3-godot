@@ -7,11 +7,14 @@ signal exp_collected(total_exp: int)
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
+const SocialRulesScript = preload("res://src/core/social_rules.gd")
+const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
 
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 const SLOT_COUNT: int = 5
 const IDLE_INTERVAL_MS: float = 5.0 * 60.0 * 1000.0
+const IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
 const BUBBLE_TYPES := ["Z", "EXP", "+", "♪"]
 
 const RANCH_ASSETS := {
@@ -62,22 +65,34 @@ const LIST_LEFT_ARROW_RECT := Rect2(12.0, 500.0, 16.0, 54.0)
 const LIST_RIGHT_ARROW_RECT := Rect2(347.0, 500.0, 16.0, 54.0)
 const BOTTOM_LEFT_RECT := Rect2(25.0, 614.0, 76.0, 34.0)
 const BOTTOM_RIGHT_RECT := Rect2(274.0, 614.0, 76.0, 34.0)
-const CLASS_DETAIL_RECT := Rect2(15.0, 86.0, 345.0, 176.0)
-const CLASS_LIST_RECT := Rect2(13.0, 274.0, 349.0, 319.0)
-const CLASS_LIST_CLIP_RECT := Rect2(24.0, 286.0, 327.0, 292.0)
+const CLASS_DETAIL_RECT := Rect2(15.0, 86.0, 345.0, 208.0)
+const CLASS_LIST_RECT := Rect2(13.0, 304.0, 349.0, 289.0)
+const CLASS_LIST_CLIP_RECT := Rect2(24.0, 316.0, 327.0, 262.0)
 const CLASS_COLS: int = 3
 const CLASS_CARD_W: float = 94.0
 const CLASS_CARD_H: float = 102.0
 const CLASS_CARD_GAP: float = 10.0
 const CLASS_GRID_X: float = 31.0
-const CLASS_GRID_Y: float = 292.0
-const CLASS_EVOLVE_RECT := Rect2(242.0, 214.0, 92.0, 34.0)
+const CLASS_GRID_Y: float = 322.0
+const CLASS_EVOLVE_RECT := Rect2(242.0, 248.0, 92.0, 34.0)
+const SOCIAL_PLACE_RECT := Rect2(15.0, 86.0, 345.0, 208.0)
+const SOCIAL_SLOT_A_RECT := Rect2(38.0, 136.0, 102.0, 98.0)
+const SOCIAL_SLOT_B_RECT := Rect2(235.0, 136.0, 102.0, 98.0)
+const SOCIAL_ACTION_RECT := Rect2(142.0, 254.0, 92.0, 34.0)
+const SOCIAL_PLACE_SWITCH_RECT := Rect2(253.0, 96.0, 78.0, 26.0)
+const SOCIAL_RELATION_RECT := Rect2(24.0, 266.0, 327.0, 24.0)
+const SOCIAL_RESULT_POPUP_RECT := Rect2(25.0, 111.0, 325.0, 392.0)
+const SOCIAL_RESULT_CLOSE_RECT := Rect2(134.0, 452.0, 107.0, 34.0)
 
 var _game: Node = null
 var _storage: Node = null
 var _active_page: String = "ranch"
 var _selected_slot: int = 0
 var _slots_data: Array = []
+var _social_places: Array = []
+var _social_selected_slot: String = "slot_a"
+var _care_focus_instance_id: String = ""
+var _care_state_map: Dictionary = {}
 var _captured_monsters: Array = []
 var _idle_exp_map: Dictionary = {}
 var _bubbles: Array = []
@@ -95,6 +110,7 @@ var _last_drag_x: float = 0.0
 var _last_drag_y: float = 0.0
 var _status_text: String = ""
 var _status_timer: float = 0.0
+var _social_result_popup: Dictionary = {}
 
 class BubbleData:
 	var slot_index: int = 0
@@ -143,7 +159,7 @@ func _gui_input(event: InputEvent) -> void:
 				_last_drag_y = event.position.y
 				var design_pos := _to_design(event.position)
 				_dragging_list = _active_page == "ranch" and LIST_RECT.has_point(design_pos)
-				_dragging_class_list = _active_page == "classroom" and CLASS_LIST_RECT.has_point(design_pos)
+				_dragging_class_list = (_active_page == "classroom" or _active_page == "social") and CLASS_LIST_RECT.has_point(design_pos)
 			else:
 				if abs(event.position.x - _last_drag_x) < 8.0 and abs(event.position.y - _last_drag_y) < 8.0:
 					_handle_tap(_to_design(event.position))
@@ -151,12 +167,12 @@ func _gui_input(event: InputEvent) -> void:
 				_dragging_class_list = false
 			accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-			if _active_page == "classroom":
+			if _active_page == "classroom" or _active_page == "social":
 				_class_scroll_y = clampf(_class_scroll_y - 36.0, 0.0, _class_max_scroll_y)
 			else:
 				_list_scroll_x = clampf(_list_scroll_x - 24.0, 0.0, _max_list_scroll_x)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
-			if _active_page == "classroom":
+			if _active_page == "classroom" or _active_page == "social":
 				_class_scroll_y = clampf(_class_scroll_y + 36.0, 0.0, _class_max_scroll_y)
 			else:
 				_list_scroll_x = clampf(_list_scroll_x + 24.0, 0.0, _max_list_scroll_x)
@@ -176,7 +192,7 @@ func _gui_input(event: InputEvent) -> void:
 			_last_drag_y = event.position.y
 			var design_pos := _to_design(event.position)
 			_dragging_list = _active_page == "ranch" and LIST_RECT.has_point(design_pos)
-			_dragging_class_list = _active_page == "classroom" and CLASS_LIST_RECT.has_point(design_pos)
+			_dragging_class_list = (_active_page == "classroom" or _active_page == "social") and CLASS_LIST_RECT.has_point(design_pos)
 		else:
 			if abs(event.position.x - _last_drag_x) < 8.0 and abs(event.position.y - _last_drag_y) < 8.0:
 				_handle_tap(_to_design(event.position))
@@ -191,8 +207,13 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 func _handle_tap(pos: Vector2) -> void:
+	if not _social_result_popup.is_empty():
+		if SOCIAL_RESULT_CLOSE_RECT.has_point(pos) or not SOCIAL_RESULT_POPUP_RECT.has_point(pos):
+			_social_result_popup = {}
+			queue_redraw()
+		return
 	if BACK_RECT.has_point(pos):
-		if _active_page == "classroom":
+		if _active_page == "classroom" or _active_page == "social":
 			_switch_to_ranch()
 		else:
 			_go_to_scene("main")
@@ -200,11 +221,14 @@ func _handle_tap(pos: Vector2) -> void:
 	if _active_page == "classroom":
 		_handle_classroom_tap(pos)
 		return
+	if _active_page == "social":
+		_handle_social_tap(pos)
+		return
 	_handle_ranch_tap(pos)
 
 func _handle_ranch_tap(pos: Vector2) -> void:
 	if BOTTOM_LEFT_RECT.has_point(pos):
-		_show_status("点击场上怪物收获")
+		_toggle_care_focus_selected()
 		return
 	if BOTTOM_RIGHT_RECT.has_point(pos):
 		_switch_to_classroom()
@@ -229,7 +253,7 @@ func _handle_classroom_tap(pos: Vector2) -> void:
 		_switch_to_ranch()
 		return
 	if BOTTOM_RIGHT_RECT.has_point(pos):
-		_show_status("功能预留")
+		_switch_to_social()
 		return
 	if CLASS_EVOLVE_RECT.has_point(pos):
 		_on_evolve_pressed()
@@ -238,6 +262,32 @@ func _handle_classroom_tap(pos: Vector2) -> void:
 	if idx >= 0 and idx < _captured_monsters.size():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[idx])
 		queue_redraw()
+
+func _handle_social_tap(pos: Vector2) -> void:
+	if BOTTOM_LEFT_RECT.has_point(pos):
+		_switch_to_classroom()
+		return
+	if BOTTOM_RIGHT_RECT.has_point(pos):
+		_try_social_action()
+		return
+	if SOCIAL_PLACE_SWITCH_RECT.has_point(pos):
+		_cycle_social_place()
+		return
+	if SOCIAL_SLOT_A_RECT.has_point(pos):
+		_select_or_clear_social_slot("slot_a")
+		return
+	if SOCIAL_SLOT_B_RECT.has_point(pos):
+		_select_or_clear_social_slot("slot_b")
+		return
+	var idx := _classroom_index_at(pos)
+	if idx >= 0 and idx < _captured_monsters.size():
+		_assign_social_instance(_get_instance_id(_captured_monsters[idx]))
+
+func _switch_to_social() -> void:
+	_active_page = "social"
+	_dragging_class_list = false
+	_update_class_scroll_limit()
+	queue_redraw()
 
 func _switch_to_classroom() -> void:
 	_active_page = "classroom"
@@ -249,6 +299,108 @@ func _switch_to_classroom() -> void:
 func _switch_to_ranch() -> void:
 	_active_page = "ranch"
 	_dragging_class_list = false
+	queue_redraw()
+
+func _toggle_care_focus_selected() -> void:
+	var instance_id := _selected_monster_id()
+	if instance_id.is_empty():
+		_show_status("先选择牧场中的怪物")
+		return
+	if _care_focus_instance_id == instance_id:
+		if _storage != null and _storage.has_method("clear_ranch_care_focus"):
+			_storage.clear_ranch_care_focus()
+		_care_focus_instance_id = ""
+		_show_status("已取消专注培养")
+	else:
+		if _storage != null and _storage.has_method("set_ranch_care_focus"):
+			if not _storage.set_ranch_care_focus(instance_id):
+				_show_status("专注培养设置失败")
+				return
+		_care_focus_instance_id = instance_id
+		var care := _get_care_state(instance_id)
+		var label := str(care.get("label", ""))
+		_show_status("专注培养已设定%s" % ("：" + label if not label.is_empty() else ""))
+	_load_data()
+	_refresh_ranch_view()
+
+func _select_or_clear_social_slot(slot_key: String) -> void:
+	var place := _current_social_place()
+	if place.get("started_at", null) != null:
+		_show_status("社交进行中")
+		return
+	if _social_selected_slot == slot_key and place.get(slot_key, null) != null:
+		if _storage != null and _storage.has_method("clear_social_slot"):
+			_storage.clear_social_slot(0, slot_key)
+			_load_data()
+		else:
+			place[slot_key] = null
+			_social_places[0] = place
+		queue_redraw()
+		return
+	_social_selected_slot = slot_key
+	queue_redraw()
+
+func _assign_social_instance(instance_id: String) -> void:
+	var place := _current_social_place()
+	if place.get("started_at", null) != null:
+		_show_status("社交进行中")
+		return
+	if _storage != null and _storage.has_method("assign_social_slot"):
+		_storage.assign_social_slot(0, _social_selected_slot, instance_id)
+		_load_data()
+	else:
+		if place.get("slot_a") == instance_id:
+			place["slot_a"] = null
+		if place.get("slot_b") == instance_id:
+			place["slot_b"] = null
+		place[_social_selected_slot] = instance_id
+		_social_places[0] = place
+	queue_redraw()
+
+func _try_social_action() -> void:
+	var place := _current_social_place()
+	if SocialRulesScript.is_ready(place):
+		if _storage != null and _storage.has_method("collect_social"):
+			var collect_result: Dictionary = _storage.collect_social(0)
+			if bool(collect_result.get("ok", false)):
+				var result: Dictionary = collect_result.get("result", {})
+				_show_status("%s +%dEXP +%d金币" % [result.get("label", "社交完成"), int(result.get("exp_each", 0)), int(result.get("gold", 0))])
+				_social_result_popup = result.duplicate(true)
+				_load_data()
+				queue_redraw()
+				return
+		_show_status("社交领取失败")
+		return
+	if place.get("started_at", null) != null:
+		_show_status("社交进行中 %d%%" % int(SocialRulesScript.progress(place) * 100.0))
+		return
+	if not SocialRulesScript.can_start(place):
+		_show_status("需要放入两只怪物")
+		return
+	if _storage != null and _storage.has_method("start_social"):
+		var result: Dictionary = _storage.start_social(0)
+		if bool(result.get("ok", false)):
+			_show_status("社交开始")
+			_load_data()
+			return
+		_show_status("社交开始失败")
+
+func _cycle_social_place() -> void:
+	var place := _current_social_place()
+	if place.get("started_at", null) != null:
+		_show_status("社交进行中，不能更换场所")
+		return
+	if _storage != null and _storage.has_method("cycle_social_place"):
+		if not _storage.cycle_social_place(0):
+			_show_status("场所切换失败")
+			return
+		_load_data()
+	else:
+		place["place_id"] = SocialRulesScript.next_place_id(str(place.get("place_id", "meadow_yard")))
+		place["last_result"] = {}
+		_social_places[0] = place
+	var place_config := SocialRulesScript.place_config_for(_current_social_place())
+	_show_status("切换到%s" % str(place_config.get("name", "社交场所")))
 	queue_redraw()
 
 func _get_instance_id(value: Variant) -> String:
@@ -276,6 +428,8 @@ func _load_data() -> void:
 		var saved_slots: Array = ranch_state.get("slots", [])
 		for i in range(mini(saved_slots.size(), SLOT_COUNT)):
 			_slots_data[i] = _normalize_slot(saved_slots[i])
+		_social_places = SocialRulesScript.normalize_places(ranch_state.get("social_places", []), 1)
+		_care_focus_instance_id = str(ranch_state.get("care_focus_instance_id", ""))
 
 		if _storage.has_method("get_captured_monsters"):
 			_captured_monsters = _storage.get_owned_monsters() if _storage.has_method("get_owned_monsters") else _storage.get_captured_monsters()
@@ -283,6 +437,8 @@ func _load_data() -> void:
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
 			_captured_monsters = player.get("captured", [])
 	else:
+		_social_places = SocialRulesScript.normalize_places([], 1)
+		_care_focus_instance_id = ""
 		_captured_monsters = [
 			{"instanceId": "monster_001", "monsterId": "monster_001"},
 			{"instanceId": "monster_002", "monsterId": "monster_002"},
@@ -298,6 +454,8 @@ func _load_data() -> void:
 		]
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
+	if _social_places.is_empty():
+		_social_places = SocialRulesScript.normalize_places([], 1)
 	_select_slot(clampi(_selected_slot, 0, SLOT_COUNT - 1))
 	_update_list_scroll_limit()
 	_update_class_scroll_limit()
@@ -316,21 +474,25 @@ func _save_ranch_state() -> void:
 		_storage.set_ranch_state({
 			"slots": _slots_data,
 			"unlocked_slots": SLOT_COUNT,
+			"social_places": _social_places,
+			"care_focus_instance_id": _care_focus_instance_id,
 		})
 
 func _calc_idle_exp() -> void:
 	_idle_exp_map = {}
+	_care_state_map = {}
 	var now := Time.get_unix_time_from_system() * 1000.0
 	for slot: Dictionary in _slots_data:
 		var monster_id = slot.get("instance_id", null)
 		var placed_at = slot.get("placed_at", null)
 		if monster_id == null or placed_at == null:
 			continue
-		var elapsed := maxf(0.0, now - float(placed_at))
+		var elapsed := minf(maxf(0.0, now - float(placed_at)), IDLE_MAX_MS)
 		var intervals := int(elapsed / IDLE_INTERVAL_MS)
 		if intervals <= 0:
 			continue
 		var rate := _get_idle_exp_rate(str(monster_id))
+		_care_state_map[str(monster_id)] = _get_care_state(str(monster_id))
 		_idle_exp_map[str(monster_id)] = intervals * rate
 
 func _init_bubbles() -> void:
@@ -369,6 +531,8 @@ func _on_picker_item_pressed(instance_id: String) -> void:
 	for i in range(_slots_data.size()):
 		if _slots_data[i].get("instance_id", null) == instance_id:
 			_slots_data[i] = {"instance_id": null, "placed_at": null}
+			if _care_focus_instance_id == instance_id:
+				_care_focus_instance_id = ""
 			_save_ranch_state()
 			_refresh_ranch_view()
 			return
@@ -379,6 +543,8 @@ func _on_picker_item_pressed(instance_id: String) -> void:
 		var old_exp := int(_idle_exp_map.get(str(old_id), 0))
 		if old_exp > 0 and _storage != null and _storage.has_method("add_instance_exp"):
 			_storage.add_instance_exp(str(old_id), old_exp)
+		if _care_focus_instance_id == str(old_id):
+			_care_focus_instance_id = ""
 	_slots_data[_selected_slot] = {
 		"instance_id": instance_id,
 		"placed_at": Time.get_unix_time_from_system() * 1000.0,
@@ -457,7 +623,9 @@ func _on_evolve_pressed() -> void:
 		_storage.add_achievement_progress("evolveCount", 1)
 	var new_id := str(result.get("newMonsterId", ""))
 	var new_data := MonsterDb.get_monster(new_id)
-	_show_status("进化成功：%s" % str(new_data.get("name", new_id)))
+	var report: Dictionary = result.get("evolutionReport", {})
+	var play_text := str(report.get("play_upgrade", ""))
+	_show_status("进化成功：%s %s" % [str(new_data.get("name", new_id)), play_text])
 	_load_data()
 	_refresh_ranch_view()
 
@@ -477,12 +645,16 @@ func _draw() -> void:
 	_draw_header()
 	if _active_page == "classroom":
 		_draw_classroom()
+	elif _active_page == "social":
+		_draw_social()
 	else:
 		_draw_ranch_slots()
 		_draw_bubbles()
 		_draw_monster_list()
 		_draw_income_panel()
 		_draw_status_text()
+	if not _social_result_popup.is_empty():
+		_draw_social_result_popup()
 
 func _draw_background() -> void:
 	var bg := _tex(RANCH_ASSETS["bg"])
@@ -495,7 +667,12 @@ func _draw_background() -> void:
 func _draw_header() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["back"]), BACK_RECT)
 	_draw_texture_fit(_tex(RANCH_ASSETS["header"]), Rect2(97, 18, 205, 46))
-	_draw_text("怪物课堂" if _active_page == "classroom" else "怪物牧场", DESIGN_W / 2.0, 50.0, C["text"], 22.0, 190.0)
+	var title := "怪物牧场"
+	if _active_page == "classroom":
+		title = "怪物课堂"
+	elif _active_page == "social":
+		title = "社交庭院"
+	_draw_text(title, DESIGN_W / 2.0, 50.0, C["text"], 22.0, 190.0)
 
 func _draw_status_text() -> void:
 	if _status_timer <= 0.0 or _status_text.is_empty():
@@ -529,6 +706,10 @@ func _draw_slot(index: int, rect: Rect2) -> void:
 		var id := str(monster_id)
 		var level := _get_monster_level(id)
 		_draw_monster_portrait(id, Rect2(rect.position.x + 20.0, rect.position.y + 2.0, rect.size.x - 40.0, 70.0))
+		var care: Dictionary = _care_state_map.get(id, _get_care_state(id))
+		var care_label := str(care.get("label", ""))
+		if not care_label.is_empty():
+			_draw_text(care_label, rect.get_center().x, rect.position.y + 20.0, C["gold"], 8.0, rect.size.x - 12.0)
 		_draw_texture_fit(_tex(RANCH_ASSETS["banner"]), Rect2(rect.position.x + 20.0, rect.position.y + 88.0, rect.size.x - 40.0, 22.0))
 		_draw_text("Lv.%d" % level, rect.get_center().x, rect.position.y + 104.0, C["text"], 13.0, 76.0)
 		_draw_texture_fit(_tex(RANCH_ASSETS["status_ribbon"]), Rect2(rect.position.x + 8.0, rect.position.y + 109.0, rect.size.x - 16.0, 22.0))
@@ -558,7 +739,7 @@ func _draw_income_panel() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["income_panel"]), INCOME_RECT)
 	var total_exp := _total_idle_exp()
 	var total_coin := total_exp * 1.25
-	_draw_code_button(BOTTOM_LEFT_RECT, "提示", true)
+	_draw_code_button(BOTTOM_LEFT_RECT, "专注", true)
 	_draw_texture_fit(_tex(RANCH_ASSETS["exp"]), Rect2(116.0, 617.0, 25.0, 25.0))
 	_draw_text("+" + _format_count(total_exp), 164.0, 638.0, Color(0.98, 0.92, 0.65), 17.0, 54.0)
 	_draw_texture_fit(_tex(RANCH_ASSETS["coin"]), Rect2(198.0, 617.0, 25.0, 25.0))
@@ -605,8 +786,11 @@ func _draw_classroom_detail() -> void:
 	_draw_text(str(monster.get("name", monster_id)), 188.0, 113.0, C["text"], 18.0, 130.0)
 	_draw_text("Lv.%d  %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", "")))], 188.0, 137.0, C["text_muted"], 11.0, 145.0)
 	_draw_text("HP %d   ATK %d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0))], 188.0, 160.0, Color(0.82, 0.92, 1.0), 11.0, 150.0)
+	_draw_text(str(info.get("stat_summary", "")), 188.0, 176.0, Color(0.82, 0.92, 1.0), 9.0, 154.0)
 	_draw_text("进化: %s" % target_name, 188.0, 188.0, C["gold"] if bool(info.get("has_evolution", false)) else C["text_muted"], 12.0, 154.0)
 	_draw_text(str(info.get("condition_text", "无法进化")), 188.0, 209.0, C["text_muted"], 10.0, 154.0)
+	_draw_text(str(info.get("play_upgrade_text", "玩法升级: 无")), 188.0, 230.0, Color(0.76, 0.95, 1.0), 10.0, 158.0)
+	_draw_text(str(info.get("social_text", "社交启发: 无")), 128.0, 264.0, C["text_muted"], 9.5, 204.0)
 	_draw_code_button(CLASS_EVOLVE_RECT, "进化", bool(info.get("can_evolve", false)))
 
 func _draw_classroom_list() -> void:
@@ -640,7 +824,159 @@ func _draw_classroom_bottom() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["income_panel"]), INCOME_RECT)
 	_draw_code_button(BOTTOM_LEFT_RECT, "牧场", true)
 	_draw_text("怪物课堂", DESIGN_W / 2.0, 637.0, C["text_muted"], 12.0, 120.0)
-	_draw_code_button(BOTTOM_RIGHT_RECT, "预留", false)
+	_draw_code_button(BOTTOM_RIGHT_RECT, "社交", true)
+
+func _draw_social() -> void:
+	_draw_social_place()
+	_draw_social_list()
+	_draw_social_bottom()
+	_draw_status_text()
+
+func _draw_social_place() -> void:
+	var place := _current_social_place()
+	var place_config := SocialRulesScript.place_config_for(place)
+	_draw_rounded_rect(SOCIAL_PLACE_RECT.position.x, SOCIAL_PLACE_RECT.position.y, SOCIAL_PLACE_RECT.size.x, SOCIAL_PLACE_RECT.size.y, 10.0, Color(0.03, 0.06, 0.13, 0.86))
+	_draw_stroke_rect(SOCIAL_PLACE_RECT, 1.5, Color(0.52, 0.72, 0.48, 0.78))
+	_draw_text(str(place_config.get("name", "社交场所")), DESIGN_W / 2.0, SOCIAL_PLACE_RECT.position.y + 22.0, C["gold"], 17.0, 180.0)
+	_draw_text("%s · 用时%s" % [str(place_config.get("summary", "")), SocialRulesScript.duration_label_for_place(place)], DESIGN_W / 2.0, SOCIAL_PLACE_RECT.position.y + 40.0, C["text_muted"], 9.0, 265.0)
+	_draw_code_button(SOCIAL_PLACE_SWITCH_RECT, "换场", place.get("started_at", null) == null)
+	_draw_social_slot("slot_a", SOCIAL_SLOT_A_RECT, place)
+	_draw_social_slot("slot_b", SOCIAL_SLOT_B_RECT, place)
+	_draw_text("＋", DESIGN_W / 2.0, 182.0, C["text_muted"], 24.0, 40.0)
+	var preview_text := _social_preview_text(place)
+	_draw_text(preview_text, DESIGN_W / 2.0, 236.0, C["text_muted"], 9.2, 220.0)
+	_draw_text(_social_event_text(place), DESIGN_W / 2.0, 249.0, Color(0.76, 0.95, 1.0), 8.6, 230.0)
+	_draw_text(_social_event_flavor_text(place), DESIGN_W / 2.0, 262.0, Color(0.82, 0.88, 0.96), 7.8, 300.0)
+	_draw_social_relationship_detail(place)
+
+func _draw_social_slot(slot_key: String, rect: Rect2, place: Dictionary) -> void:
+	var selected := _social_selected_slot == slot_key
+	var instance_id := str(place.get(slot_key, ""))
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.07, 0.13, 0.20, 0.92))
+	_draw_stroke_rect(rect, 2.0, C["gold"] if selected else Color(0.34, 0.48, 0.68, 0.95))
+	if instance_id.is_empty():
+		_draw_text("选择怪物", rect.get_center().x, rect.position.y + 58.0, C["text_muted"], 12.0, rect.size.x - 10.0)
+		_draw_text(slot_key.replace("slot_", "").to_upper(), rect.get_center().x, rect.position.y + 84.0, C["text_muted"], 9.0, rect.size.x)
+		return
+	var instance := _get_instance(instance_id)
+	var monster := MonsterDb.get_monster(str(instance.get("monsterId", "")))
+	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 20.0, rect.position.y + 8.0, rect.size.x - 40.0, 56.0))
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 74.0, C["text"], 10.0, rect.size.x - 8.0)
+	_draw_text("%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))], rect.get_center().x, rect.position.y + 90.0, C["text_muted"], 8.5, rect.size.x - 8.0)
+
+func _draw_social_list() -> void:
+	_draw_texture_fit(_tex(RANCH_ASSETS["list_panel"]), CLASS_LIST_RECT)
+	for i in range(_captured_monsters.size()):
+		var card := _classroom_card_rect(i)
+		if card.position.y + card.size.y < CLASS_LIST_CLIP_RECT.position.y or card.position.y > CLASS_LIST_CLIP_RECT.end.y:
+			continue
+		if card.position.x < CLASS_LIST_CLIP_RECT.position.x or card.end.x > CLASS_LIST_CLIP_RECT.end.x:
+			continue
+		_draw_classroom_card(_get_instance_id(_captured_monsters[i]), card)
+
+func _draw_social_bottom() -> void:
+	_draw_texture_fit(_tex(RANCH_ASSETS["income_panel"]), INCOME_RECT)
+	_draw_code_button(BOTTOM_LEFT_RECT, "课堂", true)
+	var place := _current_social_place()
+	var place_config := SocialRulesScript.place_config_for(place)
+	_draw_text("%s会影响相性、事件和关系成长 · %s" % [str(place_config.get("short", "场所")), SocialRulesScript.duration_label_for_place(place)], DESIGN_W / 2.0, 637.0, C["text_muted"], 10.0, 250.0)
+	_draw_code_button(BOTTOM_RIGHT_RECT, _social_action_label(place), _social_action_enabled(place))
+
+func _draw_social_relationship_detail(place: Dictionary) -> void:
+	var detail := _social_relationship_detail(place)
+	_draw_rounded_rect(SOCIAL_RELATION_RECT.position.x, SOCIAL_RELATION_RECT.position.y, SOCIAL_RELATION_RECT.size.x, SOCIAL_RELATION_RECT.size.y, 5.0, Color(0.04, 0.09, 0.16, 0.78))
+	if detail.is_empty():
+		_draw_text("关系详情：放入两只怪物后显示历史", SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 15.0, C["text_muted"], 8.6, SOCIAL_RELATION_RECT.size.x - 12.0)
+		return
+	var title := "当前 %s · %d次 · 最高%d" % [
+		str(detail.get("currentLabel", "未相识")),
+		int(detail.get("count", 0)),
+		int(detail.get("bestScore", 0))
+	]
+	if not bool(detail.get("hasHistory", false)):
+		title = "当前 未相识 · 预计%s · %d分" % [str(detail.get("nextLabel", "初识")), int(detail.get("nextScore", 0))]
+	_draw_text(title, SOCIAL_RELATION_RECT.position.x + 86.0, SOCIAL_RELATION_RECT.position.y + 10.0, C["gold"], 8.4, 150.0)
+	var event_name := str(detail.get("lastEventName", ""))
+	if event_name.is_empty():
+		event_name = str(detail.get("nextEventName", ""))
+	var hook := str(detail.get("lastEventHook", ""))
+	if hook.is_empty():
+		hook = str(detail.get("nextEventHook", ""))
+	_draw_text("%s / %s" % [event_name, hook], SOCIAL_RELATION_RECT.position.x + 243.0, SOCIAL_RELATION_RECT.position.y + 10.0, Color(0.76, 0.95, 1.0), 8.0, 150.0)
+	var flavor := str(detail.get("lastEventFlavor", ""))
+	if flavor.is_empty():
+		flavor = str(detail.get("nextEventFlavor", ""))
+	_draw_text(flavor, SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 22.0, C["text_muted"], 7.1, SOCIAL_RELATION_RECT.size.x - 14.0)
+
+func _draw_social_result_popup() -> void:
+	var result := _social_result_popup
+	var major: Dictionary = result.get("majorOutcome", {})
+	var major_type := str(major.get("type", "none"))
+	draw_rect(_scale_rect(Rect2(0, 0, DESIGN_W, DESIGN_H)), Color(0.0, 0.0, 0.0, 0.58))
+	var accent := C["gold"]
+	if major_type == "erosion":
+		accent = Color(1.0, 0.34, 0.30)
+	elif major_type == "birth":
+		accent = Color(0.65, 1.0, 0.68)
+	_draw_rounded_rect(SOCIAL_RESULT_POPUP_RECT.position.x, SOCIAL_RESULT_POPUP_RECT.position.y, SOCIAL_RESULT_POPUP_RECT.size.x, SOCIAL_RESULT_POPUP_RECT.size.y, 10.0, Color(0.03, 0.06, 0.12, 0.96))
+	_draw_stroke_rect(SOCIAL_RESULT_POPUP_RECT, 2.0, accent)
+	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 150.0, accent, 22.0, 260.0)
+	_draw_text("相性 %d · %s · +%dEXP · +%d金币" % [
+		int(result.get("score", 0)),
+		str(result.get("relation_label", "初识")),
+		int(result.get("exp_each", 0)),
+		int(result.get("gold", 0))
+	], DESIGN_W / 2.0, 176.0, C["text"], 11.0, 268.0)
+	var event: Dictionary = result.get("event", {})
+	_draw_text(str(event.get("name", "社交事件")), DESIGN_W / 2.0, 211.0, Color(0.76, 0.95, 1.0), 15.0, 260.0)
+	_draw_text(str(event.get("flavor", "关系发生了变化。")), DESIGN_W / 2.0, 236.0, C["text_muted"], 10.2, 276.0)
+	var lines := _social_result_major_lines(result)
+	var y := 288.0
+	for line in lines:
+		_draw_text(str(line), DESIGN_W / 2.0, y, C["text"], 11.2, 278.0)
+		y += 24.0
+	_draw_code_button(SOCIAL_RESULT_CLOSE_RECT, "确认", true)
+
+func _social_result_title(result: Dictionary) -> String:
+	var major: Dictionary = result.get("majorOutcome", {})
+	match str(major.get("type", "none")):
+		"birth":
+			return "复合新生"
+		"erosion":
+			return "侵蚀吞噬"
+		_:
+			return str(result.get("label", "社交完成"))
+
+func _social_result_major_lines(result: Dictionary) -> Array:
+	var major: Dictionary = result.get("majorOutcome", {})
+	match str(major.get("type", "none")):
+		"birth":
+			var created: Array = major.get("createdInstances", [])
+			var names: Array = []
+			for child in created:
+				if child is Dictionary:
+					var child_data: Dictionary = child
+					names.append(str(child_data.get("name", "复合幼体")))
+			if names.is_empty():
+				return ["产生了复合幼体计划，等待写入怪物池。"]
+			return [
+				"诞生 %d 只 Lv.1 复合幼体" % names.size(),
+				"新成员：%s" % "、".join(names.slice(0, 2)),
+				"已记录父母血缘与复合特质"
+			]
+		"erosion":
+			var effect: Dictionary = major.get("negativeEffect", {})
+			return [
+				"%s 吞噬了 %s" % [str(major.get("aggressorName", "侵蚀者")), str(major.get("victimName", "伙伴"))],
+				"获得额外 +%dEXP" % int(major.get("expGain", 0)),
+				"负面状态：%s" % str(effect.get("name", "侵蚀负担"))
+			]
+		_:
+			var tags: Array = result.get("tags", [])
+			return [
+				str(result.get("summary", "这次社交被记录到关系记忆。")),
+				"标签：%s" % "、".join(tags)
+			]
 
 func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	var bg := Color(0.09, 0.16, 0.24, 0.90)
@@ -757,6 +1093,7 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 	var item_name := str(item_data.get("name", "进化道具"))
 	var level := int(instance.get("level", 1))
 	var has_evolution := not target_id.is_empty() and MonsterDb.has_monster(target_id)
+	var preview := EvolutionRulesScript.build_preview(instance)
 	var level_ok := level >= required_level
 	var item_ok: bool = item_count > 0
 	var condition := "无法进化"
@@ -780,7 +1117,10 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 		"level_ok": level_ok,
 		"item_ok": item_ok,
 		"can_evolve": has_evolution and level_ok and item_ok,
-		"condition_text": condition
+		"condition_text": condition,
+		"stat_summary": str(preview.get("stat_summary", "")),
+		"play_upgrade_text": "玩法: %s" % str(preview.get("play_upgrade", "稳定成长")) if has_evolution else "玩法: 已稳定",
+		"social_text": str(preview.get("social_text", "社交启发: 无"))
 	}
 
 func _get_default_evolution_item(monster_id: String) -> String:
@@ -803,6 +1143,98 @@ func _get_nature_name(nature_id: String) -> String:
 		return "无性格"
 	var nature := NatureDB.get_nature(nature_id)
 	return str(nature.get("name", nature_id)) if not nature.is_empty() else nature_id
+
+func _gender_label(instance: Dictionary) -> String:
+	var gender := SocialRulesScript.gender_for_instance(instance)
+	return str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
+
+func _current_social_place() -> Dictionary:
+	if _social_places.is_empty():
+		_social_places = SocialRulesScript.normalize_places([], 1)
+	return _social_places[0]
+
+func _social_action_label(place: Dictionary) -> String:
+	if SocialRulesScript.is_ready(place):
+		return "领取"
+	if place.get("started_at", null) != null:
+		return "%d%%" % int(SocialRulesScript.progress(place) * 100.0)
+	return "开始"
+
+func _social_action_enabled(place: Dictionary) -> bool:
+	return SocialRulesScript.is_ready(place) or SocialRulesScript.can_start(place)
+
+func _social_preview_text(place: Dictionary) -> String:
+	var a_id := str(place.get("slot_a", ""))
+	var b_id := str(place.get("slot_b", ""))
+	if a_id.is_empty() or b_id.is_empty():
+		var last: Dictionary = place.get("last_result", {})
+		if not last.is_empty():
+			var last_major: Dictionary = last.get("majorOutcome", {})
+			if str(last_major.get("type", "none")) != "none":
+				return "%s：%s" % [str(last_major.get("name", "上次结果")), str(last_major.get("summary", ""))]
+			return str(last.get("summary", "上次社交完成"))
+		return "放入两只怪物后开始社交"
+	var a := _get_instance(a_id)
+	var b := _get_instance(b_id)
+	if a.is_empty() or b.is_empty():
+		return "社交对象异常"
+	var preview := SocialRulesScript.preview(a, b, place)
+	var major: Dictionary = preview.get("majorOutcome", {})
+	var major_text := ""
+	if str(major.get("type", "none")) != "none":
+		major_text = " · " + str(major.get("name", "特殊结果"))
+	return "%s %d分  关系:%s%s" % [preview.get("label", "社交"), int(preview.get("score", 0)), preview.get("relation_label", "初识"), major_text]
+
+func _social_event_text(place: Dictionary) -> String:
+	var a_id := str(place.get("slot_a", ""))
+	var b_id := str(place.get("slot_b", ""))
+	if a_id.is_empty() or b_id.is_empty():
+		var last: Dictionary = place.get("last_result", {})
+		if not last.is_empty():
+			var last_major: Dictionary = last.get("majorOutcome", {})
+			if str(last_major.get("type", "none")) != "none":
+				return "%s：%s" % [str(last_major.get("name", "特殊结果")), str(last_major.get("rarity", "rare"))]
+			var event: Dictionary = last.get("event", {})
+			return "%s：%s" % [str(event.get("name", "上次事件")), str(last.get("relation_label", "关系"))]
+		return "选择两只怪物后预览事件"
+	var a := _get_instance(a_id)
+	var b := _get_instance(b_id)
+	if a.is_empty() or b.is_empty():
+		return ""
+	var preview := SocialRulesScript.preview(a, b, place)
+	var major: Dictionary = preview.get("majorOutcome", {})
+	if str(major.get("type", "none")) != "none":
+		return "%s：%s" % [str(major.get("name", "特殊结果")), str(major.get("summary", ""))]
+	var event: Dictionary = preview.get("event", {})
+	return "%s：%s / %s" % [str(event.get("name", "社交事件")), str(event.get("theme", "陪伴")), str(event.get("hook", "memory"))]
+
+func _social_event_flavor_text(place: Dictionary) -> String:
+	var a_id := str(place.get("slot_a", ""))
+	var b_id := str(place.get("slot_b", ""))
+	var event: Dictionary = {}
+	if a_id.is_empty() or b_id.is_empty():
+		var last: Dictionary = place.get("last_result", {})
+		event = last.get("event", {})
+	else:
+		var a := _get_instance(a_id)
+		var b := _get_instance(b_id)
+		if not a.is_empty() and not b.is_empty():
+			event = SocialRulesScript.preview(a, b, place).get("event", {})
+	var flavor := str(event.get("flavor", ""))
+	if flavor.is_empty():
+		return "事件内容会记录到关系记忆里。"
+	return flavor
+
+func _social_relationship_detail(place: Dictionary) -> Dictionary:
+	var a_id := str(place.get("slot_a", ""))
+	var b_id := str(place.get("slot_b", ""))
+	if a_id.is_empty() or b_id.is_empty():
+		return {}
+	var a := _get_instance(a_id)
+	var b := _get_instance(b_id)
+	if a.is_empty() or b.is_empty():
+		return {}
+	return SocialRulesScript.build_relationship_detail(a, b, place)
 
 func _used_monsters() -> Dictionary:
 	var used := {}
@@ -852,10 +1284,18 @@ func _get_idle_exp_rate(monster_id: String) -> float:
 		return _storage.get_idle_exp_rate(_get_monster_id(monster_id))
 	return 5.0 + float(_get_monster_level(monster_id))
 
+func _get_care_state(instance_id: String) -> Dictionary:
+	if _storage != null and _storage.has_method("get_ranch_care_state"):
+		return _storage.get_ranch_care_state(instance_id)
+	return {
+		"rate": 5.0 + float(_get_monster_level(instance_id)),
+		"label": "专注" if _care_focus_instance_id == instance_id else ""
+	}
+
 func _format_elapsed(placed_at: Variant) -> String:
 	if placed_at == null:
 		return "00:00:00"
-	var elapsed := maxf(0.0, Time.get_unix_time_from_system() * 1000.0 - float(placed_at))
+	var elapsed := minf(maxf(0.0, Time.get_unix_time_from_system() * 1000.0 - float(placed_at)), IDLE_MAX_MS)
 	var total_sec := int(elapsed / 1000.0)
 	var h := total_sec / 3600
 	var m := (total_sec % 3600) / 60
