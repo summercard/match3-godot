@@ -7,6 +7,7 @@ extends Control
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")
+const SocialRulesScript = preload("res://src/core/social_rules.gd")
 
 # === 常量 ===
 const DESIGN_W := 375.0
@@ -737,6 +738,11 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		# 等级
 		var lvl: int = _get_real_level(instance_id)
 		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 69.0, C["white"], 8.0)
+		# 性别
+		var gender := SocialRulesScript.gender_for_instance(instance)
+		var gender_emoji := "♂" if gender == "male" else ("♀" if gender == "female" else "⚥")
+		var gender_label := str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
+		_draw_text(font, "%s %s" % [gender_emoji, gender_label], card_x + LIST_ITEM_W / 2.0, card_y + 79.0, C["text_muted"], 7.5)
 		var catchup_state := _get_catchup_state(instance_id)
 		if bool(catchup_state.get("enabled", false)):
 			_draw_rounded_rect(card_x + 9.0, card_y + 72.0, LIST_ITEM_W - 18.0, 12.0, 5.0, Color(0.10, 0.45, 0.35, 0.88))

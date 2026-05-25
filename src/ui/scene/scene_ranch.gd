@@ -58,10 +58,10 @@ const SLOT_RECTS := [
 
 const BACK_RECT := Rect2(12.0, 13.0, 54.0, 54.0)
 const INCOME_RECT := Rect2(18.0, 604.0, 339.0, 54.0)
-const LIST_RECT := Rect2(9.0, 466.0, 357.0, 128.0)
-const LIST_CLIP_RECT := Rect2(28.0, 480.0, 319.0, 88.0)
+const LIST_RECT := Rect2(9.0, 460.0, 357.0, 138.0)
+const LIST_CLIP_RECT := Rect2(28.0, 474.0, 319.0, 102.0)
 const LIST_CARD_W: float = 55.0
-const LIST_CARD_H: float = 74.0
+const LIST_CARD_H: float = 82.0
 const LIST_CARD_GAP: float = 8.0
 const LIST_CARD_START_X: float = 34.0
 const LIST_CARD_Y: float = 484.0
@@ -827,8 +827,10 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	_draw_stroke_rect(rect, 2.0, stroke)
 	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 14.0, rect.position.y + 8.0, rect.size.x - 28.0, 62.0))
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
-	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 82.0, C["text"], 9.0, rect.size.x - 8.0)
-	_draw_text("Lv.%d" % _get_monster_level(instance_id), rect.get_center().x, rect.position.y + 96.0, C["text_muted"], 8.0, rect.size.x)
+	var stats := _get_instance_stats(instance_id)
+	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 79.0, C["text"], 9.0, rect.size.x - 8.0)
+	_draw_text("%s  HP%d ATK%d" % [elem, int(stats.get("hp", 0)), int(stats.get("atk", 0))], rect.get_center().x, rect.position.y + 91.0, C["text_muted"], 7.5, rect.size.x - 8.0)
 
 func _draw_classroom_bottom() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["income_panel"]), INCOME_RECT)
@@ -1014,10 +1016,13 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 		stroke = Color(0.52, 0.86, 0.25)
 	elif monster_id == _selected_monster_id():
 		stroke = C["gold"]
+	var monster := MonsterDb.get_monster(monster_id)
+	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 5.0, bg)
 	_draw_stroke_rect(rect, 2.0, stroke)
 	_draw_monster_portrait(monster_id, Rect2(rect.position.x + 6.0, rect.position.y + 5.0, rect.size.x - 12.0, 47.0))
-	_draw_text("Lv.%d" % _get_monster_level(monster_id), rect.get_center().x, rect.position.y + 67.0, C["text"], 9.0, rect.size.x)
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 63.0, C["text"], 8.0, rect.size.x)
+	_draw_text("Lv.%d %s" % [_get_monster_level(monster_id), elem], rect.get_center().x, rect.position.y + 75.0, C["text_muted"], 7.5, rect.size.x)
 	if in_use:
 		_draw_texture_fit(_tex(RANCH_ASSETS["check"]), Rect2(rect.position.x + rect.size.x - 20.0, rect.position.y + rect.size.y - 20.0, 19.0, 19.0))
 
