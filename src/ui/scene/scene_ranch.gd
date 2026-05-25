@@ -835,7 +835,7 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	var gender_sym := _gender_label(instance)
 	if gender_sym.length() > 0:
 		gender_sym = gender_sym.substr(0, 1)
-	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
+	var elem: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
 	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 76.0, C["text"], 9.0, rect.size.x - 8.0)
 	_draw_text("%s %s %s" % [gender_sym, nature_short, elem], rect.get_center().x, rect.position.y + 88.0, C["text_muted"], 7.5, rect.size.x - 8.0)
 	_draw_text("HP%d ATK%d DEF%d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0))], rect.get_center().x, rect.get_center().y + 27.0, C["text_muted"], 7.5, rect.size.x - 8.0)
@@ -1025,7 +1025,7 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	elif monster_id == _selected_monster_id():
 		stroke = C["gold"]
 	var monster := MonsterDb.get_monster(monster_id)
-	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
+	var elem: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
 	var inst: Dictionary = {} if _storage == null else _get_instance(monster_id)
 	var nature := _get_nature_name(str(inst.get("nature", "")))
 	if nature.length() > 2:
