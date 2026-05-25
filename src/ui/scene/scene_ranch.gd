@@ -60,7 +60,7 @@ const BACK_RECT := Rect2(12.0, 13.0, 54.0, 54.0)
 const INCOME_RECT := Rect2(18.0, 604.0, 339.0, 54.0)
 const LIST_RECT := Rect2(9.0, 460.0, 357.0, 138.0)
 const LIST_CLIP_RECT := Rect2(28.0, 474.0, 319.0, 102.0)
-const LIST_CARD_W: float = 55.0
+const LIST_CARD_W: float = 60.0
 const LIST_CARD_H: float = 82.0
 const LIST_CARD_GAP: float = 8.0
 const LIST_CARD_START_X: float = 34.0
@@ -828,9 +828,13 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 14.0, rect.position.y + 8.0, rect.size.x - 28.0, 62.0))
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var stats := _get_instance_stats(instance_id)
+	var instance := _get_instance(instance_id)
+	var nature_short := _get_nature_name(str(instance.get("nature", "")))[0:3]
+	var gender_sym := _gender_label(instance)[0]
 	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
-	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 79.0, C["text"], 9.0, rect.size.x - 8.0)
-	_draw_text("%s  HP%d ATK%d" % [elem, int(stats.get("hp", 0)), int(stats.get("atk", 0))], rect.get_center().x, rect.position.y + 91.0, C["text_muted"], 7.5, rect.size.x - 8.0)
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 76.0, C["text"], 9.0, rect.size.x - 8.0)
+	_draw_text("%s %s %s" % [gender_sym, nature_short, elem], rect.get_center().x, rect.position.y + 88.0, C["text_muted"], 7.5, rect.size.x - 8.0)
+	_draw_text("HP%d ATK%d DEF%d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0))], rect.get_center().x, rect.get_center().y + 27.0, C["text_muted"], 7.5, rect.size.x - 8.0)
 
 func _draw_classroom_bottom() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["income_panel"]), INCOME_RECT)
@@ -1018,11 +1022,14 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 		stroke = C["gold"]
 	var monster := MonsterDb.get_monster(monster_id)
 	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
+	var inst := _get_instance(monster_id) if _storage else {}
+	var nature := _get_nature_name(str(inst.get("nature", "")))[0:2]
+	var gender := _gender_label(inst)[0] if not inst.is_empty() else ""
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 5.0, bg)
 	_draw_stroke_rect(rect, 2.0, stroke)
 	_draw_monster_portrait(monster_id, Rect2(rect.position.x + 6.0, rect.position.y + 5.0, rect.size.x - 12.0, 47.0))
-	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 63.0, C["text"], 8.0, rect.size.x)
-	_draw_text("Lv.%d %s" % [_get_monster_level(monster_id), elem], rect.get_center().x, rect.position.y + 75.0, C["text_muted"], 7.5, rect.size.x)
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 62.0, C["text"], 8.0, rect.size.x)
+	_draw_text("%s%s %s" % [gender, nature, elem], rect.get_center().x, rect.position.y + 73.0, C["text_muted"], 7.5, rect.size.x)
 	if in_use:
 		_draw_texture_fit(_tex(RANCH_ASSETS["check"]), Rect2(rect.position.x + rect.size.x - 20.0, rect.position.y + rect.size.y - 20.0, 19.0, 19.0))
 
