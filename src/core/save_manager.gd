@@ -7,13 +7,18 @@ extends Node
 ## - 使用 ConfigFile 进行持久化存储（微信用 wx.setStorageSync JSON序列化）
 ## - ConfigFile 有多个 section：player/team/inventory/stageProgress/achievements/signIn/settings/ranch/tutorial/rewards
 ## - 经验公式：每级所需 = 80 + level * 10，总经验需计算到 level-1
-## - 扫荡奖励 = (100 + 3*50)*0.8 = 160 金币，(100 + 3*20)*0.8 = 72 经验
-## - 牧场挂机经验速率 = 5 + level 每5分钟
+## - 扫荡奖励 = 关卡基础奖励 × 星级倍率 × 0.8
+## - 牧场挂机经验速率 = 5 + level 每5分钟，累计最多8小时
 ## - 签到连续天数超过7天额外奖励 +20金币 +10经验
 
 const ItemDB = preload("res://src/data/item_db.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const AchievementDBScript = preload("res://src/data/achievement_db.gd")
+const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
+const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
+const SocialRulesScript = preload("res://src/core/social_rules.gd")
+const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
+const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
 
 # ========== 单例模式 ==========
 static var instance: Node
@@ -28,6 +33,7 @@ func _exit_tree() -> void:
 ## 存储文件路径（相对于用户数据目录）
 const SAVE_PATH: String = "user://save_game.cfg"
 const RANCH_IDLE_INTERVAL_MS: float = 5.0 * 60.0 * 1000.0
+const RANCH_IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
 
 var _config: ConfigFile = null
 var _dirty: bool = false
@@ -329,13 +335,43 @@ func add_instance_exp(instance_id: String, exp_gained: int) -> Dictionary:
 	save_monster_pool(pool)
 	return result
 
+func get_team_reference_level() -> int:
+	var team_instances := get_team_instances()
+	var highest := 1
+	for instance: Dictionary in team_instances:
+		highest = maxi(highest, int(instance.get("level", 1)))
+	return highest
+
+func get_instance_catchup_state(instance_id: String, reference_level: int = -1) -> Dictionary:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return GrowthRulesScript.get_catchup_state(1, 1)
+	var ref_level := get_team_reference_level() if reference_level < 0 else reference_level
+	return GrowthRulesScript.get_catchup_state(int(instance.get("level", 1)), ref_level)
+
+func calc_instance_battle_exp(instance_id: String, base_exp: int, reference_level: int = -1) -> int:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return maxi(0, base_exp)
+	var ref_level := get_team_reference_level() if reference_level < 0 else reference_level
+	return GrowthRulesScript.calc_catchup_exp(base_exp, int(instance.get("level", 1)), ref_level)
+
 func evolve_instance(instance_id: String) -> Dictionary:
 	var pool := get_monster_pool()
 	var idx := MonsterPool.find_index(pool, instance_id)
 	if idx < 0:
 		return {"ok": false, "reason": "not_found"}
 	var instance: Dictionary = pool[idx]
+	var before := instance.duplicate(true)
 	var result := MonsterPool.evolve_instance(instance)
+	if bool(result.get("ok", false)):
+		var report := EvolutionRulesScript.build_report(before, instance)
+		var history: Array = instance.get("evolutionHistory", [])
+		history.append(EvolutionRulesScript.make_history_entry(report))
+		instance["evolutionHistory"] = history.slice(maxi(0, history.size() - 8), history.size())
+		instance["evolutionInsight"] = {}
+		instance["evolutionCount"] = int(instance.get("evolutionCount", 0)) + 1
+		result["evolutionReport"] = report
 	pool[idx] = instance
 	save_monster_pool(pool)
 	return result
@@ -603,6 +639,37 @@ func get_stage_stars(stage_id: String) -> int:
 	var all: Dictionary = load_stage_progress()
 	return all.get(stage_id, {}).get("stars", 0)
 
+func is_stage_cleared(stage_id: String) -> bool:
+	var all: Dictionary = load_stage_progress()
+	var data: Dictionary = all.get(stage_id, {})
+	return bool(data.get("cleared", false)) or int(data.get("stars", 0)) > 0
+
+func is_stage_unlocked(stage_id: String) -> bool:
+	return bool(get_stage_unlock_state(stage_id).get("unlocked", false))
+
+func get_stage_unlock_state(stage_id: String) -> Dictionary:
+	var required_id := _required_stage_for_unlock(stage_id)
+	if required_id == "__missing__":
+		return {
+			"unlocked": false,
+			"requiredStageId": "",
+			"requiredStageName": "",
+			"reason": "stage_not_found"
+		}
+	if required_id.is_empty() or is_stage_cleared(required_id):
+		return {
+			"unlocked": true,
+			"requiredStageId": required_id,
+			"requiredStageName": _stage_name(required_id),
+			"reason": ""
+		}
+	return {
+		"unlocked": false,
+		"requiredStageId": required_id,
+		"requiredStageName": _stage_name(required_id),
+		"reason": "clear_required_stage"
+	}
+
 ## 检查是否解锁扫荡（3星通关）
 ## JS: canSweep(stageId)
 func can_sweep(stage_id: String) -> bool:
@@ -614,21 +681,7 @@ func can_sweep(stage_id: String) -> bool:
 func get_sweep_reward(stage_id: String) -> Dictionary:
 	var stage: Dictionary = get_stage(stage_id)
 	var stage_rewards: Dictionary = stage.get("rewards", {})
-	var base_gold: int = int(stage_rewards.get("gold", 0))
-	var base_exp: int = int(stage_rewards.get("exp", 0))
-	if base_gold <= 0 and base_exp <= 0:
-		base_gold = 100
-		base_exp = 60
-	var stars: int = clampi(get_stage_stars(stage_id), 1, 3)
-	var star_multiplier: float = 1.0
-	if stars == 1:
-		star_multiplier = 0.6
-	elif stars == 2:
-		star_multiplier = 0.8
-	var sweep_ratio: float = 0.8
-	var gold: int = maxi(1, int(round(base_gold * star_multiplier * sweep_ratio)))
-	var exp: int = maxi(1, int(round(base_exp * star_multiplier * sweep_ratio)))
-	return { "gold": gold, "exp": exp }
+	return RewardRulesScript.calc_sweep_rewards(stage_rewards, get_stage_stars(stage_id))
 
 ## 执行扫荡
 ## JS: doSweep(stageId)
@@ -655,6 +708,27 @@ func get_stage_chapters() -> Array:
 func get_stage(stage_id: String) -> Dictionary:
 	var db := StageDBScript.new()
 	return db.get_stage(stage_id)
+
+func _required_stage_for_unlock(stage_id: String) -> String:
+	var chapters := get_stage_chapters()
+	var previous_chapter_gate := ""
+	for chapter: Dictionary in chapters:
+		var previous_main_stage := previous_chapter_gate
+		for stage: Dictionary in chapter.get("stages", []):
+			var current_id := str(stage.get("id", ""))
+			if current_id == stage_id:
+				return previous_main_stage
+			if str(stage.get("type", "normal")) != "elite":
+				previous_main_stage = current_id
+		if not previous_main_stage.is_empty():
+			previous_chapter_gate = previous_main_stage
+	return "__missing__"
+
+func _stage_name(stage_id: String) -> String:
+	if stage_id.is_empty():
+		return ""
+	var stage := get_stage(stage_id)
+	return str(stage.get("name", stage_id))
 
 func roll_drop() -> String:
 	return ItemDB.roll_drop()
@@ -842,11 +916,33 @@ func load_settings() -> Dictionary:
 	return _get_value("settings", "data", {
 		"soundOn": true,
 		"musicOn": true,
+		"capture": {
+			"autoCapture": false,
+			"equippedItem": ""
+		},
 		"version": "v0.1.0"
 	})
 
+func load_capture_settings() -> Dictionary:
+	var settings: Dictionary = load_settings()
+	var capture: Dictionary = settings.get("capture", {})
+	return {
+		"autoCapture": bool(capture.get("autoCapture", false)),
+		"equippedItem": str(capture.get("equippedItem", ""))
+	}
+
+func save_capture_settings(capture_settings: Dictionary) -> bool:
+	var settings: Dictionary = load_settings()
+	var capture: Dictionary = settings.get("capture", {})
+	if capture_settings.has("autoCapture"):
+		capture["autoCapture"] = bool(capture_settings.get("autoCapture", false))
+	if capture_settings.has("equippedItem"):
+		capture["equippedItem"] = str(capture_settings.get("equippedItem", ""))
+	settings["capture"] = capture
+	return save_settings(settings)
+
 # ========== 牧场系统（section: ranch） ==========
-## 牧场数据结构: { slots: [{ instance_id, placed_at }, ...], unlocked_slots: 5 }
+## 牧场数据结构: { slots: [{ instance_id, placed_at }, ...], unlocked_slots: 5, care_focus_instance_id, social_places: [{ slot_a, slot_b, started_at, last_result }] }
 
 ## 获取牧场状态
 ## JS: getRanchState()
@@ -859,8 +955,12 @@ func get_ranch_state() -> Dictionary:
 			{ "instance_id": null, "placed_at": null },
 			{ "instance_id": null, "placed_at": null },
 			{ "instance_id": null, "placed_at": null }
+			],
+			"unlocked_slots": 5,
+		"social_places": [
+			{ "slot_a": null, "slot_b": null, "started_at": null, "last_result": {} }
 		],
-		"unlocked_slots": 5
+		"care_focus_instance_id": null
 	})
 	var normalized := _normalize_ranch_state(state)
 	if normalized != state:
@@ -878,14 +978,28 @@ func set_ranch_state(state: Dictionary) -> bool:
 func _normalize_ranch_state(state: Dictionary) -> Dictionary:
 	var normalized: Dictionary = {
 		"slots": [],
-		"unlocked_slots": int(state.get("unlocked_slots", state.get("unlockedSlots", 3)))
+		"unlocked_slots": int(state.get("unlocked_slots", state.get("unlockedSlots", 3))),
+		"social_places": SocialRulesScript.normalize_places(state.get("social_places", state.get("socialPlaces", [])), 1),
+		"care_focus_instance_id": null
 	}
 	var slots: Array = state.get("slots", [])
+	var focus_ref := str(state.get("care_focus_instance_id", state.get("careFocusInstanceId", "")))
+	var focus_id := _resolve_instance_id(focus_ref)
 	for slot_data in slots:
 		normalized["slots"].append(_normalize_ranch_slot(slot_data))
 	while normalized["slots"].size() < normalized["unlocked_slots"]:
 		normalized["slots"].append({ "instance_id": null, "placed_at": null })
+	if _ranch_slots_contain_instance(normalized["slots"], focus_id):
+		normalized["care_focus_instance_id"] = focus_id
 	return normalized
+
+func _ranch_slots_contain_instance(slots: Array, instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	for slot: Dictionary in slots:
+		if slot.get("instance_id") == instance_id:
+			return true
+	return false
 
 func _normalize_ranch_slot(slot_data: Variant) -> Dictionary:
 	if not slot_data is Dictionary:
@@ -913,11 +1027,47 @@ func _normalize_ranch_timestamp_ms(value: Variant) -> Variant:
 ## 公式: 5 + level，保证前期挂机也有可见成长反馈
 func get_idle_exp_rate(monster_id: String) -> float:
 	var instance_id := _resolve_instance_id(monster_id)
-	var level: int = get_instance_level(instance_id) if not instance_id.is_empty() else 1
-	return 5.0 + level
+	if instance_id.is_empty():
+		return RanchCareRulesScript.calc_base_rate(1)
+	return float(get_ranch_care_state(instance_id).get("rate", RanchCareRulesScript.calc_base_rate(get_instance_level(instance_id))))
 
 func get_idle_exp_rate_for_instance(instance_id: String) -> float:
 	return get_idle_exp_rate(instance_id)
+
+func get_ranch_care_focus() -> String:
+	return str(get_ranch_state().get("care_focus_instance_id", ""))
+
+func set_ranch_care_focus(instance_id: String) -> bool:
+	if get_monster_instance(instance_id).is_empty():
+		return false
+	var ranch := get_ranch_state()
+	var slots: Array = ranch.get("slots", [])
+	if not _ranch_slots_contain_instance(slots, instance_id):
+		return false
+	ranch["care_focus_instance_id"] = instance_id
+	return set_ranch_state(ranch)
+
+func clear_ranch_care_focus() -> bool:
+	var ranch := get_ranch_state()
+	ranch["care_focus_instance_id"] = null
+	return set_ranch_state(ranch)
+
+func get_ranch_care_state(instance_id: String) -> Dictionary:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return RanchCareRulesScript.calc_state(1, 1, 0, false)
+	var ranch := get_ranch_state()
+	var occupied_count := 0
+	for slot: Dictionary in ranch.get("slots", []):
+		if slot.get("instance_id", null) != null:
+			occupied_count += 1
+	var focus_id := str(ranch.get("care_focus_instance_id", ""))
+	return RanchCareRulesScript.calc_state(
+		int(instance.get("level", 1)),
+		get_team_reference_level(),
+		occupied_count,
+		focus_id == instance_id
+	)
 
 ## 收取单只怪物的挂机经验
 ## JS: collectIdleExp(monsterId)
@@ -940,7 +1090,7 @@ func collect_idle_exp_for_instance(instance_id: String) -> float:
 		return 0.0
 
 	var now_ms: float = Time.get_unix_time_from_system() * 1000.0
-	var elapsed_ms: float = now_ms - float(slot.get("placed_at", 0.0))
+	var elapsed_ms: float = minf(now_ms - float(slot.get("placed_at", 0.0)), RANCH_IDLE_MAX_MS)
 	var intervals: int = int(elapsed_ms / RANCH_IDLE_INTERVAL_MS)
 	if intervals <= 0:
 		return 0.0
@@ -980,7 +1130,237 @@ func remove_instance_from_ranch(instance_id: String) -> bool:
 			slot["instance_id"] = null
 			slot["placed_at"] = null
 			changed = true
+	for place: Dictionary in ranch.get("social_places", []):
+		if place.get("slot_a") == instance_id:
+			place["slot_a"] = null
+			place["started_at"] = null
+			changed = true
+		if place.get("slot_b") == instance_id:
+			place["slot_b"] = null
+			place["started_at"] = null
+			changed = true
+	if ranch.get("care_focus_instance_id", null) == instance_id:
+		ranch["care_focus_instance_id"] = null
+		changed = true
 	return set_ranch_state(ranch) if changed else true
+
+func assign_social_slot(place_index: int, social_slot: String, instance_id: String) -> bool:
+	var ranch := get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	if place_index < 0 or place_index >= places.size() or get_monster_instance(instance_id).is_empty():
+		return false
+	if social_slot != "slot_a" and social_slot != "slot_b":
+		return false
+	var place: Dictionary = places[place_index]
+	if place.get("started_at", null) != null:
+		return false
+	if place.get("slot_a") == instance_id:
+		place["slot_a"] = null
+	if place.get("slot_b") == instance_id:
+		place["slot_b"] = null
+	place[social_slot] = instance_id
+	places[place_index] = place
+	ranch["social_places"] = places
+	return set_ranch_state(ranch)
+
+func clear_social_slot(place_index: int, social_slot: String) -> bool:
+	var ranch := get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	if place_index < 0 or place_index >= places.size():
+		return false
+	if social_slot != "slot_a" and social_slot != "slot_b":
+		return false
+	var place: Dictionary = places[place_index]
+	if place.get("started_at", null) != null:
+		return false
+	place[social_slot] = null
+	places[place_index] = place
+	ranch["social_places"] = places
+	return set_ranch_state(ranch)
+
+func cycle_social_place(place_index: int) -> bool:
+	var ranch := get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	if place_index < 0 or place_index >= places.size():
+		return false
+	var place: Dictionary = places[place_index]
+	if place.get("started_at", null) != null:
+		return false
+	place["place_id"] = SocialRulesScript.next_place_id(str(place.get("place_id", "meadow_yard")))
+	place["last_result"] = {}
+	places[place_index] = place
+	ranch["social_places"] = places
+	return set_ranch_state(ranch)
+
+func start_social(place_index: int) -> Dictionary:
+	var ranch := get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	if place_index < 0 or place_index >= places.size():
+		return {"ok": false, "reason": "place_not_found"}
+	var place: Dictionary = places[place_index]
+	if not SocialRulesScript.can_start(place):
+		return {"ok": false, "reason": "need_two_monsters"}
+	place["started_at"] = Time.get_unix_time_from_system() * 1000.0
+	place["last_result"] = {}
+	places[place_index] = place
+	ranch["social_places"] = places
+	set_ranch_state(ranch)
+	return {"ok": true, "place": place}
+
+func collect_social(place_index: int) -> Dictionary:
+	var ranch := get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	if place_index < 0 or place_index >= places.size():
+		return {"ok": false, "reason": "place_not_found"}
+	var place: Dictionary = places[place_index]
+	if not SocialRulesScript.is_ready(place):
+		return {"ok": false, "reason": "not_ready", "progress": SocialRulesScript.progress(place)}
+	var a_id := str(place.get("slot_a", ""))
+	var b_id := str(place.get("slot_b", ""))
+	var a := get_monster_instance(a_id)
+	var b := get_monster_instance(b_id)
+	if a.is_empty() or b.is_empty():
+		return {"ok": false, "reason": "monster_not_found"}
+	var result := SocialRulesScript.resolve(a, b, place)
+	var major_outcome: Dictionary = result.get("majorOutcome", {})
+	var erosion_victim_id := str(major_outcome.get("victimInstanceId", "")) if str(major_outcome.get("type", "none")) == "erosion" else ""
+	var exp_each := int(result.get("exp_each", 0))
+	if exp_each > 0:
+		if a_id != erosion_victim_id:
+			add_instance_exp(a_id, exp_each)
+		if b_id != erosion_victim_id:
+			add_instance_exp(b_id, exp_each)
+	if a_id != erosion_victim_id:
+		_apply_social_memory(a_id, b_id, result)
+		_apply_social_evolution_insight(a_id, result)
+	if b_id != erosion_victim_id:
+		_apply_social_memory(b_id, a_id, result)
+		_apply_social_evolution_insight(b_id, result)
+	var gold := int(result.get("gold", 0))
+	if gold > 0:
+		add_gold(gold)
+	for item: Dictionary in result.get("items", []):
+		add_item(str(item.get("id", "")), int(item.get("count", 1)))
+	var applied_major := _apply_social_major_outcome(result)
+	if not applied_major.is_empty():
+		result["majorOutcome"] = applied_major
+		if str(applied_major.get("type", "none")) == "erosion":
+			var victim_id := str(applied_major.get("victimInstanceId", ""))
+			if str(place.get("slot_a", "")) == victim_id:
+				place["slot_a"] = null
+			if str(place.get("slot_b", "")) == victim_id:
+				place["slot_b"] = null
+	place["started_at"] = null
+	place["last_result"] = result
+	places[place_index] = place
+	ranch["social_places"] = places
+	set_ranch_state(ranch)
+	return {"ok": true, "result": result}
+
+func _apply_social_major_outcome(social_result: Dictionary) -> Dictionary:
+	var major: Dictionary = social_result.get("majorOutcome", {})
+	match str(major.get("type", "none")):
+		"birth":
+			return _apply_social_birth(major)
+		"erosion":
+			return _apply_social_erosion(major)
+		_:
+			return major
+
+func _apply_social_birth(major: Dictionary) -> Dictionary:
+	var applied := major.duplicate(true)
+	var created: Array = []
+	for raw_plan in major.get("childPlans", []):
+		if not raw_plan is Dictionary:
+			continue
+		var plan: Dictionary = raw_plan
+		var monster_id := str(plan.get("monsterId", ""))
+		if monster_id.is_empty() or not MonsterDb.has_monster(monster_id):
+			continue
+		var child := add_monster_instance(monster_id, {
+			"name": str(plan.get("name", "")),
+			"level": 1,
+			"exp": 0,
+			"nature": str(plan.get("nature", "brave")),
+			"gender": str(plan.get("gender", "")),
+			"source": "social_birth",
+			"lineage": plan.get("lineage", {}),
+			"mutationTraits": plan.get("mutationTraits", [])
+		})
+		if not child.is_empty():
+			created.append(child)
+	applied["createdInstances"] = created
+	applied["applied"] = not created.is_empty()
+	return applied
+
+func _apply_social_erosion(major: Dictionary) -> Dictionary:
+	var applied := major.duplicate(true)
+	var aggressor_id := str(major.get("aggressorInstanceId", ""))
+	var victim_id := str(major.get("victimInstanceId", ""))
+	if not aggressor_id.is_empty():
+		add_instance_exp(aggressor_id, int(major.get("expGain", 0)))
+		var aggressor := get_monster_instance(aggressor_id)
+		if not aggressor.is_empty():
+			var effects: Array = aggressor.get("conditionEffects", []).duplicate(true) if aggressor.get("conditionEffects", []) is Array else []
+			var effect: Dictionary = major.get("negativeEffect", {})
+			if not effect.is_empty():
+				effects.append(effect.duplicate(true))
+			var traits: Array = aggressor.get("mutationTraits", []).duplicate(true) if aggressor.get("mutationTraits", []) is Array else []
+			if not traits.has("erosion_hunger"):
+				traits.append("erosion_hunger")
+			update_monster_instance(aggressor_id, {
+				"conditionEffects": effects,
+				"mutationTraits": traits
+			})
+	var removed := false
+	if not victim_id.is_empty():
+		removed = remove_monster_instance(victim_id)
+	applied["victimRemoved"] = removed
+	applied["applied"] = removed
+	return applied
+
+func _apply_social_evolution_insight(instance_id: String, social_result: Dictionary) -> void:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return
+	var insight := EvolutionRulesScript.make_social_insight(instance, social_result)
+	if insight.is_empty():
+		return
+	update_monster_instance(instance_id, {"evolutionInsight": insight})
+
+func _apply_social_memory(instance_id: String, partner_id: String, social_result: Dictionary) -> void:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return
+	var profile: Dictionary = instance.get("socialProfile", {})
+	profile["socialExp"] = int(profile.get("socialExp", 0)) + int(social_result.get("score", 0))
+	profile["bondExp"] = int(profile.get("bondExp", 0)) + int(round(float(social_result.get("score", 0)) * 0.5))
+	profile["lastPartnerId"] = partner_id
+	profile["lastSocialTags"] = social_result.get("tags", []).duplicate(true)
+	var memory: Dictionary = instance.get("bondMemory", {})
+	var partners: Dictionary = memory.get("partners", {})
+	var partner_memory: Dictionary = partners.get(partner_id, {})
+	partner_memory["count"] = int(partner_memory.get("count", 0)) + 1
+	partner_memory["bestScore"] = maxi(int(partner_memory.get("bestScore", 0)), int(social_result.get("score", 0)))
+	partner_memory["lastLabel"] = str(social_result.get("label", "社交"))
+	partner_memory["lastTags"] = social_result.get("tags", []).duplicate(true)
+	partner_memory["relationLevel"] = int(social_result.get("relation_level", 1))
+	partner_memory["relationLabel"] = str(social_result.get("relation_label", "初识"))
+	partner_memory["placeId"] = str(social_result.get("place_id", "meadow_yard"))
+	partner_memory["placeName"] = str(social_result.get("place_name", "草坪庭院"))
+	var event: Dictionary = social_result.get("event", {})
+	partner_memory["lastEventId"] = str(event.get("id", ""))
+	partner_memory["lastEventName"] = str(event.get("name", ""))
+	partner_memory["lastEventSummary"] = str(event.get("summary", ""))
+	partner_memory["lastEventFlavor"] = str(event.get("flavor", ""))
+	partner_memory["lastEventOutcome"] = str(event.get("outcome", event.get("impact", "")))
+	partner_memory["lastEventHook"] = str(event.get("hook", ""))
+	partners[partner_id] = partner_memory
+	memory["partners"] = partners
+	update_monster_instance(instance_id, {
+		"socialProfile": profile,
+		"bondMemory": memory
+	})
 
 # ========== 新手引导（section: tutorial） ==========
 ## 引导进度数据结构: { completed: bool, currentStep: int }

@@ -5,11 +5,13 @@ class_name SceneResult
 extends Control
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
+const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
+const ItemDBScript = preload("res://src/data/item_db.gd")
 
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
-const STAR_MULTIPLIERS: Array[float] = [0.0, 0.6, 0.8, 1.0, 1.2, 1.5]
 
 const RESULT_ASSETS := {
 	"bg": "res://assets/images/battle/battle_bg_forest_ruins.png",
@@ -73,10 +75,12 @@ var _capture_target: Dictionary = {}
 var _captured: bool = false
 var _capture_result: Dictionary = {}
 var _capture_item_used: Dictionary = {}
+var _capture_window: Dictionary = {}
 
 # 奖励
-var _rewards: Dictionary = {"gold": 0, "exp": 0, "item": null, "item_name": ""}
+var _rewards: Dictionary = {"gold": 0, "exp": 0, "item": null, "item_name": "", "item_count": 0}
 var _level_ups: Array[Dictionary] = []
+var _monster_exp_awards: Dictionary = {}
 
 # 动画进度
 var _star_anim_progress: float = 0.0
@@ -167,6 +171,7 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		_capture_target = _battle_result.get("capture_target", {})
 		_capture_result = _battle_result.get("capture_result_text", {})
 		_capture_item_used = _battle_result.get("capture_item_used", {})
+		_capture_window = _battle_result.get("capture_window", {})
 	else:
 		if _is_win:
 			_process_capture()
@@ -208,27 +213,13 @@ func init(data: Dictionary = {}) -> void:
 
 func _calc_stars() -> void:
 	var player_team: Array = _battle_result.get("playerTeam", [])
-	var alive_hp: float = 0.0
-	var max_hp: float = 0.0
-	for monster: Dictionary in player_team:
-		if monster:
-			alive_hp += monster.get("hp", 0)
-			max_hp += monster.get("maxHP", 0)
-	var hp_ratio: float = alive_hp / max_hp if max_hp > 0.0 else 0.0
+	var hp_ratio := RewardRulesScript.calc_hp_ratio(player_team)
 	var turn_count: int = _battle_result.get("turnCount", 0)
 	var max_turns: int = _battle_result.get("maxTurns", 20)
 	_stars = _calculate_battle_stars(turn_count, max_turns, hp_ratio)
 
 func _calculate_battle_stars(turns: int, max_turns: int, hp_ratio: float) -> int:
-	var ratio_score: float = hp_ratio
-	var turn_score: float = 1.0 - (turns as float / max(1, max_turns) as float)
-	var total: float = ratio_score * 0.6 + turn_score * 0.4
-	if total >= 0.8:
-		return 3
-	elif total >= 0.5:
-		return 2
-	else:
-		return 1
+	return RewardRulesScript.calc_battle_stars(turns, max_turns, hp_ratio)
 
 func _process_capture() -> void:
 	var enemies: Array = _battle_result.get("enemies", [])
@@ -241,53 +232,86 @@ func _process_capture() -> void:
 		var valid_enemies: Array = enemies.filter(func(e): return e and e.has("id"))
 		if not valid_enemies.is_empty():
 			target_enemy = valid_enemies[randi() % valid_enemies.size()]
-	if not target_enemy.is_empty():
-		_capture_target = target_enemy
-		var enemy_rarity: int = target_enemy.get("rarity", 1)
-		var player: Dictionary = {}
-		if _storage and _storage.has_method("load_player"):
-			player = _storage.load_player()
-		var consecutive_fails: int = player.get("captureFails", 0)
-		var prob: float = _calc_capture_probability(target_enemy.get("hp", 0), target_enemy.get("maxHP", 1), _battle_result.get("playerLevel", 1), _battle_result.get("enemyLevel", 1), enemy_rarity, consecutive_fails)
-		var bonus: float = _consume_best_capture_item()
-		if bonus > 0:
-			prob = minf(0.95, prob + bonus)
-		_captured = randf() < prob
-		_capture_result = _get_capture_result_text(prob, _captured)
-		if _storage and _storage.has_method("load_player") and _storage.has_method("save_player"):
-			var player_data: Dictionary = _storage.load_player()
-			player_data["captureFails"] = 0 if _captured else (consecutive_fails + 1)
-			_storage.save_player(player_data)
-		_play_capture_effect()
+	if target_enemy.is_empty():
+		_capture_result = CaptureSystemScript.get_capture_skip_feedback("no_target")
+		return
+
+	_capture_target = target_enemy
+	var settings: Dictionary = _load_capture_preferences()
+	if not bool(settings.get("autoCapture", false)):
+		_captured = false
+		_capture_item_used = {}
+		_capture_result = CaptureSystemScript.get_capture_skip_feedback("auto_off", {"target": _capture_target})
+		return
+
+	var item_use: Dictionary = _consume_selected_capture_item(str(settings.get("equippedItem", "")))
+	if not bool(item_use.get("ok", false)):
+		_captured = false
+		_capture_item_used = {}
+		_capture_result = CaptureSystemScript.get_capture_skip_feedback(str(item_use.get("reason", "no_item")), {
+			"target": _capture_target,
+			"item_name": str(item_use.get("item_name", "捕捉球"))
+		})
+		return
+
+	var enemy_rarity: int = target_enemy.get("rarity", 1)
+	var player: Dictionary = {}
+	if _storage and _storage.has_method("load_player"):
+		player = _storage.load_player()
+	var consecutive_fails: int = player.get("captureFails", 0)
+	_capture_window = CaptureSystemScript.calc_taming_window(target_enemy.get("hp", 0), target_enemy.get("maxHP", 1))
+	var prob: float = _calc_capture_probability(target_enemy.get("hp", 0), target_enemy.get("maxHP", 1), _battle_result.get("playerLevel", 1), _battle_result.get("enemyLevel", 1), enemy_rarity, consecutive_fails)
+	prob = minf(0.95, prob + float(item_use.get("bonus", 0.0)))
+	_captured = randf() < prob
+	_capture_result = _get_capture_result_text(prob, _captured)
+	if _storage and _storage.has_method("load_player") and _storage.has_method("save_player"):
+		var player_data: Dictionary = _storage.load_player()
+		player_data["captureFails"] = 0 if _captured else (consecutive_fails + 1)
+		_storage.save_player(player_data)
+	_play_capture_effect()
 
 func _calc_capture_probability(hp: float, max_hp: float, player_level: int, enemy_level: int, rarity: int, consecutive_fails: int) -> float:
-	var hp_ratio: float = hp / max_hp if max_hp > 0.0 else 0.0
-	var base_prob: float = 0.3 + (1.0 - hp_ratio) * 0.4
-	base_prob += (player_level - enemy_level) * 0.02
-	base_prob -= rarity * 0.05
-	base_prob += mini(consecutive_fails * 0.05, 0.2)
-	return clampf(base_prob, 0.05, 0.9)
+	var stage_id := str(_battle_result.get("stageId", _battle_result.get("stage_id", "")))
+	var taming_window: Dictionary = _capture_window
+	if taming_window.is_empty():
+		taming_window = CaptureSystemScript.calc_taming_window(hp, max_hp)
+	return CaptureSystemScript.calc_capture_probability(hp, max_hp, player_level, enemy_level, rarity, {
+		"stage_id": stage_id,
+		"consecutive_fails": consecutive_fails,
+		"taming_window": taming_window
+	})
 
-func _consume_best_capture_item() -> float:
+func _load_capture_preferences() -> Dictionary:
+	if _storage and _storage.has_method("load_capture_settings"):
+		return _storage.load_capture_settings()
+	return {"autoCapture": false, "equippedItem": ""}
+
+func _consume_selected_capture_item(item_id: String) -> Dictionary:
 	if not _storage or not _storage.has_method("load_inventory") or not _storage.has_method("use_item"):
-		return 0.0
+		return {"ok": false, "reason": "storage_unavailable"}
+	if item_id.is_empty():
+		return {"ok": false, "reason": "no_item"}
 	var inventory: Dictionary = _storage.load_inventory()
-	var candidates: Array[Dictionary] = [
-		{"id": "capture_ball_plus", "bonus": 0.30, "name": "超级捕获球"},
-		{"id": "capture_ball", "bonus": 0.15, "name": "捕获球"}
-	]
-	for candidate: Dictionary in candidates:
-		if inventory.get(candidate["id"], 0) > 0:
-			if _storage.use_item(candidate["id"], 1):
-				_capture_item_used = candidate
-				return candidate["bonus"]
-	return 0.0
+	var item_def: Dictionary = ItemDBScript.get_item(item_id)
+	if str(item_def.get("type", "")) != "capture":
+		return {"ok": false, "reason": "invalid_item", "item_name": str(item_def.get("name", "道具"))}
+	if int(inventory.get(item_id, 0)) <= 0:
+		return {"ok": false, "reason": "item_empty", "item_name": str(item_def.get("name", "捕捉球"))}
+	if _storage.use_item(item_id, 1):
+		var bonus := float(item_def.get("effect", {}).get("captureBonus", 0.0))
+		_capture_item_used = {
+			"id": item_id,
+			"bonus": bonus,
+			"name": str(item_def.get("name", "捕获球"))
+		}
+		return {"ok": true, "bonus": bonus, "item": _capture_item_used.duplicate(true)}
+	return {"ok": false, "reason": "item_empty", "item_name": str(item_def.get("name", "捕捉球"))}
 
 func _get_capture_result_text(prob: float, captured: bool) -> Dictionary:
-	if captured:
-		return {"title": "🎉 收服成功！", "desc": "怪物已被收入囊中！"}
-	else:
-		return {"title": "💀 收服失败", "desc": "收服失败（概率 %.0f%%）" % (prob * 100.0)}
+	return CaptureSystemScript.get_capture_result_text(prob, captured, _capture_window, {
+		"target": _capture_target,
+		"item_used": _capture_item_used
+	})
 
 func _play_capture_effect() -> void:
 	var center_pos := Vector2(DESIGN_W / 2.0, 125.0)
@@ -305,25 +329,24 @@ func _play_capture_effect() -> void:
 
 func _calc_rewards() -> void:
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
-	var star_multiplier: float = STAR_MULTIPLIERS[_stars] if _stars < STAR_MULTIPLIERS.size() else 1.0
-	if stage_rewards.has("gold") and stage_rewards.has("exp"):
-		if _is_win:
-			_rewards["gold"] = int(round(stage_rewards["gold"] * star_multiplier))
-			_rewards["exp"] = int(round(stage_rewards["exp"] * star_multiplier))
-		else:
-			_rewards["gold"] = int(round(stage_rewards["gold"] * 0.3))
-			_rewards["exp"] = int(round(stage_rewards["exp"] * 0.3))
-	else:
-		_rewards["gold"] = 100 + _stars * 50 if _is_win else 30
-		_rewards["exp"] = 100 + _stars * 20 if _is_win else 30
+	var reward_result := RewardRulesScript.calc_battle_rewards(stage_rewards, _stars, _is_win)
+	_rewards["gold"] = int(reward_result.get("gold", 0))
+	_rewards["exp"] = int(reward_result.get("exp", 0))
 	_rewards["item"] = null
 	_rewards["item_name"] = ""
-	if _is_win and randf() < 0.3:
+	_rewards["item_count"] = 0
+	var first_item: Dictionary = RewardRulesScript.get_first_guaranteed_item(stage_rewards)
+	if _is_win and not first_item.is_empty():
+		_rewards["item"] = str(first_item.get("id", ""))
+		_rewards["item_name"] = _rewards["item"]
+		_rewards["item_count"] = maxi(1, int(first_item.get("count", 1)))
+	elif _is_win and randf() < 0.3:
 		if _storage and _storage.has_method("roll_drop"):
 			var item_id: String = _storage.roll_drop()
 			if not item_id.is_empty():
 				_rewards["item"] = item_id
 				_rewards["item_name"] = item_id
+				_rewards["item_count"] = 1
 
 func _setup_buttons() -> void:
 	if _is_win and _battle_result.has("stageId"):
@@ -354,7 +377,13 @@ func _save_rewards() -> void:
 				_storage.save_player(player) if _storage.has_method("save_player") else null
 				_storage.init_monster_pokedex(_capture_target["id"]) if _storage.has_method("init_monster_pokedex") else null
 	if _rewards["item"] and _storage.has_method("add_item"):
-		_storage.add_item(_rewards["item"], 1)
+		var item_count := 1
+		var guaranteed_items: Array = _battle_result.get("stageRewards", {}).get("guaranteedItems", [])
+		for item: Dictionary in guaranteed_items:
+			if str(item.get("id", "")) == str(_rewards["item"]):
+				item_count = maxi(1, int(item.get("count", 1)))
+				break
+		_storage.add_item(_rewards["item"], item_count)
 	var rewards: Dictionary = _storage.load_rewards() if _storage.has_method("load_rewards") else {}
 	rewards["totalGoldEarned"] = rewards.get("totalGoldEarned", 0) + _rewards["gold"]
 	rewards["battleCount"] = rewards.get("battleCount", 0) + 1
@@ -392,9 +421,11 @@ func _add_monster_exp_from_battle() -> void:
 	if team_members.is_empty():
 		return
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
-	var base_exp: int = stage_rewards.get("exp", 100) if stage_rewards else 100
-	var exp_to_add: int = int(round(base_exp))
+	var exp_to_add := RewardRulesScript.calc_monster_exp(stage_rewards, _stars, _is_win)
+	if exp_to_add <= 0:
+		return
 	var player_team: Array = _battle_result.get("playerTeam", [])
+	var reference_level: int = _storage.get_team_reference_level() if _storage.has_method("get_team_reference_level") else 1
 	for monster_id in team_members:
 		var member_id := str(monster_id)
 		var battle_monster: Dictionary = {}
@@ -403,14 +434,24 @@ func _add_monster_exp_from_battle() -> void:
 				battle_monster = m
 				break
 		if not battle_monster.is_empty() and battle_monster.get("hp", 0) > 0:
+			var actual_exp: int = exp_to_add
+			var catchup_state: Dictionary = {}
+			if _storage.has_method("calc_instance_battle_exp"):
+				actual_exp = _storage.calc_instance_battle_exp(member_id, exp_to_add, reference_level)
+			if _storage.has_method("get_instance_catchup_state"):
+				catchup_state = _storage.get_instance_catchup_state(member_id, reference_level)
+			_monster_exp_awards[member_id] = {
+				"exp": actual_exp,
+				"catchup": catchup_state
+			}
 			var result: Dictionary = {}
 			if _storage.has_method("add_instance_exp") and not _storage.get_monster_instance(member_id).is_empty():
-				result = _storage.add_instance_exp(member_id, exp_to_add)
+				result = _storage.add_instance_exp(member_id, actual_exp)
 			else:
 				if _storage.has_method("init_monster_pokedex"):
 					_storage.init_monster_pokedex(member_id)
 				if _storage.has_method("add_monster_exp"):
-					result = _storage.add_monster_exp(member_id, exp_to_add)
+					result = _storage.add_monster_exp(member_id, actual_exp)
 			if not result.is_empty():
 				if result.get("leveledUp", false):
 					_level_ups.append({
@@ -663,13 +704,24 @@ func _draw_capture_section(font: Font, y: float) -> void:
 	
 	var lines: Array = []
 	if not _capture_target.is_empty():
-		lines.append("目标: %s" % _capture_target.get("name", ""))
+		var target_tags: Array = _capture_result.get("target_tags", [])
+		if target_tags.is_empty():
+			target_tags = CaptureSystemScript.get_target_value_tags(_capture_target)
+		var tag_text := " / ".join(target_tags.slice(0, 3))
+		lines.append("目标: %s  %s" % [_capture_target.get("name", ""), tag_text])
 	if not _capture_item_used.is_empty():
 		lines.append("消耗: %s" % _capture_item_used.get("name", ""))
-	lines.append(_capture_result.get("desc", ""))
+	var reason := str(_capture_result.get("reason", ""))
+	var advice := str(_capture_result.get("advice", ""))
+	if reason.is_empty() and not _capture_window.is_empty():
+		reason = "窗口: %s %d%%" % [_capture_window.get("label", ""), int(round(float(_capture_window.get("stability", 0.0)) * 100.0))]
+	if not reason.is_empty():
+		lines.append(reason)
+	if not advice.is_empty() and not _captured:
+		lines.append(advice)
 	
-	for i in range(mini(lines.size(), 2)):
-		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 91.0 + i * 13.0, C["text_secondary"], 9.5)
+	for i in range(mini(lines.size(), 3)):
+		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 91.0 + i * 13.0, C["text_secondary"], 8.8)
 
 func _draw_rewards_section(font: Font, y: float) -> void:
 	var progress := _reward_anim_progress
@@ -683,7 +735,7 @@ func _draw_rewards_section(font: Font, y: float) -> void:
 		{"icon": "exp", "amount": "+%d" % _rewards["exp"], "color": C["thunder"]},
 	]
 	if _rewards["item"]:
-		reward_items.append({"icon": "capture_ball", "amount": "x1", "color": C["text_primary"]})
+		reward_items.append({"icon": "capture_ball", "amount": "x%d" % maxi(1, int(_rewards.get("item_count", 1))), "color": C["text_primary"]})
 	elif _is_win:
 		reward_items.append({"icon": "gem_grass", "amount": "x2", "color": Color(0.65, 1.0, 0.45)})
 	
@@ -706,12 +758,11 @@ func _draw_exp_section(font: Font, y: float) -> void:
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
 	var desc := ""
 	if stage_rewards.has("exp"):
-		var mult := STAR_MULTIPLIERS[_stars] if _stars < STAR_MULTIPLIERS.size() else 1.0
+		var mult := RewardRulesScript.get_star_multiplier(_stars)
 		desc = "基础 %d × %.1fx 星级系数" % [stage_rewards["exp"], mult]
 	else:
-		var base_exp: int = 100 if _is_win else 30
-		var star_bonus: int = _stars * 20
-		desc = "基础 %d + 星级加成 %d" % [base_exp, star_bonus]
+		var fallback_rewards := RewardRulesScript.calc_battle_rewards(stage_rewards, _stars, _is_win)
+		desc = "统一默认奖励 %d" % int(fallback_rewards.get("exp", 0))
 	_draw_centered_text(font, desc, DESIGN_W / 2.0, y + 106.0, C["text_muted"], 9.5)
 
 	var team: Array = _battle_result.get("playerTeam", [])
@@ -722,11 +773,18 @@ func _draw_exp_section(font: Font, y: float) -> void:
 	var start_x: float = (DESIGN_W - total_w) / 2.0
 	for i in range(display_team.size()):
 		var monster: Dictionary = display_team[i]
+		var member_id := str(monster.get("id", ""))
+		var award: Dictionary = _monster_exp_awards.get(member_id, {})
+		var award_exp := int(award.get("exp", 0))
+		var catchup: Dictionary = award.get("catchup", {})
 		var x: float = start_x + float(i) * (card_w + gap)
 		_draw_texture_fit(_tex("monster_exp_card"), Rect2(x, y + 30.0, card_w, 68.0))
 		_draw_monster_portrait(monster, Rect2(x + 6.0, y + 35.0, 42.0, 42.0))
 		_draw_centered_text(font, "Lv.%d" % monster.get("level", 1), x + card_w / 2.0, y + 84.0, C["white"], 8.0)
-		_draw_centered_text(font, "+%d" % _rewards["exp"], x + card_w / 2.0, y + 101.0, Color(0.78, 1.0, 0.45), 8.0)
+		var exp_text := "+%d" % award_exp
+		if bool(catchup.get("enabled", false)):
+			exp_text = "+%d %s" % [award_exp, str(catchup.get("label", ""))]
+		_draw_centered_text(font, exp_text, x + card_w / 2.0, y + 101.0, Color(0.78, 1.0, 0.45), 7.2)
 
 func _draw_levelups_section(font: Font, y: float) -> void:
 	if _level_ups.is_empty():

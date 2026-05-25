@@ -15,6 +15,65 @@ const MAP_NODE_POSITIONS: Array[Vector2] = [
 	Vector2(116, 176), Vector2(178, 128)
 ]
 const MAP_BOSS_POSITION: Vector2 = Vector2(292, 158)
+const BOSS_LAYOUT_DEFAULT := {
+	"position": MAP_BOSS_POSITION,
+	"card_size": Vector2(118.0, 126.0),
+	"badge_path": "res://assets/images/stage/boss_badge.png",
+	"badge_rect": Rect2(-63.0, -74.0, 126.0, 142.0),
+	"art_rect": Rect2(-57.0, -97.0, 114.0, 102.0),
+	"label_y": 25.0,
+	"stars_y": 45.0
+}
+const CHAPTER_BOSS_LAYOUT_OVERRIDES := {
+	"chapter_8": {
+		"position": Vector2(282.0, 182.0),
+		"card_size": Vector2(204.0, 224.0),
+		"badge_path": "res://assets/images/stage/chapter_08_temporal/boss_badge_temporal.png",
+		"badge_rect": Rect2(-101.0, -132.0, 202.0, 268.0),
+		"art_rect": Rect2(-98.0, -134.0, 196.0, 176.0),
+		"label_y": 84.0,
+		"stars_y": 108.0
+	},
+	"chapter_9": {
+		"position": Vector2(274.0, 182.0),
+		"card_size": Vector2(208.0, 236.0),
+		"badge_path": "res://assets/images/stage/chapter_09_star/boss_badge_star.png",
+		"art_path": "res://assets/images/stage/chapter_09_star/boss_star_dragon.png",
+		"badge_rect": Rect2(-104.0, -148.0, 208.0, 304.0),
+		"art_rect": Rect2(-102.0, -142.0, 204.0, 184.0),
+		"label_y": 90.0,
+		"stars_y": 114.0
+	}
+}
+const STAGE_NODE_ASSETS_DEFAULT := {
+	"node_normal": "res://assets/images/stage/node_normal.png",
+	"node_selected": "res://assets/images/stage/node_selected.png",
+	"node_crystal": "res://assets/images/stage/node_crystal.png",
+	"node_chest": "res://assets/images/stage/node_chest.png",
+	"node_locked": "res://assets/images/stage/node_locked.png"
+}
+const CHAPTER_STAGE_NODE_ASSET_OVERRIDES := {
+	"chapter_8": {
+		"node_normal": "res://assets/images/stage/chapter_08_temporal/node_temporal_normal.png",
+		"node_selected": "res://assets/images/stage/chapter_08_temporal/node_temporal_selected.png",
+		"node_crystal": "res://assets/images/stage/chapter_08_temporal/node_temporal_elite.png"
+	},
+	"chapter_9": {
+		"node_normal": "res://assets/images/stage/chapter_09_star/node_star_normal.png",
+		"node_selected": "res://assets/images/stage/chapter_09_star/node_star_selected.png",
+		"node_crystal": "res://assets/images/stage/chapter_09_star/node_star_elite.png"
+	}
+}
+const CHAPTER_STAGE_NODE_SIZE_OVERRIDES := {
+	"chapter_8": {
+		"normal": Vector2(78.0, 62.0),
+		"elite": Vector2(80.0, 98.0)
+	},
+	"chapter_9": {
+		"normal": Vector2(80.0, 64.0),
+		"elite": Vector2(82.0, 100.0)
+	}
+}
 const MAP_CONTENT_TOP: float = 78.0
 const MAP_REWARD_TOP: float = 566.0
 const HEADER_BAR_RECT: Rect2 = Rect2(76.0, 12.0, 286.0, 66.0)
@@ -29,6 +88,8 @@ const HEADER_NEXT_RECT: Rect2 = Rect2(DESIGN_W - 49.0, 30.0, 34.0, 34.0)
 const REWARD_PANEL_RECT: Rect2 = Rect2(17.0, MAP_REWARD_TOP, DESIGN_W - 34.0, 84.0)
 const REWARD_SLOT_SIZE: Vector2 = Vector2(32.0, 34.0)
 const REWARD_SLOT_GAP: float = 7.0
+const SWEEP_DIALOG_W: float = 270.0
+const SWEEP_DIALOG_H: float = 190.0
 
 const MAP_STAGE_POSITION_PRESETS := {
 	4: [
@@ -56,7 +117,12 @@ const CHAPTER_THEME_BACKGROUNDS := {
 
 const CHAPTER_BACKGROUND_OVERRIDES := {
 	"chapter_3": "res://assets/images/stage/stage_map_bg_chapter_03_mystic_forest.png",
-	"chapter_4": "res://assets/images/stage/stage_map_bg_chapter_04_eclipse_canopy.png"
+	"chapter_4": "res://assets/images/stage/stage_map_bg_chapter_04_eclipse_canopy.png",
+	"chapter_5": "res://assets/images/stage/stage_map_bg_chapter_05_thunder_temple.png",
+	"chapter_6": "res://assets/images/stage/stage_map_bg_chapter_06_frost_throne.png",
+	"chapter_7": "res://assets/images/stage/stage_map_bg_chapter_07_void_domain.png",
+	"chapter_8": "res://assets/images/stage/stage_map_bg_chapter_08_temporal_rift.png",
+	"chapter_9": "res://assets/images/stage/stage_map_bg_chapter_09_starlit_temple.png"
 }
 
 const CHAPTER_THEME_TINTS := {
@@ -125,6 +191,8 @@ var _sweep_anim_overlay: Control
 # SweepDialog 内部子节点
 var _sweep_title_label: Label
 var _sweep_gold_label: Label
+var _sweep_exp_label: Label
+var _sweep_rule_label: Label
 var _sweep_confirm_btn: Button
 var _sweep_cancel_btn: Button
 
@@ -149,6 +217,8 @@ var _touched_btn: Variant = null  # 可以是 String 或 null
 var _sweep_dialog_active: bool = false
 var _sweep_dialog_stage_id: String = ""
 var _sweep_dialog_stage_name: String = ""
+var _sweep_dialog_reward: Dictionary = {}
+var _sweep_dialog_stars: int = 0
 
 # 扫荡动画
 var _sweep_anim_active: bool = false
@@ -297,15 +367,15 @@ func _create_ui() -> void:
 	# SweepDialog
 	_sweep_dialog = Control.new()
 	_sweep_dialog.name = "SweepDialog"
-	_sweep_dialog.custom_minimum_size = Vector2(260, 160)
-	_sweep_dialog.position = Vector2((DESIGN_W - 260) / 2.0, (DESIGN_H - 160) / 2.0)
+	_sweep_dialog.custom_minimum_size = Vector2(SWEEP_DIALOG_W, SWEEP_DIALOG_H)
+	_sweep_dialog.position = Vector2((DESIGN_W - SWEEP_DIALOG_W) / 2.0, (DESIGN_H - SWEEP_DIALOG_H) / 2.0)
 	_sweep_dialog.visible = false
 	add_child(_sweep_dialog)
 	
 	var sweep_vbox: VBoxContainer = VBoxContainer.new()
 	sweep_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	sweep_vbox.position = Vector2(0, 20)
-	sweep_vbox.custom_minimum_size = Vector2(260, 120)
+	sweep_vbox.position = Vector2(0, 16)
+	sweep_vbox.custom_minimum_size = Vector2(SWEEP_DIALOG_W, 150)
 	_sweep_dialog.add_child(sweep_vbox)
 	
 	_sweep_title_label = Label.new()
@@ -319,6 +389,19 @@ func _create_ui() -> void:
 	_sweep_gold_label.text = "+120 金币"
 	_sweep_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sweep_vbox.add_child(_sweep_gold_label)
+
+	_sweep_exp_label = Label.new()
+	_sweep_exp_label.name = "ExpLabel"
+	_sweep_exp_label.text = "+0 经验"
+	_sweep_exp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sweep_vbox.add_child(_sweep_exp_label)
+
+	_sweep_rule_label = Label.new()
+	_sweep_rule_label.name = "RuleLabel"
+	_sweep_rule_label.text = "3 星扫荡收益 80%"
+	_sweep_rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_sweep_rule_label.add_theme_font_size_override("font_size", 11)
+	sweep_vbox.add_child(_sweep_rule_label)
 	
 	var sweep_btn_container: HBoxContainer = HBoxContainer.new()
 	sweep_btn_container.alignment = HBoxContainer.ALIGNMENT_CENTER
@@ -443,19 +526,25 @@ func _build_cards() -> void:
 		
 		var stars: int = 0
 		var can_sweep: bool = false
+		var unlock_state: Dictionary = {"unlocked": true}
 		if _storage:
 			stars = _storage.get_stage_stars(stage["id"]) if _storage.has_method("get_stage_stars") else 0
 			can_sweep = _storage.can_sweep(stage["id"]) if _storage.has_method("can_sweep") else false
+			if _storage.has_method("get_stage_unlock_state"):
+				unlock_state = _storage.get_stage_unlock_state(stage["id"])
 		
 		var pos: Vector2
+		var boss_layout := _boss_layout_for_chapter(str(chapter.get("id", "")))
 		if is_boss:
-			pos = MAP_BOSS_POSITION
+			pos = boss_layout["position"]
 		else:
 			pos = normal_positions[node_index] if node_index < normal_positions.size() else MAP_NODE_POSITIONS[-1]
 			node_index += 1
 		
-		var node_w: float = 118.0 if is_boss else (66.0 if is_elite else 64.0)
-		var node_h: float = 126.0 if is_boss else (76.0 if is_elite else 54.0)
+		var boss_card_size: Vector2 = boss_layout["card_size"]
+		var stage_node_size := _stage_node_size_for_chapter(str(chapter.get("id", "")), is_elite)
+		var node_w: float = boss_card_size.x if is_boss else stage_node_size.x
+		var node_h: float = boss_card_size.y if is_boss else stage_node_size.y
 		
 		var card: Dictionary = {
 			"type": "stage",
@@ -468,13 +557,14 @@ func _build_cards() -> void:
 			"cy": pos.y,
 			"w": node_w,
 			"h": node_h,
-			"enabled": true,
+			"enabled": bool(unlock_state.get("unlocked", true)),
 			"chapter_id": chapter.get("id", ""),
 			"stage_data": stage,
 			"stars": stars,
 			"can_sweep": can_sweep,
 			"is_elite": is_elite,
 			"is_boss": is_boss,
+			"unlock_state": unlock_state,
 			"sweep_rect": Rect2(pos.x + 24, pos.y - 26, 30, 26)
 		}
 		_cards.append(card)
@@ -489,6 +579,25 @@ func _count_non_boss_stages(stages: Array) -> int:
 		if stage.get("type", "normal") != "boss":
 			count += 1
 	return count
+
+func _boss_layout_for_chapter(chapter_id: String) -> Dictionary:
+	var layout := BOSS_LAYOUT_DEFAULT.duplicate(true)
+	if CHAPTER_BOSS_LAYOUT_OVERRIDES.has(chapter_id):
+		layout.merge(CHAPTER_BOSS_LAYOUT_OVERRIDES[chapter_id], true)
+	return layout
+
+func _stage_node_size_for_chapter(chapter_id: String, is_elite: bool) -> Vector2:
+	var kind := "elite" if is_elite else "normal"
+	var default_size := Vector2(66.0, 76.0) if is_elite else Vector2(64.0, 54.0)
+	if not CHAPTER_STAGE_NODE_SIZE_OVERRIDES.has(chapter_id):
+		return default_size
+	return CHAPTER_STAGE_NODE_SIZE_OVERRIDES[chapter_id].get(kind, default_size)
+
+func _stage_node_asset_path(chapter_id: String, node_key: String) -> String:
+	var paths := STAGE_NODE_ASSETS_DEFAULT.duplicate(true)
+	if CHAPTER_STAGE_NODE_ASSET_OVERRIDES.has(chapter_id):
+		paths.merge(CHAPTER_STAGE_NODE_ASSET_OVERRIDES[chapter_id], true)
+	return str(paths.get(node_key, STAGE_NODE_ASSETS_DEFAULT["node_normal"]))
 
 func _sample_stage_positions(count: int) -> Array[Vector2]:
 	var result: Array[Vector2] = []
@@ -560,9 +669,10 @@ func _on_touch_start(x: float, y: float) -> void:
 	
 	# 检查关卡卡片
 	for card: Dictionary in _cards:
-		if not card.get("enabled", false):
-			continue
 		if x >= card["x"] and x <= card["x"] + card["w"] and y >= card["y"] and y <= card["y"] + card["h"]:
+			if not card.get("enabled", false):
+				_touched_btn = null
+				return
 			_touched_btn = card["id"]
 			return
 	
@@ -595,21 +705,20 @@ func _on_tap(x: float, y: float) -> void:
 		if HEADER_NEXT_RECT.has_point(Vector2(x, y)):
 			_switch_chapter(1)
 			return
-	
-	# 检查关卡卡片
-	for card: Dictionary in _cards:
-		if not card.get("enabled", false):
-			continue
 		
+		# 检查关卡卡片
+	for card: Dictionary in _cards:
 		# 扫荡按钮
 		var sweep: Rect2 = card.get("sweep_rect")
-		if sweep and card.get("can_sweep", false):
+		if card.get("enabled", false) and sweep and card.get("can_sweep", false):
 			if x >= sweep.position.x and x <= sweep.position.x + sweep.size.x and y >= sweep.position.y and y <= sweep.position.y + sweep.size.y:
 				_show_sweep_dialog(card["id"], card.get("text", ""))
 				return
 		
 		# 关卡主体
 		if x >= card["x"] and x <= card["x"] + card["w"] and y >= card["y"] and y <= card["y"] + card["h"]:
+			if not card.get("enabled", false):
+				return
 			if card.get("type") == "stage":
 				stage_selected.emit(card["id"], card.get("stage_data", {}), _current_chapter_index)
 			return
@@ -628,13 +737,13 @@ func _show_sweep_dialog(stage_id: String, stage_name: String) -> void:
 	_refresh_sweep_dialog_content()
 
 func _handle_sweep_dialog_tap(x: float, y: float) -> void:
-	var dlg_w: float = 260.0
-	var dlg_h: float = 160.0
+	var dlg_w: float = SWEEP_DIALOG_W
+	var dlg_h: float = SWEEP_DIALOG_H
 	var dlg_x: float = (DESIGN_W - dlg_w) / 2.0
 	var dlg_y: float = (DESIGN_H - dlg_h) / 2.0
 	
-	var confirm_btn: Rect2 = Rect2(dlg_x + 20, dlg_y + 95, 100, 40)
-	var cancel_btn: Rect2 = Rect2(dlg_x + 140, dlg_y + 95, 100, 40)
+	var confirm_btn: Rect2 = Rect2(dlg_x + 25, dlg_y + 128, 100, 40)
+	var cancel_btn: Rect2 = Rect2(dlg_x + 145, dlg_y + 128, 100, 40)
 	
 	if confirm_btn.has_point(Vector2(x, y)):
 		_do_sweep_confirm()
@@ -648,6 +757,8 @@ func _handle_sweep_dialog_tap(x: float, y: float) -> void:
 func _on_sweep_cancel_pressed() -> void:
 	_sweep_dialog_active = false
 	_sweep_dialog.visible = false
+	_sweep_dialog_reward = {}
+	_sweep_dialog_stars = 0
 
 func _do_sweep_confirm() -> void:
 	if not _storage:
@@ -670,12 +781,20 @@ func _refresh_sweep_dialog_content() -> void:
 	var reward: Dictionary = {}
 	if _storage and _storage.has_method("get_sweep_reward"):
 		reward = _storage.get_sweep_reward(_sweep_dialog_stage_id)
+	_sweep_dialog_reward = reward
+	_sweep_dialog_stars = _storage.get_stage_stars(_sweep_dialog_stage_id) if _storage and _storage.has_method("get_stage_stars") else 0
 	
 	if _sweep_title_label:
 		_sweep_title_label.text = "确认扫荡: %s" % _sweep_dialog_stage_name
 	
 	if _sweep_gold_label:
 		_sweep_gold_label.text = "+%d 金币" % reward.get("gold", 120)
+
+	if _sweep_exp_label:
+		_sweep_exp_label.text = "+%d 经验" % reward.get("exp", 0)
+
+	if _sweep_rule_label:
+		_sweep_rule_label.text = "%d 星扫荡收益 80%%" % clampi(_sweep_dialog_stars, 1, 3)
 
 # ==================== 动画更新 ====================
 
@@ -791,11 +910,12 @@ func _refresh_stage_nodes() -> void:
 
 func _draw() -> void:
 	_draw_stage_background()
-	_draw_chapter_header()
 	_draw_stage_paths()
 	for card: Dictionary in _cards:
 		_draw_stage_card(card)
 	_draw_reward_panel()
+	_draw_chapter_header()
+	_draw_chapter_mechanic_banner()
 	if _sweep_dialog_active:
 		_draw_sweep_dialog()
 
@@ -818,6 +938,10 @@ func _current_chapter() -> Dictionary:
 func _current_chapter_element() -> String:
 	var chapter := _current_chapter()
 	return str(chapter.get("element", "grass"))
+
+func _current_chapter_mechanic() -> Dictionary:
+	var chapter := _current_chapter()
+	return chapter.get("chapterMechanic", {})
 
 func _current_chapter_background_path() -> String:
 	var chapter := _current_chapter()
@@ -863,6 +987,17 @@ func _draw_chapter_header() -> void:
 	_draw_text_in_rect("%d/%d" % [chapter_stars, total_stars], HEADER_STAR_TEXT_RECT, Color.WHITE, 14, true)
 	_draw_page_dots(DESIGN_W / 2.0, HEADER_BAR_RECT.position.y + HEADER_BAR_RECT.size.y + 8.0, _chapters.size(), _current_chapter_index)
 
+func _draw_chapter_mechanic_banner() -> void:
+	var mechanic := _current_chapter_mechanic()
+	if mechanic.is_empty():
+		return
+	var theme_color: Color = CHAPTER_THEME_TINTS.get(_current_chapter_element(), Color(0.30, 0.95, 0.34))
+	var rect := Rect2(18.0, 86.0, DESIGN_W - 36.0, 52.0)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.03, 0.06, 0.12, 0.64))
+	_draw_rounded_rect(rect.position.x, rect.position.y, 7.0, rect.size.y, 4.0, Color(theme_color.r, theme_color.g, theme_color.b, 0.9))
+	_draw_text_in_rect("玩法：%s" % str(mechanic.get("name", "章节机制")), Rect2(rect.position.x + 16.0, rect.position.y + 5.0, rect.size.x - 28.0, 20.0), theme_color, 15, true, 11)
+	_draw_text_in_rect(str(mechanic.get("tagline", "")), Rect2(rect.position.x + 16.0, rect.position.y + 28.0, rect.size.x - 28.0, 18.0), Color(0.88, 0.93, 1.0), 13, false, 10)
+
 func _draw_page_dots(cx: float, cy: float, total: int, current: int) -> void:
 	if total <= 0:
 		return
@@ -899,35 +1034,57 @@ func _draw_stage_card(card: Dictionary) -> void:
 	var is_boss: bool = card.get("is_boss", false)
 	var is_elite: bool = card.get("is_elite", false)
 	var is_pressed: bool = _touched_btn == card.get("id", "")
+	var is_unlocked: bool = card.get("enabled", true)
 	var draw_cx: float = card.get("cx", 0.0)
 	var draw_y: float = card.get("y", 0.0)
 	
 	if is_boss:
-		var boss_alpha := 0.82 if is_pressed else 1.0
-		_draw_texture_contain(_get_texture("res://assets/images/stage/boss_badge.png"), Rect2(draw_cx - 63, draw_y - 11, 126, 142), boss_alpha)
-		var boss_path := str(CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/stage/boss_flower.png"))
-		_draw_texture_contain(_get_texture(boss_path), Rect2(draw_cx - 57, draw_y - 34, 114, 102), boss_alpha)
-		_draw_text_center("BOSS", draw_cx, draw_y + 88, Color(1.0, 0.82, 0.0), 13, true, 70)
-		_draw_stars(draw_cx - 22, draw_y + 108, card.get("stars", 0))
+		var boss_alpha := 0.42 if not is_unlocked else (0.82 if is_pressed else 1.0)
+		var boss_layout := _boss_layout_for_chapter(str(card.get("chapter_id", "")))
+		var badge_rect: Rect2 = boss_layout["badge_rect"]
+		var art_rect: Rect2 = boss_layout["art_rect"]
+		var boss_origin := Vector2(draw_cx, card.get("cy", 0.0))
+		_draw_texture_contain(_get_texture(str(boss_layout["badge_path"])), Rect2(badge_rect.position + boss_origin, badge_rect.size), boss_alpha)
+		var boss_path := str(boss_layout.get("art_path", CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/stage/boss_flower.png")))
+		_draw_texture_contain(_get_texture(boss_path), Rect2(art_rect.position + boss_origin, art_rect.size), boss_alpha)
+		_draw_text_center("BOSS", draw_cx, card.get("cy", 0.0) + float(boss_layout["label_y"]), Color(1.0, 0.82, 0.0), 13, true, 70)
+		_draw_stars(draw_cx - 22, card.get("cy", 0.0) + float(boss_layout["stars_y"]), card.get("stars", 0))
+		if not is_unlocked:
+			_draw_stage_lock_overlay(card, true)
 		return
 	
 	var node_key := "node_crystal" if is_elite else "node_normal"
-	if card.get("stars", 0) >= 3 and card.get("stage_no", 0) == _cards.size():
+	if not is_unlocked:
+		node_key = "node_locked"
+	if is_unlocked and card.get("stars", 0) >= 3 and card.get("stage_no", 0) == _cards.size():
 		node_key = "node_chest"
 	if is_pressed:
 		node_key = "node_selected"
-	var node_path := "res://assets/images/stage/%s.png" % node_key
-	var node_w := 62.0 if is_elite else 60.0
-	var node_h := 70.0 if is_elite else 50.0
+	var node_path := _stage_node_asset_path(str(card.get("chapter_id", "")), node_key)
+	var node_w: float = float(card.get("w", 62.0 if is_elite else 60.0))
+	var node_h: float = float(card.get("h", 70.0 if is_elite else 50.0))
 	var node_x := draw_cx - node_w / 2.0
 	var node_y: float = float(card.get("cy", 0.0)) - node_h / 2.0
 	
 	if _get_texture(node_path):
-		_draw_texture_contain(_get_texture(node_path), Rect2(node_x, node_y, node_w, node_h))
+		_draw_texture_contain(_get_texture(node_path), Rect2(node_x, node_y, node_w, node_h), 0.55 if not is_unlocked else 1.0)
 	else:
-		draw_circle(Vector2(draw_cx, card.get("cy", 0.0)), 26, Color(0.1, 0.5, 1.0, 0.95))
-	_draw_text_center(str(card.get("stage_no", 1)), draw_cx, card.get("cy", 0.0) + (-1.0 if is_elite else -4.0), Color.WHITE, 15, true, 42)
-	_draw_stars(draw_cx - 21, card.get("cy", 0.0) + 28, card.get("stars", 0))
+		draw_circle(Vector2(draw_cx, card.get("cy", 0.0)), 26, Color(0.08, 0.10, 0.14, 0.72) if not is_unlocked else Color(0.1, 0.5, 1.0, 0.95))
+	_draw_text_center(str(card.get("stage_no", 1)), draw_cx, card.get("cy", 0.0) + (-1.0 if is_elite else -4.0), Color(0.62, 0.68, 0.76) if not is_unlocked else Color.WHITE, 15, true, 42)
+	if is_unlocked:
+		_draw_stars(draw_cx - 21, card.get("cy", 0.0) + 28, card.get("stars", 0))
+	else:
+		_draw_stage_lock_overlay(card, false)
+
+func _draw_stage_lock_overlay(card: Dictionary, is_boss: bool) -> void:
+	var cx: float = card.get("cx", 0.0)
+	var cy: float = card.get("cy", 0.0)
+	var required: Dictionary = card.get("unlock_state", {})
+	var required_name := str(required.get("requiredStageName", "前置关卡"))
+	var label := "通关%s解锁" % required_name if not required_name.is_empty() else "未解锁"
+	var label_y := cy + (64.0 if is_boss else 36.0)
+	_draw_text_center("锁", cx, cy + (-3.0 if is_boss else 0.0), Color(0.78, 0.84, 0.92), 14, true, 38)
+	_draw_text_center(label, cx, label_y, Color(0.68, 0.76, 0.88), 8, false, 92)
 
 func _draw_stars(x: float, y: float, count: int) -> void:
 	for i in range(3):
@@ -956,14 +1113,23 @@ func _draw_reward_icon(key: String, rect: Rect2) -> void:
 	_draw_texture_contain(_get_texture(path), rect.grow(-inset))
 
 func _draw_sweep_dialog() -> void:
-	var dlg_w := 260.0
-	var dlg_h := 160.0
+	var dlg_w := SWEEP_DIALOG_W
+	var dlg_h := SWEEP_DIALOG_H
 	var dlg_x := (DESIGN_W - dlg_w) / 2.0
 	var dlg_y := (DESIGN_H - dlg_h) / 2.0
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0, 0, 0, 0.45))
 	_draw_texture_fit(_get_texture("res://assets/images/stage/ui_reward_panel_clean.png"), Rect2(dlg_x, dlg_y, dlg_w, dlg_h), 0.96)
 	_draw_text_center("确认扫荡", DESIGN_W / 2.0, dlg_y + 35, Color.WHITE, 18, true, 180)
 	_draw_text_center(_sweep_dialog_stage_name, DESIGN_W / 2.0, dlg_y + 62, Color(0.8, 0.85, 1.0), 13, false, 200)
+	_draw_text_center("+%d 金币    +%d 经验" % [int(_sweep_dialog_reward.get("gold", 0)), int(_sweep_dialog_reward.get("exp", 0))], DESIGN_W / 2.0, dlg_y + 91, Color(1.0, 0.86, 0.3), 15, true, 230)
+	_draw_text_center("%d 星通关已解锁，扫荡获得对应奖励的 80%%" % clampi(_sweep_dialog_stars, 1, 3), DESIGN_W / 2.0, dlg_y + 116, Color(0.66, 0.78, 1.0), 10, false, 230)
+
+	var confirm_rect := Rect2(dlg_x + 25, dlg_y + 128, 100, 40)
+	var cancel_rect := Rect2(dlg_x + 145, dlg_y + 128, 100, 40)
+	_draw_rounded_rect(confirm_rect.position.x, confirm_rect.position.y, confirm_rect.size.x, confirm_rect.size.y, 8.0, Color(0.18, 0.52, 0.95, 0.92))
+	_draw_rounded_rect(cancel_rect.position.x, cancel_rect.position.y, cancel_rect.size.x, cancel_rect.size.y, 8.0, Color(0.18, 0.22, 0.32, 0.92))
+	_draw_text_center("扫荡", confirm_rect.get_center().x, confirm_rect.position.y + 25.0, Color.WHITE, 14, true, 90)
+	_draw_text_center("取消", cancel_rect.get_center().x, cancel_rect.position.y + 25.0, Color(0.82, 0.88, 0.96), 14, true, 90)
 
 func _get_texture(path: String) -> Texture2D:
 	if path.is_empty() or not ResourceLoader.exists(path):

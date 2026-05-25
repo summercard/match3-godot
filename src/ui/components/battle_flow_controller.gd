@@ -16,4 +16,5 @@ static func build_result_payload(battle, capture_state: Dictionary) -> Dictionar
 	result["capture_target"] = capture_state.get("target", {})
 	result["capture_result_text"] = capture_state.get("result_text", {})
 	result["capture_item_used"] = capture_state.get("item_used", {})
+	result["capture_window"] = capture_state.get("window", {})
 	return result

@@ -83,6 +83,7 @@ var _inventory: Dictionary = {}
 var _player: Dictionary = {}
 var _item_list: Array = []
 var _selected_item: Dictionary = {}
+var _capture_settings: Dictionary = {}
 var _toast_text: String = ""
 var _toast_timer: float = 0.0
 var _scroll_offset: float = 0.0
@@ -102,6 +103,7 @@ func init(data: Dictionary = {}) -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
+	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else {"autoCapture": false, "equippedItem": ""}
 	_active_tab = data.get("tab", "all")
 	_selected_item = {}
 	_toast_text = ""
@@ -234,7 +236,12 @@ func _use_item(item_id: String) -> void:
 				_storage.add_gold(gold_gain)
 				_show_toast("获得 %d 金币" % gold_gain)
 		"capture":
-			_show_toast("捕获球会在胜利结算时自动使用")
+			if _storage and _storage.has_method("save_capture_settings"):
+				_capture_settings["equippedItem"] = item_id
+				_storage.save_capture_settings(_capture_settings)
+				_show_toast("已装备为捕捉球")
+			else:
+				_show_toast("捕捉球可在战斗中选择")
 		"battle":
 			_show_toast("战斗道具请在战斗中使用")
 		"evolution":
@@ -243,6 +250,7 @@ func _use_item(item_id: String) -> void:
 			_show_toast("该道具暂时无法使用")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
+	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else _capture_settings
 	_build_item_list()
 	_scroll_offset = minf(_scroll_offset, _get_max_scroll_offset())
 	queue_redraw()
@@ -367,8 +375,13 @@ func _draw_detail_panel() -> void:
 	_draw_text_left(item_data.get("name", ""), Vector2(143.0, 549.0), C["blue"], 18.0, true, 160.0)
 	_draw_text_left(_wrap_text(item_data.get("desc", ""), 15), Vector2(143.0, 579.0), C["muted"], 13.0, false, 178.0)
 	_draw_text_left("拥有: %d" % int(_selected_item.get("count", 0)), Vector2(143.0, 630.0), C["gold"], 12.0, true, 100.0)
+	var item_type := str(item_data.get("type", ""))
+	var equipped := item_type == "capture" and str(_capture_settings.get("equippedItem", "")) == item_id
+	if item_type == "capture":
+		_draw_text_left("战斗捕捉球: %s" % ("已装备" if equipped else "未装备"), Vector2(223.0, 630.0), C["gold"] if equipped else C["muted"], 12.0, true, 122.0)
 	_draw_texture_fit(_tex("use_button"), USE_BTN_RECT)
-	_draw_text_shadow("使用", USE_BTN_RECT.get_center() + Vector2(0, 8.0), C["white"], 20.0, true, USE_BTN_RECT.size.x)
+	var button_text := "装备" if item_type == "capture" and not equipped else ("已装备" if item_type == "capture" else "使用")
+	_draw_text_shadow(button_text, USE_BTN_RECT.get_center() + Vector2(0, 8.0), C["white"], 18.0, true, USE_BTN_RECT.size.x)
 
 
 func _draw_toast() -> void:

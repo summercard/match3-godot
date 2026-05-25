@@ -4,6 +4,7 @@
 class_name SceneTeam
 extends Control
 
+const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")
 
@@ -278,6 +279,11 @@ func _calc_stats(monster_id: String, level: int) -> Dictionary:
 		return MonsterDB.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
 	return {"hp": 50, "atk": 10, "def": 10, "spd": 10}
 
+func _get_catchup_state(instance_id: String) -> Dictionary:
+	if _storage and _storage.has_method("get_instance_catchup_state") and not _storage.get_monster_instance(instance_id).is_empty():
+		return _storage.get_instance_catchup_state(instance_id)
+	return {"enabled": false, "label": ""}
+
 func _get_roster_page_count() -> int:
 	return maxi(1, ceili(float(_captured_monsters.size()) / float(LIST_PAGE_SIZE)))
 
@@ -488,6 +494,7 @@ func _draw() -> void:
 		_draw_slot(font, s, t)
 
 	_draw_team_summary(font)
+	_draw_bond_summary(font)
 	_draw_roster_toolbar(font)
 	
 	# 渲染怪物列表
@@ -559,6 +566,48 @@ func _draw_team_summary(font: Font) -> void:
 					skill_color = C["gold"]
 	_draw_text_in_rect(font, skill_text, Rect2(194.0, 264.0, 155.0, 20.0), skill_color, 10.0, 8.0)
 
+func _draw_bond_summary(font: Font) -> void:
+	var branches: Array = EcologyBondRulesScript.calc_team_bond_branches(_get_team_units())
+	var bond: Dictionary = branches[0] if not branches.is_empty() else {}
+	var rect := Rect2(14.0, 302.0, 346.0, 22.0)
+	var active := str(bond.get("status", "hint")) == "active"
+	var color := Color(0.08, 0.24, 0.16, 0.88) if active else Color(0.08, 0.11, 0.20, 0.88)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, color)
+	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, C["gold"] if active else Color(0.22, 0.36, 0.62, 0.82), 1.0)
+	var title := str(bond.get("name", "羁绊"))
+	var summary := str(bond.get("summary", "选择怪物查看羁绊方向。"))
+	_draw_text_in_rect(font, "分支：%s" % title, Rect2(rect.position.x + 10.0, rect.position.y + 2.0, 102.0, 18.0), C["gold"] if active else C["text_secondary"], 10.0, 8.0)
+	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 2.0, 222.0, 18.0), C["text_primary"] if active else C["text_muted"], 9.0, 7.0)
+
+func _get_team_monster_defs() -> Array:
+	var result: Array = []
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		var ref_id := "" if value == null else str(value)
+		if ref_id.is_empty():
+			continue
+		var md := _get_monster_data(ref_id)
+		if not md.is_empty():
+			result.append(md)
+	return result
+
+func _get_team_units() -> Array:
+	var result: Array = []
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		var ref_id := "" if value == null else str(value)
+		if ref_id.is_empty():
+			continue
+		if _storage and _storage.has_method("get_monster_instance") and not _storage.get_monster_instance(ref_id).is_empty():
+			var view: Dictionary = MonsterServiceScript.get_instance_view(ref_id, _storage)
+			if not view.is_empty():
+				result.append(view)
+				continue
+		var md := _get_monster_data(ref_id)
+		if not md.is_empty():
+			result.append(md)
+	return result
+
 func _draw_roster_toolbar(font: Font) -> void:
 	var y := LIST_PANEL_RECT.position.y + 8.0
 	_draw_rounded_rect(LIST_PANEL_RECT.position.x, LIST_PANEL_RECT.position.y, LIST_PANEL_RECT.size.x, LIST_PANEL_RECT.size.y, 10.0, Color(0.03, 0.08, 0.16, 0.90))
@@ -620,8 +669,12 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 			
 			var lvl: int = _get_real_level(monster_id)
 			_draw_text(font, "Lv.%d" % lvl, cx, new_y + new_h - 57.0, C["white"], 10.0)
+			var catchup_state := _get_catchup_state(monster_id)
+			if bool(catchup_state.get("enabled", false)):
+				_draw_rounded_rect(cx - 35.0, new_y + new_h - 74.0, 70.0, 16.0, 6.0, Color(0.10, 0.45, 0.35, 0.86))
+				_draw_text(font, str(catchup_state.get("label", "")), cx, new_y + new_h - 62.0, Color(0.75, 1.0, 0.72), 7.5)
 			
-			var elem: String = md.get("element", "fire")
+			var elem: String = md.get("boardAffinity", md.get("element", "fire"))
 			_draw_element_icon(elem, Rect2(new_x + 8.0, new_y + 9.0, 22.0, 22.0))
 			
 			var stats: Dictionary = _calc_stats(monster_id, lvl)
@@ -684,15 +737,20 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		# 等级
 		var lvl: int = _get_real_level(instance_id)
 		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 69.0, C["white"], 8.0)
+		var catchup_state := _get_catchup_state(instance_id)
+		if bool(catchup_state.get("enabled", false)):
+			_draw_rounded_rect(card_x + 9.0, card_y + 72.0, LIST_ITEM_W - 18.0, 12.0, 5.0, Color(0.10, 0.45, 0.35, 0.88))
+			_draw_text(font, str(catchup_state.get("label", "")), card_x + LIST_ITEM_W / 2.0, card_y + 82.0, Color(0.75, 1.0, 0.72), 6.8)
 		
 		# 属性角标
-		var elem: String = md.get("element", "fire")
+		var elem: String = md.get("boardAffinity", md.get("element", "fire"))
 		_draw_element_icon(elem, Rect2(card_x + 5.0, card_y + 5.0, 18.0, 18.0))
 		var rarity := int(md.get("rarity", 1))
 		var stars := ""
 		for s in range(mini(rarity, 5)):
 			stars += "★"
-		_draw_text(font, stars, card_x + LIST_ITEM_W / 2.0, card_y + 82.0, C["gold"], 7.5)
+		var stars_y := 82.0 if not bool(catchup_state.get("enabled", false)) else 91.0
+		_draw_text(font, stars, card_x + LIST_ITEM_W / 2.0, card_y + stars_y, C["gold"], 7.5)
 
 	if _captured_monsters.is_empty():
 		_draw_text(font, "暂无可编队精灵", DESIGN_W / 2.0, LIST_START_Y + 80.0, C["text_muted"], 12.0)

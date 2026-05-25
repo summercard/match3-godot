@@ -3,6 +3,7 @@
 class_name SceneAlbum
 extends Control
 
+const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 
 const DESIGN_W: float = 375.0
@@ -94,6 +95,7 @@ var _all_monsters: Array = []
 var _filtered_monsters: Array = []
 var _captured_ids: Array = []
 var _selected_element: String = "all"
+var _selected_tab: String = "album"
 var _selected_monster_id: String = ""
 var _scroll_y: float = 0.0
 var _max_scroll_y: float = 0.0
@@ -166,6 +168,14 @@ func _handle_tap(pos: Vector2) -> void:
 	if _back_rect.has_point(pos):
 		_go_back()
 		return
+	for i in range(3):
+		var tab_rect := _bottom_tab_rect(i)
+		if tab_rect.has_point(pos):
+			_selected_tab = ["album", "bond", "collection"][i]
+			_selected_monster_id = ""
+			_scroll_y = 0.0
+			queue_redraw()
+			return
 	for i in range(ELEMENT_ORDER.size()):
 		var rect := _filter_rect(i)
 		if rect.has_point(pos):
@@ -230,10 +240,15 @@ func _apply_filter() -> void:
 func _draw() -> void:
 	_draw_background()
 	_draw_header()
-	_draw_filters()
-	_draw_grid()
-	if not _selected_monster_id.is_empty():
-		_draw_detail_panel()
+	if _selected_tab == "bond":
+		_draw_bond_overview()
+	elif _selected_tab == "collection":
+		_draw_collection_overview()
+	else:
+		_draw_filters()
+		_draw_grid()
+		if not _selected_monster_id.is_empty():
+			_draw_detail_panel()
 	_draw_bottom_tabs()
 
 func _draw_background() -> void:
@@ -316,7 +331,14 @@ func _draw_detail_panel() -> void:
 	_draw_detail_stats(monster)
 	_draw_detail_skill(monster)
 	_draw_detail_evolution(monster)
+	_draw_detail_ecology(monster)
 	_draw_detail_buttons(monster)
+
+func _draw_detail_ecology(monster: Dictionary) -> void:
+	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
+	var ecology: Dictionary = identity.get("ecology", {})
+	_draw_rounded_rect(154.0, DETAIL_Y + 150.0, 188.0, 14.0, 5.0, Color(0.05, 0.10, 0.18, 0.78))
+	_draw_text("%s · %s" % [identity.get("roleLabel", "角色"), ecology.get("name", "生态")], 248.0, DETAIL_Y + 161.0, C["gold"], 8.8, 176.0)
 
 func _draw_detail_nature(monster_id: String) -> void:
 	# 从SaveManager获取性格数据
@@ -401,11 +423,13 @@ func _draw_detail_stats(monster: Dictionary) -> void:
 		_draw_text(str(stats[i][1]), x + 170.0, row_y + 15.0, C["text"], 10.0, 40.0)
 
 func _draw_detail_skill(monster: Dictionary) -> void:
-	var skill: Dictionary = monster.get("skill", {})
+	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
 	_draw_texture_fit(_tex(ALBUM_ASSETS["skill_panel"]), Rect2(24.0, DETAIL_Y + 166.0, 124.0, 58.0))
 	_draw_texture_fit(_tex(ELEMENT_ICON_ASSETS.get(monster.get("element", ""), "")), Rect2(32.0, DETAIL_Y + 176.0, 32.0, 32.0))
 	_draw_text(skill.get("name", "未知技能"), 94.0, DETAIL_Y + 187.0, C["text"], 11.0, 76.0)
-	_draw_text("能量 %d  倍率 %.1fx" % [skill.get("cost", 0), skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 8.5, 76.0)
+	var skill_type := str(skill.get("type", "strike"))
+	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
+	_draw_text("能量 %d  %s %.1fx" % [skill.get("cost", 0), type_label, skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 8.5, 76.0)
 
 func _draw_detail_evolution(monster: Dictionary) -> void:
 	_draw_texture_fit(_tex(ALBUM_ASSETS["evolution_strip"]), Rect2(154.0, DETAIL_Y + 164.0, 188.0, 60.0))
@@ -427,15 +451,71 @@ func _draw_bottom_tabs() -> void:
 	var y := BOTTOM_TAB_Y
 	var tab_w := 112.0
 	var tabs := [
-		["图鉴", "icon_album", true],
-		["羁绊", "icon_paw", false],
-		["收藏", "icon_favorite", false],
+		["图鉴", "icon_album", _selected_tab == "album"],
+		["羁绊", "icon_paw", _selected_tab == "bond"],
+		["目标", "icon_favorite", _selected_tab == "collection"],
 	]
 	for i in range(tabs.size()):
-		var x := 18.0 + float(i) * (tab_w + 4.0)
+		var rect := _bottom_tab_rect(i)
+		var x := rect.position.x
 		_draw_texture_fit(_tex(ALBUM_ASSETS["bottom_tab_selected"] if tabs[i][2] else ALBUM_ASSETS["bottom_tab_normal"]), Rect2(x, y, tab_w, 42.0), 1.0 if tabs[i][2] else 0.78)
 		_draw_texture_fit(_tex(ALBUM_ASSETS[tabs[i][1]]), Rect2(x + 14.0, y + 6.0, 28.0, 28.0), 1.0 if tabs[i][2] else 0.6)
 		_draw_text(tabs[i][0], x + 72.0, y + 27.0, C["text"] if tabs[i][2] else C["text_muted"], 13.0, 60.0)
+
+func _bottom_tab_rect(index: int) -> Rect2:
+	var tab_w := 112.0
+	return Rect2(18.0 + float(index) * (tab_w + 4.0), BOTTOM_TAB_Y, tab_w, 42.0)
+
+func _draw_bond_overview() -> void:
+	_draw_text("生态羁绊", DESIGN_W / 2.0, 88.0, C["gold"], 22.0, 220.0)
+	_draw_text("补齐生态与角色身份，解锁更明确的组队方向。", DESIGN_W / 2.0, 112.0, C["text_muted"], 12.0, 310.0)
+	var progress: Array = EcologyBondRulesScript.get_ecology_progress(_all_monsters, _captured_ids)
+	var y := 134.0
+	for i in range(mini(progress.size(), 8)):
+		var group: Dictionary = progress[i]
+		var owned := int(group.get("owned", 0))
+		var total := maxi(1, int(group.get("total", 1)))
+		var ratio := float(owned) / float(total)
+		var rect := Rect2(24.0, y + float(i) * 54.0, DESIGN_W - 48.0, 46.0)
+		_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.04, 0.08, 0.17, 0.86))
+		_draw_stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 1.0, Color(0.22, 0.36, 0.62, 0.86))
+		_draw_text(str(group.get("name", "")), rect.position.x + 68.0, rect.position.y + 18.0, C["text"], 13.0, 120.0)
+		_draw_text(str(group.get("theme", "")), rect.position.x + 178.0, rect.position.y + 18.0, C["text_muted"], 10.0, 150.0)
+		draw_rect(Rect2(rect.position.x + 16.0, rect.position.y + 28.0, rect.size.x - 84.0, 7.0), Color(0.01, 0.03, 0.08, 0.92))
+		draw_rect(Rect2(rect.position.x + 16.0, rect.position.y + 28.0, (rect.size.x - 84.0) * ratio, 7.0), C["green"] if ratio >= 1.0 else C["blue"])
+		_draw_text("%d/%d" % [owned, total], rect.end.x - 36.0, rect.position.y + 34.0, C["gold"], 12.0, 58.0)
+
+func _draw_collection_overview() -> void:
+	_draw_text("生态目标", DESIGN_W / 2.0, 88.0, C["gold"], 22.0, 220.0)
+	_draw_text("先看缺口和组队方向，奖励口后续再接。", DESIGN_W / 2.0, 112.0, C["text_muted"], 12.0, 300.0)
+	var role_target: Dictionary = EcologyBondRulesScript.get_role_collection_target(_all_monsters, _captured_ids)
+	_draw_collection_role_target(role_target)
+	var targets: Array = EcologyBondRulesScript.get_ecology_targets(_all_monsters, _captured_ids)
+	var y := 190.0
+	for i in range(mini(targets.size(), 6)):
+		_draw_collection_target_card(targets[i], Rect2(24.0, y + float(i) * 64.0, DESIGN_W - 48.0, 56.0))
+
+func _draw_collection_role_target(target: Dictionary) -> void:
+	var rect := Rect2(24.0, 132.0, DESIGN_W - 48.0, 46.0)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.06, 0.10, 0.20, 0.88))
+	_draw_stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 1.0, Color(0.38, 0.48, 0.68, 0.86))
+	_draw_text(str(target.get("name", "角色目标")), rect.position.x + 72.0, rect.position.y + 18.0, C["text"], 13.0, 120.0)
+	_draw_text("%d/%d" % [int(target.get("owned", 0)), int(target.get("total", 1))], rect.end.x - 38.0, rect.position.y + 18.0, C["gold"], 12.0, 58.0)
+	_draw_text(str(target.get("suggestion", "")), rect.position.x + rect.size.x / 2.0, rect.position.y + 36.0, C["text_muted"], 9.5, rect.size.x - 28.0)
+
+func _draw_collection_target_card(target: Dictionary, rect: Rect2) -> void:
+	var owned := int(target.get("owned", 0))
+	var total := maxi(1, int(target.get("total", 1)))
+	var ratio := float(target.get("ratio", float(owned) / float(total)))
+	var complete := owned >= total
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.04, 0.08, 0.17, 0.88))
+	_draw_stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 1.0, Color(0.22, 0.36, 0.62, 0.86))
+	_draw_text(str(target.get("name", "")), rect.position.x + 72.0, rect.position.y + 18.0, C["text"], 13.0, 116.0)
+	_draw_text(str(target.get("statusLabel", "")), rect.end.x - 42.0, rect.position.y + 18.0, C["green"] if complete else C["gold"], 12.0, 64.0)
+	_draw_text(str(target.get("theme", "")), rect.position.x + 204.0, rect.position.y + 18.0, C["text_muted"], 9.0, 122.0)
+	draw_rect(Rect2(rect.position.x + 14.0, rect.position.y + 29.0, rect.size.x - 28.0, 6.0), Color(0.01, 0.03, 0.08, 0.92))
+	draw_rect(Rect2(rect.position.x + 14.0, rect.position.y + 29.0, (rect.size.x - 28.0) * ratio, 6.0), C["green"] if complete else C["blue"])
+	_draw_text(str(target.get("suggestion", "")), rect.position.x + rect.size.x / 2.0, rect.position.y + 49.0, C["text_muted"], 9.2, rect.size.x - 22.0)
 
 func _filter_rect(index: int) -> Rect2:
 	var w := 38.0 if index > 0 else 58.0

@@ -21,21 +21,38 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_001", "name": "小火龙", "element": "fire",
 		"rarity": 2, "emoji": "🦎",
 		"baseHP": 180, "baseATK": 45, "baseDEF": 30, "baseSPD": 15,
-		"skill": { "name": "火焰冲击", "cost": 8, "multiplier": 2.5 },
+		"skill": {
+			"name": "火焰冲击", "cost": 8, "type": "strike", "multiplier": 2.5,
+			"effects": [
+				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 2.5 }
+			]
+		},
 		"evolution": { "level": 16, "target": "monster_006" }
 	},
 	"monster_002": {
 		"id": "monster_002", "name": "水龟仔", "element": "water",
 		"rarity": 2, "emoji": "🐢",
 		"baseHP": 200, "baseATK": 35, "baseDEF": 40, "baseSPD": 12,
-		"skill": { "name": "水之护盾", "cost": 7, "multiplier": 2.0 },
+		"skill": {
+			"name": "水之护盾", "cost": 7, "type": "ward", "multiplier": 1.0,
+			"effects": [
+				{ "kind": "heal", "target": "lowest_ally", "ratio": 0.28, "min": 24 },
+				{ "kind": "guard", "target": "lowest_ally", "reduction": 0.25, "turns": 1 }
+			]
+		},
 		"evolution": { "level": 16, "target": "monster_007" }
 	},
 	"monster_003": {
 		"id": "monster_003", "name": "草苗儿", "element": "grass",
 		"rarity": 2, "emoji": "🌱",
 		"baseHP": 170, "baseATK": 38, "baseDEF": 35, "baseSPD": 18,
-		"skill": { "name": "藤鞭抽打", "cost": 6, "multiplier": 2.2 },
+		"skill": {
+			"name": "藤蔓束缚", "cost": 6, "type": "tempo", "multiplier": 1.35,
+			"effects": [
+				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 1.35 },
+				{ "kind": "weaken", "target": "damaged_enemy", "reduction": 0.35, "turns": 1 }
+			]
+		},
 		"evolution": { "level": 16, "target": "monster_008" }
 	},
 	"monster_004": {
@@ -56,21 +73,38 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_006", "name": "火恐龙", "element": "fire",
 		"rarity": 3, "emoji": "🔥",
 		"baseHP": 160, "baseATK": 55, "baseDEF": 30, "baseSPD": 22,
-		"skill": { "name": "烈焰冲击", "cost": 10, "multiplier": 3.0 },
+		"skill": {
+			"name": "烈焰冲击", "cost": 10, "type": "strike", "multiplier": 3.0,
+			"effects": [
+				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 3.0 }
+			]
+		},
 		"leaderSkill": "ATK_BOOST_FIRE"
 	},
 	"monster_007": {
 		"id": "monster_007", "name": "水箭龟", "element": "water",
 		"rarity": 3, "emoji": "🐢",
 		"baseHP": 180, "baseATK": 42, "baseDEF": 45, "baseSPD": 18,
-		"skill": { "name": "水流护盾", "cost": 9, "multiplier": 2.5 },
+		"skill": {
+			"name": "水流护盾", "cost": 9, "type": "ward", "multiplier": 1.0,
+			"effects": [
+				{ "kind": "heal", "target": "lowest_ally", "ratio": 0.34, "min": 36 },
+				{ "kind": "guard", "target": "lowest_ally", "reduction": 0.35, "turns": 1 }
+			]
+		},
 		"leaderSkill": "ATK_BOOST_WATER"
 	},
 	"monster_008": {
 		"id": "monster_008", "name": "妙蛙草", "element": "grass",
 		"rarity": 3, "emoji": "🌿",
 		"baseHP": 150, "baseATK": 48, "baseDEF": 38, "baseSPD": 25,
-		"skill": { "name": "藤蔓束缚", "cost": 8, "multiplier": 2.8 },
+		"skill": {
+			"name": "藤蔓束缚", "cost": 8, "type": "tempo", "multiplier": 1.65,
+			"effects": [
+				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 1.65 },
+				{ "kind": "weaken", "target": "damaged_enemy", "reduction": 0.45, "turns": 1 }
+			]
+		},
 		"leaderSkill": "ATK_BOOST_GRASS"
 	},
 	"monster_009": {
@@ -982,6 +1016,40 @@ const ELEMENT_CHART: Dictionary = {
 	"chaos":   { "strong": "star",   "weak": "light"   }
 }
 
+# ========== 棋盘能量亲和 ==========
+## element 是世界观/克制属性，boardAffinity 是消除宝石时响应的五色棋盘能量。
+const BOARD_AFFINITY_FALLBACK: Dictionary = {
+	"fire": "fire",
+	"water": "water",
+	"grass": "grass",
+	"thunder": "thunder",
+	"light": "light",
+	"earth": "grass",
+	"wind": "thunder",
+	"dark": "light",
+	"ice": "water",
+	"void": "light",
+	"temporal": "thunder",
+	"star": "light",
+	"chaos": "fire"
+}
+
+const BOARD_AFFINITY_NAMES: Dictionary = {
+	"fire": "炽能",
+	"water": "潮能",
+	"grass": "生能",
+	"thunder": "震能",
+	"light": "辉能"
+}
+
+const SKILL_TYPE_LABELS: Dictionary = {
+	"strike": "输出",
+	"ward": "守护",
+	"tempo": "控场",
+	"hunt": "猎手",
+	"shape": "塑盘"
+}
+
 # ========== 稀有度成长率 ==========
 const RARITY_GROWTH_RATE: Dictionary = {
 	1: 0.08,  # ★1 普通
@@ -1004,6 +1072,51 @@ static func get_element_multiplier(atk_element: String, def_element: String) -> 
 	if chart.get("weak") == def_element:
 		return 0.75
 	return 1.0
+
+## 根据幻想属性推导棋盘能量亲和，兼容旧怪物数据。
+static func get_board_affinity_from_element(element: String) -> String:
+	return str(BOARD_AFFINITY_FALLBACK.get(element, "fire"))
+
+## 获取怪物的棋盘能量亲和。新数据可显式写 boardAffinity，旧数据自动从 element 推导。
+static func get_board_affinity(monster: Dictionary) -> String:
+	var explicit := str(monster.get("boardAffinity", ""))
+	if not explicit.is_empty():
+		return explicit
+	return get_board_affinity_from_element(str(monster.get("element", "fire")))
+
+static func with_board_affinity(data: Dictionary) -> Dictionary:
+	if data.is_empty():
+		return {}
+	var result := data.duplicate(true)
+	result["boardAffinity"] = get_board_affinity(result)
+	if result.has("skill"):
+		result["skill"] = normalize_skill(result.get("skill", {}))
+	return result
+
+## 将旧倍率技能归一为效果结构。新技能可直接配置 type/effects。
+static func normalize_skill(skill: Dictionary) -> Dictionary:
+	if skill.is_empty():
+		return {}
+	var result := skill.duplicate(true)
+	if not result.has("type"):
+		result["type"] = "strike"
+	var effects_value: Variant = result.get("effects", [])
+	if not result.has("effects") or not (effects_value is Array) or (effects_value as Array).is_empty():
+		result["effects"] = [
+			{
+				"kind": "damage",
+				"target": "weakest_enemy",
+				"multiplier": float(result.get("multiplier", 1.0))
+			}
+		]
+	if not result.has("multiplier"):
+		var multiplier := 1.0
+		for effect: Dictionary in result.get("effects", []):
+			if effect.get("kind", "") == "damage":
+				multiplier = float(effect.get("multiplier", multiplier))
+				break
+		result["multiplier"] = multiplier
+	return result
 
 ## 获取怪物数据（支持等级/性格修正）
 ## JS: getMonsterStats(monsterId, level, natureId)
@@ -1031,6 +1144,7 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		"id": data.get("id", ""),
 		"name": data.get("name", ""),
 		"element": data.get("element", ""),
+		"boardAffinity": get_board_affinity(data),
 		"rarity": data.get("rarity", 1),
 		"emoji": data.get("emoji", ""),
 		"hp": hp,
@@ -1038,7 +1152,7 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		"atk": atk,
 		"def": def,
 		"spd": spd,
-		"skill": data.get("skill", {}).duplicate(true),
+		"skill": normalize_skill(data.get("skill", {})),
 		"skillCharge": 0,
 		"isBoss": data.get("isBoss", false),
 		"enemySkills": null if not data.has("enemySkills") else data.get("enemySkills", []).duplicate(true),
@@ -1047,10 +1161,13 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 
 ## 快捷方法：根据ID获取怪物数据
 static func get_monster(monster_id: String) -> Dictionary:
-	return MONSTER_DB.get(monster_id, {})
+	return with_board_affinity(MONSTER_DB.get(monster_id, {}))
 
 static func get_all() -> Array:
-	return MONSTER_DB.values()
+	var result: Array = []
+	for monster: Dictionary in MONSTER_DB.values():
+		result.append(with_board_affinity(monster))
+	return result
 
 static func has_monster(monster_id: String) -> bool:
 	return MONSTER_DB.has(monster_id)

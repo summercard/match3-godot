@@ -75,6 +75,16 @@ func _run() -> void:
 		push_error("[BattleInput] viewport mouse dispatch did not trigger a valid swap")
 		await _finish(1)
 		return
+
+	battle_scene = await _load_battle(main, stage_data)
+	battle_scene.set("_auto_capture_enabled", false)
+	var toggle_pos := _capture_toggle_center(battle_scene)
+	_send_mouse_click(battle_scene, toggle_pos)
+	await process_frame
+	if not bool(battle_scene.get("_auto_capture_enabled")):
+		push_error("[BattleInput] capture toggle should activate once per click")
+		await _finish(1)
+		return
 	
 	await _finish(0)
 
@@ -146,6 +156,28 @@ func _send_mouse_drag(battle_scene: Control, local_start: Vector2, local_end: Ve
 	release.pressed = false
 	release.position = global_end
 	battle_scene.call("_input", release)
+
+func _send_mouse_click(battle_scene: Control, local_pos: Vector2) -> void:
+	var transform := battle_scene.get_global_transform_with_canvas()
+	var global_pos: Vector2 = transform * local_pos
+
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = global_pos
+	battle_scene.call("_input", press)
+
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = global_pos
+	battle_scene.call("_input", release)
+
+func _capture_toggle_center(battle_scene: Control) -> Vector2:
+	var board = battle_scene.get("_board")
+	var bottom_y: float = float(board.offset_y + board.rows * board.cell_size + 15.0)
+	var rect: Rect2 = battle_scene.call("_get_capture_toggle_rect", bottom_y)
+	return rect.get_center()
 
 func _dispatch_mouse_drag(battle_scene: Control, local_start: Vector2, local_end: Vector2) -> void:
 	var transform := battle_scene.get_global_transform_with_canvas()

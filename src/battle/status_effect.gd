@@ -126,7 +126,7 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 		for m in player_team:
 			if m == null or m.get("hp", 0) <= 0:
 				continue
-			if m.get("element", "") == element:
+			if MonsterDb.get_board_affinity(m) == element:
 				source_atk = m.get("atk", 10)
 				break
 

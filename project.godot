@@ -12,8 +12,8 @@ config_version=5
 
 config/name="三消宝可梦"
 run/main_scene="res://main.tscn"
-run/max_fps=60
 config/features=PackedStringArray("4.6")
+run/max_fps=60
 
 [autoload]
 
@@ -28,7 +28,6 @@ window/size/viewport_height=667
 window/size/window_width_override=750
 window/size/window_height_override=1334
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation=1
 
 [rendering]
