@@ -9,6 +9,10 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
+const ELEMENT_LABELS := {
+	"fire": "🔥火", "water": "💧水", "grass": "🌿草",
+	"thunder": "⚡雷", "light": "✨光", "dark": "🌑暗"
+}
 
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
@@ -75,6 +79,8 @@ const CLASS_CARD_GAP: float = 10.0
 const CLASS_GRID_X: float = 31.0
 const CLASS_GRID_Y: float = 322.0
 const CLASS_EVOLVE_RECT := Rect2(242.0, 248.0, 92.0, 34.0)
+const CLASS_LEFT_ARROW_RECT := Rect2(13.0, 540.0, 26.0, 50.0)
+const CLASS_RIGHT_ARROW_RECT := Rect2(335.0, 540.0, 26.0, 50.0)
 const SOCIAL_PLACE_RECT := Rect2(15.0, 86.0, 345.0, 208.0)
 const SOCIAL_SLOT_A_RECT := Rect2(38.0, 136.0, 102.0, 98.0)
 const SOCIAL_SLOT_B_RECT := Rect2(235.0, 136.0, 102.0, 98.0)
@@ -99,11 +105,13 @@ var _bubbles: Array = []
 var _bubble_timer: float = 0.0
 var _texture_cache: Dictionary = {}
 var _time: float = 0.0
-var _list_scroll_x: float = 0.0
-var _max_list_scroll_x: float = 0.0
+var _list_page: int = 0
+var _max_list_page: int = 0
 var _dragging_list: bool = false
 var _class_scroll_y: float = 0.0
 var _class_max_scroll_y: float = 0.0
+var _class_page: int = 0
+var _class_max_page: int = 0
 var _dragging_class_list: bool = false
 var _class_selected_instance_id: String = ""
 var _last_drag_x: float = 0.0
@@ -159,7 +167,7 @@ func _gui_input(event: InputEvent) -> void:
 				_last_drag_y = event.position.y
 				var design_pos := _to_design(event.position)
 				_dragging_list = _active_page == "ranch" and LIST_RECT.has_point(design_pos)
-				_dragging_class_list = (_active_page == "classroom" or _active_page == "social") and CLASS_LIST_RECT.has_point(design_pos)
+				_dragging_class_list = false  # no drag for classroom/social lists
 			else:
 				if abs(event.position.x - _last_drag_x) < 8.0 and abs(event.position.y - _last_drag_y) < 8.0:
 					_handle_tap(_to_design(event.position))
@@ -167,24 +175,12 @@ func _gui_input(event: InputEvent) -> void:
 				_dragging_class_list = false
 			accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-			if _active_page == "classroom" or _active_page == "social":
-				_class_scroll_y = clampf(_class_scroll_y - 36.0, 0.0, _class_max_scroll_y)
-			else:
-				_list_scroll_x = clampf(_list_scroll_x - 24.0, 0.0, _max_list_scroll_x)
+			if _active_page != "classroom" and _active_page != "social":
+				_change_list_page(-1)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
-			if _active_page == "classroom" or _active_page == "social":
-				_class_scroll_y = clampf(_class_scroll_y + 36.0, 0.0, _class_max_scroll_y)
-			else:
-				_list_scroll_x = clampf(_list_scroll_x + 24.0, 0.0, _max_list_scroll_x)
+			if _active_page != "classroom" and _active_page != "social":
+				_change_list_page(1)
 	elif event is InputEventMouseMotion and _dragging_list:
-		var delta_x: float = _last_drag_x - event.position.x
-		_list_scroll_x = clampf(_list_scroll_x + delta_x, 0.0, _max_list_scroll_x)
-		_last_drag_x = event.position.x
-		accept_event()
-	elif event is InputEventMouseMotion and _dragging_class_list:
-		var delta_y: float = _last_drag_y - event.position.y
-		_class_scroll_y = clampf(_class_scroll_y + delta_y, 0.0, _class_max_scroll_y)
-		_last_drag_y = event.position.y
 		accept_event()
 	elif event is InputEventScreenTouch:
 		if event.pressed:
@@ -192,7 +188,7 @@ func _gui_input(event: InputEvent) -> void:
 			_last_drag_y = event.position.y
 			var design_pos := _to_design(event.position)
 			_dragging_list = _active_page == "ranch" and LIST_RECT.has_point(design_pos)
-			_dragging_class_list = (_active_page == "classroom" or _active_page == "social") and CLASS_LIST_RECT.has_point(design_pos)
+			_dragging_class_list = false  # no drag for classroom/social lists
 		else:
 			if abs(event.position.x - _last_drag_x) < 8.0 and abs(event.position.y - _last_drag_y) < 8.0:
 				_handle_tap(_to_design(event.position))
@@ -200,10 +196,8 @@ func _gui_input(event: InputEvent) -> void:
 			_dragging_class_list = false
 		accept_event()
 	elif event is InputEventScreenDrag and _dragging_list:
-		_list_scroll_x = clampf(_list_scroll_x - event.relative.x, 0.0, _max_list_scroll_x)
 		accept_event()
 	elif event is InputEventScreenDrag and _dragging_class_list:
-		_class_scroll_y = clampf(_class_scroll_y - event.relative.y, 0.0, _class_max_scroll_y)
 		accept_event()
 
 func _handle_tap(pos: Vector2) -> void:
@@ -255,6 +249,14 @@ func _handle_classroom_tap(pos: Vector2) -> void:
 	if BOTTOM_RIGHT_RECT.has_point(pos):
 		_switch_to_social()
 		return
+	if CLASS_LEFT_ARROW_RECT.has_point(pos):
+		_class_page = clampi(_class_page - 1, 0, _class_max_page)
+		queue_redraw()
+		return
+	if CLASS_RIGHT_ARROW_RECT.has_point(pos):
+		_class_page = clampi(_class_page + 1, 0, _class_max_page)
+		queue_redraw()
+		return
 	if CLASS_EVOLVE_RECT.has_point(pos):
 		_on_evolve_pressed()
 		return
@@ -272,6 +274,14 @@ func _handle_social_tap(pos: Vector2) -> void:
 		return
 	if SOCIAL_PLACE_SWITCH_RECT.has_point(pos):
 		_cycle_social_place()
+		return
+	if CLASS_LEFT_ARROW_RECT.has_point(pos):
+		_class_page = clampi(_class_page - 1, 0, _class_max_page)
+		queue_redraw()
+		return
+	if CLASS_RIGHT_ARROW_RECT.has_point(pos):
+		_class_page = clampi(_class_page + 1, 0, _class_max_page)
+		queue_redraw()
 		return
 	if SOCIAL_SLOT_A_RECT.has_point(pos):
 		_select_or_clear_social_slot("slot_a")
@@ -784,8 +794,8 @@ func _draw_classroom_detail() -> void:
 	var target_name := str(target.get("name", "无")) if not target.is_empty() else "无"
 	_draw_monster_portrait(instance_id, Rect2(34.0, 110.0, 92.0, 92.0))
 	_draw_text(str(monster.get("name", monster_id)), 188.0, 113.0, C["text"], 18.0, 130.0)
-	_draw_text("Lv.%d  %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", "")))], 188.0, 137.0, C["text_muted"], 11.0, 145.0)
-	_draw_text("HP %d   ATK %d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0))], 188.0, 160.0, Color(0.82, 0.92, 1.0), 11.0, 150.0)
+	_draw_text("Lv.%d  %s  %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))], 188.0, 137.0, C["text_muted"], 11.0, 145.0)
+	_draw_text("%s    HP %d   ATK %d   DEF %d   SPD %d" % [_gender_label(instance), int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0))], 188.0, 160.0, Color(0.82, 0.92, 1.0), 10.5, 154.0)
 	_draw_text(str(info.get("stat_summary", "")), 188.0, 176.0, Color(0.82, 0.92, 1.0), 9.0, 154.0)
 	_draw_text("进化: %s" % target_name, 188.0, 188.0, C["gold"] if bool(info.get("has_evolution", false)) else C["text_muted"], 12.0, 154.0)
 	_draw_text(str(info.get("condition_text", "无法进化")), 188.0, 209.0, C["text_muted"], 10.0, 154.0)
@@ -825,6 +835,12 @@ func _draw_classroom_bottom() -> void:
 	_draw_code_button(BOTTOM_LEFT_RECT, "牧场", true)
 	_draw_text("怪物课堂", DESIGN_W / 2.0, 637.0, C["text_muted"], 12.0, 120.0)
 	_draw_code_button(BOTTOM_RIGHT_RECT, "社交", true)
+	if _class_max_page > 0:
+		var left_a := 0.35 if _class_page <= 0 else 0.9
+		var right_a := 0.35 if _class_page >= _class_max_page else 0.9
+		_draw_text("<", CLASS_LEFT_ARROW_RECT.get_center().x, CLASS_LEFT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, left_a), 16.0, 22.0)
+		_draw_text(">", CLASS_RIGHT_ARROW_RECT.get_center().x, CLASS_RIGHT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, right_a), 16.0, 22.0)
+		_draw_text("%d/%d" % [_class_page + 1, _class_max_page + 1], DESIGN_W / 2.0, 570.0, Color(0.76, 0.82, 1.0, 0.75), 9.0, 60.0)
 
 func _draw_social() -> void:
 	_draw_social_place()
@@ -881,6 +897,12 @@ func _draw_social_bottom() -> void:
 	var place_config := SocialRulesScript.place_config_for(place)
 	_draw_text("%s会影响相性、事件和关系成长 · %s" % [str(place_config.get("short", "场所")), SocialRulesScript.duration_label_for_place(place)], DESIGN_W / 2.0, 637.0, C["text_muted"], 10.0, 250.0)
 	_draw_code_button(BOTTOM_RIGHT_RECT, _social_action_label(place), _social_action_enabled(place))
+	if _class_max_page > 0:
+		var left_a := 0.35 if _class_page <= 0 else 0.9
+		var right_a := 0.35 if _class_page >= _class_max_page else 0.9
+		_draw_text("<", CLASS_LEFT_ARROW_RECT.get_center().x, CLASS_LEFT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, left_a), 16.0, 22.0)
+		_draw_text(">", CLASS_RIGHT_ARROW_RECT.get_center().x, CLASS_RIGHT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, right_a), 16.0, 22.0)
+		_draw_text("%d/%d" % [_class_page + 1, _class_max_page + 1], DESIGN_W / 2.0, 570.0, Color(0.76, 0.82, 1.0, 0.75), 9.0, 60.0)
 
 func _draw_social_relationship_detail(place: Dictionary) -> void:
 	var detail := _social_relationship_detail(place)
@@ -912,12 +934,15 @@ func _draw_social_result_popup() -> void:
 	var result := _social_result_popup
 	var major: Dictionary = result.get("majorOutcome", {})
 	var major_type := str(major.get("type", "none"))
+	var tags: Array = result.get("tags", [])
 	draw_rect(_scale_rect(Rect2(0, 0, DESIGN_W, DESIGN_H)), Color(0.0, 0.0, 0.0, 0.58))
 	var accent := C["gold"]
 	if major_type == "erosion":
 		accent = Color(1.0, 0.34, 0.30)
 	elif major_type == "birth":
 		accent = Color(0.65, 1.0, 0.68)
+	elif tags.has("属性相克"):
+		accent = Color(1.0, 0.68, 0.18)
 	_draw_rounded_rect(SOCIAL_RESULT_POPUP_RECT.position.x, SOCIAL_RESULT_POPUP_RECT.position.y, SOCIAL_RESULT_POPUP_RECT.size.x, SOCIAL_RESULT_POPUP_RECT.size.y, 10.0, Color(0.03, 0.06, 0.12, 0.96))
 	_draw_stroke_rect(SOCIAL_RESULT_POPUP_RECT, 2.0, accent)
 	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 150.0, accent, 22.0, 260.0)
@@ -973,10 +998,13 @@ func _social_result_major_lines(result: Dictionary) -> Array:
 			]
 		_:
 			var tags: Array = result.get("tags", [])
-			return [
-				str(result.get("summary", "这次社交被记录到关系记忆。")),
-				"标签：%s" % "、".join(tags)
+			var lines: Array = [
+				str(result.get("summary", "这次社交被记录到关系记忆。"))
 			]
+			if tags.has("属性相克"):
+				lines.append("⚠ 属性相克 · 侵蚀风险提高")
+			lines.append("标签：%s" % "、".join(tags))
+			return lines
 
 func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	var bg := Color(0.09, 0.16, 0.24, 0.90)
@@ -994,23 +1022,22 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 		_draw_texture_fit(_tex(RANCH_ASSETS["check"]), Rect2(rect.position.x + rect.size.x - 20.0, rect.position.y + rect.size.y - 20.0, 19.0, 19.0))
 
 func _draw_list_controls() -> void:
-	if _max_list_scroll_x <= 0.0:
+	if _max_list_page <= 0:
 		return
-	var left_alpha := 0.35 if _list_scroll_x <= 0.5 else 0.9
-	var right_alpha := 0.35 if _list_scroll_x >= _max_list_scroll_x - 0.5 else 0.9
+	var left_alpha := 0.35 if _list_page <= 0 else 0.9
+	var right_alpha := 0.35 if _list_page >= _max_list_page else 0.9
 	_draw_text("<", LIST_LEFT_ARROW_RECT.get_center().x, LIST_LEFT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, left_alpha), 16.0, 22.0)
 	_draw_text(">", LIST_RIGHT_ARROW_RECT.get_center().x, LIST_RIGHT_ARROW_RECT.position.y + 35.0, Color(1.0, 0.92, 0.55, right_alpha), 16.0, 22.0)
-	var track := Rect2(42.0, 580.0, 291.0, 4.0)
-	_draw_rounded_rect(track.position.x, track.position.y, track.size.x, track.size.y, 2.0, Color(0.15, 0.25, 0.38, 0.82))
-	var thumb_w := maxf(38.0, track.size.x * minf(1.0, LIST_CLIP_RECT.size.x / _monster_list_content_width()))
-	var thumb_x := track.position.x
-	if _max_list_scroll_x > 0.0:
-		thumb_x += (track.size.x - thumb_w) * (_list_scroll_x / _max_list_scroll_x)
-	_draw_rounded_rect(thumb_x, track.position.y, thumb_w, track.size.y, 2.0, Color(0.85, 0.72, 0.34, 0.95))
+	_draw_text("%d/%d" % [_list_page + 1, _max_list_page + 1], DESIGN_W / 2.0, 573.0, Color(0.76, 0.82, 1.0, 0.75), 9.0, 60.0)
+
+func _change_list_page(direction: int) -> void:
+	var new_page := clampi(_list_page + direction, 0, _max_list_page)
+	if new_page != _list_page:
+		_list_page = new_page
+		queue_redraw()
 
 func _scroll_monster_list(direction: int) -> void:
-	_list_scroll_x = clampf(_list_scroll_x + float(direction) * (LIST_CARD_W + LIST_CARD_GAP) * 3.0, 0.0, _max_list_scroll_x)
-	queue_redraw()
+	_change_list_page(direction)
 
 func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
 	var tex := _tex(MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "ranch"))
@@ -1021,28 +1048,41 @@ func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
 		_draw_text(db.get("emoji", "?"), rect.get_center().x, rect.position.y + rect.size.y * 0.72, C["text"], minf(26.0, rect.size.x * 0.52), rect.size.x)
 
 func _picker_card_rect(index: int) -> Rect2:
-	return Rect2(LIST_CARD_START_X + float(index) * (LIST_CARD_W + LIST_CARD_GAP) - _list_scroll_x, LIST_CARD_Y, LIST_CARD_W, LIST_CARD_H)
+	var cards_per_page := int(LIST_CLIP_RECT.size.x / (LIST_CARD_W + LIST_CARD_GAP))
+	cards_per_page = maxi(1, cards_per_page)
+	var page_offset := _list_page * cards_per_page
+	var card_x := LIST_CARD_START_X + float(index - page_offset) * (LIST_CARD_W + LIST_CARD_GAP)
+	return Rect2(card_x, LIST_CARD_Y, LIST_CARD_W, LIST_CARD_H)
 
 func _picker_index_at(pos: Vector2) -> int:
 	if not LIST_CLIP_RECT.has_point(pos):
 		return -1
 	if LIST_LEFT_ARROW_RECT.has_point(pos) or LIST_RIGHT_ARROW_RECT.has_point(pos):
 		return -1
-	var rel := pos.x + _list_scroll_x - LIST_CARD_START_X
+	var cards_per_page := int(LIST_CLIP_RECT.size.x / (LIST_CARD_W + LIST_CARD_GAP))
+	cards_per_page = maxi(1, cards_per_page)
+	var page_offset := _list_page * cards_per_page
+	var rel := pos.x - LIST_CARD_START_X
 	if rel < 0.0:
 		return -1
-	var idx := int(rel / (LIST_CARD_W + LIST_CARD_GAP))
+	var idx := page_offset + int(rel / (LIST_CARD_W + LIST_CARD_GAP))
 	var card := _picker_card_rect(idx)
 	if not LIST_CLIP_RECT.encloses(card) or not card.has_point(pos):
 		return -1
 	return idx
 
 func _classroom_card_rect(index: int) -> Rect2:
-	var col := index % CLASS_COLS
-	var row := index / CLASS_COLS
+	var rows_visible := int(CLASS_LIST_CLIP_RECT.size.y / (CLASS_CARD_H + CLASS_CARD_GAP))
+	rows_visible = maxi(1, rows_visible)
+	var page_offset := _class_page * rows_visible * CLASS_COLS
+	var local := index - page_offset
+	if local < 0:
+		return Rect2(-9999, -9999, CLASS_CARD_W, CLASS_CARD_H)
+	var col := local % CLASS_COLS
+	var row := local / CLASS_COLS
 	return Rect2(
 		CLASS_GRID_X + float(col) * (CLASS_CARD_W + CLASS_CARD_GAP),
-		CLASS_GRID_Y + float(row) * (CLASS_CARD_H + CLASS_CARD_GAP) - _class_scroll_y,
+		CLASS_GRID_Y + float(row) * (CLASS_CARD_H + CLASS_CARD_GAP),
 		CLASS_CARD_W,
 		CLASS_CARD_H
 	)
@@ -1245,13 +1285,20 @@ func _used_monsters() -> Dictionary:
 	return used
 
 func _update_list_scroll_limit() -> void:
-	var last_card_end := LIST_CARD_START_X + maxf(0.0, float(_captured_monsters.size()) - 1.0) * (LIST_CARD_W + LIST_CARD_GAP) + LIST_CARD_W
-	_max_list_scroll_x = maxf(0.0, last_card_end - LIST_CLIP_RECT.end.x)
-	_list_scroll_x = clampf(_list_scroll_x, 0.0, _max_list_scroll_x)
+	var cards_per_page := int(LIST_CLIP_RECT.size.x / (LIST_CARD_W + LIST_CARD_GAP))
+	cards_per_page = maxi(1, cards_per_page)
+	_max_list_page = maxi(0, ceili(float(_captured_monsters.size()) / float(cards_per_page)) - 1)
+	_list_page = clampi(_list_page, 0, _max_list_page)
 
 func _update_class_scroll_limit() -> void:
 	_class_max_scroll_y = maxf(0.0, _classroom_content_height() - CLASS_LIST_CLIP_RECT.size.y)
 	_class_scroll_y = clampf(_class_scroll_y, 0.0, _class_max_scroll_y)
+	var class_cards_per_row := CLASS_COLS
+	var class_rows_visible := int(CLASS_LIST_CLIP_RECT.size.y / (CLASS_CARD_H + CLASS_CARD_GAP))
+	class_rows_visible = maxi(1, class_rows_visible)
+	var rows_total := ceili(float(_captured_monsters.size()) / float(class_cards_per_row))
+	_class_max_page = maxi(0, rows_total - class_rows_visible)
+	_class_page = clampi(_class_page, 0, _class_max_page)
 
 func _monster_list_content_width() -> float:
 	if _captured_monsters.is_empty():
