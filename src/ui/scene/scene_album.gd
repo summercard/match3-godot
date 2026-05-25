@@ -327,7 +327,7 @@ func _draw_detail_panel() -> void:
 	_draw_texture_fit(_tex(ALBUM_ASSETS["portrait_stage"]), Rect2(24.0, DETAIL_Y + 70.0, 122.0, 118.0))
 	_draw_monster_portrait(id, Rect2(50.0, DETAIL_Y + 80.0, 74.0, 72.0))
 	_draw_texture_fit(_tex(ALBUM_ASSETS["fx_sparkle"]), Rect2(106.0, DETAIL_Y + 68.0, 34.0, 44.0), 0.45)
-	_draw_detail_nature(id)  # 绘制性格
+	_draw_detail_nature(id)
 	_draw_detail_stats(monster)
 	_draw_detail_skill(monster)
 	_draw_detail_evolution(monster)
@@ -349,18 +349,18 @@ func _draw_detail_nature(monster_id: String) -> void:
 	elif _storage and _storage.has_method("get_monster_pokedex"):
 		var pokedex: Dictionary = _storage.get_monster_pokedex(monster_id)
 		nature_id = pokedex.get("nature", "")
-	
+
 	# 如果没有性格（未收服），显示"未收服"
 	if nature_id.is_empty():
 		_draw_text("未收服", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
 		return
-	
+
 	# 获取性格信息
 	var NatureDB = load("res://src/data/nature_db.gd")
 	var nature: Dictionary = {}
 	if NatureDB and NatureDB.has_method("get_nature"):
 		nature = NatureDB.get_nature(nature_id)
-	
+
 	if not nature.is_empty():
 		# 显示性格emoji和名称
 		var emoji: String = nature.get("emoji", "🌀")
@@ -368,6 +368,15 @@ func _draw_detail_nature(monster_id: String) -> void:
 		_draw_text("%s %s" % [emoji, name], 108.0, DETAIL_Y + 52.0, C["text"], 11.0, 120.0)
 	else:
 		_draw_text("??", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
+
+func _gender_label_for_detail(monster_id: String) -> String:
+	# 取代表实例的性别
+	var instances := _get_instances_for_species(monster_id)
+	if instances.is_empty():
+		return ""
+	var instance := _pick_representative_instance(instances)
+	var gender := SocialRulesScript.gender_for_instance(instance)
+	return str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
 
 func _draw_detail_stats(monster: Dictionary) -> void:
 	var x := 154.0

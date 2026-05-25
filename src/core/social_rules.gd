@@ -173,6 +173,30 @@ const EVENT_CATALOG := [
 		"hook": "relationship_detail"
 	},
 	{
+		"id": "any_counter_tension",
+		"placeIds": [],
+		"minRelation": 1,
+		"minScore": 40,
+		"requiredTags": ["属性相克"],
+		"name": "本能对峙",
+		"theme": "紧张",
+		"flavor": "它们的本能互相警报，但理智按住了爪子。这不是战争，只是距离。",
+		"outcome": "属性相克关系被记录，后续侵蚀事件触发概率提高。",
+		"hook": "counter_tension"
+	},
+	{
+		"id": "meadow_counter_storm",
+		"placeIds": ["meadow_yard"],
+		"minRelation": 2,
+		"minScore": 60,
+		"requiredTags": ["属性相克"],
+		"name": "风暴前夕",
+		"theme": "警告",
+		"flavor": "草叶在两只怪物的对峙间被压成了弧线。空气中有什么正在积累。",
+		"outcome": "警告：属性相克关系升温，侵蚀吞噬风险提升。",
+		"hook": "counter_escalation"
+	},
+	{
 		"id": "any_bond_echo",
 		"placeIds": [],
 		"minRelation": 4,
@@ -340,7 +364,10 @@ static func _build_result(instance_a: Dictionary, instance_b: Dictionary, place:
 		score += 10
 		tags.append("安静陪伴")
 
-	if element_a == element_b and not element_a.is_empty():
+	if _is_element_counter(element_a, element_b):
+		score += 8
+		tags.append("属性相克")
+	elif element_a == element_b and not element_a.is_empty():
 		score += 18
 		tags.append("同属性共鸣")
 	elif _is_element_complement(element_a, element_b):
@@ -426,6 +453,27 @@ static func _normalize_timestamp_ms(value: Variant) -> Variant:
 	if timestamp < 100000000000.0:
 		return timestamp * 1000.0
 	return timestamp
+
+static func _is_element_counter(a: String, b: String) -> bool:
+	# 属性相克表（A counter B）
+	var counter_map := {
+		"fire": ["grass"],
+		"water": ["fire"],
+		"grass": ["earth", "ice"],
+		"earth": ["thunder"],
+		"thunder": ["wind"],
+		"wind": ["earth"],
+		"light": ["dark"],
+		"dark": ["light"],
+		"void": ["star"],
+		"star": ["void"],
+		"ice": ["grass"],
+		"temporal": ["void"],
+		"chaos": [],
+	}
+	var a_counters: Array = counter_map.get(a, [])
+	var b_counters: Array = counter_map.get(b, [])
+	return a_counters.has(b) or b_counters.has(a)
 
 static func _is_element_complement(a: String, b: String) -> bool:
 	var pair := [a, b]
@@ -617,8 +665,8 @@ static func _birth_mutation_traits(element_a: String, element_b: String) -> Arra
 	return traits
 
 static func _erosion_candidate(instance_a: Dictionary, instance_b: Dictionary, element_a: String, element_b: String, score: int) -> Dictionary:
-	var danger_a := _erosion_power(instance_a, element_a)
-	var danger_b := _erosion_power(instance_b, element_b)
+	var danger_a := _erosion_power(instance_a, element_a, element_b)
+	var danger_b := _erosion_power(instance_b, element_b, element_a)
 	if maxi(danger_a, danger_b) <= 0 or score > 64:
 		return {}
 	var aggressor := instance_a
@@ -648,9 +696,11 @@ static func _erosion_candidate(instance_a: Dictionary, instance_b: Dictionary, e
 		"risk": "lose_partner"
 	}
 
-static func _erosion_power(instance: Dictionary, element: String) -> int:
+static func _erosion_power(instance: Dictionary, element_a: String, element_b: String) -> int:
 	var power := 0
-	if element in ["dark", "void", "chaos"]:
+	if element_a in ["dark", "void", "chaos"]:
+		power += 2
+	if _is_element_counter(element_a, element_b):
 		power += 2
 	var nature := str(instance.get("nature", ""))
 	if nature in ["fierce", "chaos"]:
