@@ -80,9 +80,9 @@ expand_mode = 1
 [node name="Avatar" type="TextureRect" parent="Header" unique_id=1204256247]
 layout_mode = 0
 offset_left = 15.0
-offset_top = 16.0
+offset_top = 10.0
 offset_right = 71.0
-offset_bottom = 72.0
+offset_bottom = 66.0
 mouse_filter = 2
 texture = ExtResource("5_avatar")
 expand_mode = 1
@@ -196,6 +196,7 @@ texture = ExtResource("11_gold_capsule")
 expand_mode = 1
 
 [node name="GoldIcon" type="TextureRect" parent="Header" unique_id=608515020]
+visible = false
 layout_mode = 0
 offset_left = 202.0
 offset_top = 13.0
@@ -224,14 +225,15 @@ vertical_alignment = 1
 [node name="DiamondCapsule" type="TextureRect" parent="Header" unique_id=88269070]
 layout_mode = 0
 offset_left = 292.0
-offset_top = 11.0
+offset_top = 18.0
 offset_right = 372.0
-offset_bottom = 41.0
+offset_bottom = 36.0
 mouse_filter = 2
 texture = ExtResource("13_diamond_capsule")
 expand_mode = 1
 
 [node name="DiamondIcon" type="TextureRect" parent="Header" unique_id=2106521504]
+visible = false
 layout_mode = 0
 offset_left = 295.0
 offset_top = 13.0

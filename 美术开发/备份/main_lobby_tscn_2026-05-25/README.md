@@ -8,7 +8,7 @@
 |---|---|
 | `scene_main_legacy_draw.gd.bak` | 迁移前大厅完整 `_draw()` 与手工点击区实现 |
 | `main_lobby_before.png` | 迁移前 Godot 运行画面基线 |
-| `main_lobby_after_exp_fix.png` | TSCN 迁移及经验条校正后的运行画面 |
+| `main_lobby_after_final.png` | TSCN 迁移及经验条校正后的最终运行验收画面 |
 
 ## 本轮迁移范围
 
