@@ -5,6 +5,7 @@ extends Control
 
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const SocialRulesScript = preload("res://src/core/social_rules.gd")
 
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
