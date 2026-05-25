@@ -828,7 +828,7 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 14.0, rect.position.y + 8.0, rect.size.x - 28.0, 62.0))
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var stats := _get_instance_stats(instance_id)
-	var instance := _get_instance(instance_id)
+	var instance: Dictionary = _get_instance(instance_id)
 	var nature_short := _get_nature_name(str(instance.get("nature", "")))
 	if nature_short.length() > 3:
 		nature_short = nature_short.substr(0, 3)
@@ -1026,7 +1026,7 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 		stroke = C["gold"]
 	var monster := MonsterDb.get_monster(monster_id)
 	var elem := ELEMENT_LABELS.get(str(monster.get("element", "")), "")
-	var inst := _get_instance(monster_id) if _storage else {}
+	var inst: Dictionary = {} if _storage == null else _get_instance(monster_id)
 	var nature := _get_nature_name(str(inst.get("nature", "")))
 	if nature.length() > 2:
 		nature = nature.substr(0, 2)
