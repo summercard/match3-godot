@@ -7,20 +7,27 @@ extends Control
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")
-const SocialRulesScript = preload("res://src/core/social_rules.gd")
+const MonsterDBScript = preload("res://src/data/monster_db.gd")
+const LeaderSkillDBScript = preload("res://src/data/leader_skill_db.gd")
 
 # === 常量 ===
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const MARGIN := 15.0
-const LIST_PANEL_RECT := Rect2(12.0, 327.0, 351.0, 252.0)
-const LIST_START_Y := 364.0
-const LIST_ITEM_W := 79.0
-const LIST_ITEM_H := 88.0
-const LIST_GAP := 8.0
+const LIST_PANEL_RECT := Rect2(10.0, 325.0, 355.0, 276.0)
+const LIST_START_Y := 377.0
+const LIST_ITEM_W := 74.0
+const LIST_ITEM_H := 84.0
+const LIST_GAP := 11.0
 const LIST_COLS := 4
 const LIST_ROWS := 2
 const LIST_PAGE_SIZE := LIST_COLS * LIST_ROWS
+const FILTER_ORDER := ["all", "fire", "water", "grass", "thunder", "light"]
+const SORT_OPTIONS := [
+	{"id": "level", "label": "等级"},
+	{"id": "power", "label": "战力"},
+	{"id": "rarity", "label": "稀有度"}
+]
 
 const TEAM_ASSETS := {
 	"bg": "res://assets/images/main/main_lobby_bg.png",
@@ -40,17 +47,9 @@ const TEAM_ASSETS := {
 	"empty_slot": "res://assets/images/team/ui_empty_slot.png",
 	"btn_cancel": "res://assets/images/team/ui_btn_cancel.png",
 	"btn_save": "res://assets/images/team/ui_btn_save.png",
-	"btn_disassemble": "res://assets/images/team/ui_btn_disassemble.png",
 	"page_button": "res://assets/images/stage/ui_arrow_button.png",
 	"page_prev": "res://assets/images/stage/icon_prev_arrow.png",
 	"page_next": "res://assets/images/stage/icon_next_arrow.png",
-	"icon_power": "res://assets/images/team/icon_power_swords.png",
-	"icon_leader": "res://assets/images/team/icon_leader_crown.png",
-	"icon_hp": "res://assets/images/team/icon_stat_hp.png",
-	"icon_atk": "res://assets/images/team/icon_stat_atk.png",
-	"icon_def": "res://assets/images/team/icon_stat_def.png",
-	"icon_spd": "res://assets/images/team/icon_stat_spd.png",
-	"icon_check": "res://assets/images/team/icon_check.png",
 }
 
 const ELEMENT_ICON_ASSETS := {
@@ -91,6 +90,8 @@ var _hovered_slot: String = ""
 var _hovered_monster_index: int = -1
 var _roster_page: int = 0
 var _captured_monsters: Array = []
+var _active_filter: String = "all"
+var _sort_option: int = 0
 
 # 动画状态
 var _anim_state: Dictionary = {
@@ -102,12 +103,16 @@ var _anim_state: Dictionary = {
 }
 
 var _show_confirm: bool = false
+var _show_help: bool = false
 
 # 按钮区域
 var _back_btn: Rect2 = Rect2(12.0, 10.0, 52.0, 48.0)
+var _help_btn: Rect2 = Rect2(DESIGN_W - 64.0, 10.0, 52.0, 48.0)
 var _save_btn: Rect2 = Rect2()
 var _cancel_btn: Rect2 = Rect2()
-var _disassemble_btn: Rect2 = Rect2()
+var _filter_all_btn: Rect2 = Rect2()
+var _filter_cycle_btn: Rect2 = Rect2()
+var _sort_btn: Rect2 = Rect2()
 var _roster_prev_btn: Rect2 = Rect2()
 var _roster_next_btn: Rect2 = Rect2()
 
@@ -132,14 +137,20 @@ func _add_dark_background() -> void:
 
 func _ready() -> void:
 	_add_dark_background()
+	_prime_texture_cache()
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_update_slots_layout()
 
 func _process(delta: float) -> void:
 	_time_acc += delta
 	var a := _anim_state
-	a["guide_timer"] += delta
-	a["slot_glow_phase"] += delta * 4.0
+	var needs_redraw := false
+	if bool(a["show_guide"]):
+		a["guide_timer"] += delta
+		needs_redraw = true
+	if not _selected_slot.is_empty():
+		a["slot_glow_phase"] += delta * 4.0
+		needs_redraw = true
 	
 	# 分配弹跳动画
 	if a["assign_pop_scale"] != 1.0 and a["assign_pop_target"] != "":
@@ -155,8 +166,10 @@ func _process(delta: float) -> void:
 				a["assign_pop_scale"] = 1.0 + 0.05 * sin(t2 * PI)
 		else:
 			a["assign_pop_scale"] = 1.0
-	
-	queue_redraw()
+		needs_redraw = true
+
+	if needs_redraw:
+		queue_redraw()
 
 # ==================== 初始化 ====================
 
@@ -179,11 +192,31 @@ func init(data: Dictionary = {}) -> void:
 	_selected_slot = ""
 	_hovered_slot = ""
 	_hovered_monster_index = -1
+	_active_filter = "all"
+	_sort_option = 0
 	
 	_captured_monsters = _get_captured_monsters()
 	_anim_state["show_guide"] = _captured_monsters.is_empty()
 	_show_confirm = false
+	_show_help = false
 	_update_slots_layout()
+	queue_redraw()
+
+static func warm_assets() -> void:
+	for path in TEAM_ASSETS.values():
+		ResourceLoader.load(str(path), "", ResourceLoader.CACHE_MODE_REUSE)
+	for path in ELEMENT_ICON_ASSETS.values():
+		ResourceLoader.load(str(path), "", ResourceLoader.CACHE_MODE_REUSE)
+	for monster_id in ["monster_001", "monster_002", "monster_003"]:
+		var path := MonsterArtDBScript.get_art_path(monster_id, "team")
+		if not path.is_empty():
+			ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REUSE)
+
+func _prime_texture_cache() -> void:
+	for path in TEAM_ASSETS.values():
+		_get_texture(str(path))
+	for path in ELEMENT_ICON_ASSETS.values():
+		_get_texture(str(path))
 
 # ==================== 辅助 ====================
 
@@ -216,10 +249,7 @@ func _get_monster_id(value: Variant) -> String:
 func _get_monster_data(monster_id: String) -> Dictionary:
 	if monster_id.is_empty():
 		return {}
-	var MonsterDB = load("res://src/data/monster_db.gd")
-	if MonsterDB:
-		return MonsterDB.get_monster(_get_monster_id(monster_id))
-	return {}
+	return MonsterDBScript.get_monster(_get_monster_id(monster_id))
 
 func _get_real_level(ref_id: String) -> int:
 	if not _storage:
@@ -275,10 +305,7 @@ func _calc_team_power() -> int:
 func _calc_stats(monster_id: String, level: int) -> Dictionary:
 	if _storage and _storage.has_method("get_instance_stats") and not _storage.get_monster_instance(monster_id).is_empty():
 		return _storage.get_instance_stats(monster_id)
-	var MonsterDB = load("res://src/data/monster_db.gd")
-	if MonsterDB and MonsterDB.has_method("get_monster_stats"):
-		return MonsterDB.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
-	return {"hp": 50, "atk": 10, "def": 10, "spd": 10}
+	return MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
 
 func _get_catchup_state(instance_id: String) -> Dictionary:
 	if _storage and _storage.has_method("get_instance_catchup_state") and not _storage.get_monster_instance(instance_id).is_empty():
@@ -286,10 +313,62 @@ func _get_catchup_state(instance_id: String) -> Dictionary:
 	return {"enabled": false, "label": ""}
 
 func _get_roster_page_count() -> int:
-	return maxi(1, ceili(float(_captured_monsters.size()) / float(LIST_PAGE_SIZE)))
+	return maxi(1, ceili(float(_get_display_monsters().size()) / float(LIST_PAGE_SIZE)))
 
 func _clamp_roster_page() -> void:
 	_roster_page = clampi(_roster_page, 0, _get_roster_page_count() - 1)
+
+func _get_display_monsters() -> Array:
+	var result: Array = []
+	for instance in _captured_monsters:
+		if not (instance is Dictionary):
+			continue
+		var monster_id := _get_monster_id(instance)
+		var md := _get_monster_data(monster_id)
+		if md.is_empty():
+			continue
+		var element := str(md.get("boardAffinity", md.get("element", "")))
+		if _active_filter != "all" and element != _active_filter:
+			continue
+		result.append(instance)
+	var sort_id := str(SORT_OPTIONS[_sort_option]["id"])
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var score_a := _get_sort_score(a, sort_id)
+		var score_b := _get_sort_score(b, sort_id)
+		if score_a == score_b:
+			return _get_instance_id(a) < _get_instance_id(b)
+		return score_a > score_b
+	)
+	return result
+
+func _get_sort_score(instance: Dictionary, sort_id: String) -> int:
+	var instance_id := _get_instance_id(instance)
+	var md := _get_monster_data(_get_monster_id(instance))
+	if sort_id == "rarity":
+		return int(md.get("rarity", 1))
+	if sort_id == "power":
+		var stats := _calc_stats(instance_id, _get_real_level(instance_id))
+		return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	return _get_real_level(instance_id)
+
+func _select_filter(filter_id: String) -> void:
+	_active_filter = filter_id
+	_roster_page = 0
+	queue_redraw()
+
+func _cycle_element_filter() -> void:
+	var index := FILTER_ORDER.find(_active_filter)
+	if index < 0:
+		index = 0
+	index = 1 if index == 0 else index + 1
+	if index >= FILTER_ORDER.size():
+		index = 1
+	_select_filter(str(FILTER_ORDER[index]))
+
+func _cycle_sort_option() -> void:
+	_sort_option = (_sort_option + 1) % SORT_OPTIONS.size()
+	_roster_page = 0
+	queue_redraw()
 
 func _get_assign_pop_elapsed() -> float:
 	var start_time: float = _anim_state.get("assign_pop_start_time", 0.0)
@@ -303,14 +382,14 @@ func _trigger_assign_pop(slot_key: String) -> void:
 	_anim_state["assign_pop_start_time"] = Time.get_ticks_msec()
 
 func _update_slots_layout() -> void:
-	var start_y := 70.0
+	var start_y := 67.0
 	
 	# 队长槽
-	var leader_rect := Rect2(14.0, start_y, 124.0, 178.0)
+	var leader_rect := Rect2(12.0, start_y, 125.0, 181.0)
 	# 成员1槽
-	var member1_rect := Rect2(146.0, start_y + 4.0, 102.0, 170.0)
+	var member1_rect := Rect2(141.0, start_y + 3.0, 108.0, 178.0)
 	# 成员2槽
-	var member2_rect := Rect2(256.0, start_y + 4.0, 102.0, 170.0)
+	var member2_rect := Rect2(253.0, start_y + 3.0, 108.0, 178.0)
 	
 	_slots = [
 		{"key": "leader", "rect": leader_rect, "label": "队长"},
@@ -319,11 +398,13 @@ func _update_slots_layout() -> void:
 	]
 	
 	# 按钮区域
-	_disassemble_btn = Rect2(MARGIN, DESIGN_H - 64.0, 48.0, 48.0)
-	_cancel_btn = Rect2(74.0, DESIGN_H - 65.0, 118.0, 48.0)
-	_save_btn = Rect2(205.0, DESIGN_H - 65.0, 150.0, 48.0)
-	_roster_prev_btn = Rect2(126.0, LIST_PANEL_RECT.end.y - 32.0, 26.0, 26.0)
-	_roster_next_btn = Rect2(223.0, LIST_PANEL_RECT.end.y - 32.0, 26.0, 26.0)
+	_filter_all_btn = Rect2(18.0, 331.0, 62.0, 44.0)
+	_filter_cycle_btn = Rect2(86.0, 331.0, 124.0, 44.0)
+	_sort_btn = Rect2(244.0, 331.0, 108.0, 44.0)
+	_roster_prev_btn = Rect2(112.0, 555.0, 46.0, 44.0)
+	_roster_next_btn = Rect2(217.0, 555.0, 46.0, 44.0)
+	_cancel_btn = Rect2(18.0, 610.0, 165.0, 48.0)
+	_save_btn = Rect2(192.0, 610.0, 165.0, 48.0)
 
 func _point_in_rect(pos: Vector2, rect: Rect2) -> bool:
 	return rect.has_point(pos)
@@ -345,10 +426,20 @@ func _on_tap(x: float, y: float) -> void:
 	if _show_confirm:
 		_handle_confirm_tap(pos)
 		return
+
+	if _show_help:
+		_show_help = false
+		queue_redraw()
+		return
 	
 	# 返回按钮
 	if _point_in_rect(pos, _back_btn):
 		_change_to_scene("main")
+		return
+
+	if _point_in_rect(pos, _help_btn):
+		_show_help = true
+		queue_redraw()
 		return
 	
 	# 保存按钮
@@ -360,6 +451,19 @@ func _on_tap(x: float, y: float) -> void:
 	# 取消按钮
 	if _point_in_rect(pos, _cancel_btn):
 		_show_confirm = true
+		queue_redraw()
+		return
+
+	if _point_in_rect(pos, _filter_all_btn):
+		_select_filter("all")
+		return
+
+	if _point_in_rect(pos, _filter_cycle_btn):
+		_cycle_element_filter()
+		return
+
+	if _point_in_rect(pos, _sort_btn):
+		_cycle_sort_option()
 		return
 
 	if _point_in_rect(pos, _roster_prev_btn):
@@ -378,8 +482,9 @@ func _on_tap(x: float, y: float) -> void:
 	
 	# 怪物列表点击
 	var monster_idx := _get_monster_index_at_pos(pos)
-	if monster_idx >= 0 and monster_idx < _captured_monsters.size():
-		_assign_to_slot(_get_instance_id(_captured_monsters[monster_idx]))
+	var visible_monsters := _get_display_monsters()
+	if monster_idx >= 0 and monster_idx < visible_monsters.size():
+		_assign_to_slot(_get_instance_id(visible_monsters[monster_idx]))
 		return
 
 func _handle_confirm_tap(pos: Vector2) -> void:
@@ -394,8 +499,10 @@ func _handle_confirm_tap(pos: Vector2) -> void:
 		_change_to_scene("main")
 	elif _point_in_rect(pos, continue_btn):
 		_show_confirm = false
+		queue_redraw()
 	elif not _point_in_rect(pos, dialog_rect):
 		_show_confirm = false
+		queue_redraw()
 
 func _handle_slot_tap(slot_key: String) -> void:
 	if _team.get(slot_key) != null:
@@ -406,6 +513,7 @@ func _handle_slot_tap(slot_key: String) -> void:
 	else:
 		# 空槽位 → 切换选中
 		_selected_slot = "" if _selected_slot == slot_key else slot_key
+	queue_redraw()
 
 func _turn_roster_page(direction: int) -> void:
 	if direction == 0:
@@ -422,9 +530,10 @@ func _assign_to_slot(monster_id: String) -> void:
 		# 自动填入第一个空槽位
 		for key in ["leader", "member1", "member2"]:
 			if _team[key] == null:
-				_team[key] = monster_id
-				_trigger_assign_pop(key)
-				return
+					_team[key] = monster_id
+					_trigger_assign_pop(key)
+					queue_redraw()
+					return
 		# 队伍满了，替换队长
 		_team["leader"] = monster_id
 		_trigger_assign_pop("leader")
@@ -438,6 +547,7 @@ func _assign_to_slot(monster_id: String) -> void:
 				_team[key] = existing
 				break
 		_selected_slot = ""
+	queue_redraw()
 
 func _get_monster_index_at_pos(pos: Vector2) -> int:
 	var list_x := (DESIGN_W - (LIST_COLS * LIST_ITEM_W + (LIST_COLS - 1) * LIST_GAP)) / 2.0
@@ -478,17 +588,16 @@ func _draw() -> void:
 	
 	# 标题
 	_draw_texture_fit(_tex("header"), Rect2(78.0, 13.0, 220.0, 42.0))
-	_draw_text(font, "队伍编成", DESIGN_W / 2.0, 43.0, C["text_primary"], 22.0)
+	_draw_text(font, "队伍编成", DESIGN_W / 2.0, 44.0, C["text_primary"], 24.0)
 	
 	# 返回按钮
 	_draw_texture_fit(_tex("back_button"), _back_btn)
-	_draw_text(font, "←", _back_btn.position.x + _back_btn.size.x / 2.0, _back_btn.position.y + 30.0, C["text_secondary"], 24.0)
-	_draw_texture_fit(_tex("help_button"), Rect2(DESIGN_W - 57.0, 10.0, 42.0, 42.0))
+	_draw_texture_fit(_tex("help_button"), _help_btn)
 	
 	# 空引导提示
 	if _anim_state["show_guide"]:
 		var alpha := 0.6 + sin(t * 3.0) * 0.4
-		_draw_text(font, "点击开始冒险，赢取你的第一只怪物", DESIGN_W / 2.0, 63.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 10.0)
+		_draw_text(font, "点击开始冒险，赢取你的第一只怪物", DESIGN_W / 2.0, 63.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 12.0)
 	
 	# 渲染槽位
 	for s: Dictionary in _slots:
@@ -501,14 +610,15 @@ func _draw() -> void:
 	# 渲染怪物列表
 	_draw_monster_list(font, t)
 	
-	# 底部按钮
-	_draw_icon_button(_disassemble_btn, "btn_disassemble")
+	# 底部主操作：不展示尚未实现的分解入口。
 	_draw_button(_cancel_btn, "取消", "btn_cancel")
 	_draw_button(_save_btn, "保存队伍", "btn_save")
 	
 	# 确认弹窗
 	if _show_confirm:
 		_draw_confirm_dialog(font)
+	elif _show_help:
+		_draw_help_dialog(font)
 
 func _draw_text(font: Font, text: String, x: float, y: float, color: Color, size: float) -> void:
 	draw_string(font, Vector2(x - 100.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, 200.0, size, color)
@@ -537,20 +647,14 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 
 func _draw_button(rect: Rect2, text: String, asset_key: String) -> void:
 	_draw_texture_fit(_tex(asset_key), rect)
-	_draw_text(ThemeDB.fallback_font, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 6.0, C["white"], 16.0)
-
-func _draw_icon_button(rect: Rect2, asset_key: String) -> void:
-	_draw_texture_fit(_tex(asset_key), rect)
+	_draw_text(ThemeDB.fallback_font, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 7.0, C["white"], 18.0)
 
 func _draw_team_summary(font: Font) -> void:
 	var power := _calc_team_power()
-	_draw_texture_fit(_tex("power_banner"), Rect2(14.0, 256.0, 134.0, 42.0))
-	_draw_texture_contain(_tex("icon_power"), Rect2(26.0, 262.0, 28.0, 28.0))
-	_draw_text(font, "队伍战力", 92.0, 272.0, C["text_secondary"], 10.0)
-	_draw_text(font, "%d" % power, 95.0, 291.0, C["gold"] if power > 0 else C["text_muted"], 17.0)
+	_draw_texture_three_slice(_tex("power_banner"), Rect2(12.0, 252.0, 135.0, 45.0), 126.0, 32.0)
+	_draw_text(font, "%d" % power, 96.0, 282.0, C["gold"] if power > 0 else C["text_muted"], 22.0)
 
-	_draw_texture_fit(_tex("leader_skill_banner"), Rect2(150.0, 256.0, 210.0, 42.0))
-	_draw_texture_contain(_tex("icon_leader"), Rect2(160.0, 262.0, 29.0, 26.0))
+	_draw_texture_three_slice(_tex("leader_skill_banner"), Rect2(150.0, 252.0, 213.0, 45.0), 126.0, 32.0)
 	var leader_value: Variant = _team.get("leader", null)
 	var leader_id := "" if leader_value == null else str(leader_value)
 	var skill_text := "未设置队长技能"
@@ -559,26 +663,25 @@ func _draw_team_summary(font: Font) -> void:
 		var md := _get_monster_data(leader_id)
 		var skill_id: String = md.get("leaderSkill", md.get("leader_skill", ""))
 		if not skill_id.is_empty():
-			var LeaderSkillDB = load("res://src/data/leader_skill_db.gd")
-			if LeaderSkillDB:
-				var skill = LeaderSkillDB.get_leader_skill(skill_id)
+			if LeaderSkillDBScript:
+				var skill = LeaderSkillDBScript.get_leader_skill(skill_id)
 				if skill:
 					skill_text = "%s：%s" % [skill.get("name", "队长技"), skill.get("desc", "")]
 					skill_color = C["gold"]
-	_draw_text_in_rect(font, skill_text, Rect2(194.0, 264.0, 155.0, 20.0), skill_color, 10.0, 8.0)
+	_draw_text_in_rect(font, skill_text, Rect2(196.0, 263.0, 158.0, 24.0), skill_color, 12.0, 10.0)
 
 func _draw_bond_summary(font: Font) -> void:
 	var branches: Array = EcologyBondRulesScript.calc_team_bond_branches(_get_team_units())
 	var bond: Dictionary = branches[0] if not branches.is_empty() else {}
-	var rect := Rect2(14.0, 302.0, 346.0, 22.0)
+	var rect := Rect2(12.0, 301.0, 351.0, 21.0)
 	var active := str(bond.get("status", "hint")) == "active"
 	var color := Color(0.08, 0.24, 0.16, 0.88) if active else Color(0.08, 0.11, 0.20, 0.88)
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, color)
 	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, C["gold"] if active else Color(0.22, 0.36, 0.62, 0.82), 1.0)
 	var title := str(bond.get("name", "羁绊"))
 	var summary := str(bond.get("summary", "选择怪物查看羁绊方向。"))
-	_draw_text_in_rect(font, "分支：%s" % title, Rect2(rect.position.x + 10.0, rect.position.y + 2.0, 102.0, 18.0), C["gold"] if active else C["text_secondary"], 10.0, 8.0)
-	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 2.0, 222.0, 18.0), C["text_primary"] if active else C["text_muted"], 9.0, 7.0)
+	_draw_text_in_rect(font, "分支：%s" % title, Rect2(rect.position.x + 8.0, rect.position.y + 1.0, 104.0, 19.0), C["gold"] if active else C["text_secondary"], 11.0, 10.0)
+	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 1.0, 231.0, 19.0), C["text_primary"] if active else C["text_muted"], 10.0, 9.0)
 
 func _get_team_monster_defs() -> Array:
 	var result: Array = []
@@ -610,21 +713,18 @@ func _get_team_units() -> Array:
 	return result
 
 func _draw_roster_toolbar(font: Font) -> void:
-	var y := LIST_PANEL_RECT.position.y + 8.0
 	_draw_rounded_rect(LIST_PANEL_RECT.position.x, LIST_PANEL_RECT.position.y, LIST_PANEL_RECT.size.x, LIST_PANEL_RECT.size.y, 10.0, Color(0.03, 0.08, 0.16, 0.90))
 	_draw_rounded_rect_outline(LIST_PANEL_RECT.position.x, LIST_PANEL_RECT.position.y, LIST_PANEL_RECT.size.x, LIST_PANEL_RECT.size.y, 10.0, Color(0.22, 0.36, 0.62, 0.92), 2.0)
-	_draw_texture_fit(_tex("filter_tab_selected"), Rect2(18.0, y, 58.0, 28.0))
-	_draw_text(font, "全部", 45.0, y + 19.0, C["white"], 11.0)
-	var tabs := [
-		{"label": "火", "elem": "fire", "x": 82.0},
-		{"label": "水", "elem": "water", "x": 124.0},
-		{"label": "草", "elem": "grass", "x": 166.0},
-	]
-	for tab in tabs:
-		_draw_texture_fit(_tex("filter_tab_normal"), Rect2(tab["x"], y + 2.0, 36.0, 25.0))
-		_draw_element_icon(tab["elem"], Rect2(tab["x"] + 8.0, y + 5.0, 20.0, 20.0))
-	_draw_texture_fit(_tex("sort_dropdown"), Rect2(256.0, y, 92.0, 30.0))
-	_draw_text(font, "等级", 299.0, y + 20.0, C["text_secondary"], 11.0)
+	_draw_texture_fit(_tex("filter_tab_selected" if _active_filter == "all" else "filter_tab_normal"), _filter_all_btn)
+	_draw_text(font, "全部", _filter_all_btn.get_center().x, _filter_all_btn.position.y + 28.0, C["white"], 13.0)
+	_draw_texture_fit(_tex("filter_tab_selected" if _active_filter != "all" else "filter_tab_normal"), _filter_cycle_btn)
+	var filter_label := "属性筛选"
+	if _active_filter != "all":
+		_draw_element_icon(_active_filter, Rect2(_filter_cycle_btn.position.x + 11.0, _filter_cycle_btn.position.y + 9.0, 26.0, 26.0))
+		filter_label = "%s系" % _get_element_name(_active_filter)
+	_draw_text(font, filter_label, _filter_cycle_btn.position.x + 76.0, _filter_cycle_btn.position.y + 28.0, C["white"], 13.0)
+	_draw_texture_fit(_tex("sort_dropdown"), _sort_btn)
+	_draw_text(font, str(SORT_OPTIONS[_sort_option]["label"]), _sort_btn.position.x + 48.0, _sort_btn.position.y + 28.0, C["text_secondary"], 13.0)
 
 func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 	var rect: Rect2 = slot["rect"]
@@ -664,25 +764,24 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 	if not monster_id.is_empty():
 		var md: Dictionary = _get_monster_data(monster_id)
 		if not md.is_empty():
-			var face_size := 74.0 if key == "leader" else 60.0
-			_draw_monster_portrait(monster_id, Rect2(cx - face_size / 2.0, new_y + 25.0, face_size, face_size))
-			_draw_text(font, md.get("name", "未知"), cx, new_y + (112.0 if key == "leader" else 102.0), C["text_primary"], 11.0)
-			
+			var face_size := 78.0 if key == "leader" else 66.0
+			_draw_monster_portrait(monster_id, Rect2(cx - face_size / 2.0, new_y + 22.0, face_size, face_size))
+
 			var lvl: int = _get_real_level(monster_id)
-			_draw_text(font, "Lv.%d" % lvl, cx, new_y + new_h - 57.0, C["white"], 10.0)
+			var unit_line := "%s  Lv.%d" % [md.get("name", "未知"), lvl]
+			_draw_text(font, unit_line, cx, new_y + (99.0 if key == "leader" else 100.0), C["text_primary"], 11.0)
 			var catchup_state := _get_catchup_state(monster_id)
 			if bool(catchup_state.get("enabled", false)):
-				_draw_rounded_rect(cx - 35.0, new_y + new_h - 74.0, 70.0, 16.0, 6.0, Color(0.10, 0.45, 0.35, 0.86))
-				_draw_text(font, str(catchup_state.get("label", "")), cx, new_y + new_h - 62.0, Color(0.75, 1.0, 0.72), 7.5)
-			
-			var elem: String = md.get("boardAffinity", md.get("element", "fire"))
-			_draw_element_icon(elem, Rect2(new_x + 8.0, new_y + 9.0, 22.0, 22.0))
-			
+				_draw_rounded_rect(cx - 35.0, new_y + 75.0, 70.0, 15.0, 6.0, Color(0.10, 0.45, 0.35, 0.86))
+				_draw_text(font, str(catchup_state.get("label", "")), cx, new_y + 86.0, Color(0.75, 1.0, 0.72), 9.0)
+
+			# 清理卡框未投入功能的底部空槽装饰，为角色标识保留干净底栏。
+			draw_rect(Rect2(new_x + 4.0, new_y + new_h - 30.0, new_w - 8.0, 25.0), Color(0.02, 0.06, 0.14, 1.0))
 			var stats: Dictionary = _calc_stats(monster_id, lvl)
-			_draw_stat_pair(font, "hp", int(stats.get("hp", 0)), new_x + 9.0, new_y + new_h - 39.0)
-			_draw_stat_pair(font, "atk", int(stats.get("atk", 0)), new_x + new_w * 0.51, new_y + new_h - 39.0)
-			_draw_stat_pair(font, "def", int(stats.get("def", 0)), new_x + 9.0, new_y + new_h - 23.0)
-			_draw_stat_pair(font, "spd", int(stats.get("spd", 0)), new_x + new_w * 0.51, new_y + new_h - 23.0)
+			_draw_stat_pair(font, "hp", int(stats.get("hp", 0)), new_x + 8.0, new_y + 126.0)
+			_draw_stat_pair(font, "atk", int(stats.get("atk", 0)), new_x + new_w * 0.51, new_y + 126.0)
+			_draw_stat_pair(font, "def", int(stats.get("def", 0)), new_x + 8.0, new_y + 147.0)
+			_draw_stat_pair(font, "spd", int(stats.get("spd", 0)), new_x + new_w * 0.51, new_y + 147.0)
 		else:
 			_draw_text(font, label, cx, new_y + new_h / 2.0, C["text_muted"], 9.0)
 	else:
@@ -690,8 +789,8 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 		var slot_label_text := "选择怪物" if is_selected else label
 		var text_color := C["gold"] if is_selected else C["text_muted"]
 		_draw_texture_contain(_tex("empty_slot"), Rect2(cx - 29.0, new_y + 30.0, 58.0, 68.0), 0.55)
-		_draw_text(font, slot_label_text, cx, new_y + 116.0, text_color, 11.0)
-	_draw_text(font, label, cx, new_y + new_h - 9.0, C["text_muted"], 8.5)
+		_draw_text(font, slot_label_text, cx, new_y + 116.0, text_color, 12.0)
+	_draw_text(font, label, cx, new_y + new_h - 8.0, C["text_muted"], 10.0)
 
 func _draw_rounded_rect_outline(x: float, y: float, w: float, h: float, r: float, color: Color, line_w: float) -> void:
 	# 用粗线模拟 strokeRect
@@ -703,8 +802,9 @@ func _draw_rounded_rect_outline(x: float, y: float, w: float, h: float, r: float
 func _draw_monster_list(font: Font, t: float) -> void:
 	var list_x := (DESIGN_W - (LIST_COLS * LIST_ITEM_W + (LIST_COLS - 1) * LIST_GAP)) / 2.0
 	var list_y := LIST_START_Y
+	var visible_monsters := _get_display_monsters()
 	var page_start := _roster_page * LIST_PAGE_SIZE
-	var page_end := mini(_captured_monsters.size(), page_start + LIST_PAGE_SIZE)
+	var page_end := mini(visible_monsters.size(), page_start + LIST_PAGE_SIZE)
 	for i in range(page_start, page_end):
 		var local_index := i - page_start
 		var row := int(local_index / LIST_COLS)
@@ -712,7 +812,7 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		var card_x := list_x + col * (LIST_ITEM_W + LIST_GAP)
 		var card_y := list_y + row * (LIST_ITEM_H + LIST_GAP)
 		
-		var instance: Dictionary = _captured_monsters[i]
+		var instance: Dictionary = visible_monsters[i]
 		var instance_id := _get_instance_id(instance)
 		var monster_id := _get_monster_id(instance)
 		var md: Dictionary = _get_monster_data(monster_id)
@@ -722,44 +822,37 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		var is_hovered := (_hovered_monster_index == i)
 		var in_team := _team.values().has(instance_id)
 		var card_key := "roster_card_selected" if in_team or is_hovered else "roster_card"
-		_draw_texture_fit(_tex(card_key), Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
-		if in_team:
-			_draw_texture_contain(_tex("icon_check"), Rect2(card_x + LIST_ITEM_W - 21.0, card_y - 4.0, 22.0, 20.0))
-		
+		var card_tex := _tex(card_key)
+		_draw_texture_fit(card_tex, Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
+
 		# 怪物头像
-		_draw_monster_portrait(monster_id, Rect2(card_x + 16.0, card_y + 7.0, 47.0, 44.0))
-		
+		_draw_monster_portrait(monster_id, Rect2(card_x + 16.0, card_y + 6.0, 42.0, 42.0))
+
+		# 用卡片自身的干净底纹替换装饰暗星，不添加会切断边框的实色底。
+		_draw_roster_footer_patch(card_tex, Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
+
 		# 名字
 		var name: String = md.get("name", "?")
 		if name.length() > 5:
 			name = name.substr(0, 5)
-		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 57.0, C["text_primary"], 9.0)
-		
+		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 58.0, C["text_primary"], 11.0)
+
 		# 等级
 		var lvl: int = _get_real_level(instance_id)
-		_draw_text(font, "Lv.%d" % lvl, card_x + LIST_ITEM_W / 2.0, card_y + 69.0, C["white"], 8.0)
-		# 性别
-		var gender := SocialRulesScript.gender_for_instance(instance)
-		var gender_emoji := "♂" if gender == "male" else ("♀" if gender == "female" else "⚥")
-		var gender_label := str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
-		_draw_text(font, "%s %s" % [gender_emoji, gender_label], card_x + LIST_ITEM_W / 2.0, card_y + 79.0, C["text_muted"], 7.5)
 		var catchup_state := _get_catchup_state(instance_id)
 		if bool(catchup_state.get("enabled", false)):
-			_draw_rounded_rect(card_x + 9.0, card_y + 72.0, LIST_ITEM_W - 18.0, 12.0, 5.0, Color(0.10, 0.45, 0.35, 0.88))
-			_draw_text(font, str(catchup_state.get("label", "")), card_x + LIST_ITEM_W / 2.0, card_y + 82.0, Color(0.75, 1.0, 0.72), 6.8)
-		
+			_draw_rounded_rect(card_x + 6.0, card_y + 64.0, LIST_ITEM_W - 12.0, 16.0, 5.0, Color(0.10, 0.45, 0.35, 0.92))
+			_draw_text(font, str(catchup_state.get("label", "")), card_x + LIST_ITEM_W / 2.0, card_y + 76.0, Color(0.75, 1.0, 0.72), 9.0)
+		else:
+			var rarity := int(md.get("rarity", 1))
+			_draw_text(font, "Lv.%d  %d★" % [lvl, rarity], card_x + LIST_ITEM_W / 2.0, card_y + 74.0, C["gold"], 10.0)
+
 		# 属性角标
 		var elem: String = md.get("boardAffinity", md.get("element", "fire"))
 		_draw_element_icon(elem, Rect2(card_x + 5.0, card_y + 5.0, 18.0, 18.0))
-		var rarity := int(md.get("rarity", 1))
-		var stars := ""
-		for s in range(mini(rarity, 5)):
-			stars += "★"
-		var stars_y := 82.0 if not bool(catchup_state.get("enabled", false)) else 91.0
-		_draw_text(font, stars, card_x + LIST_ITEM_W / 2.0, card_y + stars_y, C["gold"], 7.5)
-
-	if _captured_monsters.is_empty():
-		_draw_text(font, "暂无可编队精灵", DESIGN_W / 2.0, LIST_START_Y + 80.0, C["text_muted"], 12.0)
+	if visible_monsters.is_empty():
+		var empty_text := "暂无可编队精灵" if _active_filter == "all" else "当前属性没有精灵"
+		_draw_text(font, empty_text, DESIGN_W / 2.0, LIST_START_Y + 80.0, C["text_muted"], 14.0)
 	_draw_roster_page_controls(font)
 
 func _draw_roster_page_controls(font: Font) -> void:
@@ -767,15 +860,15 @@ func _draw_roster_page_controls(font: Font) -> void:
 	var prev_opacity := 1.0 if _roster_page > 0 else 0.42
 	var next_opacity := 1.0 if _roster_page < page_count - 1 else 0.42
 	_draw_texture_contain(_tex("page_button"), _roster_prev_btn, prev_opacity)
-	_draw_texture_contain(_tex("page_prev"), _roster_prev_btn.grow(-5.0), prev_opacity)
+	_draw_texture_contain(_tex("page_prev"), _roster_prev_btn.grow(-10.0), prev_opacity)
 	_draw_texture_contain(_tex("page_button"), _roster_next_btn, next_opacity)
-	_draw_texture_contain(_tex("page_next"), _roster_next_btn.grow(-5.0), next_opacity)
-	_draw_text(font, "%d/%d" % [_roster_page + 1, page_count], DESIGN_W / 2.0, LIST_PANEL_RECT.end.y - 14.0, C["text_secondary"], 10.0)
+	_draw_texture_contain(_tex("page_next"), _roster_next_btn.grow(-10.0), next_opacity)
+	_draw_text(font, "%d/%d" % [_roster_page + 1, page_count], DESIGN_W / 2.0, 581.0, C["text_secondary"], 13.0)
 	var dot_gap := 10.0
 	var start_x := DESIGN_W / 2.0 - float(page_count - 1) * dot_gap * 0.5
 	for i in range(page_count):
 		var color := C["gold"] if i == _roster_page else Color(0.36, 0.48, 0.74, 0.85)
-		draw_circle(Vector2(start_x + float(i) * dot_gap, LIST_PANEL_RECT.end.y - 28.0), 2.4 if i == _roster_page else 1.8, color)
+		draw_circle(Vector2(start_x + float(i) * dot_gap, 565.0), 2.8 if i == _roster_page else 2.0, color)
 
 func _draw_confirm_dialog(font: Font) -> void:
 	var cx := DESIGN_W / 2.0
@@ -806,10 +899,23 @@ func _draw_confirm_dialog(font: Font) -> void:
 	_draw_rounded_rect(continue_btn.position.x, continue_btn.position.y, continue_btn.size.x, continue_btn.size.y, 8.0, C["bg_card"])
 	_draw_text(font, "继续编辑", continue_btn.position.x + 50.0, continue_btn.position.y + 24.0, C["text_primary"], 14.0)
 
-func _draw_stat_pair(font: Font, stat_key: String, value: int, x: float, y: float) -> void:
-	var icon_key := "icon_%s" % stat_key
-	_draw_texture_contain(_tex(icon_key), Rect2(x, y - 10.0, 13.0, 13.0))
-	draw_string(font, Vector2(x + 15.0, y), "%d" % value, HORIZONTAL_ALIGNMENT_LEFT, 44.0, 8.5, C["text_secondary"])
+func _draw_help_dialog(font: Font) -> void:
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66))
+	var rect := Rect2(28.0, 206.0, 319.0, 242.0)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 12.0, Color(0.04, 0.09, 0.19, 0.98))
+	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 12.0, Color(0.42, 0.64, 1.0, 0.92), 2.0)
+	_draw_text(font, "编队说明", DESIGN_W / 2.0, rect.position.y + 38.0, C["white"], 20.0)
+	_draw_text_in_rect(font, "点击下方精灵，自动填入空位。", Rect2(48.0, 258.0, 279.0, 26.0), C["text_primary"], 14.0, 12.0)
+	_draw_text_in_rect(font, "先点上方槽位，可指定替换位置。", Rect2(48.0, 284.0, 279.0, 26.0), C["text_primary"], 14.0, 12.0)
+	_draw_text_in_rect(font, "属性筛选可切换元素。", Rect2(48.0, 325.0, 279.0, 24.0), C["text_secondary"], 13.0, 12.0)
+	_draw_text_in_rect(font, "排序可切换等级、战力、稀有度。", Rect2(48.0, 349.0, 279.0, 24.0), C["text_secondary"], 13.0, 12.0)
+	var close_btn := Rect2(96.0, 385.0, 183.0, 46.0)
+	_draw_texture_fit(_tex("btn_save"), close_btn)
+	_draw_text(font, "知道了", DESIGN_W / 2.0, 415.0, C["white"], 16.0)
+
+func _draw_stat_pair(font: Font, _stat_key: String, value: int, x: float, y: float) -> void:
+	# 槽位卡框已内置属性图标，避免重复叠绘造成重影。
+	draw_string(font, Vector2(x + 16.0, y), "%d" % value, HORIZONTAL_ALIGNMENT_LEFT, 44.0, 10.0, C["text_secondary"])
 
 func _draw_element_icon(element: String, rect: Rect2) -> void:
 	var path: String = ELEMENT_ICON_ASSETS.get(element, "")
@@ -847,6 +953,28 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 	if tex == null:
 		return
 	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
+
+func _draw_texture_three_slice(tex: Texture2D, rect: Rect2, left_src_w: float, right_src_w: float, opacity: float = 1.0) -> void:
+	if tex == null or rect.size.y <= 0.0:
+		return
+	var tex_size := tex.get_size()
+	var scale := rect.size.y / tex_size.y
+	var left_w := left_src_w * scale
+	var right_w := right_src_w * scale
+	var center_w := maxf(0.0, rect.size.x - left_w - right_w)
+	var center_src_w := tex_size.x - left_src_w - right_src_w
+	var modulate := Color(1.0, 1.0, 1.0, opacity)
+	draw_texture_rect_region(tex, Rect2(rect.position, Vector2(left_w, rect.size.y)), Rect2(0.0, 0.0, left_src_w, tex_size.y), modulate)
+	draw_texture_rect_region(tex, Rect2(rect.position.x + left_w, rect.position.y, center_w, rect.size.y), Rect2(left_src_w, 0.0, center_src_w, tex_size.y), modulate)
+	draw_texture_rect_region(tex, Rect2(rect.end.x - right_w, rect.position.y, right_w, rect.size.y), Rect2(tex_size.x - right_src_w, 0.0, right_src_w, tex_size.y), modulate)
+
+func _draw_roster_footer_patch(tex: Texture2D, card_rect: Rect2) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	var target := Rect2(card_rect.position.x + 7.0, card_rect.position.y + 61.0, card_rect.size.x - 14.0, 18.0)
+	var source := Rect2(tex_size.x * 0.18, tex_size.y * 0.35, tex_size.x * 0.64, tex_size.y * 0.22)
+	draw_texture_rect_region(tex, target, source)
 
 func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
@@ -888,11 +1016,11 @@ func _save_team() -> void:
 
 func _change_to_scene(scene_name: String) -> void:
 	if has_node("/root/SceneManager"):
-		get_node("/root/SceneManager").switch_scene(scene_name)
+		get_node("/root/SceneManager").switch_scene(scene_name, {}, "quick")
 	elif has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm and gm.has_node("scene_manager"):
-			gm.scene_manager.switch_scene(scene_name)
+			gm.scene_manager.switch_scene(scene_name, {}, "quick")
 
 func destroy() -> void:
 	pass

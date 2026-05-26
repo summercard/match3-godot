@@ -58,6 +58,9 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "battle":
 		_seed_battle_demo_fx(main)
 		return
+	if scene_name == "ranch":
+		_seed_ranch_demo(main)
+		return
 	if scene_name != "team":
 		return
 	var count := int(_read_arg("--team-demo-count=", "0"))
@@ -84,6 +87,77 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	team_scene.set("_roster_page", int(_read_arg("--team-demo-page=", "0")))
 	team_scene.call("_clamp_roster_page")
 	team_scene.queue_redraw()
+
+func _seed_ranch_demo(main: Control) -> void:
+	if _read_arg("--ranch-demo=", "0") != "1":
+		return
+	var ranch_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("SceneRanch")
+	if ranch_scene == null:
+		return
+	var roster: Array = ranch_scene.get("_captured_monsters")
+	if roster.is_empty():
+		return
+	var visual_roster: Array = []
+	var natures := ["brave", "gentle", "cautious"]
+	var genders := ["male", "female", "neutral"]
+	for i in range(mini(3, roster.size())):
+		var monster_id := str(ranch_scene.call("_get_monster_id", roster[i]))
+		visual_roster.append({
+			"instanceId": monster_id,
+			"monsterId": monster_id,
+			"level": i + 3,
+			"nature": natures[i],
+			"gender": genders[i],
+		})
+	ranch_scene.set("_storage", null)
+	ranch_scene.set("_captured_monsters", visual_roster)
+	ranch_scene.set("_class_selected_instance_id", str(visual_roster[0].get("instanceId", "")))
+	ranch_scene.set("_care_focus_instance_id", str(visual_roster[0].get("instanceId", "")))
+	var social_places: Array = ranch_scene.get("_social_places")
+	if not social_places.is_empty() and visual_roster.size() >= 2:
+		social_places[0]["slot_a"] = str(visual_roster[0].get("instanceId", ""))
+		social_places[0]["slot_b"] = str(visual_roster[1].get("instanceId", ""))
+		ranch_scene.set("_social_places", social_places)
+	var now := Time.get_unix_time_from_system() * 1000.0
+	var slots: Array = []
+	for i in range(5):
+		if i < visual_roster.size():
+			slots.append({
+				"instance_id": str(visual_roster[i].get("instanceId", "")),
+				"placed_at": now - float((i + 1) * 32) * 60.0 * 1000.0
+			})
+		else:
+			slots.append({"instance_id": null, "placed_at": null})
+	ranch_scene.set("_slots_data", slots)
+	ranch_scene.set("_selected_slot", 0)
+	ranch_scene.call("_calc_idle_exp")
+	ranch_scene.call("_init_bubbles")
+	ranch_scene.call("_update_list_scroll_limit")
+	ranch_scene.call("_update_class_scroll_limit")
+	var page := _read_arg("--ranch-page=", "ranch")
+	if page == "classroom":
+		ranch_scene.call("_switch_to_classroom")
+	elif page == "social":
+		ranch_scene.call("_switch_to_social")
+		if _read_arg("--ranch-popup=", "0") == "1":
+			ranch_scene.set("_social_result_popup", {
+				"label": "社交完成",
+				"score": 88,
+				"relation_label": "默契",
+				"exp_each": 36,
+				"gold": 120,
+				"summary": "两只精灵在草坪上建立了默契。",
+				"tags": ["友好交流", "同伴默契"],
+				"event": {
+					"name": "追逐花瓣",
+					"flavor": "微风卷起花瓣，它们并肩跑过草坡。",
+				},
+				"majorOutcome": {"type": "none"},
+			})
+	if ranch_scene.has_method("_sync_gui"):
+		ranch_scene.call("_sync_gui")
+	else:
+		ranch_scene.queue_redraw()
 
 func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null

@@ -1,5 +1,5 @@
 ## main.gd — 项目入口
-## 管理场景切换；大厅使用可编辑 PackedScene，其余页面维持动态脚本加载。
+## 管理场景切换；大厅和精灵牧场使用可编辑 PackedScene。
 extends Control
 
 const DESIGN_SIZE: Vector2 = Vector2(375.0, 667.0)
@@ -16,7 +16,6 @@ const SCENE_MAP: Dictionary = {
 	"team": "res://src/ui/scene/scene_team.gd",
 	"album": "res://src/ui/scene/scene_album.gd",
 	"evolve": "res://src/ui/scene/scene_evolve.gd",
-	"ranch": "res://src/ui/scene/scene_ranch.gd",
 	"shop": "res://src/ui/scene/scene_shop.gd",
 	"inventory": "res://src/ui/scene/scene_inventory.gd",
 	"achievement": "res://src/ui/scene/scene_achievement.gd",
@@ -27,6 +26,7 @@ const SCENE_MAP: Dictionary = {
 
 const PACKED_SCENE_MAP: Dictionary = {
 	"main": "res://src/ui/scenes/main_lobby.tscn",
+	"ranch": "res://src/ui/scenes/ranch_hub.tscn",
 }
 
 var _current_scene: Control = null
