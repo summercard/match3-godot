@@ -1,0 +1,3344 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/ui/scene/scene_album_gui.gd" id="1_5sexc"]
+[ext_resource type="Texture2D" path="res://assets/images/main/main_lobby_bg.png" id="2_dmak6"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_back_button.png" id="3_kv2bi"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_header_plaque.png" id="4_ynhr1"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_filter_tab_normal.png" id="5_4r3yu"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_fire.png" id="6_lwaa5"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_water.png" id="7_u1fqi"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_grass.png" id="8_snesh"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_thunder.png" id="9_w0q78"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_light.png" id="10_dmuhb"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_earth.png" id="11_b1baw"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_wind.png" id="12_084vh"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_element_dark.png" id="13_cw21g"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_roster_card_green.png" id="14_usnmi"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_lock.png" id="15_7dl6j"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_star_dim.png" id="16_qr0pi"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/ui_arrow_button.png" id="17_yvg7j"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_prev_arrow.png" id="18_ieq2a"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_next_arrow.png" id="19_a0n1c"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_detail_panel.png" id="20_6e4x8"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_portrait_stage.png" id="21_jdyql"]
+[ext_resource type="Texture2D" path="res://assets/images/album/fx_sparkle_cluster.png" id="22_fxvvh"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_stat_row.png" id="23_2ugvr"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_skill_panel.png" id="24_axnt3"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_evolution_strip.png" id="25_ky0m3"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_evolution_arrows.png" id="26_40u1r"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_btn_secondary_blue.png" id="27_tk25h"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_btn_primary_gold.png" id="28_dktgc"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_bottom_tab_normal.png" id="29_42nqe"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_album_book.png" id="30_g5bff"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_paw.png" id="31_78gw8"]
+[ext_resource type="Texture2D" path="res://assets/images/album/icon_favorite.png" id="32_3rx3r"]
+
+[node name="AlbumGui" type="Control" unique_id=607476915]
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 375.0
+offset_bottom = 667.0
+script = ExtResource("1_5sexc")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1584286156]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+texture = ExtResource("2_dmak6")
+expand_mode = 1
+
+[node name="Shade" type="ColorRect" parent="." unique_id=459791384]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0.02, 0.05, 0.11, 0.28)
+
+[node name="Header" type="Control" parent="." unique_id=24874520]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 92.0
+mouse_filter = 2
+
+[node name="BackButton" type="TextureButton" parent="Header" unique_id=1768899933]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 80.0
+offset_bottom = 76.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Header/BackButton" unique_id=1850309698]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("3_kv2bi")
+expand_mode = 1
+
+[node name="Plaque" type="TextureRect" parent="Header" unique_id=625881028]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 18.0
+offset_right = 324.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("4_ynhr1")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="Header" unique_id=727782132]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 25.0
+offset_right = 307.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 25
+text = "精灵图鉴"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="ProgressPill" type="ColorRect" parent="Header" unique_id=18352044]
+layout_mode = 0
+offset_left = 252.0
+offset_top = 61.0
+offset_right = 307.0
+offset_bottom = 81.0
+mouse_filter = 2
+color = Color(0.03, 0.1, 0.24, 0.72)
+
+[node name="Progress" type="Label" parent="Header" unique_id=1805115788]
+layout_mode = 0
+offset_left = 254.0
+offset_top = 60.0
+offset_right = 305.0
+offset_bottom = 83.0
+theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="AlbumPage" type="Control" parent="." unique_id=1984843080]
+anchors_preset = 0
+offset_top = 88.0
+offset_right = 375.0
+offset_bottom = 597.0
+mouse_filter = 2
+
+[node name="Filters" type="Control" parent="AlbumPage" unique_id=704618886]
+anchors_preset = 0
+offset_left = 14.0
+offset_right = 361.0
+offset_bottom = 54.0
+mouse_filter = 2
+
+[node name="All" type="TextureButton" parent="AlbumPage/Filters" unique_id=1533687319]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 7.0
+offset_right = 38.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/All" unique_id=496898141]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/All" unique_id=30019130]
+visible = false
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/All" unique_id=917404540]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "全部"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Fire" type="TextureButton" parent="AlbumPage/Filters" unique_id=1688582026]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 7.0
+offset_right = 76.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Fire" unique_id=1017254631]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Fire" unique_id=75089376]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("6_lwaa5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Fire" unique_id=47308825]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "火"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Water" type="TextureButton" parent="AlbumPage/Filters" unique_id=1315439152]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 7.0
+offset_right = 114.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Water" unique_id=736750045]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Water" unique_id=69845190]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("7_u1fqi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Water" unique_id=60210804]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "水"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Grass" type="TextureButton" parent="AlbumPage/Filters" unique_id=982259359]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 7.0
+offset_right = 152.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Grass" unique_id=422365754]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Grass" unique_id=1076791592]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Grass" unique_id=873015258]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "草"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Thunder" type="TextureButton" parent="AlbumPage/Filters" unique_id=29160623]
+layout_mode = 0
+offset_left = 154.0
+offset_top = 7.0
+offset_right = 190.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Thunder" unique_id=492741282]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Thunder" unique_id=1908139406]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("9_w0q78")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Thunder" unique_id=7803677]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "雷"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Light" type="TextureButton" parent="AlbumPage/Filters" unique_id=121458126]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 7.0
+offset_right = 228.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Light" unique_id=1669423933]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Light" unique_id=2035168841]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("10_dmuhb")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Light" unique_id=988210563]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "光"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Earth" type="TextureButton" parent="AlbumPage/Filters" unique_id=1964342615]
+layout_mode = 0
+offset_left = 230.0
+offset_top = 7.0
+offset_right = 266.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Earth" unique_id=1252791946]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Earth" unique_id=2016950946]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("11_b1baw")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Earth" unique_id=432313107]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "地"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Wind" type="TextureButton" parent="AlbumPage/Filters" unique_id=1987390750]
+layout_mode = 0
+offset_left = 268.0
+offset_top = 7.0
+offset_right = 304.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Wind" unique_id=413107712]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Wind" unique_id=1569187071]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("12_084vh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Wind" unique_id=207523266]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "风"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Dark" type="TextureButton" parent="AlbumPage/Filters" unique_id=1176225502]
+layout_mode = 0
+offset_left = 306.0
+offset_top = 7.0
+offset_right = 342.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Dark" unique_id=1673192192]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("5_4r3yu")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Dark" unique_id=1217843436]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("13_cw21g")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="AlbumPage/Filters/Dark" unique_id=1745630040]
+layout_mode = 0
+offset_top = 25.0
+offset_right = 36.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+text = "暗"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Grid" type="Control" parent="AlbumPage" unique_id=1767716641]
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 58.0
+offset_right = 355.0
+offset_bottom = 400.0
+mouse_filter = 2
+
+[node name="Card1" type="TextureButton" parent="AlbumPage/Grid" unique_id=68547336]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card1" unique_id=1827138616]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1481665076]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card1" unique_id=639884327]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1553138912]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1940195118]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card1" unique_id=1954602652]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card1" unique_id=1739109005]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card1/Stars" unique_id=271349452]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card1/Stars" unique_id=942802857]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card1/Stars" unique_id=471305257]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card1/Stars" unique_id=1885158128]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card1/Stars" unique_id=1332497370]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Card2" type="TextureButton" parent="AlbumPage/Grid" unique_id=1108431375]
+layout_mode = 0
+offset_left = 112.0
+offset_right = 215.0
+offset_bottom = 158.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card2" unique_id=1907863278]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=83450686]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card2" unique_id=95739063]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=2116424614]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=1484349050]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card2" unique_id=1536046624]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card2" unique_id=756522731]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card2/Stars" unique_id=706043838]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card2/Stars" unique_id=1676583831]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card2/Stars" unique_id=2093828047]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card2/Stars" unique_id=714702768]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card2/Stars" unique_id=1176700227]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Card3" type="TextureButton" parent="AlbumPage/Grid" unique_id=1971137159]
+layout_mode = 0
+offset_left = 224.0
+offset_right = 327.0
+offset_bottom = 158.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card3" unique_id=1404831583]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=1897508888]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card3" unique_id=511683009]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=519393906]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=289619516]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card3" unique_id=4087368]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card3" unique_id=1897073409]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card3/Stars" unique_id=666004010]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card3/Stars" unique_id=2121368072]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card3/Stars" unique_id=1136359882]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card3/Stars" unique_id=598987123]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card3/Stars" unique_id=1363113257]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Card4" type="TextureButton" parent="AlbumPage/Grid" unique_id=1371854079]
+layout_mode = 0
+offset_top = 171.0
+offset_right = 103.0
+offset_bottom = 329.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card4" unique_id=1659122511]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=772517680]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card4" unique_id=1313385293]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=2059624272]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=1716090191]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card4" unique_id=1535736026]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card4" unique_id=977457942]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card4/Stars" unique_id=859294787]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card4/Stars" unique_id=900326162]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card4/Stars" unique_id=536000329]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card4/Stars" unique_id=106457867]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card4/Stars" unique_id=214830495]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Card5" type="TextureButton" parent="AlbumPage/Grid" unique_id=1355039070]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 171.0
+offset_right = 215.0
+offset_bottom = 329.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card5" unique_id=131352247]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=823526528]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card5" unique_id=493724011]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1794412542]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1403518930]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card5" unique_id=218995326]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card5" unique_id=1132138957]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card5/Stars" unique_id=1776064673]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card5/Stars" unique_id=257429563]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card5/Stars" unique_id=1198436943]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card5/Stars" unique_id=1501731894]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card5/Stars" unique_id=997080361]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Card6" type="TextureButton" parent="AlbumPage/Grid" unique_id=1031388017]
+layout_mode = 0
+offset_left = 224.0
+offset_top = 171.0
+offset_right = 327.0
+offset_bottom = 329.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
+layout_mode = 0
+offset_right = 103.0
+offset_bottom = 158.0
+mouse_filter = 2
+texture = ExtResource("14_usnmi")
+expand_mode = 1
+
+[node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card6" unique_id=512290940]
+visible = false
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 101.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(1, 0.82, 0.17, 0.16)
+
+[node name="ElementIcon" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=811078792]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Number" type="Label" parent="AlbumPage/Grid/Card6" unique_id=812033213]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 9.0
+offset_right = 89.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "001"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=1767153147]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 25.0
+offset_right = 93.0
+offset_bottom = 97.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockIcon" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=1036703564]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 49.0
+offset_right = 66.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("15_7dl6j")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="AlbumPage/Grid/Card6" unique_id=148400778]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 101.0
+offset_right = 95.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="AlbumPage/Grid/Card6" unique_id=1646327885]
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 126.0
+offset_right = 87.0
+offset_bottom = 143.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="AlbumPage/Grid/Card6/Stars" unique_id=2142654543]
+layout_mode = 0
+offset_right = 13.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="AlbumPage/Grid/Card6/Stars" unique_id=1856607667]
+layout_mode = 0
+offset_left = 13.0
+offset_right = 26.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="AlbumPage/Grid/Card6/Stars" unique_id=1675836142]
+layout_mode = 0
+offset_left = 26.0
+offset_right = 39.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="AlbumPage/Grid/Card6/Stars" unique_id=1487602802]
+layout_mode = 0
+offset_left = 39.0
+offset_right = 52.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="AlbumPage/Grid/Card6/Stars" unique_id=1933749984]
+layout_mode = 0
+offset_left = 52.0
+offset_right = 65.0
+offset_bottom = 13.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PageControls" type="Control" parent="AlbumPage" unique_id=1141274915]
+anchors_preset = 0
+offset_left = 83.0
+offset_top = 405.0
+offset_right = 292.0
+offset_bottom = 451.0
+mouse_filter = 2
+
+[node name="PreviousButton" type="TextureButton" parent="AlbumPage/PageControls" unique_id=832628616]
+layout_mode = 0
+offset_right = 48.0
+offset_bottom = 42.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/PageControls/PreviousButton" unique_id=614808275]
+layout_mode = 0
+offset_right = 48.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("17_yvg7j")
+expand_mode = 1
+
+[node name="Arrow" type="TextureRect" parent="AlbumPage/PageControls/PreviousButton" unique_id=217744117]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 34.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("18_ieq2a")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PageLabel" type="Label" parent="AlbumPage/PageControls" unique_id=1712457555]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 4.0
+offset_right = 153.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 19
+text = "1/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="NextButton" type="TextureButton" parent="AlbumPage/PageControls" unique_id=1273801395]
+layout_mode = 0
+offset_left = 161.0
+offset_right = 209.0
+offset_bottom = 42.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="AlbumPage/PageControls/NextButton" unique_id=117810424]
+layout_mode = 0
+offset_right = 48.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("17_yvg7j")
+expand_mode = 1
+
+[node name="Arrow" type="TextureRect" parent="AlbumPage/PageControls/NextButton" unique_id=1359827186]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 34.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("19_a0n1c")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailPanel" type="Control" parent="." unique_id=1903359594]
+visible = false
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 100.0
+offset_right = 357.0
+offset_bottom = 529.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel" unique_id=1747680476]
+layout_mode = 0
+offset_right = 339.0
+offset_bottom = 429.0
+mouse_filter = 2
+texture = ExtResource("20_6e4x8")
+expand_mode = 1
+
+[node name="ElementIcon" type="TextureRect" parent="DetailPanel" unique_id=1574705745]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 54.0
+offset_bottom = 52.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="DetailPanel" unique_id=601604622]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 15.0
+offset_right = 228.0
+offset_bottom = 43.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "001 精灵"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Nature" type="Label" parent="DetailPanel" unique_id=242510346]
+layout_mode = 0
+offset_left = 59.0
+offset_top = 42.0
+offset_right = 154.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.78, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "性格"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Owned" type="Label" parent="DetailPanel" unique_id=1354175204]
+layout_mode = 0
+offset_left = 158.0
+offset_top = 42.0
+offset_right = 300.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "已拥有"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stars" type="Control" parent="DetailPanel" unique_id=461855606]
+anchors_preset = 0
+offset_left = 238.0
+offset_top = 18.0
+offset_right = 314.0
+offset_bottom = 35.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="DetailPanel/Stars" unique_id=372644835]
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="DetailPanel/Stars" unique_id=1901066202]
+layout_mode = 0
+offset_left = 15.0
+offset_right = 29.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="DetailPanel/Stars" unique_id=502201917]
+layout_mode = 0
+offset_left = 30.0
+offset_right = 44.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star4" type="TextureRect" parent="DetailPanel/Stars" unique_id=114641243]
+layout_mode = 0
+offset_left = 45.0
+offset_right = 59.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star5" type="TextureRect" parent="DetailPanel/Stars" unique_id=667428642]
+layout_mode = 0
+offset_left = 60.0
+offset_right = 74.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("16_qr0pi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PortraitStage" type="Control" parent="DetailPanel" unique_id=394673652]
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 68.0
+offset_right = 142.0
+offset_bottom = 194.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/PortraitStage" unique_id=1488496854]
+layout_mode = 0
+offset_right = 124.0
+offset_bottom = 126.0
+mouse_filter = 2
+texture = ExtResource("21_jdyql")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="DetailPanel/PortraitStage" unique_id=122675132]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 116.0
+offset_bottom = 110.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Sparkle" type="TextureRect" parent="DetailPanel/PortraitStage" unique_id=1154015025]
+layout_mode = 0
+offset_left = 84.0
+offset_top = 8.0
+offset_right = 118.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("22_fxvvh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Stats" type="Control" parent="DetailPanel" unique_id=1763936011]
+anchors_preset = 0
+offset_left = 154.0
+offset_top = 73.0
+offset_right = 314.0
+offset_bottom = 192.0
+mouse_filter = 2
+
+[node name="Stat1" type="Control" parent="DetailPanel/Stats" unique_id=1302823273]
+anchors_preset = 0
+offset_right = 160.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/Stats/Stat1" unique_id=595241867]
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 25.0
+mouse_filter = 2
+texture = ExtResource("23_2ugvr")
+expand_mode = 1
+
+[node name="Name" type="Label" parent="DetailPanel/Stats/Stat1" unique_id=997357275]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 52.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.86, 0.96, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "属性"
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat1" unique_id=1350298611]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 149.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.02, 0.08, 0.17, 0.78)
+
+[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat1" unique_id=477875968]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 97.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.32, 0.95, 0.52, 0.92)
+
+[node name="Value" type="Label" parent="DetailPanel/Stats/Stat1" unique_id=2025192314]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 3.0
+offset_right = 151.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stat2" type="Control" parent="DetailPanel/Stats" unique_id=351641716]
+anchors_preset = 0
+offset_top = 30.0
+offset_right = 160.0
+offset_bottom = 55.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/Stats/Stat2" unique_id=1217400032]
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 25.0
+mouse_filter = 2
+texture = ExtResource("23_2ugvr")
+expand_mode = 1
+
+[node name="Name" type="Label" parent="DetailPanel/Stats/Stat2" unique_id=1268675554]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 52.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.86, 0.96, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "属性"
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat2" unique_id=911336973]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 149.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.02, 0.08, 0.17, 0.78)
+
+[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat2" unique_id=1841592708]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 97.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.32, 0.95, 0.52, 0.92)
+
+[node name="Value" type="Label" parent="DetailPanel/Stats/Stat2" unique_id=1573421675]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 3.0
+offset_right = 151.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stat3" type="Control" parent="DetailPanel/Stats" unique_id=489263354]
+anchors_preset = 0
+offset_top = 60.0
+offset_right = 160.0
+offset_bottom = 85.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/Stats/Stat3" unique_id=470832065]
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 25.0
+mouse_filter = 2
+texture = ExtResource("23_2ugvr")
+expand_mode = 1
+
+[node name="Name" type="Label" parent="DetailPanel/Stats/Stat3" unique_id=1790257235]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 52.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.86, 0.96, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "属性"
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat3" unique_id=588335619]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 149.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.02, 0.08, 0.17, 0.78)
+
+[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat3" unique_id=1854729795]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 97.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.32, 0.95, 0.52, 0.92)
+
+[node name="Value" type="Label" parent="DetailPanel/Stats/Stat3" unique_id=952832100]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 3.0
+offset_right = 151.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Stat4" type="Control" parent="DetailPanel/Stats" unique_id=710197198]
+anchors_preset = 0
+offset_top = 90.0
+offset_right = 160.0
+offset_bottom = 115.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/Stats/Stat4" unique_id=1422555776]
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 25.0
+mouse_filter = 2
+texture = ExtResource("23_2ugvr")
+expand_mode = 1
+
+[node name="Name" type="Label" parent="DetailPanel/Stats/Stat4" unique_id=52169903]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 52.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.86, 0.96, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "属性"
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat4" unique_id=1392539974]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 149.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.02, 0.08, 0.17, 0.78)
+
+[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat4" unique_id=537984997]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 97.0
+offset_bottom = 17.0
+mouse_filter = 2
+color = Color(0.32, 0.95, 0.52, 0.92)
+
+[node name="Value" type="Label" parent="DetailPanel/Stats/Stat4" unique_id=1597512229]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 3.0
+offset_right = 151.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="SkillPanel" type="Control" parent="DetailPanel" unique_id=1412370694]
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 207.0
+offset_right = 321.0
+offset_bottom = 265.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/SkillPanel" unique_id=1915409958]
+layout_mode = 0
+offset_right = 303.0
+offset_bottom = 58.0
+mouse_filter = 2
+texture = ExtResource("24_axnt3")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="DetailPanel/SkillPanel" unique_id=325648395]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 13.0
+offset_right = 42.0
+offset_bottom = 43.0
+mouse_filter = 2
+texture = ExtResource("8_snesh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="DetailPanel/SkillPanel" unique_id=1884665577]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 7.0
+offset_right = 275.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "技能"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Desc" type="Label" parent="DetailPanel/SkillPanel" unique_id=1753506952]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 29.0
+offset_right = 282.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.78, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "技能描述"
+vertical_alignment = 1
+clip_text = true
+
+[node name="EvolutionStrip" type="Control" parent="DetailPanel" unique_id=7764731]
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 277.0
+offset_right = 321.0
+offset_bottom = 338.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=1472682837]
+layout_mode = 0
+offset_right = 303.0
+offset_bottom = 61.0
+mouse_filter = 2
+texture = ExtResource("25_ky0m3")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="DetailPanel/EvolutionStrip" unique_id=604077708]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 5.0
+offset_right = 94.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 0.91, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "进化路线"
+vertical_alignment = 1
+clip_text = true
+
+[node name="From" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=386138863]
+layout_mode = 0
+offset_left = 117.0
+offset_top = 11.0
+offset_right = 158.0
+offset_bottom = 52.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Arrow" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=1135579736]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 21.0
+offset_right = 194.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("26_40u1r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="To" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=472393607]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 11.0
+offset_right = 243.0
+offset_bottom = 52.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Empty" type="Label" parent="DetailPanel/EvolutionStrip" unique_id=101542087]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 21.0
+offset_right = 226.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0.72, 0.8, 0.92, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "暂无进化"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Ecology" type="Label" parent="DetailPanel" unique_id=273665143]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 347.0
+offset_right = 313.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "角色 · 生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="CloseButton" type="TextureButton" parent="DetailPanel" unique_id=1440138589]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 377.0
+offset_right = 143.0
+offset_bottom = 413.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/CloseButton" unique_id=82655148]
+layout_mode = 0
+offset_right = 116.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("27_tk25h")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="DetailPanel/CloseButton" unique_id=933595780]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 116.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "关闭"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="EvolveButton" type="TextureButton" parent="DetailPanel" unique_id=729252360]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 377.0
+offset_right = 312.0
+offset_bottom = 413.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/EvolveButton" unique_id=1512668888]
+layout_mode = 0
+offset_right = 116.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("28_dktgc")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="DetailPanel/EvolveButton" unique_id=1775202593]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 116.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "进化"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BondPage" type="Control" parent="." unique_id=1441497115]
+visible = false
+anchors_preset = 0
+offset_left = 21.0
+offset_top = 104.0
+offset_right = 354.0
+offset_bottom = 534.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="BondPage" unique_id=1407810164]
+layout_mode = 0
+offset_right = 333.0
+offset_bottom = 430.0
+mouse_filter = 2
+texture = ExtResource("20_6e4x8")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="BondPage" unique_id=1469386020]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 22.0
+offset_right = 184.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "羁绊图鉴"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Subtitle" type="Label" parent="BondPage" unique_id=1258152]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 50.0
+offset_right = 274.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.78, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "按生态主题查看已收集进度"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Rows" type="Control" parent="BondPage" unique_id=1850537991]
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 87.0
+offset_right = 309.0
+offset_bottom = 387.0
+mouse_filter = 2
+
+[node name="Row1" type="Control" parent="BondPage/Rows" unique_id=9065069]
+anchors_preset = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=304471067]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row1" unique_id=973481649]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row1" unique_id=258695305]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row1" unique_id=1128733105]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=222335698]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=1806888909]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row2" type="Control" parent="BondPage/Rows" unique_id=1070995018]
+anchors_preset = 0
+offset_top = 49.0
+offset_right = 285.0
+offset_bottom = 89.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=2061535469]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row2" unique_id=2019749434]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row2" unique_id=1181026247]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row2" unique_id=1991241964]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=35275940]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=1055345271]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row3" type="Control" parent="BondPage/Rows" unique_id=848186748]
+anchors_preset = 0
+offset_top = 98.0
+offset_right = 285.0
+offset_bottom = 138.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=449153637]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row3" unique_id=2054551111]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row3" unique_id=673052040]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row3" unique_id=1984077648]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=285123493]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=1382924563]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row4" type="Control" parent="BondPage/Rows" unique_id=1426946462]
+anchors_preset = 0
+offset_top = 147.0
+offset_right = 285.0
+offset_bottom = 187.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=1699623303]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row4" unique_id=1424506739]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row4" unique_id=110314011]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row4" unique_id=91245235]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=1283348850]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=780049538]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row5" type="Control" parent="BondPage/Rows" unique_id=987791573]
+anchors_preset = 0
+offset_top = 196.0
+offset_right = 285.0
+offset_bottom = 236.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=484746163]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row5" unique_id=939197030]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row5" unique_id=893256513]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row5" unique_id=119606444]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=1453645370]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=803093279]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row6" type="Control" parent="BondPage/Rows" unique_id=1007987928]
+anchors_preset = 0
+offset_top = 245.0
+offset_right = 285.0
+offset_bottom = 285.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=1826884054]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="BondPage/Rows/Row6" unique_id=993065987]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 99.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "生态"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="BondPage/Rows/Row6" unique_id=539955681]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 4.0
+offset_right = 272.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="BondPage/Rows/Row6" unique_id=1862952587]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 22.0
+offset_right = 121.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=120627589]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 273.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=89381881]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 25.0
+offset_right = 67.0
+offset_bottom = 31.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="CollectionPage" type="Control" parent="." unique_id=1322174343]
+visible = false
+anchors_preset = 0
+offset_left = 21.0
+offset_top = 104.0
+offset_right = 354.0
+offset_bottom = 534.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="CollectionPage" unique_id=2127462078]
+layout_mode = 0
+offset_right = 333.0
+offset_bottom = 430.0
+mouse_filter = 2
+texture = ExtResource("20_6e4x8")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="CollectionPage" unique_id=964051455]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 184.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "收集目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Subtitle" type="Label" parent="CollectionPage" unique_id=833664679]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 48.0
+offset_right = 294.0
+offset_bottom = 71.0
+theme_override_colors/font_color = Color(0.78, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "以翻页图鉴为入口，追踪角色与生态目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="RoleTarget" type="Control" parent="CollectionPage" unique_id=1559686625]
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 78.0
+offset_right = 309.0
+offset_bottom = 147.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/RoleTarget" unique_id=1197801783]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 69.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.82)
+
+[node name="Name" type="Label" parent="CollectionPage/RoleTarget" unique_id=2023073350]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 8.0
+offset_right = 137.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "角色目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Progress" type="Label" parent="CollectionPage/RoleTarget" unique_id=1630224896]
+layout_mode = 0
+offset_left = 208.0
+offset_top = 9.0
+offset_right = 266.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/RoleTarget" unique_id=1281637786]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 36.0
+offset_right = 265.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.79, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+clip_text = true
+
+[node name="Rows" type="Control" parent="CollectionPage" unique_id=2042298768]
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 164.0
+offset_right = 309.0
+offset_bottom = 381.0
+mouse_filter = 2
+
+[node name="Row1" type="Control" parent="CollectionPage/Rows" unique_id=195144055]
+anchors_preset = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=1154318486]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="CollectionPage/Rows/Row1" unique_id=1049969229]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Status" type="Label" parent="CollectionPage/Rows/Row1" unique_id=129101248]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 3.0
+offset_right = 271.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="CollectionPage/Rows/Row1" unique_id=52180420]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 19.0
+offset_right = 82.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row1" unique_id=998135022]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 271.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=1868292508]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 309.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=423826968]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 10.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row2" type="Control" parent="CollectionPage/Rows" unique_id=938650292]
+anchors_preset = 0
+offset_top = 43.0
+offset_right = 285.0
+offset_bottom = 80.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=767236987]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1221580103]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Status" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1914373819]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 3.0
+offset_right = 271.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1276039548]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 19.0
+offset_right = 82.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1688730412]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 271.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=232330734]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 309.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=460549650]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 10.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row3" type="Control" parent="CollectionPage/Rows" unique_id=1744384923]
+anchors_preset = 0
+offset_top = 86.0
+offset_right = 285.0
+offset_bottom = 123.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=1890465171]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="CollectionPage/Rows/Row3" unique_id=1780065344]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Status" type="Label" parent="CollectionPage/Rows/Row3" unique_id=1324400799]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 3.0
+offset_right = 271.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="CollectionPage/Rows/Row3" unique_id=954354160]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 19.0
+offset_right = 82.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row3" unique_id=1831540810]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 271.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=556992829]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 309.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=492504849]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 10.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row4" type="Control" parent="CollectionPage/Rows" unique_id=1603493559]
+anchors_preset = 0
+offset_top = 129.0
+offset_right = 285.0
+offset_bottom = 166.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=1482866860]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="CollectionPage/Rows/Row4" unique_id=42889243]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Status" type="Label" parent="CollectionPage/Rows/Row4" unique_id=430506636]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 3.0
+offset_right = 271.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="CollectionPage/Rows/Row4" unique_id=31721746]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 19.0
+offset_right = 82.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row4" unique_id=226444150]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 271.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=362357579]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 309.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=1409802967]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 10.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="Row5" type="Control" parent="CollectionPage/Rows" unique_id=963143024]
+anchors_preset = 0
+offset_top = 172.0
+offset_right = 285.0
+offset_bottom = 209.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=392520719]
+layout_mode = 0
+offset_right = 285.0
+offset_bottom = 37.0
+mouse_filter = 2
+color = Color(0.04, 0.12, 0.26, 0.8)
+
+[node name="Name" type="Label" parent="CollectionPage/Rows/Row5" unique_id=1195715570]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 3.0
+offset_right = 102.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "目标"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Status" type="Label" parent="CollectionPage/Rows/Row5" unique_id=1721090046]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 3.0
+offset_right = 271.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Theme" type="Label" parent="CollectionPage/Rows/Row5" unique_id=355077350]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 19.0
+offset_right = 82.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.71, 0.83, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+clip_text = true
+
+[node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row5" unique_id=694511932]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 271.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.8, 0.91, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=899209361]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 309.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.02, 0.06, 0.13, 0.88)
+
+[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=1586325905]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 32.0
+offset_right = 10.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.29, 0.86, 0.47, 0.96)
+
+[node name="BottomTabs" type="Control" parent="." unique_id=1699004637]
+anchors_preset = 0
+offset_left = 27.0
+offset_top = 596.0
+offset_right = 348.0
+offset_bottom = 650.0
+mouse_filter = 2
+
+[node name="AlbumTab" type="TextureButton" parent="BottomTabs" unique_id=1953943272]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="BottomTabs/AlbumTab" unique_id=1622711870]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 49.0
+mouse_filter = 2
+texture = ExtResource("29_42nqe")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomTabs/AlbumTab" unique_id=663286872]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 37.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("30_g5bff")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomTabs/AlbumTab" unique_id=1667752523]
+layout_mode = 0
+offset_left = 39.0
+offset_top = 12.0
+offset_right = 84.0
+offset_bottom = 35.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "图鉴"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BondTab" type="TextureButton" parent="BottomTabs" unique_id=286522887]
+layout_mode = 0
+offset_left = 107.0
+offset_right = 203.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="BottomTabs/BondTab" unique_id=892577514]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 49.0
+mouse_filter = 2
+texture = ExtResource("29_42nqe")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomTabs/BondTab" unique_id=1695358771]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 37.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("31_78gw8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomTabs/BondTab" unique_id=1479623014]
+layout_mode = 0
+offset_left = 39.0
+offset_top = 12.0
+offset_right = 84.0
+offset_bottom = 35.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "羁绊"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="CollectionTab" type="TextureButton" parent="BottomTabs" unique_id=322185956]
+layout_mode = 0
+offset_left = 214.0
+offset_right = 310.0
+offset_bottom = 49.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="BottomTabs/CollectionTab" unique_id=605478040]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 49.0
+mouse_filter = 2
+texture = ExtResource("29_42nqe")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomTabs/CollectionTab" unique_id=1163090691]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 37.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("32_3rx3r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomTabs/CollectionTab" unique_id=947968751]
+layout_mode = 0
+offset_left = 39.0
+offset_top = 12.0
+offset_right = 84.0
+offset_bottom = 35.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "目标"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true

@@ -52,6 +52,30 @@ func _scene_data(scene_name: String) -> Dictionary:
 			"stageId": stage_id,
 			"stageData": stage_db.get_stage(stage_id)
 		}
+	if scene_name == "result":
+		return {
+			"result": "win",
+			"stageId": "stage_1_1",
+			"turnCount": 5,
+			"maxTurns": 20,
+			"playerLevel": 5,
+			"enemyLevel": 3,
+			"stageRewards": {"gold": 80, "exp": 30, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
+			"playerTeam": [
+				{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "hp": 20, "maxHP": 20},
+				{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 3, "hp": 18, "maxHP": 18},
+				{"id": "monster_003", "monsterId": "monster_003", "name": "草苗儿", "level": 5, "hp": 22, "maxHP": 22}
+			],
+			"enemies": [
+				{"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "hp": 0, "maxHP": 16}
+			],
+			"capture_played_inline": true,
+			"captured": true,
+			"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1},
+			"capture_result_text": {"title": "收服成功", "reason": "窗口稳定"},
+			"capture_item_used": {"name": "捕捉球"},
+			"capture_window": {"label": "稳定", "stability": 0.82}
+		}
 	return {}
 
 func _seed_demo_state(main: Control, scene_name: String) -> void:
@@ -60,6 +84,15 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 		return
 	if scene_name == "ranch":
 		_seed_ranch_demo(main)
+		return
+	if scene_name == "inventory":
+		_seed_inventory_demo(main)
+		return
+	if scene_name == "shop":
+		_seed_shop_demo(main)
+		return
+	if scene_name == "achievement":
+		_seed_achievement_scroll_demo(main)
 		return
 	if scene_name != "team":
 		return
@@ -158,6 +191,62 @@ func _seed_ranch_demo(main: Control) -> void:
 		ranch_scene.call("_sync_gui")
 	else:
 		ranch_scene.queue_redraw()
+
+func _seed_inventory_demo(main: Control) -> void:
+	var inventory_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("InventoryGui")
+	if inventory_scene == null:
+		return
+	inventory_scene.set("_inventory", {
+		"capture_ball": 12,
+		"capture_ball_plus": 3,
+		"exp_potion": 8,
+		"exp_crystal": 2,
+		"hp_potion": 5,
+		"gold_bag": 4,
+		"gold_chest": 1,
+		"evolution_stone_fire": 2,
+		"evolution_stone_water": 2,
+		"evolution_stone_grass": 2,
+		"evolution_stone_thunder": 1,
+		"evolution_stone_light": 1,
+		"evolution_stone_earth": 1,
+		"evolution_stone_wind": 1,
+		"evolution_stone_dark": 1,
+	})
+	inventory_scene.set("_player", {"gold": 1280, "gems": 36})
+	inventory_scene.set("_capture_settings", {"autoCapture": true, "equippedItem": "capture_ball_plus"})
+	inventory_scene.set("_active_tab", _read_arg("--inventory-tab=", "all"))
+	inventory_scene.set("_selected_item", {})
+	inventory_scene.call("_build_item_list")
+	if inventory_scene.has_method("_sync_gui"):
+		inventory_scene.call("_sync_gui")
+	else:
+		inventory_scene.queue_redraw()
+
+func _seed_achievement_scroll_demo(main: Control) -> void:
+	var achievement_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("SceneAchievement")
+	if achievement_scene == null:
+		return
+	var offset := float(_read_arg("--achievement-scroll=", "168"))
+	achievement_scene.set("_scroll_offset", offset)
+	achievement_scene.queue_redraw()
+
+func _seed_shop_demo(main: Control) -> void:
+	var shop_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("ShopGui")
+	if shop_scene == null:
+		return
+	shop_scene.set("player_data", {"gold": 5000, "gems": 120})
+	shop_scene.set("_active_tab", _read_arg("--shop-tab=", "recommend"))
+	if shop_scene.has_method("_sync_gui"):
+		shop_scene.call("_sync_gui")
+	if _read_arg("--shop-popup=", "0") == "1":
+		var items: Array = shop_scene.call("_get_visible_shop_items")
+		if not items.is_empty():
+			shop_scene.call("_show_purchase_popup", items[0])
+	elif _read_arg("--shop-toast=", "0") == "1":
+		shop_scene.call("_show_toast", "获得 经验药水 x1", "success")
+	else:
+		shop_scene.queue_redraw()
 
 func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null

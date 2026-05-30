@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://cko67qkbhlwfs"]
+
+[ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/stage/boss_badge.png" id="1_badge"]
+[ext_resource type="Texture2D" uid="uid://cua112u0uug48" path="res://assets/images/stage/boss_flower.png" id="2_art"]
+[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/stage/icon_star_dim.png" id="3_star"]
+
+[node name="BossButton" type="TextureButton" unique_id=2140221094]
+offset_right = 126.0
+offset_bottom = 150.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="." unique_id=634336892]
+layout_mode = 0
+offset_right = 126.0
+offset_bottom = 142.0
+mouse_filter = 2
+texture = ExtResource("1_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Art" type="TextureRect" parent="." unique_id=594346209]
+layout_mode = 0
+offset_left = 6.0
+offset_top = -23.0
+offset_right = 120.0
+offset_bottom = 79.0
+mouse_filter = 2
+texture = ExtResource("2_art")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="." unique_id=672946286]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 99.0
+offset_right = 101.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(1, 0.82, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+text = "BOSS"
+horizontal_alignment = 1
+
+[node name="Stars" type="Control" parent="." unique_id=1909670814]
+anchors_preset = 0
+offset_left = 39.0
+offset_top = 123.0
+offset_right = 87.0
+offset_bottom = 137.0
+mouse_filter = 2
+
+[node name="Star1" type="TextureRect" parent="Stars" unique_id=790004681]
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star2" type="TextureRect" parent="Stars" unique_id=966841850]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 30.0
+offset_bottom = 14.0
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star3" type="TextureRect" parent="Stars" unique_id=1090440356]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 46.0
+offset_bottom = 14.0
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Lock" type="Label" parent="." unique_id=858113426]
+visible = false
+layout_mode = 0
+offset_left = 8.0
+offset_top = 137.0
+offset_right = 118.0
+offset_bottom = 152.0
+theme_override_colors/font_color = Color(0.75, 0.82, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+text = "通关前置关卡解锁"
+horizontal_alignment = 1

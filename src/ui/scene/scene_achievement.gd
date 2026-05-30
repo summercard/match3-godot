@@ -210,6 +210,8 @@ func _on_tap(point: Vector2) -> void:
 		return
 	var ach: Dictionary = _filtered_achievements[index]
 	var card_rect := _get_card_rect(index)
+	if not _is_card_fully_visible(card_rect):
+		return
 	if not card_rect.has_point(point):
 		return
 	if ach.get("unlocked", false) and not ach.get("claimed", false) and _get_claim_rect(card_rect).has_point(point):
@@ -271,10 +273,12 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
+	_draw_list()
+	# 列表是 Canvas 绘制，没有真实裁剪容器；重绘顶部背景和固定 UI，避免滚动卡片盖住头部。
+	_draw_background_region(Rect2(0.0, 0.0, DESIGN_W, LIST_TOP))
 	_draw_header()
 	_draw_summary()
 	_draw_tabs()
-	_draw_list()
 	_draw_toast()
 
 
@@ -315,7 +319,7 @@ func _draw_list() -> void:
 		return
 	for i in range(_filtered_achievements.size()):
 		var rect := _get_card_rect(i)
-		if rect.position.y + rect.size.y < LIST_TOP or rect.position.y > LIST_BOTTOM:
+		if not _is_card_fully_visible(rect):
 			continue
 		_draw_achievement_card(_filtered_achievements[i], rect)
 	_draw_scrollbar()
@@ -410,6 +414,9 @@ func _get_card_rect(index: int) -> Rect2:
 func _get_claim_rect(card_rect: Rect2) -> Rect2:
 	return Rect2(card_rect.position.x + 260.0, card_rect.position.y + 54.0, 86.0, 34.0)
 
+func _is_card_fully_visible(rect: Rect2) -> bool:
+	return rect.position.y >= LIST_TOP and rect.end.y <= LIST_BOTTOM
+
 
 func _get_badge_key(ach: Dictionary) -> String:
 	if not ach.get("unlocked", false):
@@ -478,6 +485,23 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
 	var scale := maxf(rect.size.x / size.x, rect.size.y / size.y)
 	var source_size := rect.size / scale
 	var source_pos := (size - source_size) * 0.5
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
+
+func _draw_background_region(rect: Rect2) -> void:
+	var tex := _tex("bg")
+	if tex == null:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var screen_rect := Rect2(0.0, 0.0, DESIGN_W, DESIGN_H)
+	var size := tex.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		draw_rect(rect, Color(0.04, 0.07, 0.15), true)
+		return
+	var scale := maxf(screen_rect.size.x / size.x, screen_rect.size.y / size.y)
+	var full_source_size := screen_rect.size / scale
+	var full_source_pos := (size - full_source_size) * 0.5
+	var source_pos := full_source_pos + (rect.position - screen_rect.position) / scale
+	var source_size := rect.size / scale
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
 
 
