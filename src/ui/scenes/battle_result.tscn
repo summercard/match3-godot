@@ -1,0 +1,711 @@
+[gd_scene format=3 uid="uid://beu7d4n487scj"]
+
+[ext_resource type="Texture2D" uid="uid://c1vhx6cwsyvym" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://ctikbdr4ca5qm" path="res://assets/images/result/ui_btn_next.png" id="btn_next"]
+[ext_resource type="Texture2D" uid="uid://c0w62741dayyh" path="res://assets/images/result/ui_btn_secondary.png" id="btn_secondary"]
+[ext_resource type="Texture2D" uid="uid://d2e6f4y61dsd2" path="res://assets/images/result/fx_victory_burst.png" id="burst"]
+[ext_resource type="PackedScene" path="res://src/ui/scenes/capture_result_panel.tscn" id="capture_panel"]
+[ext_resource type="Texture2D" uid="uid://bli4tak8ed2wy" path="res://assets/images/result/fx_confetti_cluster.png" id="confetti"]
+[ext_resource type="Texture2D" uid="uid://etj6ajh77boa" path="res://assets/images/result/ui_monster_exp_card.png" id="exp_card"]
+[ext_resource type="Texture2D" uid="uid://c5m8fubnxwy20" path="res://assets/images/result/ui_team_exp_panel.png" id="exp_panel"]
+[ext_resource type="Texture2D" uid="uid://c7leo2mqqyo8s" path="res://assets/images/result/ui_info_chip.png" id="info_chip"]
+[ext_resource type="Texture2D" uid="uid://bh1h57uryyaxp" path="res://assets/images/result/fx_levelup_glow.png" id="level_glow"]
+[ext_resource type="Texture2D" uid="uid://brghfpalbhcju" path="res://assets/images/result/ui_reward_panel.png" id="reward_panel"]
+[ext_resource type="Texture2D" uid="uid://dl4ghu8buer0n" path="res://assets/images/result/ui_reward_slot.png" id="reward_slot"]
+[ext_resource type="Script" uid="uid://bgmehtlw34xli" path="res://src/ui/scene/scene_result_gui.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://britbssgudkie" path="res://assets/images/result/icon_star_dim_large.png" id="star_dim"]
+[ext_resource type="Texture2D" uid="uid://ced3ry1lpaudt" path="res://assets/images/result/icon_sweep_badge.png" id="sweep"]
+[ext_resource type="Texture2D" uid="uid://btbhx1tt7bxg2" path="res://assets/images/result/ui_victory_banner.png" id="victory"]
+
+[node name="BattleResultGui" type="Control" unique_id=2092080466]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 1
+script = ExtResource("script")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1156930113]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+texture = ExtResource("bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="." unique_id=747442968]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0.02, 0.05, 0.12, 0.34)
+
+[node name="WinFx" type="Control" parent="." unique_id=1739148844]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 135.0
+
+[node name="Burst" type="TextureRect" parent="WinFx" unique_id=1503307524]
+layout_mode = 0
+offset_left = 52.0
+offset_top = -28.0
+offset_right = 322.0
+offset_bottom = 148.0
+mouse_filter = 2
+texture = ExtResource("burst")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ConfettiLeft" type="TextureRect" parent="WinFx" unique_id=792984503]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 34.0
+offset_right = 100.0
+offset_bottom = 118.0
+mouse_filter = 2
+texture = ExtResource("confetti")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ConfettiRight" type="TextureRect" parent="WinFx" unique_id=77504225]
+layout_mode = 0
+offset_left = 276.0
+offset_top = 36.0
+offset_right = 368.0
+offset_bottom = 120.0
+mouse_filter = 2
+texture = ExtResource("confetti")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Banner" type="Control" parent="." unique_id=691974770]
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 357.0
+offset_bottom = 120.0
+
+[node name="Frame" type="TextureRect" parent="Banner" unique_id=57386606]
+layout_mode = 0
+offset_right = 339.0
+offset_bottom = 110.0
+mouse_filter = 2
+texture = ExtResource("victory")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Banner" unique_id=1683066956]
+layout_mode = 0
+offset_top = 38.0
+offset_right = 339.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
+text = "战斗胜利"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StarRow" type="Control" parent="." unique_id=232303451]
+anchors_preset = 0
+offset_left = 108.0
+offset_top = 106.0
+offset_right = 301.0
+offset_bottom = 166.0
+
+[node name="Star1" type="TextureRect" parent="StarRow" unique_id=1132103650]
+layout_mode = 0
+offset_left = 5.0
+offset_right = 59.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("star_dim")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="StarRow" unique_id=350311975]
+layout_mode = 0
+offset_left = 53.0
+offset_right = 107.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("star_dim")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="StarRow" unique_id=1432092673]
+layout_mode = 0
+offset_left = 101.0
+offset_right = 155.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("star_dim")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BattleInfo" type="Control" parent="." unique_id=1626943882]
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 170.0
+offset_right = 347.0
+offset_bottom = 228.0
+
+[node name="Frame" type="TextureRect" parent="BattleInfo" unique_id=993747995]
+layout_mode = 0
+offset_right = 319.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("info_chip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TurnLabel" type="Label" parent="BattleInfo" unique_id=219448252]
+layout_mode = 0
+offset_top = 7.0
+offset_right = 319.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "回合 0 / 20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyLabel" type="Label" parent="BattleInfo" unique_id=2110618714]
+layout_mode = 0
+offset_top = 39.0
+offset_right = 319.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 0.45, 0.42, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CaptureResultPanel" parent="." unique_id=707313623 instance=ExtResource("capture_panel")]
+layout_mode = 0
+offset_top = 238.0
+offset_bottom = 238.0
+
+[node name="RewardPanel" type="Control" parent="." unique_id=1054542105]
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 350.0
+offset_right = 359.0
+offset_bottom = 460.0
+
+[node name="Frame" type="TextureRect" parent="RewardPanel" unique_id=2125386871]
+layout_mode = 0
+offset_left = -35.0
+offset_top = 49.0
+offset_right = 378.0
+offset_bottom = 185.0
+mouse_filter = 2
+texture = ExtResource("reward_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="RewardPanel" unique_id=1209168286]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 28.0
+offset_right = 344.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "获得奖励"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slots" type="Control" parent="RewardPanel" unique_id=552024371]
+anchors_preset = 0
+offset_left = 74.0
+offset_top = 34.0
+offset_right = 269.0
+offset_bottom = 100.0
+
+[node name="RewardSlot1" type="Control" parent="RewardPanel/Slots" unique_id=657978786]
+anchors_preset = 0
+offset_top = 29.0
+offset_right = 54.0
+offset_bottom = 101.0
+
+[node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=118173143]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("reward_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=1770531726]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 9.0
+offset_right = 41.0
+offset_bottom = 37.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot1" unique_id=963877189]
+layout_mode = 0
+offset_top = 52.0
+offset_right = 54.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardSlot2" type="Control" parent="RewardPanel/Slots" unique_id=795980711]
+anchors_preset = 0
+offset_left = 67.0
+offset_top = 29.0
+offset_right = 121.0
+offset_bottom = 101.0
+
+[node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=1519586129]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("reward_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=833072020]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 9.0
+offset_right = 41.0
+offset_bottom = 37.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot2" unique_id=1432715867]
+layout_mode = 0
+offset_top = 52.0
+offset_right = 54.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardSlot3" type="Control" parent="RewardPanel/Slots" unique_id=1481737944]
+anchors_preset = 0
+offset_left = 134.0
+offset_top = 29.0
+offset_right = 188.0
+offset_bottom = 101.0
+
+[node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1858066800]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("reward_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1002186608]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 9.0
+offset_right = 41.0
+offset_bottom = 37.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot3" unique_id=801588685]
+layout_mode = 0
+offset_top = 52.0
+offset_right = 54.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExpPanel" type="Control" parent="." unique_id=823335105]
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 464.0
+offset_right = 359.0
+offset_bottom = 580.0
+
+[node name="Frame" type="TextureRect" parent="ExpPanel" unique_id=310957884]
+layout_mode = 0
+offset_left = -36.0
+offset_top = 18.0
+offset_right = 376.0
+offset_bottom = 177.0
+mouse_filter = 2
+texture = ExtResource("exp_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="ExpPanel" unique_id=1654325864]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 17.0
+offset_right = 344.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "队伍经验"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Desc" type="Label" parent="ExpPanel" unique_id=1853513822]
+layout_mode = 0
+offset_top = 23.0
+offset_right = 343.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.58, 0.64, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Cards" type="Control" parent="ExpPanel" unique_id=554168705]
+anchors_preset = 0
+offset_left = 87.0
+offset_top = 41.0
+offset_right = 256.0
+offset_bottom = 116.0
+
+[node name="ExpCard1" type="Control" parent="ExpPanel/Cards" unique_id=1422004063]
+anchors_preset = 0
+offset_left = -10.0
+offset_top = 15.0
+offset_right = 44.0
+offset_bottom = 91.0
+
+[node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard1" unique_id=1373587523]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 68.0
+mouse_filter = 2
+texture = ExtResource("exp_card")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard1" unique_id=782904571]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 48.0
+offset_bottom = 47.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=588148548]
+layout_mode = 0
+offset_top = 48.0
+offset_right = 54.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 8
+text = "Lv.1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=1359102942]
+layout_mode = 0
+offset_left = -7.0
+offset_top = 62.0
+offset_right = 61.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExpCard2" type="Control" parent="ExpPanel/Cards" unique_id=2098007429]
+anchors_preset = 0
+offset_left = 54.0
+offset_top = 15.0
+offset_right = 108.0
+offset_bottom = 91.0
+
+[node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard2" unique_id=215914357]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 68.0
+mouse_filter = 2
+texture = ExtResource("exp_card")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard2" unique_id=1866527594]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 48.0
+offset_bottom = 47.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=1930564297]
+layout_mode = 0
+offset_top = 48.0
+offset_right = 54.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 8
+text = "Lv.1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=742288577]
+layout_mode = 0
+offset_left = -7.0
+offset_top = 62.0
+offset_right = 61.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExpCard3" type="Control" parent="ExpPanel/Cards" unique_id=1579014413]
+anchors_preset = 0
+offset_left = 118.0
+offset_top = 15.0
+offset_right = 172.0
+offset_bottom = 91.0
+
+[node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard3" unique_id=1773636129]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 68.0
+mouse_filter = 2
+texture = ExtResource("exp_card")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard3" unique_id=1966652861]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 48.0
+offset_bottom = 47.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1125240006]
+layout_mode = 0
+offset_top = 48.0
+offset_right = 54.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 8
+text = "Lv.1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1622793231]
+layout_mode = 0
+offset_left = -7.0
+offset_top = 62.0
+offset_right = 61.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LevelUpPanel" type="Control" parent="." unique_id=1286156204]
+visible = false
+anchors_preset = 0
+offset_left = 55.0
+offset_top = 566.0
+offset_right = 320.0
+offset_bottom = 596.0
+
+[node name="Glow" type="TextureRect" parent="LevelUpPanel" unique_id=678435177]
+layout_mode = 0
+offset_right = 265.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("level_glow")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="LevelUpPanel" unique_id=1822400316]
+layout_mode = 0
+offset_top = 6.0
+offset_right = 265.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "UP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SweepUnlocked" type="Control" parent="." unique_id=1401381945]
+visible = false
+anchors_preset = 0
+offset_left = 110.0
+offset_top = 580.0
+offset_right = 300.0
+offset_bottom = 608.0
+
+[node name="Icon" type="TextureRect" parent="SweepUnlocked" unique_id=1680925290]
+layout_mode = 0
+offset_right = 34.0
+offset_bottom = 34.0
+mouse_filter = 2
+texture = ExtResource("sweep")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="SweepUnlocked" unique_id=1126614567]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 7.0
+offset_right = 190.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "已解锁扫荡功能"
+vertical_alignment = 1
+
+[node name="Buttons" type="Control" parent="." unique_id=2009834381]
+anchors_preset = 0
+offset_left = 14.0
+offset_top = 610.0
+offset_right = 341.0
+offset_bottom = 660.0
+
+[node name="BackButton" type="TextureButton" parent="Buttons" unique_id=206069040]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 46.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Buttons/BackButton" unique_id=1208805136]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 46.0
+mouse_filter = 2
+texture = ExtResource("btn_secondary")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="Buttons/BackButton" unique_id=2144941832]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 112.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "返回"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextButton" type="TextureButton" parent="Buttons" unique_id=2020187757]
+layout_mode = 0
+offset_left = 119.0
+offset_right = 231.0
+offset_bottom = 46.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Buttons/NextButton" unique_id=426806487]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 46.0
+mouse_filter = 2
+texture = ExtResource("btn_next")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="Buttons/NextButton" unique_id=1913172504]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 112.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "下一关"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RetryButton" type="TextureButton" parent="Buttons" unique_id=1417554593]
+layout_mode = 0
+offset_left = 238.0
+offset_right = 350.0
+offset_bottom = 46.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Buttons/RetryButton" unique_id=495682816]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 46.0
+mouse_filter = 2
+texture = ExtResource("btn_secondary")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="Buttons/RetryButton" unique_id=1743095096]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 112.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "再来一次"
+horizontal_alignment = 1
+vertical_alignment = 1

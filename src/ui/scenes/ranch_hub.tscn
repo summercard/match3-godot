@@ -119,9 +119,9 @@ expand_mode = 1
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=1952174850]
 layout_mode = 0
 offset_left = 11.0
-offset_top = 91.0
+offset_top = 93.0
 offset_right = 95.0
-offset_bottom = 112.0
+offset_bottom = 114.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
 theme_override_constants/outline_size = 2
@@ -214,9 +214,9 @@ expand_mode = 1
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=923259660]
 layout_mode = 0
 offset_left = 11.0
-offset_top = 91.0
+offset_top = 93.0
 offset_right = 95.0
-offset_bottom = 112.0
+offset_bottom = 114.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
 theme_override_constants/outline_size = 2
@@ -305,9 +305,9 @@ expand_mode = 1
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=1359126315]
 layout_mode = 0
 offset_left = 11.0
-offset_top = 91.0
+offset_top = 93.0
 offset_right = 95.0
-offset_bottom = 112.0
+offset_bottom = 114.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
 theme_override_constants/outline_size = 2
@@ -855,9 +855,9 @@ stretch_mode = 5
 
 [node name="BottomButtons" type="Control" parent="Pages/RanchPage" unique_id=1621847581]
 anchors_preset = 0
-offset_top = 621.0
+offset_top = 612.0
 offset_right = 375.0
-offset_bottom = 667.0
+offset_bottom = 658.0
 
 [node name="FocusButton" type="TextureButton" parent="Pages/RanchPage/BottomButtons" unique_id=83724475]
 layout_mode = 0
@@ -960,10 +960,10 @@ expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1629723582]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 28.0
-offset_right = 107.0
-offset_bottom = 113.0
+offset_left = 35.0
+offset_top = 43.0
+offset_right = 126.0
+offset_bottom = 128.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -971,10 +971,10 @@ stretch_mode = 5
 [node name="Empty" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1249252571]
 visible = false
 layout_mode = 0
-offset_left = 34.0
-offset_top = 64.0
-offset_right = 175.0
-offset_bottom = 95.0
+offset_left = 51.0
+offset_top = 70.0
+offset_right = 192.0
+offset_bottom = 101.0
 theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
 theme_override_font_sizes/font_size = 14
 text = "暂无怪物"
@@ -1036,10 +1036,10 @@ horizontal_alignment = 1
 
 [node name="Upgrade" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1562322154]
 layout_mode = 0
-offset_left = 45.0
-offset_top = 153.0
-offset_right = 223.0
-offset_bottom = 170.0
+offset_left = 90.0
+offset_top = 147.0
+offset_right = 268.0
+offset_bottom = 164.0
 theme_override_colors/font_color = Color(0.76, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 9
 text = "玩法: 稳定成长"
@@ -1047,10 +1047,10 @@ horizontal_alignment = 1
 
 [node name="EvolveButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel" unique_id=1962767549]
 layout_mode = 0
-offset_left = 226.0
-offset_top = 142.0
-offset_right = 334.0
-offset_bottom = 188.0
+offset_left = 126.0
+offset_top = 164.0
+offset_right = 234.0
+offset_bottom = 210.0
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -1399,6 +1399,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SocialPage" type="Control" parent="Pages" unique_id=174540711]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
