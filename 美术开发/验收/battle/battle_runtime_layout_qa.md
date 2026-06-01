@@ -52,3 +52,67 @@
 - `美术开发/验收/battle/battle_runtime_formal_ui_boss_fx.png`
 - `美术开发/验收/battle/battle_runtime_formal_ui_multi3.png`
 - `美术开发/验收/battle/battle_runtime_formal_ui_aspect_qa.png`
+
+## 2026-06-01 可编辑 GUI 混合场景验收
+
+| 检查项 | 结果 | 说明 / 证据 |
+| --- | --- | --- |
+| 现状备份 | 通过 | `美术开发/备份/battle_before_editable_ui_20260601.tar.gz` |
+| PackedScene 入口 | 通过 | `main.gd` 已将 `battle` 映射到 `src/ui/scenes/battle_screen.tscn` |
+| 静态 UI 节点化 | 通过 | 背景、顶部 HUD、敌我槽位、血条、底部捕捉控件均可在编辑器调整 |
+| 棋盘位置 | 通过 | `BATTLE_BOARD_Y = 300` 保持不变 |
+| 动态特效 | 通过 | 伤害浮字、护盾、命中和连击仍由代码覆盖层绘制 |
+| 输入回归 | 通过 | `tests/battle_input_test.gd`, `tests/active_skill_test.gd` |
+| GUI 契约 | 通过 | `tests/battle_gui_scene_test.gd` |
+| 主流程冒烟 | 通过 | `tests/p0_smoke_test.gd` |
+
+验收图：
+
+- `美术开发/验收/battle/battle_runtime_editable_ui_v1.png`
+- `美术开发/验收/battle/battle_runtime_editable_ui_v1_multi3.png`
+- `美术开发/验收/battle/battle_runtime_editable_ui_v1_fx.png`
+
+## 2026-06-01 黄色沟边 HP 血条验收
+
+| 检查项 | 结果 | 说明 / 证据 |
+| --- | --- | --- |
+| 黄色沟边 | 通过 | 单敌主血条、三敌小血条和我方三条血条均使用黄色沟边深色轨道 |
+| 填充分层 | 通过 | 敌方红色、我方绿色胶囊填充独立于外框，缩小后仍能辨认边缘 |
+| 绿色填充 | 通过 | 连通背景去除保留绿色本体，不再被绿幕处理染暗 |
+| GUI 契约 | 通过 | `tests/battle_gui_scene_test.gd` |
+| 输入与流程 | 通过 | `tests/battle_input_test.gd`, `tests/active_skill_test.gd`, `tests/p0_smoke_test.gd` |
+
+最终验收图：
+
+- `美术开发/验收/battle/battle_runtime_editable_ui_hp_gold_groove_v6_fix.png`
+- `美术开发/验收/battle/battle_runtime_editable_ui_hp_gold_groove_v6_fix_multi3.png`
+
+`v5` 图已废弃：外框使用保持比例居中模式，导致轨道只显示为血条后方的一小截。`v6` 改为外框铺满节点矩形后重新验收。
+
+## 2026-06-01 HP 系统色内条验收
+
+| 检查项 | 结果 | 说明 / 证据 |
+| --- | --- | --- |
+| 内条渲染 | 通过 | `ProgressBar + StyleBoxFlat` 系统圆角色块替代缩放位图 |
+| 小尺寸边缘 | 通过 | 三敌与我方小血条无位图图案和缩放毛边 |
+| 外框保留 | 通过 | 黄色沟边深色轨道继续使用独立美术资产 |
+| 旧绘制路径 | 通过 | `_draw_hp_bar()` 同步使用系统圆角纯色 |
+| 回归测试 | 通过 | `BattleGuiScene`, `BattleInput`, `ActiveSkill`, `P0Smoke` |
+
+最终验收图：
+
+- `美术开发/验收/battle/battle_runtime_editable_ui_hp_system_fill_v1.png`
+- `美术开发/验收/battle/battle_runtime_editable_ui_hp_system_fill_v1_multi3.png`
+
+## 2026-06-01 HP 三层结构验收
+
+| 检查项 | 结果 | 说明 / 证据 |
+| --- | --- | --- |
+| 顶层装饰框 | 通过 | `ui_hp_frame_overlay.png` 中间透明，仅保留黄色沟边装饰 |
+| 底层空槽 | 通过 | 深蓝纯色槽独立绘制，残血区域清晰 |
+| 动态填充 | 通过 | 红绿填充含暗部、主体色和顶部高光，右端随血量变化保持圆角 |
+| 单敌残血 | 通过 | `battle_runtime_editable_ui_hp_layered_v2_damage.png` |
+| 三敌残血 | 通过 | `battle_runtime_editable_ui_hp_layered_v2_damage_multi3.png` |
+| 回归测试 | 通过 | `BattleGuiScene`, `BattleInput`, `ActiveSkill`, `P0Smoke` |
+
+截图脚本支持 `--battle-demo-hp=1`，仅用于视觉验收，不改变战斗逻辑。

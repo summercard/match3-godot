@@ -18,6 +18,8 @@ func _capture() -> void:
 	await process_frame
 	_seed_demo_state(main, scene_name)
 	await process_frame
+	for _frame in range(int(_read_arg("--settle-frames=", "0"))):
+		await process_frame
 	var image := root.get_texture().get_image()
 	var error := image.save_png(output_path)
 	if error != OK:
@@ -254,6 +256,8 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		return
 	if _read_arg("--battle-art-aspect-qa=", "0") == "1":
 		_seed_battle_art_aspect_qa(battle_scene)
+	if _read_arg("--battle-demo-hp=", "0") == "1":
+		_seed_battle_demo_hp(battle_scene)
 	if _read_arg("--battle-demo-fx=", "0") != "1":
 		battle_scene.queue_redraw()
 		return
@@ -286,6 +290,21 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		}
 	})
 	battle_scene.queue_redraw()
+
+func _seed_battle_demo_hp(battle_scene: Control) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null:
+		return
+	for i in range(battle.enemies.size()):
+		var enemy: Dictionary = battle.enemies[i]
+		var max_hp := maxi(int(enemy.get("maxHP", 1)), 1)
+		enemy["hp"] = maxi(int(max_hp * (0.68 - i * 0.20)), 1)
+	if battle.player_team.size() > 1:
+		var player: Dictionary = battle.player_team[1]
+		var max_hp := maxi(int(player.get("maxHP", 1)), 1)
+		player["hp"] = maxi(int(max_hp * 0.30), 1)
+	if battle_scene.has_method("_sync_gui"):
+		battle_scene.call("_sync_gui")
 
 func _seed_battle_art_aspect_qa(battle_scene: Control) -> void:
 	var battle = battle_scene.get("_battle")

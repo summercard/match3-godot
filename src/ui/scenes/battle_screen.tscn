@@ -1,0 +1,362 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_turn_badge.png" id="turn_badge"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_speed_button.png" id="speed_button"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_settings_button.png" id="settings_button"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_capture_toggle_off.png" id="capture_toggle"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_item_slot_selected.png" id="item_selected"]
+[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
+[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/enemy_slot.tscn" id="enemy_slot"]
+[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
+
+[node name="BattleScreenGui" type="Control"]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 0
+script = ExtResource("script")
+
+[node name="Background" type="TextureRect" parent="."]
+z_index = -20
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+texture = ExtResource("bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="TopHud" type="Control" parent="."]
+z_index = -1
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 72.0
+mouse_filter = 2
+
+[node name="TurnBadge" type="Control" parent="TopHud"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 5.0
+offset_right = 81.0
+offset_bottom = 53.0
+mouse_filter = 2
+
+[node name="Image" type="TextureRect" parent="TopHud/TurnBadge"]
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("turn_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="TopHud/TurnBadge"]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 72.0
+offset_bottom = 22.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 10
+text = "回合"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="TopHud/TurnBadge"]
+layout_mode = 0
+offset_top = 18.0
+offset_right = 72.0
+offset_bottom = 43.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "0/20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpeedButton" type="TextureRect" parent="TopHud"]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 5.0
+offset_right = 327.0
+offset_bottom = 53.0
+mouse_filter = 2
+texture = ExtResource("speed_button")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SpeedLabel" type="Label" parent="TopHud"]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 27.0
+offset_right = 327.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 10
+text = "x2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingsButton" type="TextureRect" parent="TopHud"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 5.0
+offset_right = 372.0
+offset_bottom = 53.0
+mouse_filter = 2
+texture = ExtResource("settings_button")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BossPhase" type="Label" parent="TopHud"]
+visible = false
+layout_mode = 0
+offset_left = 270.0
+offset_top = 53.0
+offset_right = 374.0
+offset_bottom = 70.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 10
+text = "阶段 1/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Combatants" type="Control" parent="."]
+z_index = -1
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 296.0
+mouse_filter = 2
+
+[node name="SingleEnemy" parent="Combatants" instance=ExtResource("enemy_stage")]
+
+[node name="MultiEnemies" type="Control" parent="Combatants"]
+visible = false
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 218.0
+mouse_filter = 2
+
+[node name="Enemy1" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 72.0
+offset_right = 120.0
+offset_bottom = 174.0
+
+[node name="Enemy2" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+layout_mode = 0
+offset_left = 139.5
+offset_top = 63.0
+offset_right = 235.5
+offset_bottom = 165.0
+
+[node name="Enemy3" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 72.0
+offset_right = 351.0
+offset_bottom = 174.0
+
+[node name="Players" type="Control" parent="Combatants"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 296.0
+mouse_filter = 2
+
+[node name="Player1" parent="Combatants/Players" instance=ExtResource("player_slot")]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 218.0
+offset_right = 124.0
+offset_bottom = 284.0
+
+[node name="Player2" parent="Combatants/Players" instance=ExtResource("player_slot")]
+layout_mode = 0
+offset_left = 134.0
+offset_top = 218.0
+offset_right = 240.0
+offset_bottom = 284.0
+
+[node name="Player3" parent="Combatants/Players" instance=ExtResource("player_slot")]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 218.0
+offset_right = 356.0
+offset_bottom = 284.0
+
+[node name="BottomControls" type="Control" parent="."]
+z_index = -1
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+
+[node name="CaptureToggle" type="Control" parent="BottomControls"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 622.0
+offset_right = 57.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Image" type="TextureRect" parent="BottomControls/CaptureToggle"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("capture_toggle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/CaptureToggle"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 43.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+text = "关"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Item1" type="Control" parent="BottomControls"]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 622.0
+offset_right = 106.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Selection" type="TextureRect" parent="BottomControls/Item1"]
+visible = false
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_selected")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="BottomControls/Item1"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/Item1"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 43.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Item2" type="Control" parent="BottomControls"]
+layout_mode = 0
+offset_left = 113.0
+offset_top = 622.0
+offset_right = 152.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Selection" type="TextureRect" parent="BottomControls/Item2"]
+visible = false
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_selected")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="BottomControls/Item2"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/Item2"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 43.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Item3" type="Control" parent="BottomControls"]
+layout_mode = 0
+offset_left = 159.0
+offset_top = 622.0
+offset_right = 198.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Selection" type="TextureRect" parent="BottomControls/Item3"]
+visible = false
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_selected")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="BottomControls/Item3"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/Item3"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 43.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
