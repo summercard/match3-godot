@@ -82,7 +82,7 @@ func _run() -> void:
 	_send_mouse_click(battle_scene, toggle_pos)
 	await process_frame
 	if not bool(battle_scene.get("_auto_capture_enabled")):
-		push_error("[BattleInput] capture toggle should activate once per click")
+		push_error("[BattleInput] standalone capture toggle should activate once per click")
 		await _finish(1)
 		return
 	

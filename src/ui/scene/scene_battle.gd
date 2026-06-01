@@ -316,6 +316,7 @@ const BATTLE_UI_ASSETS := {
 	"item_capture_ball_plus": "res://assets/images/battle/ui/icon_capture_ball_plus.png",
 	"item_hp_potion": "res://assets/images/battle/ui/icon_hp_potion.png",
 	"hp_frame": "res://assets/images/battle/ui/ui_hp_frame.png",
+	"hp_frame_overlay": "res://assets/images/battle/ui/ui_hp_frame_overlay.png",
 	"hp_fill_green": "res://assets/images/battle/ui/ui_hp_fill_green.png",
 	"hp_fill_red": "res://assets/images/battle/ui/ui_hp_fill_red.png",
 	"hp_fill_blue": "res://assets/images/battle/ui/ui_hp_fill_blue.png",
@@ -358,7 +359,11 @@ func _ready() -> void:
 	instance = self
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_add_background(BATTLE_BG_PATH)
+	if not _uses_editable_gui():
+		_add_background(BATTLE_BG_PATH)
+
+func _uses_editable_gui() -> bool:
+	return false
 
 func init(data: Dictionary = {}) -> void:
 	var stage_data = data.get("stageData", null)
@@ -1819,22 +1824,27 @@ func _draw() -> void:
 	if _attack_shake_timer > 0 and _state != BattleState.BATTLE_END:
 		_draw_apply_shake()
 	
-	# 背景
-	_draw_background()
+	# 可编辑 GUI 模式下，背景、HUD 和角色由 .tscn 节点负责。
+	if not _uses_editable_gui():
+		_draw_background()
 	
 	# 攻击白闪
 	if _attack_flash_timer > 0:
 		var alpha: float = _attack_flash_timer / 0.1 * 0.3
 		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(1.0, 1.0, 1.0, alpha))
 	
-	# 标题栏
-	_draw_title_bar()
-	
-	# 敌方信息区
-	_draw_enemies()
-	
-	# 我方信息区
-	_draw_team()
+	if not _uses_editable_gui():
+		# 标题栏
+		_draw_title_bar()
+
+		# 敌方信息区
+		_draw_enemies()
+
+		# 我方信息区
+		_draw_team()
+	else:
+		# 角色主体由 UI 节点承载，瞬态战斗特效仍位于代码绘制层。
+		_draw_combatant_fx()
 	
 	# 棋盘背景
 	_draw_board_background()
@@ -1874,9 +1884,10 @@ func _draw() -> void:
 	
 	# 倒下提示
 	_draw_fall_messages()
-	
-	# 底部信息栏
-	_draw_bottom_bar()
+
+	if not _uses_editable_gui():
+		# 独立底部捕捉控件，不绘制整块底栏背板。
+		_draw_bottom_capture_controls()
 	
 	# 中间消息
 	_draw_message()
@@ -1963,32 +1974,26 @@ func _draw_background() -> void:
 	var bg_tex := _get_texture(BATTLE_BG_PATH)
 	if bg_tex:
 		_draw_texture_cover(bg_tex, Rect2(0, 0, DESIGN_W, DESIGN_H))
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.04, 0.06, 0.12, 0.14))
-	draw_rect(Rect2(0, 50, DESIGN_W, 210), Color(0.08, 0.24, 0.28, 0.13))
-	draw_rect(Rect2(0, 260, DESIGN_W, DESIGN_H - 260), Color(0.01, 0.04, 0.10, 0.20))
 
 func _draw_title_bar() -> void:
 	var turn_count: int = _battle.turn_count if _battle != null else 0
 	var max_turns: int = _battle.max_turns if _battle != null else 20
-	var scrim_tex := _get_texture(BATTLE_UI_ASSETS["top_scrim"])
 	var turn_tex := _get_texture(BATTLE_UI_ASSETS["turn_badge"])
 	var speed_tex := _get_texture(BATTLE_UI_ASSETS["speed_button"])
 	var settings_tex := _get_texture(BATTLE_UI_ASSETS["settings_button"])
-	if scrim_tex:
-		_draw_texture_fit(scrim_tex, Rect2(0, 0, DESIGN_W, 62.0), 1.0)
 	if turn_tex:
-		_draw_texture_fit(turn_tex, Rect2(9.0, 5.0, 72.0, 48.0), 1.0)
+		_draw_texture_contain(turn_tex, Rect2(9.0, 5.0, 72.0, 48.0), 1.0)
 	else:
 		_draw_rounded_rect(12.0, 9.0, 62.0, 42.0, 5.0, Color(0.07, 0.13, 0.26, 0.92))
 	_draw_text_with_shadow("回合", 45.0, 19.0, C["white"], 9.5, true)
 	_draw_text_with_shadow("%d/%d" % [turn_count, max_turns], 45.0, 37.0, C["gold"], 14.0, true)
 	if speed_tex:
-		_draw_texture_fit(speed_tex, Rect2(285.0, 5.0, 42.0, 48.0), 1.0)
+		_draw_texture_contain(speed_tex, Rect2(285.0, 5.0, 42.0, 48.0), 1.0)
 	else:
 		_draw_rounded_rect(287.0, 9.0, 38.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
 	_draw_text_with_shadow("x2", 306.0, 40.0, C["white"], 9.5, true)
 	if settings_tex:
-		_draw_texture_fit(settings_tex, Rect2(330.0, 5.0, 42.0, 48.0), 1.0)
+		_draw_texture_contain(settings_tex, Rect2(330.0, 5.0, 42.0, 48.0), 1.0)
 	else:
 		_draw_rounded_rect(333.0, 9.0, 30.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
 	
@@ -1999,30 +2004,6 @@ func _draw_title_bar() -> void:
 			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
 			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
 	
-	# 队长技能信息条（标题栏下方）
-	if _battle != null:
-		var ls_info = _battle.get_status().get("leader_skill_info", null)
-		if ls_info != null:
-			var ls_bar_y := 42.0
-			_draw_rounded_rect(5, ls_bar_y, DESIGN_W - 10, 16, 3.0, Color(1.0, 0.84, 0.0, 0.15))
-			var ls_dict: Dictionary = ls_info if ls_info is Dictionary else {}
-			var ls_name: String = ls_dict.get("name", "")
-			var ls_desc: String = ls_dict.get("desc", "")
-			var ls_icon: String = ls_dict.get("icon", "👑")
-			_draw_text_with_shadow("👑 队长技能: %s %s — %s" % [ls_icon, ls_name, ls_desc], DESIGN_W / 2.0, ls_bar_y + 10, C["gold"], 9.0)
-		
-		# 属性协同信息条
-		var syn_info: Array = _battle.get_status().get("synergy_info", [])
-		if syn_info.size() > 0:
-			var syn_bar_y := 60.0 if ls_info != null else 42.0
-			_draw_rounded_rect(5, syn_bar_y, DESIGN_W - 10, 14.0 + syn_info.size() * 2.0, 3.0, Color(0.4, 0.8, 0.4, 0.12))
-			var syn_labels: Array = []
-			for s in syn_info:
-				if s is Dictionary:
-					syn_labels.append(s.get("label", ""))
-			var syn_text: String = "🤝 " + " | ".join(syn_labels)
-			_draw_text_with_shadow(syn_text, DESIGN_W / 2.0, syn_bar_y + 9.0, C["success"], 8.0)
-
 func _draw_enemies() -> void:
 	BattleCombatantRendererScript.draw_enemies(self, _battle, _combatant_render_state())
 
@@ -2031,6 +2012,9 @@ func _draw_enemy_card(x: float, y: float, index: int, name: String, hp: int, max
 
 func _draw_team() -> void:
 	BattleCombatantRendererScript.draw_team(self, _battle, _combatant_render_state())
+
+func _draw_combatant_fx() -> void:
+	BattleCombatantRendererScript.draw_fx(self, _battle, _combatant_render_state())
 
 func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, max_hp: int, monster: Dictionary) -> void:
 	BattleCombatantRendererScript.draw_player_card(self, _battle, _combatant_render_state(), x, y, index, name, hp, max_hp, monster)
@@ -2210,10 +2194,15 @@ func _draw_bottom_bar() -> void:
 	elif _state != BattleState.IDLE:
 		status_text = "处理中..."
 	
-	_draw_text_with_shadow("回合 %d/%d" % [turn_count, max_turns], 58.0, bottom_y + 16.0, C["text_secondary"], 10.5, true)
-	_draw_text_with_shadow("连锁 %dx" % combo_count, 160.0, bottom_y + 16.0, C["gold"], 12.0, true)
-	_draw_text_with_shadow(status_text, 280.0, bottom_y + 16.0, state_color, 11.0, true)
+	_draw_text_with_shadow("回合 %d/%d" % [turn_count, max_turns], 232.0, bottom_y + 14.0, C["text_secondary"], 9.5, true)
+	_draw_text_with_shadow("连锁 %dx" % combo_count, 292.0, bottom_y + 14.0, C["gold"], 10.5, true)
+	_draw_text_with_shadow(status_text, 334.0, bottom_y + 14.0, state_color, 9.0, true)
 	_draw_capture_window_hint(bottom_y)
+	_draw_capture_toggle(bottom_y)
+	_draw_item_hotbar(bottom_y)
+
+func _draw_bottom_capture_controls() -> void:
+	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 619.0
 	_draw_capture_toggle(bottom_y)
 	_draw_item_hotbar(bottom_y)
 
@@ -2236,18 +2225,18 @@ func _draw_capture_window_hint(base_y: float) -> void:
 		color = C["shield"]
 	elif state == "overpowered":
 		color = C["danger"]
-	_draw_text_with_shadow("捕捉 %s %d%%" % [label, stability], 282.0, base_y + 32.0, color, 9.2, true)
+	_draw_text_with_shadow("捕捉 %s %d%%" % [label, stability], 277.0, base_y + 33.0, color, 8.8, true)
 
 func _draw_capture_toggle(base_y: float) -> void:
 	var rect := _get_capture_toggle_rect(base_y)
 	var key := "capture_toggle_on" if _auto_capture_enabled else "capture_toggle_off"
 	var tex := _get_texture(BATTLE_UI_ASSETS[key])
 	if tex:
-		_draw_texture_fit(tex, rect, 1.0)
+		_draw_texture_contain(tex, rect, 1.0)
 	else:
 		var bg := C["success"] if _auto_capture_enabled else C["bg_medium"]
 		_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 6.0, bg)
-	_draw_text_with_shadow("捕捉%s" % ("开" if _auto_capture_enabled else "关"), rect.position.x + rect.size.x / 2.0 + 5.0, rect.position.y + 14.5, C["white"], 8.7, true)
+	_draw_bottom_button_badge(rect, "开" if _auto_capture_enabled else "关")
 
 func _draw_item_hotbar(base_y: float) -> void:
 	"""绘制底部道具快捷栏（3格）"""
@@ -2260,37 +2249,40 @@ func _draw_item_hotbar(base_y: float) -> void:
 			continue
 
 		var is_selected := _is_hotbar_item_selected(i, item)
-		var slot_key := "item_slot_selected" if is_selected else "item_slot"
-		var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
-		if slot_tex:
-			_draw_texture_fit(slot_tex, slot_rect, 1.0)
-		else:
-			_draw_rounded_rect(slot_rect.position.x, slot_rect.position.y, slot_rect.size.x, slot_rect.size.y, 6.0, C["bg_card"])
-			if is_selected:
-				_draw_rounded_rect_outline(slot_rect.position.x, slot_rect.position.y, slot_rect.size.x, slot_rect.size.y, 6.0, C["gold"], 2.0)
-
 		if has_item:
 			var item_def: Dictionary = ItemDB.get_item(item["id"])
 			var icon_tex := _get_texture(_item_icon_asset_path(str(item["id"])))
 			if icon_tex:
-				_draw_texture_contain(icon_tex, slot_rect.grow(-2.0), 1.0)
+				_draw_texture_contain(icon_tex, slot_rect, 1.0)
 			else:
+				var slot_key := "item_slot_selected" if is_selected else "item_slot"
+				var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
+				if slot_tex:
+					_draw_texture_fit(slot_tex, slot_rect, 1.0)
 				var emoji: String = item_def.get("emoji", "?")
 				_draw_text(emoji, slot_rect.get_center().x, slot_rect.position.y + 13.0, C["white"], 13.5, true)
+			if is_selected:
+				_draw_rounded_rect_outline(slot_rect.position.x + 1.0, slot_rect.position.y + 1.0, slot_rect.size.x - 2.0, slot_rect.size.y - 2.0, 9.0, C["gold"], 2.0)
 
 			# 数量标签
 			var count: int = item["count"]
 			if count > 1:
-				_draw_text("x%d" % count, slot_rect.position.x + slot_rect.size.x - 2.0, slot_rect.position.y + slot_rect.size.y - 5.0, C["gold"], 8.0, false)
+				_draw_bottom_button_badge(slot_rect, str(count))
+
+func _draw_bottom_button_badge(rect: Rect2, label: String) -> void:
+	var badge_center := Vector2(rect.end.x - 4.0, rect.end.y - 4.0)
+	draw_circle(badge_center, 8.0, Color(0.92, 0.20, 0.36, 1.0))
+	draw_arc(badge_center, 8.0, 0.0, TAU, 20, Color(1.0, 0.72, 0.80, 1.0), 1.0, true)
+	_draw_text_with_shadow(label, badge_center.x, badge_center.y + 3.0, C["white"], 7.6, true)
 
 func _get_capture_toggle_rect(base_y: float) -> Rect2:
-	return Rect2(19.0, base_y + 22.0, 76.0, 19.0)
+	return Rect2(18.0, base_y + 3.0, 39.0, 39.0)
 
 func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
-	var slot_size: float = 27.0
-	var slot_gap: float = 6.0
-	var start_x: float = 108.0
-	return Rect2(start_x + slot_idx * (slot_size + slot_gap), base_y + 14.0, slot_size, slot_size)
+	var slot_size: float = 39.0
+	var slot_gap: float = 7.0
+	var start_x: float = 67.0
+	return Rect2(start_x + slot_idx * (slot_size + slot_gap), base_y + 3.0, slot_size, slot_size)
 
 func _item_icon_asset_path(item_id: String) -> String:
 	if item_id == "capture_ball":
@@ -2359,8 +2351,8 @@ func _save_capture_preferences() -> void:
 		})
 
 func _try_tap_hotbar(x: float, y: float) -> bool:
-	"""检测点击是否命中道具快捷栏，返回是否处理了"""
-	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 614.0
+	"""检测独立底部捕捉控件，不依赖整块底栏背板。"""
+	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 619.0
 	if _get_capture_toggle_rect(bottom_y).has_point(Vector2(x, y)):
 		_auto_capture_enabled = not _auto_capture_enabled
 		_save_capture_preferences()
@@ -2376,25 +2368,23 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 
 	for i in range(3):
 		var slot_rect := _get_hotbar_slot_rect(bottom_y, i)
-		if slot_rect.has_point(Vector2(x, y)):
-			if i >= _hotbar_items.size():
-				return false
-			var item: Dictionary = _hotbar_items[i]
-			if item.is_empty() or item.get("count", 0) <= 0:
-				return false
-			var def: Dictionary = ItemDB.get_item(item["id"])
-			if str(def.get("type", "")) == "capture":
-				_try_use_item_at_slot(i)
-				return true
-			if _selected_hotbar_slot == i:
-				# 再次点击同一格子 → 使用道具
-				_try_use_item_at_slot(i)
-				return true
-			else:
-				# 选中格子
-				_selected_hotbar_slot = i
-				_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
-				return true
+		if not slot_rect.has_point(Vector2(x, y)):
+			continue
+		if i >= _hotbar_items.size():
+			return false
+		var item: Dictionary = _hotbar_items[i]
+		if item.is_empty() or item.get("count", 0) <= 0:
+			return false
+		var def: Dictionary = ItemDB.get_item(item["id"])
+		if str(def.get("type", "")) == "capture":
+			_try_use_item_at_slot(i)
+			return true
+		if _selected_hotbar_slot == i:
+			_try_use_item_at_slot(i)
+			return true
+		_selected_hotbar_slot = i
+		_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
+		return true
 	return false
 
 func _try_use_item_at_slot(slot_idx: int) -> bool:
@@ -2446,7 +2436,7 @@ func _draw_message() -> void:
 		return
 	
 	var alpha: float = mini(1.0, _message_timer)
-	var toast_y: float = float(_board.offset_y) - 10.0 if _board != null else 290.0
+	var toast_y: float = float(_board.offset_y) + 28.0 if _board != null else 328.0
 	var toast_tex := _get_texture(BATTLE_UI_ASSETS["toast_panel"])
 	if toast_tex:
 		_draw_texture_fit(toast_tex, Rect2(DESIGN_W / 2.0 - 112.0, toast_y - 15.0, 224.0, 30.0), 0.96 * alpha)
@@ -2841,35 +2831,40 @@ func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: 
 		_draw_rounded_rect(x, y, w, h, 8.0, panel_color)
 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
-	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER)
+	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
 
-func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color) -> void:
-	var frame_tex := _get_texture(BATTLE_UI_ASSETS["hp_frame"])
-	if frame_tex:
-		_draw_texture_fit(frame_tex, Rect2(x, y, w, h), 1.0)
-		if current > 0 and maximum > 0:
-			var ratio: float = clampf(current / maximum, 0.0, 1.0)
-			var fill_w: float = floor((w - 4.0) * ratio)
-			var fill_tex := _get_texture(_hp_fill_asset_for_color(color))
-			if fill_tex and fill_w > 1.0:
-				_draw_texture_fit(fill_tex, Rect2(x + 2.0, y + 2.0, fill_w, h - 4.0), 1.0)
-		return
-	var bg_color := Color(0.2, 0.2, 0.3, 0.8)
-	_draw_rounded_rect(x, y, w, h, 2.0, bg_color)
+func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color, element: String = "", show_orb: bool = false) -> void:
+	var radius := h * 0.5
+	var ratio: float = clampf(current / maximum, 0.0, 1.0) if maximum > 0 else 0.0
+	var frame_tex := _get_texture(BATTLE_UI_ASSETS["hp_frame_overlay"])
+	_draw_rounded_rect(x, y, w, h, radius, Color(0.075, 0.105, 0.16, 1.0))
 	if current > 0 and maximum > 0:
-		var ratio_fallback: float = clampf(current / maximum, 0.0, 1.0)
-		var fill_w_fallback: float = floor((w - 2) * ratio_fallback)
-		_draw_rounded_rect(x + 1, y + 1, fill_w_fallback, h - 2, 2.0, color)
-	_draw_stroke_rect(x, y, w, h, 1.0, Color(0.86, 0.94, 1.0, 0.28))
-
-func _hp_fill_asset_for_color(color: Color) -> String:
-	if color.r > 0.85 and color.g < 0.35:
-		return BATTLE_UI_ASSETS["hp_fill_red"]
-	if color.r > 0.85 and color.g > 0.55:
-		return BATTLE_UI_ASSETS["hp_fill_gold"]
-	if color.b > 0.75 and color.g > 0.35:
-		return BATTLE_UI_ASSETS["hp_fill_blue"]
-	return BATTLE_UI_ASSETS["hp_fill_green"]
+		var fill_w := maxf(h - 2.0, floor((w - 2.0) * ratio))
+		_draw_rounded_rect(x + 1.0, y + 1.0, fill_w, h - 2.0, maxf(1.0, radius - 1.0), color.darkened(0.20))
+		_draw_rounded_rect(x + 2.0, y + 2.0, maxf(fill_w - 2.0, 1.0), h - 4.0, maxf(1.0, radius - 2.0), color)
+		_draw_rounded_rect(x + 3.0, y + 2.0, maxf(fill_w - 4.0, 1.0), maxf(h * 0.22, 1.0), maxf(1.0, radius - 2.0), Color(1.0, 1.0, 1.0, 0.28))
+	if frame_tex:
+		_draw_texture_fit(frame_tex, Rect2(x - 1.5, y - 1.5, w + 3.0, h + 3.0), 1.0)
+	else:
+		_draw_rounded_rect(x - 1.5, y - 1.5, w + 3.0, h + 3.0, radius + 1.5, Color(1.0, 0.75, 0.32, 1.0))
+	if not show_orb:
+		return
+	var orb_size := h * 2.75
+	var orb_rect := Rect2(x - orb_size * 0.68, y + h / 2.0 - orb_size / 2.0, orb_size, orb_size)
+	var orb_tex := _get_texture(GEM_IMAGE_PATHS.get(element, ""))
+	if orb_tex:
+		_draw_texture_contain(orb_tex, orb_rect, 1.0)
+	else:
+		draw_circle(orb_rect.get_center(), orb_size * 0.42, color)
+	var bead_y := y + h + 8.0
+	var bead_start_x := x + 18.0
+	var active_beads := clampi(int(ceil(ratio * 5.0)), 0, 5)
+	for i in range(5):
+		var bead_color := color if i < active_beads else Color(0.12, 0.16, 0.22, 1.0)
+		var center := Vector2(bead_start_x + i * 14.0, bead_y)
+		draw_circle(center, 5.0, Color(1.0, 0.75, 0.32, 1.0))
+		draw_circle(center, 3.8, bead_color)
+		draw_circle(center - Vector2(1.0, 1.0), 1.1, Color(1.0, 1.0, 1.0, 0.48))
 
 func _floating_text_plate_path(text: String, ft: Dictionary) -> String:
 	if text.begins_with("+"):

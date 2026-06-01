@@ -23,20 +23,18 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
 	var is_boss: bool = enemy.get("isBoss", false)
-	scene._draw_text_with_shadow(name, design_w / 2.0, 23.0, colors.get("text_primary", Color.WHITE), 14.0, true)
-	scene._draw_hp_bar(88.0, 36.0, 199.0, 10.0, float(hp), float(max_hp), colors.get("danger", Color.RED))
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], design_w / 2.0, 45.0, colors.get("white", Color.WHITE), 8.0, true)
-	_draw_stage_ring(scene, str(enemy.get("element", "")), Rect2(42.0, 114.0, 292.0, 92.0), 0.95)
+	scene._draw_text_with_shadow(name, design_w / 2.0, 83.0, colors.get("text_primary", Color.WHITE), 13.0, true)
+	scene._draw_hp_bar(196.0, 91.0, 150.0, 14.0, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
+	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], 271.0, 102.0, colors.get("white", Color.WHITE), 8.0, true)
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
-		var boss_scale: float = 170.0 if is_boss else 118.0
-		var monster_y: float = 58.0 if is_boss else 67.0
+		var boss_scale: float = 170.0 if is_boss else 128.0
+		var monster_y: float = 104.0 if is_boss else 111.0
 		scene._draw_texture_contain(monster_tex, Rect2(design_w / 2.0 - boss_scale / 2.0, monster_y + sin(idle_time * TAU / 1.8) * 3.0, boss_scale, boss_scale), 1.0 if hp > 0 else 0.35)
 	else:
-		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), design_w / 2.0, 119.0, colors.get("white", Color.WHITE), 50.0)
-	_draw_boss_visuals(scene, state, design_w / 2.0 - 55.0, 72.0, 0, hp)
-	_draw_enemy_status(scene, battle, state, design_w / 2.0 - 55.0, 72.0, 0, hp, 110.0)
-	_draw_stage_enemy_intent(scene, state, hp)
+		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), design_w / 2.0, 168.0, colors.get("white", Color.WHITE), 50.0)
+	_draw_boss_visuals(scene, state, design_w / 2.0 - 55.0, 120.0, 0, hp)
+	_draw_enemy_status(scene, battle, state, design_w / 2.0 - 55.0, 120.0, 0, hp, 110.0)
 
 static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float, index: int, name: String, hp: int, max_hp: int, enemy: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})
@@ -50,15 +48,14 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 		var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.6
 		_draw_hit_spark(scene, Vector2(cx, y + 42.0), 82.0, flash_alpha)
 
-	_draw_stage_ring(scene, str(enemy.get("element", "")), Rect2(x - 10.0, y + 50.0, slot_w + 20.0, 46.0), 0.82)
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
 		scene._draw_texture_contain(monster_tex, Rect2(cx - sprite_size / 2.0, y + 11.0 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, sprite_size, sprite_size), 1.0 if hp > 0 else 0.35)
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), cx, y + 43.0, colors.get("white", Color.WHITE), 34.0)
 	scene._draw_text_with_shadow(name, cx, y + 14.0, colors.get("text_primary", Color.WHITE), 10.4, true)
-	scene._draw_hp_bar(x + 13.0, y + 82.0, slot_w - 26.0, 7.0, float(hp), float(max_hp), colors.get("danger", Color.RED))
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], cx, y + 94.0, colors.get("white", Color.WHITE), 7.4, true)
+	scene._draw_hp_bar(x + 7.0, y + 80.0, slot_w - 14.0, 10.0, float(hp), float(max_hp), colors.get("danger", Color.RED))
+	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], cx, y + 89.0, colors.get("white", Color.WHITE), 7.4, true)
 
 	var defeated_enemies: Array = state.get("defeated_enemies", [])
 	if hp <= 0 and not defeated_enemies.has(index):
@@ -67,7 +64,6 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 
 	_draw_boss_visuals(scene, state, x, y, index, hp)
 	_draw_enemy_status(scene, battle, state, x, y, index, hp, slot_w)
-	_draw_enemy_intent(scene, state, x, y, index, hp, slot_w)
 
 static func _draw_enemy_intent(scene, state: Dictionary, x: float, y: float, index: int, hp: int, card_w: float) -> void:
 	if hp <= 0:
@@ -214,31 +210,62 @@ static func draw_team(scene, battle, state: Dictionary) -> void:
 		var monster: Dictionary = battle.player_team[i]
 		if monster == null:
 			continue
-		draw_player_card(scene, battle, state, 18.0 + i * 116.0, 196.0, i, monster.get("name", "伙伴"), maxi(monster.get("hp", 0), 0), maxi(monster.get("maxHP", 1), 1), monster)
+		draw_player_card(scene, battle, state, 18.0 + i * 116.0, 218.0, i, monster.get("name", "伙伴"), maxi(monster.get("hp", 0), 0), maxi(monster.get("maxHP", 1), 1), monster)
+
+static func draw_fx(scene, battle, state: Dictionary) -> void:
+	if battle == null:
+		return
+	var colors: Dictionary = state.get("colors", {})
+	if battle.enemies.size() == 1:
+		var enemy: Dictionary = battle.enemies[0]
+		var hp: int = maxi(enemy.get("hp", 0), 0)
+		_draw_boss_visuals(scene, state, state.get("design_w", 375.0) / 2.0 - 55.0, 120.0, 0, hp)
+		_draw_enemy_status(scene, battle, state, state.get("design_w", 375.0) / 2.0 - 55.0, 120.0, 0, hp, 110.0)
+	else:
+		var enemy_count: int = mini(battle.enemies.size(), 3)
+		var stage_slots := _multi_enemy_slots(enemy_count)
+		for i in range(enemy_count):
+			var enemy: Dictionary = battle.enemies[i]
+			if enemy == null:
+				continue
+			var hp: int = maxi(enemy.get("hp", 0), 0)
+			var x: float = stage_slots[i].x
+			var y: float = stage_slots[i].y
+			var cx: float = x + 48.0
+			var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == i)
+			if not flash.is_empty():
+				var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.6
+				_draw_hit_spark(scene, Vector2(cx, y + 42.0), 82.0, flash_alpha)
+			var defeated_enemies: Array = state.get("defeated_enemies", [])
+			if hp <= 0 and not defeated_enemies.has(i):
+				defeated_enemies.append(i)
+				scene._spawn_defeat_particles(cx, y + 48.0, colors.get("danger", Color.RED))
+			_draw_boss_visuals(scene, state, x, y, i, hp)
+			_draw_enemy_status(scene, battle, state, x, y, i, hp, 96.0)
+	for i in range(mini(battle.player_team.size(), 3)):
+		var monster: Dictionary = battle.player_team[i]
+		if monster == null:
+			continue
+		var flash: Array = state.get("hit_flashes", []).filter(func(f): return not f.get("isEnemy", false) and f.get("monsterIndex", -1) == i)
+		if not flash.is_empty():
+			_draw_hit_spark(scene, Vector2(18.0 + i * 116.0 + 53.0, 253.0), 78.0, 0.62)
 
 static func draw_player_card(scene, battle, state: Dictionary, x: float, y: float, index: int, name: String, hp: int, max_hp: int, monster: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
 	var card_w: float = 106.0
-	var card_h: float = 82.0
 	var flash: Array = state.get("hit_flashes", []).filter(func(f): return not f.get("isEnemy", false) and f.get("monsterIndex", -1) == index)
-	var card_color: Color = colors.get("bg_card", Color(0.1, 0.15, 0.25))
-	if not flash.is_empty():
-		var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.55
-		card_color = Color(1.0, 0.84, 0.2, flash_alpha)
-	scene._draw_panel(x, y, card_w, card_h, card_color, 0.88)
 	if not flash.is_empty():
 		_draw_hit_spark(scene, Vector2(x + card_w / 2.0, y + 35.0), 78.0, 0.62)
 
 	var monster_tex: Texture2D = scene._get_monster_texture(monster)
 	if monster_tex:
-		scene._draw_texture_cover(monster_tex, Rect2(x + 18.0, y + 9.0 + sin(idle_time * TAU / 1.5) * 1.2, 70.0, 50.0), 1.0 if hp > 0 else 0.35)
+		scene._draw_texture_contain(monster_tex, Rect2(x + 8.0, y + 3.0 + sin(idle_time * TAU / 1.5) * 1.2, 90.0, 58.0), 1.0 if hp > 0 else 0.35)
 	else:
 		scene._draw_text_with_shadow(monster.get("emoji", "👾"), x + 53.0, y + 36.0, colors.get("white", Color.WHITE), 31.0)
-	scene._draw_text_with_shadow(name, x + card_w / 2.0, y + 14.0, colors.get("text_primary", Color.WHITE), 11.0)
-	scene._draw_hp_bar(x + 13.0, y + 55.0, card_w - 26.0, 8.0, float(hp), float(max_hp), colors.get("success", Color.GREEN))
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 61.0, colors.get("white", Color.WHITE), 7.2)
-	_draw_skill_charge(scene, battle, state, x, y, monster)
+	scene._draw_text_with_shadow(name, x + card_w / 2.0, y + 8.0, colors.get("text_primary", Color.WHITE), 10.0)
+	scene._draw_hp_bar(x + 4.0, y + 52.0, card_w - 8.0, 11.0, float(hp), float(max_hp), colors.get("success", Color.GREEN))
+	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 61.0, colors.get("white", Color.WHITE), 7.4, true)
 
 static func _draw_skill_charge(scene, battle, state: Dictionary, x: float, y: float, monster: Dictionary) -> void:
 	if not monster.has("skill"):

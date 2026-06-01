@@ -24,10 +24,12 @@ const SCENE_MAP: Dictionary = {
 }
 
 const PACKED_SCENE_MAP: Dictionary = {
+	"start": "res://src/ui/scenes/start_screen.tscn",
 	"main": "res://src/ui/scenes/main_lobby.tscn",
 	"ranch": "res://src/ui/scenes/ranch_hub.tscn",
 	"stage_select": "res://src/ui/scenes/stage_select_map.tscn",
 	"battle_prepare": "res://src/ui/scenes/battle_prepare.tscn",
+	"battle": "res://src/ui/scenes/battle_screen.tscn",
 	"result": "res://src/ui/scenes/battle_result.tscn",
 	"album": "res://src/ui/scenes/album.tscn",
 	"inventory": "res://src/ui/scenes/inventory.tscn",
