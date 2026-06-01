@@ -17,3 +17,13 @@ Thumbs.db
 
 # Dev cycle
 .dev-cycle/
+
+# Source art and one-off development outputs
+美术开发/
+assets/images/concepts/
+tmp_*.gd.uid
+*.pyc
+__pycache__/
+*.bak
+*.tar.gz
+*.zip

@@ -678,9 +678,9 @@ static func _erosion_candidate(instance_a: Dictionary, instance_b: Dictionary, e
 		aggressor_element = element_b
 	return {
 		"type": "erosion",
-		"name": "侵蚀吞噬",
+		"name": "侵蚀风险",
 		"rarity": "danger",
-		"summary": "危险属性或性格压过社交边界，一只怪物吞噬了另一只。",
+		"summary": "危险属性或性格压过社交边界；默认保护会阻止自动吞噬。",
 		"aggressorInstanceId": str(aggressor.get("instanceId", "")),
 		"victimInstanceId": str(victim.get("instanceId", "")),
 		"aggressorName": str(MonsterDb.get_monster(str(aggressor.get("monsterId", ""))).get("name", "侵蚀者")),
@@ -693,7 +693,9 @@ static func _erosion_candidate(instance_a: Dictionary, instance_b: Dictionary, e
 			"severity": 1,
 			"element": aggressor_element
 		},
-		"risk": "lose_partner"
+		"risk": "lose_partner",
+		"protectedByDefault": true,
+		"requiresConfirmation": true
 	}
 
 static func _erosion_power(instance: Dictionary, element_a: String, element_b: String) -> int:

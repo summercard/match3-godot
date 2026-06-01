@@ -964,7 +964,7 @@ func _social_result_title(result: Dictionary) -> String:
 		"birth":
 			return "复合新生"
 		"erosion":
-			return "侵蚀吞噬"
+			return "侵蚀警报"
 		_:
 			return str(result.get("label", "社交完成"))
 
@@ -986,6 +986,12 @@ func _social_result_major_lines(result: Dictionary) -> Array:
 				"已记录父母血缘与复合特质"
 			]
 		"erosion":
+			if bool(major.get("protected", false)):
+				return [
+					"%s 出现侵蚀冲动" % str(major.get("aggressorName", "侵蚀者")),
+					"%s 已受保护，未从怪物池删除" % str(major.get("victimName", "伙伴")),
+					"高风险确认流程尚未开启"
+				]
 			var effect: Dictionary = major.get("negativeEffect", {})
 			return [
 				"%s 吞噬了 %s" % [str(major.get("aggressorName", "侵蚀者")), str(major.get("victimName", "伙伴"))],

@@ -14,6 +14,7 @@ func _run() -> void:
 		return
 
 	save_manager.clear_all_data()
+	save_manager.save_player(save_manager.get_player())
 	var legacy_main: Control = load("res://main.tscn").instantiate()
 	_owned_roots.append(legacy_main)
 	root.add_child(legacy_main)
@@ -24,7 +25,7 @@ func _run() -> void:
 	legacy_main.queue_free()
 	await process_frame
 
-	save_manager.save_tutorial_progress(0)
+	save_manager.clear_all_data()
 	var main: Control = load("res://main.tscn").instantiate()
 	_owned_roots.append(main)
 	root.add_child(main)
@@ -33,7 +34,7 @@ func _run() -> void:
 
 	_expect(main.get_current_scene_name() == "start", "start scene should load")
 	await _enter_from_start(main)
-	_expect(main.get_current_scene_name() == "tutorial", "fresh player should enter tutorial from start")
+	_expect(main.get_current_scene_name() == "tutorial", "new save should enter tutorial from start")
 
 	var tutorial: Control = main.get_current_scene()
 	_expect(tutorial != null and int(tutorial.get("_current_step")) == 0, "tutorial should start at step 0")
