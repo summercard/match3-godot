@@ -8,6 +8,7 @@ extends Control
 
 signal hold_pressed
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const FADE_SPEED := 1.8
 const PULSE_SPEED := 1.7
 const MONSTER_BOB_HEIGHT := 3.0
@@ -47,6 +48,7 @@ const GEM_PHASES := {
 var _elapsed := 0.0
 var _opacity := 0.0
 var _entering := false
+var _entry_queued := false
 var _monster_base_positions: Dictionary = {}
 var _gem_base_positions: Dictionary = {}
 
@@ -54,11 +56,10 @@ func _ready() -> void:
 	name = "SceneStart"
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_content.modulate = Color(1.0, 1.0, 1.0, 0.0)
-	_start_button.button_down.connect(_on_start_button_down)
-	_start_button.button_up.connect(_on_start_button_up)
+	_start_button.pressed.connect(_on_start_button_pressed)
 	_start_button.tooltip_text = "开始冒险"
 	_start_glow.pivot_offset = _start_glow.size * 0.5
-	_start_button.pivot_offset = _start_button.size * 0.5
+	_attach_button_feedback(_start_button, CartoonButtonFeedback.Profile.PRIMARY)
 	for node in _monster_nodes:
 		node.pivot_offset = node.size * 0.5
 		_monster_base_positions[node.name] = node.position
@@ -97,15 +98,12 @@ func _animate_button() -> void:
 	_start_glow.scale = Vector2.ONE * (1.0 + pulse * 0.035)
 	_hint_group.modulate.a = 0.56 + pulse * 0.28
 
-func _on_start_button_down() -> void:
-	if _entering:
+func _on_start_button_pressed() -> void:
+	if _entering or _entry_queued:
 		return
-	_start_button.scale = Vector2(0.96, 0.96)
 	_start_glow.scale = Vector2(1.06, 1.06)
-	_do_enter()
-
-func _on_start_button_up() -> void:
-	_start_button.scale = Vector2.ONE
+	_entry_queued = true
+	get_tree().create_timer(0.24).timeout.connect(_do_enter)
 
 func _do_enter() -> void:
 	if _entering:
@@ -133,3 +131,8 @@ func _get_entry_scene() -> String:
 		if not progress.get("completed", false):
 			return "tutorial"
 	return "main"
+
+func _attach_button_feedback(button: BaseButton, profile: int) -> void:
+	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+	button.add_child(feedback)
+	feedback.setup(button, profile)

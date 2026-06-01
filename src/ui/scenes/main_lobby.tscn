@@ -2,34 +2,32 @@
 
 [ext_resource type="Script" uid="uid://dlvybuxwqe88n" path="res://src/ui/scene/scene_main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://b5cwalievin07" path="res://src/ui/components/lobby_particle_layer.gd" id="2_particles"]
-[ext_resource type="Texture2D" uid="uid://dttc0io5lqong" path="res://assets/images/main/main_lobby_bg_v2.png" id="3_bg"]
-[ext_resource type="Texture2D" uid="uid://d253rc75y2flw" path="res://assets/images/main/ui_avatar_frame_v2.png" id="4_avatar_frame"]
-[ext_resource type="Texture2D" uid="uid://cy1g3m68dg18x" path="res://assets/images/main/icon_avatar.png" id="5_avatar"]
-[ext_resource type="Texture2D" uid="uid://u6bfqatl1vyo" path="res://assets/images/main/ui_player_name_plate_v2.png" id="6_name_plate"]
-[ext_resource type="Texture2D" uid="uid://b5332lfmc4aqg" path="res://assets/images/main/icon_edit_v2.png" id="7_edit"]
-[ext_resource type="Texture2D" uid="uid://w82j6tnwxlca" path="res://assets/images/main/ui_level_shield_v2.png" id="8_level"]
-[ext_resource type="Texture2D" uid="uid://c3cntld4e5ar8" path="res://assets/images/main/ui_exp_bar_empty_v2.png" id="9_exp_empty"]
-[ext_resource type="Texture2D" uid="uid://cp54dxoatdxkc" path="res://assets/images/main/ui_exp_bar_fill_v2.png" id="10_exp_fill"]
-[ext_resource type="Texture2D" uid="uid://bkmp4clvvu417" path="res://assets/images/main/ui_gold_capsule_v2.png" id="11_gold_capsule"]
-[ext_resource type="Texture2D" uid="uid://cegre0vtwf1vr" path="res://assets/images/main/icon_gold_v2.png" id="12_gold"]
-[ext_resource type="Texture2D" uid="uid://de4u6bumadjxd" path="res://assets/images/main/ui_diamond_capsule_v2.png" id="13_diamond_capsule"]
-[ext_resource type="Texture2D" uid="uid://bkicb0a1vmtxm" path="res://assets/images/main/icon_diamond_v2.png" id="14_diamond"]
-[ext_resource type="Texture2D" uid="uid://d3div844dx1uy" path="res://assets/images/main/ui_rank_panel_v2.png" id="15_rank"]
-[ext_resource type="Texture2D" uid="uid://g0edio4hrhbv" path="res://assets/images/main/ui_entry_button_v2.png" id="16_entry"]
-[ext_resource type="Texture2D" uid="uid://c6s5u8tryp2v2" path="res://assets/images/main/ui_bottom_nav_frame_v2.png" id="17_nav"]
-[ext_resource type="Texture2D" uid="uid://dlo6nin2g8wy0" path="res://assets/images/main/ui_bottom_nav_frame_pressed_v2.png" id="18_nav_pressed"]
-[ext_resource type="Texture2D" uid="uid://c68f3npcjpdk7" path="res://assets/images/main/ui_notification_dot_v2.png" id="19_notice"]
-[ext_resource type="Texture2D" uid="uid://cmnrhcuxsdpon" path="res://assets/images/main/icon_paw_v2.png" id="20_start"]
-[ext_resource type="Texture2D" uid="uid://b3d10dxp4btqi" path="res://assets/images/main/icon_swords_v2.png" id="21_team"]
-[ext_resource type="Texture2D" uid="uid://c8nwp5euuudam" path="res://assets/images/main/icon_leaf_v2.png" id="22_ranch"]
-[ext_resource type="Texture2D" uid="uid://chtvmfv6jlpa5" path="res://assets/images/main/icon_cart_v2.png" id="23_shop"]
-[ext_resource type="Texture2D" uid="uid://dc0oaet8mhcge" path="res://assets/images/main/icon_album_book_v2.png" id="24_album"]
-[ext_resource type="Texture2D" uid="uid://boi366mwighos" path="res://assets/images/main/icon_inventory_bag_v2.png" id="25_inventory"]
-[ext_resource type="Texture2D" uid="uid://dnycca83svd5l" path="res://assets/images/main/icon_achievement_medal_v2.png" id="26_achievement"]
-[ext_resource type="Texture2D" uid="uid://cnw4p4vs0gu52" path="res://assets/images/main/icon_settings_gear_v2.png" id="27_settings"]
-[ext_resource type="Texture2D" uid="uid://dke5hi3jv2mup" path="res://assets/images/main/icon_signin_calendar_v2.png" id="28_signin"]
+[ext_resource type="Texture2D" uid="uid://287wgurvcwv4" path="res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://dws8wae6sgtuq" path="res://assets/images/main/lobby_refresh/ui_player_status_card_v3.png" id="4_player_card"]
+[ext_resource type="Texture2D" uid="uid://dmkrosm0ge0ib" path="res://assets/images/main/lobby_refresh/icon_avatar_slime_v3.png" id="5_avatar"]
+[ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/main/lobby_refresh/icon_level_shield_v3.png" id="6_level"]
+[ext_resource type="Texture2D" path="res://assets/images/main/ui_exp_bar_empty_v2.png" id="7_exp_empty"]
+[ext_resource type="Script" path="res://src/ui/components/battle_hp_bar.gd" id="7_exp_bar"]
+[ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="8_currency"]
+[ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="9_gold"]
+[ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="10_diamond"]
+[ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/main/lobby_refresh/icon_plus_v3.png" id="11_plus"]
+[ext_resource type="Texture2D" uid="uid://vdants1nwxss" path="res://assets/images/main/lobby_refresh/ui_trophy_capsule_v3.png" id="12_trophy_capsule"]
+[ext_resource type="Texture2D" uid="uid://juqei62ypmlc" path="res://assets/images/main/lobby_refresh/icon_trophy_score_v3.png" id="13_trophy"]
+[ext_resource type="Texture2D" uid="uid://ds531ylm048xq" path="res://assets/images/main/lobby_refresh/ui_settings_button_v3.png" id="14_settings"]
+[ext_resource type="Texture2D" uid="uid://bdc3tphg7nwn5" path="res://assets/images/main/lobby_refresh/ui_entry_shop_v3.png" id="15_shop_entry"]
+[ext_resource type="Texture2D" uid="uid://cchkq1ji5vvc3" path="res://assets/images/main/lobby_refresh/ui_entry_inn_v3.png" id="16_inn_entry"]
+[ext_resource type="Texture2D" uid="uid://dfkl83jl7tvt0" path="res://assets/images/main/lobby_refresh/ui_entry_ranch_v3.png" id="17_ranch_entry"]
+[ext_resource type="Texture2D" uid="uid://scamfhbqqsp3" path="res://assets/images/main/lobby_refresh/ui_start_adventure_v3.png" id="18_start"]
+[ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="19_bottom_nav"]
+[ext_resource type="Texture2D" uid="uid://cm5qw1ps05mpl" path="res://assets/images/main/lobby_refresh/icon_album_book_v3.png" id="20_album"]
+[ext_resource type="Texture2D" uid="uid://cw6t51d6rrafl" path="res://assets/images/main/lobby_refresh/icon_inventory_bag_v3.png" id="21_inventory"]
+[ext_resource type="Texture2D" uid="uid://2s1cvrpev0p7" path="res://assets/images/main/lobby_refresh/icon_achievement_trophy_v3.png" id="22_achievement"]
+[ext_resource type="Texture2D" uid="uid://bgimnmu4qhwn" path="res://assets/images/main/lobby_refresh/icon_settings_gear_v3.png" id="23_settings_gear"]
+[ext_resource type="Texture2D" uid="uid://buogqmac3onxn" path="res://assets/images/main/lobby_refresh/icon_signin_calendar_v3.png" id="24_signin"]
+[ext_resource type="Texture2D" uid="uid://c68f3npcjpdk7" path="res://assets/images/main/ui_notification_dot_v2.png" id="25_notice"]
 
-[node name="MainLobby" type="Control" unique_id=776085402]
+[node name="MainLobby" type="Control" unique_id=194569078]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 0
@@ -38,7 +36,7 @@ offset_bottom = 667.0
 mouse_filter = 1
 script = ExtResource("1_main")
 
-[node name="Background" type="TextureRect" parent="." unique_id=755917836]
+[node name="Background" type="TextureRect" parent="." unique_id=1483469276]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -47,605 +45,576 @@ texture = ExtResource("3_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="ScreenShade" type="ColorRect" parent="." unique_id=1156092708]
+[node name="ScreenShade" type="ColorRect" parent="." unique_id=1998399311]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.04, 0.1, 0.16)
+color = Color(0.02, 0.04, 0.1, 0.03)
 
-[node name="Particles" type="Control" parent="." unique_id=1519943961]
+[node name="Particles" type="Control" parent="." unique_id=513460632]
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 script = ExtResource("2_particles")
 
-[node name="Header" type="Control" parent="." unique_id=537363584]
+[node name="Header" type="Control" parent="." unique_id=236415546]
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 96.0
+offset_bottom = 64.0
 mouse_filter = 2
 
-[node name="AvatarFrame" type="TextureRect" parent="Header" unique_id=1838490819]
+[node name="PlayerStatus" type="TextureRect" parent="Header" unique_id=1230815732]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 78.0
-offset_bottom = 78.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 130.0
+offset_bottom = 62.0
 mouse_filter = 2
-texture = ExtResource("4_avatar_frame")
+texture = ExtResource("4_player_card")
 expand_mode = 1
+stretch_mode = 5
 
-[node name="Avatar" type="TextureRect" parent="Header" unique_id=1204256247]
+[node name="Avatar" type="TextureRect" parent="Header" unique_id=331730849]
 layout_mode = 0
-offset_left = 15.0
+offset_left = 11.0
 offset_top = 10.0
-offset_right = 71.0
-offset_bottom = 66.0
+offset_right = 52.0
+offset_bottom = 51.0
 mouse_filter = 2
 texture = ExtResource("5_avatar")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PlayerNamePlate" type="TextureRect" parent="Header" unique_id=1482723329]
+[node name="OwnerLevelTitle" type="Label" parent="Header" unique_id=2090889518]
 layout_mode = 0
-offset_left = 80.0
-offset_top = 18.0
-offset_right = 196.0
-offset_bottom = 41.0
-mouse_filter = 2
-texture = ExtResource("6_name_plate")
-expand_mode = 1
-
-[node name="PlayerName" type="Label" parent="Header" unique_id=746808738]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 82.0
-offset_top = 16.0
-offset_right = 169.0
-offset_bottom = 43.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 14
-text = "冒险者小帅"
+offset_left = 60.0
+offset_top = 9.0
+offset_right = 119.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(0.28, 0.14, 0.05, 1)
+theme_override_font_sizes/font_size = 10
+text = "主人等级"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EditIcon" type="TextureRect" parent="Header" unique_id=1004820782]
+[node name="PlayerName" type="Label" parent="Header" unique_id=70482570]
+unique_name_in_owner = true
+visible = false
 layout_mode = 0
-offset_left = 164.0
-offset_top = 20.0
-offset_right = 184.0
+offset_left = 45.0
+offset_top = 8.0
+offset_right = 111.0
+offset_bottom = 24.0
+text = "冒险者"
+
+[node name="LevelBadge" type="TextureRect" parent="Header" unique_id=939879965]
+layout_mode = 0
+visible = false
+offset_left = 52.0
+offset_top = 35.0
+offset_right = 69.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("6_level")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LevelValue" type="Label" parent="Header" unique_id=852806575]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 53.0
+offset_top = 39.0
+offset_right = 68.0
+offset_bottom = 53.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.16, 0.03, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
+text = "28"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExperienceTrack" type="TextureRect" parent="Header"]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 43.0
+offset_right = 120.0
+offset_bottom = 50.0
+mouse_filter = 2
+texture = ExtResource("7_exp_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ExperienceFill" type="Control" parent="Header" unique_id=878699461]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 69.0
+offset_top = 44.0
+offset_right = 119.0
+offset_bottom = 49.0
+mouse_filter = 2
+script = ExtResource("7_exp_bar")
+fill_color = Color(0.35, 0.78, 0.12, 1)
+
+[node name="ExpValue" type="Label" parent="Header" unique_id=623275096]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 34.0
+offset_right = 121.0
+offset_bottom = 49.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.28, 0.04, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "2,450/3,500"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldCapsule" type="TextureRect" parent="Header" unique_id=194318496]
+layout_mode = 0
+offset_left = 127.0
+offset_top = 15.0
+offset_right = 203.0
+offset_bottom = 43.0
+mouse_filter = 2
+texture = ExtResource("8_currency")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoldIcon" type="TextureRect" parent="Header" unique_id=780420617]
+layout_mode = 0
+offset_left = 130.0
+offset_top = 18.0
+offset_right = 151.0
 offset_bottom = 40.0
 mouse_filter = 2
-texture = ExtResource("7_edit")
+texture = ExtResource("9_gold")
 expand_mode = 1
+stretch_mode = 5
 
-[node name="LevelShield" type="TextureRect" parent="Header" unique_id=1701210718]
-layout_mode = 0
-offset_left = 26.0
-offset_top = 75.0
-offset_right = 64.0
-offset_bottom = 118.0
-mouse_filter = 2
-texture = ExtResource("8_level")
-expand_mode = 1
-
-[node name="LevelValue" type="Label" parent="Header" unique_id=1630931037]
+[node name="GoldValue" type="Label" parent="Header" unique_id=342748516]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 27.0
-offset_top = 78.0
-offset_right = 63.0
-offset_bottom = 104.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 18
-text = "14"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ExperienceEmpty" type="TextureRect" parent="Header" unique_id=300488872]
-layout_mode = 0
-offset_left = 77.0
-offset_top = 45.0
-offset_right = 185.0
-offset_bottom = 60.0
-mouse_filter = 2
-texture = ExtResource("9_exp_empty")
-expand_mode = 1
-
-[node name="ExperienceFill" type="TextureRect" parent="Header" unique_id=829886236]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 78.0
-offset_top = 45.0
-offset_right = 186.0
-offset_bottom = 60.0
-mouse_filter = 2
-texture = ExtResource("10_exp_fill")
-expand_mode = 1
-
-[node name="ExpValue" type="Label" parent="Header" unique_id=515057656]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 87.0
-offset_top = 43.0
-offset_right = 169.0
-offset_bottom = 60.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 10
-text = "36/220"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="GoldCapsule" type="TextureRect" parent="Header" unique_id=153639788]
-layout_mode = 0
-offset_left = 199.0
+offset_left = 150.0
 offset_top = 17.0
-offset_right = 287.0
-offset_bottom = 37.0
-mouse_filter = 2
-texture = ExtResource("11_gold_capsule")
-expand_mode = 1
-
-[node name="GoldIcon" type="TextureRect" parent="Header" unique_id=608515020]
-visible = false
-layout_mode = 0
-offset_left = 202.0
-offset_top = 13.0
-offset_right = 230.0
-offset_bottom = 39.0
-mouse_filter = 2
-texture = ExtResource("12_gold")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="GoldValue" type="Label" parent="Header" unique_id=1212353042]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 228.0
-offset_top = 13.0
-offset_right = 267.0
-offset_bottom = 39.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 13
-text = "3408"
+offset_right = 187.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 11
+text = "12,350"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="DiamondCapsule" type="TextureRect" parent="Header" unique_id=88269070]
+[node name="GoldPlus" type="TextureButton" parent="Header" unique_id=152312080]
 layout_mode = 0
-offset_left = 292.0
+offset_left = 184.0
+offset_top = 20.0
+offset_right = 202.0
+offset_bottom = 38.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_plus")
+texture_pressed = ExtResource("11_plus")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="DiamondCapsule" type="TextureRect" parent="Header" unique_id=432962208]
+layout_mode = 0
+offset_left = 203.0
+offset_top = 15.0
+offset_right = 279.0
+offset_bottom = 43.0
+mouse_filter = 2
+texture = ExtResource("8_currency")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondIcon" type="TextureRect" parent="Header" unique_id=759331152]
+layout_mode = 0
+offset_left = 206.0
 offset_top = 18.0
-offset_right = 372.0
-offset_bottom = 36.0
+offset_right = 229.0
+offset_bottom = 40.0
 mouse_filter = 2
-texture = ExtResource("13_diamond_capsule")
-expand_mode = 1
-
-[node name="DiamondIcon" type="TextureRect" parent="Header" unique_id=2106521504]
-visible = false
-layout_mode = 0
-offset_left = 295.0
-offset_top = 13.0
-offset_right = 323.0
-offset_bottom = 39.0
-mouse_filter = 2
-texture = ExtResource("14_diamond")
+texture = ExtResource("10_diamond")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="DiamondValue" type="Label" parent="Header" unique_id=675792610]
+[node name="DiamondValue" type="Label" parent="Header" unique_id=1472582720]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 323.0
-offset_top = 13.0
-offset_right = 354.0
-offset_bottom = 39.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 13
-text = "0"
+offset_left = 227.0
+offset_top = 17.0
+offset_right = 264.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 11
+text = "2,548"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="RankPanel" type="TextureRect" parent="Header" unique_id=104438721]
+[node name="DiamondPlus" type="TextureButton" parent="Header" unique_id=1552543318]
 layout_mode = 0
-offset_left = 246.0
-offset_top = 45.0
-offset_right = 366.0
-offset_bottom = 93.0
-mouse_filter = 2
-texture = ExtResource("15_rank")
-expand_mode = 1
+offset_left = 260.0
+offset_top = 20.0
+offset_right = 278.0
+offset_bottom = 38.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_plus")
+texture_pressed = ExtResource("11_plus")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="RankTitle" type="Label" parent="Header" unique_id=945316888]
+[node name="RankPanel" type="TextureRect" parent="Header" unique_id=1402777171]
+layout_mode = 0
+offset_left = 277.0
+offset_top = 15.0
+offset_right = 344.0
+offset_bottom = 43.0
+mouse_filter = 2
+texture = ExtResource("12_trophy_capsule")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RankIcon" type="TextureRect" parent="Header" unique_id=734181460]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 18.0
+offset_right = 302.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("13_trophy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RankTitle" type="Label" parent="Header" unique_id=1520743959]
 layout_mode = 0
 offset_left = 300.0
-offset_top = 49.0
-offset_right = 366.0
-offset_bottom = 67.0
-theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "冒险家III"
+offset_top = 17.0
+offset_right = 342.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 7
+text = "成就分数"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RankScore" type="Label" parent="Header" unique_id=417789513]
+[node name="RankScore" type="Label" parent="Header" unique_id=1466909314]
 layout_mode = 0
-offset_left = 311.0
-offset_top = 68.0
-offset_right = 370.0
-offset_bottom = 86.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "3120"
+offset_left = 300.0
+offset_top = 27.0
+offset_right = 342.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 8
+text = "15,680"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PrimaryButtons" type="Control" parent="." unique_id=694672849]
+[node name="SettingsTopButton" type="TextureButton" parent="Header" unique_id=21274050]
+layout_mode = 0
+offset_left = 344.0
+offset_top = 14.0
+offset_right = 374.0
+offset_bottom = 44.0
+texture_normal = ExtResource("14_settings")
+texture_pressed = ExtResource("14_settings")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="PrimaryButtons" type="Control" parent="." unique_id=1916736131]
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 599.0
+offset_bottom = 598.0
 
-[node name="StartButton" type="TextureButton" parent="PrimaryButtons" unique_id=285203491]
+[node name="ShopButton" type="TextureButton" parent="PrimaryButtons" unique_id=688719407]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 28.0
-offset_top = 295.0
-offset_right = 164.0
-offset_bottom = 337.0
-texture_normal = ExtResource("16_entry")
-texture_pressed = ExtResource("16_entry")
+offset_left = 40.0
+offset_top = 473.0
+offset_right = 157.0
+offset_bottom = 514.0
+texture_normal = ExtResource("15_shop_entry")
+texture_pressed = ExtResource("15_shop_entry")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Icon" type="TextureRect" parent="PrimaryButtons/StartButton" unique_id=377307943]
+[node name="Text" type="Label" parent="PrimaryButtons/ShopButton" unique_id=315721104]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 7.0
-offset_right = 38.0
-offset_bottom = 33.0
-mouse_filter = 2
-texture = ExtResource("20_start")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="PrimaryButtons/StartButton" unique_id=1776157251]
-layout_mode = 0
-offset_left = 41.0
-offset_top = 6.0
-offset_right = 126.0
-offset_bottom = 36.0
+offset_left = 35.0
+offset_right = 113.0
+offset_bottom = 41.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 14
-text = "冒险之旅"
+theme_override_colors/font_outline_color = Color(0.46, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "商店"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TeamButton" type="TextureButton" parent="PrimaryButtons" unique_id=273604702]
+[node name="TeamButton" type="TextureButton" parent="PrimaryButtons" unique_id=751627152]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 218.0
-offset_top = 345.0
-offset_right = 354.0
-offset_bottom = 387.0
-texture_normal = ExtResource("16_entry")
-texture_pressed = ExtResource("16_entry")
+offset_left = 244.0
+offset_top = 341.0
+offset_right = 367.0
+offset_bottom = 382.0
+texture_normal = ExtResource("16_inn_entry")
+texture_pressed = ExtResource("16_inn_entry")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Icon" type="TextureRect" parent="PrimaryButtons/TeamButton" unique_id=373233730]
+[node name="Text" type="Label" parent="PrimaryButtons/TeamButton" unique_id=1841956407]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 7.0
-offset_right = 38.0
-offset_bottom = 33.0
-mouse_filter = 2
-texture = ExtResource("21_team")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="PrimaryButtons/TeamButton" unique_id=934439200]
-layout_mode = 0
-offset_left = 43.0
-offset_top = 6.0
-offset_right = 128.0
-offset_bottom = 36.0
+offset_left = 35.0
+offset_right = 119.0
+offset_bottom = 41.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
+theme_override_colors/font_outline_color = Color(0.24, 0.08, 0.44, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = "精灵编队"
+text = "精灵旅馆"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RanchButton" type="TextureButton" parent="PrimaryButtons" unique_id=1959942131]
+[node name="RanchButton" type="TextureButton" parent="PrimaryButtons" unique_id=50223786]
 unique_name_in_owner = true
+layout_mode = 0
+offset_left = 238.0
+offset_top = 478.0
+offset_right = 365.0
+offset_bottom = 519.0
+texture_normal = ExtResource("17_ranch_entry")
+texture_pressed = ExtResource("17_ranch_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Text" type="Label" parent="PrimaryButtons/RanchButton" unique_id=1602113103]
 layout_mode = 0
 offset_left = 34.0
-offset_top = 508.0
-offset_right = 170.0
-offset_bottom = 550.0
-texture_normal = ExtResource("16_entry")
-texture_pressed = ExtResource("16_entry")
-ignore_texture_size = true
-stretch_mode = 0
-
-[node name="Icon" type="TextureRect" parent="PrimaryButtons/RanchButton" unique_id=1632483246]
-layout_mode = 0
-offset_left = 12.0
-offset_top = 7.0
-offset_right = 38.0
-offset_bottom = 33.0
-mouse_filter = 2
-texture = ExtResource("22_ranch")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="PrimaryButtons/RanchButton" unique_id=1145718756]
-layout_mode = 0
-offset_left = 43.0
-offset_top = 6.0
-offset_right = 128.0
-offset_bottom = 36.0
+offset_right = 123.0
+offset_bottom = 41.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
+theme_override_colors/font_outline_color = Color(0.1, 0.31, 0.06, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
 text = "精灵牧场"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ShopButton" type="TextureButton" parent="PrimaryButtons" unique_id=474192381]
+[node name="StartButton" type="TextureButton" parent="PrimaryButtons" unique_id=318868816]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 209.0
-offset_top = 536.0
-offset_right = 345.0
-offset_bottom = 578.0
-texture_normal = ExtResource("16_entry")
-texture_pressed = ExtResource("16_entry")
+offset_left = 79.0
+offset_top = 523.0
+offset_right = 296.0
+offset_bottom = 589.0
+texture_normal = ExtResource("18_start")
+texture_pressed = ExtResource("18_start")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Icon" type="TextureRect" parent="PrimaryButtons/ShopButton" unique_id=995616354]
+[node name="Text" type="Label" parent="PrimaryButtons/StartButton" unique_id=137747126]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 7.0
-offset_right = 38.0
-offset_bottom = 33.0
-mouse_filter = 2
-texture = ExtResource("23_shop")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="PrimaryButtons/ShopButton" unique_id=64411535]
-layout_mode = 0
-offset_left = 43.0
-offset_top = 6.0
-offset_right = 128.0
-offset_bottom = 36.0
+offset_left = 11.0
+offset_top = 5.0
+offset_right = 206.0
+offset_bottom = 59.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 14
-text = "商店"
+theme_override_colors/font_outline_color = Color(0.67, 0.24, 0.02, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 28
+text = "开始冒险"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BottomNav" type="Control" parent="." unique_id=735765179]
+[node name="BottomNav" type="Control" parent="." unique_id=923097332]
 anchors_preset = 0
-offset_top = 599.0
+offset_top = 596.0
 offset_right = 375.0
 offset_bottom = 667.0
 
-[node name="AlbumButton" type="TextureButton" parent="BottomNav" unique_id=1789242514]
+[node name="Panel" type="TextureRect" parent="BottomNav" unique_id=997851502]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 1.0
+offset_right = 362.0
+offset_bottom = 70.0
+mouse_filter = 2
+texture = ExtResource("19_bottom_nav")
+expand_mode = 1
+
+[node name="AlbumButton" type="TextureButton" parent="BottomNav" unique_id=1689431658]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 75.0
-offset_bottom = 68.0
-texture_normal = ExtResource("17_nav")
-texture_pressed = ExtResource("18_nav_pressed")
-ignore_texture_size = true
-stretch_mode = 0
+offset_left = 18.0
+offset_top = 3.0
+offset_right = 86.0
+offset_bottom = 69.0
 
-[node name="Icon" type="TextureRect" parent="BottomNav/AlbumButton" unique_id=375137167]
+[node name="Icon" type="TextureRect" parent="BottomNav/AlbumButton" unique_id=641652189]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 5.0
-offset_right = 54.0
-offset_bottom = 41.0
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 55.0
+offset_bottom = 47.0
 mouse_filter = 2
-texture = ExtResource("24_album")
+texture = ExtResource("20_album")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/AlbumButton" unique_id=469430534]
+[node name="Text" type="Label" parent="BottomNav/AlbumButton" unique_id=643349088]
 layout_mode = 0
-offset_top = 43.0
-offset_right = 75.0
-offset_bottom = 66.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
+offset_left = 6.0
+offset_top = 39.0
+offset_right = 74.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.35, 0.18, 0.07, 1)
 theme_override_font_sizes/font_size = 12
 text = "图鉴"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="InventoryButton" type="TextureButton" parent="BottomNav" unique_id=1189604405]
+[node name="InventoryButton" type="TextureButton" parent="BottomNav" unique_id=948349458]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 75.0
-offset_right = 150.0
-offset_bottom = 68.0
-texture_normal = ExtResource("17_nav")
-texture_pressed = ExtResource("18_nav_pressed")
-ignore_texture_size = true
-stretch_mode = 0
+offset_left = 86.0
+offset_top = 3.0
+offset_right = 154.0
+offset_bottom = 69.0
 
-[node name="Icon" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=1486735152]
+[node name="Icon" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=401067934]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 5.0
-offset_right = 54.0
-offset_bottom = 41.0
+offset_left = 20.0
+offset_top = 13.0
+offset_right = 52.0
+offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("25_inventory")
+texture = ExtResource("21_inventory")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/InventoryButton" unique_id=2023881405]
+[node name="Text" type="Label" parent="BottomNav/InventoryButton" unique_id=1643125940]
 layout_mode = 0
-offset_top = 43.0
-offset_right = 75.0
-offset_bottom = 66.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
+offset_top = 39.0
+offset_right = 68.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.35, 0.18, 0.07, 1)
 theme_override_font_sizes/font_size = 12
 text = "背包"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Notice" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=705760752]
+[node name="Notice" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=886777775]
 layout_mode = 0
-offset_left = 53.0
-offset_top = 6.0
-offset_right = 69.0
-offset_bottom = 22.0
+offset_left = 48.0
+offset_top = 2.0
+offset_right = 62.0
+offset_bottom = 16.0
 mouse_filter = 2
-texture = ExtResource("19_notice")
+texture = ExtResource("25_notice")
 expand_mode = 1
 
-[node name="AchievementButton" type="TextureButton" parent="BottomNav" unique_id=941286428]
+[node name="AchievementButton" type="TextureButton" parent="BottomNav" unique_id=606235016]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 150.0
-offset_right = 225.0
-offset_bottom = 68.0
-texture_normal = ExtResource("17_nav")
-texture_pressed = ExtResource("18_nav_pressed")
-ignore_texture_size = true
-stretch_mode = 0
+offset_left = 154.0
+offset_top = 3.0
+offset_right = 222.0
+offset_bottom = 69.0
 
-[node name="Icon" type="TextureRect" parent="BottomNav/AchievementButton" unique_id=233499048]
+[node name="Icon" type="TextureRect" parent="BottomNav/AchievementButton" unique_id=1169439017]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 5.0
-offset_right = 54.0
-offset_bottom = 41.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 50.0
+offset_bottom = 49.0
 mouse_filter = 2
-texture = ExtResource("26_achievement")
+texture = ExtResource("22_achievement")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/AchievementButton" unique_id=592009227]
+[node name="Text" type="Label" parent="BottomNav/AchievementButton" unique_id=1533170618]
 layout_mode = 0
-offset_top = 43.0
-offset_right = 75.0
-offset_bottom = 66.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
+offset_top = 39.0
+offset_right = 68.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.35, 0.18, 0.07, 1)
 theme_override_font_sizes/font_size = 12
 text = "成就"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SettingsButton" type="TextureButton" parent="BottomNav" unique_id=1046090328]
+[node name="SettingsButton" type="TextureButton" parent="BottomNav" unique_id=503122956]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 225.0
-offset_right = 300.0
-offset_bottom = 68.0
-texture_normal = ExtResource("17_nav")
-texture_pressed = ExtResource("18_nav_pressed")
-ignore_texture_size = true
-stretch_mode = 0
+offset_left = 222.0
+offset_top = 3.0
+offset_right = 290.0
+offset_bottom = 69.0
 
-[node name="Icon" type="TextureRect" parent="BottomNav/SettingsButton" unique_id=952824793]
+[node name="Icon" type="TextureRect" parent="BottomNav/SettingsButton" unique_id=1526332577]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 5.0
-offset_right = 54.0
-offset_bottom = 41.0
+offset_left = 13.0
+offset_top = 14.0
+offset_right = 45.0
+offset_bottom = 49.0
 mouse_filter = 2
-texture = ExtResource("27_settings")
+texture = ExtResource("23_settings_gear")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/SettingsButton" unique_id=1725167839]
+[node name="Text" type="Label" parent="BottomNav/SettingsButton" unique_id=295374642]
 layout_mode = 0
-offset_top = 43.0
-offset_right = 75.0
-offset_bottom = 66.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
+offset_left = -4.0
+offset_top = 39.0
+offset_right = 64.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.35, 0.18, 0.07, 1)
 theme_override_font_sizes/font_size = 12
 text = "设置"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SigninButton" type="TextureButton" parent="BottomNav" unique_id=1115043872]
+[node name="SigninButton" type="TextureButton" parent="BottomNav" unique_id=1064506983]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 300.0
-offset_right = 375.0
-offset_bottom = 68.0
-texture_normal = ExtResource("17_nav")
-texture_pressed = ExtResource("18_nav_pressed")
-ignore_texture_size = true
-stretch_mode = 0
+offset_left = 290.0
+offset_top = 3.0
+offset_right = 358.0
+offset_bottom = 69.0
 
-[node name="Icon" type="TextureRect" parent="BottomNav/SigninButton" unique_id=1064677089]
+[node name="Icon" type="TextureRect" parent="BottomNav/SigninButton" unique_id=386736636]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 5.0
-offset_right = 54.0
-offset_bottom = 41.0
+offset_left = 10.0
+offset_top = 13.0
+offset_right = 42.0
+offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("28_signin")
+texture = ExtResource("24_signin")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/SigninButton" unique_id=1933241916]
+[node name="Text" type="Label" parent="BottomNav/SigninButton" unique_id=448206371]
 layout_mode = 0
-offset_top = 43.0
-offset_right = 75.0
-offset_bottom = 66.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "每日签到"
+offset_left = -7.0
+offset_top = 39.0
+offset_right = 61.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.35, 0.18, 0.07, 1)
+theme_override_font_sizes/font_size = 12
+text = "签到"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Notice" type="TextureRect" parent="BottomNav/SigninButton" unique_id=637099740]
+[node name="Notice" type="TextureRect" parent="BottomNav/SigninButton" unique_id=1846830305]
 layout_mode = 0
-offset_left = 53.0
-offset_top = 6.0
-offset_right = 69.0
-offset_bottom = 22.0
+offset_left = 48.0
+offset_top = 2.0
+offset_right = 62.0
+offset_bottom = 16.0
 mouse_filter = 2
-texture = ExtResource("19_notice")
+texture = ExtResource("25_notice")
 expand_mode = 1

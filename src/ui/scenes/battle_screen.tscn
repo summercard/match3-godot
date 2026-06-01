@@ -1,26 +1,25 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene format=3 uid="uid://cr6a6i5kodk7m"]
 
-[ext_resource type="Script" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_turn_badge.png" id="turn_badge"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_speed_button.png" id="speed_button"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_settings_button.png" id="settings_button"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_capture_toggle_off.png" id="capture_toggle"]
-[ext_resource type="Texture2D" path="res://assets/images/battle/ui/ui_item_slot_selected.png" id="item_selected"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/enemy_slot.tscn" id="enemy_slot"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
+[ext_resource type="Texture2D" uid="uid://c1vhx6cwsyvym" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://cbbvkb1ckwkv8" path="res://assets/images/battle/ui/ui_capture_toggle_off.png" id="capture_toggle"]
+[ext_resource type="PackedScene" uid="uid://y280sjcpnwtf" path="res://src/ui/scenes/battle/enemy_slot.tscn" id="enemy_slot"]
+[ext_resource type="PackedScene" uid="uid://d2u36y1wnlpla" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
+[ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/battle/ui/ui_item_slot_selected.png" id="item_selected"]
+[ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
+[ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://d0n4xhqf1hcnu" path="res://assets/images/battle/ui/ui_settings_button.png" id="settings_button"]
+[ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/battle/ui/ui_speed_button.png" id="speed_button"]
+[ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/battle/ui/ui_turn_badge.png" id="turn_badge"]
 
-[node name="BattleScreenGui" type="Control"]
+[node name="BattleScreenGui" type="Control" unique_id=807451328]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
-mouse_filter = 0
 script = ExtResource("script")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1814830667]
 z_index = -20
 layout_mode = 0
 offset_right = 375.0
@@ -30,22 +29,22 @@ texture = ExtResource("bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="TopHud" type="Control" parent="."]
+[node name="TopHud" type="Control" parent="." unique_id=1268773425]
 z_index = -1
-layout_mode = 0
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 72.0
 mouse_filter = 2
 
-[node name="TurnBadge" type="Control" parent="TopHud"]
-layout_mode = 0
+[node name="TurnBadge" type="Control" parent="TopHud" unique_id=708575208]
+anchors_preset = 0
 offset_left = 9.0
 offset_top = 5.0
 offset_right = 81.0
 offset_bottom = 53.0
 mouse_filter = 2
 
-[node name="Image" type="TextureRect" parent="TopHud/TurnBadge"]
+[node name="Image" type="TextureRect" parent="TopHud/TurnBadge" unique_id=1337029866]
 layout_mode = 0
 offset_right = 72.0
 offset_bottom = 48.0
@@ -54,12 +53,11 @@ texture = ExtResource("turn_badge")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Title" type="Label" parent="TopHud/TurnBadge"]
+[node name="Title" type="Label" parent="TopHud/TurnBadge" unique_id=1243297738]
 layout_mode = 0
 offset_top = 5.0
 offset_right = 72.0
 offset_bottom = 22.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
 theme_override_constants/outline_size = 2
@@ -68,12 +66,11 @@ text = "回合"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Value" type="Label" parent="TopHud/TurnBadge"]
+[node name="Value" type="Label" parent="TopHud/TurnBadge" unique_id=515103777]
 layout_mode = 0
 offset_top = 18.0
 offset_right = 72.0
 offset_bottom = 43.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
@@ -82,7 +79,7 @@ text = "0/20"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpeedButton" type="TextureRect" parent="TopHud"]
+[node name="SpeedButton" type="TextureRect" parent="TopHud" unique_id=1876612873]
 layout_mode = 0
 offset_left = 285.0
 offset_top = 5.0
@@ -93,13 +90,12 @@ texture = ExtResource("speed_button")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SpeedLabel" type="Label" parent="TopHud"]
+[node name="SpeedLabel" type="Label" parent="TopHud" unique_id=1652010195]
 layout_mode = 0
 offset_left = 285.0
 offset_top = 27.0
 offset_right = 327.0
 offset_bottom = 48.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
 theme_override_constants/outline_size = 2
@@ -108,7 +104,7 @@ text = "x2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SettingsButton" type="TextureRect" parent="TopHud"]
+[node name="SettingsButton" type="TextureRect" parent="TopHud" unique_id=593486601]
 layout_mode = 0
 offset_left = 330.0
 offset_top = 5.0
@@ -119,14 +115,13 @@ texture = ExtResource("settings_button")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BossPhase" type="Label" parent="TopHud"]
+[node name="BossPhase" type="Label" parent="TopHud" unique_id=810267290]
 visible = false
 layout_mode = 0
 offset_left = 270.0
 offset_top = 53.0
 offset_right = 374.0
 offset_bottom = 70.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
@@ -135,86 +130,92 @@ text = "阶段 1/1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Combatants" type="Control" parent="."]
+[node name="Combatants" type="Control" parent="." unique_id=113229536]
 z_index = -1
-layout_mode = 0
+anchors_preset = 0
+offset_top = 8.0
 offset_right = 375.0
-offset_bottom = 296.0
+offset_bottom = 304.0
 mouse_filter = 2
 
-[node name="SingleEnemy" parent="Combatants" instance=ExtResource("enemy_stage")]
-
-[node name="MultiEnemies" type="Control" parent="Combatants"]
-visible = false
+[node name="SingleEnemy" parent="Combatants" unique_id=1489973222 instance=ExtResource("enemy_stage")]
 layout_mode = 0
+offset_left = -2.0
+offset_top = -17.0
+offset_right = 373.0
+offset_bottom = 201.0
+
+[node name="MultiEnemies" type="Control" parent="Combatants" unique_id=233443107]
+anchors_preset = 0
+offset_top = 46.0
 offset_right = 375.0
-offset_bottom = 218.0
+offset_bottom = 264.0
 mouse_filter = 2
 
-[node name="Enemy1" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+[node name="Enemy1" parent="Combatants/MultiEnemies" unique_id=149372447 instance=ExtResource("enemy_slot")]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 72.0
-offset_right = 120.0
-offset_bottom = 174.0
+offset_left = 36.0
+offset_top = 76.0
+offset_right = 132.0
+offset_bottom = 178.0
 
-[node name="Enemy2" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+[node name="Enemy2" parent="Combatants/MultiEnemies" unique_id=1757924947 instance=ExtResource("enemy_slot")]
 layout_mode = 0
 offset_left = 139.5
-offset_top = 63.0
+offset_top = 65.0
 offset_right = 235.5
-offset_bottom = 165.0
+offset_bottom = 167.0
 
-[node name="Enemy3" parent="Combatants/MultiEnemies" instance=ExtResource("enemy_slot")]
+[node name="Enemy3" parent="Combatants/MultiEnemies" unique_id=1497443033 instance=ExtResource("enemy_slot")]
 layout_mode = 0
-offset_left = 255.0
-offset_top = 72.0
-offset_right = 351.0
-offset_bottom = 174.0
+offset_left = 249.0
+offset_top = 79.0
+offset_right = 345.0
+offset_bottom = 181.0
 
-[node name="Players" type="Control" parent="Combatants"]
-layout_mode = 0
+[node name="Players" type="Control" parent="Combatants" unique_id=45776905]
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 296.0
 mouse_filter = 2
 
-[node name="Player1" parent="Combatants/Players" instance=ExtResource("player_slot")]
+[node name="Player1" parent="Combatants/Players" unique_id=1268474758 instance=ExtResource("player_slot")]
 layout_mode = 0
 offset_left = 18.0
 offset_top = 218.0
 offset_right = 124.0
 offset_bottom = 284.0
 
-[node name="Player2" parent="Combatants/Players" instance=ExtResource("player_slot")]
+[node name="Player2" parent="Combatants/Players" unique_id=1377905937 instance=ExtResource("player_slot")]
 layout_mode = 0
 offset_left = 134.0
 offset_top = 218.0
 offset_right = 240.0
 offset_bottom = 284.0
 
-[node name="Player3" parent="Combatants/Players" instance=ExtResource("player_slot")]
+[node name="Player3" parent="Combatants/Players" unique_id=352475589 instance=ExtResource("player_slot")]
 layout_mode = 0
 offset_left = 250.0
 offset_top = 218.0
 offset_right = 356.0
 offset_bottom = 284.0
 
-[node name="BottomControls" type="Control" parent="."]
+[node name="BottomControls" type="Control" parent="." unique_id=850106023]
 z_index = -1
-layout_mode = 0
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 
-[node name="CaptureToggle" type="Control" parent="BottomControls"]
-layout_mode = 0
+[node name="CaptureToggle" type="Control" parent="BottomControls" unique_id=769315055]
+anchors_preset = 0
 offset_left = 18.0
 offset_top = 622.0
 offset_right = 57.0
 offset_bottom = 661.0
 mouse_filter = 2
 
-[node name="Image" type="TextureRect" parent="BottomControls/CaptureToggle"]
+[node name="Image" type="TextureRect" parent="BottomControls/CaptureToggle" unique_id=1866542774]
 layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
@@ -223,13 +224,12 @@ texture = ExtResource("capture_toggle")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Badge" type="Label" parent="BottomControls/CaptureToggle"]
+[node name="Badge" type="Label" parent="BottomControls/CaptureToggle" unique_id=1366279616]
 layout_mode = 0
 offset_left = 27.0
 offset_top = 25.0
 offset_right = 43.0
 offset_bottom = 43.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
@@ -238,15 +238,15 @@ text = "关"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Item1" type="Control" parent="BottomControls"]
-layout_mode = 0
+[node name="Item1" type="Control" parent="BottomControls" unique_id=351864708]
+anchors_preset = 0
 offset_left = 67.0
 offset_top = 622.0
 offset_right = 106.0
 offset_bottom = 661.0
 mouse_filter = 2
 
-[node name="Selection" type="TextureRect" parent="BottomControls/Item1"]
+[node name="Selection" type="TextureRect" parent="BottomControls/Item1" unique_id=606224822]
 visible = false
 layout_mode = 0
 offset_right = 39.0
@@ -256,7 +256,7 @@ texture = ExtResource("item_selected")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="BottomControls/Item1"]
+[node name="Icon" type="TextureRect" parent="BottomControls/Item1" unique_id=821633786]
 layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
@@ -264,13 +264,12 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Badge" type="Label" parent="BottomControls/Item1"]
+[node name="Badge" type="Label" parent="BottomControls/Item1" unique_id=1365865181]
 layout_mode = 0
 offset_left = 27.0
 offset_top = 25.0
 offset_right = 43.0
 offset_bottom = 43.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
@@ -279,15 +278,15 @@ text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Item2" type="Control" parent="BottomControls"]
-layout_mode = 0
+[node name="Item2" type="Control" parent="BottomControls" unique_id=2119732949]
+anchors_preset = 0
 offset_left = 113.0
 offset_top = 622.0
 offset_right = 152.0
 offset_bottom = 661.0
 mouse_filter = 2
 
-[node name="Selection" type="TextureRect" parent="BottomControls/Item2"]
+[node name="Selection" type="TextureRect" parent="BottomControls/Item2" unique_id=738385169]
 visible = false
 layout_mode = 0
 offset_right = 39.0
@@ -297,7 +296,7 @@ texture = ExtResource("item_selected")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="BottomControls/Item2"]
+[node name="Icon" type="TextureRect" parent="BottomControls/Item2" unique_id=1280525603]
 layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
@@ -305,13 +304,12 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Badge" type="Label" parent="BottomControls/Item2"]
+[node name="Badge" type="Label" parent="BottomControls/Item2" unique_id=1842045315]
 layout_mode = 0
 offset_left = 27.0
 offset_top = 25.0
 offset_right = 43.0
 offset_bottom = 43.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
@@ -320,15 +318,15 @@ text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Item3" type="Control" parent="BottomControls"]
-layout_mode = 0
+[node name="Item3" type="Control" parent="BottomControls" unique_id=1170275015]
+anchors_preset = 0
 offset_left = 159.0
 offset_top = 622.0
 offset_right = 198.0
 offset_bottom = 661.0
 mouse_filter = 2
 
-[node name="Selection" type="TextureRect" parent="BottomControls/Item3"]
+[node name="Selection" type="TextureRect" parent="BottomControls/Item3" unique_id=1449281424]
 visible = false
 layout_mode = 0
 offset_right = 39.0
@@ -338,7 +336,7 @@ texture = ExtResource("item_selected")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="BottomControls/Item3"]
+[node name="Icon" type="TextureRect" parent="BottomControls/Item3" unique_id=1019521732]
 layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
@@ -346,13 +344,12 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Badge" type="Label" parent="BottomControls/Item3"]
+[node name="Badge" type="Label" parent="BottomControls/Item3" unique_id=386701086]
 layout_mode = 0
 offset_left = 27.0
 offset_top = 25.0
 offset_right = 43.0
 offset_bottom = 43.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2

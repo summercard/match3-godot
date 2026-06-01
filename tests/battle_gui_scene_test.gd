@@ -27,7 +27,9 @@ func _run() -> void:
 		"TopHud/SpeedButton",
 		"TopHud/SettingsButton",
 		"Combatants/SingleEnemy/Portrait",
+		"Combatants/SingleEnemy/HpFrameBase",
 		"Combatants/Players/Player1/HpBar",
+		"Combatants/Players/Player1/HpFrameBase",
 		"BottomControls/CaptureToggle/Image",
 		"BottomControls/Item1/Icon",
 	]:
@@ -45,6 +47,7 @@ func _run() -> void:
 	battle = main.get_current_scene()
 	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should show for three enemies")
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
+	_expect(battle.has_node("Combatants/MultiEnemies/Enemy3/HpFrameBase"), "multi-enemy hp bars should keep the base frame layer")
 
 	main.queue_free()
 	await process_frame
