@@ -18,6 +18,14 @@ func _run() -> void:
 		_expect(loaded_lobby.scene_file_path == "res://src/ui/scenes/main_lobby.tscn", "main should load editable lobby PackedScene")
 		_expect(loaded_lobby.has_node("%PlayerName"), "editable player-name node should exist")
 		_expect(loaded_lobby.has_node("%ExperienceFill"), "editable experience fill node should exist")
+		_expect(loaded_lobby.has_node("Header/ExperienceTrack"), "owner level card should expose the experience track")
+		_expect(loaded_lobby.has_node("Header/SettingsTopButton"), "concept lobby should expose the top settings shortcut")
+		_expect(loaded_lobby.has_node("BottomNav/Panel"), "concept lobby should expose the bottom navigation panel")
+		var particles := loaded_lobby.get_node("Particles")
+		var effect_profile: Dictionary = particles.call("get_effect_profile")
+		_expect(int(effect_profile.get("sun_rays", 0)) > 0, "lobby should expose subtle sunlight rays")
+		_expect(int(effect_profile.get("motes", 0)) <= 20, "lobby ambient motes should stay restrained")
+		_expect(int(effect_profile.get("sparkles", 0)) <= 8, "lobby sparkles should stay restrained")
 
 	var lobby: Control = load("res://src/ui/scenes/main_lobby.tscn").instantiate()
 	root.add_child(lobby)
@@ -38,11 +46,28 @@ func _run() -> void:
 	for button_name in expected_buttons:
 		var button := lobby.get_node("%" + button_name) as TextureButton
 		_expect(button != null, "%s should be editable TextureButton" % button_name)
-		if button_name == "StartButton":
-			button.button_down.emit()
-		else:
-			button.pressed.emit()
+		_expect(button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % button_name)
+		var feedback_profile: Dictionary = button.get_node("CartoonFeedback").call("get_feedback_profile")
+		_expect(float(feedback_profile.get("press_scale", 1.0)) < 1.0, "%s should compress on press" % button_name)
+		_expect(float(feedback_profile.get("hover_scale", 1.0)) > 1.0, "%s should lift on hover" % button_name)
+		_expect(bool(feedback_profile.get("burst", false)), "%s should expose a release burst" % button_name)
+		button.pressed.emit()
+		await create_timer(0.23 if button_name == "StartButton" else 0.17).timeout
 	_expect(emitted_ids == expected_buttons.values(), "all lobby buttons should preserve their navigation ids")
+	lobby.set("_player", {"name": "test", "level": 4, "gold": 0, "gems": 0, "exp": 50, "exp_to_level": 100})
+	lobby.call("_update_player_display")
+	_expect(is_equal_approx(float(lobby.get_node("%ExperienceFill").get("value")), 50.0), "owner level experience bar should use a real percentage value")
+	var top_settings := lobby.get_node("Header/SettingsTopButton") as TextureButton
+	_expect(top_settings.has_node("CartoonFeedback"), "top settings shortcut should expose cartoon feedback")
+	top_settings.pressed.emit()
+	await create_timer(0.17).timeout
+	_expect(emitted_ids.back() == "settings", "top settings shortcut should preserve the settings navigation id")
+	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus"]:
+		var plus_button := lobby.get_node(plus_path) as TextureButton
+		_expect(plus_button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % plus_path)
+		plus_button.pressed.emit()
+		await create_timer(0.17).timeout
+		_expect(emitted_ids.back() == "shop", "%s should open the shop" % plus_path)
 
 	main.queue_free()
 	lobby.queue_free()

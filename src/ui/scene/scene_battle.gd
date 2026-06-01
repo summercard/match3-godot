@@ -2836,15 +2836,20 @@ func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size
 func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color, element: String = "", show_orb: bool = false) -> void:
 	var radius := h * 0.5
 	var ratio: float = clampf(current / maximum, 0.0, 1.0) if maximum > 0 else 0.0
+	var frame_base_tex := _get_texture(BATTLE_UI_ASSETS["hp_frame"])
 	var frame_tex := _get_texture(BATTLE_UI_ASSETS["hp_frame_overlay"])
-	_draw_rounded_rect(x, y, w, h, radius, Color(0.075, 0.105, 0.16, 1.0))
+	var frame_rect := Rect2(x - 1.5, y - 1.5, w + 3.0, h + 3.0)
+	if frame_base_tex:
+		_draw_texture_fit(frame_base_tex, frame_rect, 1.0)
+	else:
+		_draw_rounded_rect(x, y, w, h, radius, Color(0.075, 0.105, 0.16, 1.0))
 	if current > 0 and maximum > 0:
 		var fill_w := maxf(h - 2.0, floor((w - 2.0) * ratio))
 		_draw_rounded_rect(x + 1.0, y + 1.0, fill_w, h - 2.0, maxf(1.0, radius - 1.0), color.darkened(0.20))
 		_draw_rounded_rect(x + 2.0, y + 2.0, maxf(fill_w - 2.0, 1.0), h - 4.0, maxf(1.0, radius - 2.0), color)
 		_draw_rounded_rect(x + 3.0, y + 2.0, maxf(fill_w - 4.0, 1.0), maxf(h * 0.22, 1.0), maxf(1.0, radius - 2.0), Color(1.0, 1.0, 1.0, 0.28))
 	if frame_tex:
-		_draw_texture_fit(frame_tex, Rect2(x - 1.5, y - 1.5, w + 3.0, h + 3.0), 1.0)
+		_draw_texture_fit(frame_tex, frame_rect, 1.0)
 	else:
 		_draw_rounded_rect(x - 1.5, y - 1.5, w + 3.0, h + 3.0, radius + 1.5, Color(1.0, 0.75, 0.32, 1.0))
 	if not show_orb:
