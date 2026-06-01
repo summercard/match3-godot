@@ -13,7 +13,7 @@ func _run() -> void:
 	_test_social_rules()
 	_test_save_manager_social_flow()
 	_test_social_birth_major_outcome()
-	_test_social_erosion_major_outcome()
+	_test_social_erosion_is_protected()
 	_finish()
 
 
@@ -142,7 +142,7 @@ func _test_social_birth_major_outcome() -> void:
 		_expect((child_data.get("mutationTraits", []) as Array).has("hybrid_birth"), "birth child should keep hybrid trait")
 
 
-func _test_social_erosion_major_outcome() -> void:
+func _test_social_erosion_is_protected() -> void:
 	var save_manager := root.get_node_or_null("/root/SaveManager")
 	_expect(save_manager != null, "SaveManager should exist for erosion test")
 	if save_manager == null:
@@ -161,14 +161,17 @@ func _test_social_erosion_major_outcome() -> void:
 	var result: Dictionary = collect.get("result", {})
 	var major: Dictionary = result.get("majorOutcome", {})
 	_expect(str(major.get("type", "")) == "erosion", "dangerous mismatch social should create erosion major outcome")
-	_expect(save_manager.get_monster_instance(victim_id).is_empty(), "erosion victim should be removed from monster pool")
+	_expect(bool(major.get("protected", false)), "erosion should be protected by default")
+	_expect(bool(major.get("requiresConfirmation", false)), "erosion should require a future explicit confirmation flow")
+	_expect(not bool(major.get("victimRemoved", true)), "protected erosion should not remove victim")
+	_expect(not save_manager.get_monster_instance(victim_id).is_empty(), "protected erosion victim should remain in monster pool")
 	var aggressor_after: Dictionary = save_manager.get_monster_instance(aggressor_id)
 	_expect(not aggressor_after.is_empty(), "erosion aggressor should remain")
-	_expect((aggressor_after.get("mutationTraits", []) as Array).has("erosion_hunger"), "erosion aggressor should keep negative mutation trait")
+	_expect(not (aggressor_after.get("mutationTraits", []) as Array).has("erosion_hunger"), "protected erosion should not mutate aggressor")
 	var effects: Array = aggressor_after.get("conditionEffects", [])
-	_expect(effects.size() >= 1, "erosion aggressor should keep negative condition effect")
+	_expect(effects.is_empty(), "protected erosion should not apply negative condition effect")
 	var social_place: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
-	_expect(social_place.get("slot_b", null) == null or str(social_place.get("slot_b", "")) == "", "erosion should clear victim social slot")
+	_expect(str(social_place.get("slot_b", "")) == victim_id, "protected erosion should keep victim social slot")
 
 
 func _force_social_ready(save_manager: Node) -> void:

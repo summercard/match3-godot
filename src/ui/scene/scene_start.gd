@@ -126,7 +126,9 @@ func _get_entry_scene() -> String:
 	var save_manager := get_node_or_null("/root/SaveManager")
 	if save_manager != null and save_manager.has_method("load_tutorial_progress"):
 		if save_manager.has_method("has_tutorial_progress") and not save_manager.has_tutorial_progress():
-			return "main"
+			if save_manager.has_method("has_player_data") and save_manager.has_player_data():
+				return "main"
+			return "tutorial"
 		var progress: Dictionary = save_manager.load_tutorial_progress()
 		if not progress.get("completed", false):
 			return "tutorial"

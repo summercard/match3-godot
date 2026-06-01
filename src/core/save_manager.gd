@@ -118,6 +118,9 @@ func get_player() -> Dictionary:
 func load_player() -> Dictionary:
 	return get_player()
 
+func has_player_data() -> bool:
+	return _config.has_section_key("player", "data")
+
 ## 保存玩家数据
 ## JS: savePlayer(playerData)
 func save_player(player_data: Dictionary) -> bool:
@@ -1222,20 +1225,14 @@ func collect_social(place_index: int) -> Dictionary:
 	if a.is_empty() or b.is_empty():
 		return {"ok": false, "reason": "monster_not_found"}
 	var result := SocialRulesScript.resolve(a, b, place)
-	var major_outcome: Dictionary = result.get("majorOutcome", {})
-	var erosion_victim_id := str(major_outcome.get("victimInstanceId", "")) if str(major_outcome.get("type", "none")) == "erosion" else ""
 	var exp_each := int(result.get("exp_each", 0))
 	if exp_each > 0:
-		if a_id != erosion_victim_id:
-			add_instance_exp(a_id, exp_each)
-		if b_id != erosion_victim_id:
-			add_instance_exp(b_id, exp_each)
-	if a_id != erosion_victim_id:
-		_apply_social_memory(a_id, b_id, result)
-		_apply_social_evolution_insight(a_id, result)
-	if b_id != erosion_victim_id:
-		_apply_social_memory(b_id, a_id, result)
-		_apply_social_evolution_insight(b_id, result)
+		add_instance_exp(a_id, exp_each)
+		add_instance_exp(b_id, exp_each)
+	_apply_social_memory(a_id, b_id, result)
+	_apply_social_evolution_insight(a_id, result)
+	_apply_social_memory(b_id, a_id, result)
+	_apply_social_evolution_insight(b_id, result)
 	var gold := int(result.get("gold", 0))
 	if gold > 0:
 		add_gold(gold)
@@ -1244,7 +1241,7 @@ func collect_social(place_index: int) -> Dictionary:
 	var applied_major := _apply_social_major_outcome(result)
 	if not applied_major.is_empty():
 		result["majorOutcome"] = applied_major
-		if str(applied_major.get("type", "none")) == "erosion":
+		if str(applied_major.get("type", "none")) == "erosion" and bool(applied_major.get("victimRemoved", false)):
 			var victim_id := str(applied_major.get("victimInstanceId", ""))
 			if str(place.get("slot_a", "")) == victim_id:
 				place["slot_a"] = null
@@ -1295,28 +1292,11 @@ func _apply_social_birth(major: Dictionary) -> Dictionary:
 
 func _apply_social_erosion(major: Dictionary) -> Dictionary:
 	var applied := major.duplicate(true)
-	var aggressor_id := str(major.get("aggressorInstanceId", ""))
-	var victim_id := str(major.get("victimInstanceId", ""))
-	if not aggressor_id.is_empty():
-		add_instance_exp(aggressor_id, int(major.get("expGain", 0)))
-		var aggressor := get_monster_instance(aggressor_id)
-		if not aggressor.is_empty():
-			var effects: Array = aggressor.get("conditionEffects", []).duplicate(true) if aggressor.get("conditionEffects", []) is Array else []
-			var effect: Dictionary = major.get("negativeEffect", {})
-			if not effect.is_empty():
-				effects.append(effect.duplicate(true))
-			var traits: Array = aggressor.get("mutationTraits", []).duplicate(true) if aggressor.get("mutationTraits", []) is Array else []
-			if not traits.has("erosion_hunger"):
-				traits.append("erosion_hunger")
-			update_monster_instance(aggressor_id, {
-				"conditionEffects": effects,
-				"mutationTraits": traits
-			})
-	var removed := false
-	if not victim_id.is_empty():
-		removed = remove_monster_instance(victim_id)
-	applied["victimRemoved"] = removed
-	applied["applied"] = removed
+	applied["summary"] = "检测到侵蚀风险；默认保护已阻止自动吞噬。"
+	applied["protected"] = true
+	applied["requiresConfirmation"] = true
+	applied["victimRemoved"] = false
+	applied["applied"] = false
 	return applied
 
 func _apply_social_evolution_insight(instance_id: String, social_result: Dictionary) -> void:
