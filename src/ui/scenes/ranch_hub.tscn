@@ -21,6 +21,8 @@
 [ext_resource type="Texture2D" uid="uid://dyfilvh4p2q38" path="res://assets/images/ranch/ui_social_place_panel.png" id="20_social_place"]
 [ext_resource type="Texture2D" uid="uid://bxqtbuwui8a1o" path="res://assets/images/ranch/ui_social_slot_frame.png" id="21_social_slot"]
 [ext_resource type="Texture2D" uid="uid://bj3wfdek2qibt" path="res://assets/images/ranch/ui_social_result_panel.png" id="22_social_result"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_btn_previous_round.png" id="23_previous_round"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_btn_next_round.png" id="24_next_round"]
 
 [node name="RanchHub" type="Control" unique_id=995115595]
 clip_contents = true
@@ -45,7 +47,7 @@ layout_mode = 0
 offset_right = 375.0
 offset_bottom = 86.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.5)
+color = Color(1, 1, 1, 0)
 
 [node name="Pages" type="Control" parent="." unique_id=1180915431]
 anchors_preset = 0
@@ -66,9 +68,9 @@ offset_bottom = 438.0
 [node name="Slot1" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=1706141859]
 layout_mode = 0
 offset_left = 20.0
-offset_top = 232.0
+offset_top = 171.0
 offset_right = 126.0
-offset_bottom = 344.0
+offset_bottom = 283.0
 ignore_texture_size = true
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1366583310]
@@ -161,9 +163,9 @@ horizontal_alignment = 1
 [node name="Slot2" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=1428104767]
 layout_mode = 0
 offset_left = 134.0
-offset_top = 230.0
+offset_top = 166.0
 offset_right = 240.0
-offset_bottom = 342.0
+offset_bottom = 278.0
 ignore_texture_size = true
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1157801372]
@@ -252,9 +254,9 @@ horizontal_alignment = 1
 [node name="Slot3" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=406071953]
 layout_mode = 0
 offset_left = 248.0
-offset_top = 228.0
+offset_top = 171.0
 offset_right = 354.0
-offset_bottom = 340.0
+offset_bottom = 283.0
 ignore_texture_size = true
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1025689886]
@@ -343,9 +345,9 @@ horizontal_alignment = 1
 [node name="Slot4" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=305052866]
 layout_mode = 0
 offset_left = 66.0
-offset_top = 329.0
+offset_top = 308.0
 offset_right = 174.0
-offset_bottom = 441.0
+offset_bottom = 420.0
 ignore_texture_size = true
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1530923397]
@@ -428,9 +430,9 @@ horizontal_alignment = 1
 [node name="Slot5" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=518046513]
 layout_mode = 0
 offset_left = 198.0
-offset_top = 333.0
+offset_top = 308.0
 offset_right = 306.0
-offset_bottom = 445.0
+offset_bottom = 420.0
 ignore_texture_size = true
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=899441358]
@@ -515,11 +517,12 @@ horizontal_alignment = 1
 
 [node name="CollectRow" type="Control" parent="Pages/RanchPage" unique_id=22385307]
 anchors_preset = 0
-offset_top = 87.0
+offset_top = 122.0
 offset_right = 375.0
 offset_bottom = 131.0
 
 [node name="ExpIcon" type="TextureRect" parent="Pages/RanchPage/CollectRow" unique_id=116448812]
+visible = false
 layout_mode = 0
 offset_left = 19.0
 offset_top = 6.0
@@ -531,6 +534,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="ExpValue" type="Label" parent="Pages/RanchPage/CollectRow" unique_id=1817310012]
+visible = false
 layout_mode = 0
 offset_left = 49.0
 offset_top = 7.0
@@ -545,6 +549,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CoinIcon" type="TextureRect" parent="Pages/RanchPage/CollectRow" unique_id=1740448345]
+visible = false
 layout_mode = 0
 offset_left = 248.0
 offset_top = 7.0
@@ -556,6 +561,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="CoinValue" type="Label" parent="Pages/RanchPage/CollectRow" unique_id=2062596011]
+visible = false
 layout_mode = 0
 offset_left = 276.0
 offset_top = 7.0
@@ -571,27 +577,27 @@ vertical_alignment = 1
 
 [node name="CollectButton" type="TextureButton" parent="Pages/RanchPage/CollectRow" unique_id=1057719274]
 layout_mode = 0
-offset_left = 144.0
-offset_top = 24.0
-offset_right = 235.0
-offset_bottom = 68.0
+offset_left = 287.0
+offset_top = 0.0
+offset_right = 367.0
+offset_bottom = 34.0
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/CollectRow/CollectButton" unique_id=1209784725]
 layout_mode = 0
-offset_right = 91.0
-offset_bottom = 44.0
+offset_right = 80.0
+offset_bottom = 34.0
 mouse_filter = 2
 texture = ExtResource("9_gold_button")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/CollectRow/CollectButton" unique_id=8031256]
 layout_mode = 0
-offset_right = 91.0
-offset_bottom = 44.0
+offset_right = 80.0
+offset_bottom = 34.0
 theme_override_colors/font_color = Color(0.22, 0.12, 0.02, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 text = "收获"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -599,16 +605,16 @@ vertical_alignment = 1
 [node name="RosterPanel" type="Control" parent="Pages/RanchPage" unique_id=1472920349]
 anchors_preset = 0
 offset_left = 10.0
-offset_top = 486.0
+offset_top = 444.0
 offset_right = 365.0
-offset_bottom = 616.0
+offset_bottom = 600.0
 
 [node name="Frame" type="NinePatchRect" parent="Pages/RanchPage/RosterPanel" unique_id=2119970018]
 layout_mode = 0
-offset_left = -25.0
-offset_top = -45.0
-offset_right = 367.89325
-offset_bottom = 152.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 357.0
+offset_bottom = 156.0
 texture = ExtResource("12_roster_panel")
 patch_margin_left = 32
 patch_margin_top = 28
@@ -617,46 +623,46 @@ patch_margin_bottom = 28
 
 [node name="PreviousButton" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=804617861]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 4.0
-offset_right = 52.0
-offset_bottom = 96.0
+offset_left = 82.0
+offset_top = 120.0
+offset_right = 114.0
+offset_bottom = 152.0
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/PreviousButton" unique_id=1015537678]
 layout_mode = 0
-offset_right = 39.0
-offset_bottom = 92.0
+offset_right = 32.0
+offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("16_previous")
+texture = ExtResource("23_previous_round")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NextButton" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=612461374]
 layout_mode = 0
-offset_left = 298.0
-offset_top = 4.0
-offset_right = 337.0
-offset_bottom = 96.0
+offset_left = 241.0
+offset_top = 120.0
+offset_right = 273.0
+offset_bottom = 152.0
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/NextButton" unique_id=1851915433]
 layout_mode = 0
-offset_right = 39.0
-offset_bottom = 92.0
+offset_right = 32.0
+offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("17_next")
+texture = ExtResource("24_next_round")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Card1" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1896302962]
 layout_mode = 0
-offset_left = 57.0
-offset_top = 6.0
-offset_right = 127.0
-offset_bottom = 88.0
+offset_left = 55.0
+offset_top = 35.0
+offset_right = 125.0
+offset_bottom = 117.0
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -723,10 +729,10 @@ stretch_mode = 5
 
 [node name="Card2" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1625096792]
 layout_mode = 0
-offset_left = 141.0
-offset_top = 6.0
-offset_right = 211.0
-offset_bottom = 88.0
+offset_left = 142.0
+offset_top = 35.0
+offset_right = 212.0
+offset_bottom = 117.0
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -789,10 +795,10 @@ stretch_mode = 5
 
 [node name="Card3" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1434607902]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 6.0
-offset_right = 295.0
-offset_bottom = 88.0
+offset_left = 229.0
+offset_top = 35.0
+offset_right = 299.0
+offset_bottom = 117.0
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -872,7 +878,7 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("10_blue_button")
+texture = ExtResource("9_gold_button")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/FocusButton" unique_id=1736476068]
@@ -898,7 +904,7 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("10_blue_button")
+texture = ExtResource("9_gold_button")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/ClassroomButton" unique_id=1456923114]
@@ -924,7 +930,7 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("10_blue_button")
+texture = ExtResource("9_gold_button")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/SocialButton" unique_id=1083448417]
@@ -2090,27 +2096,27 @@ mouse_filter = 2
 [node name="BackButton" type="TextureButton" parent="Header" unique_id=4964717]
 layout_mode = 0
 offset_left = 12.0
-offset_top = 13.0
-offset_right = 72.0
-offset_bottom = 61.0
+offset_top = 102.0
+offset_right = 56.0
+offset_bottom = 146.0
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Header/BackButton" unique_id=1224875841]
 layout_mode = 0
-offset_right = 50.0
-offset_bottom = 48.0
+offset_right = 44.0
+offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("3_back")
+texture = ExtResource("23_previous_round")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="TitleFrame" type="TextureRect" parent="Header" unique_id=728904535]
 layout_mode = 0
 offset_left = 88.0
-offset_top = 13.0
+offset_top = 61.0
 offset_right = 307.0
-offset_bottom = 66.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("4_header")
 expand_mode = 1
@@ -2119,14 +2125,14 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Header" unique_id=1010518782]
 layout_mode = 0
 offset_left = 92.0
-offset_top = 22.0
+offset_top = 70.0
 offset_right = 303.0
-offset_bottom = 55.0
+offset_bottom = 103.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 23
-text = "怪物牧场"
+text = "宠物农场"
 horizontal_alignment = 1
 vertical_alignment = 1
 
