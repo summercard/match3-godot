@@ -135,14 +135,15 @@ func _seed_ranch_demo(main: Control) -> void:
 	var visual_roster: Array = []
 	var natures := ["brave", "gentle", "cautious"]
 	var genders := ["male", "female", "neutral"]
-	for i in range(mini(3, roster.size())):
-		var monster_id := str(ranch_scene.call("_get_monster_id", roster[i]))
+	for i in range(6):
+		var source: Dictionary = roster[i] if i < roster.size() else {"monsterId": "monster_%03d" % (i + 1)}
+		var monster_id := str(ranch_scene.call("_get_monster_id", source))
 		visual_roster.append({
 			"instanceId": monster_id,
 			"monsterId": monster_id,
 			"level": i + 3,
-			"nature": natures[i],
-			"gender": genders[i],
+			"nature": natures[i % natures.size()],
+			"gender": genders[i % genders.size()],
 		})
 	ranch_scene.set("_storage", null)
 	ranch_scene.set("_captured_monsters", visual_roster)
