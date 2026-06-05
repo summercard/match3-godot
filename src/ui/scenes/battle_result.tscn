@@ -1,35 +1,35 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/battle_garden_ruins_bg.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_btn_gold.png" id="btn_next"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_btn_blue.png" id="btn_secondary"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_golden_burst.png" id="burst"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/capture_result_panel.tscn" id="capture_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_confetti.png" id="confetti"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="exp_card"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="exp_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_blue.png" id="info_chip"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_sparkles.png" id="level_glow"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="reward_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_reward_card.png" id="reward_slot"]
+[ext_resource type="Texture2D" uid="uid://chysk2aqocnr5" path="res://assets/images/battle_flow_new/battle_garden_ruins_bg.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://bijxnq5hqgoqv" path="res://assets/images/result_refresh/ui_btn_gold.png" id="btn_next"]
+[ext_resource type="Texture2D" uid="uid://cxor28yddwp1v" path="res://assets/images/result_refresh/ui_btn_blue.png" id="btn_retry"]
+[ext_resource type="Texture2D" uid="uid://bx2ghuvydsnil" path="res://assets/images/result_refresh/fx_golden_burst.png" id="burst"]
+[ext_resource type="Texture2D" uid="uid://c0h344kt4d710" path="res://assets/images/capture_success_new/ui/ui_button_blue.png" id="capture_btn_blue"]
+[ext_resource type="Texture2D" uid="uid://cdecxss8dii2d" path="res://assets/images/capture_success_new/ui/ui_button_green.png" id="capture_btn_green"]
+[ext_resource type="Texture2D" uid="uid://dsys4c4hrwoep" path="res://assets/images/capture_success_new/ui/fx_magic_circle.png" id="capture_circle"]
+[ext_resource type="Texture2D" uid="uid://dqeylminseuf6" path="res://assets/images/capture_success_new/ui/fx_confetti_strip.png" id="capture_confetti"]
+[ext_resource type="Texture2D" uid="uid://c1w6vhwhj0q5a" path="res://assets/images/capture_success_new/ui/ui_info_plaque.png" id="capture_info"]
+[ext_resource type="PackedScene" uid="uid://box82ko1pcn26" path="res://src/ui/scenes/capture_result_panel.tscn" id="capture_panel"]
+[ext_resource type="Texture2D" uid="uid://fj0kteqhhifn" path="res://assets/images/capture_success_new/ui/fx_sparkle_strip.png" id="capture_sparkles"]
+[ext_resource type="Texture2D" uid="uid://k1ck07tlob7q" path="res://assets/images/capture_success_new/ui/ui_title_pink_plaque.png" id="capture_title"]
+[ext_resource type="Texture2D" uid="uid://df3a2ib6ds7aj" path="res://assets/images/result_refresh/fx_confetti.png" id="confetti"]
+[ext_resource type="Texture2D" uid="uid://c5t3y8kr00lw5" path="res://assets/images/result_refresh/ui_monster_card.png" id="exp_card"]
+[ext_resource type="Texture2D" uid="uid://ukl225soelee" path="res://assets/images/result_refresh/ui_pill_blue.png" id="info_chip"]
+[ext_resource type="Texture2D" uid="uid://cxwjj7iyiuq0s" path="res://assets/images/result_refresh/fx_sparkles.png" id="level_glow"]
+[ext_resource type="Texture2D" uid="uid://dy1tf0p04oyi3" path="res://assets/images/result_refresh/ui_panel_large.png" id="reward_panel"]
+[ext_resource type="Texture2D" uid="uid://bjngmri0c8ln2" path="res://assets/images/result_refresh/ui_reward_card.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://bgmehtlw34xli" path="res://src/ui/scene/scene_result_gui.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/icon_star_silver.png" id="star_dim"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/icon_star_gold.png" id="sweep"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png" id="victory"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_info_plaque.png" id="capture_info"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_title_pink_plaque.png" id="capture_title"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_button_blue.png" id="capture_btn_blue"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_button_green.png" id="capture_btn_green"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_magic_circle.png" id="capture_circle"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_sparkle_strip.png" id="capture_sparkles"]
-[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_confetti_strip.png" id="capture_confetti"]
+[ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/result_refresh/icon_star_silver.png" id="star_dim"]
+[ext_resource type="Texture2D" uid="uid://dgefp00870m83" path="res://assets/images/result_refresh/icon_star_gold.png" id="sweep"]
+[ext_resource type="Texture2D" uid="uid://d2bwuottadupy" path="res://assets/images/result_refresh/ui_victory_blue_banner.png" id="victory"]
 
 [node name="BattleResultGui" type="Control" unique_id=2092080466]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 0
+offset_top = -1.0
 offset_right = 375.0
-offset_bottom = 667.0
+offset_bottom = 666.0
 mouse_filter = 1
 script = ExtResource("script")
 
@@ -51,15 +51,16 @@ color = Color(0.02, 0.05, 0.12, 0.34)
 
 [node name="WinFx" type="Control" parent="." unique_id=1739148844]
 anchors_preset = 0
+offset_top = -22.0
 offset_right = 375.0
-offset_bottom = 135.0
+offset_bottom = 113.0
 
 [node name="Burst" type="TextureRect" parent="WinFx" unique_id=1503307524]
 layout_mode = 0
-offset_left = 52.0
-offset_top = -20.0
-offset_right = 305.0
-offset_bottom = 108.0
+offset_left = 48.0
+offset_top = 24.0
+offset_right = 301.0
+offset_bottom = 152.0
 mouse_filter = 2
 texture = ExtResource("burst")
 expand_mode = 1
@@ -89,15 +90,15 @@ stretch_mode = 5
 
 [node name="Banner" type="Control" parent="." unique_id=691974770]
 anchors_preset = 0
-offset_left = 18.0
-offset_top = 12.0
-offset_right = 357.0
-offset_bottom = 132.0
+offset_left = 6.0
+offset_top = 22.0
+offset_right = 369.0
+offset_bottom = 180.0
 
 [node name="Frame" type="TextureRect" parent="Banner" unique_id=57386606]
 layout_mode = 0
-offset_right = 339.0
-offset_bottom = 120.0
+offset_right = 363.0
+offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("victory")
 expand_mode = 1
@@ -105,21 +106,21 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="Banner" unique_id=1683066956]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 42.0
-offset_right = 297.0
-offset_bottom = 84.0
+offset_left = 54.0
+offset_top = 62.0
+offset_right = 309.0
+offset_bottom = 110.0
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 27
+theme_override_font_sizes/font_size = 30
 text = "战斗胜利"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CaptureSuccessLayer" type="Control" parent="." unique_id=2026060401]
 visible = false
-layout_mode = 0
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 1
@@ -204,7 +205,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Stage" type="Control" parent="CaptureSuccessLayer" unique_id=2026060409]
-layout_mode = 0
+anchors_preset = 0
 offset_left = 42.0
 offset_top = 164.0
 offset_right = 333.0
@@ -329,7 +330,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Buttons" type="Control" parent="CaptureSuccessLayer" unique_id=2026060419]
-layout_mode = 0
+anchors_preset = 0
 offset_left = 24.0
 offset_top = 558.0
 offset_right = 351.0
@@ -394,16 +395,16 @@ vertical_alignment = 1
 
 [node name="StarRow" type="Control" parent="." unique_id=232303451]
 anchors_preset = 0
-offset_left = 108.0
-offset_top = 116.0
-offset_right = 301.0
-offset_bottom = 166.0
+offset_left = 88.0
+offset_top = 172.0
+offset_right = 287.0
+offset_bottom = 230.0
 
 [node name="Star1" type="TextureRect" parent="StarRow" unique_id=1132103650]
 layout_mode = 0
-offset_left = 17.0
-offset_right = 61.0
-offset_bottom = 44.0
+offset_left = 15.0
+offset_right = 67.0
+offset_bottom = 56.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -411,9 +412,9 @@ stretch_mode = 5
 
 [node name="Star2" type="TextureRect" parent="StarRow" unique_id=350311975]
 layout_mode = 0
-offset_left = 68.0
-offset_right = 112.0
-offset_bottom = 44.0
+offset_left = 73.0
+offset_right = 125.0
+offset_bottom = 56.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -421,9 +422,9 @@ stretch_mode = 5
 
 [node name="Star3" type="TextureRect" parent="StarRow" unique_id=1432092673]
 layout_mode = 0
-offset_left = 119.0
-offset_right = 163.0
-offset_bottom = 44.0
+offset_left = 131.0
+offset_right = 183.0
+offset_bottom = 56.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -432,9 +433,9 @@ stretch_mode = 5
 [node name="BattleInfo" type="Control" parent="." unique_id=1626943882]
 anchors_preset = 0
 offset_left = 28.0
-offset_top = 162.0
+offset_top = 230.0
 offset_right = 347.0
-offset_bottom = 214.0
+offset_bottom = 264.0
 
 [node name="Frame" type="TextureRect" parent="BattleInfo" unique_id=993747995]
 layout_mode = 0
@@ -474,22 +475,20 @@ vertical_alignment = 1
 
 [node name="CaptureResultPanel" parent="." unique_id=707313623 instance=ExtResource("capture_panel")]
 layout_mode = 0
-offset_top = 196.0
-offset_bottom = 312.0
+offset_top = 270.0
+offset_bottom = 326.0
 
 [node name="RewardPanel" type="Control" parent="." unique_id=1054542105]
 anchors_preset = 0
 offset_left = 16.0
-offset_top = 318.0
+offset_top = 332.0
 offset_right = 359.0
-offset_bottom = 426.0
+offset_bottom = 446.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel" unique_id=2125386871]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 343.0
-offset_bottom = 108.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("reward_panel")
 expand_mode = 1
@@ -497,7 +496,6 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="RewardPanel" unique_id=1209168286]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 10.0
 offset_right = 343.0
 offset_bottom = 34.0
@@ -512,14 +510,14 @@ vertical_alignment = 1
 [node name="Slots" type="Control" parent="RewardPanel" unique_id=552024371]
 anchors_preset = 0
 offset_left = 58.0
-offset_top = 38.0
+offset_top = 39.0
 offset_right = 285.0
-offset_bottom = 106.0
+offset_bottom = 110.0
 
 [node name="RewardSlot1" type="Control" parent="RewardPanel/Slots" unique_id=657978786]
 anchors_preset = 0
-offset_top = 0.0
-offset_right = 64.0
+offset_left = 38.0
+offset_right = 102.0
 offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=118173143]
@@ -556,9 +554,8 @@ vertical_alignment = 1
 
 [node name="RewardSlot2" type="Control" parent="RewardPanel/Slots" unique_id=795980711]
 anchors_preset = 0
-offset_left = 81.0
-offset_top = 0.0
-offset_right = 145.0
+offset_left = 82.0
+offset_right = 146.0
 offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=1519586129]
@@ -595,9 +592,8 @@ vertical_alignment = 1
 
 [node name="RewardSlot3" type="Control" parent="RewardPanel/Slots" unique_id=1481737944]
 anchors_preset = 0
-offset_left = 162.0
-offset_top = 0.0
-offset_right = 226.0
+offset_left = 127.0
+offset_right = 191.0
 offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1858066800]
@@ -635,24 +631,21 @@ vertical_alignment = 1
 [node name="ExpPanel" type="Control" parent="." unique_id=823335105]
 anchors_preset = 0
 offset_left = 16.0
-offset_top = 432.0
+offset_top = 456.0
 offset_right = 359.0
-offset_bottom = 552.0
+offset_bottom = 584.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel" unique_id=310957884]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 343.0
-offset_bottom = 120.0
+offset_bottom = 128.0
 mouse_filter = 2
-texture = ExtResource("exp_panel")
+texture = ExtResource("reward_panel")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Title" type="Label" parent="ExpPanel" unique_id=1654325864]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 8.0
 offset_right = 343.0
 offset_bottom = 29.0
@@ -680,15 +673,14 @@ vertical_alignment = 1
 [node name="Cards" type="Control" parent="ExpPanel" unique_id=554168705]
 anchors_preset = 0
 offset_left = 87.0
-offset_top = 30.0
+offset_top = 34.0
 offset_right = 291.0
-offset_bottom = 118.0
+offset_bottom = 126.0
 
 [node name="ExpCard1" type="Control" parent="ExpPanel/Cards" unique_id=1422004063]
 anchors_preset = 0
-offset_left = -18.0
 offset_top = 1.0
-offset_right = 50.0
+offset_right = 68.0
 offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard1" unique_id=1373587523]
@@ -739,9 +731,9 @@ vertical_alignment = 1
 
 [node name="ExpCard2" type="Control" parent="ExpPanel/Cards" unique_id=2098007429]
 anchors_preset = 0
-offset_left = 68.0
+offset_left = 50.0
 offset_top = 1.0
-offset_right = 136.0
+offset_right = 118.0
 offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard2" unique_id=215914357]
@@ -792,9 +784,9 @@ vertical_alignment = 1
 
 [node name="ExpCard3" type="Control" parent="ExpPanel/Cards" unique_id=1579014413]
 anchors_preset = 0
-offset_left = 154.0
+offset_left = 102.0
 offset_top = 1.0
-offset_right = 222.0
+offset_right = 170.0
 offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard3" unique_id=1773636129]
@@ -847,9 +839,9 @@ vertical_alignment = 1
 visible = false
 anchors_preset = 0
 offset_left = 55.0
-offset_top = 558.0
+offset_top = 548.0
 offset_right = 320.0
-offset_bottom = 588.0
+offset_bottom = 578.0
 
 [node name="Glow" type="TextureRect" parent="LevelUpPanel" unique_id=678435177]
 layout_mode = 0
@@ -877,9 +869,9 @@ vertical_alignment = 1
 visible = false
 anchors_preset = 0
 offset_left = 110.0
-offset_top = 560.0
+offset_top = 550.0
 offset_right = 300.0
-offset_bottom = 590.0
+offset_bottom = 580.0
 
 [node name="Icon" type="TextureRect" parent="SweepUnlocked" unique_id=1680925290]
 layout_mode = 0
@@ -905,31 +897,31 @@ vertical_alignment = 1
 
 [node name="Buttons" type="Control" parent="." unique_id=2009834381]
 anchors_preset = 0
-offset_left = 12.0
-offset_top = 608.0
-offset_right = 363.0
-offset_bottom = 660.0
+offset_left = 10.0
+offset_top = 603.0
+offset_right = 365.0
+offset_bottom = 662.0
 
 [node name="BackButton" type="TextureButton" parent="Buttons" unique_id=206069040]
 layout_mode = 0
 offset_right = 108.0
-offset_bottom = 46.0
+offset_bottom = 52.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/BackButton" unique_id=1208805136]
 layout_mode = 0
 offset_right = 108.0
-offset_bottom = 46.0
+offset_bottom = 52.0
 mouse_filter = 2
-texture = ExtResource("btn_secondary")
+texture = ExtResource("btn_retry")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Text" type="Label" parent="Buttons/BackButton" unique_id=2144941832]
 layout_mode = 0
-offset_top = 8.0
+offset_top = 9.0
 offset_right = 108.0
-offset_bottom = 38.0
+offset_bottom = 43.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -940,15 +932,15 @@ vertical_alignment = 1
 
 [node name="NextButton" type="TextureButton" parent="Buttons" unique_id=2020187757]
 layout_mode = 0
-offset_left = 121.0
-offset_right = 229.0
-offset_bottom = 46.0
+offset_left = 118.0
+offset_right = 238.0
+offset_bottom = 52.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/NextButton" unique_id=426806487]
 layout_mode = 0
-offset_right = 108.0
-offset_bottom = 46.0
+offset_right = 120.0
+offset_bottom = 52.0
 mouse_filter = 2
 texture = ExtResource("btn_next")
 expand_mode = 1
@@ -956,9 +948,9 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="Buttons/NextButton" unique_id=1913172504]
 layout_mode = 0
-offset_top = 8.0
-offset_right = 108.0
-offset_bottom = 38.0
+offset_top = 9.0
+offset_right = 120.0
+offset_bottom = 43.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -969,25 +961,25 @@ vertical_alignment = 1
 
 [node name="RetryButton" type="TextureButton" parent="Buttons" unique_id=1417554593]
 layout_mode = 0
-offset_left = 243.0
-offset_right = 351.0
-offset_bottom = 46.0
+offset_left = 247.0
+offset_right = 355.0
+offset_bottom = 52.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/RetryButton" unique_id=495682816]
 layout_mode = 0
 offset_right = 108.0
-offset_bottom = 46.0
+offset_bottom = 52.0
 mouse_filter = 2
-texture = ExtResource("btn_secondary")
+texture = ExtResource("btn_retry")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Text" type="Label" parent="Buttons/RetryButton" unique_id=1743095096]
 layout_mode = 0
-offset_top = 8.0
+offset_top = 9.0
 offset_right = 108.0
-offset_bottom = 38.0
+offset_bottom = 43.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2

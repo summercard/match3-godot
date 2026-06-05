@@ -39,7 +39,6 @@ const TAB_PATHS := ["BottomTabs/AlbumTab", "BottomTabs/BondTab", "BottomTabs/Col
 const STAT_LABELS := ["生命", "攻击", "防御", "速度"]
 
 var _album_page := 0
-var _preview_monster_id := ""
 var _locked_silhouette_material: ShaderMaterial = null
 
 func _ready() -> void:
@@ -56,7 +55,6 @@ func init(data: Dictionary = {}) -> void:
 	if not target_id.is_empty():
 		_selected_tab = "album"
 		_selected_element = "all"
-		_preview_monster_id = target_id
 		if _is_captured(target_id):
 			_selected_monster_id = target_id
 		_apply_filter()
@@ -127,7 +125,6 @@ func _on_filter_pressed(element: String) -> void:
 		return
 	_selected_element = element
 	_selected_monster_id = ""
-	_preview_monster_id = ""
 	_album_page = 0
 	_apply_filter()
 
@@ -137,7 +134,6 @@ func _on_card_pressed(visible_index: int) -> void:
 		return
 	var monster: Dictionary = _filtered_monsters[index]
 	var id := str(monster.get("id", ""))
-	_preview_monster_id = id
 	if not _is_captured(id):
 		_selected_monster_id = ""
 		_sync_gui()
@@ -148,13 +144,11 @@ func _on_card_pressed(visible_index: int) -> void:
 func _on_previous_page_pressed() -> void:
 	_album_page = maxi(0, _album_page - 1)
 	_selected_monster_id = ""
-	_preview_monster_id = ""
 	_sync_gui()
 
 func _on_next_page_pressed() -> void:
 	_album_page = mini(_max_album_page(), _album_page + 1)
 	_selected_monster_id = ""
-	_preview_monster_id = ""
 	_sync_gui()
 
 func _page_for_monster(monster_id: String) -> int:
@@ -170,7 +164,6 @@ func _on_detail_close_pressed() -> void:
 func _on_tab_pressed(tab_id: String) -> void:
 	_selected_tab = tab_id
 	_selected_monster_id = ""
-	_preview_monster_id = ""
 	_album_page = 0
 	_sync_gui()
 
@@ -257,49 +250,6 @@ func _sync_grid() -> void:
 			continue
 		var monster: Dictionary = _filtered_monsters[index]
 		_sync_card(card, monster, index)
-	_sync_preview()
-
-func _sync_preview() -> void:
-	var preview := _node("AlbumPage/PreviewPanel")
-	var monster := _preview_monster()
-	preview.visible = not monster.is_empty()
-	_node("AlbumPage/PreviewEmpty").visible = monster.is_empty()
-	if monster.is_empty():
-		return
-	var id := str(monster.get("id", ""))
-	var element := str(monster.get("element", "grass"))
-	var unlocked := _is_captured(id)
-	var portrait := get_node("AlbumPage/PreviewPanel/Portrait") as TextureRect
-	portrait.visible = true
-	portrait.texture = _monster_texture(id, "album")
-	portrait.material = null if unlocked else _locked_portrait_material()
-	(get_node("AlbumPage/PreviewPanel/LockIcon") as TextureRect).visible = false
-	(get_node("AlbumPage/PreviewPanel/ElementIcon") as TextureRect).texture = _element_texture(element)
-	_label("AlbumPage/PreviewPanel/Name").text = str(monster.get("name", "???")) if unlocked else "未发现精灵"
-	_label("AlbumPage/PreviewPanel/Number").text = "#%03d" % [_filtered_monsters.find(monster) + 1]
-	_label("AlbumPage/PreviewPanel/Element").text = str(ELEMENT_NAMES.get(element, element))
-	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
-	_label("AlbumPage/PreviewPanel/Skill").text = "技能  %s" % (str(skill.get("name", "未知")) if unlocked else "???")
-	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
-	_label("AlbumPage/PreviewPanel/Ecology").text = "栖息  %s" % (str(identity.get("ecology", {}).get("name", "未知")) if unlocked else "???")
-
-func _preview_monster() -> Dictionary:
-	if not _preview_monster_id.is_empty():
-		for monster: Dictionary in _filtered_monsters:
-			if str(monster.get("id", "")) == _preview_monster_id:
-				return monster
-	var selected := _selected_monster()
-	if not selected.is_empty():
-		return selected
-	var start := _album_page * PAGE_SIZE
-	var end := mini(start + PAGE_SIZE, _filtered_monsters.size())
-	for i in range(start, end):
-		var monster: Dictionary = _filtered_monsters[i]
-		if _is_captured(str(monster.get("id", ""))):
-			return monster
-	if start < end:
-		return _filtered_monsters[start]
-	return {}
 
 func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	var id := str(monster.get("id", ""))

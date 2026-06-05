@@ -17,7 +17,9 @@ func _run() -> void:
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "album tscn should hide the legacy lock icon before runtime sync")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture != null, "album tscn should show a concept-style portrait in the editor")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("album/portraits/monster_001_album_thumb.png"), "album tscn should use normalized dex portraits instead of raw battle art")
-	_assert((scene.get_node("AlbumPage/PreviewPanel") as Control).position.x > 230.0, "album preview panel should leave enough space for the roster grid")
+	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "album should remove the right-side persistent pet detail panel")
+	_assert(not scene.has_node("AlbumPage/PreviewEmpty"), "album should remove the right-side empty preview hint")
+	_assert((scene.get_node("AlbumPage/Grid") as Control).size.x > 330.0, "album roster grid should use the space freed by the removed preview")
 	root.add_child(scene)
 	await process_frame
 	scene.call("init", {})
@@ -25,13 +27,12 @@ func _run() -> void:
 
 	_assert(scene.scene_file_path == SCENE_PATH, "album should be a PackedScene GUI")
 	_assert(scene.has_node("AlbumPage/Grid/Card1"), "card nodes should be editable")
-	_assert(scene.has_node("AlbumPage/Grid/Card15"), "concept-style roster should provide three editable columns with five pets each")
+	_assert(scene.has_node("AlbumPage/Grid/Card15"), "concept-style roster should provide a full-width five-column pet list")
 	_assert(scene.has_node("AlbumPage/PageControls/PreviousButton"), "previous page button should exist")
 	_assert(scene.has_node("AlbumPage/PageControls/NextButton"), "next page button should exist")
 	_assert(scene.has_node("DetailPanel"), "detail panel should be editable")
 	_assert(scene.has_node("LobbyBottomNav/BattleButton"), "bond tab should live in the bottom navigation")
 	_assert(scene.has_node("AlbumResourceBar/GoldCapsule/Value"), "shared resource bar should be editable")
-	_assert(scene.has_node("AlbumPage/PreviewPanel/Portrait"), "concept-style pet preview should be editable")
 	_assert(scene.has_node("LobbyBottomNav/PetsButton/Selected"), "shared bottom navigation should identify the pet section")
 	_assert(not (scene.get_node("Header/BackButton") as TextureButton).visible, "album should not expose the lobby back button")
 	var bottom_panel := scene.get_node("LobbyBottomNav/Panel") as TextureRect
@@ -77,7 +78,8 @@ func _run() -> void:
 	card.pressed.emit()
 	await process_frame
 	_assert((scene.get_node("DetailPanel") as Control).visible, "card press should open detail for QA-unlocked album")
-	_assert(not (scene.get_node("AlbumPage/PreviewPanel/Name") as Label).text.is_empty(), "preview should show selected pet data")
+	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "card press should not recreate the removed right-side preview")
+	_assert(not scene.has_node("AlbumPage/PreviewEmpty"), "card press should not recreate the removed empty preview hint")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/Frame") as TextureRect).visible, "unlocked roster portrait should not use the legacy card frame")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.contains("album/portraits/"), "runtime album grid should keep normalized dex portraits")
 
@@ -87,7 +89,6 @@ func _run() -> void:
 	_assert(not (scene.get_node("DetailPanel") as Control).visible, "close button should hide detail")
 
 	scene.set("_captured_ids", [])
-	scene.set("_preview_monster_id", "")
 	scene.call("_sync_gui")
 	await process_frame
 	card.pressed.emit()
@@ -100,6 +101,7 @@ func _run() -> void:
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/Stars") as Control).visible, "locked silhouette should not keep unlocked card metadata")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "locked silhouette should not add a lock marker")
 	_assert(not (scene.get_node("DetailPanel") as Control).visible, "locked card should not reveal the complete detail panel")
+	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "locked card should not reveal the removed right-side preview")
 
 	var filter_frame := scene.get_node("AlbumPage/Filters/Fire/Frame") as TextureRect
 	_assert(filter_frame.texture.resource_path.ends_with("ui_dex_filter_normal.png") or filter_frame.texture.resource_path.ends_with("ui_dex_filter_selected.png"), "filters should use the new light dex art")

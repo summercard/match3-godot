@@ -246,17 +246,17 @@ func _sync_battle_info() -> void:
 
 func _sync_capture_panel() -> void:
 	var panel := _node("CaptureResultPanel")
-	panel.visible = _is_win and not _capture_result.is_empty()
+	panel.visible = _is_win and not _captured and not _capture_result.is_empty()
 	if not panel.visible:
 		return
-	(panel.get_node("Ring") as TextureRect).texture = _result_texture("fx_capture_ring")
-	(panel.get_node("MonsterPortrait") as TextureRect).texture = _monster_texture(_capture_target, "result")
+	(panel.get_node("Ring") as TextureRect).visible = false
+	(panel.get_node("MonsterPortrait") as TextureRect).visible = false
 	(panel.get_node("Plaque") as TextureRect).texture = _result_texture("capture_plaque")
-	(panel.get_node("Title") as Label).text = str(_capture_result.get("title", ""))
-	var lines := _capture_lines()
-	(panel.get_node("Line1") as Label).text = str(lines[0]) if lines.size() > 0 else ""
-	(panel.get_node("Line2") as Label).text = str(lines[1]) if lines.size() > 1 else ""
-	(panel.get_node("Line3") as Label).text = str(lines[2]) if lines.size() > 2 else ""
+	(panel.get_node("Title") as Label).text = "未捕捉"
+	for path in ["Line1", "Line2", "Line3"]:
+		var line := panel.get_node(path) as Label
+		line.text = ""
+		line.visible = false
 
 func _capture_lines() -> Array[String]:
 	var lines: Array[String] = []

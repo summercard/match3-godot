@@ -1,16 +1,17 @@
 [gd_scene format=3 uid="uid://box82ko1pcn26"]
 
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_purple.png" id="plaque"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_golden_burst.png" id="ring"]
+[ext_resource type="Texture2D" path="res://assets/images/result_refresh/ui_capture_status_plaque.png" id="plaque"]
+[ext_resource type="Texture2D" path="res://assets/images/result_refresh/fx_golden_burst.png" id="ring"]
 
 [node name="CaptureResultPanel" type="Control" unique_id=482320752]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 104.0
+offset_bottom = 56.0
 mouse_filter = 2
 
 [node name="Ring" type="TextureRect" parent="." unique_id=1420156845]
+visible = false
 layout_mode = 0
 offset_left = 132.0
 offset_top = -18.0
@@ -22,6 +23,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="MonsterPortrait" type="TextureRect" parent="." unique_id=1119309342]
+visible = false
 layout_mode = 0
 offset_left = 154.0
 offset_top = -14.0
@@ -33,10 +35,10 @@ stretch_mode = 5
 
 [node name="Plaque" type="TextureRect" parent="." unique_id=521886397]
 layout_mode = 0
-offset_left = 72.0
-offset_top = 44.0
-offset_right = 303.0
-offset_bottom = 92.0
+offset_left = 88.0
+offset_top = 4.0
+offset_right = 287.0
+offset_bottom = 52.0
 mouse_filter = 2
 texture = ExtResource("plaque")
 expand_mode = 1
@@ -44,19 +46,20 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="." unique_id=1784909357]
 layout_mode = 0
-offset_left = 74.0
-offset_top = 56.0
-offset_right = 301.0
-offset_bottom = 78.0
+offset_left = 92.0
+offset_top = 10.0
+offset_right = 283.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.35, 1, 0.46, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
-text = "捕捉结果"
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "未捕捉"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line1" type="Label" parent="." unique_id=1785423804]
+visible = false
 layout_mode = 0
 offset_left = 38.0
 offset_top = 78.0
@@ -70,6 +73,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line2" type="Label" parent="." unique_id=316171509]
+visible = false
 layout_mode = 0
 offset_left = 38.0
 offset_top = 90.0
@@ -83,6 +87,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line3" type="Label" parent="." unique_id=1114390296]
+visible = false
 layout_mode = 0
 offset_left = 38.0
 offset_top = 102.0
