@@ -3,6 +3,9 @@
 class_name SceneShopGui
 extends "res://src/ui/scene/scene_shop.gd"
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const TAB_ACTIVE_TEXTURE := preload("res://assets/images/shop/concept/image2/ui_shop_tab_active_image2_clean.png")
+const TAB_NORMAL_TEXTURE := preload("res://assets/images/shop/concept/image2/ui_shop_tab_normal_image2_clean.png")
 const PAGE_SIZE := 9
 const CARD_PATHS := [
 	"ProductGrid/Cards/Card1",
@@ -15,10 +18,11 @@ const CARD_PATHS := [
 	"ProductGrid/Cards/Card8",
 	"ProductGrid/Cards/Card9",
 ]
-const TAB_PATHS := ["Tabs/Recommend", "Tabs/Items", "Tabs/Gems"]
+const TAB_PATHS := ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters", "Tabs/Chest"]
 
 var _shop_page := 0
 var _toast_timer := 0.0
+var _toast_tween: Tween = null
 
 func _ready() -> void:
 	if _bg_texture:
@@ -27,7 +31,9 @@ func _ready() -> void:
 	set_process(false)
 	_setup_toast_bubble()
 	_connect_gui_actions()
+	_attach_shop_feedback()
 	_sync_gui()
+	call_deferred("_play_enter_animation")
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
@@ -55,9 +61,17 @@ func _get_visible_shop_items() -> Array:
 	for entry in shop_list:
 		var item: Dictionary = entry.get("data", {})
 		var item_type: String = item.get("type", "")
-		if _active_tab == "items" and item_type == "evolution":
+		var item_id := str(entry.get("id", ""))
+		if _active_tab == "gems":
+			result.append(entry)
 			continue
-		if _active_tab == "gems" and item_type != "evolution":
+		if _active_tab == "coins" and item_type != "gold":
+			continue
+		if _active_tab == "hearts" and item_id != "hp_potion":
+			continue
+		if _active_tab == "boosters" and not (item_type in ["capture", "exp", "battle"]):
+			continue
+		if _active_tab == "chest" and item_type != "evolution":
 			continue
 		result.append(entry)
 	return result
@@ -68,6 +82,7 @@ func _connect_gui_actions() -> void:
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(str(TABS[i].get("id", "recommend"))))
 	for i in CARD_PATHS.size():
 		_connect_button(CARD_PATHS[i], _on_card_pressed.bind(i))
+	_connect_button("Header/SettingsButton", _go_to_scene.bind("settings"))
 	_connect_button("ProductGrid/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("ProductGrid/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("PopupOverlay/Panel/CloseButton", _on_popup_cancel_pressed)
@@ -76,6 +91,7 @@ func _connect_gui_actions() -> void:
 	_connect_button("PopupOverlay/Panel/PlusTenButton", _on_popup_plus_ten_pressed)
 	_connect_button("PopupOverlay/Panel/CancelButton", _on_popup_cancel_pressed)
 	_connect_button("PopupOverlay/Panel/ConfirmButton", _on_popup_confirm_pressed)
+	_connect_button("BottomNav/HomeButton", _go_main)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -89,6 +105,7 @@ func _on_tab_pressed(tab_id: String) -> void:
 	selected_item = {}
 	popup = {}
 	_sync_gui()
+	_play_tab_switch_motion()
 
 func _on_card_pressed(visible_index: int) -> void:
 	var index := _shop_page * PAGE_SIZE + visible_index
@@ -139,6 +156,7 @@ func _show_purchase_popup(item: Dictionary) -> void:
 		"currency": item.get("currency", "gold")
 	}
 	_sync_popup()
+	_play_popup_motion()
 
 func _show_toast(msg: String, kind: String = "info") -> void:
 	_setup_toast_bubble()
@@ -146,7 +164,13 @@ func _show_toast(msg: String, kind: String = "info") -> void:
 	var toast := _node("Toast")
 	toast.visible = true
 	toast.z_index = 80
+	toast.scale = Vector2(0.92, 0.92)
 	_apply_toast_style(kind)
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(toast, "scale", Vector2(1.08, 1.08), 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_toast_tween.tween_property(toast, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_toast_timer = 1.8
 	set_process(true)
 
@@ -200,6 +224,7 @@ func _apply_toast_style(kind: String) -> void:
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Header"):
 		return
+	_sync_static_labels()
 	_sync_header()
 	_sync_tabs()
 	if has_node("FeatureBanner"):
@@ -208,18 +233,39 @@ func _sync_gui() -> void:
 	_sync_page_controls()
 	_sync_popup()
 
+func _sync_static_labels() -> void:
+	var labels := {
+		"BottomNav/HomeButton/Text": "主页",
+		"PopupOverlay/Panel/Title": "购买确认",
+		"PopupOverlay/Panel/CloseButton/Text": "×",
+		"PopupOverlay/Panel/CancelButton/Text": "取消",
+		"PopupOverlay/Panel/ConfirmButton/Text": "确认购买",
+	}
+	for path in labels.keys():
+		if has_node(path):
+			_label(path).text = str(labels[path])
+
 func _sync_header() -> void:
-	_label("Header/Title").text = "商店"
+	if has_node("Header/Title"):
+		_label("Header/Title").text = "商店"
+	if has_node("TitlePlaque/Title"):
+		_label("TitlePlaque/Title").text = "商店"
 	_label("Header/GoldChip/Amount").text = _format_number(int(player_data.get("gold", 0)))
 	_label("Header/DiamondChip/Amount").text = _format_number(int(player_data.get("gems", 0)))
+	if has_node("Header/EnergyChip/Amount"):
+		_label("Header/EnergyChip/Amount").text = "5 Full"
 
 func _sync_tabs() -> void:
 	for i in TAB_PATHS.size():
 		var tab := get_node(TAB_PATHS[i]) as TextureButton
 		var active: bool = str(TABS[i].get("id", "")) == _active_tab
-		(tab.get_node("Frame") as TextureRect).texture = _tex("tab_active" if active else "tab_inactive")
+		var frame := tab.get_node("Frame") as TextureRect
+		frame.texture = TAB_ACTIVE_TEXTURE if active else TAB_NORMAL_TEXTURE
 		(tab.get_node("Text") as Label).text = str(TABS[i].get("label", ""))
-		tab.modulate.a = 1.0 if active else 0.78
+		tab.modulate.a = 1.0
+		var text := tab.get_node("Text") as Label
+		text.add_theme_color_override("font_color", Color.WHITE if active else Color(0.43, 0.24, 0.07))
+		text.add_theme_color_override("font_shadow_color", Color(0.42, 0.10, 0.13, 0.72) if active else Color(1.0, 0.95, 0.78, 0.72))
 
 func _sync_feature() -> void:
 	_label("FeatureBanner/Title").text = "新手超值礼包"
@@ -246,15 +292,21 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 	(card.get_node("Limit") as Label).text = _get_limit_text(shop_item)
 	(card.get_node("Price/Icon") as TextureRect).texture = _tex(currency_key)
 	(card.get_node("Price/Text") as Label).text = str(shop_item.get("price", 0))
+	if card.has_node("BestRibbon"):
+		(card.get_node("BestRibbon") as Control).visible = item_id in ["gold_chest", "evolution_stone_light", "evolution_stone_dark"]
+		if card.has_node("BestRibbon/Text"):
+			(card.get_node("BestRibbon/Text") as Label).text = "超值"
 	card.disabled = false
-	card.modulate.a = 1.0 if can_afford else 0.74
+	card.modulate.a = 1.0
+	if card.has_node("Price"):
+		(card.get_node("Price") as Control).modulate.a = 1.0
 	if card.has_node("BuyButton"):
-		(card.get_node("BuyButton") as Control).visible = false
+		(card.get_node("BuyButton") as Control).visible = true
 
 func _sync_page_controls() -> void:
 	_clamp_shop_page()
 	var max_page := _max_shop_page()
-	_label("ProductGrid/PageControls/PageLabel").text = "%d/%d" % [_shop_page + 1, max_page + 1]
+	_label("ProductGrid/PageControls/PageLabel").text = "%d / %d" % [_shop_page + 1, max_page + 1]
 	var prev := get_node("ProductGrid/PageControls/PreviousButton") as TextureButton
 	var next := get_node("ProductGrid/PageControls/NextButton") as TextureButton
 	prev.disabled = _shop_page <= 0
@@ -282,6 +334,88 @@ func _sync_popup() -> void:
 	confirm.disabled = not can_afford
 	confirm.modulate.a = 1.0 if can_afford else 0.62
 
+func _attach_shop_feedback() -> void:
+	var primary_paths := {
+		"PopupOverlay/Panel/ConfirmButton": true,
+	}
+	var entry_paths := {}
+	for path in CARD_PATHS:
+		entry_paths[path] = true
+	var feedback_paths := [
+		"Tabs/Gems",
+		"Tabs/Coins",
+		"Tabs/Hearts",
+		"Tabs/Boosters",
+		"Tabs/Chest",
+		"Header/SettingsButton",
+		"ProductGrid/PageControls/PreviousButton",
+		"ProductGrid/PageControls/NextButton",
+		"PopupOverlay/Panel/CloseButton",
+		"PopupOverlay/Panel/MinusButton",
+		"PopupOverlay/Panel/PlusButton",
+		"PopupOverlay/Panel/PlusTenButton",
+		"PopupOverlay/Panel/CancelButton",
+		"PopupOverlay/Panel/ConfirmButton",
+		"BottomNav/HomeButton",
+	]
+	for path in CARD_PATHS:
+		feedback_paths.append(path)
+	for path in feedback_paths:
+		var button := get_node_or_null(path) as BaseButton
+		if button == null or button.has_node("CartoonFeedback"):
+			continue
+		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+		button.add_child(feedback)
+		var profile := CartoonButtonFeedback.Profile.NAV
+		if primary_paths.has(path):
+			profile = CartoonButtonFeedback.Profile.PRIMARY
+		elif entry_paths.has(path):
+			profile = CartoonButtonFeedback.Profile.ENTRY
+		elif path == "Header/SettingsButton":
+			profile = CartoonButtonFeedback.Profile.ICON
+		feedback.setup(button, profile)
+
+func _play_enter_animation() -> void:
+	if not is_inside_tree():
+		return
+	if has_node("TitlePlaque"):
+		var title := _node("TitlePlaque")
+		title.pivot_offset = title.size * 0.5
+		title.scale = Vector2(0.94, 0.94)
+		var title_tween := create_tween()
+		title_tween.tween_property(title, "scale", Vector2(1.04, 1.04), 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		title_tween.tween_property(title, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	for i in CARD_PATHS.size():
+		var card := get_node_or_null(CARD_PATHS[i]) as Control
+		if card == null or not card.visible:
+			continue
+		card.pivot_offset = card.size * 0.5
+		card.scale = Vector2(0.96, 0.96)
+		var tween := create_tween()
+		tween.tween_interval(0.015 * float(i))
+		tween.tween_property(card, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _play_tab_switch_motion() -> void:
+	for i in CARD_PATHS.size():
+		var card := get_node_or_null(CARD_PATHS[i]) as Control
+		if card == null or not card.visible:
+			continue
+		card.pivot_offset = card.size * 0.5
+		card.scale = Vector2(0.98, 0.98)
+		var tween := create_tween()
+		tween.tween_interval(0.01 * float(i))
+		tween.tween_property(card, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _play_popup_motion() -> void:
+	var panel := get_node_or_null("PopupOverlay/Panel") as Control
+	if panel == null or popup.is_empty():
+		return
+	panel.pivot_offset = panel.size * 0.5
+	panel.scale = Vector2(0.92, 0.92)
+	var tween := create_tween()
+	tween.tween_property(panel, "scale", Vector2(1.03, 1.03), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
 func _max_shop_page() -> int:
 	return maxi(0, ceili(float(_get_visible_shop_items().size()) / float(PAGE_SIZE)) - 1)
 
@@ -293,3 +427,25 @@ func _node(path: NodePath) -> Control:
 
 func _label(path: NodePath) -> Label:
 	return get_node(path) as Label
+
+func _go_to_scene(scene_name: String) -> void:
+	if game and game.get("scene_manager") and game.scene_manager.has_method("switch_scene"):
+		game.scene_manager.switch_scene(scene_name, {}, "slide")
+	elif has_node("/root/SceneManager"):
+		get_node("/root/SceneManager").switch_scene(scene_name, {}, "slide")
+
+func _make_tab_style(active: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.94, 0.32, 0.52, 1.0) if active else Color(1.0, 0.94, 0.78, 0.98)
+	style.border_color = Color(1.0, 0.72, 0.28, 1.0) if active else Color(0.91, 0.58, 0.20, 1.0)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 15
+	style.corner_radius_top_right = 15
+	style.corner_radius_bottom_left = 15
+	style.corner_radius_bottom_right = 15
+	style.shadow_color = Color(0.36, 0.16, 0.03, 0.22)
+	style.shadow_size = 3
+	return style

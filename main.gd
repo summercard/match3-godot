@@ -31,9 +31,13 @@ const PACKED_SCENE_MAP: Dictionary = {
 	"battle_prepare": "res://src/ui/scenes/battle_prepare.tscn",
 	"battle": "res://src/ui/scenes/battle_screen.tscn",
 	"result": "res://src/ui/scenes/battle_result.tscn",
+	"team": "res://src/ui/scenes/team.tscn",
 	"album": "res://src/ui/scenes/album.tscn",
 	"inventory": "res://src/ui/scenes/inventory.tscn",
 	"shop": "res://src/ui/scenes/shop.tscn",
+	"achievement": "res://src/ui/scenes/achievement.tscn",
+	"settings": "res://src/ui/scenes/settings.tscn",
+	"sign_in": "res://src/ui/scenes/sign_in.tscn",
 }
 
 var _current_scene: Control = null

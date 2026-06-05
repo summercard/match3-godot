@@ -46,9 +46,11 @@ func _run() -> void:
 	ranch.call("_sync_gui")
 	var evolve := ranch.get_node("Pages/ClassroomPage/DetailPanel/EvolveButton") as TextureButton
 	var frame := evolve.get_node("Frame") as TextureRect
+	var modern_frame := evolve.get_node("ModernFrame") as Panel
 
 	_expect(not evolve.disabled, "unavailable evolution button should remain tappable for feedback")
-	_expect(_texture_path(frame).ends_with("ui_btn_secondary_blue.png"), "unavailable evolution should use the blue secondary visual")
+	_expect(not frame.visible, "classroom evolution should hide the legacy texture frame")
+	_expect(_panel_bg_color(modern_frame).is_equal_approx(Color(0.39, 0.57, 0.16, 1.0)), "unavailable evolution should use the muted modern green visual")
 	evolve.pressed.emit()
 	_expect(str(ranch.get("_status_text")) == "需要 Lv.16", "low level tap should state the required level")
 	_expect(not (ranch.get_node("Header/Status") as Label).visible, "classroom feedback should not overlap the detail-panel header")
@@ -57,14 +59,14 @@ func _run() -> void:
 	save_manager.update_monster_instance(instance_id, {"level": 16})
 	ranch.call("_load_data")
 	ranch.call("_sync_gui")
-	_expect(_texture_path(frame).ends_with("ui_btn_secondary_blue.png"), "missing-item state should remain visually inactive")
+	_expect(_panel_bg_color(modern_frame).is_equal_approx(Color(0.39, 0.57, 0.16, 1.0)), "missing-item state should remain visually inactive")
 	evolve.pressed.emit()
 	_expect(str(ranch.get("_status_text")).contains("不足"), "missing-item tap should explain the unavailable material")
 
 	save_manager.add_item("evolution_stone_fire", 1)
 	ranch.call("_load_data")
 	ranch.call("_sync_gui")
-	_expect(_texture_path(frame).ends_with("ui_btn_collect_gold.png"), "ready evolution should use the gold action visual")
+	_expect(_panel_bg_color(modern_frame).is_equal_approx(Color(0.52, 0.80, 0.12, 1.0)), "ready evolution should use the bright modern green action visual")
 	evolve.pressed.emit()
 	var evolved: Dictionary = save_manager.get_monster_instance(instance_id)
 	_expect(str(evolved.get("monsterId", "")) == "monster_006", "GUI evolve action should update the monster")
@@ -84,8 +86,9 @@ func _run() -> void:
 	await process_frame
 	_finish()
 
-func _texture_path(frame: TextureRect) -> String:
-	return frame.texture.resource_path if frame.texture != null else ""
+func _panel_bg_color(panel: Panel) -> Color:
+	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	return style.bg_color if style != null else Color.TRANSPARENT
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:

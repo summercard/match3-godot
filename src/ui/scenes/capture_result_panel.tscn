@@ -1,21 +1,21 @@
 [gd_scene format=3 uid="uid://box82ko1pcn26"]
 
-[ext_resource type="Texture2D" uid="uid://b0yrhnfkdrnq6" path="res://assets/images/result/ui_capture_plaque.png" id="plaque"]
-[ext_resource type="Texture2D" uid="uid://bead5g7utilne" path="res://assets/images/result/fx_capture_ring.png" id="ring"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_purple.png" id="plaque"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_golden_burst.png" id="ring"]
 
 [node name="CaptureResultPanel" type="Control" unique_id=482320752]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 150.0
+offset_bottom = 104.0
 mouse_filter = 2
 
 [node name="Ring" type="TextureRect" parent="." unique_id=1420156845]
 layout_mode = 0
-offset_left = 79.0
-offset_top = -57.0
-offset_right = 290.0
-offset_bottom = 125.0
+offset_left = 132.0
+offset_top = -18.0
+offset_right = 243.0
+offset_bottom = 48.0
 mouse_filter = 2
 texture = ExtResource("ring")
 expand_mode = 1
@@ -23,20 +23,20 @@ stretch_mode = 5
 
 [node name="MonsterPortrait" type="TextureRect" parent="." unique_id=1119309342]
 layout_mode = 0
-offset_left = 143.0
-offset_top = 4.0
-offset_right = 231.0
-offset_bottom = 92.0
+offset_left = 154.0
+offset_top = -14.0
+offset_right = 220.0
+offset_bottom = 52.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Plaque" type="TextureRect" parent="." unique_id=521886397]
 layout_mode = 0
-offset_left = 63.0
-offset_top = 74.0
-offset_right = 313.0
-offset_bottom = 130.0
+offset_left = 72.0
+offset_top = 44.0
+offset_right = 303.0
+offset_bottom = 92.0
 mouse_filter = 2
 texture = ExtResource("plaque")
 expand_mode = 1
@@ -44,53 +44,53 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="." unique_id=1784909357]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 89.0
-offset_right = 303.0
-offset_bottom = 114.0
+offset_left = 74.0
+offset_top = 56.0
+offset_right = 301.0
+offset_bottom = 78.0
 theme_override_colors/font_color = Color(0.35, 1, 0.46, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "捕捉结果"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line1" type="Label" parent="." unique_id=1785423804]
 layout_mode = 0
-offset_left = 26.0
-offset_top = 110.0
-offset_right = 349.0
-offset_bottom = 125.0
+offset_left = 38.0
+offset_top = 78.0
+offset_right = 337.0
+offset_bottom = 91.0
 theme_override_colors/font_color = Color(0.74, 0.8, 0.92, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line2" type="Label" parent="." unique_id=316171509]
 layout_mode = 0
-offset_left = 26.0
-offset_top = 123.0
-offset_right = 349.0
-offset_bottom = 138.0
+offset_left = 38.0
+offset_top = 90.0
+offset_right = 337.0
+offset_bottom = 103.0
 theme_override_colors/font_color = Color(0.74, 0.8, 0.92, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Line3" type="Label" parent="." unique_id=1114390296]
 layout_mode = 0
-offset_left = 26.0
-offset_top = 136.0
-offset_right = 349.0
-offset_bottom = 151.0
+offset_left = 38.0
+offset_top = 102.0
+offset_right = 337.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.74, 0.8, 0.92, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 vertical_alignment = 1

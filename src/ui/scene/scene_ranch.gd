@@ -385,8 +385,13 @@ func _assign_social_instance(instance_id: String) -> void:
 	if place.get("started_at", null) != null:
 		_show_status("社交进行中")
 		return
+	if _is_instance_in_ranch(instance_id):
+		_show_status("该精灵正在农场挂机，请先从农场取下")
+		return
 	if _storage != null and _storage.has_method("assign_social_slot"):
-		_storage.assign_social_slot(0, _social_selected_slot, instance_id)
+		if not _storage.assign_social_slot(0, _social_selected_slot, instance_id):
+			_show_status("该精灵当前无法参加社交")
+			return
 		_load_data()
 	else:
 		if place.get("slot_a") == instance_id:
@@ -575,6 +580,9 @@ func _on_picker_item_pressed(instance_id: String) -> void:
 			_save_ranch_state()
 			_refresh_ranch_view()
 			return
+	if _is_instance_in_social(instance_id):
+		_show_status("该精灵正在社交，请先结束社交")
+		return
 	if _selected_slot < 0 or _selected_slot >= SLOT_COUNT:
 		return
 	var old_id = _slots_data[_selected_slot].get("instance_id", null)
@@ -1294,6 +1302,22 @@ func _used_monsters() -> Dictionary:
 		if id != null:
 			used[str(id)] = true
 	return used
+
+func _is_instance_in_ranch(instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	for slot: Dictionary in _slots_data:
+		if str(slot.get("instance_id", "")) == instance_id:
+			return true
+	return false
+
+func _is_instance_in_social(instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	for place: Dictionary in _social_places:
+		if str(place.get("slot_a", "")) == instance_id or str(place.get("slot_b", "")) == instance_id:
+			return true
+	return false
 
 func _update_list_scroll_limit() -> void:
 	var cards_per_page := int(LIST_CLIP_RECT.size.x / (LIST_CARD_W + LIST_CARD_GAP))

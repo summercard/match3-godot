@@ -55,6 +55,7 @@ func _scene_data(scene_name: String) -> Dictionary:
 			"stageData": stage_db.get_stage(stage_id)
 		}
 	if scene_name == "result":
+		var captured := _read_arg("--result-captured=", "true") != "false"
 		return {
 			"result": "win",
 			"stageId": "stage_1_1",
@@ -71,8 +72,8 @@ func _scene_data(scene_name: String) -> Dictionary:
 			"enemies": [
 				{"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "hp": 0, "maxHP": 16}
 			],
-			"capture_played_inline": true,
-			"captured": true,
+			"capture_played_inline": captured,
+			"captured": captured,
 			"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1},
 			"capture_result_text": {"title": "收服成功", "reason": "窗口稳定"},
 			"capture_item_used": {"name": "捕捉球"},
@@ -92,6 +93,9 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 		return
 	if scene_name == "shop":
 		_seed_shop_demo(main)
+		return
+	if scene_name == "album":
+		_seed_album_demo(main)
 		return
 	if scene_name == "achievement":
 		_seed_achievement_scroll_demo(main)
@@ -153,6 +157,8 @@ func _seed_ranch_demo(main: Control) -> void:
 	if not social_places.is_empty() and visual_roster.size() >= 2:
 		social_places[0]["slot_a"] = str(visual_roster[0].get("instanceId", ""))
 		social_places[0]["slot_b"] = str(visual_roster[1].get("instanceId", ""))
+		if _read_arg("--ranch-social-running=", "0") == "1":
+			social_places[0]["started_at"] = Time.get_unix_time_from_system() * 1000.0 - 6.0 * 60.0 * 1000.0
 		ranch_scene.set("_social_places", social_places)
 	var now := Time.get_unix_time_from_system() * 1000.0
 	var slots: Array = []
@@ -226,6 +232,20 @@ func _seed_inventory_demo(main: Control) -> void:
 	else:
 		inventory_scene.queue_redraw()
 
+func _seed_album_demo(main: Control) -> void:
+	if _read_arg("--album-locked-demo=", "0") != "1":
+		return
+	var album_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("AlbumGui")
+	if album_scene == null:
+		return
+	var monsters: Array = album_scene.get("_filtered_monsters")
+	var captured: Array = []
+	for i in mini(3, monsters.size()):
+		captured.append(str((monsters[i] as Dictionary).get("id", "")))
+	album_scene.set("_captured_ids", captured)
+	album_scene.set("_preview_monster_id", "")
+	album_scene.call("_sync_gui")
+
 func _seed_achievement_scroll_demo(main: Control) -> void:
 	var achievement_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("SceneAchievement")
 	if achievement_scene == null:
@@ -239,7 +259,7 @@ func _seed_shop_demo(main: Control) -> void:
 	if shop_scene == null:
 		return
 	shop_scene.set("player_data", {"gold": 5000, "gems": 120})
-	shop_scene.set("_active_tab", _read_arg("--shop-tab=", "recommend"))
+	shop_scene.set("_active_tab", _read_arg("--shop-tab=", "gems"))
 	if shop_scene.has_method("_sync_gui"):
 		shop_scene.call("_sync_gui")
 	if _read_arg("--shop-popup=", "0") == "1":
@@ -259,6 +279,9 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		_seed_battle_art_aspect_qa(battle_scene)
 	if _read_arg("--battle-demo-hp=", "0") == "1":
 		_seed_battle_demo_hp(battle_scene)
+	if _read_arg("--battle-victory-overlay=", "0") == "1":
+		_seed_battle_victory_overlay(battle_scene)
+		return
 	if _read_arg("--battle-demo-fx=", "0") != "1":
 		battle_scene.queue_redraw()
 		return
@@ -290,6 +313,34 @@ func _seed_battle_demo_fx(main: Control) -> void:
 			"charge_timer": 0.8
 		}
 	})
+	battle_scene.queue_redraw()
+
+func _seed_battle_victory_overlay(battle_scene: Control) -> void:
+	var captured := _read_arg("--battle-victory-captured=", "true") != "false"
+	var battle = battle_scene.get("_battle")
+	if battle != null:
+		battle.set("battle_result", "win")
+		var enemies: Array = battle.get("enemies")
+		for i in range(enemies.size()):
+			var enemy: Dictionary = enemies[i]
+			enemy["hp"] = 0
+			enemies[i] = enemy
+		battle.set("enemies", enemies)
+	battle_scene.set("_state", 5)
+	battle_scene.set("_battle_end_overlay_timer", 0.82)
+	battle_scene.set("_battle_end_overlay_started", true)
+	if battle_scene.has_method("_spawn_victory_particles"):
+		battle_scene.call("_spawn_victory_particles")
+	if battle_scene.has_method("_update_victory_particles"):
+		battle_scene.call("_update_victory_particles", 0.48)
+	battle_scene.set("_battle_end_particles_spawned", true)
+	battle_scene.set("_capture_phase", "done")
+	battle_scene.set("_capture_success", captured)
+	battle_scene.set("_capture_result_text", {
+		"title": "收服成功" if captured else "👉 收服失败...",
+		"reason": "窗口稳定" if captured else "窗口已开，但这次判定没有成功。"
+	})
+	battle_scene.set("_capture_target", {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫"})
 	battle_scene.queue_redraw()
 
 func _seed_battle_demo_hp(battle_scene: Control) -> void:

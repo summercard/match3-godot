@@ -1,44 +1,149 @@
 [gd_scene format=3 uid="uid://dlu23xo10t2vq"]
 
-[ext_resource type="Script" uid="uid://bta68622dgta3" path="res://src/ui/scene/scene_ranch_gui.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://53i31whp52kp" path="res://assets/images/ranch/bg_ranch_pasture.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://dc6yj1cdj8uky" path="res://assets/images/ranch/ui_back_button.png" id="3_back"]
-[ext_resource type="Texture2D" uid="uid://brjohqh01qrpi" path="res://assets/images/ranch/ui_header_plaque.png" id="4_header"]
-[ext_resource type="Texture2D" uid="uid://cnmlb3gxmjnee" path="res://assets/images/ranch/ui_status_ribbon_green.png" id="5_ribbon"]
-[ext_resource type="Texture2D" uid="uid://djugnh1inxd71" path="res://assets/images/ranch/fx_leaf_sparkle_cluster.png" id="6_sparkle"]
-[ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ranch/icon_exp_badge.png" id="7_exp"]
-[ext_resource type="Texture2D" uid="uid://dahjyw6jpe0r3" path="res://assets/images/ranch/icon_gold_coin.png" id="8_coin"]
-[ext_resource type="Texture2D" uid="uid://frjj2tjjs1y7" path="res://assets/images/ranch/ui_btn_collect_gold.png" id="9_gold_button"]
-[ext_resource type="Texture2D" uid="uid://dexu6gjb5318x" path="res://assets/images/team/ui_btn_cancel.png" id="10_blue_button"]
-[ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/album/ui_btn_secondary_blue.png" id="11_disabled_button"]
-[ext_resource type="Texture2D" uid="uid://cinwvhr6y661f" path="res://assets/images/ranch/ui_care_roster_panel.png" id="12_roster_panel"]
-[ext_resource type="Texture2D" uid="uid://dk4l42xmcflof" path="res://assets/images/ranch/ui_roster_card_ranch.png" id="13_card"]
-[ext_resource type="Texture2D" uid="uid://uomxda6s6wcc" path="res://assets/images/ranch/icon_check_badge.png" id="15_check"]
-[ext_resource type="Texture2D" uid="uid://cx2v2jx2rl4ge" path="res://assets/images/stage/icon_prev_arrow.png" id="16_previous"]
-[ext_resource type="Texture2D" uid="uid://bcg7iju0r67x0" path="res://assets/images/stage/icon_next_arrow.png" id="17_next"]
-[ext_resource type="Texture2D" uid="uid://bkt5606dedikh" path="res://assets/images/ranch/ui_classroom_detail_panel.png" id="18_class_detail"]
-[ext_resource type="Texture2D" uid="uid://bwkgtfdik0aq7" path="res://assets/images/ranch/ui_relationship_ribbon.png" id="19_relation"]
-[ext_resource type="Texture2D" uid="uid://dyfilvh4p2q38" path="res://assets/images/ranch/ui_social_place_panel.png" id="20_social_place"]
-[ext_resource type="Texture2D" uid="uid://bxqtbuwui8a1o" path="res://assets/images/ranch/ui_social_slot_frame.png" id="21_social_slot"]
-[ext_resource type="Texture2D" uid="uid://bj3wfdek2qibt" path="res://assets/images/ranch/ui_social_result_panel.png" id="22_social_result"]
-[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_btn_previous_round.png" id="23_previous_round"]
-[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_btn_next_round.png" id="24_next_round"]
+[ext_resource type="Script" uid="uid://bta68622dgta3" path="res://src/ui/scene/scene_ranch_gui.gd" id="1_ke1ks"]
+[ext_resource type="Texture2D" uid="uid://53i31whp52kp" path="res://assets/images/ranch/bg_ranch_pasture.png" id="2_asi3g"]
+[ext_resource type="Texture2D" uid="uid://b6mrxkcfwhl5w" path="res://assets/images/ranch/ui_slot_occupied.png" id="3_4vts4"]
+[ext_resource type="Texture2D" uid="uid://kyu0nt3dpkuo" path="res://assets/images/ranch/ui_level_badge.png" id="4_reeqw"]
+[ext_resource type="Texture2D" uid="uid://djugnh1inxd71" path="res://assets/images/ranch/fx_leaf_sparkle_cluster.png" id="5_h6git"]
+[ext_resource type="Texture2D" uid="uid://cnmlb3gxmjnee" path="res://assets/images/ranch/ui_status_ribbon_green.png" id="6_evj83"]
+[ext_resource type="Texture2D" uid="uid://cbxsgj8tlo60a" path="res://assets/images/ranch/ui_timer_plate.png" id="7_1yngj"]
+[ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ranch/icon_exp_badge.png" id="8_5svvp"]
+[ext_resource type="Texture2D" uid="uid://dahjyw6jpe0r3" path="res://assets/images/ranch/icon_gold_coin.png" id="9_2pk37"]
+[ext_resource type="Texture2D" uid="uid://frjj2tjjs1y7" path="res://assets/images/ranch/ui_btn_collect_gold.png" id="10_2bgry"]
+[ext_resource type="Texture2D" uid="uid://cinwvhr6y661f" path="res://assets/images/ranch/ui_care_roster_panel.png" id="11_l0i8l"]
+[ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ranch/ui_btn_previous_round.png" id="12_uqcji"]
+[ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ranch/ui_btn_next_round.png" id="13_72f50"]
+[ext_resource type="Texture2D" uid="uid://dk4l42xmcflof" path="res://assets/images/ranch/ui_roster_card_ranch.png" id="14_p3130"]
+[ext_resource type="Texture2D" uid="uid://uomxda6s6wcc" path="res://assets/images/ranch/icon_check_badge.png" id="15_5g78r"]
+[ext_resource type="Texture2D" uid="uid://bkt5606dedikh" path="res://assets/images/ranch/ui_classroom_detail_panel.png" id="16_yskjy"]
+[ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/album/ui_btn_secondary_blue.png" id="17_qrgjm"]
+[ext_resource type="Texture2D" uid="uid://cx2v2jx2rl4ge" path="res://assets/images/stage/icon_prev_arrow.png" id="18_towwe"]
+[ext_resource type="Texture2D" uid="uid://bcg7iju0r67x0" path="res://assets/images/stage/icon_next_arrow.png" id="19_tygpk"]
+[ext_resource type="Texture2D" uid="uid://bwkgtfdik0aq7" path="res://assets/images/ranch/ui_relationship_ribbon.png" id="20_tn4tg"]
+[ext_resource type="Texture2D" uid="uid://dyfilvh4p2q38" path="res://assets/images/ranch/ui_social_place_panel.png" id="21_eayjd"]
+[ext_resource type="Texture2D" uid="uid://bxqtbuwui8a1o" path="res://assets/images/ranch/ui_social_slot_frame.png" id="22_w0t05"]
+[ext_resource type="Texture2D" uid="uid://bj3wfdek2qibt" path="res://assets/images/ranch/ui_social_result_panel.png" id="23_vtvj8"]
+[ext_resource type="Texture2D" uid="uid://brjohqh01qrpi" path="res://assets/images/ranch/ui_header_plaque.png" id="24_87rtj"]
+[ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="25_jbwww"]
+[ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="26_cwols"]
+[ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="27_4kyrp"]
+[ext_resource type="Texture2D" uid="uid://wmi2nklh64v6" path="res://assets/images/ranch/ui_pet_farm_nav_panel.png" id="28_76x2r"]
+[ext_resource type="Texture2D" uid="uid://c8aamojsqoxli" path="res://assets/images/ranch/ui_pet_farm_nav_selected.png" id="29_ceena"]
+[ext_resource type="Texture2D" uid="uid://bhmpl5kylv0ga" path="res://assets/images/ranch/icon_pet_tab.png" id="30_h68c6"]
+[ext_resource type="Texture2D" uid="uid://bqvnxe6tuss1n" path="res://assets/images/ranch/icon_pet_classroom.png" id="31_gfw44"]
+[ext_resource type="Texture2D" uid="uid://j7mvnqwsdqwi" path="res://assets/images/ranch/icon_social_plaza.png" id="32_qnd86"]
+[ext_resource type="Texture2D" uid="uid://dyjbfmladd4un" path="res://assets/images/ranch/icon_menu_tab.png" id="33_l085d"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch/fx_social_heart.png" id="34_social_heart"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_social_bond_hearts.png" id="35_bond_hearts"]
 
-[node name="RanchHub" type="Control" unique_id=995115595]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r8pwf"]
+bg_color = Color(1, 0.96, 0.84, 0.99)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.96, 0.68, 0.24, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.33, 0.16, 0.03, 0.28)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xhaif"]
+bg_color = Color(1, 0.91, 0.73, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.68, 0.24, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.33, 0.16, 0.03, 0.28)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6r8en"]
+bg_color = Color(1, 0.95, 0.82, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.96, 0.68, 0.24, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.33, 0.16, 0.03, 0.28)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m2tru"]
+bg_color = Color(0.82, 0.69, 0.49, 0.7)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pxbg2"]
+bg_color = Color(0.98, 0.31, 0.5, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gcd6x"]
+bg_color = Color(1, 0.95, 0.82, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.69, 0.3, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ca4fg"]
+bg_color = Color(1, 0.95, 0.82, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.69, 0.3, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h4son"]
+bg_color = Color(1, 0.95, 0.82, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.69, 0.3, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="SceneRanch" type="Control" unique_id=995115595]
 clip_contents = true
 layout_mode = 3
-anchors_preset = 0
-offset_right = 375.0
-offset_bottom = 667.0
-mouse_filter = 1
-script = ExtResource("1_script")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ke1ks")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1357441767]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-texture = ExtResource("2_bg")
+texture = ExtResource("2_asi3g")
 expand_mode = 1
 stretch_mode = 6
 
@@ -71,9 +176,20 @@ offset_left = 20.0
 offset_top = 171.0
 offset_right = 126.0
 offset_bottom = 283.0
+pivot_offset = Vector2(53, 56)
 ignore_texture_size = true
 
+[node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=822101608]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("3_4vts4")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1366583310]
+visible = false
 layout_mode = 0
 offset_left = 22.0
 offset_top = 17.0
@@ -83,42 +199,57 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1341602261]
+visible = false
+layout_mode = 0
+offset_left = 17.0
+offset_top = -17.0
+offset_right = 89.0
+offset_bottom = 7.0
+mouse_filter = 2
+texture = ExtResource("4_reeqw")
+expand_mode = 1
+
 [node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=817687865]
+visible = false
 layout_mode = 0
 offset_left = 42.0
 offset_top = 1.0
 offset_right = 70.0
 offset_bottom = 15.0
 mouse_filter = 2
-texture = ExtResource("6_sparkle")
+texture = ExtResource("5_h6git")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=327730678]
+visible = false
 layout_mode = 0
 offset_left = 17.0
-offset_top = 68.0
+offset_top = -16.0
 offset_right = 89.0
-offset_bottom = 92.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 3
+offset_bottom = 7.0
+theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 12
 text = "Lv.3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1114502829]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
 offset_right = 95.0
 offset_bottom = 111.0
 mouse_filter = 2
-texture = ExtResource("5_ribbon")
+texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=1952174850]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
@@ -133,7 +264,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=1727885869]
-visible = false
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 32.0
 offset_top = 45.0
@@ -147,7 +278,7 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=1823551377]
-visible = false
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
@@ -160,15 +291,49 @@ theme_override_font_sizes/font_size = 11
 text = "放入这里"
 horizontal_alignment = 1
 
+[node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1072251594]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 135.0
+mouse_filter = 2
+texture = ExtResource("7_1yngj")
+expand_mode = 1
+
+[node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=2045224827]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Slot2" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=1428104767]
 layout_mode = 0
 offset_left = 134.0
 offset_top = 166.0
 offset_right = 240.0
 offset_bottom = 278.0
+pivot_offset = Vector2(53, 56)
 ignore_texture_size = true
 
+[node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1362477804]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("3_4vts4")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1157801372]
+visible = false
 layout_mode = 0
 offset_left = 22.0
 offset_top = 17.0
@@ -178,42 +343,57 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=909115565]
+visible = false
+layout_mode = 0
+offset_left = 17.0
+offset_top = -17.0
+offset_right = 89.0
+offset_bottom = 7.0
+mouse_filter = 2
+texture = ExtResource("4_reeqw")
+expand_mode = 1
+
 [node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=337969961]
+visible = false
 layout_mode = 0
 offset_left = 42.0
 offset_top = 1.0
 offset_right = 70.0
 offset_bottom = 15.0
 mouse_filter = 2
-texture = ExtResource("6_sparkle")
+texture = ExtResource("5_h6git")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=1129923069]
+visible = false
 layout_mode = 0
 offset_left = 17.0
-offset_top = 68.0
+offset_top = -16.0
 offset_right = 89.0
-offset_bottom = 92.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 3
+offset_bottom = 7.0
+theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 12
 text = "Lv.4"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1636993171]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
 offset_right = 95.0
 offset_bottom = 111.0
 mouse_filter = 2
-texture = ExtResource("5_ribbon")
+texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=923259660]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
@@ -228,7 +408,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=495169321]
-visible = false
+modulate = Color(0.98, 0.9, 0.67, 1)
 layout_mode = 0
 offset_left = 32.0
 offset_top = 45.0
@@ -240,7 +420,6 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=1857928552]
-visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
@@ -251,15 +430,49 @@ theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
 
+[node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1764226313]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 135.0
+mouse_filter = 2
+texture = ExtResource("7_1yngj")
+expand_mode = 1
+
+[node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=1286536515]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Slot3" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=406071953]
 layout_mode = 0
 offset_left = 248.0
 offset_top = 171.0
 offset_right = 354.0
 offset_bottom = 283.0
+pivot_offset = Vector2(53, 56)
 ignore_texture_size = true
 
+[node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1500811951]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("3_4vts4")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1025689886]
+visible = false
 layout_mode = 0
 offset_left = 22.0
 offset_top = 17.0
@@ -269,42 +482,57 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=235685397]
+visible = false
+layout_mode = 0
+offset_left = 17.0
+offset_top = -17.0
+offset_right = 89.0
+offset_bottom = 7.0
+mouse_filter = 2
+texture = ExtResource("4_reeqw")
+expand_mode = 1
+
 [node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1897213609]
+visible = false
 layout_mode = 0
 offset_left = 42.0
 offset_top = 1.0
 offset_right = 70.0
 offset_bottom = 15.0
 mouse_filter = 2
-texture = ExtResource("6_sparkle")
+texture = ExtResource("5_h6git")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=53297459]
+visible = false
 layout_mode = 0
 offset_left = 17.0
-offset_top = 68.0
+offset_top = -16.0
 offset_right = 89.0
-offset_bottom = 92.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 3
+offset_bottom = 7.0
+theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 12
 text = "Lv.5"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1469056223]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
 offset_right = 95.0
 offset_bottom = 111.0
 mouse_filter = 2
-texture = ExtResource("5_ribbon")
+texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=1359126315]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 93.0
@@ -319,7 +547,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=1357323496]
-visible = false
+modulate = Color(0.98, 0.9, 0.67, 1)
 layout_mode = 0
 offset_left = 32.0
 offset_top = 45.0
@@ -331,7 +559,6 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=887957630]
-visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
@@ -342,15 +569,49 @@ theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
 
+[node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=717384118]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 135.0
+mouse_filter = 2
+texture = ExtResource("7_1yngj")
+expand_mode = 1
+
+[node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=1408973114]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Slot4" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=305052866]
 layout_mode = 0
 offset_left = 66.0
 offset_top = 308.0
 offset_right = 174.0
 offset_bottom = 420.0
+pivot_offset = Vector2(54, 56)
 ignore_texture_size = true
 
+[node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1655470061]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("3_4vts4")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1530923397]
+visible = false
 layout_mode = 0
 offset_left = 22.0
 offset_top = 17.0
@@ -360,38 +621,56 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=274217230]
+visible = false
+layout_mode = 0
+offset_left = 17.0
+offset_top = -17.0
+offset_right = 89.0
+offset_bottom = 7.0
+mouse_filter = 2
+texture = ExtResource("4_reeqw")
+expand_mode = 1
+
 [node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1966482019]
+visible = false
 layout_mode = 0
 offset_left = 42.0
 offset_top = 1.0
 offset_right = 70.0
 offset_bottom = 15.0
 mouse_filter = 2
-texture = ExtResource("6_sparkle")
+texture = ExtResource("5_h6git")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=1259360154]
+visible = false
 layout_mode = 0
 offset_left = 17.0
-offset_top = 68.0
-offset_right = 91.0
-offset_bottom = 92.0
+offset_top = -16.0
+offset_right = 89.0
+offset_bottom = 7.0
+theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 12
 text = "Lv.1"
 horizontal_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=977962167]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 106.0
 offset_right = 97.0
 offset_bottom = 124.0
 mouse_filter = 2
-texture = ExtResource("5_ribbon")
+texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=560662066]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 108.0
@@ -402,6 +681,7 @@ text = "放置 00:00"
 horizontal_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=288537903]
+modulate = Color(0.98, 0.9, 0.67, 1)
 layout_mode = 0
 offset_left = 33.0
 offset_top = 45.0
@@ -427,13 +707,46 @@ theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
 
+[node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=648470816]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 135.0
+mouse_filter = 2
+texture = ExtResource("7_1yngj")
+expand_mode = 1
+
+[node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=1538646827]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Slot5" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=518046513]
 layout_mode = 0
 offset_left = 198.0
 offset_top = 308.0
 offset_right = 306.0
 offset_bottom = 420.0
+pivot_offset = Vector2(54, 56)
 ignore_texture_size = true
+
+[node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=68018851]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("3_4vts4")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=899441358]
 visible = false
@@ -446,6 +759,17 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=1919811389]
+visible = false
+layout_mode = 0
+offset_left = 17.0
+offset_top = -17.0
+offset_right = 89.0
+offset_bottom = 7.0
+mouse_filter = 2
+texture = ExtResource("4_reeqw")
+expand_mode = 1
+
 [node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=990925348]
 visible = false
 layout_mode = 0
@@ -454,7 +778,7 @@ offset_top = 1.0
 offset_right = 70.0
 offset_bottom = 15.0
 mouse_filter = 2
-texture = ExtResource("6_sparkle")
+texture = ExtResource("5_h6git")
 expand_mode = 1
 stretch_mode = 5
 
@@ -462,24 +786,29 @@ stretch_mode = 5
 visible = false
 layout_mode = 0
 offset_left = 17.0
-offset_top = 68.0
-offset_right = 91.0
-offset_bottom = 92.0
+offset_top = -16.0
+offset_right = 89.0
+offset_bottom = 7.0
+theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 12
 text = "Lv.1"
 horizontal_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=1757642050]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 102.0
 offset_right = 97.0
 offset_bottom = 120.0
 mouse_filter = 2
-texture = ExtResource("5_ribbon")
+texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot5" unique_id=2000299588]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 104.0
@@ -490,6 +819,7 @@ text = "放置 00:00"
 horizontal_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot5" unique_id=888991365]
+modulate = Color(0.98, 0.9, 0.67, 1)
 layout_mode = 0
 offset_left = 33.0
 offset_top = 45.0
@@ -515,6 +845,29 @@ theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
 
+[node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=601422701]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 135.0
+mouse_filter = 2
+texture = ExtResource("7_1yngj")
+expand_mode = 1
+
+[node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot5" unique_id=455740514]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 113.0
+offset_right = 91.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="CollectRow" type="Control" parent="Pages/RanchPage" unique_id=22385307]
 anchors_preset = 0
 offset_top = 122.0
@@ -529,7 +882,7 @@ offset_top = 6.0
 offset_right = 48.0
 offset_bottom = 36.0
 mouse_filter = 2
-texture = ExtResource("7_exp")
+texture = ExtResource("8_5svvp")
 expand_mode = 1
 stretch_mode = 5
 
@@ -544,7 +897,7 @@ theme_override_colors/font_color = Color(0.98, 0.92, 0.65, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 16
-text = "+346"
+text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -556,7 +909,7 @@ offset_top = 7.0
 offset_right = 277.0
 offset_bottom = 35.0
 mouse_filter = 2
-texture = ExtResource("8_coin")
+texture = ExtResource("9_2pk37")
 expand_mode = 1
 stretch_mode = 5
 
@@ -571,16 +924,16 @@ theme_override_colors/font_color = Color(0.98, 0.92, 0.65, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 16
-text = "+432"
+text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CollectButton" type="TextureButton" parent="Pages/RanchPage/CollectRow" unique_id=1057719274]
 layout_mode = 0
 offset_left = 287.0
-offset_top = 0.0
 offset_right = 367.0
 offset_bottom = 34.0
+pivot_offset = Vector2(40, 17)
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -589,7 +942,7 @@ layout_mode = 0
 offset_right = 80.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/CollectRow/CollectButton" unique_id=8031256]
@@ -609,24 +962,24 @@ offset_top = 444.0
 offset_right = 365.0
 offset_bottom = 600.0
 
-[node name="Frame" type="NinePatchRect" parent="Pages/RanchPage/RosterPanel" unique_id=2119970018]
+[node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel" unique_id=2119970018]
 layout_mode = 0
 offset_left = -2.0
 offset_top = -2.0
 offset_right = 357.0
 offset_bottom = 156.0
-texture = ExtResource("12_roster_panel")
-patch_margin_left = 32
-patch_margin_top = 28
-patch_margin_right = 32
-patch_margin_bottom = 28
+mouse_filter = 2
+texture = ExtResource("11_l0i8l")
+expand_mode = 1
 
 [node name="PreviousButton" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=804617861]
+visible = false
 layout_mode = 0
 offset_left = 82.0
 offset_top = 120.0
 offset_right = 114.0
 offset_bottom = 152.0
+disabled = true
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -635,16 +988,18 @@ layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("23_previous_round")
+texture = ExtResource("12_uqcji")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NextButton" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=612461374]
+visible = false
 layout_mode = 0
 offset_left = 241.0
 offset_top = 120.0
 offset_right = 273.0
 offset_bottom = 152.0
+disabled = true
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -653,38 +1008,41 @@ layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("24_next_round")
+texture = ExtResource("13_72f50")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Card1" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1896302962]
+visible = false
 layout_mode = 0
-offset_left = 55.0
-offset_top = 35.0
-offset_right = 125.0
-offset_bottom = 117.0
+offset_left = 8.0
+offset_top = 42.0
+offset_right = 60.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=763529742]
 layout_mode = 0
-offset_right = 70.0
-offset_bottom = 82.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=636449542]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 8.0
-offset_right = 59.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
 offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=1983748034]
+visible = false
 layout_mode = 0
 offset_left = 6.0
 offset_top = 49.0
@@ -699,13 +1057,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=595536360]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 63.0
-offset_right = 64.0
-offset_bottom = 81.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 2
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 10
 text = "Lv.3"
 horizontal_alignment = 1
@@ -717,44 +1075,63 @@ offset_right = 70.0
 offset_bottom = 10.0
 
 [node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=336961152]
+visible = false
 layout_mode = 0
-offset_left = 49.0
-offset_top = 61.0
-offset_right = 69.0
-offset_bottom = 81.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Card2" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1625096792]
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card1" unique_id=857022595]
+visible = false
 layout_mode = 0
-offset_left = 142.0
-offset_top = 35.0
-offset_right = 212.0
-offset_bottom = 117.0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card2" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1625096792]
+visible = false
+layout_mode = 0
+offset_left = 65.0
+offset_top = 42.0
+offset_right = 117.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=1628277654]
 layout_mode = 0
-offset_right = 70.0
-offset_bottom = 82.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=12770104]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 7.0
-offset_right = 59.0
-offset_bottom = 50.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=824633457]
+visible = false
 layout_mode = 0
 offset_left = 6.0
 offset_top = 49.0
@@ -767,11 +1144,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=1411481766]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 63.0
-offset_right = 64.0
-offset_bottom = 81.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 10
 text = "Lv.4"
 horizontal_alignment = 1
@@ -783,44 +1162,63 @@ offset_right = 70.0
 offset_bottom = 10.0
 
 [node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=1202476496]
+visible = false
 layout_mode = 0
-offset_left = 49.0
-offset_top = 61.0
-offset_right = 69.0
-offset_bottom = 81.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Card3" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1434607902]
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card2" unique_id=1723478053]
+visible = false
 layout_mode = 0
-offset_left = 229.0
-offset_top = 35.0
-offset_right = 299.0
-offset_bottom = 117.0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card3" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1434607902]
+visible = false
+layout_mode = 0
+offset_left = 122.0
+offset_top = 42.0
+offset_right = 174.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=778313726]
 layout_mode = 0
-offset_right = 70.0
-offset_bottom = 82.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=1144986937]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 7.0
-offset_right = 59.0
-offset_bottom = 50.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=1669296916]
+visible = false
 layout_mode = 0
 offset_left = 6.0
 offset_top = 49.0
@@ -833,11 +1231,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=108589]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 63.0
-offset_right = 64.0
-offset_bottom = 81.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 10
 text = "Lv.5"
 horizontal_alignment = 1
@@ -849,17 +1249,326 @@ offset_right = 70.0
 offset_bottom = 10.0
 
 [node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=1751763969]
+visible = false
 layout_mode = 0
-offset_left = 49.0
-offset_top = 61.0
-offset_right = 69.0
-offset_bottom = 81.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card3" unique_id=769609976]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Heading" type="Label" parent="Pages/RanchPage/RosterPanel" unique_id=1905221422]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 1.0
+offset_right = 354.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "🐾  我的宠物  🐾"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Pages/RanchPage/RosterPanel" unique_id=1815649189]
+layout_mode = 0
+offset_top = 21.0
+offset_right = 355.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 9
+text = "点击宠物，再点击农场空位进行放置"
+horizontal_alignment = 1
+
+[node name="Card4" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1460872550]
+visible = false
+layout_mode = 0
+offset_left = 179.0
+offset_top = 42.0
+offset_right = 231.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=2091950460]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=965244608]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=1330595989]
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=1326385020]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 10
+text = "Lv.5"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=57440017]
+visible = false
+layout_mode = 0
+offset_right = 70.0
+offset_bottom = 10.0
+
+[node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=1267923570]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card4" unique_id=1590793859]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card5" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1696030260]
+visible = false
+layout_mode = 0
+offset_left = 236.0
+offset_top = 42.0
+offset_right = 288.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=1505481912]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=124882235]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=1884647653]
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=1241813835]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 10
+text = "Lv.5"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=282972062]
+visible = false
+layout_mode = 0
+offset_right = 70.0
+offset_bottom = 10.0
+
+[node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=1874054946]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card5" unique_id=2105033699]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card6" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1412682747]
+visible = false
+layout_mode = 0
+offset_left = 293.0
+offset_top = 42.0
+offset_right = 345.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=916438206]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=1203801815]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=1979885620]
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=1912892625]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 10
+text = "Lv.5"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=1093451103]
+visible = false
+layout_mode = 0
+offset_right = 70.0
+offset_bottom = 10.0
+
+[node name="Check" type="TextureRect" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=1752222044]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/RanchPage/RosterPanel/Card6" unique_id=851240927]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PageText" type="Label" parent="Pages/RanchPage/RosterPanel" unique_id=209950076]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 124.0
+offset_right = 239.0
+offset_bottom = 147.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
 [node name="BottomButtons" type="Control" parent="Pages/RanchPage" unique_id=1621847581]
+visible = false
 anchors_preset = 0
 offset_top = 612.0
 offset_right = 375.0
@@ -870,6 +1579,7 @@ layout_mode = 0
 offset_left = 10.0
 offset_right = 122.0
 offset_bottom = 45.0
+pivot_offset = Vector2(56, 22.5)
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -878,20 +1588,21 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/FocusButton" unique_id=1736476068]
 layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.32, 0.16, 0.03, 1)
 theme_override_font_sizes/font_size = 13
-text = "取消专注"
+text = "专注培养"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ClassroomButton" type="TextureButton" parent="Pages/RanchPage/BottomButtons" unique_id=390356831]
+visible = false
 layout_mode = 0
 offset_left = 131.0
 offset_right = 243.0
@@ -904,20 +1615,21 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/ClassroomButton" unique_id=1456923114]
 layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.32, 0.16, 0.03, 1)
 theme_override_font_sizes/font_size = 13
 text = "怪物课堂"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SocialButton" type="TextureButton" parent="Pages/RanchPage/BottomButtons" unique_id=1199042189]
+visible = false
 layout_mode = 0
 offset_left = 252.0
 offset_right = 364.0
@@ -930,21 +1642,20 @@ layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/RanchPage/BottomButtons/SocialButton" unique_id=1083448417]
 layout_mode = 0
 offset_right = 112.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.32, 0.16, 0.03, 1)
 theme_override_font_sizes/font_size = 13
 text = "社交庭院"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ClassroomPage" type="Control" parent="Pages" unique_id=852056861]
-visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -952,24 +1663,32 @@ offset_bottom = 667.0
 [node name="DetailPanel" type="Control" parent="Pages/ClassroomPage" unique_id=1650442259]
 anchors_preset = 0
 offset_left = 12.0
-offset_top = 84.0
+offset_top = 122.0
 offset_right = 363.0
-offset_bottom = 278.0
+offset_bottom = 440.0
+
+[node name="CreamFrame" type="Panel" parent="Pages/ClassroomPage/DetailPanel" unique_id=2012638517]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r8pwf")
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1040982781]
+visible = false
 layout_mode = 0
 offset_right = 351.0
 offset_bottom = 194.0
 mouse_filter = 2
-texture = ExtResource("18_class_detail")
+texture = ExtResource("16_yskjy")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1629723582]
 layout_mode = 0
-offset_left = 35.0
-offset_top = 43.0
-offset_right = 126.0
-offset_bottom = 128.0
+offset_left = 18.0
+offset_top = 74.0
+offset_right = 153.0
+offset_bottom = 192.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -987,38 +1706,39 @@ text = "暂无怪物"
 
 [node name="Name" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=384115174]
 layout_mode = 0
-offset_left = 145.0
-offset_top = 31.0
-offset_right = 275.0
-offset_bottom = 49.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 157.0
+offset_bottom = 71.0
+theme_override_colors/font_color = Color(0.21, 0.42, 0.76, 1)
+theme_override_font_sizes/font_size = 15
 text = "小火龙"
 horizontal_alignment = 1
 
 [node name="Info" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=620100325]
 layout_mode = 0
-offset_left = 144.0
-offset_top = 54.0
-offset_right = 276.0
-offset_bottom = 69.0
-theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
-theme_override_font_sizes/font_size = 10
+offset_left = 20.0
+offset_top = 194.0
+offset_right = 150.0
+offset_bottom = 216.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 11
 text = "Lv.3 · 勇敢 · 火"
 horizontal_alignment = 1
 
 [node name="Stats" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1094460168]
 layout_mode = 0
-offset_left = 142.0
-offset_top = 74.0
-offset_right = 278.0
-offset_bottom = 89.0
-theme_override_colors/font_color = Color(0.82, 0.92, 1, 1)
+offset_left = 18.0
+offset_top = 216.0
+offset_right = 333.0
+offset_bottom = 234.0
+theme_override_colors/font_color = Color(0.49, 0.31, 0.13, 1)
 theme_override_font_sizes/font_size = 10
 text = "HP 100   ATK 32   DEF 25"
 horizontal_alignment = 1
 
 [node name="Evolution" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1088863621]
+visible = false
 layout_mode = 0
 offset_left = 142.0
 offset_top = 95.0
@@ -1030,6 +1750,7 @@ text = "进化目标：火恐龙"
 horizontal_alignment = 1
 
 [node name="Condition" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1389357766]
+visible = false
 layout_mode = 0
 offset_left = 142.0
 offset_top = 113.0
@@ -1041,6 +1762,7 @@ text = "等级不足(3/12)"
 horizontal_alignment = 1
 
 [node name="Upgrade" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1562322154]
+visible = false
 layout_mode = 0
 offset_left = 90.0
 offset_top = 147.0
@@ -1051,29 +1773,155 @@ theme_override_font_sizes/font_size = 9
 text = "玩法: 稳定成长"
 horizontal_alignment = 1
 
+[node name="RequirementsPanel" type="Panel" parent="Pages/ClassroomPage/DetailPanel" unique_id=1456940473]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 239.0
+offset_right = 341.0
+offset_bottom = 308.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xhaif")
+
+[node name="Divider" type="ColorRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=497084759]
+layout_mode = 0
+offset_left = 175.0
+offset_top = 56.0
+offset_right = 177.0
+offset_bottom = 211.0
+mouse_filter = 2
+color = Color(1, 0.76, 0.24, 0.5)
+
+[node name="PreviewTitle" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1357669452]
+layout_mode = 0
+offset_top = 12.0
+offset_right = 351.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 18
+text = "进化预览"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TargetName" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1969326537]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 47.0
+offset_right = 339.0
+offset_bottom = 71.0
+theme_override_colors/font_color = Color(0.21, 0.42, 0.76, 1)
+theme_override_font_sizes/font_size = 15
+text = "进化形态"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TargetLevel" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=869140085]
+layout_mode = 0
+offset_left = 213.0
+offset_top = 194.0
+offset_right = 323.0
+offset_bottom = 217.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Arrow" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=2124748050]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 103.0
+offset_right = 212.0
+offset_bottom = 154.0
+theme_override_colors/font_color = Color(1, 0.61, 0.08, 1)
+theme_override_font_sizes/font_size = 42
+text = "➜"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RequirementsTitle" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1539644153]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 244.0
+offset_right = 198.0
+offset_bottom = 267.0
+theme_override_colors/font_color = Color(0.5, 0.27, 0.08, 1)
+theme_override_font_sizes/font_size = 13
+text = "进化条件"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LevelRequirement" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=32927874]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 270.0
+offset_right = 92.0
+offset_bottom = 298.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneRequirement" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=207402901]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 270.0
+offset_right = 222.0
+offset_bottom = 298.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TargetPortrait" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1587896114]
+layout_mode = 0
+offset_left = 202.0
+offset_top = 74.0
+offset_right = 337.0
+offset_bottom = 192.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StoneIcon" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1707619719]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 270.0
+offset_right = 114.0
+offset_bottom = 296.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
 [node name="EvolveButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel" unique_id=1962767549]
 layout_mode = 0
-offset_left = 126.0
-offset_top = 164.0
-offset_right = 234.0
-offset_bottom = 210.0
+offset_left = 223.0
+offset_top = 252.0
+offset_right = 328.0
+offset_bottom = 297.0
+pivot_offset = Vector2(52.5, 22.5)
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/EvolveButton" unique_id=980725544]
+[node name="ModernFrame" type="Panel" parent="Pages/ClassroomPage/DetailPanel/EvolveButton" unique_id=588438878]
 layout_mode = 0
-offset_right = 108.0
-offset_bottom = 46.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource("11_disabled_button")
+
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/EvolveButton" unique_id=980725544]
+visible = false
+layout_mode = 0
+offset_right = 105.0
+offset_bottom = 45.0
+mouse_filter = 2
+texture = ExtResource("17_qrgjm")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/ClassroomPage/DetailPanel/EvolveButton" unique_id=1296996258]
 layout_mode = 0
-offset_right = 108.0
-offset_bottom = 46.0
+offset_right = 105.0
+offset_bottom = 45.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 15
 text = "进化"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1081,46 +1929,50 @@ vertical_alignment = 1
 [node name="RosterPanel" type="Control" parent="Pages/ClassroomPage" unique_id=1039711920]
 anchors_preset = 0
 offset_left = 10.0
-offset_top = 288.0
+offset_top = 444.0
 offset_right = 365.0
-offset_bottom = 542.0
+offset_bottom = 600.0
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel" unique_id=1777807248]
 layout_mode = 0
-offset_right = 355.0
-offset_bottom = 254.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 357.0
+offset_bottom = 156.0
 mouse_filter = 2
-texture = ExtResource("12_roster_panel")
+texture = ExtResource("11_l0i8l")
 expand_mode = 1
 
 [node name="Card1" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=434160890]
 layout_mode = 0
-offset_left = 28.0
-offset_top = 23.0
-offset_right = 124.0
-offset_bottom = 135.0
+offset_left = 8.0
+offset_top = 42.0
+offset_right = 60.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=1447070247]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=637470877]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=2101700221]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 90.0
@@ -1133,11 +1985,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=2090432740]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 66.0
-offset_right = 86.0
-offset_bottom = 81.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.3 · 火"
 horizontal_alignment = 1
@@ -1156,38 +2010,60 @@ horizontal_alignment = 1
 [node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=679229332]
 visible = false
 layout_mode = 0
-offset_right = 20.0
-offset_bottom = 20.0
-texture = ExtResource("15_check")
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card1" unique_id=1781225260]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Card2" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=2088133441]
 layout_mode = 0
-offset_left = 132.0
-offset_top = 23.0
-offset_right = 228.0
-offset_bottom = 135.0
+offset_left = 65.0
+offset_top = 42.0
+offset_right = 117.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=1284906099]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=52611622]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=2024140874]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 89.0
@@ -1199,11 +2075,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=617868005]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 67.0
-offset_right = 86.0
-offset_bottom = 82.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.4 · 水"
 horizontal_alignment = 1
@@ -1222,38 +2100,60 @@ horizontal_alignment = 1
 [node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=355254030]
 visible = false
 layout_mode = 0
-offset_right = 20.0
-offset_bottom = 20.0
-texture = ExtResource("15_check")
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card2" unique_id=2032147263]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Card3" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1122132987]
 layout_mode = 0
-offset_left = 236.0
-offset_top = 23.0
-offset_right = 332.0
-offset_bottom = 135.0
+offset_left = 122.0
+offset_top = 42.0
+offset_right = 174.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=1684487087]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=804289953]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=2029167295]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 89.0
@@ -1265,11 +2165,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=108312880]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 70.0
-offset_right = 86.0
-offset_bottom = 85.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.5 · 草"
 horizontal_alignment = 1
@@ -1288,17 +2190,37 @@ horizontal_alignment = 1
 [node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=620095572]
 visible = false
 layout_mode = 0
-offset_right = 20.0
-offset_bottom = 20.0
-texture = ExtResource("15_check")
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card3" unique_id=682485964]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PreviousButton" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1538661436]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 208.0
-offset_right = 46.0
-offset_bottom = 252.0
+offset_left = 82.0
+offset_top = 120.0
+offset_right = 114.0
+offset_bottom = 152.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/PreviousButton" unique_id=1109573988]
@@ -1306,17 +2228,17 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("16_previous")
+texture = ExtResource("18_towwe")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NextButton" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1848793189]
 visible = false
 layout_mode = 0
-offset_left = 309.0
-offset_top = 208.0
-offset_right = 353.0
-offset_bottom = 252.0
+offset_left = 241.0
+offset_top = 120.0
+offset_right = 273.0
+offset_bottom = 152.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/NextButton" unique_id=637261599]
@@ -1324,18 +2246,319 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("17_next")
+texture = ExtResource("19_tygpk")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="Card4" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1423853574]
+layout_mode = 0
+offset_left = 179.0
+offset_top = 42.0
+offset_right = 231.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=861991952]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=1184261816]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=1245143074]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=2075710091]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=1102670655]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 79.0
+offset_right = 86.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=408251661]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card4" unique_id=1327744799]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card5" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=477669672]
+layout_mode = 0
+offset_left = 236.0
+offset_top = 42.0
+offset_right = 288.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=225377641]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=233041957]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=1149812991]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=540361436]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=1276590343]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 79.0
+offset_right = 86.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=1001244577]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card5" unique_id=1875885182]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card6" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=29507558]
+layout_mode = 0
+offset_left = 293.0
+offset_top = 42.0
+offset_right = 345.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=679700128]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=582136306]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=634854348]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=1826766744]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=270334012]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 79.0
+offset_right = 86.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=1562675061]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 157.0
+offset_bottom = 183.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/ClassroomPage/RosterPanel/Card6" unique_id=1901757357]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Heading" type="Label" parent="Pages/ClassroomPage/RosterPanel" unique_id=1625982000]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 355.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "我的精灵"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Pages/ClassroomPage/RosterPanel" unique_id=1146755110]
+layout_mode = 0
+offset_top = 22.0
+offset_right = 355.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 9
+text = "点击精灵，在当前页面执行操作"
+horizontal_alignment = 1
+
+[node name="PageText" type="Label" parent="Pages/ClassroomPage/RosterPanel" unique_id=1459398062]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 124.0
+offset_right = 239.0
+offset_bottom = 147.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
 [node name="Ribbon" type="TextureRect" parent="Pages/ClassroomPage" unique_id=1553618433]
+visible = false
 layout_mode = 0
 offset_left = 18.0
 offset_top = 555.0
 offset_right = 357.0
 offset_bottom = 597.0
 mouse_filter = 2
-texture = ExtResource("19_relation")
+texture = ExtResource("20_tn4tg")
 expand_mode = 1
 
 [node name="RibbonText" type="Label" parent="Pages/ClassroomPage/Ribbon" unique_id=463323994]
@@ -1349,6 +2572,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BottomButtons" type="Control" parent="Pages/ClassroomPage" unique_id=2137004725]
+visible = false
 anchors_preset = 0
 offset_top = 610.0
 offset_right = 375.0
@@ -1366,7 +2590,7 @@ layout_mode = 0
 offset_right = 105.0
 offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/ClassroomPage/BottomButtons/RanchButton" unique_id=1835285352]
@@ -1391,7 +2615,7 @@ layout_mode = 0
 offset_right = 105.0
 offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/ClassroomPage/BottomButtons/SocialButton" unique_id=1846108923]
@@ -1413,72 +2637,85 @@ offset_bottom = 667.0
 [node name="PlacePanel" type="Control" parent="Pages/SocialPage" unique_id=1749309290]
 anchors_preset = 0
 offset_left = 12.0
-offset_top = 84.0
+offset_top = 96.0
 offset_right = 363.0
-offset_bottom = 278.0
+offset_bottom = 320.0
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/PlacePanel" unique_id=1160364081]
+visible = false
 layout_mode = 0
 offset_right = 351.0
 offset_bottom = 194.0
 mouse_filter = 2
-texture = ExtResource("20_social_place")
+texture = ExtResource("21_eayjd")
 expand_mode = 1
 
 [node name="Title" type="Label" parent="Pages/SocialPage/PlacePanel" unique_id=1359663558]
+visible = false
 layout_mode = 0
-offset_left = 117.0
-offset_top = 36.0
-offset_right = 233.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
-theme_override_font_sizes/font_size = 14
+offset_right = 351.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.24, 0.12, 0.03, 0.92)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 17
 text = "青草庭院"
 horizontal_alignment = 1
 
 [node name="Duration" type="Label" parent="Pages/SocialPage/PlacePanel" unique_id=956558776]
+visible = false
 layout_mode = 0
-offset_left = 120.0
-offset_top = 53.0
-offset_right = 230.0
-offset_bottom = 67.0
-theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
-theme_override_font_sizes/font_size = 9
+offset_top = 23.0
+offset_right = 351.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(1, 0.92, 0.64, 1)
+theme_override_colors/font_outline_color = Color(0.24, 0.12, 0.03, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
 text = "用时00:30"
 horizontal_alignment = 1
 
 [node name="SwitchButton" type="TextureButton" parent="Pages/SocialPage/PlacePanel" unique_id=170336067]
+z_index = 4
 layout_mode = 0
-offset_left = 129.0
-offset_top = 166.0
-offset_right = 227.0
-offset_bottom = 210.0
+offset_left = 261.0
+offset_top = 243.0
+offset_right = 333.0
+offset_bottom = 268.0
+pivot_offset = Vector2(36, 12.5)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SwitchButton" unique_id=724976987]
+[node name="SocialFrame" type="Panel" parent="Pages/SocialPage/PlacePanel/SwitchButton"]
 layout_mode = 0
-offset_right = 98.0
-offset_bottom = 44.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+
+[node name="Frame" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SwitchButton" unique_id=724976987]
+visible = false
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 25.0
+mouse_filter = 2
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/SocialPage/PlacePanel/SwitchButton" unique_id=1985152144]
 layout_mode = 0
-offset_right = 98.0
-offset_bottom = 44.0
+offset_right = 72.0
+offset_bottom = 25.0
 theme_override_colors/font_color = Color(0.22, 0.12, 0.02, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 10
 text = "换场"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SlotA" type="TextureButton" parent="Pages/SocialPage/PlacePanel" unique_id=162678078]
 layout_mode = 0
-offset_left = 15.0
-offset_top = 48.0
-offset_right = 116.0
-offset_bottom = 138.0
+offset_left = 36.0
+offset_top = 58.0
+offset_right = 156.0
+offset_bottom = 201.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=2102981876]
@@ -1487,57 +2724,57 @@ layout_mode = 0
 offset_right = 101.0
 offset_bottom = 90.0
 mouse_filter = 2
-texture = ExtResource("21_social_slot")
+texture = ExtResource("22_w0t05")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=2134535332]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 6.0
-offset_right = 81.0
-offset_bottom = 56.0
+offset_right = 120.0
+offset_bottom = 112.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=1744040305]
 layout_mode = 0
-offset_left = 78.0
-offset_top = 3.0
-offset_right = 98.0
-offset_bottom = 23.0
+offset_left = 95.0
+offset_top = 4.0
+offset_right = 116.0
+offset_bottom = 25.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
 
 [node name="Name" type="Label" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=1326830841]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 56.0
-offset_right = 95.0
-offset_bottom = 73.0
+offset_top = 111.0
+offset_right = 120.0
+offset_bottom = 129.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_outline_color = Color(0.22, 0.1, 0.02, 0.92)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
 text = "小火龙"
 horizontal_alignment = 1
 
 [node name="Detail" type="Label" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=694729776]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 72.0
-offset_right = 95.0
-offset_bottom = 88.0
-theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
-theme_override_font_sizes/font_size = 8
+offset_top = 128.0
+offset_right = 120.0
+offset_bottom = 143.0
+theme_override_colors/font_color = Color(1, 0.92, 0.64, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.1, 0.02, 0.92)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
 text = "雄 勇敢"
 horizontal_alignment = 1
 
 [node name="SlotB" type="TextureButton" parent="Pages/SocialPage/PlacePanel" unique_id=435774432]
 layout_mode = 0
-offset_left = 235.0
-offset_top = 47.0
-offset_right = 336.0
-offset_bottom = 137.0
+offset_left = 195.0
+offset_top = 58.0
+offset_right = 315.0
+offset_bottom = 201.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotB" unique_id=579922503]
@@ -1546,15 +2783,13 @@ layout_mode = 0
 offset_right = 101.0
 offset_bottom = 90.0
 mouse_filter = 2
-texture = ExtResource("21_social_slot")
+texture = ExtResource("22_w0t05")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotB" unique_id=952585466]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 6.0
-offset_right = 81.0
-offset_bottom = 56.0
+offset_right = 120.0
+offset_bottom = 112.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1562,37 +2797,40 @@ stretch_mode = 5
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotB" unique_id=1108406730]
 visible = false
 layout_mode = 0
-offset_left = 78.0
-offset_top = 3.0
-offset_right = 98.0
-offset_bottom = 23.0
+offset_left = 95.0
+offset_top = 4.0
+offset_right = 116.0
+offset_bottom = 25.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
 
 [node name="Name" type="Label" parent="Pages/SocialPage/PlacePanel/SlotB" unique_id=1208464408]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 56.0
-offset_right = 95.0
-offset_bottom = 73.0
+offset_top = 111.0
+offset_right = 120.0
+offset_bottom = 129.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_outline_color = Color(0.22, 0.1, 0.02, 0.92)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
 text = "水龟仔"
 horizontal_alignment = 1
 
 [node name="Detail" type="Label" parent="Pages/SocialPage/PlacePanel/SlotB" unique_id=823486107]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 72.0
-offset_right = 95.0
-offset_bottom = 88.0
-theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
-theme_override_font_sizes/font_size = 8
+offset_top = 128.0
+offset_right = 120.0
+offset_bottom = 143.0
+theme_override_colors/font_color = Color(1, 0.92, 0.64, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.1, 0.02, 0.92)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
 text = "雌 温和"
 horizontal_alignment = 1
 
 [node name="Preview" type="Label" parent="Pages/SocialPage/PlacePanel" unique_id=119161819]
+visible = false
 layout_mode = 0
 offset_left = 30.0
 offset_top = 126.0
@@ -1604,12 +2842,13 @@ text = "友好交流 88分  关系:默契"
 horizontal_alignment = 1
 
 [node name="Relationship" type="NinePatchRect" parent="Pages/SocialPage/PlacePanel" unique_id=1349890342]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 143.0
 offset_right = 341.0
 offset_bottom = 168.0
-texture = ExtResource("19_relation")
+texture = ExtResource("20_tn4tg")
 patch_margin_left = 30
 patch_margin_right = 30
 
@@ -1623,48 +2862,117 @@ text = "当前 默契 · 1次 · 最高88"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="HeartBubble" type="TextureRect" parent="Pages/SocialPage/PlacePanel" unique_id=680374775]
+layout_mode = 0
+offset_left = 147.0
+offset_top = 90.0
+offset_right = 205.0
+offset_bottom = 142.0
+mouse_filter = 2
+texture = ExtResource("34_social_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FxLayer" type="Control" parent="Pages/SocialPage/PlacePanel"]
+layout_mode = 0
+offset_right = 351.0
+offset_bottom = 270.0
+mouse_filter = 2
+
+[node name="HeartFx1" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+visible = false
+layout_mode = 0
+offset_left = 151.0
+offset_top = 96.0
+offset_right = 169.0
+offset_bottom = 112.0
+mouse_filter = 2
+texture = ExtResource("34_social_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeartFx2" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+visible = false
+layout_mode = 0
+offset_left = 181.0
+offset_top = 106.0
+offset_right = 195.0
+offset_bottom = 118.0
+mouse_filter = 2
+texture = ExtResource("34_social_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeartFx3" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+visible = false
+layout_mode = 0
+offset_left = 165.0
+offset_top = 83.0
+offset_right = 177.0
+offset_bottom = 94.0
+mouse_filter = 2
+texture = ExtResource("34_social_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeartFx4" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+visible = false
+layout_mode = 0
+offset_left = 194.0
+offset_top = 91.0
+offset_right = 210.0
+offset_bottom = 105.0
+mouse_filter = 2
+texture = ExtResource("34_social_heart")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="RosterPanel" type="Control" parent="Pages/SocialPage" unique_id=1114714981]
 anchors_preset = 0
 offset_left = 10.0
-offset_top = 288.0
+offset_top = 444.0
 offset_right = 365.0
-offset_bottom = 542.0
+offset_bottom = 600.0
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel" unique_id=604395256]
 layout_mode = 0
-offset_right = 355.0
-offset_bottom = 254.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 357.0
+offset_bottom = 156.0
 mouse_filter = 2
-texture = ExtResource("12_roster_panel")
+texture = ExtResource("11_l0i8l")
 expand_mode = 1
 
 [node name="Card1" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1059752229]
 layout_mode = 0
-offset_left = 28.0
-offset_top = 24.0
-offset_right = 124.0
-offset_bottom = 136.0
+offset_left = 8.0
+offset_top = 42.0
+offset_right = 60.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1591437861]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1413098494]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1594402758]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 89.0
@@ -1676,11 +2984,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1051131617]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 67.0
-offset_right = 86.0
-offset_bottom = 82.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.3 · 火"
 horizontal_alignment = 1
@@ -1697,42 +3007,61 @@ text = "勇敢"
 horizontal_alignment = 1
 
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1785011264]
+visible = false
 layout_mode = 0
-offset_left = 74.0
-offset_top = 89.0
-offset_right = 94.0
-offset_bottom = 109.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card1" unique_id=1616881134]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Card2" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=616383467]
 layout_mode = 0
-offset_left = 132.0
-offset_top = 24.0
-offset_right = 228.0
-offset_bottom = 136.0
+offset_left = 65.0
+offset_top = 42.0
+offset_right = 117.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=300780720]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=701764811]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=268113111]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 89.0
@@ -1744,11 +3073,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=1051779608]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 67.0
-offset_right = 86.0
-offset_bottom = 82.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.4 · 水"
 horizontal_alignment = 1
@@ -1765,42 +3096,61 @@ text = "温和"
 horizontal_alignment = 1
 
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=1927099244]
+visible = false
 layout_mode = 0
-offset_left = 74.0
-offset_top = 89.0
-offset_right = 94.0
-offset_bottom = 109.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card2" unique_id=927442960]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Card3" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=813255996]
 layout_mode = 0
-offset_left = 236.0
-offset_top = 24.0
-offset_right = 332.0
-offset_bottom = 136.0
+offset_left = 122.0
+offset_top = 42.0
+offset_right = 174.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=208173753]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 112.0
+offset_right = 52.0
+offset_bottom = 76.0
 mouse_filter = 2
-texture = ExtResource("13_card")
+texture = ExtResource("14_p3130")
 expand_mode = 1
 
 [node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=56004773]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 11.0
-offset_right = 77.0
-offset_bottom = 65.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=72106239]
+visible = false
 layout_mode = 0
 offset_left = 10.0
 offset_top = 89.0
@@ -1812,11 +3162,13 @@ horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=1930194341]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 68.0
-offset_right = 86.0
-offset_bottom = 83.0
-theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 9
 text = "Lv.5 · 草"
 horizontal_alignment = 1
@@ -1835,21 +3187,37 @@ horizontal_alignment = 1
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=1276870461]
 visible = false
 layout_mode = 0
-offset_left = 74.0
-offset_top = 89.0
-offset_right = 94.0
-offset_bottom = 109.0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
 mouse_filter = 2
-texture = ExtResource("15_check")
+texture = ExtResource("15_5g78r")
 expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card3" unique_id=899583653]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PreviousButton" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1176827036]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 208.0
-offset_right = 46.0
-offset_bottom = 252.0
+offset_left = 82.0
+offset_top = 120.0
+offset_right = 114.0
+offset_bottom = 152.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/PreviousButton" unique_id=2051167095]
@@ -1857,17 +3225,17 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("16_previous")
+texture = ExtResource("18_towwe")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NextButton" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1519092314]
 visible = false
 layout_mode = 0
-offset_left = 309.0
-offset_top = 208.0
-offset_right = 353.0
-offset_bottom = 252.0
+offset_left = 241.0
+offset_top = 120.0
+offset_right = 273.0
+offset_bottom = 152.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/NextButton" unique_id=1936610060]
@@ -1875,18 +3243,316 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("17_next")
+texture = ExtResource("19_tygpk")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="Card4" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1439713269]
+layout_mode = 0
+offset_left = 179.0
+offset_top = 42.0
+offset_right = 231.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=1105607207]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=2137544640]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=2074376999]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=1395667603]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=2077536899]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 77.0
+offset_right = 86.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=1371040263]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card4" unique_id=541387382]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card5" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=457280577]
+layout_mode = 0
+offset_left = 236.0
+offset_top = 42.0
+offset_right = 288.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=422297167]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=1380344937]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=1457201410]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=525161662]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=1538856547]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 77.0
+offset_right = 86.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=1703978735]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card5" unique_id=1820091642]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card6" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1641076313]
+layout_mode = 0
+offset_left = 293.0
+offset_top = 42.0
+offset_right = 345.0
+offset_bottom = 118.0
+pivot_offset = Vector2(26, 38)
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=1354219317]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 76.0
+mouse_filter = 2
+texture = ExtResource("14_p3130")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=1348700948]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 47.0
+offset_bottom = 51.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=1057732397]
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 89.0
+offset_right = 86.0
+offset_bottom = 107.0
+theme_override_font_sizes/font_size = 11
+text = "草苗儿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=2027528443]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.4, 0.2, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "Lv.5 · 草"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=676827237]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 77.0
+offset_right = 86.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 8
+text = "谨慎"
+horizontal_alignment = 1
+
+[node name="Check" type="TextureRect" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=1895306584]
+visible = false
+layout_mode = 0
+offset_left = 37.0
+offset_top = 58.0
+offset_right = 52.0
+offset_bottom = 73.0
+mouse_filter = 2
+texture = ExtResource("15_5g78r")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionMark" type="Label" parent="Pages/SocialPage/RosterPanel/Card6" unique_id=113672914]
+visible = false
+layout_mode = 0
+offset_left = 35.0
+offset_top = 54.0
+offset_right = 53.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0.23, 0.67, 0.16, 1)
+theme_override_colors/font_outline_color = Color(1, 0.98, 0.84, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Heading" type="Label" parent="Pages/SocialPage/RosterPanel" unique_id=1721905273]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 355.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 14
+text = "我的精灵"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Pages/SocialPage/RosterPanel" unique_id=695252367]
+layout_mode = 0
+offset_top = 22.0
+offset_right = 355.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 9
+text = "点击精灵，在当前页面执行操作"
+horizontal_alignment = 1
+
+[node name="PageText" type="Label" parent="Pages/SocialPage/RosterPanel" unique_id=797212699]
+layout_mode = 0
+offset_left = 116.0
+offset_top = 124.0
+offset_right = 239.0
+offset_bottom = 147.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
 [node name="Ribbon" type="TextureRect" parent="Pages/SocialPage" unique_id=1267274546]
+visible = false
 layout_mode = 0
 offset_left = 18.0
 offset_top = 555.0
 offset_right = 357.0
 offset_bottom = 597.0
 mouse_filter = 2
-texture = ExtResource("19_relation")
+texture = ExtResource("20_tn4tg")
 expand_mode = 1
 
 [node name="RibbonText" type="Label" parent="Pages/SocialPage/Ribbon" unique_id=1438499372]
@@ -1900,12 +3566,14 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BottomButtons" type="Control" parent="Pages/SocialPage" unique_id=2036469146]
+z_index = 4
 anchors_preset = 0
-offset_top = 610.0
+offset_top = 350.0
 offset_right = 375.0
-offset_bottom = 667.0
+offset_bottom = 407.0
 
 [node name="ClassroomButton" type="TextureButton" parent="Pages/SocialPage/BottomButtons" unique_id=1665302814]
+visible = false
 layout_mode = 0
 offset_left = 14.0
 offset_right = 119.0
@@ -1917,7 +3585,7 @@ layout_mode = 0
 offset_right = 105.0
 offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/SocialPage/BottomButtons/ClassroomButton" unique_id=2121842057]
@@ -1932,23 +3600,32 @@ vertical_alignment = 1
 
 [node name="ActionButton" type="TextureButton" parent="Pages/SocialPage/BottomButtons" unique_id=808442280]
 layout_mode = 0
-offset_left = 256.0
-offset_right = 361.0
-offset_bottom = 48.0
+offset_left = 244.0
+offset_top = 9.0
+offset_right = 349.0
+offset_bottom = 55.0
+pivot_offset = Vector2(52.5, 23)
 ignore_texture_size = true
 
+[node name="SocialFrame" type="Panel" parent="Pages/SocialPage/BottomButtons/ActionButton" unique_id=1873407961]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/BottomButtons/ActionButton" unique_id=1073461200]
+visible = false
 layout_mode = 0
 offset_right = 105.0
 offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/SocialPage/BottomButtons/ActionButton" unique_id=1860556302]
 layout_mode = 0
 offset_right = 105.0
-offset_bottom = 48.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.22, 0.12, 0.02, 1)
 theme_override_font_sizes/font_size = 13
 text = "开始"
@@ -1980,7 +3657,7 @@ layout_mode = 0
 offset_right = 325.0
 offset_bottom = 392.0
 mouse_filter = 2
-texture = ExtResource("22_social_result")
+texture = ExtResource("23_vtvj8")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2066,6 +3743,7 @@ offset_left = 125.0
 offset_top = 443.0
 offset_right = 250.0
 offset_bottom = 489.0
+pivot_offset = Vector2(62.5, 23)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Pages/SocialPage/ResultPopup/ConfirmButton" unique_id=1010415241]
@@ -2073,7 +3751,7 @@ layout_mode = 0
 offset_right = 125.0
 offset_bottom = 46.0
 mouse_filter = 2
-texture = ExtResource("9_gold_button")
+texture = ExtResource("10_2bgry")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/SocialPage/ResultPopup/ConfirmButton" unique_id=485396203]
@@ -2085,6 +3763,75 @@ theme_override_font_sizes/font_size = 13
 text = "确认"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BondPanel" type="Panel" parent="Pages/SocialPage" unique_id=219184840]
+z_index = 2
+layout_mode = 0
+offset_left = 12.0
+offset_top = 330.0
+offset_right = 363.0
+offset_bottom = 422.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6r8en")
+
+[node name="Heart" type="TextureRect" parent="Pages/SocialPage/BondPanel" unique_id=1870693515]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 14.0
+offset_right = 65.0
+offset_bottom = 67.0
+mouse_filter = 2
+texture = ExtResource("35_bond_hearts")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BondTitle" type="Label" parent="Pages/SocialPage/BondPanel" unique_id=1290433937]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 8.0
+offset_right = 236.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
+
+[node name="ProgressText" type="Label" parent="Pages/SocialPage/BondPanel" unique_id=1134675093]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 28.0
+offset_right = 226.0
+offset_bottom = 51.0
+theme_override_colors/font_color = Color(0.57, 0.24, 0.13, 1)
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+
+[node name="Summary" type="Label" parent="Pages/SocialPage/BondPanel" unique_id=906493972]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 57.0
+offset_right = 234.0
+offset_bottom = 85.0
+theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 8
+vertical_alignment = 1
+
+[node name="ProgressBack" type="Panel" parent="Pages/SocialPage/BondPanel" unique_id=854769868]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 45.0
+offset_right = 226.0
+offset_bottom = 55.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_m2tru")
+
+[node name="ProgressFill" type="Panel" parent="Pages/SocialPage/BondPanel" unique_id=1526829892]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 45.0
+offset_right = 72.0
+offset_bottom = 55.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pxbg2")
 
 [node name="Header" type="Control" parent="." unique_id=1062151602]
 z_index = 10
@@ -2099,6 +3846,7 @@ offset_left = 12.0
 offset_top = 102.0
 offset_right = 56.0
 offset_bottom = 146.0
+pivot_offset = Vector2(22, 22)
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -2107,37 +3855,38 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("23_previous_round")
+texture = ExtResource("12_uqcji")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="TitleFrame" type="TextureRect" parent="Header" unique_id=728904535]
 layout_mode = 0
-offset_left = 88.0
+offset_left = 85.0
 offset_top = 61.0
-offset_right = 307.0
+offset_right = 304.0
 offset_bottom = 114.0
 mouse_filter = 2
-texture = ExtResource("4_header")
+texture = ExtResource("24_87rtj")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Title" type="Label" parent="Header" unique_id=1010518782]
 layout_mode = 0
-offset_left = 92.0
-offset_top = 70.0
-offset_right = 303.0
-offset_bottom = 103.0
+offset_left = 89.0
+offset_top = 72.0
+offset_right = 300.0
+offset_bottom = 105.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 23
-text = "宠物农场"
+text = "精灵农场"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Status" type="Label" parent="Header" unique_id=1842691377]
 visible = false
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_left = 57.0
 offset_top = 74.0
@@ -2147,5 +3896,376 @@ theme_override_colors/font_color = Color(1, 0.88, 0.36, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 16
-text = "收获 +120 EXP"
 horizontal_alignment = 1
+
+[node name="PetFarmResourceBar" type="Control" parent="." unique_id=1494755375]
+z_index = 9
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="GoldCapsule" type="Panel" parent="PetFarmResourceBar" unique_id=1164883971]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 14.0
+offset_right = 121.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gcd6x")
+
+[node name="Frame" type="TextureRect" parent="PetFarmResourceBar/GoldCapsule" unique_id=451354424]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("25_jbwww")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmResourceBar/GoldCapsule" unique_id=843484111]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 27.0
+offset_bottom = 27.0
+mouse_filter = 2
+texture = ExtResource("26_cwols")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PetFarmResourceBar/GoldCapsule" unique_id=1703166086]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+theme_override_colors/font_color = Color(0.34, 0.17, 0.04, 1)
+theme_override_font_sizes/font_size = 12
+text = "金币  0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GemCapsule" type="Panel" parent="PetFarmResourceBar" unique_id=137991559]
+layout_mode = 0
+offset_left = 127.0
+offset_top = 14.0
+offset_right = 232.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ca4fg")
+
+[node name="Frame" type="TextureRect" parent="PetFarmResourceBar/GemCapsule" unique_id=1643549940]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("25_jbwww")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmResourceBar/GemCapsule" unique_id=1452880629]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 27.0
+offset_bottom = 27.0
+mouse_filter = 2
+texture = ExtResource("27_4kyrp")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PetFarmResourceBar/GemCapsule" unique_id=1536927877]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+theme_override_colors/font_color = Color(0.34, 0.17, 0.04, 1)
+theme_override_font_sizes/font_size = 12
+text = "钻石  0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnergyCapsule" type="Panel" parent="PetFarmResourceBar" unique_id=919754895]
+layout_mode = 0
+offset_left = 238.0
+offset_top = 14.0
+offset_right = 359.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_h4son")
+
+[node name="Frame" type="TextureRect" parent="PetFarmResourceBar/EnergyCapsule" unique_id=1902604643]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("25_jbwww")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmResourceBar/EnergyCapsule" unique_id=1528396850]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 27.0
+offset_bottom = 27.0
+mouse_filter = 2
+texture = ExtResource("8_5svvp")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PetFarmResourceBar/EnergyCapsule" unique_id=2004795185]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+theme_override_colors/font_color = Color(0.34, 0.17, 0.04, 1)
+theme_override_font_sizes/font_size = 12
+text = "体力  Full"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SharedToast" type="Label" parent="." unique_id=778715728]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 30
+layout_mode = 0
+offset_left = 42.0
+offset_top = 116.0
+offset_right = 333.0
+offset_bottom = 150.0
+theme_override_colors/font_color = Color(1, 0.91, 0.42, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.08, 0.02, 0.96)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PetFarmBottomNav" type="Control" parent="." unique_id=1020926209]
+z_index = 12
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 600.0
+offset_right = 363.0
+offset_bottom = 665.0
+
+[node name="Panel" type="TextureRect" parent="PetFarmBottomNav" unique_id=2053859899]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("28_76x2r")
+expand_mode = 1
+
+[node name="Nav1" type="Button" parent="PetFarmBottomNav" unique_id=457861422]
+modulate = Color(0.92, 0.92, 0.92, 1)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 75.0
+offset_bottom = 61.0
+pivot_offset = Vector2(33.5, 28.5)
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav1" unique_id=202457561]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 64.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("29_ceena")
+expand_mode = 1
+
+[node name="Glyph" type="Label" parent="PetFarmBottomNav/Nav1" unique_id=1125156458]
+layout_mode = 0
+offset_top = 2.0
+offset_right = 67.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.52, 0.25, 0.05, 1)
+theme_override_font_sizes/font_size = 27
+text = "⌂"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text" type="Label" parent="PetFarmBottomNav/Nav1" unique_id=594671838]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 67.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 11
+text = "主页"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Nav2" type="Button" parent="PetFarmBottomNav" unique_id=364303599]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 4.0
+offset_right = 142.0
+offset_bottom = 61.0
+pivot_offset = Vector2(33.5, 28.5)
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav2" unique_id=362631236]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 64.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("29_ceena")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmBottomNav/Nav2" unique_id=446479245]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("30_h68c6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PetFarmBottomNav/Nav2" unique_id=1810959342]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 67.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 11
+text = "农场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Nav3" type="Button" parent="PetFarmBottomNav" unique_id=672987752]
+modulate = Color(0.92, 0.92, 0.92, 1)
+layout_mode = 0
+offset_left = 142.0
+offset_top = 4.0
+offset_right = 209.0
+offset_bottom = 61.0
+pivot_offset = Vector2(33.5, 28.5)
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav3" unique_id=1485065725]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 64.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("29_ceena")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmBottomNav/Nav3" unique_id=1803025713]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("31_gfw44")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PetFarmBottomNav/Nav3" unique_id=1711623634]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 67.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 11
+text = "课堂"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Nav4" type="Button" parent="PetFarmBottomNav" unique_id=311284353]
+modulate = Color(0.92, 0.92, 0.92, 1)
+layout_mode = 0
+offset_left = 209.0
+offset_top = 4.0
+offset_right = 276.0
+offset_bottom = 61.0
+pivot_offset = Vector2(33.5, 28.5)
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav4" unique_id=1978902525]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 64.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("29_ceena")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmBottomNav/Nav4" unique_id=1341327995]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("32_qnd86")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PetFarmBottomNav/Nav4" unique_id=388909366]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 67.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 11
+text = "广场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Nav5" type="Button" parent="PetFarmBottomNav" unique_id=124124742]
+modulate = Color(0.92, 0.92, 0.92, 1)
+layout_mode = 0
+offset_left = 276.0
+offset_top = 4.0
+offset_right = 343.0
+offset_bottom = 61.0
+pivot_offset = Vector2(33.5, 28.5)
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav5" unique_id=29280089]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 64.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("29_ceena")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="PetFarmBottomNav/Nav5" unique_id=858935388]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("33_l085d")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PetFarmBottomNav/Nav5" unique_id=719016063]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 67.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 11
+text = "菜单"
+horizontal_alignment = 1
+vertical_alignment = 1

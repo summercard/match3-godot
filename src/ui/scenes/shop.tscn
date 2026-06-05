@@ -1,27 +1,102 @@
 [gd_scene format=3 uid="uid://c72yn1k0rw21q"]
 
-[ext_resource type="Script" uid="uid://b1mwnf6oxkocj" path="res://src/ui/scene/scene_shop_gui.gd" id="1_utc0t"]
-[ext_resource type="Texture2D" uid="uid://bg8uqatwoy6cg" path="res://assets/images/shop/bg_shop_room.png" id="2_7elti"]
-[ext_resource type="Texture2D" uid="uid://bt31ramhvkx50" path="res://assets/images/shop/ui_top_bar.png" id="3_iegda"]
-[ext_resource type="Texture2D" uid="uid://ctd7b8okr78de" path="res://assets/images/shop/ui_back_button.png" id="4_ohk5r"]
-[ext_resource type="Texture2D" uid="uid://v3vet5p1nm0j" path="res://assets/images/shop/ui_currency_chip.png" id="5_uovvq"]
-[ext_resource type="Texture2D" uid="uid://dq28s12div2e4" path="res://assets/images/main/icon_gold.png" id="6_1pd8y"]
-[ext_resource type="Texture2D" uid="uid://b4lby180p5l47" path="res://assets/images/main/icon_diamond.png" id="7_1xkr1"]
-[ext_resource type="Texture2D" uid="uid://cwt1013483b4s" path="res://assets/images/shop/ui_tab_inactive.png" id="8_sx5pg"]
-[ext_resource type="Texture2D" uid="uid://ft2okh6xryeh" path="res://assets/images/shop/ui_feature_banner.png" id="9_uams2"]
-[ext_resource type="Texture2D" uid="uid://ei2gt0ngelq7" path="res://assets/images/shop/ui_product_card.png" id="10_am3cg"]
-[ext_resource type="Texture2D" uid="uid://br3iocipe2326" path="res://assets/images/items/icon_item_capture_ball.png" id="11_a5pmm"]
-[ext_resource type="Texture2D" uid="uid://w3eo1ifau1np" path="res://assets/images/shop/ui_price_plate.png" id="12_3cdwu"]
-[ext_resource type="Texture2D" uid="uid://cbbj4w1kv74xi" path="res://assets/images/stage/ui_arrow_button.png" id="13_ck87i"]
-[ext_resource type="Texture2D" uid="uid://cx2v2jx2rl4ge" path="res://assets/images/stage/icon_prev_arrow.png" id="14_nblan"]
-[ext_resource type="Texture2D" uid="uid://bcg7iju0r67x0" path="res://assets/images/stage/icon_next_arrow.png" id="15_284ei"]
-[ext_resource type="Texture2D" uid="uid://cbtp6x31rxt3f" path="res://assets/images/shop/ui_bottom_nav.png" id="16_gi807"]
-[ext_resource type="Texture2D" uid="uid://bs3i2laruru4e" path="res://assets/images/shop/ui_popup_panel.png" id="17_gw6pm"]
-[ext_resource type="Texture2D" uid="uid://t6qxc7kurfk2" path="res://assets/images/shop/ui_qty_button.png" id="18_wkqae"]
-[ext_resource type="Texture2D" uid="uid://y7stx75uk4c4" path="res://assets/images/shop/ui_buy_button_disabled.png" id="19_vacra"]
-[ext_resource type="Texture2D" uid="uid://dhw5ysfd8v8ux" path="res://assets/images/shop/ui_buy_button.png" id="20_tdbsf"]
+[ext_resource type="Script" path="res://src/ui/scene/scene_shop_gui.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="3_currency"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="4_gold"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="5_diamond"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/icon_plus_v3.png" id="6_plus"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch/fx_social_heart.png" id="7_heart"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_settings_button_v3.png" id="8_settings"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_category_gems.png" id="9_cat_gems"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_category_coins.png" id="10_cat_coins"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_category_hearts.png" id="11_cat_hearts"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_category_boosters.png" id="12_cat_boosters"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_category_chest.png" id="13_cat_chest"]
+[ext_resource type="Texture2D" path="res://assets/images/items/icon_item_capture_ball.png" id="14_item_placeholder"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="15_bottom_nav"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_nav_home.png" id="16_nav_home"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_nav_pets.png" id="17_nav_pets"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_nav_battle.png" id="18_nav_battle"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_nav_shop.png" id="19_nav_shop"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/icon_shop_nav_menu.png" id="20_nav_menu"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_dex_page_prev.png" id="24_prev"]
+[ext_resource type="Texture2D" path="res://assets/images/album/ui_dex_page_next.png" id="25_next"]
+[ext_resource type="Texture2D" path="res://assets/images/battle/monsters/monster_002_water_cub.png" id="26_mascot"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_card_panel_image2_clean.png" id="27_card_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_price_button_image2_clean.png" id="28_price_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_tab_active_image2_clean.png" id="29_tab_active_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_tab_normal_image2_clean.png" id="30_tab_normal_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png" id="31_title_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/icon_shop_home_image2.png" id="32_home_image2"]
 
-[node name="ShopGui" type="Control" unique_id=1115117231]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title_plaque"]
+bg_color = Color(0.92, 0.42, 0.12, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.75, 0.22, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.30, 0.13, 0.02, 0.35)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buy"]
+bg_color = Color(0.48, 0.82, 0.16, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.28, 0.58, 0.08, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+shadow_color = Color(0.14, 0.33, 0.03, 0.24)
+shadow_size = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selected_nav"]
+bg_color = Color(1, 0.77, 0.20, 0.54)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.70, 0.98, 0.20, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_popup"]
+bg_color = Color(1, 0.95, 0.82, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.94, 0.58, 0.18, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.32)
+shadow_size = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_quantity"]
+bg_color = Color(1, 0.98, 0.89, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.54, 0.18, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="ShopGui" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,1413 +105,2143 @@ offset_right = 375.0
 offset_bottom = 667.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_utc0t")
+script = ExtResource("1_script")
 
-[node name="Background" type="TextureRect" parent="." unique_id=2026526159]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-texture = ExtResource("2_7elti")
+texture = ExtResource("2_bg")
 expand_mode = 1
+stretch_mode = 6
 
-[node name="Shade" type="ColorRect" parent="." unique_id=1939662859]
+[node name="Shade" type="ColorRect" parent="."]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.04, 0.1, 0.1)
+color = Color(1, 0.96, 0.82, 0.08)
 
-[node name="Header" type="Control" parent="." unique_id=429962300]
+[node name="Header" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 62.0
+offset_bottom = 70.0
 mouse_filter = 2
 
-[node name="TopBar" type="TextureRect" parent="Header" unique_id=2121377211]
-layout_mode = 0
-offset_right = 375.0
-offset_bottom = 60.0
+[node name="GoldChip" type="Control" parent="Header"]
+anchors_preset = 0
+offset_left = 4.0
+offset_top = 8.0
+offset_right = 116.0
+offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("3_iegda")
+
+[node name="Frame" type="TextureRect" parent="Header/GoldChip"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 112.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
 expand_mode = 1
+stretch_mode = 5
 
-[node name="BackButton" type="TextureButton" parent="Header" unique_id=1897048436]
+[node name="Icon" type="TextureRect" parent="Header/GoldChip"]
 layout_mode = 0
-offset_left = 6.0
-offset_top = -2.0
-offset_right = 64.0
-offset_bottom = 56.0
+offset_left = 5.0
+offset_top = 6.0
+offset_right = 33.0
+offset_bottom = 34.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="Header/GoldChip"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 7.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Plus" type="TextureRect" parent="Header/GoldChip"]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 10.0
+offset_right = 107.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("6_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondChip" type="Control" parent="Header"]
+anchors_preset = 0
+offset_left = 118.0
+offset_top = 8.0
+offset_right = 230.0
+offset_bottom = 48.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="Header/DiamondChip"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 112.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Header/DiamondChip"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 6.0
+offset_right = 33.0
+offset_bottom = 34.0
+mouse_filter = 2
+texture = ExtResource("5_diamond")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="Header/DiamondChip"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 7.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Plus" type="TextureRect" parent="Header/DiamondChip"]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 10.0
+offset_right = 107.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("6_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnergyChip" type="Control" parent="Header"]
+anchors_preset = 0
+offset_left = 232.0
+offset_top = 8.0
+offset_right = 344.0
+offset_bottom = 48.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="Header/EnergyChip"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 112.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Header/EnergyChip"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 6.0
+offset_right = 33.0
+offset_bottom = 34.0
+mouse_filter = 2
+texture = ExtResource("7_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="Header/EnergyChip"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 7.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "5 Full"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Plus" type="TextureRect" parent="Header/EnergyChip"]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 10.0
+offset_right = 107.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("6_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SettingsButton" type="TextureButton" parent="Header"]
+layout_mode = 0
+offset_left = 345.0
+offset_top = 10.0
+offset_right = 373.0
+offset_bottom = 38.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="Header/BackButton" unique_id=949245766]
+[node name="Frame" type="TextureRect" parent="Header/SettingsButton"]
 layout_mode = 0
-offset_right = 58.0
-offset_bottom = 58.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
-texture = ExtResource("4_ohk5r")
+texture = ExtResource("8_settings")
 expand_mode = 1
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="Header" unique_id=531508013]
+[node name="TitlePlaque" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 54.0
+offset_top = 63.0
+offset_right = 321.0
+offset_bottom = 127.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="TitlePlaque"]
 layout_mode = 0
-offset_left = 78.0
-offset_top = 15.0
-offset_right = 160.0
-offset_bottom = 49.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 267.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+texture = ExtResource("31_title_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Title" type="Label" parent="TitlePlaque"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 9.0
+offset_right = 233.0
+offset_bottom = 56.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 27
+theme_override_font_sizes/font_size = 31
 text = "商店"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="GoldChip" type="Control" parent="Header" unique_id=1931267053]
+[node name="Tabs" type="Control" parent="."]
 anchors_preset = 0
-offset_left = 176.0
-offset_top = 14.0
-offset_right = 269.0
-offset_bottom = 46.0
+offset_left = 9.0
+offset_top = 132.0
+offset_right = 366.0
+offset_bottom = 178.0
 mouse_filter = 2
 
-[node name="Frame" type="TextureRect" parent="Header/GoldChip" unique_id=921344469]
+[node name="Gems" type="TextureButton" parent="Tabs"]
 layout_mode = 0
-offset_right = 93.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 70.0
+offset_bottom = 43.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Tabs/Gems"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 70.0
+offset_bottom = 43.0
+mouse_filter = 2
+
+texture = ExtResource("29_tab_active_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="Tabs/Gems"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 29.0
 offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("5_uovvq")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="Header/GoldChip" unique_id=1076790904]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 6.0
-offset_right = 28.0
-offset_bottom = 30.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
+texture = ExtResource("9_cat_gems")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Amount" type="Label" parent="Header/GoldChip" unique_id=1458120600]
+[node name="Text" type="Label" parent="Tabs/Gems"]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 6.0
-offset_right = 88.0
-offset_bottom = 29.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 28.0
+offset_top = 8.0
+offset_right = 68.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 13
-text = "0"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="DiamondChip" type="Control" parent="Header" unique_id=1610869453]
-anchors_preset = 0
-offset_left = 278.0
-offset_top = 14.0
-offset_right = 370.0
-offset_bottom = 46.0
+[node name="Coins" type="TextureButton" parent="Tabs"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 0.0
+offset_right = 142.0
+offset_bottom = 43.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="Tabs/Coins"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 70.0
+offset_bottom = 43.0
 mouse_filter = 2
 
-[node name="Frame" type="TextureRect" parent="Header/DiamondChip" unique_id=205768298]
+texture = ExtResource("30_tab_normal_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="Tabs/Coins"]
 layout_mode = 0
-offset_right = 92.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 29.0
 offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("5_uovvq")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="Header/DiamondChip" unique_id=519652810]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 5.0
-offset_right = 26.0
-offset_bottom = 29.0
-mouse_filter = 2
-texture = ExtResource("7_1xkr1")
+texture = ExtResource("10_cat_coins")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Amount" type="Label" parent="Header/DiamondChip" unique_id=1632447999]
+[node name="Text" type="Label" parent="Tabs/Coins"]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 6.0
-offset_right = 87.0
-offset_bottom = 29.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 28.0
+offset_top = 8.0
+offset_right = 68.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 13
-text = "0"
+text = "冒险"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Tabs" type="Control" parent="." unique_id=1957563140]
-anchors_preset = 0
-offset_left = 38.0
-offset_top = 562.0
-offset_right = 340.0
-offset_bottom = 605.0
-mouse_filter = 2
-
-[node name="Recommend" type="TextureButton" parent="Tabs" unique_id=1238488418]
+[node name="Hearts" type="TextureButton" parent="Tabs"]
 layout_mode = 0
-offset_right = 98.0
-offset_bottom = 42.0
+offset_left = 144.0
+offset_top = 0.0
+offset_right = 214.0
+offset_bottom = 43.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="Tabs/Recommend" unique_id=1100946651]
+[node name="Frame" type="TextureRect" parent="Tabs/Hearts"]
 layout_mode = 0
-offset_right = 98.0
-offset_bottom = 42.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 70.0
+offset_bottom = 43.0
 mouse_filter = 2
-texture = ExtResource("8_sx5pg")
+
+texture = ExtResource("30_tab_normal_image2")
 expand_mode = 1
-
-[node name="Text" type="Label" parent="Tabs/Recommend" unique_id=1729676698]
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="Tabs/Hearts"]
 layout_mode = 0
-offset_top = 7.0
-offset_right = 98.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 17
-text = "推荐"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Items" type="TextureButton" parent="Tabs" unique_id=1327847347]
-layout_mode = 0
-offset_left = 102.0
-offset_right = 200.0
-offset_bottom = 42.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="Tabs/Items" unique_id=433441500]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 42.0
-mouse_filter = 2
-texture = ExtResource("8_sx5pg")
-expand_mode = 1
-
-[node name="Text" type="Label" parent="Tabs/Items" unique_id=1744452679]
-layout_mode = 0
-offset_top = 7.0
-offset_right = 98.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 17
-text = "道具"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Gems" type="TextureButton" parent="Tabs" unique_id=1175344553]
-layout_mode = 0
-offset_left = 204.0
-offset_right = 302.0
-offset_bottom = 42.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="Tabs/Gems" unique_id=158183095]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 42.0
-mouse_filter = 2
-texture = ExtResource("8_sx5pg")
-expand_mode = 1
-
-[node name="Text" type="Label" parent="Tabs/Gems" unique_id=1026293222]
-layout_mode = 0
-offset_top = 7.0
-offset_right = 98.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 17
-text = "宝石"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="FeatureBanner" type="Control" parent="." unique_id=1777832556]
-visible = false
-anchors_preset = 0
-offset_left = 12.0
-offset_top = 112.0
-offset_right = 363.0
-offset_bottom = 230.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="FeatureBanner" unique_id=1591195591]
-layout_mode = 0
-offset_right = 351.0
-offset_bottom = 118.0
-mouse_filter = 2
-texture = ExtResource("9_uams2")
-expand_mode = 1
-
-[node name="Title" type="Label" parent="FeatureBanner" unique_id=460459554]
-layout_mode = 0
-offset_left = 118.0
-offset_top = 19.0
-offset_right = 255.0
-offset_bottom = 44.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Desc" type="Label" parent="FeatureBanner" unique_id=1142234763]
-layout_mode = 0
-offset_left = 118.0
-offset_top = 46.0
-offset_right = 255.0
-offset_bottom = 69.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="ProductGrid" type="Control" parent="." unique_id=1304273126]
-anchors_preset = 0
-offset_left = 10.0
-offset_top = 228.0
-offset_right = 365.0
-offset_bottom = 693.0
-mouse_filter = 2
-
-[node name="Panel" type="ColorRect" parent="ProductGrid" unique_id=1840437565]
-layout_mode = 0
-offset_right = 355.0
-offset_bottom = 465.0
-mouse_filter = 2
-color = Color(0.02, 0.08, 0.15, 0.42)
-
-[node name="Cards" type="Control" parent="ProductGrid" unique_id=1363912003]
-anchors_preset = 0
-offset_left = 8.0
+offset_left = 5.0
 offset_top = 8.0
-offset_right = 347.0
-offset_bottom = 350.0
+offset_right = 29.0
+offset_bottom = 32.0
 mouse_filter = 2
-
-[node name="Card1" type="TextureButton" parent="ProductGrid/Cards" unique_id=1973991935]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card1" unique_id=563745594]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card1" unique_id=1550079580]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card1" unique_id=1957234250]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
+texture = ExtResource("11_cat_hearts")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card1" unique_id=1690557122]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card1" unique_id=999893846]
-anchors_preset = 0
-offset_left = 14.0
-offset_top = 73.0
-offset_right = 95.0
-offset_bottom = 95.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card1/Price" unique_id=1534017853]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card1/Price" unique_id=1181829229]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card1/Price" unique_id=1370065445]
+[node name="Text" type="Label" parent="Tabs/Hearts"]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card2" type="TextureButton" parent="ProductGrid/Cards" unique_id=1087790546]
-layout_mode = 0
-offset_left = 115.0
-offset_right = 222.0
-offset_bottom = 103.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card2" unique_id=731044597]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card2" unique_id=1207967703]
-layout_mode = 0
-offset_left = 8.0
 offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_right = 68.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
+theme_override_font_sizes/font_size = 13
+text = "商店"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card2" unique_id=2117600341]
+[node name="Boosters" type="TextureButton" parent="Tabs"]
 layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card2" unique_id=1315789051]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card2" unique_id=85723191]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card2/Price" unique_id=722327306]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card2/Price" unique_id=125428136]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card2/Price" unique_id=45477999]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card3" type="TextureButton" parent="ProductGrid/Cards" unique_id=1035413148]
-layout_mode = 0
-offset_left = 230.0
-offset_right = 337.0
-offset_bottom = 103.0
+offset_left = 216.0
+offset_top = 0.0
+offset_right = 288.0
+offset_bottom = 43.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card3" unique_id=1961544487]
+[node name="Frame" type="TextureRect" parent="Tabs/Boosters"]
 layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 72.0
+offset_bottom = 43.0
 mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
 
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card3" unique_id=1389295429]
+texture = ExtResource("30_tab_normal_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="Tabs/Boosters"]
 layout_mode = 0
-offset_left = 8.0
+offset_left = 5.0
 offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card3" unique_id=726004944]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
+offset_right = 29.0
+offset_bottom = 32.0
 mouse_filter = 2
-texture = ExtResource("11_a5pmm")
+texture = ExtResource("12_cat_boosters")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card3" unique_id=1138226962]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card3" unique_id=234747834]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card3/Price" unique_id=456210300]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card3/Price" unique_id=1224693389]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card3/Price" unique_id=1097103924]
+[node name="Text" type="Label" parent="Tabs/Boosters"]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card4" type="TextureButton" parent="ProductGrid/Cards" unique_id=1671024755]
-layout_mode = 0
-offset_top = 113.0
-offset_right = 107.0
-offset_bottom = 216.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card4" unique_id=104825476]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card4" unique_id=1523105056]
-layout_mode = 0
-offset_left = 8.0
 offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_right = 70.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
+theme_override_font_sizes/font_size = 13
+text = "菜单"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card4" unique_id=9975326]
+[node name="Chest" type="TextureButton" parent="Tabs"]
 layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card4" unique_id=330990984]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card4" unique_id=1321121189]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card4/Price" unique_id=295684387]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card4/Price" unique_id=156544290]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card4/Price" unique_id=161292806]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card5" type="TextureButton" parent="ProductGrid/Cards" unique_id=2009010171]
-layout_mode = 0
-offset_left = 115.0
-offset_top = 113.0
-offset_right = 222.0
-offset_bottom = 216.0
+offset_left = 290.0
+offset_top = 0.0
+offset_right = 357.0
+offset_bottom = 43.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card5" unique_id=832986825]
+[node name="Frame" type="TextureRect" parent="Tabs/Chest"]
 layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 67.0
+offset_bottom = 43.0
 mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
 
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card5" unique_id=895329241]
+texture = ExtResource("30_tab_normal_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="Tabs/Chest"]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 7.0
-offset_right = 94.0
-offset_bottom = 30.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 29.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("13_cat_chest")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="Tabs/Chest"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 8.0
+offset_right = 65.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
+theme_override_font_sizes/font_size = 13
+text = "??"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card5" unique_id=521082343]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 24.0
-offset_right = 74.0
-offset_bottom = 62.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card5" unique_id=1240159045]
-layout_mode = 0
+[node name="ProductGrid" type="Control" parent="."]
+z_index = 5
+anchors_preset = 0
 offset_left = 16.0
-offset_top = 58.0
-offset_right = 86.0
-offset_bottom = 81.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_top = 184.0
+offset_right = 359.0
+offset_bottom = 590.0
+mouse_filter = 2
+
+[node name="Panel" type="ColorRect" parent="ProductGrid"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 343.0
+offset_bottom = 406.0
+mouse_filter = 2
+color = Color(1, 0.96, 0.82, 0.18)
+
+[node name="Cards" type="Control" parent="ProductGrid"]
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 343.0
+offset_bottom = 397.0
+mouse_filter = 2
+
+[node name="Card1" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card1"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card1"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
+theme_override_font_sizes/font_size = 13
+text = "??"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card5" unique_id=1634286569]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card5/Price" unique_id=1604672458]
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card1"]
 layout_mode = 0
-offset_left = 4.0
-offset_top = -4.0
-offset_right = 85.0
-offset_bottom = 18.0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card5/Price" unique_id=117215350]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 2.0
-offset_right = 25.0
-offset_bottom = 18.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
+texture = ExtResource("14_item_placeholder")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card5/Price" unique_id=281761525]
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card1"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card1"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card1/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card1/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card1/Price"]
 layout_mode = 0
 offset_left = 29.0
-offset_top = -1.0
-offset_right = 72.0
-offset_bottom = 22.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card6" type="TextureButton" parent="ProductGrid/Cards" unique_id=2083611108]
-layout_mode = 0
-offset_left = 230.0
-offset_top = 113.0
-offset_right = 337.0
-offset_bottom = 216.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card6" unique_id=1778774667]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card6" unique_id=453410137]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card6" unique_id=632574228]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card6" unique_id=1330512234]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card6" unique_id=1190886003]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card6/Price" unique_id=1159816573]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card6/Price" unique_id=660020126]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card6/Price" unique_id=1028994031]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Card7" type="TextureButton" parent="ProductGrid/Cards" unique_id=565564029]
-layout_mode = 0
-offset_top = 226.0
-offset_right = 107.0
-offset_bottom = 329.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card7" unique_id=1976367542]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card7" unique_id=704344553]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card7" unique_id=1672761262]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card7" unique_id=1876714136]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card7" unique_id=1812213826]
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card1"]
+visible = false
 anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card7/Price" unique_id=1994449544]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card7/Price" unique_id=104629566]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card7/Price" unique_id=866520596]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card8" type="TextureButton" parent="ProductGrid/Cards" unique_id=1715921299]
-layout_mode = 0
-offset_left = 115.0
-offset_top = 226.0
-offset_right = 222.0
-offset_bottom = 329.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card8" unique_id=1808271633]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card8" unique_id=1897170578]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card8" unique_id=643911293]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card8" unique_id=2082874904]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card8" unique_id=1390609039]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card8/Price" unique_id=1642444895]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card8/Price" unique_id=1307742134]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card8/Price" unique_id=443604013]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Card9" type="TextureButton" parent="ProductGrid/Cards" unique_id=1949876656]
-layout_mode = 0
-offset_left = 230.0
-offset_top = 226.0
-offset_right = 337.0
-offset_bottom = 329.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card9" unique_id=958097453]
-layout_mode = 0
-offset_right = 107.0
-offset_bottom = 103.0
-mouse_filter = 2
-texture = ExtResource("10_am3cg")
-expand_mode = 1
-
-[node name="Name" type="Label" parent="ProductGrid/Cards/Card9" unique_id=342230703]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 31.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "商品"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card9" unique_id=2132084469]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 28.0
-offset_right = 77.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("11_a5pmm")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Limit" type="Label" parent="ProductGrid/Cards/Card9" unique_id=822542013]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 64.0
-offset_right = 89.0
-offset_bottom = 87.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 8
-text = "限购"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Price" type="Control" parent="ProductGrid/Cards/Card9" unique_id=1636285371]
-anchors_preset = 0
-offset_left = 13.0
-offset_top = 77.0
-offset_right = 94.0
-offset_bottom = 99.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card9/Price" unique_id=1596478710]
-layout_mode = 0
-offset_right = 81.0
-offset_bottom = 22.0
-mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card9/Price" unique_id=922913334]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 3.0
-offset_right = 25.0
-offset_bottom = 19.0
-mouse_filter = 2
-texture = ExtResource("6_1pd8y")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Text" type="Label" parent="ProductGrid/Cards/Card9/Price" unique_id=837554758]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 3.0
-offset_right = 71.0
-offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="PageControls" type="Control" parent="ProductGrid" unique_id=589570271]
-anchors_preset = 0
-offset_left = 88.0
-offset_top = 374.0
-offset_right = 267.0
-offset_bottom = 417.0
-mouse_filter = 2
-
-[node name="PreviousButton" type="TextureButton" parent="ProductGrid/PageControls" unique_id=2013964083]
-layout_mode = 0
-offset_left = -75.0
-offset_right = -29.0
-offset_bottom = 40.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/PageControls/PreviousButton" unique_id=1256439143]
-layout_mode = 0
-offset_right = 46.0
-offset_bottom = 40.0
-mouse_filter = 2
-texture = ExtResource("13_ck87i")
-expand_mode = 1
-
-[node name="Arrow" type="TextureRect" parent="ProductGrid/PageControls/PreviousButton" unique_id=1661100094]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 10.0
-offset_right = 33.0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
 offset_bottom = 29.0
 mouse_filter = 2
-texture = ExtResource("14_nblan")
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card1/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card1/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card2" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 0.0
+offset_right = 223.0
+offset_bottom = 128.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card2"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card2"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card2"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PageLabel" type="Label" parent="ProductGrid/PageControls" unique_id=1894029736]
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card2"]
 layout_mode = 0
-offset_left = 52.0
-offset_top = 5.0
-offset_right = 127.0
-offset_bottom = 31.0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card2"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card2/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card2/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card2/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card2"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card2/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card2/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card3" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 0.0
+offset_right = 343.0
+offset_bottom = 128.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card3"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card3"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card3"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card3"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card3"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card3/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card3/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card3/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card3"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card3/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card3/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card4" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 134.0
+offset_right = 103.0
+offset_bottom = 262.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card4"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card4"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card4"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card4"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card4"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card4/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card4/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card4/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card4"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card4/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card4/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card5" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 134.0
+offset_right = 223.0
+offset_bottom = 262.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card5"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card5"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card5"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card5"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card5"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card5/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card5/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card5/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card5"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card5/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card5/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card6" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 134.0
+offset_right = 343.0
+offset_bottom = 262.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card6"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card6"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card6"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card6"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card6"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card6/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card6/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card6/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card6"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card6/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card6/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card7" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 268.0
+offset_right = 103.0
+offset_bottom = 396.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card7"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card7"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card7"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card7"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card7"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card7/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card7/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card7/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card7"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card7/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card7/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card8" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 268.0
+offset_right = 223.0
+offset_bottom = 396.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card8"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card8"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card8"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card8"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card8"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card8/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card8/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card8/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card8"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card8/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card8/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Card9" type="TextureButton" parent="ProductGrid/Cards"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 268.0
+offset_right = 343.0
+offset_bottom = 396.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card9"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+texture = ExtResource("27_card_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="ProductGrid/Cards/Card9"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 98.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card9"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 35.0
+offset_right = 80.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("14_item_placeholder")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Limit" type="Label" parent="ProductGrid/Cards/Card9"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 83.0
+offset_right = 94.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
+theme_override_font_sizes/font_size = 9
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Price" type="Control" parent="ProductGrid/Cards/Card9"]
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 101.0
+offset_right = 94.0
+offset_bottom = 126.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/Cards/Card9/Price"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 85.0
+offset_bottom = 25.0
+mouse_filter = 2
+
+texture = ExtResource("28_price_image2")
+expand_mode = 1
+stretch_mode = 5
+[node name="Icon" type="TextureRect" parent="ProductGrid/Cards/Card9/Price"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 28.0
+offset_bottom = 22.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card9/Price"]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 1.0
+offset_right = 76.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BestRibbon" type="Control" parent="ProductGrid/Cards/Card9"]
+visible = false
+anchors_preset = 0
+offset_left = 73.0
+offset_top = -4.0
+offset_right = 108.0
+offset_bottom = 29.0
+mouse_filter = 2
+
+[node name="Bg" type="ColorRect" parent="ProductGrid/Cards/Card9/BestRibbon"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 34.0
+offset_bottom = 27.0
+mouse_filter = 2
+color = Color(0.95, 0.34, 0.37, 0.96)
+
+[node name="Text" type="Label" parent="ProductGrid/Cards/Card9/BestRibbon"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 8
+text = "超值"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="PageControls" type="Control" parent="ProductGrid"]
+anchors_preset = 0
+offset_left = 104.0
+offset_top = 396.0
+offset_right = 239.0
+offset_bottom = 432.0
+mouse_filter = 2
+
+[node name="PreviousButton" type="TextureButton" parent="ProductGrid/PageControls"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 36.0
+offset_bottom = 36.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/PageControls/PreviousButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 36.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("24_prev")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NextButton" type="TextureButton" parent="ProductGrid/PageControls"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 0.0
+offset_right = 135.0
+offset_bottom = 36.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ProductGrid/PageControls/NextButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 36.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("25_next")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PageLabel" type="Label" parent="ProductGrid/PageControls"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 5.0
+offset_right = 99.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.43, 0.22, 0.07, 1)
+theme_override_font_sizes/font_size = 15
 text = "1/1"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="NextButton" type="TextureButton" parent="ProductGrid/PageControls" unique_id=1609579406]
+[node name="Mascot" type="TextureRect" parent="."]
+visible = false
+z_index = 4
 layout_mode = 0
-offset_left = 203.0
-offset_right = 249.0
-offset_bottom = 40.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="ProductGrid/PageControls/NextButton" unique_id=172512048]
-layout_mode = 0
-offset_right = 46.0
-offset_bottom = 40.0
+offset_left = 7.0
+offset_top = 500.0
+offset_right = 101.0
+offset_bottom = 588.0
 mouse_filter = 2
-texture = ExtResource("13_ck87i")
-expand_mode = 1
-
-[node name="Arrow" type="TextureRect" parent="ProductGrid/PageControls/NextButton" unique_id=2103370501]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 10.0
-offset_right = 33.0
-offset_bottom = 29.0
-mouse_filter = 2
-texture = ExtResource("15_284ei")
+texture = ExtResource("26_mascot")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BottomNav" type="Control" parent="." unique_id=1904340906]
+[node name="BottomNav" type="Control" parent="."]
+z_index = 20
 anchors_preset = 0
-offset_top = 652.0
+offset_left = 0.0
+offset_top = 596.0
 offset_right = 375.0
-offset_bottom = 725.0
+offset_bottom = 667.0
 mouse_filter = 2
 
-[node name="Frame" type="TextureRect" parent="BottomNav" unique_id=252291073]
+[node name="Frame" type="TextureRect" parent="BottomNav"]
 layout_mode = 0
-offset_right = 375.0
-offset_bottom = 73.0
+offset_left = 13.0
+offset_top = 1.0
+offset_right = 362.0
+offset_bottom = 70.0
 mouse_filter = 2
-texture = ExtResource("16_gi807")
+texture = ExtResource("15_bottom_nav")
 expand_mode = 1
 
-[node name="Label1" type="Label" parent="BottomNav" unique_id=1438679261]
+[node name="HomeButton" type="TextureButton" parent="BottomNav"]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 33.0
-offset_right = 97.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "每日特惠"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Label2" type="Label" parent="BottomNav" unique_id=1310986897]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 33.0
-offset_right = 222.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "限时礼包"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Label3" type="Label" parent="BottomNav" unique_id=312510638]
-layout_mode = 0
-offset_left = 277.0
-offset_top = 33.0
-offset_right = 347.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "月卡"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="PopupOverlay" type="Control" parent="." unique_id=1870761342]
+offset_left = 18.0
+offset_top = 3.0
+offset_right = 86.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+modulate = Color(1, 1, 1, 1)
+self_modulate = Color(1, 1, 1, 1)
+[node name="Selected" type="Panel" parent="BottomNav/HomeButton"]
 visible = false
-anchors_preset = 0
-offset_right = 375.0
-offset_bottom = 667.0
-mouse_filter = 2
-
-[node name="Dim" type="ColorRect" parent="PopupOverlay" unique_id=1115991852]
 layout_mode = 0
-offset_right = 375.0
-offset_bottom = 667.0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 65.0
+offset_bottom = 63.0
 mouse_filter = 2
-color = Color(0, 0, 0, 0.52)
+theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
 
-[node name="Panel" type="Control" parent="PopupOverlay" unique_id=1348029792]
-anchors_preset = 0
-offset_left = 38.0
-offset_top = 342.0
-offset_right = 338.0
-offset_bottom = 594.0
-mouse_filter = 2
-
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel" unique_id=401150008]
+[node name="IconCover" type="ColorRect" parent="BottomNav/HomeButton"]
 layout_mode = 0
-offset_right = 300.0
-offset_bottom = 252.0
+offset_left = 8.0
+offset_top = 2.0
+offset_right = 60.0
+offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("17_gw6pm")
+color = Color(1, 0.94, 0.78, 0.96)
+z_index = 4
+
+[node name="Icon" type="TextureRect" parent="BottomNav/HomeButton"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 56.0
+offset_bottom = 47.0
+mouse_filter = 2
+texture = ExtResource("32_home_image2")
 expand_mode = 1
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="PopupOverlay/Panel" unique_id=1799075824]
+z_index = 7
+modulate = Color(1, 1, 1, 1)
+self_modulate = Color(1, 1, 1, 1)
+[node name="Text" type="Label" parent="BottomNav/HomeButton"]
 layout_mode = 0
-offset_left = 76.0
+offset_left = 0.0
+offset_top = 39.0
+offset_right = 68.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+z_index = 8
+[node name="PetsButton" type="TextureButton" parent="BottomNav"]
+visible = false
+layout_mode = 0
+offset_left = 86.0
+offset_top = 3.0
+offset_right = 154.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+[node name="Selected" type="Panel" parent="BottomNav/PetsButton"]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 65.0
+offset_bottom = 63.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
+
+[node name="Icon" type="TextureRect" parent="BottomNav/PetsButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 0.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("17_nav_pets")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/PetsButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BattleButton" type="TextureButton" parent="BottomNav"]
+visible = false
+layout_mode = 0
+offset_left = 154.0
+offset_top = 3.0
+offset_right = 222.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+[node name="Selected" type="Panel" parent="BottomNav/BattleButton"]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 65.0
+offset_bottom = 63.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
+
+[node name="Icon" type="TextureRect" parent="BottomNav/BattleButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 0.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("18_nav_battle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/BattleButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="ShopButton" type="TextureButton" parent="BottomNav"]
+visible = false
+layout_mode = 0
+offset_left = 222.0
+offset_top = 3.0
+offset_right = 290.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+[node name="Selected" type="Panel" parent="BottomNav/ShopButton"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 65.0
+offset_bottom = 63.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
+
+[node name="Icon" type="TextureRect" parent="BottomNav/ShopButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 0.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("19_nav_shop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/ShopButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="MenuButton" type="TextureButton" parent="BottomNav"]
+visible = false
+layout_mode = 0
+offset_left = 290.0
+offset_top = 3.0
+offset_right = 358.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+[node name="Selected" type="Panel" parent="BottomNav/MenuButton"]
+visible = false
+layout_mode = 0
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 65.0
+offset_bottom = 63.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
+
+[node name="Icon" type="TextureRect" parent="BottomNav/MenuButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 0.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("20_nav_menu")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/MenuButton"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "??"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="PopupOverlay" type="Control" parent="."]
+visible = false
+z_index = 60
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="PopupOverlay"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="Panel" type="Control" parent="PopupOverlay"]
+anchors_preset = 0
+offset_left = 34.0
+offset_top = 278.0
+offset_right = 341.0
+offset_bottom = 548.0
+mouse_filter = 2
+
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 307.0
+offset_bottom = 270.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_popup")
+
+[node name="Title" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 70.0
 offset_top = 16.0
-offset_right = 224.0
-offset_bottom = 41.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_right = 237.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 18
@@ -1445,92 +2250,94 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="CloseButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1943746972]
+[node name="CloseButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
-offset_left = 258.0
+offset_left = 267.0
 offset_top = 12.0
-offset_right = 288.0
+offset_right = 297.0
 offset_bottom = 42.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/CloseButton" unique_id=961849450]
+[node name="Text" type="Label" parent="PopupOverlay/Panel/CloseButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 30.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
 theme_override_font_sizes/font_size = 23
 text = "×"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Icon" type="TextureRect" parent="PopupOverlay/Panel" unique_id=549811803]
+[node name="Icon" type="TextureRect" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 31.0
 offset_top = 76.0
 offset_right = 101.0
 offset_bottom = 142.0
 mouse_filter = 2
-texture = ExtResource("11_a5pmm")
+texture = ExtResource("14_item_placeholder")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Name" type="Label" parent="PopupOverlay/Panel" unique_id=1209130770]
+[node name="Name" type="Label" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 118.0
 offset_top = 78.0
 offset_right = 268.0
 offset_bottom = 102.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 17
 text = "商品"
+horizontal_alignment = 0
 vertical_alignment = 1
 clip_text = true
 
-[node name="Owned" type="Label" parent="PopupOverlay/Panel" unique_id=154722839]
+[node name="Owned" type="Label" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 118.0
 offset_top = 105.0
 offset_right = 268.0
 offset_bottom = 128.0
-theme_override_colors/font_color = Color(0.64, 0.7, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
+theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
 theme_override_font_sizes/font_size = 12
 text = "拥有: 0"
+horizontal_alignment = 0
 vertical_alignment = 1
 clip_text = true
 
-[node name="MinusButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=195386368]
+[node name="MinusButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 38.0
 offset_top = 145.0
 offset_right = 80.0
 offset_bottom = 179.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/MinusButton" unique_id=1094280028]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/MinusButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 42.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("18_wkqae")
-expand_mode = 1
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/MinusButton" unique_id=1596395590]
+theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
+[node name="Text" type="Label" parent="PopupOverlay/Panel/MinusButton"]
 layout_mode = 0
+offset_left = 0.0
 offset_top = 4.0
 offset_right = 42.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 20
@@ -1539,54 +2346,32 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="QuantityBox" type="ColorRect" parent="PopupOverlay/Panel" unique_id=1169945852]
-layout_mode = 0
-offset_left = 87.0
-offset_top = 145.0
-offset_right = 203.0
-offset_bottom = 179.0
-mouse_filter = 2
-color = Color(0.04, 0.11, 0.2, 0.85)
-
-[node name="Quantity" type="Label" parent="PopupOverlay/Panel" unique_id=1723936579]
-layout_mode = 0
-offset_left = 87.0
-offset_top = 148.0
-offset_right = 203.0
-offset_bottom = 173.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 18
-text = "1"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="PlusButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1764660094]
+[node name="PlusButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 212.0
 offset_top = 145.0
 offset_right = 252.0
 offset_bottom = 179.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/PlusButton" unique_id=1171372709]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/PlusButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 40.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("18_wkqae")
-expand_mode = 1
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/PlusButton" unique_id=93396799]
+theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
+[node name="Text" type="Label" parent="PopupOverlay/Panel/PlusButton"]
 layout_mode = 0
+offset_left = 0.0
 offset_top = 4.0
 offset_right = 40.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 18
@@ -1595,29 +2380,32 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="PlusTenButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=2108278228]
+[node name="PlusTenButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 254.0
 offset_top = 145.0
 offset_right = 294.0
 offset_bottom = 179.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/PlusTenButton" unique_id=1480077115]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/PlusTenButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 40.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("18_wkqae")
-expand_mode = 1
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/PlusTenButton" unique_id=1527787122]
+theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
+[node name="Text" type="Label" parent="PopupOverlay/Panel/PlusTenButton"]
 layout_mode = 0
-offset_top = 5.0
+offset_left = 0.0
+offset_top = 4.0
 offset_right = 40.0
-offset_bottom = 28.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 12
@@ -1626,7 +2414,29 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="TotalPrice" type="Control" parent="PopupOverlay/Panel" unique_id=293868454]
+[node name="QuantityBox" type="Panel" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 145.0
+offset_right = 203.0
+offset_bottom = 179.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
+
+[node name="Quantity" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 87.0
+offset_top = 148.0
+offset_right = 203.0
+offset_bottom = 173.0
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_font_sizes/font_size = 18
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TotalPrice" type="Control" parent="PopupOverlay/Panel"]
 anchors_preset = 0
 offset_left = 88.0
 offset_top = 186.0
@@ -1634,33 +2444,34 @@ offset_right = 212.0
 offset_bottom = 215.0
 mouse_filter = 2
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/TotalPrice" unique_id=1654720926]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/TotalPrice"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 124.0
 offset_bottom = 29.0
 mouse_filter = 2
-texture = ExtResource("12_3cdwu")
-expand_mode = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_buy")
 
-[node name="Icon" type="TextureRect" parent="PopupOverlay/Panel/TotalPrice" unique_id=1201953863]
+[node name="Icon" type="TextureRect" parent="PopupOverlay/Panel/TotalPrice"]
 layout_mode = 0
-offset_left = 56.0
+offset_left = 54.0
 offset_top = 4.0
-offset_right = 77.0
+offset_right = 75.0
 offset_bottom = 25.0
 mouse_filter = 2
-texture = ExtResource("6_1pd8y")
+texture = ExtResource("4_gold")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/TotalPrice" unique_id=1028809986]
+[node name="Text" type="Label" parent="PopupOverlay/Panel/TotalPrice"]
 layout_mode = 0
-offset_left = 79.0
+offset_left = 78.0
 offset_top = 5.0
-offset_right = 119.0
-offset_bottom = 28.0
-theme_override_colors/font_color = Color(1, 0.78, 0.18, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_right = 120.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
@@ -1669,29 +2480,32 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="CancelButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=258139497]
+[node name="CancelButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 18.0
 offset_top = 211.0
 offset_right = 142.0
 offset_bottom = 247.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/CancelButton" unique_id=1162329372]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/CancelButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 124.0
 offset_bottom = 36.0
 mouse_filter = 2
-texture = ExtResource("19_vacra")
-expand_mode = 1
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/CancelButton" unique_id=1716979425]
+theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
+[node name="Text" type="Label" parent="PopupOverlay/Panel/CancelButton"]
 layout_mode = 0
+offset_left = 0.0
 offset_top = 7.0
 offset_right = 124.0
 offset_bottom = 30.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_color = Color(0.43, 0.20, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 16
@@ -1700,29 +2514,32 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="ConfirmButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1800665172]
+[node name="ConfirmButton" type="TextureButton" parent="PopupOverlay/Panel"]
 layout_mode = 0
 offset_left = 158.0
 offset_top = 211.0
 offset_right = 284.0
 offset_bottom = 247.0
+mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="PopupOverlay/Panel/ConfirmButton" unique_id=1757575678]
+[node name="Frame" type="Panel" parent="PopupOverlay/Panel/ConfirmButton"]
 layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
 offset_right = 126.0
 offset_bottom = 36.0
 mouse_filter = 2
-texture = ExtResource("20_tdbsf")
-expand_mode = 1
 
-[node name="Text" type="Label" parent="PopupOverlay/Panel/ConfirmButton" unique_id=952616564]
+theme_override_styles/panel = SubResource("StyleBoxFlat_buy")
+[node name="Text" type="Label" parent="PopupOverlay/Panel/ConfirmButton"]
 layout_mode = 0
+offset_left = 0.0
 offset_top = 7.0
 offset_right = 126.0
 offset_bottom = 30.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
@@ -1731,7 +2548,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="Toast" type="Control" parent="." unique_id=638277127]
+[node name="Toast" type="Control" parent="."]
 visible = false
 z_index = 80
 anchors_preset = 0
@@ -1741,44 +2558,49 @@ offset_right = 310.0
 offset_bottom = 180.0
 mouse_filter = 2
 
-[node name="TailShadow" type="ColorRect" parent="Toast" unique_id=605359523]
+[node name="TailShadow" type="ColorRect" parent="Toast"]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 44.0
 offset_right = 28.0
 offset_bottom = 64.0
-rotation = 0.785398
 mouse_filter = 2
 color = Color(0, 0, 0, 0.35)
 
-[node name="Tail" type="ColorRect" parent="Toast" unique_id=1233648914]
+rotation = 0.785398
+
+[node name="Tail" type="ColorRect" parent="Toast"]
 layout_mode = 0
 offset_left = 5.0
 offset_top = 41.0
 offset_right = 25.0
 offset_bottom = 61.0
-rotation = 0.785398
 mouse_filter = 2
 color = Color(1, 0.945098, 0.745098, 0.96)
 
-[node name="Frame" type="Panel" parent="Toast" unique_id=560770850]
+rotation = 0.785398
+
+[node name="Frame" type="Panel" parent="Toast"]
 layout_mode = 0
 offset_left = 14.0
+offset_top = 0.0
 offset_right = 232.0
 offset_bottom = 56.0
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_popup")
 
-[node name="Text" type="Label" parent="Toast" unique_id=217733034]
+[node name="Text" type="Label" parent="Toast"]
 layout_mode = 0
 offset_left = 28.0
 offset_top = 12.0
 offset_right = 222.0
 offset_bottom = 45.0
 theme_override_colors/font_color = Color(0.16, 0.095, 0.025, 1)
-theme_override_colors/font_shadow_color = Color(1, 0.96, 0.78, 0.6)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true

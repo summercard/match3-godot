@@ -2,6 +2,8 @@
 class_name SceneResultGui
 extends "res://src/ui/scene/scene_result.gd"
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+
 const STAR_PATHS := ["StarRow/Star1", "StarRow/Star2", "StarRow/Star3"]
 const REWARD_SLOT_PATHS := [
 	"RewardPanel/Slots/RewardSlot1",
@@ -13,6 +15,21 @@ const EXP_CARD_PATHS := [
 	"ExpPanel/Cards/ExpCard2",
 	"ExpPanel/Cards/ExpCard3",
 ]
+const NORMAL_RESULT_NODES := [
+	"WinFx",
+	"Banner",
+	"StarRow",
+	"BattleInfo",
+	"CaptureResultPanel",
+	"RewardPanel",
+	"ExpPanel",
+	"LevelUpPanel",
+	"SweepUnlocked",
+	"Buttons",
+]
+
+var _capture_success_time := 0.0
+var _capture_success_last_visible := false
 
 func _ready() -> void:
 	name = "SceneResult"
@@ -31,6 +48,7 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+	_update_capture_success_animation(delta)
 	_sync_gui()
 
 func _draw() -> void:
@@ -43,15 +61,154 @@ func _connect_gui_actions() -> void:
 	_connect_button("Buttons/BackButton", _on_back_btn_pressed)
 	_connect_button("Buttons/NextButton", _on_next_btn_pressed)
 	_connect_button("Buttons/RetryButton", _on_retry_btn_pressed)
+	_connect_button("CaptureSuccessLayer/Buttons/ConfirmButton", _on_capture_confirm_pressed)
+	_connect_button("CaptureSuccessLayer/Buttons/ViewDexButton", _on_capture_dex_pressed)
+	_attach_gui_feedback()
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
 	if button != null and not button.pressed.is_connected(action):
 		button.pressed.connect(action)
 
+func _attach_gui_feedback() -> void:
+	for path in [
+		"Buttons/BackButton",
+		"Buttons/NextButton",
+		"Buttons/RetryButton",
+		"CaptureSuccessLayer/Buttons/ConfirmButton",
+		"CaptureSuccessLayer/Buttons/ViewDexButton",
+	]:
+		var button := get_node_or_null(path) as BaseButton
+		if button == null or button.has_node("CartoonFeedback"):
+			continue
+		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+		button.add_child(feedback)
+		var profile := CartoonButtonFeedback.Profile.PRIMARY if path.contains("CaptureSuccessLayer") else CartoonButtonFeedback.Profile.NAV
+		feedback.setup(button, profile)
+
+func _should_show_capture_success() -> bool:
+	return _is_win and _captured and not _capture_target.is_empty()
+
+func _sync_capture_success_layer() -> void:
+	var layer := get_node_or_null("CaptureSuccessLayer") as Control
+	if layer == null:
+		return
+	var show_success := _should_show_capture_success()
+	layer.visible = show_success
+	for path in NORMAL_RESULT_NODES:
+		var node := get_node_or_null(path) as CanvasItem
+		if node != null:
+			node.visible = not show_success
+	if show_success and not _capture_success_last_visible:
+		_capture_success_time = 0.0
+		_restart_capture_success_entry()
+	_capture_success_last_visible = show_success
+	if not show_success:
+		return
+	_sync_capture_success_data(layer)
+
+func _sync_capture_success_data(layer: Control) -> void:
+	var portrait := layer.get_node_or_null("Stage/MonsterPortrait") as TextureRect
+	if portrait != null:
+		portrait.texture = _monster_texture(_capture_target, "result")
+	var name_label := layer.get_node_or_null("InfoPlaque/PetName") as Label
+	if name_label != null:
+		name_label.text = _capture_monster_name()
+	var element_label := layer.get_node_or_null("InfoPlaque/ElementLabel") as Label
+	if element_label != null:
+		element_label.text = _capture_element_label()
+	var star_label := layer.get_node_or_null("InfoPlaque/StarLabel") as Label
+	if star_label != null:
+		var rarity := clampi(int(_capture_target.get("rarity", 1)), 1, 5)
+		star_label.text = "★".repeat(rarity) + "☆".repeat(5 - rarity)
+
+func _capture_monster_name() -> String:
+	var name_text := str(_capture_target.get("name", ""))
+	if name_text.is_empty():
+		name_text = str(_capture_target.get("monsterId", _capture_target.get("id", "新精灵")))
+	return name_text
+
+func _capture_element_label() -> String:
+	var raw := str(_capture_target.get("element", _capture_target.get("type", _capture_target.get("boardAffinity", ""))))
+	if raw.is_empty():
+		var monster_id := str(_capture_target.get("monsterId", _capture_target.get("id", ""))).to_lower()
+		var art_path := MonsterArtDBScript.get_art_path(monster_id, "result").to_lower()
+		for key in ["fire", "water", "grass", "thunder", "earth", "wind", "light", "dark", "ice"]:
+			if monster_id.contains(key) or art_path.contains("_%s" % key):
+				raw = key
+				break
+	if raw.is_empty():
+		var tags: Array = CaptureSystemScript.get_target_value_tags(_capture_target)
+		if not tags.is_empty():
+			for tag in tags:
+				var tag_text := str(tag)
+				if tag_text in ["火", "水", "草", "雷", "土", "风", "光", "暗", "冰"]:
+					raw = tag_text
+					break
+	var map := {
+		"water": "水",
+		"fire": "火",
+		"grass": "草",
+		"leaf": "草",
+		"thunder": "雷",
+		"earth": "土",
+		"wind": "风",
+		"light": "光",
+		"dark": "暗",
+		"ice": "冰",
+	}
+	return str(map.get(raw, raw if not raw.is_empty() else "未知"))
+
+func _restart_capture_success_entry() -> void:
+	var layer := get_node_or_null("CaptureSuccessLayer") as Control
+	if layer == null:
+		return
+	for path in ["TitlePlaque", "Stage", "InfoPlaque", "Buttons"]:
+		var node := layer.get_node_or_null(path) as Control
+		if node == null:
+			continue
+		node.pivot_offset = node.size * 0.5
+		node.scale = Vector2(0.88, 0.88)
+		node.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(0.04 * float(["TitlePlaque", "Stage", "InfoPlaque", "Buttons"].find(path)))
+		tween.tween_property(node, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(node, "scale", Vector2(1.04, 1.04), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(node, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _update_capture_success_animation(delta: float) -> void:
+	if not _should_show_capture_success():
+		return
+	_capture_success_time += delta
+	var layer := get_node_or_null("CaptureSuccessLayer") as Control
+	if layer == null:
+		return
+	var t := _capture_success_time
+	_set_fx_node(layer, "Stage/MagicCircle", 0.96 + sin(t * 2.2) * 0.035, fposmod(t * 0.18, TAU), 0.82 + sin(t * 3.1) * 0.08)
+	_set_fx_node(layer, "Stage/MonsterPortrait", 1.0 + sin(t * 2.8) * 0.018, 0.0, 1.0)
+	_set_fx_node(layer, "SparklesA", 1.0 + sin(t * 3.8) * 0.04, 0.0, 0.62 + sin(t * 4.3) * 0.22)
+	_set_fx_node(layer, "SparklesB", 1.0 + sin(t * 3.0 + 1.3) * 0.04, 0.0, 0.44 + sin(t * 4.1 + 0.8) * 0.18)
+	var confetti := layer.get_node_or_null("ConfettiTop") as Control
+	if confetti != null:
+		confetti.position.y = 13.0 + sin(t * 1.6) * 4.0
+		confetti.modulate.a = 0.72 + sin(t * 2.4) * 0.08
+	var title := layer.get_node_or_null("TitlePlaque") as Control
+	if title != null:
+		title.position.y = 60.0 + sin(t * 2.0) * 1.6
+
+func _set_fx_node(root: Node, path: NodePath, scale_value: float, rotation_value: float, alpha: float) -> void:
+	var node := root.get_node_or_null(path) as Control
+	if node == null:
+		return
+	node.pivot_offset = node.size * 0.5
+	node.scale = Vector2.ONE * scale_value
+	node.rotation = rotation_value
+	node.modulate.a = clampf(alpha, 0.0, 1.0)
+
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Banner"):
 		return
+	_sync_capture_success_layer()
 	_sync_banner()
 	_sync_stars()
 	_sync_battle_info()
@@ -60,6 +217,7 @@ func _sync_gui() -> void:
 	_sync_exp_panel()
 	_sync_levelups()
 	_sync_buttons()
+	_sync_capture_success_layer()
 
 func _sync_banner() -> void:
 	var banner_key := "victory_banner" if _is_win else "defeat_banner"
@@ -181,6 +339,26 @@ func _sync_buttons() -> void:
 	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else ("返回关卡" if _is_win else "重试")
 	_label("Buttons/NextButton/Text").text = "下一关"
 	_label("Buttons/RetryButton/Text").text = "再来一次" if _is_win else "重试"
+
+func _on_capture_confirm_pressed() -> void:
+	_run_after_capture_button_feedback(func(): _on_back_btn_pressed())
+
+func _on_capture_dex_pressed() -> void:
+	var monster_id := str(_capture_target.get("monsterId", _capture_target.get("id", "")))
+	_run_after_capture_button_feedback(func():
+		_go_to_scene("album", {
+			"selectedMonsterId": monster_id,
+			"monsterId": monster_id,
+			"tab": "album",
+		})
+	)
+
+func _run_after_capture_button_feedback(action: Callable) -> void:
+	var tree := get_tree()
+	if tree == null:
+		action.call()
+		return
+	tree.create_timer(0.14).timeout.connect(action)
 
 func _result_texture(key: String) -> Texture2D:
 	var path := str(RESULT_ASSETS.get(key, COMMON_ASSETS.get(key, "")))

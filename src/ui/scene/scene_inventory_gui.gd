@@ -3,6 +3,7 @@
 class_name SceneInventoryGui
 extends "res://src/ui/scene/scene_inventory.gd"
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const PAGE_SIZE := 15
 const SLOT_PATHS := [
 	"GridPanel/Slots/Slot1",
@@ -34,7 +35,9 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(false)
 	_connect_gui_actions()
+	_attach_inventory_feedback()
 	_sync_gui()
+	call_deferred("_play_enter_animation")
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
@@ -118,12 +121,27 @@ func _show_toast(text: String) -> void:
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Header"):
 		return
+	_sync_static_labels()
 	_sync_header()
 	_sync_tabs()
 	_sync_grid()
 	_sync_page_controls()
 	_sync_detail()
 	_sync_toast()
+
+func _sync_static_labels() -> void:
+	for i in TAB_PATHS.size():
+		if has_node("%s/Text" % TAB_PATHS[i]):
+			_label("%s/Text" % TAB_PATHS[i]).text = str(TABS[i].get("label", ""))
+	var labels := {
+		"GridPanel/EmptyTitle": "还没有道具",
+		"GridPanel/EmptyHint": "去战斗或商店获取吧",
+		"DetailPanel/EmptyText": "选择一个道具查看详情",
+		"DetailPanel/UseButton/Text": "使用",
+	}
+	for path in labels.keys():
+		if has_node(path):
+			_label(path).text = str(labels[path])
 
 func _sync_header() -> void:
 	_label("Header/Title").text = "背包"
@@ -135,7 +153,11 @@ func _sync_tabs() -> void:
 		var tab := get_node(TAB_PATHS[i]) as TextureButton
 		var active: bool = str(TABS[i].get("id", "")) == _active_tab
 		(tab.get_node("Frame") as TextureRect).texture = _tex("tab_active" if active else "tab_inactive")
-		tab.modulate.a = 1.0 if active else 0.78
+		(tab.get_node("Text") as Label).text = str(TABS[i].get("label", ""))
+		tab.modulate.a = 1.0
+		var text := tab.get_node("Text") as Label
+		text.add_theme_color_override("font_color", Color.WHITE if active else Color(0.43, 0.24, 0.07))
+		text.add_theme_color_override("font_shadow_color", Color(0.44, 0.12, 0.14, 0.65) if active else Color(1.0, 0.95, 0.78, 0.72))
 
 func _sync_grid() -> void:
 	_label("GridPanel/EmptyTitle").visible = _item_list.is_empty()
@@ -168,7 +190,7 @@ func _sync_empty_slot(slot: TextureButton) -> void:
 	(slot.get_node("Icon") as TextureRect).texture = null
 	(slot.get_node("Count") as Label).text = ""
 	(slot.get_node("Name") as Label).text = ""
-	(slot.get_node("Lock") as TextureRect).visible = true
+	(slot.get_node("Lock") as TextureRect).visible = false
 	(slot.get_node("Count") as Label).visible = false
 	(slot.get_node("Name") as Label).visible = false
 
@@ -234,6 +256,44 @@ func _short_item_name(text: String) -> String:
 	if text.length() <= 5:
 		return text
 	return text.substr(0, 5)
+
+func _attach_inventory_feedback() -> void:
+	var paths := [
+		"Header/BackButton",
+		"Tabs/All",
+		"Tabs/Items",
+		"Tabs/Materials",
+		"Tabs/Gems",
+		"GridPanel/PageControls/PreviousButton",
+		"GridPanel/PageControls/NextButton",
+		"DetailPanel/UseButton",
+	]
+	for path in SLOT_PATHS:
+		paths.append(path)
+	for path in paths:
+		var button := get_node_or_null(path) as BaseButton
+		if button == null or button.has_node("CartoonFeedback"):
+			continue
+		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+		button.add_child(feedback)
+		var profile := CartoonButtonFeedback.Profile.NAV
+		if path == "DetailPanel/UseButton":
+			profile = CartoonButtonFeedback.Profile.PRIMARY
+		elif path in SLOT_PATHS:
+			profile = CartoonButtonFeedback.Profile.ENTRY
+		elif path == "Header/BackButton":
+			profile = CartoonButtonFeedback.Profile.ICON
+		feedback.setup(button, profile)
+
+func _play_enter_animation() -> void:
+	for path in ["Header", "Tabs", "GridPanel", "DetailPanel"]:
+		var node := get_node_or_null(path) as Control
+		if node == null:
+			continue
+		node.pivot_offset = node.size * 0.5
+		node.scale = Vector2(0.97, 0.97)
+		var tween := create_tween()
+		tween.tween_property(node, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _max_inventory_page() -> int:
 	return maxi(0, ceili(float(_item_list.size()) / float(PAGE_SIZE)) - 1)

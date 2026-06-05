@@ -39,8 +39,8 @@ const SHOP_ASSETS := {
 	"popup_panel": "res://assets/images/shop/ui_popup_panel.png",
 	"qty_button": "res://assets/images/shop/ui_qty_button.png",
 	"bottom_nav": "res://assets/images/shop/ui_bottom_nav.png",
-	"gold": "res://assets/images/main/icon_gold.png",
-	"diamond": "res://assets/images/main/icon_diamond.png",
+	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
+	"diamond": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
 }
 
 const ITEM_ICON_ASSETS := {
@@ -62,9 +62,11 @@ const ITEM_ICON_ASSETS := {
 }
 
 const TABS := [
-	{"id": "recommend", "label": "推荐", "icon": "★"},
-	{"id": "items", "label": "道具", "icon": "▣"},
 	{"id": "gems", "label": "宝石", "icon": "◆"},
+	{"id": "coins", "label": "金币", "icon": "●"},
+	{"id": "hearts", "label": "爱心", "icon": "♥"},
+	{"id": "boosters", "label": "增强", "icon": "★"},
+	{"id": "chest", "label": "宝箱", "icon": "▣"},
 ]
 
 const C := {
@@ -89,7 +91,7 @@ var swipe_handler: Callable
 var _storage: Node = null
 var _bg_texture: ColorRect
 var _texture_cache: Dictionary = {}
-var _active_tab := "recommend"
+var _active_tab := "gems"
 var _popup_quantity := 1
 
 
@@ -118,7 +120,7 @@ func init(data: Dictionary = {}) -> void:
 	popup = {}
 	scroll_offset = 0.0
 	_popup_quantity = 1
-	_active_tab = data.get("tab", "recommend")
+	_active_tab = data.get("tab", "gems")
 	_build_shop_list()
 	_set_input_handlers()
 	set_process(false)

@@ -296,7 +296,7 @@ const GEM_IMAGE_PATHS := {
 	"light": "res://assets/images/battle/gems/gem_light.png"
 }
 
-const BATTLE_BG_PATH := "res://assets/images/battle/battle_bg_forest_ruins.png"
+const BATTLE_BG_PATH := "res://assets/images/battle_flow_new/battle_garden_ruins_bg.png"
 
 const BATTLE_UI_ASSETS := {
 	"toast_panel": "res://assets/images/battle/ui/ui_battle_toast_panel.png",
@@ -340,16 +340,15 @@ const BATTLE_FX_ASSETS := {
 }
 
 const BATTLE_RESULT_OVERLAY_ASSETS := {
-	"victory_banner": "res://assets/images/battle/result_overlay/ui_overlay_victory_banner.png",
-	"defeat_banner": "res://assets/images/battle/result_overlay/ui_overlay_defeat_banner.png",
-	"panel": "res://assets/images/battle/result_overlay/ui_overlay_panel.png",
-	"button_continue": "res://assets/images/battle/result_overlay/ui_overlay_button_continue.png",
-	"capture_plaque": "res://assets/images/battle/result_overlay/ui_overlay_capture_plaque.png",
-	"tap_strip": "res://assets/images/battle/result_overlay/ui_overlay_tap_strip.png",
-	"victory_burst": "res://assets/images/battle/result_overlay/fx_overlay_victory_burst.png",
-	"confetti": "res://assets/images/battle/result_overlay/fx_overlay_confetti.png",
-	"defeat_smoke": "res://assets/images/battle/result_overlay/fx_overlay_defeat_smoke.png",
-	"underline": "res://assets/images/battle/result_overlay/fx_overlay_underline.png"
+	"victory_banner": "res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png",
+	"defeat_banner": "res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png",
+	"panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
+	"button_continue": "res://assets/images/battle_flow_new/ui/ui_battle_continue_button.png",
+	"capture_plaque": "res://assets/images/battle_flow_new/ui/ui_capture_status_plaque.png",
+	"tap_strip": "res://assets/images/battle_flow_new/ui/ui_battle_continue_button.png",
+	"victory_burst": "res://assets/images/battle_flow_new/ui/fx_golden_burst.png",
+	"defeat_smoke": "res://assets/images/battle_flow_new/ui/fx_sparkles.png",
+	"underline": "res://assets/images/battle_flow_new/ui/fx_sparkles.png"
 }
 
 ## 宝石 TextureRect 缓存
@@ -2459,23 +2458,22 @@ func _draw_battle_end_overlay() -> void:
 	
 	if is_win:
 		var burst_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["victory_burst"])
-		_draw_texture_centered(burst_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 100.0), Vector2(250.0, 176.0), 0.78 * fade)
-		var confetti_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["confetti"])
-		_draw_texture_fit(confetti_tex, Rect2(16.0, 88.0, 343.0, 229.0), 0.78 * fade)
+		_draw_texture_centered(burst_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 108.0), Vector2(218.0, 136.0), 0.58 * fade)
+		_draw_victory_particles(fade, true)
 	else:
 		var smoke_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["defeat_smoke"])
 		_draw_texture_fit(smoke_tex, Rect2(-50.0, DESIGN_H / 2.0 - 55.0, 475.0, 154.0), 0.92 * fade)
 	
 	var panel_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["panel"])
-	_draw_texture_centered(panel_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 34.0), Vector2(306.0, 168.0), panel_alpha)
+	_draw_texture_centered(panel_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 34.0), Vector2(292.0, 158.0), panel_alpha)
 	
 	var banner_path: String = BATTLE_RESULT_OVERLAY_ASSETS["victory_banner"] if is_win else BATTLE_RESULT_OVERLAY_ASSETS["defeat_banner"]
 	var banner_tex := _get_texture(banner_path)
-	_draw_texture_centered(banner_tex, Vector2(DESIGN_W / 2.0, banner_y), Vector2(280.0, 130.0), fade)
+	_draw_texture_centered(banner_tex, Vector2(DESIGN_W / 2.0, banner_y), Vector2(316.0, 114.0), fade)
 	
 	var title_text := "胜利" if is_win else "失败"
 	var title_color: Color = C["gold"] if is_win else Color(0.78, 0.78, 0.86)
-	_draw_text_with_shadow(title_text, DESIGN_W / 2.0, banner_y + 13.0, title_color, 26.0, true)
+	_draw_text_with_shadow(title_text, DESIGN_W / 2.0, banner_y + 11.0, title_color, 25.0, true)
 	
 	var underline_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["underline"])
 	_draw_texture_centered(underline_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 10.0), Vector2(220.0, 39.0), 0.85 * panel_alpha)
@@ -2486,24 +2484,30 @@ func _draw_battle_end_overlay() -> void:
 		state_text = "收服判定中..."
 		state_color = C["gold"]
 	elif not _capture_result_text.is_empty():
-		state_text = _capture_result_text.get("title", state_text)
-		state_color = C["success"] if _capture_success else C["text_muted"]
+		state_text = _clean_battle_end_status_text(str(_capture_result_text.get("title", state_text)))
+		state_color = C["success"] if _capture_success else Color(0.52, 0.67, 0.86)
 	
 	if not _capture_result_text.is_empty():
 		var plaque_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["capture_plaque"])
-		_draw_texture_centered(plaque_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 33.0), Vector2(186.0, 66.0), panel_alpha)
-		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 39.0, state_color, 15.0, true)
+		_draw_texture_centered(plaque_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 30.0), Vector2(218.0, 54.0), panel_alpha)
+		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 36.0, state_color, 14.0, true)
 	else:
 		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0, state_color, 15.0, true)
 	
 	if _capture_phase == "done" or _capture_phase == "":
 		var tap_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["tap_strip"])
-		_draw_texture_centered(tap_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(188.0, 50.0), 0.86 * panel_alpha)
-		_draw_text_with_shadow("点击继续", DESIGN_W / 2.0 + 6.0, DESIGN_H / 2.0 + 96.0, C["white"], 13.0)
+		_draw_texture_centered(tap_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(194.0, 54.0), 0.92 * panel_alpha)
+		_draw_text_with_shadow("点击继续", DESIGN_W / 2.0, DESIGN_H / 2.0 + 96.0, C["white"], 13.0)
 	else:
 		var button_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["button_continue"])
-		_draw_texture_centered(button_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(170.0, 70.0), 0.65 * panel_alpha)
+		_draw_texture_centered(button_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(194.0, 54.0), 0.65 * panel_alpha)
 	_draw_restore()
+
+func _clean_battle_end_status_text(text: String) -> String:
+	var cleaned := text.strip_edges()
+	for token in ["👉", "👈", "👆", "👇", "☞", "☝"]:
+		cleaned = cleaned.replace(token, "")
+	return cleaned.strip_edges()
 
 func _draw_phase_transition() -> void:
 	if _phase_transition_state.is_empty():
@@ -2652,23 +2656,37 @@ func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
 		})
 
 func _spawn_victory_particles() -> void:
+	_victory_particles.clear()
 	# 全屏胜利粒子爆发
-	var colors: Array[Color] = [C["gold"], C["success"], Color(1.0, 1.0, 1.0), C["primary"]]
-	for i in range(30):
-		var x: float = randf() * DESIGN_W
-		var y: float = DESIGN_H + 20.0  # 从底部开始
-		var vx: float = (randf() - 0.5) * 60.0
-		var vy: float = -120.0 - randf() * 80.0  # 向上飞
+	var colors: Array[Color] = [
+		Color(1.0, 0.23, 0.42),
+		Color(1.0, 0.78, 0.10),
+		Color(0.34, 0.78, 1.0),
+		Color(0.72, 0.36, 1.0),
+		Color(0.54, 1.0, 0.42)
+	]
+	for i in range(42):
+		var x: float = -24.0 + randf() * (DESIGN_W + 48.0)
+		var y: float = -170.0 + randf() * 250.0
+		var vx: float = (randf() - 0.5) * 24.0
+		var vy: float = 36.0 + randf() * 72.0
 		var color: Color = colors[randi() % colors.size()]
 		_victory_particles.append({
 			"x": x,
 			"y": y,
 			"vx": vx,
 			"vy": vy,
-			"life": 1.0 + randf() * 0.5,
-			"max_life": 1.0 + randf() * 0.5,
+			"gravity": 6.0 + randf() * 12.0,
+			"life": 2.6 + randf() * 1.4,
+			"max_life": 2.6 + randf() * 1.4,
 			"color": color,
-			"size": 3.0 + randf() * 3.0
+			"w": 8.0 + randf() * 7.0,
+			"h": 22.0 + randf() * 22.0,
+			"angle": randf() * TAU,
+			"spin": -3.6 + randf() * 7.2,
+			"swing": 8.0 + randf() * 18.0,
+			"swing_freq": 0.8 + randf() * 1.8,
+			"phase": randf() * TAU
 		})
 
 func _draw_gem_particles() -> void:
@@ -2696,13 +2714,22 @@ func _draw_defeat_particles() -> void:
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
 		_draw_circle(p["x"], p["y"], size, color)
 
-func _draw_victory_particles() -> void:
+func _draw_victory_particles(opacity: float = 1.0, overlay_pass: bool = false) -> void:
+	if _state == BattleState.BATTLE_END and not overlay_pass:
+		return
 	for p: Dictionary in _victory_particles:
 		var progress: float = 1.0 - p["life"] / p["max_life"]
-		var alpha: float = 1.0 - progress
-		var size: float = p["size"] * (1.0 - progress * 0.4)
+		var alpha: float = clampf((1.0 - progress * 0.55) * opacity, 0.0, 1.0)
+		var w: float = p.get("w", 10.0)
+		var h: float = p.get("h", 28.0)
+		var x: float = p["x"] + sin(progress * TAU * p.get("swing_freq", 1.0) + p.get("phase", 0.0)) * p.get("swing", 10.0)
+		var y: float = p["y"]
+		var angle: float = p.get("angle", 0.0) + progress * p.get("spin", 0.0)
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
-		_draw_circle(p["x"], p["y"], size, color)
+		draw_set_transform(Vector2(x, y), angle, Vector2.ONE)
+		draw_rect(Rect2(-w * 0.5, -h * 0.5, w, h), color)
+		draw_rect(Rect2(-w * 0.32, -h * 0.45, maxf(1.0, w * 0.22), h * 0.9), Color(1.0, 1.0, 1.0, alpha * 0.22))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 ## ============================================
 # 辅助绘制方法

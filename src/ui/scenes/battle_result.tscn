@@ -1,21 +1,28 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
-[ext_resource type="Texture2D" uid="uid://c1vhx6cwsyvym" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
-[ext_resource type="Texture2D" uid="uid://ctikbdr4ca5qm" path="res://assets/images/result/ui_btn_next.png" id="btn_next"]
-[ext_resource type="Texture2D" uid="uid://c0w62741dayyh" path="res://assets/images/result/ui_btn_secondary.png" id="btn_secondary"]
-[ext_resource type="Texture2D" uid="uid://d2e6f4y61dsd2" path="res://assets/images/result/fx_victory_burst.png" id="burst"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/battle_garden_ruins_bg.png" id="bg"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_btn_gold.png" id="btn_next"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_btn_blue.png" id="btn_secondary"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_golden_burst.png" id="burst"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/capture_result_panel.tscn" id="capture_panel"]
-[ext_resource type="Texture2D" uid="uid://bli4tak8ed2wy" path="res://assets/images/result/fx_confetti_cluster.png" id="confetti"]
-[ext_resource type="Texture2D" uid="uid://etj6ajh77boa" path="res://assets/images/result/ui_monster_exp_card.png" id="exp_card"]
-[ext_resource type="Texture2D" uid="uid://c5m8fubnxwy20" path="res://assets/images/result/ui_team_exp_panel.png" id="exp_panel"]
-[ext_resource type="Texture2D" uid="uid://c7leo2mqqyo8s" path="res://assets/images/result/ui_info_chip.png" id="info_chip"]
-[ext_resource type="Texture2D" uid="uid://bh1h57uryyaxp" path="res://assets/images/result/fx_levelup_glow.png" id="level_glow"]
-[ext_resource type="Texture2D" uid="uid://brghfpalbhcju" path="res://assets/images/result/ui_reward_panel.png" id="reward_panel"]
-[ext_resource type="Texture2D" uid="uid://dl4ghu8buer0n" path="res://assets/images/result/ui_reward_slot.png" id="reward_slot"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_confetti.png" id="confetti"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="exp_card"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="exp_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_blue.png" id="info_chip"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/fx_sparkles.png" id="level_glow"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="reward_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_reward_card.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://bgmehtlw34xli" path="res://src/ui/scene/scene_result_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://britbssgudkie" path="res://assets/images/result/icon_star_dim_large.png" id="star_dim"]
-[ext_resource type="Texture2D" uid="uid://ced3ry1lpaudt" path="res://assets/images/result/icon_sweep_badge.png" id="sweep"]
-[ext_resource type="Texture2D" uid="uid://btbhx1tt7bxg2" path="res://assets/images/result/ui_victory_banner.png" id="victory"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/icon_star_silver.png" id="star_dim"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/icon_star_gold.png" id="sweep"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png" id="victory"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_info_plaque.png" id="capture_info"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_title_pink_plaque.png" id="capture_title"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_button_blue.png" id="capture_btn_blue"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/ui_button_green.png" id="capture_btn_green"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_magic_circle.png" id="capture_circle"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_sparkle_strip.png" id="capture_sparkles"]
+[ext_resource type="Texture2D" path="res://assets/images/capture_success_new/ui/fx_confetti_strip.png" id="capture_confetti"]
 
 [node name="BattleResultGui" type="Control" unique_id=2092080466]
 clip_contents = true
@@ -50,9 +57,9 @@ offset_bottom = 135.0
 [node name="Burst" type="TextureRect" parent="WinFx" unique_id=1503307524]
 layout_mode = 0
 offset_left = 52.0
-offset_top = -28.0
-offset_right = 322.0
-offset_bottom = 148.0
+offset_top = -20.0
+offset_right = 305.0
+offset_bottom = 108.0
 mouse_filter = 2
 texture = ExtResource("burst")
 expand_mode = 1
@@ -83,14 +90,14 @@ stretch_mode = 5
 [node name="Banner" type="Control" parent="." unique_id=691974770]
 anchors_preset = 0
 offset_left = 18.0
-offset_top = 10.0
+offset_top = 12.0
 offset_right = 357.0
-offset_bottom = 120.0
+offset_bottom = 132.0
 
 [node name="Frame" type="TextureRect" parent="Banner" unique_id=57386606]
 layout_mode = 0
 offset_right = 339.0
-offset_bottom = 110.0
+offset_bottom = 120.0
 mouse_filter = 2
 texture = ExtResource("victory")
 expand_mode = 1
@@ -98,29 +105,305 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="Banner" unique_id=1683066956]
 layout_mode = 0
-offset_top = 38.0
-offset_right = 339.0
-offset_bottom = 82.0
+offset_left = 42.0
+offset_top = 42.0
+offset_right = 297.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 27
 text = "战斗胜利"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CaptureSuccessLayer" type="Control" parent="." unique_id=2026060401]
+visible = false
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 1
+
+[node name="AuraShade" type="ColorRect" parent="CaptureSuccessLayer" unique_id=2026060402]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(1, 0.91, 0.42, 0.08)
+
+[node name="ConfettiTop" type="TextureRect" parent="CaptureSuccessLayer" unique_id=2026060403]
+layout_mode = 0
+offset_left = -28.0
+offset_top = 13.0
+offset_right = 404.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("capture_confetti")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SparklesA" type="TextureRect" parent="CaptureSuccessLayer" unique_id=2026060404]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 70.0
+offset_right = 360.0
+offset_bottom = 130.0
+mouse_filter = 2
+texture = ExtResource("capture_sparkles")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SparklesB" type="TextureRect" parent="CaptureSuccessLayer" unique_id=2026060405]
+layout_mode = 0
+offset_left = -18.0
+offset_top = 464.0
+offset_right = 393.0
+offset_bottom = 533.0
+mouse_filter = 2
+texture = ExtResource("capture_sparkles")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitlePlaque" type="TextureRect" parent="CaptureSuccessLayer" unique_id=2026060406]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 60.0
+offset_right = 343.0
+offset_bottom = 152.0
+mouse_filter = 2
+texture = ExtResource("capture_title")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleTextTop" type="Label" parent="CaptureSuccessLayer/TitlePlaque" unique_id=2026060407]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 7.0
+offset_right = 287.0
+offset_bottom = 49.0
+theme_override_colors/font_color = Color(1, 0.88, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0.55, 0.15, 0.08, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 32
+text = "捕获"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleTextBottom" type="Label" parent="CaptureSuccessLayer/TitlePlaque" unique_id=2026060408]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 43.0
+offset_right = 287.0
+offset_bottom = 88.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.8, 0.18, 0.24, 0.92)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 34
+text = "成功!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stage" type="Control" parent="CaptureSuccessLayer" unique_id=2026060409]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 164.0
+offset_right = 333.0
+offset_bottom = 386.0
+mouse_filter = 2
+
+[node name="MagicCircle" type="TextureRect" parent="CaptureSuccessLayer/Stage" unique_id=2026060410]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 68.0
+offset_right = 279.0
+offset_bottom = 300.0
+mouse_filter = 2
+texture = ExtResource("capture_circle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MonsterGlow" type="ColorRect" parent="CaptureSuccessLayer/Stage" unique_id=2026060411]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 28.0
+offset_right = 218.0
+offset_bottom = 174.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.24, 0.13)
+
+[node name="MonsterPortrait" type="TextureRect" parent="CaptureSuccessLayer/Stage" unique_id=2026060412]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 2.0
+offset_right = 236.0
+offset_bottom = 182.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoPlaque" type="TextureRect" parent="CaptureSuccessLayer" unique_id=2026060413]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 398.0
+offset_right = 349.0
+offset_bottom = 536.0
+mouse_filter = 2
+texture = ExtResource("capture_info")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BadgeRibbon" type="TextureRect" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060426]
+layout_mode = 0
+offset_left = 88.0
+offset_top = -21.0
+offset_right = 235.0
+offset_bottom = 27.0
+mouse_filter = 2
+texture = ExtResource("capture_btn_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060414]
+layout_mode = 0
+offset_left = 94.0
+offset_top = -13.0
+offset_right = 229.0
+offset_bottom = 23.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.37, 0.84, 0.86)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "New Pet!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PetName" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060415]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 29.0
+offset_right = 295.0
+offset_bottom = 67.0
+theme_override_colors/font_color = Color(0.45, 0.2, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.82, 0.65)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 26
+text = "新精灵"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060416]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 76.0
+offset_right = 273.0
+offset_bottom = 78.0
+mouse_filter = 2
+color = Color(0.88, 0.62, 0.29, 0.55)
+
+[node name="ElementLabel" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060417]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 90.0
+offset_right = 147.0
+offset_bottom = 121.0
+theme_override_colors/font_color = Color(0.46, 0.22, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 0.55)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "属性"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StarLabel" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060418]
+layout_mode = 0
+offset_left = 145.0
+offset_top = 89.0
+offset_right = 280.0
+offset_bottom = 122.0
+theme_override_colors/font_color = Color(1, 0.75, 0.04, 1)
+theme_override_colors/font_outline_color = Color(0.55, 0.25, 0.03, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 21
+text = "★★★★★"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buttons" type="Control" parent="CaptureSuccessLayer" unique_id=2026060419]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 558.0
+offset_right = 351.0
+offset_bottom = 636.0
+
+[node name="ConfirmButton" type="TextureButton" parent="CaptureSuccessLayer/Buttons" unique_id=2026060420]
+layout_mode = 0
+offset_right = 151.0
+offset_bottom = 56.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="CaptureSuccessLayer/Buttons/ConfirmButton" unique_id=2026060421]
+layout_mode = 0
+offset_right = 151.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("capture_btn_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="CaptureSuccessLayer/Buttons/ConfirmButton" unique_id=2026060422]
+layout_mode = 0
+offset_top = 10.0
+offset_right = 151.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.26, 0.64, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 24
+text = "确认"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ViewDexButton" type="TextureButton" parent="CaptureSuccessLayer/Buttons" unique_id=2026060423]
+layout_mode = 0
+offset_left = 176.0
+offset_right = 327.0
+offset_bottom = 56.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="CaptureSuccessLayer/Buttons/ViewDexButton" unique_id=2026060424]
+layout_mode = 0
+offset_right = 151.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("capture_btn_green")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="CaptureSuccessLayer/Buttons/ViewDexButton" unique_id=2026060425]
+layout_mode = 0
+offset_top = 10.0
+offset_right = 151.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.19, 0.46, 0.05, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 23
+text = "看图鉴"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarRow" type="Control" parent="." unique_id=232303451]
 anchors_preset = 0
 offset_left = 108.0
-offset_top = 106.0
+offset_top = 116.0
 offset_right = 301.0
 offset_bottom = 166.0
 
 [node name="Star1" type="TextureRect" parent="StarRow" unique_id=1132103650]
 layout_mode = 0
-offset_left = 5.0
-offset_right = 59.0
-offset_bottom = 54.0
+offset_left = 17.0
+offset_right = 61.0
+offset_bottom = 44.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -128,9 +411,9 @@ stretch_mode = 5
 
 [node name="Star2" type="TextureRect" parent="StarRow" unique_id=350311975]
 layout_mode = 0
-offset_left = 53.0
-offset_right = 107.0
-offset_bottom = 54.0
+offset_left = 68.0
+offset_right = 112.0
+offset_bottom = 44.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -138,9 +421,9 @@ stretch_mode = 5
 
 [node name="Star3" type="TextureRect" parent="StarRow" unique_id=1432092673]
 layout_mode = 0
-offset_left = 101.0
-offset_right = 155.0
-offset_bottom = 54.0
+offset_left = 119.0
+offset_right = 163.0
+offset_bottom = 44.0
 mouse_filter = 2
 texture = ExtResource("star_dim")
 expand_mode = 1
@@ -149,14 +432,15 @@ stretch_mode = 5
 [node name="BattleInfo" type="Control" parent="." unique_id=1626943882]
 anchors_preset = 0
 offset_left = 28.0
-offset_top = 170.0
+offset_top = 162.0
 offset_right = 347.0
-offset_bottom = 228.0
+offset_bottom = 214.0
 
 [node name="Frame" type="TextureRect" parent="BattleInfo" unique_id=993747995]
 layout_mode = 0
-offset_right = 319.0
-offset_bottom = 40.0
+offset_left = 24.0
+offset_right = 295.0
+offset_bottom = 36.0
 mouse_filter = 2
 texture = ExtResource("info_chip")
 expand_mode = 1
@@ -164,9 +448,10 @@ stretch_mode = 5
 
 [node name="TurnLabel" type="Label" parent="BattleInfo" unique_id=219448252]
 layout_mode = 0
-offset_top = 7.0
-offset_right = 319.0
-offset_bottom = 31.0
+offset_left = 24.0
+offset_top = 5.0
+offset_right = 295.0
+offset_bottom = 28.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -189,22 +474,22 @@ vertical_alignment = 1
 
 [node name="CaptureResultPanel" parent="." unique_id=707313623 instance=ExtResource("capture_panel")]
 layout_mode = 0
-offset_top = 238.0
-offset_bottom = 238.0
+offset_top = 196.0
+offset_bottom = 312.0
 
 [node name="RewardPanel" type="Control" parent="." unique_id=1054542105]
 anchors_preset = 0
 offset_left = 16.0
-offset_top = 350.0
+offset_top = 318.0
 offset_right = 359.0
-offset_bottom = 460.0
+offset_bottom = 426.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel" unique_id=2125386871]
 layout_mode = 0
-offset_left = -35.0
-offset_top = 49.0
-offset_right = 378.0
-offset_bottom = 185.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 343.0
+offset_bottom = 108.0
 mouse_filter = 2
 texture = ExtResource("reward_panel")
 expand_mode = 1
@@ -212,10 +497,10 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="RewardPanel" unique_id=1209168286]
 layout_mode = 0
-offset_left = 1.0
-offset_top = 28.0
-offset_right = 344.0
-offset_bottom = 52.0
+offset_left = 0.0
+offset_top = 10.0
+offset_right = 343.0
+offset_bottom = 34.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -226,21 +511,21 @@ vertical_alignment = 1
 
 [node name="Slots" type="Control" parent="RewardPanel" unique_id=552024371]
 anchors_preset = 0
-offset_left = 74.0
-offset_top = 34.0
-offset_right = 269.0
-offset_bottom = 100.0
+offset_left = 58.0
+offset_top = 38.0
+offset_right = 285.0
+offset_bottom = 106.0
 
 [node name="RewardSlot1" type="Control" parent="RewardPanel/Slots" unique_id=657978786]
 anchors_preset = 0
-offset_top = 29.0
-offset_right = 54.0
-offset_bottom = 101.0
+offset_top = 0.0
+offset_right = 64.0
+offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=118173143]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 56.0
+offset_right = 64.0
+offset_bottom = 70.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -248,19 +533,19 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=1770531726]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 9.0
-offset_right = 41.0
-offset_bottom = 37.0
+offset_left = 17.0
+offset_top = 10.0
+offset_right = 47.0
+offset_bottom = 40.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot1" unique_id=963877189]
 layout_mode = 0
-offset_top = 52.0
-offset_right = 54.0
-offset_bottom = 72.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -271,15 +556,15 @@ vertical_alignment = 1
 
 [node name="RewardSlot2" type="Control" parent="RewardPanel/Slots" unique_id=795980711]
 anchors_preset = 0
-offset_left = 67.0
-offset_top = 29.0
-offset_right = 121.0
-offset_bottom = 101.0
+offset_left = 81.0
+offset_top = 0.0
+offset_right = 145.0
+offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=1519586129]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 56.0
+offset_right = 64.0
+offset_bottom = 70.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -287,19 +572,19 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=833072020]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 9.0
-offset_right = 41.0
-offset_bottom = 37.0
+offset_left = 17.0
+offset_top = 10.0
+offset_right = 47.0
+offset_bottom = 40.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot2" unique_id=1432715867]
 layout_mode = 0
-offset_top = 52.0
-offset_right = 54.0
-offset_bottom = 72.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -310,15 +595,15 @@ vertical_alignment = 1
 
 [node name="RewardSlot3" type="Control" parent="RewardPanel/Slots" unique_id=1481737944]
 anchors_preset = 0
-offset_left = 134.0
-offset_top = 29.0
-offset_right = 188.0
-offset_bottom = 101.0
+offset_left = 162.0
+offset_top = 0.0
+offset_right = 226.0
+offset_bottom = 70.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1858066800]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 56.0
+offset_right = 64.0
+offset_bottom = 70.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -326,19 +611,19 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1002186608]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 9.0
-offset_right = 41.0
-offset_bottom = 37.0
+offset_left = 17.0
+offset_top = 10.0
+offset_right = 47.0
+offset_bottom = 40.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot3" unique_id=801588685]
 layout_mode = 0
-offset_top = 52.0
-offset_right = 54.0
-offset_bottom = 72.0
+offset_top = 49.0
+offset_right = 64.0
+offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -350,16 +635,16 @@ vertical_alignment = 1
 [node name="ExpPanel" type="Control" parent="." unique_id=823335105]
 anchors_preset = 0
 offset_left = 16.0
-offset_top = 464.0
+offset_top = 432.0
 offset_right = 359.0
-offset_bottom = 580.0
+offset_bottom = 552.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel" unique_id=310957884]
 layout_mode = 0
-offset_left = -36.0
-offset_top = 18.0
-offset_right = 376.0
-offset_bottom = 177.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 343.0
+offset_bottom = 120.0
 mouse_filter = 2
 texture = ExtResource("exp_panel")
 expand_mode = 1
@@ -367,10 +652,10 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="ExpPanel" unique_id=1654325864]
 layout_mode = 0
-offset_left = 1.0
-offset_top = 17.0
-offset_right = 344.0
-offset_bottom = 38.0
+offset_left = 0.0
+offset_top = 8.0
+offset_right = 343.0
+offset_bottom = 29.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -380,10 +665,11 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Desc" type="Label" parent="ExpPanel" unique_id=1853513822]
+visible = false
 layout_mode = 0
-offset_top = 23.0
+offset_top = 99.0
 offset_right = 343.0
-offset_bottom = 40.0
+offset_bottom = 116.0
 theme_override_colors/font_color = Color(0.58, 0.64, 0.76, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -394,21 +680,21 @@ vertical_alignment = 1
 [node name="Cards" type="Control" parent="ExpPanel" unique_id=554168705]
 anchors_preset = 0
 offset_left = 87.0
-offset_top = 41.0
-offset_right = 256.0
-offset_bottom = 116.0
+offset_top = 30.0
+offset_right = 291.0
+offset_bottom = 118.0
 
 [node name="ExpCard1" type="Control" parent="ExpPanel/Cards" unique_id=1422004063]
 anchors_preset = 0
-offset_left = -10.0
-offset_top = 15.0
-offset_right = 44.0
-offset_bottom = 91.0
+offset_left = -18.0
+offset_top = 1.0
+offset_right = 50.0
+offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard1" unique_id=1373587523]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 68.0
+offset_right = 68.0
+offset_bottom = 86.0
 mouse_filter = 2
 texture = ExtResource("exp_card")
 expand_mode = 1
@@ -416,19 +702,19 @@ stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard1" unique_id=782904571]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 5.0
-offset_right = 48.0
-offset_bottom = 47.0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 59.0
+offset_bottom = 58.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=588148548]
 layout_mode = 0
-offset_top = 48.0
-offset_right = 54.0
-offset_bottom = 64.0
+offset_top = 58.0
+offset_right = 68.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -439,10 +725,10 @@ vertical_alignment = 1
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=1359102942]
 layout_mode = 0
-offset_left = -7.0
-offset_top = 62.0
-offset_right = 61.0
-offset_bottom = 80.0
+offset_left = -8.0
+offset_top = 73.0
+offset_right = 76.0
+offset_bottom = 90.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -453,15 +739,15 @@ vertical_alignment = 1
 
 [node name="ExpCard2" type="Control" parent="ExpPanel/Cards" unique_id=2098007429]
 anchors_preset = 0
-offset_left = 54.0
-offset_top = 15.0
-offset_right = 108.0
-offset_bottom = 91.0
+offset_left = 68.0
+offset_top = 1.0
+offset_right = 136.0
+offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard2" unique_id=215914357]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 68.0
+offset_right = 68.0
+offset_bottom = 86.0
 mouse_filter = 2
 texture = ExtResource("exp_card")
 expand_mode = 1
@@ -469,19 +755,19 @@ stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard2" unique_id=1866527594]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 5.0
-offset_right = 48.0
-offset_bottom = 47.0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 59.0
+offset_bottom = 58.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=1930564297]
 layout_mode = 0
-offset_top = 48.0
-offset_right = 54.0
-offset_bottom = 64.0
+offset_top = 58.0
+offset_right = 68.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -492,10 +778,10 @@ vertical_alignment = 1
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=742288577]
 layout_mode = 0
-offset_left = -7.0
-offset_top = 62.0
-offset_right = 61.0
-offset_bottom = 80.0
+offset_left = -8.0
+offset_top = 73.0
+offset_right = 76.0
+offset_bottom = 90.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -506,15 +792,15 @@ vertical_alignment = 1
 
 [node name="ExpCard3" type="Control" parent="ExpPanel/Cards" unique_id=1579014413]
 anchors_preset = 0
-offset_left = 118.0
-offset_top = 15.0
-offset_right = 172.0
-offset_bottom = 91.0
+offset_left = 154.0
+offset_top = 1.0
+offset_right = 222.0
+offset_bottom = 89.0
 
 [node name="Frame" type="TextureRect" parent="ExpPanel/Cards/ExpCard3" unique_id=1773636129]
 layout_mode = 0
-offset_right = 54.0
-offset_bottom = 68.0
+offset_right = 68.0
+offset_bottom = 86.0
 mouse_filter = 2
 texture = ExtResource("exp_card")
 expand_mode = 1
@@ -522,19 +808,19 @@ stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="ExpPanel/Cards/ExpCard3" unique_id=1966652861]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 5.0
-offset_right = 48.0
-offset_bottom = 47.0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 59.0
+offset_bottom = 58.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1125240006]
 layout_mode = 0
-offset_top = 48.0
-offset_right = 54.0
-offset_bottom = 64.0
+offset_top = 58.0
+offset_right = 68.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -545,10 +831,10 @@ vertical_alignment = 1
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1622793231]
 layout_mode = 0
-offset_left = -7.0
-offset_top = 62.0
-offset_right = 61.0
-offset_bottom = 80.0
+offset_left = -8.0
+offset_top = 73.0
+offset_right = 76.0
+offset_bottom = 90.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -561,9 +847,9 @@ vertical_alignment = 1
 visible = false
 anchors_preset = 0
 offset_left = 55.0
-offset_top = 566.0
+offset_top = 558.0
 offset_right = 320.0
-offset_bottom = 596.0
+offset_bottom = 588.0
 
 [node name="Glow" type="TextureRect" parent="LevelUpPanel" unique_id=678435177]
 layout_mode = 0
@@ -591,9 +877,9 @@ vertical_alignment = 1
 visible = false
 anchors_preset = 0
 offset_left = 110.0
-offset_top = 580.0
+offset_top = 560.0
 offset_right = 300.0
-offset_bottom = 608.0
+offset_bottom = 590.0
 
 [node name="Icon" type="TextureRect" parent="SweepUnlocked" unique_id=1680925290]
 layout_mode = 0
@@ -619,20 +905,20 @@ vertical_alignment = 1
 
 [node name="Buttons" type="Control" parent="." unique_id=2009834381]
 anchors_preset = 0
-offset_left = 14.0
-offset_top = 610.0
-offset_right = 341.0
+offset_left = 12.0
+offset_top = 608.0
+offset_right = 363.0
 offset_bottom = 660.0
 
 [node name="BackButton" type="TextureButton" parent="Buttons" unique_id=206069040]
 layout_mode = 0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 46.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/BackButton" unique_id=1208805136]
 layout_mode = 0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 46.0
 mouse_filter = 2
 texture = ExtResource("btn_secondary")
@@ -642,7 +928,7 @@ stretch_mode = 5
 [node name="Text" type="Label" parent="Buttons/BackButton" unique_id=2144941832]
 layout_mode = 0
 offset_top = 8.0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 38.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
@@ -654,14 +940,14 @@ vertical_alignment = 1
 
 [node name="NextButton" type="TextureButton" parent="Buttons" unique_id=2020187757]
 layout_mode = 0
-offset_left = 119.0
-offset_right = 231.0
+offset_left = 121.0
+offset_right = 229.0
 offset_bottom = 46.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/NextButton" unique_id=426806487]
 layout_mode = 0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 46.0
 mouse_filter = 2
 texture = ExtResource("btn_next")
@@ -671,7 +957,7 @@ stretch_mode = 5
 [node name="Text" type="Label" parent="Buttons/NextButton" unique_id=1913172504]
 layout_mode = 0
 offset_top = 8.0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 38.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
@@ -683,14 +969,14 @@ vertical_alignment = 1
 
 [node name="RetryButton" type="TextureButton" parent="Buttons" unique_id=1417554593]
 layout_mode = 0
-offset_left = 238.0
-offset_right = 350.0
+offset_left = 243.0
+offset_right = 351.0
 offset_bottom = 46.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Buttons/RetryButton" unique_id=495682816]
 layout_mode = 0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 46.0
 mouse_filter = 2
 texture = ExtResource("btn_secondary")
@@ -700,7 +986,7 @@ stretch_mode = 5
 [node name="Text" type="Label" parent="Buttons/RetryButton" unique_id=1743095096]
 layout_mode = 0
 offset_top = 8.0
-offset_right = 112.0
+offset_right = 108.0
 offset_bottom = 38.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)

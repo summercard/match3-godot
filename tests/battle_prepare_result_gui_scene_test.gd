@@ -65,6 +65,10 @@ func _run() -> void:
 		"BattleInfo/TurnLabel",
 		"CaptureResultPanel/MonsterPortrait",
 		"CaptureResultPanel/Title",
+		"CaptureSuccessLayer/Stage/MonsterPortrait",
+		"CaptureSuccessLayer/InfoPlaque/PetName",
+		"CaptureSuccessLayer/Buttons/ConfirmButton",
+		"CaptureSuccessLayer/Buttons/ViewDexButton",
 		"RewardPanel/Slots/RewardSlot1/Icon",
 		"ExpPanel/Cards/ExpCard1/Portrait",
 		"Buttons/BackButton",
@@ -72,8 +76,8 @@ func _run() -> void:
 		"Buttons/RetryButton",
 	]:
 		_expect(result.has_node(path), "battle result GUI node should exist: %s" % path)
-	_expect((result.get_node("CaptureResultPanel") as Control).visible, "capture pet panel should show captured result")
-	_expect((result.get_node("CaptureResultPanel/Title") as Label).text == "收服成功", "capture pet panel should bind result text")
+	_expect((result.get_node("CaptureSuccessLayer") as Control).visible, "capture success layer should show captured result")
+	_expect(not (result.get_node("CaptureResultPanel") as Control).visible, "old capture pet panel should be hidden behind success layer")
 	result.queue_free()
 	await process_frame
 	_finish()

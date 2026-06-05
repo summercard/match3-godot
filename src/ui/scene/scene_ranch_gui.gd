@@ -3,6 +3,23 @@
 class_name SceneRanchGui
 extends "res://src/ui/scene/scene_ranch.gd"
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const PAGE_BACKGROUNDS := {
+	"ranch": "res://assets/images/ranch/bg_ranch_pasture.png",
+	"classroom": "res://assets/images/ranch/bg_pet_academy.png",
+	"social": "res://assets/images/ranch/bg_social_meadow_yard.png",
+}
+const SOCIAL_PLACE_BACKGROUNDS := {
+	"meadow_yard": "res://assets/images/ranch/bg_social_meadow_yard.png",
+	"sunny_yard": "res://assets/images/ranch/bg_social_sunny_yard.png",
+	"quiet_pond": "res://assets/images/ranch/bg_social_quiet_pond.png",
+}
+const LOBBY_ASSETS := {
+	"currency": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
+	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
+	"gems": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
+	"plus": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
+}
 const RANCH_CARD_PATHS := [
 	"Pages/RanchPage/RosterPanel/Card1",
 	"Pages/RanchPage/RosterPanel/Card2",
@@ -15,11 +32,17 @@ const CLASS_CARD_PATHS := [
 	"Pages/ClassroomPage/RosterPanel/Card1",
 	"Pages/ClassroomPage/RosterPanel/Card2",
 	"Pages/ClassroomPage/RosterPanel/Card3",
+	"Pages/ClassroomPage/RosterPanel/Card4",
+	"Pages/ClassroomPage/RosterPanel/Card5",
+	"Pages/ClassroomPage/RosterPanel/Card6",
 ]
 const SOCIAL_CARD_PATHS := [
 	"Pages/SocialPage/RosterPanel/Card1",
 	"Pages/SocialPage/RosterPanel/Card2",
 	"Pages/SocialPage/RosterPanel/Card3",
+	"Pages/SocialPage/RosterPanel/Card4",
+	"Pages/SocialPage/RosterPanel/Card5",
+	"Pages/SocialPage/RosterPanel/Card6",
 ]
 const SLOT_PATHS := [
 	"Pages/RanchPage/Slots/Slot1",
@@ -28,16 +51,27 @@ const SLOT_PATHS := [
 	"Pages/RanchPage/Slots/Slot4",
 	"Pages/RanchPage/Slots/Slot5",
 ]
+const SOCIAL_HEART_FX_PATHS := [
+	"Pages/SocialPage/PlacePanel/FxLayer/HeartFx1",
+	"Pages/SocialPage/PlacePanel/FxLayer/HeartFx2",
+	"Pages/SocialPage/PlacePanel/FxLayer/HeartFx3",
+	"Pages/SocialPage/PlacePanel/FxLayer/HeartFx4",
+]
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.72, 0.82)
 const TEXT_GOLD := Color(1.0, 0.84, 0.25)
 
 var _gui_tick: float = 0.0
+var _social_page: int = 0
+var _toast_tween: Tween = null
+var _social_heart_fx_running: bool = false
+var _social_heart_tweens: Array[Tween] = []
 
 func _ready() -> void:
 	super._ready()
 	_ensure_pet_farm_layout()
 	_connect_gui_actions()
+	_attach_interaction_feedback()
 	_sync_gui()
 
 func init(data: Dictionary = {}) -> void:
@@ -66,6 +100,11 @@ func _gui_input(_event: InputEvent) -> void:
 	pass
 
 func _connect_gui_actions() -> void:
+	_connect_button("PetFarmBottomNav/Nav1", _on_pet_farm_home)
+	_connect_button("PetFarmBottomNav/Nav2", _on_pet_farm_pets)
+	_connect_button("PetFarmBottomNav/Nav3", _on_pet_farm_classroom)
+	_connect_button("PetFarmBottomNav/Nav4", _on_pet_farm_social)
+	_connect_button("PetFarmBottomNav/Nav5", _on_pet_farm_menu)
 	_connect_button("Header/BackButton", _on_back_button_pressed)
 	_connect_button("Pages/RanchPage/CollectRow/CollectButton", _on_collect_button_pressed)
 	_connect_button("Pages/RanchPage/BottomButtons/FocusButton", _on_focus_button_pressed)
@@ -91,8 +130,8 @@ func _connect_gui_actions() -> void:
 	_connect_button("Pages/SocialPage/PlacePanel/SlotB", _on_social_slot_pressed.bind("slot_b"))
 	_connect_button("Pages/SocialPage/BottomButtons/ClassroomButton", _switch_to_classroom)
 	_connect_button("Pages/SocialPage/BottomButtons/ActionButton", _on_social_action_pressed)
-	_connect_button("Pages/SocialPage/RosterPanel/PreviousButton", _on_class_previous_pressed)
-	_connect_button("Pages/SocialPage/RosterPanel/NextButton", _on_class_next_pressed)
+	_connect_button("Pages/SocialPage/RosterPanel/PreviousButton", _on_social_previous_pressed)
+	_connect_button("Pages/SocialPage/RosterPanel/NextButton", _on_social_next_pressed)
 	_connect_button("Pages/SocialPage/ResultPopup/ConfirmButton", _on_result_confirm_pressed)
 	var result_shade := get_node("Pages/SocialPage/ResultPopup/Shade") as Control
 	if not result_shade.gui_input.is_connected(_on_result_shade_input):
@@ -131,19 +170,27 @@ func _on_ranch_card_pressed(visible_index: int) -> void:
 		_sync_gui()
 
 func _on_ranch_previous_pressed() -> void:
-	_change_list_page(-1)
+	_list_page = clampi(_list_page - 1, 0, _context_max_page())
 	_sync_gui()
 
 func _on_ranch_next_pressed() -> void:
-	_change_list_page(1)
+	_list_page = clampi(_list_page + 1, 0, _context_max_page())
 	_sync_gui()
 
 func _on_class_previous_pressed() -> void:
-	_class_page = clampi(_class_page - 1, 0, _class_max_page)
+	_class_page = clampi(_class_page - 1, 0, _context_max_page())
 	_sync_gui()
 
 func _on_class_next_pressed() -> void:
-	_class_page = clampi(_class_page + 1, 0, _class_max_page)
+	_class_page = clampi(_class_page + 1, 0, _context_max_page())
+	_sync_gui()
+
+func _on_social_previous_pressed() -> void:
+	_social_page = clampi(_social_page - 1, 0, _context_max_page())
+	_sync_gui()
+
+func _on_social_next_pressed() -> void:
+	_social_page = clampi(_social_page + 1, 0, _context_max_page())
 	_sync_gui()
 
 func _on_class_card_pressed(visible_index: int) -> void:
@@ -165,7 +212,7 @@ func _on_social_slot_pressed(slot_key: String) -> void:
 	_sync_gui()
 
 func _on_social_card_pressed(visible_index: int) -> void:
-	var idx := _class_page * SOCIAL_CARD_PATHS.size() + visible_index
+	var idx := _social_page * SOCIAL_CARD_PATHS.size() + visible_index
 	if idx < _captured_monsters.size():
 		_assign_social_instance(_get_instance_id(_captured_monsters[idx]))
 		_sync_gui()
@@ -203,6 +250,7 @@ func _refresh_ranch_view() -> void:
 func _show_status(text: String) -> void:
 	super._show_status(text)
 	_sync_status()
+	_play_toast_feedback()
 
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Pages"):
@@ -210,12 +258,23 @@ func _sync_gui() -> void:
 	_node("Pages/RanchPage").visible = _active_page == "ranch"
 	_node("Pages/ClassroomPage").visible = _active_page == "classroom"
 	_node("Pages/SocialPage").visible = _active_page == "social"
-	var title := "宠物农场"
+	var back_button := get_node_or_null("Header/BackButton") as TextureButton
+	if back_button != null:
+		back_button.visible = _active_page == "ranch"
+	var background := get_node_or_null("Background") as TextureRect
+	if background != null:
+		var background_path := str(PAGE_BACKGROUNDS.get(_active_page, PAGE_BACKGROUNDS["ranch"]))
+		if _active_page == "social":
+			background_path = _social_background_path()
+		background.texture = _tex(background_path)
+	var title := "精灵农场"
 	if _active_page == "classroom":
-		title = "怪物课堂"
+		title = "精灵课堂"
 	elif _active_page == "social":
-		title = "社交庭院"
+		title = "社交广场"
 	_label("Header/Title").text = title
+	_sync_top_resource_bar()
+	_sync_pet_farm_bottom_nav()
 	_sync_status()
 	if _active_page == "ranch":
 		_sync_ranch_page()
@@ -228,6 +287,7 @@ func _sync_gui() -> void:
 func _sync_dynamic_gui() -> void:
 	_sync_status()
 	if _active_page == "ranch":
+		_calc_idle_exp()
 		_sync_ranch_slots()
 		_sync_collect_row()
 	elif _active_page == "social":
@@ -244,6 +304,12 @@ func _sync_status() -> void:
 	_sync_subpage_ribbon("Pages/ClassroomPage/Ribbon/RibbonText", "培养与进化", feedback_visible and _active_page == "classroom")
 	_sync_subpage_ribbon("Pages/SocialPage/Ribbon/RibbonText", "交流活动", feedback_visible and _active_page == "social")
 
+	var toast := get_node_or_null("SharedToast") as Label
+	if toast != null:
+		toast.visible = feedback_visible
+		toast.text = _status_text
+		toast.modulate.a = minf(1.0, _status_timer) if toast.visible else 0.0
+
 func _sync_subpage_ribbon(path: String, default_text: String, show_feedback: bool) -> void:
 	var ribbon_text := get_node_or_null(path) as Label
 	if ribbon_text == null:
@@ -257,8 +323,7 @@ func _sync_ranch_page() -> void:
 	var focus := get_node("Pages/RanchPage/BottomButtons/FocusButton") as TextureButton
 	_button_label(focus).text = "取消专注" if not _care_focus_instance_id.is_empty() else "专注培养"
 	_sync_card_strip(RANCH_CARD_PATHS, _list_page * RANCH_CARD_PATHS.size(), "ranch")
-	_sync_page_buttons("Pages/RanchPage/RosterPanel", _list_page, _max_list_page)
-	_sync_roster_pagination()
+	_sync_page_buttons("Pages/RanchPage/RosterPanel", _list_page, _context_max_page())
 
 func _sync_ranch_slots() -> void:
 	for i in SLOT_PATHS.size():
@@ -266,16 +331,7 @@ func _sync_ranch_slots() -> void:
 		var slot: Dictionary = _slots_data[i] if i < _slots_data.size() else {}
 		var instance_id := str(slot.get("instance_id", ""))
 		var occupied := not instance_id.is_empty() and MonsterDb.has_monster(_get_monster_id(instance_id))
-		var slot_frame := slot_node.get_node_or_null("FarmFrame") as TextureRect
-		if slot_frame == null:
-			slot_frame = TextureRect.new()
-			slot_frame.name = "FarmFrame"
-			slot_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			slot_frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-			slot_frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			slot_frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			slot_node.add_child(slot_frame)
-			slot_node.move_child(slot_frame, 0)
+		var slot_frame := slot_node.get_node("FarmFrame") as TextureRect
 		slot_frame.texture = _tex(RANCH_ASSETS["slot_occupied"])
 		var portrait := slot_node.get_node("Portrait") as TextureRect
 		var level := slot_node.get_node("Level") as Label
@@ -301,11 +357,9 @@ func _sync_ranch_slots() -> void:
 			portrait.texture = _portrait_texture(instance_id)
 			level.text = "Lv.%d" % _get_monster_level(instance_id)
 			var care: Dictionary = _care_state_map.get(instance_id, _get_care_state(instance_id))
-			var placement_text := _format_elapsed_short(slot.get("placed_at", null))
-			if not str(care.get("label", "")).is_empty():
-				placement_text = "专注 " + placement_text.trim_prefix("放置 ")
 			status.text = "EXP +%d/h" % (60 + _get_monster_level(instance_id) * 10)
-			timer.text = placement_text.trim_prefix("放置 ").trim_prefix("专注 ")
+			timer.text = _format_elapsed(slot.get("placed_at", null))
+			timer.modulate = TEXT_GOLD if not str(care.get("label", "")).is_empty() else TEXT_WHITE
 		else:
 			empty_text.text = "放入这里" if i == _selected_slot else "空位"
 			empty_text.modulate = TEXT_GOLD if i == _selected_slot else TEXT_WHITE
@@ -318,101 +372,36 @@ func _sync_collect_row() -> void:
 	_label("Pages/RanchPage/CollectRow/CoinValue").text = "+" + _format_count(total_coin)
 
 func _ensure_pet_farm_layout() -> void:
-	_ensure_top_resource_bar()
-	_ensure_roster_heading()
-	_ensure_six_roster_cards()
-	_ensure_roster_pagination()
-	_ensure_pet_farm_bottom_nav()
-	for path in SLOT_PATHS:
-		_ensure_pet_farm_slot(get_node(path) as TextureButton)
-	for path in RANCH_CARD_PATHS:
-		_style_pet_farm_card(get_node(path) as TextureButton)
-	for path in [
-		"Pages/RanchPage/BottomButtons/FocusButton",
-		"Pages/RanchPage/BottomButtons/ClassroomButton",
-		"Pages/RanchPage/BottomButtons/SocialButton",
-	]:
-		var label := (get_node(path) as TextureButton).get_node("Text") as Label
-		label.add_theme_color_override("font_color", Color(0.32, 0.16, 0.03))
-	(get_node("Pages/RanchPage/BottomButtons") as Control).visible = false
-
-func _ensure_pet_farm_bottom_nav() -> void:
-	if has_node("PetFarmBottomNav"):
-		return
-	var nav := Control.new()
-	nav.name = "PetFarmBottomNav"
-	nav.z_index = 12
-	nav.position = Vector2(12.0, 600.0)
-	nav.size = Vector2(351.0, 65.0)
-	add_child(nav)
-	var panel := TextureRect.new()
-	panel.name = "Panel"
-	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel.texture = _tex(RANCH_ASSETS["pet_farm_nav_panel"])
-	panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	panel.stretch_mode = TextureRect.STRETCH_SCALE
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	nav.add_child(panel)
-	var specs := [
-		["主页", "⌂", "", Callable(self, "_on_pet_farm_home")],
-		["宠物", "", RANCH_ASSETS["pet_tab"], Callable(self, "_on_pet_farm_pets")],
-		["课堂", "", RANCH_ASSETS["pet_classroom"], Callable(self, "_on_pet_farm_classroom")],
-		["广场", "", RANCH_ASSETS["social_plaza"], Callable(self, "_on_pet_farm_social")],
-		["菜单", "", RANCH_ASSETS["menu_tab"], Callable(self, "_on_pet_farm_menu")],
+	# Visual structure lives in ranch_hub.tscn so the Godot editor is the
+	# source of truth. Runtime code only validates and binds live data.
+	var required_paths := [
+		"PetFarmResourceBar",
+		"SharedToast",
+		"PetFarmBottomNav/Nav5",
+		"Pages/RanchPage/RosterPanel/Card6",
+		"Pages/RanchPage/RosterPanel/PageText",
+		"Pages/ClassroomPage/DetailPanel/CreamFrame",
+		"Pages/ClassroomPage/DetailPanel/EvolveButton/ModernFrame",
+		"Pages/ClassroomPage/RosterPanel/Card6",
+		"Pages/SocialPage/PlacePanel/HeartBubble",
+		"Pages/SocialPage/PlacePanel/FxLayer/HeartFx4",
+		"Pages/SocialPage/PlacePanel/SwitchButton/SocialFrame",
+		"Pages/SocialPage/BondPanel",
+		"Pages/SocialPage/BottomButtons/ActionButton/SocialFrame",
+		"Pages/SocialPage/RosterPanel/Card6",
 	]
-	for i in specs.size():
-		var button := Button.new()
-		button.name = "Nav%d" % (i + 1)
-		button.position = Vector2(8.0 + i * 67.0, 4.0)
-		button.size = Vector2(67.0, 57.0)
-		button.flat = true
-		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		button.pressed.connect(specs[i][3])
-		nav.add_child(button)
-		if i == 1:
-			var selected := TextureRect.new()
-			selected.position = Vector2(3.0, 1.0)
-			selected.size = Vector2(61.0, 59.0)
-			selected.texture = _tex(RANCH_ASSETS["pet_farm_nav_selected"])
-			selected.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			selected.stretch_mode = TextureRect.STRETCH_SCALE
-			selected.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			button.add_child(selected)
-		if not str(specs[i][2]).is_empty():
-			var icon := TextureRect.new()
-			icon.position = Vector2(18.0, 4.0)
-			icon.size = Vector2(31.0, 31.0)
-			icon.texture = _tex(specs[i][2])
-			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			button.add_child(icon)
-		else:
-			var glyph := Label.new()
-			glyph.position = Vector2(0.0, 2.0)
-			glyph.size = Vector2(67.0, 31.0)
-			glyph.text = specs[i][1]
-			glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			glyph.add_theme_color_override("font_color", Color(0.52, 0.25, 0.05))
-			glyph.add_theme_font_size_override("font_size", 27)
-			button.add_child(glyph)
-		var text := Label.new()
-		text.position = Vector2(0.0, 34.0)
-		text.size = Vector2(67.0, 20.0)
-		text.text = specs[i][0]
-		text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		text.add_theme_color_override("font_color", Color(0.36, 0.18, 0.05))
-		text.add_theme_font_size_override("font_size", 11)
-		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		button.add_child(text)
+	for path in required_paths:
+		if not has_node(path):
+			push_error("ranch_hub.tscn is missing required UI node: " + path)
 
 func _on_pet_farm_home() -> void:
 	_go_to_scene("main")
 
 func _on_pet_farm_pets() -> void:
-	_show_status("当前已在宠物农场")
+	if _active_page == "ranch":
+		_show_status("当前已在宠物农场")
+	else:
+		_switch_to_ranch()
 
 func _on_pet_farm_classroom() -> void:
 	_switch_to_classroom()
@@ -423,163 +412,102 @@ func _on_pet_farm_social() -> void:
 func _on_pet_farm_menu() -> void:
 	_show_status("更多宠物功能正在整理中")
 
-func _ensure_top_resource_bar() -> void:
-	if has_node("PetFarmResourceBar"):
+func _sync_top_resource_bar() -> void:
+	var bar := get_node_or_null("PetFarmResourceBar") as Control
+	if bar == null or bar.get_child_count() < 3:
 		return
-	var bar := Control.new()
-	bar.name = "PetFarmResourceBar"
-	bar.z_index = 9
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bar)
-	var specs := [
-		[Rect2(16.0, 14.0, 105.0, 34.0), "★  12,350"],
-		[Rect2(127.0, 14.0, 105.0, 34.0), "◆  2,548"],
-		[Rect2(238.0, 14.0, 121.0, 34.0), "♥  5  Full"],
+	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}
+	var values := [
+		"金币  %s" % _format_resource_number(int(player.get("gold", 0))),
+		"钻石  %s" % _format_resource_number(int(player.get("gems", 0))),
+		"体力  Full",
 	]
-	for spec in specs:
-		var panel := Panel.new()
-		panel.position = spec[0].position
-		panel.size = spec[0].size
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color(1.0, 0.95, 0.82, 0.98)
-		style.border_color = Color(0.96, 0.69, 0.30, 1.0)
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(14)
-		panel.add_theme_stylebox_override("panel", style)
-		bar.add_child(panel)
-		var label := Label.new()
-		label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		label.text = spec[1]
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.add_theme_color_override("font_color", Color(0.34, 0.17, 0.04))
-		label.add_theme_font_size_override("font_size", 12)
-		panel.add_child(label)
+	for i in 3:
+		var panel := bar.get_child(i) as Panel
+		if panel != null:
+			(panel.get_node("Value") as Label).text = values[i]
 
-func _ensure_roster_heading() -> void:
-	var panel := get_node("Pages/RanchPage/RosterPanel") as Control
-	if panel.has_node("Heading"):
+func _sync_pet_farm_bottom_nav() -> void:
+	var nav := get_node_or_null("PetFarmBottomNav") as Control
+	if nav == null:
 		return
-	var heading := Label.new()
-	heading.name = "Heading"
-	heading.position = Vector2(0.0, 4.0)
-	heading.size = Vector2(355.0, 18.0)
-	heading.text = "🐾  我的宠物  🐾"
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.add_theme_color_override("font_color", Color(0.42, 0.21, 0.05))
-	heading.add_theme_font_size_override("font_size", 14)
-	panel.add_child(heading)
-	var hint := Label.new()
-	hint.name = "Hint"
-	hint.position = Vector2(0.0, 21.0)
-	hint.size = Vector2(355.0, 15.0)
-	hint.text = "点击宠物，再点击农场空位进行放置"
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_color_override("font_color", Color(0.48, 0.29, 0.11))
-	hint.add_theme_font_size_override("font_size", 9)
-	panel.add_child(hint)
-
-func _ensure_six_roster_cards() -> void:
-	var panel := get_node("Pages/RanchPage/RosterPanel") as Control
-	for i in range(3, 6):
-		var name := "Card%d" % (i + 1)
-		if panel.has_node(name):
+	var active_index := 1
+	if _active_page == "classroom":
+		active_index = 2
+	elif _active_page == "social":
+		active_index = 3
+	for i in 5:
+		var button := nav.get_node_or_null("Nav%d" % (i + 1)) as Button
+		if button == null:
 			continue
-		var card := (panel.get_node("Card3") as TextureButton).duplicate() as TextureButton
-		card.name = name
-		panel.add_child(card)
-	for i in RANCH_CARD_PATHS.size():
-		var card := get_node(RANCH_CARD_PATHS[i]) as TextureButton
-		card.position = Vector2(8.0 + i * 57.0, 42.0)
-		card.size = Vector2(52.0, 76.0)
+		var selected := button.get_node_or_null("Selected") as TextureRect
+		if selected != null:
+			selected.visible = i == active_index
+		button.modulate = Color.WHITE if i == active_index else Color(0.92, 0.92, 0.92)
 
-func _ensure_roster_pagination() -> void:
-	var panel := get_node("Pages/RanchPage/RosterPanel") as Control
-	if panel.has_node("Pagination"):
+func _play_toast_feedback() -> void:
+	var toast := get_node_or_null("SharedToast") as Label
+	if toast == null:
 		return
-	var pagination := Control.new()
-	pagination.name = "Pagination"
-	pagination.position = Vector2(126.0, 133.0)
-	pagination.size = Vector2(104.0, 13.0)
-	pagination.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(pagination)
-	for i in 5:
-		var dot := Label.new()
-		dot.name = "Dot%d" % (i + 1)
-		dot.position = Vector2(i * 20.0, 0.0)
-		dot.size = Vector2(13.0, 13.0)
-		dot.text = "●" if i == 0 else "○"
-		dot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		dot.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		dot.add_theme_color_override("font_color", Color(1.0, 0.62, 0.05) if i == 0 else Color(0.71, 0.45, 0.19))
-		dot.add_theme_font_size_override("font_size", 11)
-		pagination.add_child(dot)
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+	toast.pivot_offset = toast.size * 0.5
+	toast.scale = Vector2(0.72, 0.72)
+	toast.modulate.a = 1.0
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(toast, "scale", Vector2(1.12, 1.12), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_toast_tween.tween_property(toast, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-func _sync_roster_pagination() -> void:
-	var pagination := get_node("Pages/RanchPage/RosterPanel/Pagination") as Control
-	for i in 5:
-		var dot := pagination.get_node("Dot%d" % (i + 1)) as Label
-		var active := i == mini(_list_page, 4)
-		dot.text = "●" if active else "○"
-		dot.add_theme_color_override("font_color", Color(1.0, 0.62, 0.05) if active else Color(0.71, 0.45, 0.19))
+func _attach_interaction_feedback() -> void:
+	var paths := [
+		"Header/BackButton",
+		"Pages/RanchPage/CollectRow/CollectButton",
+		"Pages/RanchPage/BottomButtons/FocusButton",
+		"Pages/ClassroomPage/DetailPanel/EvolveButton",
+		"Pages/SocialPage/PlacePanel/SwitchButton",
+		"Pages/SocialPage/BottomButtons/ActionButton",
+		"Pages/SocialPage/ResultPopup/ConfirmButton",
+	]
+	paths.append_array(SLOT_PATHS)
+	paths.append_array(RANCH_CARD_PATHS)
+	paths.append_array(CLASS_CARD_PATHS)
+	paths.append_array(SOCIAL_CARD_PATHS)
+	for path in paths:
+		var button := get_node_or_null(path) as BaseButton
+		_attach_button_feedback(button, CartoonButtonFeedback.Profile.NAV)
+	var nav := get_node_or_null("PetFarmBottomNav") as Control
+	if nav != null:
+		for i in 5:
+			_attach_button_feedback(nav.get_node_or_null("Nav%d" % (i + 1)) as BaseButton, CartoonButtonFeedback.Profile.NAV)
 
-func _style_pet_farm_card(card: TextureButton) -> void:
-	var frame := card.get_node("Frame") as TextureRect
-	frame.size = Vector2(52.0, 76.0)
-	var portrait := card.get_node("Portrait") as TextureRect
-	portrait.position = Vector2(5.0, 5.0)
-	portrait.size = Vector2(42.0, 46.0)
-	var name_label := card.get_node("Name") as Label
-	name_label.visible = false
-	var level := card.get_node("Level") as Label
-	level.position = Vector2(2.0, 56.0)
-	level.size = Vector2(48.0, 17.0)
-	level.add_theme_color_override("font_color", Color(0.40, 0.20, 0.04))
-	level.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.84, 1.0))
-	level.add_theme_constant_override("outline_size", 1)
-	var check := card.get_node("Check") as TextureRect
-	check.position = Vector2(37.0, 58.0)
-	check.size = Vector2(15.0, 15.0)
+func _attach_button_feedback(button: BaseButton, profile: int) -> void:
+	if button == null or button.has_node("CartoonFeedback"):
+		return
+	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+	button.add_child(feedback)
+	feedback.setup(button, profile)
 
-func _ensure_pet_farm_slot(slot: TextureButton) -> void:
-	if not slot.has_node("LevelBadge"):
-		var level_badge := TextureRect.new()
-		level_badge.name = "LevelBadge"
-		level_badge.position = Vector2(17.0, -17.0)
-		level_badge.size = Vector2(72.0, 24.0)
-		level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		level_badge.texture = _tex(RANCH_ASSETS["level_badge"])
-		level_badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		level_badge.stretch_mode = TextureRect.STRETCH_SCALE
-		slot.add_child(level_badge)
-		slot.move_child(level_badge, 1)
-	if not slot.has_node("TimerPlate"):
-		var plate := TextureRect.new()
-		plate.name = "TimerPlate"
-		plate.position = Vector2(15.0, 113.0)
-		plate.size = Vector2(76.0, 22.0)
-		plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		plate.texture = _tex(RANCH_ASSETS["timer_plate"])
-		plate.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		plate.stretch_mode = TextureRect.STRETCH_SCALE
-		slot.add_child(plate)
-	if not slot.has_node("Timer"):
-		var timer := Label.new()
-		timer.name = "Timer"
-		timer.position = Vector2(15.0, 113.0)
-		timer.size = Vector2(76.0, 22.0)
-		timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		timer.add_theme_color_override("font_color", Color(0.36, 0.19, 0.05))
-		timer.add_theme_font_size_override("font_size", 9)
-		slot.add_child(timer)
-	var level := slot.get_node("Level") as Label
-	level.position = Vector2(17.0, -16.0)
-	level.size = Vector2(72.0, 23.0)
-	level.add_theme_color_override("font_color", Color(0.32, 0.17, 0.04))
-	level.add_theme_color_override("font_outline_color", Color(1.0, 0.95, 0.78, 1.0))
-	level.add_theme_constant_override("outline_size", 1)
+func _context_max_page() -> int:
+	var page_size := RANCH_CARD_PATHS.size()
+	return maxi(0, ceili(float(_captured_monsters.size()) / float(page_size)) - 1)
+
+func _format_resource_number(num: int) -> String:
+	var digits := str(absi(num))
+	var formatted := ""
+	while digits.length() > 3:
+		formatted = "," + digits.substr(digits.length() - 3) + formatted
+		digits = digits.substr(0, digits.length() - 3)
+	formatted = digits + formatted
+	return "-" + formatted if num < 0 else formatted
+
+func _social_background_path() -> String:
+	var place_id := str(_current_social_place().get("place_id", "meadow_yard"))
+	return str(SOCIAL_PLACE_BACKGROUNDS.get(place_id, SOCIAL_PLACE_BACKGROUNDS["meadow_yard"]))
+
+func _evolution_stone_icon_path(item_id: String) -> String:
+	var element := item_id.trim_prefix("evolution_stone_")
+	var path := "res://assets/images/items/icon_stone_%s.png" % element
+	return path if ResourceLoader.exists(path) else RANCH_ASSETS["exp"]
 
 func _sync_classroom_page() -> void:
 	var instance_id := _class_selected_instance_id
@@ -587,10 +515,14 @@ func _sync_classroom_page() -> void:
 		instance_id = _get_instance_id(_captured_monsters[0])
 	var panel := _node("Pages/ClassroomPage/DetailPanel")
 	var portrait := panel.get_node("Portrait") as TextureRect
+	var target_portrait := panel.get_node("TargetPortrait") as TextureRect
 	var empty := panel.get_node("Empty") as Label
 	var evolve := panel.get_node("EvolveButton") as TextureButton
+	var stone_icon := panel.get_node("StoneIcon") as TextureRect
 	if instance_id.is_empty():
 		portrait.visible = false
+		target_portrait.visible = false
+		stone_icon.visible = false
 		empty.visible = true
 		evolve.disabled = true
 		_set_action_frame(evolve, false)
@@ -602,14 +534,26 @@ func _sync_classroom_page() -> void:
 		var info := _get_evolution_info_for_instance(instance_id)
 		var target_id := str(info.get("target_id", ""))
 		var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
-		var target_name := str(target.get("name", "无")) if not target.is_empty() else "无"
+		var target_name := str(target.get("name", "最终形态")) if not target.is_empty() else "最终形态"
+		var level := int(instance.get("level", 1))
+		var target_stats := MonsterDb.get_monster_stats(target_id, level, str(instance.get("nature", ""))) if not target_id.is_empty() else {}
+		var required_level := int(info.get("required_level", 1))
+		var item_count := int(info.get("item_count", 0))
+		var required_item := str(info.get("required_item", ""))
 		portrait.visible = true
+		target_portrait.visible = not target.is_empty()
+		stone_icon.visible = not required_item.is_empty()
 		empty.visible = false
 		portrait.texture = _portrait_texture(instance_id)
+		target_portrait.texture = _tex(MonsterArtDBScript.get_art_path(target_id, "ranch"))
+		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
 		(panel.get_node("Name") as Label).text = str(monster.get("name", monster_id))
-		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
-		(panel.get_node("Stats") as Label).text = "HP %d   ATK %d   DEF %d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0))]
-		(panel.get_node("Evolution") as Label).text = "进化目标：%s" % target_name
+		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [level, _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
+		(panel.get_node("TargetName") as Label).text = target_name
+		(panel.get_node("TargetLevel") as Label).text = "进化后 · Lv.%d" % level if not target.is_empty() else "已是最终形态"
+		(panel.get_node("Stats") as Label).text = "属性预览  HP %d→%d   ATK %d→%d   DEF %d→%d" % [int(stats.get("hp", 0)), int(target_stats.get("hp", stats.get("hp", 0))), int(stats.get("atk", 0)), int(target_stats.get("atk", stats.get("atk", 0))), int(stats.get("def", 0)), int(target_stats.get("def", stats.get("def", 0)))]
+		(panel.get_node("LevelRequirement") as Label).text = "等级 %d/%d" % [level, required_level]
+		(panel.get_node("StoneRequirement") as Label).text = "%s  %d/1" % [str(info.get("item_name", "进化石")), item_count]
 		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
 		(panel.get_node("Upgrade") as Label).text = str(info.get("play_upgrade_text", "玩法: 无"))
 		# Even an unavailable evolution stays tappable so players receive the
@@ -617,12 +561,12 @@ func _sync_classroom_page() -> void:
 		evolve.disabled = false
 		_set_action_frame(evolve, bool(info.get("can_evolve", false)))
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
-	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _class_max_page)
+	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
 
 func _sync_social_page() -> void:
 	_sync_social_place()
-	_sync_card_strip(SOCIAL_CARD_PATHS, _class_page * SOCIAL_CARD_PATHS.size(), "social")
-	_sync_page_buttons("Pages/SocialPage/RosterPanel", _class_page, _class_max_page)
+	_sync_card_strip(SOCIAL_CARD_PATHS, _social_page * SOCIAL_CARD_PATHS.size(), "social")
+	_sync_page_buttons("Pages/SocialPage/RosterPanel", _social_page, _context_max_page())
 
 func _sync_social_place() -> void:
 	var place := _current_social_place()
@@ -633,6 +577,7 @@ func _sync_social_place() -> void:
 	var switch_button := panel.get_node("SwitchButton") as TextureButton
 	switch_button.disabled = place.get("started_at", null) != null
 	_set_action_frame(switch_button, not switch_button.disabled)
+	_sync_social_heart_fx(place)
 	_sync_social_slot(panel.get_node("SlotA") as TextureButton, "slot_a", place)
 	_sync_social_slot(panel.get_node("SlotB") as TextureButton, "slot_b", place)
 	(panel.get_node("Preview") as Label).text = _social_preview_text(place)
@@ -643,10 +588,65 @@ func _sync_social_place() -> void:
 		if not bool(detail.get("hasHistory", false)):
 			relation_text = "当前 未相识 · 预计%s · %d分" % [str(detail.get("nextLabel", "初识")), int(detail.get("nextScore", 0))]
 	(panel.get_node("Relationship/Text") as Label).text = relation_text
+	var bond_panel := _node("Pages/SocialPage/BondPanel")
+	var relation_level := maxi(1, int(detail.get("currentLevel", 0)))
+	(bond_panel.get_node("BondTitle") as Label).text = "%s · 羁绊 Lv.%d" % [str(config.get("name", "社交场所")), relation_level]
+	(bond_panel.get_node("ProgressText") as Label).text = relation_text
+	(bond_panel.get_node("Summary") as Label).text = _social_preview_text(place)
+	var progress_fill := bond_panel.get_node("ProgressFill") as Panel
+	progress_fill.size.x = 154.0 * _social_bond_progress(place, detail)
 	var action := get_node("Pages/SocialPage/BottomButtons/ActionButton") as TextureButton
-	action.disabled = not _social_action_enabled(place)
+	action.disabled = not _social_action_enabled(place) and place.get("started_at", null) == null
 	_set_action_frame(action, not action.disabled)
 	_button_label(action).text = _social_action_label(place)
+
+func _social_bond_progress(place: Dictionary, detail: Dictionary) -> float:
+	if place.get("started_at", null) != null:
+		return clampf(SocialRulesScript.progress(place), 0.06, 1.0)
+	if detail.is_empty():
+		return 0.0
+	return clampf(float(detail.get("bestScore", detail.get("nextScore", 0))) / 100.0, 0.08, 1.0)
+
+func _sync_social_heart_fx(place: Dictionary) -> void:
+	var should_run := place.get("started_at", null) != null
+	if should_run == _social_heart_fx_running:
+		return
+	_stop_social_heart_fx()
+	_social_heart_fx_running = should_run
+	if not should_run:
+		return
+	for i in SOCIAL_HEART_FX_PATHS.size():
+		var heart := get_node(SOCIAL_HEART_FX_PATHS[i]) as TextureRect
+		var start_position := heart.position
+		var start_scale := Vector2.ONE * (0.70 + float(i % 3) * 0.08)
+		var drift := -9.0 + float(i) * 6.0
+		heart.visible = true
+		heart.pivot_offset = heart.size * 0.5
+		var tween := create_tween().set_loops()
+		tween.tween_interval(float(i) * 0.52)
+		tween.tween_callback(_reset_social_heart_fx.bind(heart, start_position, start_scale))
+		tween.tween_property(heart, "modulate:a", 0.84, 0.45)
+		tween.parallel().tween_property(heart, "position", start_position + Vector2(drift, -23.0), 1.65)
+		tween.parallel().tween_property(heart, "scale", start_scale * 1.08, 1.65)
+		tween.tween_property(heart, "position", start_position + Vector2(drift * 1.35, -45.0), 1.25)
+		tween.parallel().tween_property(heart, "modulate:a", 0.0, 1.25)
+		tween.tween_interval(0.35)
+		_social_heart_tweens.append(tween)
+
+func _reset_social_heart_fx(heart: TextureRect, start_position: Vector2, start_scale: Vector2) -> void:
+	heart.position = start_position
+	heart.scale = start_scale
+	heart.modulate.a = 0.0
+
+func _stop_social_heart_fx() -> void:
+	for tween in _social_heart_tweens:
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_social_heart_tweens.clear()
+	for path in SOCIAL_HEART_FX_PATHS:
+		var heart := get_node_or_null(path) as TextureRect
+		if heart != null:
+			heart.visible = false
 
 func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary) -> void:
 	var instance_id := str(place.get(slot_key, ""))
@@ -686,6 +686,9 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 		else:
 			selected = str(place.get("slot_a", "")) == instance_id or str(place.get("slot_b", "")) == instance_id
 		_sync_card(card, instance_id, selected, context)
+		var ranch_locked := context == "social" and _is_instance_in_ranch(instance_id)
+		card.modulate = Color(1.0, 1.0, 1.0, 0.52) if ranch_locked else Color.WHITE
+		card.tooltip_text = "农场挂机中，先从农场取下" if ranch_locked else ""
 
 func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String) -> void:
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
@@ -699,10 +702,13 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 		detail += " · " + element
 	(card.get_node("Level") as Label).text = detail
 	var detail_label := card.get_node("Detail") as Label
-	detail_label.visible = context != "ranch"
+	detail_label.visible = false
 	detail_label.text = _get_nature_name(str(instance.get("nature", ""))).substr(0, 3)
 	var check := card.get_node("Check") as TextureRect
-	check.visible = selected if context != "classroom" else false
+	check.visible = selected and context == "ranch"
+	var selection_mark := card.get_node_or_null("SelectionMark") as Label
+	if selection_mark != null:
+		selection_mark.visible = selected and context != "ranch"
 
 func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	var previous := get_node(panel_path + "/PreviousButton") as TextureButton
@@ -711,6 +717,9 @@ func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	next.visible = page_max > 0
 	previous.disabled = page <= 0
 	next.disabled = page >= page_max
+	var page_text := get_node_or_null(panel_path + "/PageText") as Label
+	if page_text != null:
+		page_text.text = "%d / %d" % [page + 1, page_max + 1]
 
 func _sync_result_popup() -> void:
 	var popup := _node("Pages/SocialPage/ResultPopup")
@@ -746,12 +755,48 @@ func _button_label(button: TextureButton) -> Label:
 	return button.get_node("Text") as Label
 
 func _set_action_frame(button: TextureButton, enabled: bool) -> void:
+	if button.has_node("SocialFrame"):
+		_set_social_action_style(button, enabled)
+		return
+	if button.has_node("ModernFrame"):
+		_set_classroom_evolve_style(button, enabled)
+		return
 	var frame := button.get_node_or_null("Frame") as TextureRect
 	if frame != null:
 		frame.texture = _tex(RANCH_ASSETS["collect_button" if enabled else "secondary_button"])
 	var text_node := button.get_node_or_null("Text") as Label
 	if text_node != null:
 		text_node.add_theme_color_override("font_color", Color(0.22, 0.12, 0.02) if enabled else TEXT_WHITE)
+
+func _set_classroom_evolve_style(button: TextureButton, enabled: bool) -> void:
+	var modern_frame := button.get_node("ModernFrame") as Panel
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.52, 0.80, 0.12, 1.0) if enabled else Color(0.39, 0.57, 0.16, 1.0)
+	style.border_color = Color(0.98, 0.76, 0.20, 1.0)
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(14)
+	style.shadow_color = Color(0.19, 0.12, 0.02, 0.38)
+	style.shadow_size = 4
+	modern_frame.add_theme_stylebox_override("panel", style)
+	var text_node := button.get_node("Text") as Label
+	text_node.add_theme_color_override("font_color", Color.WHITE)
+	text_node.add_theme_color_override("font_outline_color", Color(0.20, 0.34, 0.05))
+	text_node.add_theme_constant_override("outline_size", 2)
+
+func _set_social_action_style(button: TextureButton, enabled: bool) -> void:
+	var social_frame := button.get_node("SocialFrame") as Panel
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(1.0, 0.52, 0.10, 1.0) if enabled else Color(0.71, 0.56, 0.32, 1.0)
+	style.border_color = Color(1.0, 0.76, 0.22, 1.0)
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(14)
+	style.shadow_color = Color(0.35, 0.16, 0.02, 0.35)
+	style.shadow_size = 4
+	social_frame.add_theme_stylebox_override("panel", style)
+	var text_node := button.get_node("Text") as Label
+	text_node.add_theme_color_override("font_color", Color.WHITE)
+	text_node.add_theme_color_override("font_outline_color", Color(0.49, 0.20, 0.02))
+	text_node.add_theme_constant_override("outline_size", 2)
 
 func _label(path: String) -> Label:
 	return get_node(path) as Label
