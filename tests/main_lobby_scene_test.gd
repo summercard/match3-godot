@@ -57,6 +57,20 @@ func _run() -> void:
 	lobby.set("_player", {"name": "test", "level": 4, "gold": 0, "gems": 0, "exp": 50, "exp_to_level": 100})
 	lobby.call("_update_player_display")
 	_expect(is_equal_approx(float(lobby.get_node("%ExperienceFill").get("value")), 50.0), "owner level experience bar should use a real percentage value")
+	var exp_profile: Dictionary = lobby.get_node("%ExperienceFill").call("get_visual_profile")
+	_expect(exp_profile.get("style", "") == "lobby_refresh", "owner level experience bar should use the lobby refresh art style")
+	_expect(bool(exp_profile.get("draws_frame", false)), "owner level experience bar should draw its own frame")
+	var level_badge := lobby.get_node("Header/LevelBadge") as TextureRect
+	var exp_bar := lobby.get_node("%ExperienceFill") as Control
+	_expect(level_badge.visible, "owner level badge should be visible beside the experience bar")
+	_expect(exp_bar.size.y >= 15.0, "owner level experience bar should be tall enough to read")
+	_expect(absf((level_badge.position.y + level_badge.size.y * 0.5) - (exp_bar.position.y + exp_bar.size.y * 0.5)) <= 2.0, "owner level badge and experience bar should align on the same center line")
+	var start_label := lobby.get_node("PrimaryButtons/StartButton/Text") as Label
+	var nav_label := lobby.get_node("BottomNav/AlbumButton/Text") as Label
+	_expect(start_label.get_theme_font("font") != null, "start text should use the shared cartoon font")
+	_expect(start_label.get_theme_font_size("font_size") >= 32, "start text should be large and readable")
+	_expect(nav_label.get_theme_font("font") != null, "bottom navigation text should use the shared cartoon font")
+	_expect(nav_label.get_theme_font_size("font_size") >= 15, "bottom navigation text should be larger than the old compact labels")
 	var top_settings := lobby.get_node("Header/SettingsTopButton") as TextureButton
 	_expect(top_settings.has_node("CartoonFeedback"), "top settings shortcut should expose cartoon feedback")
 	top_settings.pressed.emit()

@@ -16,15 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://dwvva1s4hnyr4" path="res://assets/images/album/ui_roster_card_green.png" id="14_usnmi"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/album/icon_lock.png" id="15_7dl6j"]
 [ext_resource type="Texture2D" uid="uid://bv7yc7bt4mon7" path="res://assets/images/album/icon_star_dim.png" id="16_qr0pi"]
-[ext_resource type="Texture2D" uid="uid://ba4qs7ic3x7q1" path="res://assets/images/album/ui_detail_panel.png" id="20_6e4x8"]
-[ext_resource type="Texture2D" uid="uid://bjv1gh5ihs2hp" path="res://assets/images/album/ui_portrait_stage.png" id="21_jdyql"]
 [ext_resource type="Texture2D" uid="uid://b6t57fnwq57pl" path="res://assets/images/album/fx_sparkle_cluster.png" id="22_fxvvh"]
-[ext_resource type="Texture2D" uid="uid://bwgirm1ydj5ux" path="res://assets/images/album/ui_stat_row.png" id="23_2ugvr"]
-[ext_resource type="Texture2D" uid="uid://cw7ekmf31sw50" path="res://assets/images/album/ui_skill_panel.png" id="24_axnt3"]
-[ext_resource type="Texture2D" uid="uid://dpvsgkw0uoati" path="res://assets/images/album/ui_evolution_strip.png" id="25_ky0m3"]
 [ext_resource type="Texture2D" uid="uid://ddagefyigajtj" path="res://assets/images/album/icon_evolution_arrows.png" id="26_40u1r"]
-[ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/album/ui_btn_secondary_blue.png" id="27_tk25h"]
-[ext_resource type="Texture2D" uid="uid://wfgu7h1lgg2q" path="res://assets/images/album/ui_btn_primary_gold.png" id="28_dktgc"]
 [ext_resource type="Texture2D" uid="uid://hh60i528nnsx" path="res://assets/images/album/ui_dex_mode_tab_normal.png" id="29_42nqe"]
 [ext_resource type="Texture2D" uid="uid://d07iuypk0r6i" path="res://assets/images/album/icon_album_book.png" id="30_g5bff"]
 [ext_resource type="Texture2D" uid="uid://dbcrlldj5vist" path="res://assets/images/album/icon_paw.png" id="31_78gw8"]
@@ -33,7 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="34_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="35_gem"]
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ranch/icon_exp_badge.png" id="36_energy"]
-[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="37_nav_panel"]
+[ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="37_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://bgqu7cmyj23b6" path="res://assets/images/album/ui_dex_bottom_nav_selected.png" id="38_nav_selected"]
 [ext_resource type="Texture2D" uid="uid://3gkursyvtld" path="res://assets/images/album/icon_dex_nav_album.png" id="40_pets"]
 [ext_resource type="Texture2D" uid="uid://kswiohbxlplg" path="res://assets/images/album/icon_dex_nav_bond.png" id="41_battle"]
@@ -41,22 +34,21 @@
 [ext_resource type="Texture2D" uid="uid://dyjbfmladd4un" path="res://assets/images/ranch/icon_menu_tab.png" id="43_menu"]
 [ext_resource type="Texture2D" uid="uid://wmq7knkq0xkj" path="res://assets/images/album/ui_dex_page_prev.png" id="44_dex_prev"]
 [ext_resource type="Texture2D" uid="uid://b7b6342surasa" path="res://assets/images/album/ui_dex_page_next.png" id="45_dex_next"]
-
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_001_album_thumb.png" id="46_monster_001"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_006_album_thumb.png" id="47_monster_002"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/enemy_001_album_thumb.png" id="48_monster_003"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_002_album_thumb.png" id="49_monster_004"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_011_album_thumb.png" id="50_monster_005"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_012_album_thumb.png" id="51_monster_006"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_007_album_thumb.png" id="52_monster_007"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_033_album_thumb.png" id="53_monster_008"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_034_album_thumb.png" id="54_monster_009"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_035_album_thumb.png" id="55_monster_010"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_036_album_thumb.png" id="56_monster_011"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_003_album_thumb.png" id="57_monster_012"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_008_album_thumb.png" id="58_monster_013"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_013_album_thumb.png" id="59_monster_014"]
-[ext_resource type="Texture2D" path="res://assets/images/album/portraits/monster_015_album_thumb.png" id="60_monster_015"]
+[ext_resource type="Texture2D" uid="uid://b102vvut68pah" path="res://assets/images/album/portraits/monster_001_album_thumb.png" id="46_monster_001"]
+[ext_resource type="Texture2D" uid="uid://ctd58sy8qnll6" path="res://assets/images/album/portraits/monster_006_album_thumb.png" id="47_monster_002"]
+[ext_resource type="Texture2D" uid="uid://fsp5ly7qw313" path="res://assets/images/album/portraits/enemy_001_album_thumb.png" id="48_monster_003"]
+[ext_resource type="Texture2D" uid="uid://b68x6hbc3mh1s" path="res://assets/images/album/portraits/monster_002_album_thumb.png" id="49_monster_004"]
+[ext_resource type="Texture2D" uid="uid://crjlplsrciptn" path="res://assets/images/album/portraits/monster_011_album_thumb.png" id="50_monster_005"]
+[ext_resource type="Texture2D" uid="uid://bgntotebrcg6h" path="res://assets/images/album/portraits/monster_012_album_thumb.png" id="51_monster_006"]
+[ext_resource type="Texture2D" uid="uid://dvgxhki4ft2yo" path="res://assets/images/album/portraits/monster_007_album_thumb.png" id="52_monster_007"]
+[ext_resource type="Texture2D" uid="uid://cv6xrl7h8tv0j" path="res://assets/images/album/portraits/monster_033_album_thumb.png" id="53_monster_008"]
+[ext_resource type="Texture2D" uid="uid://goa8wsf1p0p1" path="res://assets/images/album/portraits/monster_034_album_thumb.png" id="54_monster_009"]
+[ext_resource type="Texture2D" uid="uid://1hrxegjfsbbf" path="res://assets/images/album/portraits/monster_035_album_thumb.png" id="55_monster_010"]
+[ext_resource type="Texture2D" uid="uid://cmdms6jnmapcg" path="res://assets/images/album/portraits/monster_036_album_thumb.png" id="56_monster_011"]
+[ext_resource type="Texture2D" uid="uid://dpmsdihr0kndq" path="res://assets/images/album/portraits/monster_003_album_thumb.png" id="57_monster_012"]
+[ext_resource type="Texture2D" uid="uid://d3facgc8uk2bs" path="res://assets/images/album/portraits/monster_008_album_thumb.png" id="58_monster_013"]
+[ext_resource type="Texture2D" uid="uid://x5biafhmen6b" path="res://assets/images/album/portraits/monster_013_album_thumb.png" id="59_monster_014"]
+[ext_resource type="Texture2D" uid="uid://wd46tc4qqa4f" path="res://assets/images/album/portraits/monster_015_album_thumb.png" id="60_monster_015"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dex_board"]
 bg_color = Color(1, 0.95, 0.82, 0.97)
@@ -770,167 +762,21 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="PreviewEmpty" type="Label" parent="AlbumPage" unique_id=2057356570]
-layout_mode = 0
-offset_left = 231.0
-offset_top = 150.0
-offset_right = 348.0
-offset_bottom = 214.0
-theme_override_colors/font_color = Color(0.49, 0.28, 0.11, 1)
-theme_override_font_sizes/font_size = 13
-text = "选择左侧精灵\\n查看图鉴资料"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="PreviewPanel" type="Panel" parent="AlbumPage" unique_id=48594925]
-layout_mode = 0
-offset_left = 235.0
-offset_top = 84.0
-offset_right = 365.0
-offset_bottom = 370.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
-
-[node name="Caption" type="Label" parent="AlbumPage/PreviewPanel" unique_id=587760429]
-layout_mode = 0
-offset_left = 235.0
-offset_top = 7.0
-offset_right = 124.0
-offset_bottom = 28.0
-theme_override_colors/font_color = Color(0.56, 0.29, 0.08, 1)
-theme_override_font_sizes/font_size = 11
-text = "精灵资料"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Portrait" type="TextureRect" parent="AlbumPage/PreviewPanel" unique_id=1486345606]
-layout_mode = 0
-offset_left = 11.0
-offset_top = 25.0
-offset_right = 121.0
-offset_bottom = 142.0
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="LockIcon" type="TextureRect" parent="AlbumPage/PreviewPanel" unique_id=1093930959]
-visible = false
-layout_mode = 0
-offset_left = 48.0
-offset_top = 64.0
-offset_right = 84.0
-offset_bottom = 100.0
-mouse_filter = 2
-texture = ExtResource("15_7dl6j")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Name" type="Label" parent="AlbumPage/PreviewPanel" unique_id=352397380]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 142.0
-offset_right = 127.0
-offset_bottom = 169.0
-theme_override_colors/font_color = Color(0.42, 0.21, 0.06, 1)
-theme_override_font_sizes/font_size = 15
-text = "野火虫"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
-[node name="Number" type="Label" parent="AlbumPage/PreviewPanel" unique_id=811526904]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 169.0
-offset_right = 51.0
-offset_bottom = 188.0
-theme_override_colors/font_color = Color(0.64, 0.42, 0.18, 1)
-theme_override_font_sizes/font_size = 10
-text = "#001"
-vertical_alignment = 1
-
-[node name="ElementIcon" type="TextureRect" parent="AlbumPage/PreviewPanel" unique_id=874318565]
-layout_mode = 0
-offset_left = 52.0
-offset_top = 168.0
-offset_right = 73.0
-offset_bottom = 189.0
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Element" type="Label" parent="AlbumPage/PreviewPanel" unique_id=654890030]
-layout_mode = 0
-offset_left = 73.0
-offset_top = 169.0
-offset_right = 124.0
-offset_bottom = 188.0
-theme_override_colors/font_color = Color(0.64, 0.42, 0.18, 1)
-theme_override_font_sizes/font_size = 10
-text = "火"
-vertical_alignment = 1
-
-[node name="Divider" type="ColorRect" parent="AlbumPage/PreviewPanel" unique_id=111585853]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 195.0
-offset_right = 124.0
-offset_bottom = 197.0
-mouse_filter = 2
-color = Color(0.94, 0.72, 0.35, 0.72)
-
-[node name="Skill" type="Label" parent="AlbumPage/PreviewPanel" unique_id=1105965625]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 204.0
-offset_right = 124.0
-offset_bottom = 224.0
-theme_override_colors/font_color = Color(0.49, 0.28, 0.11, 1)
-theme_override_font_sizes/font_size = 10
-text = "技能  火星"
-vertical_alignment = 1
-clip_text = true
-
-[node name="Ecology" type="Label" parent="AlbumPage/PreviewPanel" unique_id=981625022]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 226.0
-offset_right = 124.0
-offset_bottom = 246.0
-theme_override_colors/font_color = Color(0.49, 0.28, 0.11, 1)
-theme_override_font_sizes/font_size = 10
-text = "栖息  熔火生态"
-vertical_alignment = 1
-clip_text = true
-
-[node name="Hint" type="Label" parent="AlbumPage/PreviewPanel" unique_id=1397464987]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 252.0
-offset_right = 124.0
-offset_bottom = 277.0
-theme_override_colors/font_color = Color(0.84, 0.39, 0.18, 1)
-theme_override_font_sizes/font_size = 10
-text = "点击卡牌查看完整资料"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-
 [node name="Grid" type="Control" parent="AlbumPage" unique_id=1767716641]
 anchors_preset = 0
-offset_left = 17.0
-offset_top = 84.0
-offset_right = 218.0
-offset_bottom = 400.0
+offset_left = 18.0
+offset_top = 88.0
+offset_right = 357.0
+offset_bottom = 410.0
 mouse_filter = 2
 
 [node name="Card1" type="TextureButton" parent="AlbumPage/Grid" unique_id=4729073]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 20.0
-offset_right = 111.0
-offset_bottom = 178.0
-scale = Vector2(0.45, 0.45)
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 103.0
+offset_bottom = 158.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
@@ -1016,7 +862,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1082,10 +927,10 @@ stretch_mode = 5
 [node name="Card2" type="TextureButton" parent="AlbumPage/Grid" unique_id=1903615037]
 layout_mode = 0
 offset_left = 68.0
-offset_top = 20.0
+offset_top = 0.0
 offset_right = 171.0
-offset_bottom = 178.0
-scale = Vector2(0.45, 0.45)
+offset_bottom = 158.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
@@ -1171,7 +1016,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1236,11 +1080,11 @@ stretch_mode = 5
 
 [node name="Card3" type="TextureButton" parent="AlbumPage/Grid" unique_id=1690346694]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 20.0
-offset_right = 231.0
-offset_bottom = 178.0
-scale = Vector2(0.45, 0.45)
+offset_left = 136.0
+offset_top = 0.0
+offset_right = 239.0
+offset_bottom = 158.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
@@ -1326,7 +1170,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1391,11 +1234,11 @@ stretch_mode = 5
 
 [node name="Card4" type="TextureButton" parent="AlbumPage/Grid" unique_id=1227069289]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 82.0
-offset_right = 111.0
-offset_bottom = 240.0
-scale = Vector2(0.45, 0.45)
+offset_left = 204.0
+offset_top = 0.0
+offset_right = 307.0
+offset_bottom = 158.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
@@ -1481,7 +1324,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1546,11 +1388,11 @@ stretch_mode = 5
 
 [node name="Card5" type="TextureButton" parent="AlbumPage/Grid" unique_id=1179121093]
 layout_mode = 0
-offset_left = 68.0
-offset_top = 82.0
-offset_right = 171.0
-offset_bottom = 240.0
-scale = Vector2(0.45, 0.45)
+offset_left = 272.0
+offset_top = 0.0
+offset_right = 375.0
+offset_bottom = 158.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
@@ -1636,7 +1478,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1701,11 +1542,11 @@ stretch_mode = 5
 
 [node name="Card6" type="TextureButton" parent="AlbumPage/Grid" unique_id=150639648]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 82.0
-offset_right = 231.0
-offset_bottom = 240.0
-scale = Vector2(0.45, 0.45)
+offset_left = 0.0
+offset_top = 102.0
+offset_right = 103.0
+offset_bottom = 260.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
@@ -1791,7 +1632,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -1856,11 +1696,11 @@ stretch_mode = 5
 
 [node name="Card7" type="TextureButton" parent="AlbumPage/Grid" unique_id=1382763545]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 144.0
-offset_right = 111.0
-offset_bottom = 302.0
-scale = Vector2(0.45, 0.45)
+offset_left = 68.0
+offset_top = 102.0
+offset_right = 171.0
+offset_bottom = 260.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card7" unique_id=1516134750]
@@ -1946,7 +1786,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2011,11 +1850,11 @@ stretch_mode = 5
 
 [node name="Card8" type="TextureButton" parent="AlbumPage/Grid" unique_id=1052783919]
 layout_mode = 0
-offset_left = 68.0
-offset_top = 144.0
-offset_right = 171.0
-offset_bottom = 302.0
-scale = Vector2(0.45, 0.45)
+offset_left = 136.0
+offset_top = 102.0
+offset_right = 239.0
+offset_bottom = 260.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card8" unique_id=2116465743]
@@ -2101,7 +1940,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2166,11 +2004,11 @@ stretch_mode = 5
 
 [node name="Card9" type="TextureButton" parent="AlbumPage/Grid" unique_id=311057418]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 144.0
-offset_right = 231.0
-offset_bottom = 302.0
-scale = Vector2(0.45, 0.45)
+offset_left = 204.0
+offset_top = 102.0
+offset_right = 307.0
+offset_bottom = 260.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card9" unique_id=1511414470]
@@ -2256,7 +2094,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2321,11 +2158,11 @@ stretch_mode = 5
 
 [node name="Card10" type="TextureButton" parent="AlbumPage/Grid" unique_id=213998615]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 206.0
-offset_right = 111.0
-offset_bottom = 364.0
-scale = Vector2(0.45, 0.45)
+offset_left = 272.0
+offset_top = 102.0
+offset_right = 375.0
+offset_bottom = 260.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card10" unique_id=2053015839]
@@ -2411,7 +2248,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2476,11 +2312,11 @@ stretch_mode = 5
 
 [node name="Card11" type="TextureButton" parent="AlbumPage/Grid" unique_id=1065981800]
 layout_mode = 0
-offset_left = 68.0
-offset_top = 206.0
-offset_right = 171.0
-offset_bottom = 364.0
-scale = Vector2(0.45, 0.45)
+offset_left = 0.0
+offset_top = 204.0
+offset_right = 103.0
+offset_bottom = 362.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card11" unique_id=850595974]
@@ -2566,7 +2402,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2631,11 +2466,11 @@ stretch_mode = 5
 
 [node name="Card12" type="TextureButton" parent="AlbumPage/Grid" unique_id=1864175924]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 206.0
-offset_right = 231.0
-offset_bottom = 364.0
-scale = Vector2(0.45, 0.45)
+offset_left = 68.0
+offset_top = 204.0
+offset_right = 171.0
+offset_bottom = 362.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card12" unique_id=1360028350]
@@ -2721,7 +2556,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2786,11 +2620,11 @@ stretch_mode = 5
 
 [node name="Card13" type="TextureButton" parent="AlbumPage/Grid" unique_id=26816447]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 268.0
-offset_right = 111.0
-offset_bottom = 426.0
-scale = Vector2(0.45, 0.45)
+offset_left = 136.0
+offset_top = 204.0
+offset_right = 239.0
+offset_bottom = 362.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card13" unique_id=398643517]
@@ -2876,7 +2710,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -2941,11 +2774,11 @@ stretch_mode = 5
 
 [node name="Card14" type="TextureButton" parent="AlbumPage/Grid" unique_id=1970519929]
 layout_mode = 0
-offset_left = 68.0
-offset_top = 268.0
-offset_right = 171.0
-offset_bottom = 426.0
-scale = Vector2(0.45, 0.45)
+offset_left = 204.0
+offset_top = 204.0
+offset_right = 307.0
+offset_bottom = 362.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card14" unique_id=730994600]
@@ -3031,7 +2864,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -3096,11 +2928,11 @@ stretch_mode = 5
 
 [node name="Card15" type="TextureButton" parent="AlbumPage/Grid" unique_id=1965734473]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 268.0
-offset_right = 231.0
-offset_bottom = 426.0
-scale = Vector2(0.45, 0.45)
+offset_left = 272.0
+offset_top = 204.0
+offset_right = 375.0
+offset_bottom = 362.0
+scale = Vector2(0.55, 0.55)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card15" unique_id=722085236]
@@ -3186,7 +3018,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -3251,10 +3082,10 @@ stretch_mode = 5
 
 [node name="PageControls" type="Control" parent="AlbumPage" unique_id=1141274915]
 anchors_preset = 0
-offset_left = 35.0
-offset_top = 445.0
-offset_right = 244.0
-offset_bottom = 493.0
+offset_left = 116.0
+offset_top = 410.0
+offset_right = 325.0
+offset_bottom = 458.0
 scale = Vector2(0.68, 0.68)
 mouse_filter = 2
 
@@ -3339,7 +3170,7 @@ offset_left = 58.0
 offset_top = 15.0
 offset_right = 228.0
 offset_bottom = 43.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3354,7 +3185,7 @@ offset_left = 59.0
 offset_top = 42.0
 offset_right = 154.0
 offset_bottom = 65.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3450,6 +3281,7 @@ offset_right = 124.0
 offset_bottom = 126.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
 [node name="Portrait" type="TextureRect" parent="DetailPanel/PortraitStage" unique_id=122675132]
 layout_mode = 0
 offset_left = 8.0
@@ -3491,13 +3323,14 @@ offset_right = 160.0
 offset_bottom = 25.0
 mouse_filter = 2
 color = Color(1, 0.92, 0.72, 0.36)
+
 [node name="Name" type="Label" parent="DetailPanel/Stats/Stat1" unique_id=997357275]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 3.0
 offset_right = 52.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3530,7 +3363,7 @@ offset_left = 111.0
 offset_top = 3.0
 offset_right = 151.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3553,13 +3386,14 @@ offset_right = 160.0
 offset_bottom = 25.0
 mouse_filter = 2
 color = Color(1, 0.92, 0.72, 0.36)
+
 [node name="Name" type="Label" parent="DetailPanel/Stats/Stat2" unique_id=1268675554]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 3.0
 offset_right = 52.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3592,7 +3426,7 @@ offset_left = 111.0
 offset_top = 3.0
 offset_right = 151.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3615,13 +3449,14 @@ offset_right = 160.0
 offset_bottom = 25.0
 mouse_filter = 2
 color = Color(1, 0.92, 0.72, 0.36)
+
 [node name="Name" type="Label" parent="DetailPanel/Stats/Stat3" unique_id=1790257235]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 3.0
 offset_right = 52.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3654,7 +3489,7 @@ offset_left = 111.0
 offset_top = 3.0
 offset_right = 151.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3677,13 +3512,14 @@ offset_right = 160.0
 offset_bottom = 25.0
 mouse_filter = 2
 color = Color(1, 0.92, 0.72, 0.36)
+
 [node name="Name" type="Label" parent="DetailPanel/Stats/Stat4" unique_id=52169903]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 3.0
 offset_right = 52.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3716,7 +3552,7 @@ offset_left = 111.0
 offset_top = 3.0
 offset_right = 151.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3740,6 +3576,7 @@ offset_right = 303.0
 offset_bottom = 58.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
 [node name="Icon" type="TextureRect" parent="DetailPanel/SkillPanel" unique_id=325648395]
 layout_mode = 0
 offset_left = 12.0
@@ -3757,7 +3594,7 @@ offset_left = 50.0
 offset_top = 7.0
 offset_right = 275.0
 offset_bottom = 30.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3772,7 +3609,7 @@ offset_left = 50.0
 offset_top = 29.0
 offset_right = 282.0
 offset_bottom = 52.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3795,13 +3632,14 @@ offset_right = 303.0
 offset_bottom = 61.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
 [node name="Title" type="Label" parent="DetailPanel/EvolutionStrip" unique_id=604077708]
 layout_mode = 0
 offset_left = 14.0
 offset_top = 5.0
 offset_right = 94.0
 offset_bottom = 28.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3847,7 +3685,7 @@ offset_left = 108.0
 offset_top = 21.0
 offset_right = 226.0
 offset_bottom = 44.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3863,7 +3701,7 @@ offset_left = 23.0
 offset_top = 347.0
 offset_right = 313.0
 offset_bottom = 370.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3886,12 +3724,13 @@ offset_right = 116.0
 offset_bottom = 36.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
 [node name="Text" type="Label" parent="DetailPanel/CloseButton" unique_id=933595780]
 layout_mode = 0
 offset_top = 5.0
 offset_right = 116.0
 offset_bottom = 29.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3915,12 +3754,13 @@ offset_right = 116.0
 offset_bottom = 36.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
 [node name="Text" type="Label" parent="DetailPanel/EvolveButton" unique_id=1775202593]
 layout_mode = 0
 offset_top = 5.0
 offset_right = 116.0
 offset_bottom = 29.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3952,7 +3792,7 @@ offset_left = 24.0
 offset_top = 22.0
 offset_right = 184.0
 offset_bottom = 48.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -3967,7 +3807,7 @@ offset_left = 24.0
 offset_top = 50.0
 offset_right = 274.0
 offset_bottom = 73.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4003,7 +3843,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4034,7 +3874,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4080,7 +3920,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4111,7 +3951,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4157,7 +3997,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4188,7 +4028,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4234,7 +4074,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4265,7 +4105,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4311,7 +4151,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4342,7 +4182,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4388,7 +4228,7 @@ offset_left = 11.0
 offset_top = 4.0
 offset_right = 99.0
 offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4419,7 +4259,7 @@ offset_left = 11.0
 offset_top = 22.0
 offset_right = 121.0
 offset_bottom = 45.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4467,7 +4307,7 @@ offset_left = 24.0
 offset_top = 20.0
 offset_right = 184.0
 offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4482,7 +4322,7 @@ offset_left = 24.0
 offset_top = 48.0
 offset_right = 294.0
 offset_bottom = 71.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4512,7 +4352,7 @@ offset_left = 13.0
 offset_top = 8.0
 offset_right = 137.0
 offset_bottom = 31.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4543,7 +4383,7 @@ offset_left = 13.0
 offset_top = 36.0
 offset_right = 265.0
 offset_bottom = 59.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4578,7 +4418,7 @@ offset_left = 10.0
 offset_top = 3.0
 offset_right = 102.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4608,7 +4448,7 @@ offset_left = 10.0
 offset_top = 19.0
 offset_right = 82.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4623,7 +4463,7 @@ offset_left = 87.0
 offset_top = 18.0
 offset_right = 271.0
 offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4670,7 +4510,7 @@ offset_left = 10.0
 offset_top = 3.0
 offset_right = 102.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4700,7 +4540,7 @@ offset_left = 10.0
 offset_top = 19.0
 offset_right = 82.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4715,7 +4555,7 @@ offset_left = 87.0
 offset_top = 18.0
 offset_right = 271.0
 offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4762,7 +4602,7 @@ offset_left = 10.0
 offset_top = 3.0
 offset_right = 102.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4792,7 +4632,7 @@ offset_left = 10.0
 offset_top = 19.0
 offset_right = 82.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4807,7 +4647,7 @@ offset_left = 87.0
 offset_top = 18.0
 offset_right = 271.0
 offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4854,7 +4694,7 @@ offset_left = 10.0
 offset_top = 3.0
 offset_right = 102.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4884,7 +4724,7 @@ offset_left = 10.0
 offset_top = 19.0
 offset_right = 82.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4899,7 +4739,7 @@ offset_left = 87.0
 offset_top = 18.0
 offset_right = 271.0
 offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4946,7 +4786,7 @@ offset_left = 10.0
 offset_top = 3.0
 offset_right = 102.0
 offset_bottom = 26.0
-theme_override_colors/font_color = Color(0.38, 0.20, 0.06, 1)
+theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4976,7 +4816,7 @@ offset_left = 10.0
 offset_top = 19.0
 offset_right = 82.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
@@ -4991,7 +4831,7 @@ offset_left = 87.0
 offset_top = 18.0
 offset_right = 271.0
 offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.50, 0.31, 0.13, 1)
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1

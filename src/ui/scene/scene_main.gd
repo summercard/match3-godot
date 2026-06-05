@@ -9,6 +9,7 @@ extends Control
 signal button_pressed(btn_id: String)
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
 const BUTTON_DESCRIPTIONS := {
 	"start": "选择关卡，开始三消冒险战斗！",
 	"team": "编队你的怪物伙伴，打造最强阵容",
@@ -54,6 +55,7 @@ var _player: Dictionary = {
 
 func _ready() -> void:
 	instance = self
+	CartoonTypographyScript.apply(self, "lobby")
 	for button_name in BUTTON_IDS:
 		var button := get_node("%" + button_name) as TextureButton
 		var button_id: String = BUTTON_IDS[button_name]

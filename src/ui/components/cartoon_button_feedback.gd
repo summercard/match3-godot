@@ -17,6 +17,7 @@ var _rest_rotation := 0.0
 var _rest_self_modulate := Color.WHITE
 var _hovered := false
 var _pressed := false
+var _burst_enabled := true
 var _elapsed := 0.0
 var _redraw_accum := 0.0
 var _burst_progress := 1.0
@@ -42,7 +43,15 @@ func setup(button: BaseButton, profile: int = Profile.NAV) -> void:
 	button.button_down.connect(_on_button_down)
 	button.button_up.connect(_on_button_up)
 	button.pressed.connect(_on_pressed)
+	_update_processing()
 	queue_redraw()
+
+
+func set_burst_enabled(enabled: bool) -> void:
+	_burst_enabled = enabled
+	if not _burst_enabled:
+		_burst_progress = 1.0
+	_update_processing()
 
 
 func get_feedback_profile() -> Dictionary:
@@ -50,12 +59,13 @@ func get_feedback_profile() -> Dictionary:
 		"profile": _profile,
 		"press_scale": _press_scale(),
 		"hover_scale": _hover_scale(),
-		"burst": true,
+		"burst": _burst_enabled,
 	}
 
 
 func _process(delta: float) -> void:
 	if _button == null:
+		set_process(false)
 		return
 	_elapsed += delta
 	_redraw_accum += delta
@@ -64,6 +74,8 @@ func _process(delta: float) -> void:
 	if _redraw_accum >= REDRAW_INTERVAL:
 		_redraw_accum = 0.0
 		queue_redraw()
+	if not _should_process_feedback():
+		set_process(false)
 
 
 func _draw() -> void:
@@ -81,7 +93,7 @@ func _draw() -> void:
 	if glow_alpha > 0.0:
 		var glow_radius := maxf(size.x, size.y) * (0.50 + idle_pulse * 0.025)
 		draw_circle(center, glow_radius, Color(1.0, 0.82, 0.30, glow_alpha * 0.18))
-	if _burst_progress >= 1.0:
+	if not _burst_enabled or _burst_progress >= 1.0:
 		return
 	var burst_alpha := 1.0 - _burst_progress
 	var base_radius := maxf(size.x, size.y) * (0.34 + _burst_progress * 0.30)
@@ -98,12 +110,14 @@ func _draw() -> void:
 
 func _on_mouse_entered() -> void:
 	_hovered = true
+	_update_processing()
 	if not _pressed:
 		_animate_to(_hover_scale(), -0.7, 0.10, Tween.TRANS_QUAD, Tween.EASE_OUT)
 
 
 func _on_mouse_exited() -> void:
 	_hovered = false
+	_update_processing()
 	if not _pressed:
 		_animate_to(1.0, 0.0, 0.12, Tween.TRANS_QUAD, Tween.EASE_OUT)
 
@@ -118,16 +132,19 @@ func _on_focus_exited() -> void:
 
 func _on_button_down() -> void:
 	_pressed = true
+	_update_processing()
 	_animate_to(_press_scale(), 1.1, 0.065, Tween.TRANS_QUAD, Tween.EASE_OUT)
 
 
 func _on_button_up() -> void:
 	_pressed = false
+	_update_processing()
 	_play_release_bounce()
 
 
 func _on_pressed() -> void:
-	_play_burst()
+	if _burst_enabled:
+		_play_burst()
 
 
 func _animate_to(scale_factor: float, rotation_degrees: float, duration: float, transition: int, easing: int) -> void:
@@ -156,6 +173,7 @@ func _play_burst() -> void:
 	if _burst_tween != null and _burst_tween.is_valid():
 		_burst_tween.kill()
 	_burst_progress = 0.0
+	_update_processing()
 	queue_redraw()
 	_burst_tween = create_tween()
 	_burst_tween.tween_method(_set_burst_progress, 0.0, 1.0, _burst_duration()).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -163,6 +181,19 @@ func _play_burst() -> void:
 
 func _set_burst_progress(value: float) -> void:
 	_burst_progress = value
+	queue_redraw()
+	if _burst_progress >= 1.0:
+		_update_processing()
+
+
+func _should_process_feedback() -> bool:
+	if _profile == Profile.PRIMARY:
+		return true
+	return _hovered or _pressed or (_burst_enabled and _burst_progress < 1.0)
+
+
+func _update_processing() -> void:
+	set_process(_should_process_feedback())
 	queue_redraw()
 
 

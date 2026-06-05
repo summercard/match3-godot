@@ -6,8 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dws8wae6sgtuq" path="res://assets/images/main/lobby_refresh/ui_player_status_card_v3.png" id="4_player_card"]
 [ext_resource type="Texture2D" uid="uid://dmkrosm0ge0ib" path="res://assets/images/main/lobby_refresh/icon_avatar_slime_v3.png" id="5_avatar"]
 [ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/main/lobby_refresh/icon_level_shield_v3.png" id="6_level"]
-[ext_resource type="Texture2D" path="res://assets/images/main/ui_exp_bar_empty_v2.png" id="7_exp_empty"]
-[ext_resource type="Script" path="res://src/ui/components/battle_hp_bar.gd" id="7_exp_bar"]
+[ext_resource type="Script" path="res://src/ui/components/lobby_experience_bar.gd" id="7_exp_bar"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="8_currency"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="9_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="10_diamond"]
@@ -111,11 +110,10 @@ text = "冒险者"
 
 [node name="LevelBadge" type="TextureRect" parent="Header" unique_id=939879965]
 layout_mode = 0
-visible = false
-offset_left = 52.0
+offset_left = 50.0
 offset_top = 35.0
-offset_right = 69.0
-offset_bottom = 54.0
+offset_right = 71.0
+offset_bottom = 57.0
 mouse_filter = 2
 texture = ExtResource("6_level")
 expand_mode = 1
@@ -124,10 +122,10 @@ stretch_mode = 5
 [node name="LevelValue" type="Label" parent="Header" unique_id=852806575]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 53.0
-offset_top = 39.0
-offset_right = 68.0
-offset_bottom = 53.0
+offset_left = 51.0
+offset_top = 38.0
+offset_right = 70.0
+offset_bottom = 55.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.16, 0.03, 1)
 theme_override_constants/outline_size = 2
@@ -136,35 +134,32 @@ text = "28"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExperienceTrack" type="TextureRect" parent="Header"]
+[node name="ExperienceTrack" type="Control" parent="Header"]
 layout_mode = 0
-offset_left = 68.0
-offset_top = 43.0
-offset_right = 120.0
-offset_bottom = 50.0
+offset_left = 66.0
+offset_top = 38.0
+offset_right = 122.0
+offset_bottom = 55.0
 mouse_filter = 2
-texture = ExtResource("7_exp_empty")
-expand_mode = 1
-stretch_mode = 5
 
 [node name="ExperienceFill" type="Control" parent="Header" unique_id=878699461]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 69.0
-offset_top = 44.0
-offset_right = 119.0
-offset_bottom = 49.0
+offset_left = 66.0
+offset_top = 38.0
+offset_right = 122.0
+offset_bottom = 55.0
 mouse_filter = 2
 script = ExtResource("7_exp_bar")
-fill_color = Color(0.35, 0.78, 0.12, 1)
+fill_color = Color(0.46, 0.86, 0.16, 1)
 
 [node name="ExpValue" type="Label" parent="Header" unique_id=623275096]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 68.0
-offset_top = 34.0
-offset_right = 121.0
-offset_bottom = 49.0
+offset_top = 38.0
+offset_right = 120.0
+offset_bottom = 54.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.12, 0.28, 0.04, 1)
 theme_override_constants/outline_size = 2

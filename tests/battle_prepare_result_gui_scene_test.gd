@@ -80,6 +80,44 @@ func _run() -> void:
 	_expect(not (result.get_node("CaptureResultPanel") as Control).visible, "old capture pet panel should be hidden behind success layer")
 	result.queue_free()
 	await process_frame
+
+	var missed_result: Control = load("res://src/ui/scenes/battle_result.tscn").instantiate()
+	root.add_child(missed_result)
+	missed_result.init({
+		"result": "win",
+		"stageId": "stage_1_1",
+		"turnCount": 5,
+		"maxTurns": 20,
+		"stageRewards": {"gold": 80, "exp": 30},
+		"playerTeam": [
+			{"id": "monster_001", "monsterId": "monster_001", "level": 5, "hp": 20, "maxHP": 20},
+			{"id": "monster_002", "monsterId": "monster_002", "level": 3, "hp": 18, "maxHP": 18},
+		],
+		"enemies": [
+			{"id": "enemy_001", "monsterId": "enemy_001", "name": "wild", "hp": 0, "maxHP": 16},
+		],
+		"capture_played_inline": true,
+		"captured": false,
+		"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "wild", "rarity": 1},
+		"capture_result_text": {"title": "auto off", "reason": "long text should not render"},
+	})
+	var missed_panel := missed_result.get_node("CaptureResultPanel") as Control
+	_expect(missed_panel.visible, "missed capture should keep a compact status plaque")
+	_expect((missed_panel.get_node("Title") as Label).text == "未捕捉", "missed capture should only show the uncaptured status")
+	for line_path in ["Line1", "Line2", "Line3"]:
+		var line := missed_panel.get_node(line_path) as Label
+		_expect(not line.visible and line.text.is_empty(), "missed capture should hide extra explanation line %s" % line_path)
+	for button_path in ["Buttons/BackButton", "Buttons/NextButton", "Buttons/RetryButton"]:
+		var button := missed_result.get_node(button_path) as TextureButton
+		var frame := button.get_node("Frame") as TextureRect
+		_expect(button.size.y >= 50.0 and frame.size == button.size, "%s frame should fit its button without cropping" % button_path)
+	_expect((missed_result.get_node("Buttons/NextButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/result_refresh/ui_btn_gold.png", "next button should use the refreshed image2 next texture")
+	_expect((missed_result.get_node("Buttons/RetryButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/result_refresh/ui_btn_blue.png", "retry button should use the refreshed image2 retry texture")
+	for star_path in ["StarRow/Star1", "StarRow/Star2", "StarRow/Star3"]:
+		var star := missed_result.get_node(star_path) as TextureRect
+		_expect(star.size.x >= 52.0 and star.size.y >= 56.0, "%s should have enough room for the large star art" % star_path)
+	missed_result.queue_free()
+	await process_frame
 	_finish()
 
 func _expect(condition: bool, message: String) -> void:

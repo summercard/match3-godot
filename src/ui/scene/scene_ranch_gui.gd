@@ -5,14 +5,14 @@ extends "res://src/ui/scene/scene_ranch.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const PAGE_BACKGROUNDS := {
-	"ranch": "res://assets/images/ranch/bg_ranch_pasture.png",
-	"classroom": "res://assets/images/ranch/bg_pet_academy.png",
-	"social": "res://assets/images/ranch/bg_social_meadow_yard.png",
+	"ranch": "res://assets/images/ranch_optimized/bg_ranch_pasture_750.png",
+	"classroom": "res://assets/images/ranch_optimized/bg_pet_academy_750.png",
+	"social": "res://assets/images/ranch_optimized/bg_social_meadow_yard_750.png",
 }
 const SOCIAL_PLACE_BACKGROUNDS := {
-	"meadow_yard": "res://assets/images/ranch/bg_social_meadow_yard.png",
-	"sunny_yard": "res://assets/images/ranch/bg_social_sunny_yard.png",
-	"quiet_pond": "res://assets/images/ranch/bg_social_quiet_pond.png",
+	"meadow_yard": "res://assets/images/ranch_optimized/bg_social_meadow_yard_750.png",
+	"sunny_yard": "res://assets/images/ranch_optimized/bg_social_sunny_yard_750.png",
+	"quiet_pond": "res://assets/images/ranch_optimized/bg_social_quiet_pond_750.png",
 }
 const LOBBY_ASSETS := {
 	"currency": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
@@ -60,12 +60,16 @@ const SOCIAL_HEART_FX_PATHS := [
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.72, 0.82)
 const TEXT_GOLD := Color(1.0, 0.84, 0.25)
+const DYNAMIC_GUI_INTERVAL := 1.0
+const STATUS_GUI_INTERVAL := 1.0 / 15.0
 
-var _gui_tick: float = 0.0
+var _dynamic_gui_tick: float = 0.0
+var _status_gui_tick: float = 0.0
 var _social_page: int = 0
 var _toast_tween: Tween = null
 var _social_heart_fx_running: bool = false
 var _social_heart_tweens: Array[Tween] = []
+var _portrait_path_cache: Dictionary = {}
 
 func _ready() -> void:
 	super._ready()
@@ -86,9 +90,13 @@ func _process(delta: float) -> void:
 	_time += delta
 	if _status_timer > 0.0:
 		_status_timer = maxf(0.0, _status_timer - delta)
-	_gui_tick += delta
-	if _gui_tick >= 0.25:
-		_gui_tick = 0.0
+		_status_gui_tick += delta
+		if _status_gui_tick >= STATUS_GUI_INTERVAL or _status_timer <= 0.0:
+			_status_gui_tick = 0.0
+			_sync_status()
+	_dynamic_gui_tick += delta
+	if _dynamic_gui_tick >= DYNAMIC_GUI_INTERVAL:
+		_dynamic_gui_tick = 0.0
 		_sync_dynamic_gui()
 
 func _draw() -> void:
@@ -232,19 +240,27 @@ func _on_result_shade_input(event: InputEvent) -> void:
 		_on_result_confirm_pressed()
 
 func _switch_to_ranch() -> void:
-	super._switch_to_ranch()
+	_active_page = "ranch"
+	_dragging_class_list = false
 	_sync_gui()
 
 func _switch_to_classroom() -> void:
-	super._switch_to_classroom()
+	_active_page = "classroom"
+	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
+		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
+	_update_class_scroll_limit()
 	_sync_gui()
 
 func _switch_to_social() -> void:
-	super._switch_to_social()
+	_active_page = "social"
+	_dragging_class_list = false
+	_update_class_scroll_limit()
 	_sync_gui()
 
 func _refresh_ranch_view() -> void:
-	super._refresh_ranch_view()
+	_calc_idle_exp()
+	_update_list_scroll_limit()
+	_update_class_scroll_limit()
 	_sync_gui()
 
 func _show_status(text: String) -> void:
@@ -266,7 +282,7 @@ func _sync_gui() -> void:
 		var background_path := str(PAGE_BACKGROUNDS.get(_active_page, PAGE_BACKGROUNDS["ranch"]))
 		if _active_page == "social":
 			background_path = _social_background_path()
-		background.texture = _tex(background_path)
+		_set_texture(background, _tex(background_path))
 	var title := "精灵农场"
 	if _active_page == "classroom":
 		title = "精灵课堂"
@@ -343,22 +359,22 @@ func _sync_ranch_slots() -> void:
 		var plus := slot_node.get_node("EmptyPlus") as Label
 		var empty_text := slot_node.get_node("EmptyText") as Label
 		var sparkle := slot_node.get_node("Sparkle") as TextureRect
-		portrait.visible = occupied
-		level.visible = occupied
-		level_badge.visible = occupied
-		ribbon.visible = occupied
-		status.visible = occupied
-		timer_plate.visible = occupied
-		timer.visible = occupied
-		sparkle.visible = occupied
-		plus.visible = not occupied
-		empty_text.visible = not occupied
+		_set_visible(portrait, occupied)
+		_set_visible(level, occupied)
+		_set_visible(level_badge, occupied)
+		_set_visible(ribbon, occupied)
+		_set_visible(status, occupied)
+		_set_visible(timer_plate, occupied)
+		_set_visible(timer, occupied)
+		_set_visible(sparkle, occupied)
+		_set_visible(plus, not occupied)
+		_set_visible(empty_text, not occupied)
 		if occupied:
-			portrait.texture = _portrait_texture(instance_id)
-			level.text = "Lv.%d" % _get_monster_level(instance_id)
+			_set_texture(portrait, _portrait_texture(instance_id))
+			_set_text(level, "Lv.%d" % _get_monster_level(instance_id))
 			var care: Dictionary = _care_state_map.get(instance_id, _get_care_state(instance_id))
-			status.text = "EXP +%d/h" % (60 + _get_monster_level(instance_id) * 10)
-			timer.text = _format_elapsed(slot.get("placed_at", null))
+			_set_text(status, "EXP +%d/h" % (60 + _get_monster_level(instance_id) * 10))
+			_set_text(timer, _format_elapsed(slot.get("placed_at", null)))
 			timer.modulate = TEXT_GOLD if not str(care.get("label", "")).is_empty() else TEXT_WHITE
 		else:
 			empty_text.text = "放入这里" if i == _selected_slot else "空位"
@@ -368,8 +384,8 @@ func _sync_ranch_slots() -> void:
 func _sync_collect_row() -> void:
 	var total_exp := _total_idle_exp()
 	var total_coin := total_exp * 1.25
-	_label("Pages/RanchPage/CollectRow/ExpValue").text = "+" + _format_count(total_exp)
-	_label("Pages/RanchPage/CollectRow/CoinValue").text = "+" + _format_count(total_coin)
+	_set_text(_label("Pages/RanchPage/CollectRow/ExpValue"), "+" + _format_count(total_exp))
+	_set_text(_label("Pages/RanchPage/CollectRow/CoinValue"), "+" + _format_count(total_coin))
 
 func _ensure_pet_farm_layout() -> void:
 	# Visual structure lives in ranch_hub.tscn so the Godot editor is the
@@ -425,7 +441,7 @@ func _sync_top_resource_bar() -> void:
 	for i in 3:
 		var panel := bar.get_child(i) as Panel
 		if panel != null:
-			(panel.get_node("Value") as Label).text = values[i]
+			_set_text(panel.get_node("Value") as Label, values[i])
 
 func _sync_pet_farm_bottom_nav() -> void:
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
@@ -474,18 +490,19 @@ func _attach_interaction_feedback() -> void:
 	paths.append_array(SOCIAL_CARD_PATHS)
 	for path in paths:
 		var button := get_node_or_null(path) as BaseButton
-		_attach_button_feedback(button, CartoonButtonFeedback.Profile.NAV)
+		_attach_button_feedback(button, CartoonButtonFeedback.Profile.NAV, false)
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
 	if nav != null:
 		for i in 5:
-			_attach_button_feedback(nav.get_node_or_null("Nav%d" % (i + 1)) as BaseButton, CartoonButtonFeedback.Profile.NAV)
+			_attach_button_feedback(nav.get_node_or_null("Nav%d" % (i + 1)) as BaseButton, CartoonButtonFeedback.Profile.NAV, false)
 
-func _attach_button_feedback(button: BaseButton, profile: int) -> void:
+func _attach_button_feedback(button: BaseButton, profile: int, burst_enabled: bool = true) -> void:
 	if button == null or button.has_node("CartoonFeedback"):
 		return
 	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 	button.add_child(feedback)
 	feedback.setup(button, profile)
+	feedback.set_burst_enabled(burst_enabled)
 
 func _context_max_page() -> int:
 	var page_size := RANCH_CARD_PATHS.size()
@@ -545,7 +562,7 @@ func _sync_classroom_page() -> void:
 		stone_icon.visible = not required_item.is_empty()
 		empty.visible = false
 		portrait.texture = _portrait_texture(instance_id)
-		target_portrait.texture = _tex(MonsterArtDBScript.get_art_path(target_id, "ranch"))
+		target_portrait.texture = _monster_portrait_texture(target_id)
 		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
 		(panel.get_node("Name") as Label).text = str(monster.get("name", monster_id))
 		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [level, _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
@@ -674,7 +691,7 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 	for i in paths.size():
 		var card := get_node(paths[i]) as TextureButton
 		var idx := start_index + i
-		card.visible = idx < _captured_monsters.size()
+		_set_visible(card, idx < _captured_monsters.size())
 		if not card.visible:
 			continue
 		var instance_id := _get_instance_id(_captured_monsters[idx])
@@ -693,22 +710,22 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String) -> void:
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var instance := _get_instance(instance_id)
-	(card.get_node("Frame") as TextureRect).texture = _tex(RANCH_ASSETS["roster_card_selected" if selected else "roster_card"])
-	(card.get_node("Portrait") as TextureRect).texture = _portrait_texture(instance_id)
-	(card.get_node("Name") as Label).text = str(monster.get("name", ""))
+	_set_texture(card.get_node("Frame") as TextureRect, _tex(RANCH_ASSETS["roster_card_selected" if selected else "roster_card"]))
+	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
+	_set_text(card.get_node("Name") as Label, str(monster.get("name", "")))
 	var detail := "Lv.%d" % _get_monster_level(instance_id)
 	if context != "ranch":
 		var element: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
 		detail += " · " + element
-	(card.get_node("Level") as Label).text = detail
+	_set_text(card.get_node("Level") as Label, detail)
 	var detail_label := card.get_node("Detail") as Label
-	detail_label.visible = false
-	detail_label.text = _get_nature_name(str(instance.get("nature", ""))).substr(0, 3)
+	_set_visible(detail_label, false)
+	_set_text(detail_label, _get_nature_name(str(instance.get("nature", ""))).substr(0, 3))
 	var check := card.get_node("Check") as TextureRect
-	check.visible = selected and context == "ranch"
+	_set_visible(check, selected and context == "ranch")
 	var selection_mark := card.get_node_or_null("SelectionMark") as Label
 	if selection_mark != null:
-		selection_mark.visible = selected and context != "ranch"
+		_set_visible(selection_mark, selected and context != "ranch")
 
 func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	var previous := get_node(panel_path + "/PreviousButton") as TextureButton
@@ -719,7 +736,7 @@ func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	next.disabled = page >= page_max
 	var page_text := get_node_or_null(panel_path + "/PageText") as Label
 	if page_text != null:
-		page_text.text = "%d / %d" % [page + 1, page_max + 1]
+		_set_text(page_text, "%d / %d" % [page + 1, page_max + 1])
 
 func _sync_result_popup() -> void:
 	var popup := _node("Pages/SocialPage/ResultPopup")
@@ -749,10 +766,37 @@ func _sync_result_popup() -> void:
 		line.text = str(lines[i]) if i < lines.size() else ""
 
 func _portrait_texture(instance_id: String) -> Texture2D:
-	return _tex(MonsterArtDBScript.get_art_path(_get_monster_id(instance_id), "ranch"))
+	return _monster_portrait_texture(_get_monster_id(instance_id))
+
+func _monster_portrait_texture(monster_id: String) -> Texture2D:
+	var path := _portrait_path(monster_id)
+	return _tex(path) if not path.is_empty() else null
+
+func _portrait_path(monster_id: String) -> String:
+	if _portrait_path_cache.has(monster_id):
+		return str(_portrait_path_cache[monster_id])
+	var album_path := "res://assets/images/album/portraits/%s_album_thumb.png" % monster_id
+	if ResourceLoader.exists(album_path):
+		_portrait_path_cache[monster_id] = album_path
+		return album_path
+	var fallback := MonsterArtDBScript.get_art_path(monster_id, "ranch")
+	_portrait_path_cache[monster_id] = fallback
+	return fallback
 
 func _button_label(button: TextureButton) -> Label:
 	return button.get_node("Text") as Label
+
+func _set_text(label: Label, value: String) -> void:
+	if label.text != value:
+		label.text = value
+
+func _set_texture(node: TextureRect, value: Texture2D) -> void:
+	if node.texture != value:
+		node.texture = value
+
+func _set_visible(node: CanvasItem, value: bool) -> void:
+	if node.visible != value:
+		node.visible = value
 
 func _set_action_frame(button: TextureButton, enabled: bool) -> void:
 	if button.has_node("SocialFrame"):
@@ -769,6 +813,9 @@ func _set_action_frame(button: TextureButton, enabled: bool) -> void:
 		text_node.add_theme_color_override("font_color", Color(0.22, 0.12, 0.02) if enabled else TEXT_WHITE)
 
 func _set_classroom_evolve_style(button: TextureButton, enabled: bool) -> void:
+	if button.has_meta("_ranch_action_style_enabled") and bool(button.get_meta("_ranch_action_style_enabled")) == enabled:
+		return
+	button.set_meta("_ranch_action_style_enabled", enabled)
 	var modern_frame := button.get_node("ModernFrame") as Panel
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.52, 0.80, 0.12, 1.0) if enabled else Color(0.39, 0.57, 0.16, 1.0)
@@ -784,6 +831,9 @@ func _set_classroom_evolve_style(button: TextureButton, enabled: bool) -> void:
 	text_node.add_theme_constant_override("outline_size", 2)
 
 func _set_social_action_style(button: TextureButton, enabled: bool) -> void:
+	if button.has_meta("_ranch_action_style_enabled") and bool(button.get_meta("_ranch_action_style_enabled")) == enabled:
+		return
+	button.set_meta("_ranch_action_style_enabled", enabled)
 	var social_frame := button.get_node("SocialFrame") as Panel
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(1.0, 0.52, 0.10, 1.0) if enabled else Color(0.71, 0.56, 0.32, 1.0)

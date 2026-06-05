@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dlu23xo10t2vq"]
 
 [ext_resource type="Script" uid="uid://bta68622dgta3" path="res://src/ui/scene/scene_ranch_gui.gd" id="1_ke1ks"]
-[ext_resource type="Texture2D" uid="uid://53i31whp52kp" path="res://assets/images/ranch/bg_ranch_pasture.png" id="2_asi3g"]
+[ext_resource type="Texture2D" path="res://assets/images/ranch_optimized/bg_ranch_pasture_750.png" id="2_asi3g"]
 [ext_resource type="Texture2D" uid="uid://b6mrxkcfwhl5w" path="res://assets/images/ranch/ui_slot_occupied.png" id="3_4vts4"]
 [ext_resource type="Texture2D" uid="uid://kyu0nt3dpkuo" path="res://assets/images/ranch/ui_level_badge.png" id="4_reeqw"]
 [ext_resource type="Texture2D" uid="uid://djugnh1inxd71" path="res://assets/images/ranch/fx_leaf_sparkle_cluster.png" id="5_h6git"]

@@ -4,6 +4,7 @@ extends Control
 
 const DESIGN_SIZE: Vector2 = Vector2(375.0, 667.0)
 const TARGET_FPS: int = 60
+const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
 
 # 场景映射：场景名 → 脚本路径
 const SCENE_MAP: Dictionary = {
@@ -131,6 +132,8 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 	add_child(scene_node)
 	_current_scene = scene_node
 	_current_scene_name = scene_name
+	var typography_profile := "lobby" if scene_name == "main" else scene_name
+	CartoonTypographyScript.apply(scene_node, typography_profile)
 	_layout_current_scene()
 	_initialize_scene(scene_node, scene_name, data)
 

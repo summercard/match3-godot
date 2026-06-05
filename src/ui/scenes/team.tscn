@@ -1,13 +1,12 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://c0p47wv7g1tyh"]
 
-[ext_resource type="Script" path="res://src/ui/scene/scene_team_gui.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bmckci7vy30q6" path="res://src/ui/scene/scene_team_gui.gd" id="1_script"]
 
-[node name="Team" type="Control"]
+[node name="Team" type="Control" unique_id=256271296]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_right = 375.0
 offset_bottom = 667.0
-mouse_filter = 0
 script = ExtResource("1_script")
