@@ -11,10 +11,39 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_social_rules()
+	_test_ranch_social_exclusivity()
 	_test_save_manager_social_flow()
 	_test_social_birth_major_outcome()
 	_test_social_erosion_is_protected()
 	_finish()
+
+func _test_ranch_social_exclusivity() -> void:
+	var save_manager := root.get_node_or_null("/root/SaveManager")
+	_expect(save_manager != null, "SaveManager should exist for ranch social exclusivity")
+	if save_manager == null:
+		return
+	save_manager.clear_all_data()
+	var owned: Array = save_manager.get_owned_monsters()
+	_expect(owned.size() >= 2, "default save should have two monsters for ranch social exclusivity")
+	if owned.size() < 2:
+		return
+	var ranch_id := str(owned[0].get("instanceId", ""))
+	var social_id := str(owned[1].get("instanceId", ""))
+	_expect(save_manager.place_instance_in_ranch(ranch_id, 0), "test monster should enter ranch")
+	_expect(save_manager.is_instance_in_ranch(ranch_id), "ranch occupancy helper should report placed monster")
+	_expect(not save_manager.assign_social_slot(0, "slot_a", ranch_id), "ranch monster should not enter social")
+	_expect(save_manager.assign_social_slot(0, "slot_a", social_id), "non-ranch monster should enter social")
+	_expect(not save_manager.place_instance_in_ranch(social_id, 1), "social monster should not enter ranch")
+
+	var ranch: Dictionary = save_manager.get_ranch_state()
+	var places: Array = ranch.get("social_places", [])
+	places[0]["slot_b"] = ranch_id
+	places[0]["started_at"] = Time.get_unix_time_from_system() * 1000.0
+	ranch["social_places"] = places
+	save_manager.set_ranch_state(ranch)
+	var normalized_place: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
+	_expect(normalized_place.get("slot_b", null) == null, "legacy overlap should remove ranch monster from social slot")
+	_expect(normalized_place.get("started_at", null) == null, "legacy overlap cleanup should cancel invalid social timer")
 
 
 func _test_social_rules() -> void:

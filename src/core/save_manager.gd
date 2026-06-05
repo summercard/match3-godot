@@ -992,15 +992,39 @@ func _normalize_ranch_state(state: Dictionary) -> Dictionary:
 		normalized["slots"].append(_normalize_ranch_slot(slot_data))
 	while normalized["slots"].size() < normalized["unlocked_slots"]:
 		normalized["slots"].append({ "instance_id": null, "placed_at": null })
+	var normalized_places: Array = normalized["social_places"]
+	for place_index in normalized_places.size():
+		var place: Dictionary = normalized_places[place_index]
+		var removed_ranch_monster := false
+		for social_slot in ["slot_a", "slot_b"]:
+			var instance_id := str(place.get(social_slot, ""))
+			if _ranch_slots_contain_instance(normalized["slots"], instance_id):
+				place[social_slot] = null
+				removed_ranch_monster = true
+		if removed_ranch_monster:
+			place["started_at"] = null
+		normalized_places[place_index] = place
+	normalized["social_places"] = normalized_places
 	if _ranch_slots_contain_instance(normalized["slots"], focus_id):
 		normalized["care_focus_instance_id"] = focus_id
 	return normalized
+
+func is_instance_in_ranch(instance_id: String) -> bool:
+	return _ranch_slots_contain_instance(get_ranch_state().get("slots", []), instance_id)
 
 func _ranch_slots_contain_instance(slots: Array, instance_id: String) -> bool:
 	if instance_id.is_empty():
 		return false
 	for slot: Dictionary in slots:
 		if slot.get("instance_id") == instance_id:
+			return true
+	return false
+
+func _social_places_contain_instance(places: Array, instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	for place: Dictionary in places:
+		if place.get("slot_a") == instance_id or place.get("slot_b") == instance_id:
 			return true
 	return false
 
@@ -1115,6 +1139,8 @@ func place_instance_in_ranch(instance_id: String, slot_index: int) -> bool:
 	var slots: Array = ranch.get("slots", [])
 	if slot_index < 0 or slot_index >= slots.size() or get_monster_instance(instance_id).is_empty():
 		return false
+	if _social_places_contain_instance(ranch.get("social_places", []), instance_id):
+		return false
 	for slot: Dictionary in slots:
 		if slot.get("instance_id") == instance_id:
 			slot["instance_id"] = null
@@ -1153,6 +1179,8 @@ func assign_social_slot(place_index: int, social_slot: String, instance_id: Stri
 	if place_index < 0 or place_index >= places.size() or get_monster_instance(instance_id).is_empty():
 		return false
 	if social_slot != "slot_a" and social_slot != "slot_b":
+		return false
+	if _ranch_slots_contain_instance(ranch.get("slots", []), instance_id):
 		return false
 	var place: Dictionary = places[place_index]
 	if place.get("started_at", null) != null:

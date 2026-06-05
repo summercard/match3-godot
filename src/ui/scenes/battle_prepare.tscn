@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://yyg32jgreiyw"]
 
-[ext_resource type="Texture2D" uid="uid://c5basv6vcugsi" path="res://assets/images/battle_prepare/ui_alert_panel.png" id="alert_panel"]
-[ext_resource type="Texture2D" uid="uid://csa5w15k617g7" path="res://assets/images/battle_prepare/ui_back_button.png" id="back"]
-[ext_resource type="Texture2D" uid="uid://cer2lr0gs3dnp" path="res://assets/images/stage/icon_back_arrow.png" id="back_arrow"]
-[ext_resource type="Texture2D" uid="uid://d1mua7eudbt1p" path="res://assets/images/battle_prepare/battle_prepare_bg.png" id="bg"]
-[ext_resource type="Texture2D" uid="uid://b6q40d71col6j" path="res://assets/images/battle_prepare/ui_enemy_card.png" id="enemy_card"]
-[ext_resource type="Texture2D" uid="uid://b66qktftvjfdv" path="res://assets/images/battle_prepare/ui_prepare_header.png" id="header"]
-[ext_resource type="Texture2D" uid="uid://j3gdmn8r7af" path="res://assets/images/battle_prepare/ui_info_panel.png" id="info_panel"]
-[ext_resource type="Texture2D" uid="uid://b6p07uws23hry" path="res://assets/images/battle_prepare/ui_power_panel.png" id="power_panel"]
-[ext_resource type="Texture2D" uid="uid://blp18i051o24k" path="res://assets/images/battle_prepare/ui_reward_slot.png" id="reward_slot"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="alert_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_blue.png" id="back"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="back_arrow"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/battle_garden_ruins_bg_blur.png" id="bg"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="enemy_card"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_prepare_wood_banner.png" id="header"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="info_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="power_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_reward_card.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://4sa0f7ilpgt3" path="res://src/ui/scene/scene_battle_prepare_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://cip7jm6diw5hn" path="res://assets/images/battle_prepare/ui_start_button.png" id="start_button"]
-[ext_resource type="Texture2D" uid="uid://ct7jgcy3ge1nd" path="res://assets/images/battle_prepare/ui_synergy_panel.png" id="synergy_panel"]
-[ext_resource type="Texture2D" uid="uid://401wlpf2fdpb" path="res://assets/images/battle_prepare/ui_team_card.png" id="team_card"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_battle_start_button_new.png" id="start_button"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="synergy_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="team_card"]
 
 [node name="BattlePrepareGui" type="Control" unique_id=526108190]
 clip_contents = true
@@ -37,7 +37,7 @@ layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.28)
+color = Color(0.02, 0.05, 0.12, 0.18)
 
 [node name="Header" type="Control" parent="." unique_id=1860094280]
 anchors_preset = 0

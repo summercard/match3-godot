@@ -59,6 +59,7 @@ func _start_battle() -> void:
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Header"):
 		return
+	_apply_concept_layout()
 	_label("Header/Title").text = "战斗准备"
 	_label("Header/StageName").text = str(_stage_data.get("name", _stage_id))
 	_sync_enemy_cards()
@@ -72,7 +73,7 @@ func _sync_gui() -> void:
 
 func _sync_enemy_cards() -> void:
 	_label("EnemyPanel/Title").text = "敌方信息"
-	_layout_cards(ENEMY_CARD_PATHS, _enemy_team.size(), 88.0, 12.0, 345.0)
+	_layout_cards(ENEMY_CARD_PATHS, _enemy_team.size(), 92.0, 18.0, 327.0)
 	for i in ENEMY_CARD_PATHS.size():
 		var card := _node(ENEMY_CARD_PATHS[i])
 		card.visible = i < _enemy_team.size()
@@ -84,7 +85,7 @@ func _sync_enemy_cards() -> void:
 func _sync_team_cards() -> void:
 	_label("TeamPanel/Title").text = "我方队伍"
 	_node("TeamPanel/EmptyLabel").visible = _player_team.is_empty()
-	_layout_cards(TEAM_CARD_PATHS, _player_team.size(), 96.0, 14.0, 345.0)
+	_layout_cards(TEAM_CARD_PATHS, _player_team.size(), 92.0, 25.0, 327.0)
 	for i in TEAM_CARD_PATHS.size():
 		var card := _node(TEAM_CARD_PATHS[i])
 		card.visible = i < _player_team.size()
@@ -104,6 +105,103 @@ func _layout_cards(paths: Array, count: int, card_w: float, gap: float, total_w:
 	for i in visible_count:
 		var card := _node(paths[i])
 		card.position.x = start_x + float(i) * (card_w + gap)
+
+func _apply_concept_layout() -> void:
+	_set_rect("Header/BackButton", 12, 22, 42, 42)
+	_set_local_rect("Header/BackButton/Frame", 0, 0, 42, 42)
+	_set_local_rect("Header/BackButton/Arrow", 8, 8, 26, 26)
+	_set_rect("Header/Bar", 54, 14, 302, 76)
+	_set_rect("Header/Title", 95, 30, 220, 34)
+	_set_rect("Header/StageName", 108, 61, 194, 24)
+	_set_font("Header/Title", 25)
+	_set_font("Header/StageName", 12)
+
+	_set_rect("EnemyPanel", 24, 106, 327, 142)
+	_set_rect("EnemyPanel/Title", 0, 0, 327, 24)
+	_set_font("EnemyPanel/Title", 16)
+	_set_rect("EnemyPanel/Cards", 0, 28, 327, 114)
+	for path in ENEMY_CARD_PATHS:
+		_layout_monster_card(path, 0, 0, 92, 114, false)
+
+	_set_rect("PowerPanel", 42, 254, 291, 72)
+	_set_local_rect("PowerPanel/Frame", 0, 0, 291, 72)
+	_set_rect("PowerPanel/Title", 0, 5, 291, 25)
+	_set_rect("PowerPanel/PlayerPower", 12, 38, 105, 25)
+	_set_rect("PowerPanel/EnemyPower", 174, 38, 105, 25)
+	_set_rect("PowerPanel/Diff", 101, 43, 89, 22)
+	_set_font("PowerPanel/Title", 17)
+	_set_font("PowerPanel/PlayerPower", 15)
+	_set_font("PowerPanel/EnemyPower", 15)
+	_set_font("PowerPanel/Diff", 11)
+
+	_set_rect("TeamPanel", 24, 340, 327, 126)
+	_set_rect("TeamPanel/Title", 0, 0, 327, 24)
+	_set_rect("TeamPanel/EmptyLabel", 0, 48, 327, 28)
+	_set_font("TeamPanel/Title", 16)
+	_set_rect("TeamPanel/Cards", 0, 27, 327, 114)
+	for path in TEAM_CARD_PATHS:
+		_layout_monster_card(path, 0, 0, 92, 114, true)
+
+	_set_rect("MechanicPanel", 34, 486, 307, 56)
+	_set_local_rect("MechanicPanel/Frame", 0, 0, 307, 56)
+	_set_rect("MechanicPanel/Title", 0, 3, 307, 21)
+	_set_rect("MechanicPanel/Line1", 14, 24, 279, 16)
+	_set_rect("MechanicPanel/Line2", 14, 39, 279, 16)
+	_set_font("MechanicPanel/Title", 14)
+	_set_font("MechanicPanel/Line1", 9)
+	_set_font("MechanicPanel/Line2", 9)
+
+	_set_rect("SynergyPanel", 48, 545, 279, 28)
+	_set_local_rect("SynergyPanel/Frame", 0, 0, 279, 32)
+	_set_rect("SynergyPanel/Line1", 12, 0, 255, 14)
+	_set_rect("SynergyPanel/Line2", 12, 14, 255, 14)
+	_set_font("SynergyPanel/Line1", 9)
+	_set_font("SynergyPanel/Line2", 9)
+
+	_set_rect("RewardPreview", 36, 574, 303, 38)
+	_set_rect("RewardPreview/Title", 0, 8, 82, 23)
+	_set_rect("RewardPreview/Slots", 98, 0, 190, 41)
+	for i in REWARD_SLOT_PATHS.size():
+		var slot_path: String = REWARD_SLOT_PATHS[i]
+		_set_rect(slot_path, float(i) * 62.0, 0, 46, 38)
+		_set_local_rect(slot_path + "/Frame", 0, 0, 46, 38)
+		_set_local_rect(slot_path + "/Icon", 8, 3, 25, 25)
+		_set_local_rect(slot_path + "/Label", -4, 26, 54, 12)
+		_set_font(slot_path + "/Label", 7)
+
+	_set_rect("StartButton", 64, 612, 247, 49)
+	_set_local_rect("StartButton/Frame", 0, 0, 247, 49)
+	_set_local_rect("StartButton/Text", 22, 4, 203, 39)
+	_set_font("StartButton/Text", 22)
+
+func _layout_monster_card(path: String, x: float, y: float, w: float, h: float, _is_team_card: bool) -> void:
+	_set_rect(path, x, y, w, h)
+	_set_local_rect(path + "/Frame", 0, 0, w, h)
+	_set_local_rect(path + "/Portrait", 14, 7, w - 28, 52)
+	_set_local_rect(path + "/ElementBadge", 8, h - 29, 20, 20)
+	_set_local_rect(path + "/Name", 8, 60, w - 16, 18)
+	_set_local_rect(path + "/Level", 30, h - 31, w - 38, 14)
+	_set_local_rect(path + "/Power", 30, h - 16, w - 38, 14)
+	_set_local_rect(path + "/Stars", 8, h - 6, w - 16, 12)
+	_set_font(path + "/Name", 10)
+	_set_font(path + "/Level", 8)
+	_set_font(path + "/Power", 8)
+	_set_font(path + "/Stars", 7)
+
+func _set_rect(path: NodePath, x: float, y: float, w: float, h: float) -> void:
+	var c := get_node_or_null(path) as Control
+	if c == null:
+		return
+	c.position = Vector2(x, y)
+	c.size = Vector2(w, h)
+
+func _set_local_rect(path: NodePath, x: float, y: float, w: float, h: float) -> void:
+	_set_rect(path, x, y, w, h)
+
+func _set_font(path: NodePath, size: int) -> void:
+	var label := get_node_or_null(path) as Label
+	if label != null:
+		label.add_theme_font_size_override("font_size", size)
 
 func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect

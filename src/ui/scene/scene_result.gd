@@ -14,34 +14,34 @@ const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 
 const RESULT_ASSETS := {
-	"bg": "res://assets/images/battle/battle_bg_forest_ruins.png",
-	"victory_banner": "res://assets/images/result/ui_victory_banner.png",
-	"defeat_banner": "res://assets/images/result/ui_defeat_banner.png",
-	"reward_panel": "res://assets/images/result/ui_reward_panel.png",
-	"team_exp_panel": "res://assets/images/result/ui_team_exp_panel.png",
-	"reward_slot": "res://assets/images/result/ui_reward_slot.png",
-	"monster_exp_card": "res://assets/images/result/ui_monster_exp_card.png",
-	"btn_next": "res://assets/images/result/ui_btn_next.png",
-	"btn_secondary": "res://assets/images/result/ui_btn_secondary.png",
-	"btn_retry": "res://assets/images/result/ui_btn_retry.png",
-	"capture_plaque": "res://assets/images/result/ui_capture_plaque.png",
-	"info_chip": "res://assets/images/result/ui_info_chip.png",
-	"star_lit": "res://assets/images/result/icon_star_lit_large.png",
-	"star_dim": "res://assets/images/result/icon_star_dim_large.png",
-	"sweep_badge": "res://assets/images/result/icon_sweep_badge.png",
-	"fx_burst": "res://assets/images/result/fx_victory_burst.png",
-	"fx_confetti": "res://assets/images/result/fx_confetti_cluster.png",
-	"fx_capture_ring": "res://assets/images/result/fx_capture_ring.png",
-	"fx_levelup_glow": "res://assets/images/result/fx_levelup_glow.png",
+	"bg": "res://assets/images/battle_flow_new/battle_garden_ruins_bg.png",
+	"victory_banner": "res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png",
+	"defeat_banner": "res://assets/images/battle_flow_new/ui/ui_victory_wood_plaque.png",
+	"reward_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
+	"team_exp_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
+	"reward_slot": "res://assets/images/battle_flow_new/ui/ui_reward_card.png",
+	"monster_exp_card": "res://assets/images/battle_flow_new/ui/ui_monster_card.png",
+	"btn_next": "res://assets/images/battle_flow_new/ui/ui_btn_gold.png",
+	"btn_secondary": "res://assets/images/battle_flow_new/ui/ui_btn_blue.png",
+	"btn_retry": "res://assets/images/battle_flow_new/ui/ui_btn_blue.png",
+	"capture_plaque": "res://assets/images/battle_flow_new/ui/ui_pill_purple.png",
+	"info_chip": "res://assets/images/battle_flow_new/ui/ui_pill_blue.png",
+	"star_lit": "res://assets/images/battle_flow_new/ui/icon_star_gold.png",
+	"star_dim": "res://assets/images/battle_flow_new/ui/icon_star_silver.png",
+	"sweep_badge": "res://assets/images/battle_flow_new/ui/icon_star_gold.png",
+	"fx_burst": "res://assets/images/battle_flow_new/ui/fx_golden_burst.png",
+	"fx_confetti": "res://assets/images/battle_flow_new/ui/fx_confetti.png",
+	"fx_capture_ring": "res://assets/images/capture_success_new/ui/fx_magic_circle.png",
+	"fx_levelup_glow": "res://assets/images/battle_flow_new/ui/fx_sparkles.png",
 }
 
 const COMMON_ASSETS := {
-	"gold": "res://assets/images/stage/icon_gold_coin.png",
-	"exp": "res://assets/images/stage/icon_exp_badge.png",
-	"capture_ball": "res://assets/images/stage/icon_capture_ball.png",
-	"gem_fire": "res://assets/images/stage/icon_gem_fire.png",
-	"gem_grass": "res://assets/images/stage/icon_gem_grass.png",
-	"gem_water": "res://assets/images/stage/icon_gem_water.png",
+	"gold": "res://assets/images/battle_flow_new/icons/icon_gold_coin.png",
+	"exp": "res://assets/images/battle_flow_new/icons/icon_exp_badge.png",
+	"capture_ball": "res://assets/images/battle_flow_new/icons/icon_capture_ball.png",
+	"gem_fire": "res://assets/images/battle_flow_new/icons/icon_element_fire.png",
+	"gem_grass": "res://assets/images/battle_flow_new/icons/icon_element_grass.png",
+	"gem_water": "res://assets/images/battle_flow_new/icons/icon_element_water.png",
 }
 
 # === 颜色常量 ===
@@ -612,8 +612,8 @@ func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.12, 0.34))
 	if _is_win:
-		var burst_alpha := 0.52 + sin(_time_acc * 2.0) * 0.08
-		_draw_texture_fit(_tex("fx_burst"), Rect2(52, -28 + oy * 0.25, 270, 176), burst_alpha)
+		var burst_alpha := 0.34 + sin(_time_acc * 2.0) * 0.05
+		_draw_texture_fit(_tex("fx_burst"), Rect2(70, -20 + oy * 0.25, 235, 138), burst_alpha)
 		_draw_texture_fit(_tex("fx_confetti"), Rect2(8, 34, 92, 84), 0.78)
 		_draw_texture_fit(_tex("fx_confetti"), Rect2(276, 36, 92, 84), 0.68)
 	
@@ -621,31 +621,31 @@ func _draw() -> void:
 	var title_text := "战斗胜利" if _is_win else "战斗失败"
 	var title_color := C["gold"] if _is_win else C["danger_light"]
 	var banner_key := "victory_banner" if _is_win else "defeat_banner"
-	_draw_texture_fit(_tex(banner_key), Rect2(18.0, 10.0 + oy, DESIGN_W - 36.0, 110.0))
-	_draw_centered_text(font, title_text, DESIGN_W / 2.0, 70.0 + oy, title_color, 28.0)
+	_draw_texture_fit(_tex(banner_key), Rect2(24.0, 8.0 + oy, DESIGN_W - 48.0, 102.0))
+	_draw_centered_text(font, title_text, DESIGN_W / 2.0, 64.0 + oy, title_color, 26.0)
 	
 	# === 星级区域 ===
-	_draw_stars_section(font, 134.0 + oy)
+	_draw_stars_section(font, 122.0 + oy)
 	
 	# === 战斗信息 ===
 	if _star_anim_progress >= 1.0:
-		_draw_battle_info(font, 174.0 + oy)
+		_draw_battle_info(font, 154.0 + oy)
 	
 	# === 收服结果 ===
 	if _reward_anim_progress >= 1.0 and _is_win:
-		_draw_capture_section(font, 218.0 + oy + _shake_offset_x)
+		_draw_capture_section(font, 204.0 + oy + _shake_offset_x)
 	
 	# === 奖励 ===
 	if _reward_anim_progress >= 1.0:
-		_draw_rewards_section(font, 308.0 + oy)
+		_draw_rewards_section(font, 326.0 + oy)
 	
 	# === 经验 ===
 	if _reward_anim_progress >= 1.0:
-		_draw_exp_section(font, 426.0 + oy)
+		_draw_exp_section(font, 444.0 + oy)
 	
 	# === 升级 ===
 	if _exp_anim_progress >= 1.0:
-		_draw_levelups_section(font, 544.0 + oy)
+		_draw_levelups_section(font, 558.0 + oy)
 	
 	# === 扫荡解锁 ===
 	if _button_anim_progress >= 1.0 and _stars >= 3 and _level_ups.is_empty():
@@ -655,7 +655,7 @@ func _draw() -> void:
 	
 	# === 按钮 ===
 	if _button_anim_progress >= 1.0:
-		_draw_buttons(font, 586.0 + oy)
+		_draw_buttons(font, 604.0 + oy)
 
 func _draw_stars_section(font: Font, y: float) -> void:
 	var progress := _star_anim_progress
@@ -695,12 +695,12 @@ func _draw_capture_section(font: Font, y: float) -> void:
 		return
 	
 	var center_x := DESIGN_W / 2.0
-	_draw_texture_fit(_tex("fx_capture_ring"), Rect2(center_x - 84.0, y - 32.0, 168.0, 92.0), 0.72)
+	_draw_texture_fit(_tex("fx_capture_ring"), Rect2(center_x - 60.0, y - 18.0, 120.0, 66.0), 0.56)
 	if not _capture_target.is_empty():
-		_draw_monster_portrait(_capture_target, Rect2(center_x - 44.0, y - 38.0, 88.0, 88.0))
+		_draw_monster_portrait(_capture_target, Rect2(center_x - 32.0, y - 20.0, 64.0, 64.0))
 	
-	_draw_texture_fit(_tex("capture_plaque"), Rect2(63.0, y + 48.0, 250.0, 56.0))
-	_draw_centered_text(font, _capture_result.get("title", ""), DESIGN_W / 2.0, y + 72.0, C["success"] if _captured else C["danger_light"], 15.0)
+	_draw_texture_fit(_tex("capture_plaque"), Rect2(72.0, y + 44.0, 232.0, 48.0))
+	_draw_centered_text(font, _capture_result.get("title", ""), DESIGN_W / 2.0, y + 65.0, C["success"] if _captured else C["danger_light"], 14.0)
 	
 	var lines: Array = []
 	if not _capture_target.is_empty():
@@ -721,7 +721,7 @@ func _draw_capture_section(font: Font, y: float) -> void:
 		lines.append(advice)
 	
 	for i in range(mini(lines.size(), 3)):
-		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 91.0 + i * 13.0, C["text_secondary"], 8.8)
+		_draw_centered_text(font, lines[i], DESIGN_W / 2.0, y + 82.0 + i * 11.0, C["text_secondary"], 8.0)
 
 func _draw_rewards_section(font: Font, y: float) -> void:
 	var progress := _reward_anim_progress

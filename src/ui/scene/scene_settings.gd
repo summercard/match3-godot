@@ -1,3 +1,4 @@
+@tool
 # scene_settings.gd - 设置场景
 class_name SceneSettings
 extends Control
@@ -22,21 +23,20 @@ const CONFIRM_YES := Rect2(64.0, 363.0, 112.0, 42.0)
 const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
 
 const SETTINGS_ASSETS := {
-	"bg": "res://assets/images/achievement/bg_achievement.png",
-	"back": "res://assets/images/achievement/ui_back_button.png",
-	"header": "res://assets/images/achievement/ui_header_bar.png",
-	"title_ribbon": "res://assets/images/achievement/ui_title_ribbon.png",
-	"panel": "res://assets/images/shop/ui_popup_panel.png",
-	"row": "res://assets/images/inventory/ui_detail_panel.png",
-	"row_alt": "res://assets/images/inventory/ui_grid_panel.png",
-	"tab_active": "res://assets/images/inventory/ui_tab_active.png",
-	"tab_inactive": "res://assets/images/inventory/ui_tab_inactive.png",
-	"button": "res://assets/images/shop/ui_buy_button.png",
-	"button_disabled": "res://assets/images/shop/ui_buy_button_disabled.png",
-	"gear": "res://assets/images/main/icon_settings_gear_v2.png",
-	"notice": "res://assets/images/main/ui_notification_dot_v2.png",
+	"bg": "res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png",
+	"back": "res://assets/images/ranch/ui_btn_previous_round.png",
+	"header": "res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png",
+	"title_ribbon": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
+	"panel": "res://assets/images/inventory_new/ui_inventory_panel.png",
+	"row": "res://assets/images/inventory_new/ui_inventory_detail_panel.png",
+	"row_alt": "res://assets/images/inventory_new/ui_inventory_detail_panel.png",
+	"tab_active": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
+	"tab_inactive": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"button": "res://assets/images/inventory_new/ui_inventory_use_button.png",
+	"button_disabled": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"gear": "res://assets/images/main/lobby_refresh/icon_settings_gear_v3.png",
+	"notice": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
 }
-
 const SETTINGS_ROWS := [
 	{
 		"id": "sound",
@@ -89,17 +89,16 @@ const SETTINGS_ROWS := [
 		],
 	},
 ]
-
 const C := {
 	"white": Color(1.0, 1.0, 1.0),
-	"muted": Color(0.66, 0.72, 0.83),
-	"dim": Color(0.42, 0.48, 0.58),
+	"muted": Color(0.62, 0.36, 0.12),
+	"dim": Color(0.55, 0.31, 0.10),
 	"gold": Color(1.0, 0.78, 0.18),
 	"green": Color(0.58, 1.0, 0.35),
 	"blue": Color(0.35, 0.72, 1.0),
 	"red": Color(1.0, 0.30, 0.22),
 	"shadow": Color(0.0, 0.0, 0.0, 0.58),
-	"panel_dark": Color(0.03, 0.08, 0.16, 0.72),
+	"panel_dark": Color(1.0, 0.93, 0.74, 0.24),
 }
 
 var game: Node = null
@@ -315,7 +314,7 @@ func _draw_setting_row(index: int, row: Dictionary) -> void:
 	_draw_texture_fit(_tex("row" if index % 2 == 0 else "row_alt"), rect, 0.96)
 	var accent := C["blue"] if row.get("type", "") == "segment" else C["green"]
 	draw_rect(Rect2(rect.position.x + 6.0, rect.position.y + 8.0, 3.0, rect.size.y - 16.0), accent, true)
-	_draw_text_left(str(row.get("label", "")), Vector2(rect.position.x + 18.0, rect.position.y + 23.0), C["white"], 17.0, true, 128.0)
+	_draw_text_left(str(row.get("label", "")), Vector2(rect.position.x + 18.0, rect.position.y + 23.0), Color(0.43, 0.24, 0.07), 17.0, true, 128.0)
 	_draw_text_left(str(row.get("desc", "")), Vector2(rect.position.x + 18.0, rect.position.y + 44.0), C["muted"], 10.0, false, 160.0)
 	if row.get("type", "") == "toggle":
 		_draw_toggle(rect, bool(settings_data.get(str(row.get("key", "")), row.get("default", true))))
@@ -355,18 +354,16 @@ func _draw_about_panel() -> void:
 	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 532.0), C["muted"], 12.0, false, 90.0)
 	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 522.0), C["dim"], 11.0, false, 168.0)
 
-
 func _draw_bottom_buttons() -> void:
 	_draw_texture_fit(_tex("button_disabled"), RESET_RECT)
 	_draw_text("重置数据", RESET_RECT.get_center().x, RESET_RECT.position.y + 30.0, Color(1.0, 0.36, 0.30), 16.0, true, 100.0)
 	_draw_texture_fit(_tex("button"), DEFAULT_RECT)
 	_draw_text("恢复默认", DEFAULT_RECT.get_center().x, DEFAULT_RECT.position.y + 30.0, C["white"], 16.0, true, 100.0)
 
-
 func _draw_confirm_dialog() -> void:
-	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66), true)
+	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.50), true)
 	_draw_texture_fit(_tex("panel"), CONFIRM_BOX)
-	draw_rect(Rect2(CONFIRM_BOX.position + Vector2(14.0, 14.0), CONFIRM_BOX.size - Vector2(28.0, 28.0)), Color(0.03, 0.06, 0.12, 0.86), true)
+	draw_rect(Rect2(CONFIRM_BOX.position + Vector2(14.0, 14.0), CONFIRM_BOX.size - Vector2(28.0, 28.0)), Color(1.0, 0.92, 0.70, 0.34), true)
 	_draw_texture_contain(_tex("notice"), Rect2(CONFIRM_BOX.position.x + 132.0, CONFIRM_BOX.position.y + 18.0, 28.0, 28.0))
 	_draw_text("确认重置？", CONFIRM_BOX.get_center().x, CONFIRM_BOX.position.y + 62.0, Color(1.0, 0.38, 0.28), 22.0, true, 180.0)
 	_draw_text("所有存档和养成进度会被清除", CONFIRM_BOX.get_center().x, CONFIRM_BOX.position.y + 93.0, C["muted"], 13.0, false, 220.0)
@@ -374,7 +371,6 @@ func _draw_confirm_dialog() -> void:
 	_draw_text("确认", CONFIRM_YES.get_center().x, CONFIRM_YES.position.y + 28.0, Color(1.0, 0.36, 0.30), 15.0, true, 82.0)
 	_draw_texture_fit(_tex("button"), CONFIRM_NO)
 	_draw_text("取消", CONFIRM_NO.get_center().x, CONFIRM_NO.position.y + 28.0, C["white"], 15.0, true, 82.0)
-
 
 func _draw_toast(text: String) -> void:
 	var rect := Rect2(96.0, 620.0, 183.0, 34.0)

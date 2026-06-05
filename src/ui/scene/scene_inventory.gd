@@ -25,42 +25,42 @@ const DETAIL_RECT := Rect2(9.0, 515.0, 357.0, 136.0)
 const USE_BTN_RECT := Rect2(275.0, 603.0, 78.0, 38.0)
 
 const INVENTORY_ASSETS := {
-	"bg": "res://assets/images/inventory/bg_inventory.png",
-	"back": "res://assets/images/inventory/ui_back_button.png",
-	"backpack": "res://assets/images/inventory/icon_backpack.png",
-	"currency_chip": "res://assets/images/inventory/ui_currency_chip.png",
-	"tab_active": "res://assets/images/inventory/ui_tab_active.png",
-	"tab_inactive": "res://assets/images/inventory/ui_tab_inactive.png",
-	"grid_panel": "res://assets/images/inventory/ui_grid_panel.png",
-	"slot": "res://assets/images/inventory/ui_slot.png",
-	"slot_selected": "res://assets/images/inventory/ui_slot_selected.png",
-	"slot_locked": "res://assets/images/inventory/ui_slot_locked.png",
-	"scrollbar": "res://assets/images/inventory/ui_scrollbar.png",
-	"detail_panel": "res://assets/images/inventory/ui_detail_panel.png",
-	"detail_icon_frame": "res://assets/images/inventory/ui_detail_icon_frame.png",
-	"rarity_ribbon": "res://assets/images/inventory/ui_rarity_ribbon.png",
-	"use_button": "res://assets/images/inventory/ui_btn_use.png",
-	"toast": "res://assets/images/inventory/ui_toast_strip.png",
-	"gold": "res://assets/images/main/icon_gold.png",
-	"diamond": "res://assets/images/main/icon_diamond.png",
+	"bg": "res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png",
+	"back": "res://assets/images/album/ui_back_button.png",
+	"backpack": "res://assets/images/main/lobby_refresh/icon_inventory_bag_v3.png",
+	"currency_chip": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
+	"tab_active": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
+	"tab_inactive": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"grid_panel": "res://assets/images/inventory_new/ui_inventory_panel.png",
+	"slot": "res://assets/images/inventory_new/ui_inventory_slot.png",
+	"slot_selected": "res://assets/images/inventory_new/ui_inventory_slot_selected.png",
+	"slot_locked": "res://assets/images/inventory_new/ui_inventory_slot_empty.png",
+	"scrollbar": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"detail_panel": "res://assets/images/inventory_new/ui_inventory_detail_panel.png",
+	"detail_icon_frame": "res://assets/images/inventory_new/ui_inventory_icon_badge.png",
+	"rarity_ribbon": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"use_button": "res://assets/images/inventory_new/ui_inventory_use_button.png",
+	"toast": "res://assets/images/inventory_new/ui_inventory_toast.png",
+	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
+	"diamond": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
 }
 
 const ITEM_ICON_ASSETS := {
-	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
-	"capture_ball_plus": "res://assets/images/items/icon_item_capture_ball_plus.png",
-	"exp_potion": "res://assets/images/items/icon_item_exp_potion.png",
-	"exp_crystal": "res://assets/images/items/icon_item_exp_potion.png",
-	"hp_potion": "res://assets/images/items/icon_item_hp_potion.png",
-	"gold_bag": "res://assets/images/items/icon_item_gold_bag.png",
-	"gold_chest": "res://assets/images/items/icon_item_gold_chest.png",
-	"evolution_stone_fire": "res://assets/images/items/icon_stone_fire.png",
-	"evolution_stone_water": "res://assets/images/items/icon_stone_water.png",
-	"evolution_stone_grass": "res://assets/images/items/icon_stone_grass.png",
-	"evolution_stone_thunder": "res://assets/images/items/icon_stone_thunder.png",
-	"evolution_stone_light": "res://assets/images/items/icon_stone_light.png",
-	"evolution_stone_earth": "res://assets/images/items/icon_stone_earth.png",
-	"evolution_stone_wind": "res://assets/images/items/icon_stone_wind.png",
-	"evolution_stone_dark": "res://assets/images/items/icon_stone_dark.png",
+	"capture_ball": "res://assets/images/inventory_new/icons/capture_ball.png",
+	"capture_ball_plus": "res://assets/images/inventory_new/icons/capture_ball_plus.png",
+	"exp_potion": "res://assets/images/inventory_new/icons/exp_potion.png",
+	"exp_crystal": "res://assets/images/inventory_new/icons/exp_potion.png",
+	"hp_potion": "res://assets/images/inventory_new/icons/hp_potion.png",
+	"gold_bag": "res://assets/images/inventory_new/icons/gold_bag.png",
+	"gold_chest": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"evolution_stone_fire": "res://assets/images/inventory_new/icons/stone_fire.png",
+	"evolution_stone_water": "res://assets/images/inventory_new/icons/stone_water.png",
+	"evolution_stone_grass": "res://assets/images/inventory_new/icons/stone_grass.png",
+	"evolution_stone_thunder": "res://assets/images/inventory_new/icons/stone_thunder.png",
+	"evolution_stone_light": "res://assets/images/inventory_new/icons/stone_light.png",
+	"evolution_stone_earth": "res://assets/images/inventory_new/icons/stone_earth.png",
+	"evolution_stone_wind": "res://assets/images/inventory_new/icons/stone_wind.png",
+	"evolution_stone_dark": "res://assets/images/inventory_new/icons/stone_dark.png",
 }
 
 const TABS := [
@@ -69,7 +69,6 @@ const TABS := [
 	{"id": "materials", "label": "材料"},
 	{"id": "gems", "label": "宝石"},
 ]
-
 const C := {
 	"white": Color(1.0, 1.0, 1.0),
 	"muted": Color(0.66, 0.72, 0.83),
@@ -477,3 +476,4 @@ func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float,
 		var y := pos.y + i * (font_size + 4.0)
 		draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, y + 2.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
 		draw_string(ThemeDB.fallback_font, Vector2(pos.x, y), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+

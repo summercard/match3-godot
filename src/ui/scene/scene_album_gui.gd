@@ -3,7 +3,9 @@
 class_name SceneAlbumGui
 extends "res://src/ui/scene/scene_album.gd"
 
-const PAGE_SIZE := 6
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const LockedSilhouetteShader := preload("res://src/ui/shaders/album_locked_silhouette.gdshader")
+const PAGE_SIZE := 15
 const CARD_PATHS := [
 	"AlbumPage/Grid/Card1",
 	"AlbumPage/Grid/Card2",
@@ -11,6 +13,15 @@ const CARD_PATHS := [
 	"AlbumPage/Grid/Card4",
 	"AlbumPage/Grid/Card5",
 	"AlbumPage/Grid/Card6",
+	"AlbumPage/Grid/Card7",
+	"AlbumPage/Grid/Card8",
+	"AlbumPage/Grid/Card9",
+	"AlbumPage/Grid/Card10",
+	"AlbumPage/Grid/Card11",
+	"AlbumPage/Grid/Card12",
+	"AlbumPage/Grid/Card13",
+	"AlbumPage/Grid/Card14",
+	"AlbumPage/Grid/Card15",
 ]
 const FILTER_PATHS := [
 	"AlbumPage/Filters/All",
@@ -28,16 +39,28 @@ const TAB_PATHS := ["BottomTabs/AlbumTab", "BottomTabs/BondTab", "BottomTabs/Col
 const STAT_LABELS := ["生命", "攻击", "防御", "速度"]
 
 var _album_page := 0
+var _preview_monster_id := ""
+var _locked_silhouette_material: ShaderMaterial = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(true)
 	_connect_gui_actions()
+	_attach_gui_feedback()
 	_sync_gui()
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
 	_album_page = int(data.get("page", 0))
+	var target_id := str(data.get("selectedMonsterId", data.get("monsterId", "")))
+	if not target_id.is_empty():
+		_selected_tab = "album"
+		_selected_element = "all"
+		_preview_monster_id = target_id
+		if _is_captured(target_id):
+			_selected_monster_id = target_id
+		_apply_filter()
+		_album_page = _page_for_monster(target_id)
 	_clamp_album_page()
 	_sync_gui()
 
@@ -68,6 +91,31 @@ func _connect_gui_actions() -> void:
 	_connect_button("DetailPanel/EvolveButton", _go_evolve)
 	for i in TAB_PATHS.size():
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(TAB_IDS[i]))
+	_connect_button("LobbyBottomNav/HomeButton", _go_to_scene.bind("main"))
+	_connect_button("LobbyBottomNav/PetsButton", _on_tab_pressed.bind("album"))
+	_connect_button("LobbyBottomNav/BattleButton", _on_tab_pressed.bind("bond"))
+	_connect_button("LobbyBottomNav/ShopButton", _on_tab_pressed.bind("collection"))
+	_connect_button("LobbyBottomNav/MenuButton", _go_to_scene.bind("settings"))
+
+func _attach_gui_feedback() -> void:
+	var primary_paths := ["DetailPanel/EvolveButton"]
+	for path in FILTER_PATHS + CARD_PATHS + TAB_PATHS + [
+		"Header/BackButton",
+		"AlbumPage/PageControls/PreviousButton",
+		"AlbumPage/PageControls/NextButton",
+		"DetailPanel/CloseButton",
+		"LobbyBottomNav/HomeButton",
+		"LobbyBottomNav/PetsButton",
+		"LobbyBottomNav/BattleButton",
+		"LobbyBottomNav/ShopButton",
+		"LobbyBottomNav/MenuButton",
+	]:
+		var button := get_node_or_null(path) as BaseButton
+		if button == null or button.has_node("CartoonFeedback"):
+			continue
+		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+		button.add_child(feedback)
+		feedback.setup(button, CartoonButtonFeedback.Profile.PRIMARY if path in primary_paths else CartoonButtonFeedback.Profile.NAV)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -79,6 +127,7 @@ func _on_filter_pressed(element: String) -> void:
 		return
 	_selected_element = element
 	_selected_monster_id = ""
+	_preview_monster_id = ""
 	_album_page = 0
 	_apply_filter()
 
@@ -88,7 +137,10 @@ func _on_card_pressed(visible_index: int) -> void:
 		return
 	var monster: Dictionary = _filtered_monsters[index]
 	var id := str(monster.get("id", ""))
+	_preview_monster_id = id
 	if not _is_captured(id):
+		_selected_monster_id = ""
+		_sync_gui()
 		return
 	_selected_monster_id = id
 	_sync_gui()
@@ -96,12 +148,20 @@ func _on_card_pressed(visible_index: int) -> void:
 func _on_previous_page_pressed() -> void:
 	_album_page = maxi(0, _album_page - 1)
 	_selected_monster_id = ""
+	_preview_monster_id = ""
 	_sync_gui()
 
 func _on_next_page_pressed() -> void:
 	_album_page = mini(_max_album_page(), _album_page + 1)
 	_selected_monster_id = ""
+	_preview_monster_id = ""
 	_sync_gui()
+
+func _page_for_monster(monster_id: String) -> int:
+	for i in range(_filtered_monsters.size()):
+		if str((_filtered_monsters[i] as Dictionary).get("id", "")) == monster_id:
+			return int(floor(float(i) / float(PAGE_SIZE)))
+	return 0
 
 func _on_detail_close_pressed() -> void:
 	_selected_monster_id = ""
@@ -110,15 +170,45 @@ func _on_detail_close_pressed() -> void:
 func _on_tab_pressed(tab_id: String) -> void:
 	_selected_tab = tab_id
 	_selected_monster_id = ""
+	_preview_monster_id = ""
 	_album_page = 0
 	_sync_gui()
 
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Header"):
 		return
+	_sync_static_labels()
+	_sync_resource_bar()
 	_sync_header()
 	_sync_pages()
 	_sync_tabs()
+
+func _sync_static_labels() -> void:
+	_node("Header/BackButton").visible = false
+	_node("BottomTabs").visible = false
+	var tab_labels := {
+		"BottomTabs/AlbumTab/Text": "图鉴",
+		"BottomTabs/BondTab/Text": "羁绊",
+		"BottomTabs/CollectionTab/Text": "目标",
+	}
+	for path in tab_labels.keys():
+		_label(path).text = str(tab_labels[path])
+	var nav_labels := {
+		"LobbyBottomNav/HomeButton/Text": "主页",
+		"LobbyBottomNav/PetsButton/Text": "图鉴",
+		"LobbyBottomNav/BattleButton/Text": "羁绊",
+		"LobbyBottomNav/ShopButton/Text": "目标",
+		"LobbyBottomNav/MenuButton/Text": "菜单",
+	}
+	for path in nav_labels.keys():
+		_label(path).text = str(nav_labels[path])
+	_label("LobbyBottomNav/HomeButton/Glyph").text = "⌂"
+
+func _sync_resource_bar() -> void:
+	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}
+	_label("AlbumResourceBar/GoldCapsule/Value").text = "金币  %s" % _format_resource_number(int(player.get("gold", 0)))
+	_label("AlbumResourceBar/GemCapsule/Value").text = "钻石  %s" % _format_resource_number(int(player.get("gems", 0)))
+	_label("AlbumResourceBar/EnergyCapsule/Value").text = "体力  Full"
 
 func _sync_header() -> void:
 	_label("Header/Title").text = "精灵图鉴"
@@ -144,11 +234,18 @@ func _sync_filters() -> void:
 		var frame := button.get_node("Frame") as TextureRect
 		var element: String = ELEMENT_ORDER[i]
 		var selected: bool = element == _selected_element
-		frame.texture = _album_texture("filter_selected" if selected else "filter_normal")
+		var compact := element in ["all", "thunder", "earth", "wind"]
+		var texture_key := "filter_selected" if selected else "filter_normal"
+		if compact:
+			texture_key = "filter_compact_selected" if selected else "filter_compact_normal"
+		frame.texture = _album_texture(texture_key)
 		var icon := button.get_node("Icon") as TextureRect
 		icon.visible = element != "all"
 		icon.texture = _element_texture(element)
-		(button.get_node("Text") as Label).text = str(ELEMENT_NAMES.get(element, element))
+		var text := button.get_node("Text") as Label
+		text.text = str(ELEMENT_NAMES.get(element, element))
+		text.add_theme_color_override("font_color", Color(0.12, 0.43, 0.72) if selected else Color(0.43, 0.24, 0.07))
+		text.add_theme_color_override("font_shadow_color", Color(1.0, 0.96, 0.82, 0.72))
 
 func _sync_grid() -> void:
 	var start := _album_page * PAGE_SIZE
@@ -160,21 +257,72 @@ func _sync_grid() -> void:
 			continue
 		var monster: Dictionary = _filtered_monsters[index]
 		_sync_card(card, monster, index)
+	_sync_preview()
+
+func _sync_preview() -> void:
+	var preview := _node("AlbumPage/PreviewPanel")
+	var monster := _preview_monster()
+	preview.visible = not monster.is_empty()
+	_node("AlbumPage/PreviewEmpty").visible = monster.is_empty()
+	if monster.is_empty():
+		return
+	var id := str(monster.get("id", ""))
+	var element := str(monster.get("element", "grass"))
+	var unlocked := _is_captured(id)
+	var portrait := get_node("AlbumPage/PreviewPanel/Portrait") as TextureRect
+	portrait.visible = true
+	portrait.texture = _monster_texture(id, "album")
+	portrait.material = null if unlocked else _locked_portrait_material()
+	(get_node("AlbumPage/PreviewPanel/LockIcon") as TextureRect).visible = false
+	(get_node("AlbumPage/PreviewPanel/ElementIcon") as TextureRect).texture = _element_texture(element)
+	_label("AlbumPage/PreviewPanel/Name").text = str(monster.get("name", "???")) if unlocked else "未发现精灵"
+	_label("AlbumPage/PreviewPanel/Number").text = "#%03d" % [_filtered_monsters.find(monster) + 1]
+	_label("AlbumPage/PreviewPanel/Element").text = str(ELEMENT_NAMES.get(element, element))
+	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
+	_label("AlbumPage/PreviewPanel/Skill").text = "技能  %s" % (str(skill.get("name", "未知")) if unlocked else "???")
+	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
+	_label("AlbumPage/PreviewPanel/Ecology").text = "栖息  %s" % (str(identity.get("ecology", {}).get("name", "未知")) if unlocked else "???")
+
+func _preview_monster() -> Dictionary:
+	if not _preview_monster_id.is_empty():
+		for monster: Dictionary in _filtered_monsters:
+			if str(monster.get("id", "")) == _preview_monster_id:
+				return monster
+	var selected := _selected_monster()
+	if not selected.is_empty():
+		return selected
+	var start := _album_page * PAGE_SIZE
+	var end := mini(start + PAGE_SIZE, _filtered_monsters.size())
+	for i in range(start, end):
+		var monster: Dictionary = _filtered_monsters[i]
+		if _is_captured(str(monster.get("id", ""))):
+			return monster
+	if start < end:
+		return _filtered_monsters[start]
+	return {}
 
 func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	var id := str(monster.get("id", ""))
 	var element := str(monster.get("element", "grass"))
 	var unlocked := _is_captured(id)
-	var selected := id == _selected_monster_id
-	var frame_key := "card_locked" if not unlocked else ("card_blue" if element in ["water", "light", "wind"] else "card_green")
-	(card.get_node("Frame") as TextureRect).texture = _album_texture(frame_key)
-	(card.get_node("SelectedFrame") as ColorRect).visible = selected
-	(card.get_node("ElementIcon") as TextureRect).texture = _element_texture(element)
-	(card.get_node("Number") as Label).text = "%03d" % [index + 1]
-	(card.get_node("Name") as Label).text = str(monster.get("name", "???")) if unlocked else "???"
-	(card.get_node("Portrait") as TextureRect).visible = unlocked
-	(card.get_node("Portrait") as TextureRect).texture = _monster_texture(id, "album")
-	(card.get_node("LockIcon") as TextureRect).visible = not unlocked
+	var frame := card.get_node("Frame") as TextureRect
+	frame.visible = false
+	(card.get_node("SelectedFrame") as ColorRect).visible = false
+	var element_icon := card.get_node("ElementIcon") as TextureRect
+	element_icon.visible = false
+	element_icon.texture = _element_texture(element)
+	var number := card.get_node("Number") as Label
+	number.visible = false
+	number.text = "%03d" % [index + 1]
+	var name_label := card.get_node("Name") as Label
+	name_label.visible = false
+	name_label.text = str(monster.get("name", "???")) if unlocked else "???"
+	var portrait := card.get_node("Portrait") as TextureRect
+	portrait.visible = true
+	portrait.texture = _monster_texture(id, "album")
+	portrait.material = null if unlocked else _locked_portrait_material()
+	(card.get_node("LockIcon") as TextureRect).visible = false
+	(card.get_node("Stars") as Control).visible = false
 	for i in 5:
 		var star := card.get_node("Stars/Star%d" % (i + 1)) as TextureRect
 		star.texture = _album_texture("icon_star_lit" if i < int(monster.get("rarity", 1)) and unlocked else "icon_star_dim")
@@ -182,7 +330,7 @@ func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 func _sync_page_controls() -> void:
 	_clamp_album_page()
 	var max_page := _max_album_page()
-	_label("AlbumPage/PageControls/PageLabel").text = "%d/%d" % [_album_page + 1, max_page + 1]
+	_label("AlbumPage/PageControls/PageLabel").text = "%d / %d" % [_album_page + 1, max_page + 1]
 	var prev := get_node("AlbumPage/PageControls/PreviousButton") as TextureButton
 	var next := get_node("AlbumPage/PageControls/NextButton") as TextureButton
 	prev.disabled = _album_page <= 0
@@ -293,7 +441,8 @@ func _sync_bond_page() -> void:
 		(row.get_node("Name") as Label).text = str(group.get("name", ""))
 		(row.get_node("Theme") as Label).text = str(group.get("theme", ""))
 		(row.get_node("Progress") as Label).text = "%d/%d" % [owned, total]
-		(row.get_node("Fill") as ColorRect).size.x = 206.0 * clampf(float(owned) / float(total), 0.0, 1.0)
+		var bar_bg := row.get_node("BarBg") as ColorRect
+		(row.get_node("Fill") as ColorRect).size.x = bar_bg.size.x * clampf(float(owned) / float(total), 0.0, 1.0)
 
 func _sync_collection_page() -> void:
 	var role_target: Dictionary = EcologyBondRulesScript.get_role_collection_target(_all_monsters, _captured_ids)
@@ -311,14 +460,33 @@ func _sync_collection_page() -> void:
 		(row.get_node("Status") as Label).text = str(target.get("statusLabel", ""))
 		(row.get_node("Theme") as Label).text = str(target.get("theme", ""))
 		(row.get_node("Suggestion") as Label).text = str(target.get("suggestion", ""))
-		(row.get_node("Fill") as ColorRect).size.x = 299.0 * clampf(float(target.get("ratio", 0.0)), 0.0, 1.0)
+		var bar_bg := row.get_node("BarBg") as ColorRect
+		(row.get_node("Fill") as ColorRect).size.x = bar_bg.size.x * clampf(float(target.get("ratio", 0.0)), 0.0, 1.0)
 
 func _sync_tabs() -> void:
 	for i in TAB_PATHS.size():
 		var tab := get_node(TAB_PATHS[i]) as TextureButton
 		var selected: bool = TAB_IDS[i] == _selected_tab
 		(tab.get_node("Frame") as TextureRect).texture = _album_texture("bottom_tab_selected" if selected else "bottom_tab_normal")
+		var text := tab.get_node("Text") as Label
+		text.add_theme_color_override("font_color", Color.WHITE if selected else Color(0.40, 0.23, 0.07))
+		text.add_theme_color_override("font_shadow_color", Color(0.13, 0.24, 0.43, 0.75) if selected else Color(1.0, 0.95, 0.78, 0.65))
 		tab.modulate.a = 1.0 if selected else 0.78
+	var bottom_tab_buttons := {
+		"album": "LobbyBottomNav/PetsButton",
+		"bond": "LobbyBottomNav/BattleButton",
+		"collection": "LobbyBottomNav/ShopButton",
+	}
+	for tab_id in bottom_tab_buttons.keys():
+		var path := str(bottom_tab_buttons[tab_id])
+		var selected := str(tab_id) == _selected_tab
+		var selected_frame := get_node_or_null("%s/Selected" % path) as TextureRect
+		if selected_frame != null:
+			selected_frame.visible = selected
+		var button := get_node(path) as Control
+		button.modulate.a = 1.0 if selected else 0.92
+		var label := get_node("%s/Text" % path) as Label
+		label.add_theme_color_override("font_color", Color(0.36, 0.18, 0.05) if selected else Color(0.42, 0.28, 0.13))
 
 func _max_album_page() -> int:
 	return maxi(0, ceili(float(_filtered_monsters.size()) / float(PAGE_SIZE)) - 1)
@@ -333,10 +501,34 @@ func _element_texture(element: String) -> Texture2D:
 	return _tex(str(ELEMENT_ICON_ASSETS.get(element, "")))
 
 func _monster_texture(id: String, variant: String) -> Texture2D:
+	if variant == "album":
+		var album_path := "res://assets/images/album/portraits/%s_album_thumb.png" % id
+		if ResourceLoader.exists(album_path):
+			return _tex(album_path)
 	return _tex(MonsterArtDBScript.get_art_path(id, variant))
 
 func _node(path: String) -> Control:
 	return get_node(path) as Control
+
+func _go_to_scene(scene_name: String) -> void:
+	var manager := _root_node("SceneManager")
+	if manager and manager.has_method("switch_scene"):
+		manager.switch_scene(scene_name)
+
+func _format_resource_number(value: int) -> String:
+	var digits := str(absi(value))
+	var formatted := ""
+	while digits.length() > 3:
+		formatted = "," + digits.substr(digits.length() - 3) + formatted
+		digits = digits.substr(0, digits.length() - 3)
+	formatted = digits + formatted
+	return "-" + formatted if value < 0 else formatted
+
+func _locked_portrait_material() -> ShaderMaterial:
+	if _locked_silhouette_material == null:
+		_locked_silhouette_material = ShaderMaterial.new()
+		_locked_silhouette_material.shader = LockedSilhouetteShader
+	return _locked_silhouette_material
 
 func _label(path: NodePath) -> Label:
 	return get_node(path) as Label

@@ -1,3 +1,4 @@
+@tool
 # scene_sign_in.gd - 每日签到场景
 class_name SceneSignIn
 extends Control
@@ -16,38 +17,37 @@ const MONTH_RECT := Rect2(17.0, 462.0, 341.0, 126.0)
 const CLAIM_RECT := Rect2(78.0, 598.0, 220.0, 52.0)
 
 const SIGN_ASSETS := {
-	"bg": "res://assets/images/sign_in/bg_sign_in.png",
-	"back": "res://assets/images/sign_in/back_button.png",
-	"header": "res://assets/images/sign_in/header_bar.png",
-	"day_card": "res://assets/images/sign_in/day_card.png",
-	"day_card_alt": "res://assets/images/sign_in/day_card_alt.png",
-	"day_card_today": "res://assets/images/sign_in/day_card_today.png",
-	"day_card_locked": "res://assets/images/sign_in/day_card_locked.png",
-	"month_panel": "res://assets/images/sign_in/month_panel.png",
-	"month_ribbon": "res://assets/images/sign_in/month_ribbon.png",
-	"claim_button": "res://assets/images/sign_in/claim_button.png",
-	"claim_disabled": "res://assets/images/sign_in/claim_button_disabled.png",
-	"stamp": "res://assets/images/sign_in/stamp_claimed.png",
-	"today_tag": "res://assets/images/sign_in/today_tag.png",
-	"progress": "res://assets/images/sign_in/progress_bar.png",
-	"warning": "res://assets/images/sign_in/warning_badge.png",
-	"calendar": "res://assets/images/sign_in/icon_calendar_star.png",
-	"mascot": "res://assets/images/sign_in/mascot_leaf.png",
-	"check": "res://assets/images/sign_in/icon_check_badge.png",
-	"fx": "res://assets/images/sign_in/fx_sparkles.png",
-	"gold": "res://assets/images/sign_in/icon_gold_coin.png",
-	"exp": "res://assets/images/sign_in/icon_exp_badge.png",
-	"water": "res://assets/images/sign_in/icon_gem_water.png",
-	"fire": "res://assets/images/sign_in/icon_gem_fire.png",
-	"potion": "res://assets/images/sign_in/icon_potion_heart.png",
-	"chest_large": "res://assets/images/sign_in/icon_chest_large.png",
-	"chest_7": "res://assets/images/sign_in/icon_chest_7.png",
-	"chest_14": "res://assets/images/sign_in/icon_chest_14.png",
-	"chest_21": "res://assets/images/sign_in/icon_chest_21.png",
-	"chest_28": "res://assets/images/sign_in/icon_chest_28.png",
-	"diamond": "res://assets/images/sign_in/icon_diamond.png",
+	"bg": "res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png",
+	"back": "res://assets/images/ranch/ui_btn_previous_round.png",
+	"header": "res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png",
+	"day_card": "res://assets/images/inventory_new/ui_inventory_slot.png",
+	"day_card_alt": "res://assets/images/inventory_new/ui_inventory_slot.png",
+	"day_card_today": "res://assets/images/inventory_new/ui_inventory_slot_selected.png",
+	"day_card_locked": "res://assets/images/inventory_new/ui_inventory_slot_empty.png",
+	"month_panel": "res://assets/images/inventory_new/ui_inventory_panel.png",
+	"month_ribbon": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
+	"claim_button": "res://assets/images/inventory_new/ui_inventory_use_button.png",
+	"claim_disabled": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
+	"stamp": "res://assets/images/album/ui_dex_bottom_nav_selected.png",
+	"today_tag": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
+	"progress": "res://assets/images/inventory_new/ui_inventory_use_button.png",
+	"warning": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
+	"calendar": "res://assets/images/main/lobby_refresh/icon_signin_calendar_v3.png",
+	"mascot": "res://assets/images/start/monster_grass_leaf.png",
+	"check": "res://assets/images/album/icon_star_lit.png",
+	"fx": "res://assets/images/album/fx_sparkle_cluster.png",
+	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
+	"exp": "res://assets/images/inventory_new/icons/exp_potion.png",
+	"water": "res://assets/images/inventory_new/icons/stone_water.png",
+	"fire": "res://assets/images/inventory_new/icons/stone_fire.png",
+	"potion": "res://assets/images/inventory_new/icons/hp_potion.png",
+	"chest_large": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"chest_7": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"chest_14": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"chest_21": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"chest_28": "res://assets/images/inventory_new/icons/gold_chest.png",
+	"diamond": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
 }
-
 const REWARD_SCHEDULE := [
 	{"day": 1, "icon": "gold", "amount": "x500"},
 	{"day": 2, "icon": "exp", "amount": "x200"},
@@ -137,7 +137,6 @@ func _play_sign_in_effect(reward: Dictionary) -> void:
 	_floating_rewards.append({"text": "+%d EXP" % int(reward.get("exp", 0)), "x": 210.0, "y": 586.0, "vy": -1.18, "life": 1.5, "color": C["green"]})
 	_animation_complete = true
 
-
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
@@ -182,7 +181,7 @@ func _process(dt: float) -> void:
 
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT))
-	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.0, 0.02, 0.08, 0.10))
+	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(1.0, 0.86, 0.48, 0.10), true)
 	_draw_header()
 	_draw_hero()
 	_draw_week_rewards()
@@ -190,13 +189,10 @@ func _draw() -> void:
 	_draw_claim_area()
 	_draw_effects()
 
-
 func _draw_header() -> void:
 	_draw_texture_fit(_tex("back"), BACK_RECT)
-	_draw_text("‹", BACK_RECT.position.x + 29.0, BACK_RECT.position.y + 43.0, Color(1.0, 0.92, 0.78), 42.0, true, 44.0)
 	_draw_texture_fit(_tex("header"), HEADER_RECT)
 	_draw_text("每日签到", HEADER_RECT.get_center().x, HEADER_RECT.position.y + 34.0, C["white"], 24.0, true, 170.0)
-
 
 func _draw_hero() -> void:
 	_draw_texture_fit(_tex("month_panel"), HERO_RECT)
@@ -204,12 +200,11 @@ func _draw_hero() -> void:
 	_draw_texture_contain(_tex("mascot"), Rect2(255.0, 76.0, 88.0, 100.0))
 	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
 	var next_reward := _get_schedule_item(_current_cycle_day())
-	_draw_text("连续签到", 174.0, 112.0, Color(1.0, 0.92, 0.68), 18.0, true, 110.0)
+	_draw_text("连续签到", 174.0, 112.0, Color(0.55, 0.31, 0.12), 18.0, true, 110.0)
 	_draw_text(str(consecutive), 158.0, 154.0, C["gold"], 42.0, true, 76.0)
-	_draw_text("天", 205.0, 154.0, C["white"], 22.0, true, 28.0)
+	_draw_text("天", 205.0, 154.0, Color(0.43, 0.24, 0.07), 22.0, true, 28.0)
 	_draw_text("今日奖励", 177.0, 174.0, C["muted"], 12.0, false, 82.0)
 	_draw_texture_contain(_tex(str(next_reward.get("icon", "gold"))), Rect2(217.0, 142.0, 38.0, 38.0))
-
 
 func _draw_week_rewards() -> void:
 	var current_day := _current_cycle_day()
@@ -224,26 +219,25 @@ func _draw_week_rewards() -> void:
 		if day > signed_limit + 1 and not today:
 			card_key = "day_card_locked"
 		_draw_texture_fit(_tex(card_key), rect)
-		_draw_text("第%d天" % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else C["white"], 15.0, true, rect.size.x - 8.0)
+		_draw_text("第%d天" % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else Color(0.43, 0.24, 0.07), 15.0, true, rect.size.x - 8.0)
 		if today:
 			_draw_texture_fit(_tex("today_tag"), Rect2(rect.position.x + 5.0, rect.position.y + 28.0, 42.0, 23.0))
 			_draw_text("今日", rect.position.x + 26.0, rect.position.y + 45.0, C["white"], 11.0, true, 34.0)
 		_draw_texture_contain(_tex(str(item["icon"])), Rect2(rect.position.x + 16.0, rect.position.y + 42.0, rect.size.x - 32.0, 45.0))
-		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 20.0, C["white"], 17.0, true, rect.size.x - 12.0)
+		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 20.0, Color(0.43, 0.24, 0.07), 17.0, true, rect.size.x - 12.0)
 		if signed:
 			_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 10.0, rect.position.y + rect.size.y - 47.0, rect.size.x - 20.0, 34.0), 0.92)
-
 
 func _draw_month_rewards() -> void:
 	_draw_texture_fit(_tex("month_panel"), MONTH_RECT)
 	_draw_texture_fit(_tex("month_ribbon"), Rect2(74.0, 448.0, 228.0, 40.0))
-	_draw_text("本月累计签到奖励", 188.0, 474.0, Color(1.0, 0.92, 0.65), 15.0, true, 180.0)
+	_draw_text("本月累计签到奖励", 188.0, 474.0, C["white"], 15.0, true, 180.0)
 	var total := int(_sign_in_data.get("totalDays", 0))
 	var month_count := clampi(total % 29, 0, 28)
 	if total > 0 and total % 28 == 0:
 		month_count = 28
 	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0, 76.0, 70.0))
-	_draw_text("本月已签到  %d/28 天" % month_count, 205.0, 505.0, C["white"], 14.0, true, 160.0)
+	_draw_text("本月已签到 %d/28 天" % month_count, 205.0, 505.0, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
 	_draw_texture_fit(_tex("progress"), Rect2(108.0, 548.0, 230.0, 26.0))
 	for i in range(MILESTONES.size()):
 		var m: Dictionary = MILESTONES[i]
@@ -252,15 +246,11 @@ func _draw_month_rewards() -> void:
 		_draw_texture_contain(_tex(str(m["icon"])), Rect2(x - 22.0, 518.0, 44.0, 34.0), 1.0 if reached else 0.55)
 		_draw_text("%d天" % int(m["day"]), x, 583.0, C["green"] if reached else C["muted"], 12.0, true, 42.0)
 
-
 func _draw_claim_area() -> void:
 	var key := "claim_button" if _can_sign_in else "claim_disabled"
 	_draw_texture_fit(_tex(key), CLAIM_RECT)
 	var label := "领取奖励" if _can_sign_in else "今日已签到"
 	_draw_text(label, CLAIM_RECT.get_center().x, CLAIM_RECT.position.y + 35.0, C["white"], 24.0 if _can_sign_in else 19.0, true, 170.0)
-	_draw_texture_contain(_tex("warning"), Rect2(77.0, 644.0, 18.0, 18.0))
-	_draw_text("每日 00:00 重置签到进度", 205.0, 658.0, C["muted"], 12.0, true, 205.0)
-
 
 func _draw_effects() -> void:
 	for p in _particles:
@@ -277,7 +267,6 @@ func _draw_effects() -> void:
 		var color: Color = r.get("color", C["white"])
 		color.a = alpha
 		_draw_text(str(r.get("text", "")), float(r.get("x", 0.0)), float(r.get("y", 0.0)), color, 16.0, true, 82.0)
-
 
 func _day_rect(index: int) -> Rect2:
 	if index < 4:
