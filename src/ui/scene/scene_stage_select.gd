@@ -166,7 +166,7 @@ const REWARD_ITEMS: Array[Dictionary] = [
 const REWARD_ICON_PATHS := {
 	"gold_coin": "res://assets/images/main/icon_gold_v2.png",
 	"exp_badge": "res://assets/images/main/icon_exp_star.png",
-	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
+	"capture_ball": "res://assets/images/items_new/icon_capture_ball.png",
 	"gem_fire": "res://assets/images/battle/gems/gem_fire.png",
 	"gem_water": "res://assets/images/battle/gems/gem_water.png",
 	"gem_grass": "res://assets/images/battle/gems/gem_grass.png",

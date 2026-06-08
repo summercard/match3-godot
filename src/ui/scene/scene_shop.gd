@@ -44,21 +44,21 @@ const SHOP_ASSETS := {
 }
 
 const ITEM_ICON_ASSETS := {
-	"capture_ball": "res://assets/images/items/icon_item_capture_ball.png",
-	"capture_ball_plus": "res://assets/images/items/icon_item_capture_ball_plus.png",
-	"exp_potion": "res://assets/images/items/icon_item_exp_potion.png",
-	"exp_crystal": "res://assets/images/items/icon_item_exp_potion.png",
-	"hp_potion": "res://assets/images/items/icon_item_hp_potion.png",
-	"gold_bag": "res://assets/images/items/icon_item_gold_bag.png",
-	"gold_chest": "res://assets/images/items/icon_item_gold_chest.png",
-	"evolution_stone_fire": "res://assets/images/items/icon_stone_fire.png",
-	"evolution_stone_water": "res://assets/images/items/icon_stone_water.png",
-	"evolution_stone_grass": "res://assets/images/items/icon_stone_grass.png",
-	"evolution_stone_thunder": "res://assets/images/items/icon_stone_thunder.png",
-	"evolution_stone_light": "res://assets/images/items/icon_stone_light.png",
-	"evolution_stone_earth": "res://assets/images/items/icon_stone_earth.png",
-	"evolution_stone_wind": "res://assets/images/items/icon_stone_wind.png",
-	"evolution_stone_dark": "res://assets/images/items/icon_stone_dark.png",
+	"capture_ball": "res://assets/images/items_new/icon_capture_ball.png",
+	"capture_ball_plus": "res://assets/images/items_new/icon_capture_ball_plus.png",
+	"exp_potion": "res://assets/images/items_new/icon_exp_potion.png",
+	"exp_crystal": "res://assets/images/items_new/icon_exp_crystal.png",
+	"hp_potion": "res://assets/images/items_new/icon_hp_potion.png",
+	"gold_bag": "res://assets/images/items_new/icon_gold_bag.png",
+	"gold_chest": "res://assets/images/items_new/icon_gold_chest.png",
+	"evolution_stone_fire": "res://assets/images/items_new/icon_evolution_stone_fire.png",
+	"evolution_stone_water": "res://assets/images/items_new/icon_evolution_stone_water.png",
+	"evolution_stone_grass": "res://assets/images/items_new/icon_evolution_stone_grass.png",
+	"evolution_stone_thunder": "res://assets/images/items_new/icon_evolution_stone_thunder.png",
+	"evolution_stone_light": "res://assets/images/items_new/icon_evolution_stone_light.png",
+	"evolution_stone_earth": "res://assets/images/items_new/icon_evolution_stone_earth.png",
+	"evolution_stone_wind": "res://assets/images/items_new/icon_evolution_stone_wind.png",
+	"evolution_stone_dark": "res://assets/images/items_new/icon_evolution_stone_dark.png",
 }
 
 const TABS := [
@@ -418,12 +418,12 @@ func _get_tab_rect(tab_id: String) -> Rect2:
 
 func _draw_feature_banner() -> void:
 	_draw_texture_fit(_tex("feature_banner"), FEATURE_RECT)
-	_draw_texture_fit(_get_texture("res://assets/images/items/icon_item_starter_chest.png"), Rect2(36.0, 130.0, 80.0, 80.0))
+	_draw_texture_fit(_get_texture("res://assets/images/items_new/icon_gold_chest.png"), Rect2(36.0, 130.0, 80.0, 80.0))
 	_draw_text_shadow("新手超值礼包", Vector2(250.0, 143.0), C["gold"], 21.0, true, 190.0)
 	_draw_text_shadow("限时特惠，助力冒险！", Vector2(252.0, 166.0), C["white"], 12.0, true, 170.0)
 	_draw_feature_reward("gold", "x10,000", Vector2(202.0, 195.0))
 	_draw_feature_reward("diamond", "x1,000", Vector2(256.0, 195.0))
-	_draw_texture_fit(_get_texture("res://assets/images/items/icon_stone_fire.png"), Rect2(302.0, 174.0, 32.0, 32.0))
+	_draw_texture_fit(_get_texture("res://assets/images/items_new/icon_evolution_stone_fire.png"), Rect2(302.0, 174.0, 32.0, 32.0))
 	_draw_text_shadow("x10", Vector2(319.0, 217.0), C["white"], 9.0, true, 42.0)
 	_draw_texture_fit(_tex("buy_button"), Rect2(224.0, 208.0, 106.0, 29.0))
 	_draw_text_shadow("¥ 30", Vector2(277.0, 229.0), C["white"], 17.0, true, 90.0)

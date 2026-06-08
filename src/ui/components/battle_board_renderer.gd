@@ -58,11 +58,9 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	var colors: Dictionary = state.get("colors", {})
 	var gem_colors: Dictionary = state.get("gem_colors", {})
 	var eliminating_gems: Array = state.get("eliminating_gems", [])
+	var falling_gems: Array = state.get("falling_gems", [])
 	var selected_gem: Vector2i = state.get("selected_gem", Vector2i(-1, -1))
 	var idle_time: float = state.get("idle_time", 0.0)
-	var eliminate_duration: float = state.get("eliminate_duration", 0.25)
-	var eliminate_phase1: float = state.get("eliminate_phase1", 0.1)
-	var eliminate_phase2: float = state.get("eliminate_phase2", 0.15)
 	var is_eliminating: bool = false
 	var elim_progress: float = 0.0
 	for eg in eliminating_gems:
@@ -75,19 +73,29 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	var cx: float = x + cell_size / 2.0
 	var cy: float = y + cell_size / 2.0
 	if is_eliminating:
-		var scale: float = 1.0
-		var alpha: float = 1.0
-		var brightness: float = 0.0
-		if elim_progress * eliminate_duration <= eliminate_phase1:
-			var p1: float = (elim_progress * eliminate_duration) / eliminate_phase1
-			scale = 1.0 + 0.2 * p1
-			brightness = p1
-		else:
-			var p2: float = ((elim_progress * eliminate_duration) - eliminate_phase1) / eliminate_phase2
-			scale = 1.2 * (1.0 - p2)
-			alpha = 1.0 - p2
-			brightness = 1.0 - p2
+		var scale: float = _eliminate_scale(elim_progress)
+		var alpha: float = _eliminate_alpha(elim_progress)
+		var brightness: float = _eliminate_brightness(elim_progress)
+		var ring_alpha := sin(clampf(elim_progress / 0.58, 0.0, 1.0) * PI) * 0.38
+		if ring_alpha > 0.0:
+			scene.draw_arc(Vector2(cx, cy), cell_size * (0.38 + elim_progress * 0.20), 0.0, TAU, 32, Color(gem_color.r, gem_color.g, gem_color.b, ring_alpha), 2.0, true)
 		scene._draw_gem_animated(cx, cy, gem_type, gem_color, scale, alpha, brightness)
+		return
+
+	var fall := _falling_entry_for(falling_gems, row, col, gem_type)
+	if not fall.is_empty():
+		var fall_t: float = clampf((float(fall.get("timer", 0.0)) - float(fall.get("delay", 0.0))) / maxf(0.01, float(fall.get("duration", 0.34))), 0.0, 1.0)
+		var eased := _ease_out_cubic(fall_t)
+		var from_y := float(fall.get("from_y", cy))
+		var to_y := float(fall.get("to_y", cy))
+		var bounce := 0.0
+		if fall_t > 0.72:
+			var bp := (fall_t - 0.72) / 0.28
+			bounce = -sin(bp * PI) * 5.0 * (1.0 - bp)
+		var fall_y := lerpf(from_y, to_y, eased) + bounce
+		var fall_scale := 1.0 + sin(fall_t * PI) * 0.055
+		var fall_alpha := clampf(fall_t / 0.18, 0.0, 1.0) if bool(fall.get("is_new", false)) else 1.0
+		scene._draw_gem_animated(cx, fall_y, gem_type, gem_color, fall_scale, fall_alpha)
 		return
 
 	var is_selected: bool = selected_gem.x == col and selected_gem.y == row
@@ -135,11 +143,12 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			]
 			for i in range(4):
 				scene.draw_line(corners[i], corners[(i + 1) % 4], chain_color, 2.5)
-			var icon_color: Color = Color(0.78, 0.78, 0.86, 0.9)
 			for corner in corners:
-				scene._draw_text_with_shadow("⛓", corner.x, corner.y, icon_color, 8.0)
+				scene.draw_circle(corner, 3.0, Color(0.95, 0.86, 0.62, 0.78))
+				scene.draw_circle(corner, 1.6, Color(0.24, 0.22, 0.28, 0.74))
 			if lock.get("hp", 1) >= 2:
-				scene._draw_text_with_shadow("🔒", cx, cy - 4.0, Color(1.0, 1.0, 1.0, 0.7), 8.0)
+				scene._draw_rounded_rect(cx - 7.0, cy - 4.0, 14.0, 10.0, 3.0, Color(0.20, 0.22, 0.30, 0.78))
+				scene.draw_arc(Vector2(cx, cy - 4.0), 6.0, PI, TAU, 14, Color(0.95, 0.86, 0.62, 0.80), 2.0)
 			else:
 				scene._draw_text_with_shadow("×1", cx, cy + 4.0, Color(1.0, 1.0, 1.0, 0.8), 8.0)
 
@@ -166,7 +175,8 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 				scene._draw_rounded_rect(x + 2.0, y + 2.0, size - 4.0, size - 4.0, 4.0, obstacle_colors.get("rock", Color(0.35, 0.3, 0.25, 1.0)))
 				scene._draw_rounded_rect(x + 4.0, y + 4.0, size - 8.0, size - 8.0, 3.0, obstacle_colors.get("rock_solid", Color(0.42, 0.38, 0.32, 1.0)))
 				scene._draw_rounded_rect(x + 6.0, y + 6.0, size - 16.0, (size - 8.0) / 3.0, 2.0, obstacle_colors.get("highlight", Color(1.0, 1.0, 1.0, 0.15)))
-				scene._draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.7), 12.0)
+				scene.draw_line(Vector2(cx - 7.0, cy - 4.0), Vector2(cx + 6.0, cy + 5.0), obstacle_colors.get("highlight", Color(1.0, 1.0, 1.0, 0.22)), 1.6)
+				scene.draw_line(Vector2(cx - 4.0, cy + 5.0), Vector2(cx + 7.0, cy - 5.0), obstacle_colors.get("highlight", Color(1.0, 1.0, 1.0, 0.16)), 1.2)
 			else:
 				scene._draw_rounded_rect(x + 2.0, y + 2.0, size - 4.0, size - 4.0, 4.0, obstacle_colors.get("rock", Color(0.35, 0.3, 0.25, 1.0)))
 				scene._draw_rounded_rect(x + 4.0, y + 4.0, size - 8.0, size - 8.0, 3.0, obstacle_colors.get("rock_cracked", Color(0.28, 0.24, 0.2, 1.0)))
@@ -174,7 +184,8 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 				scene.draw_line(Vector2(cx - 6.0, cy - 4.0), Vector2(cx, cy + 2.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.5)
 				scene.draw_line(Vector2(cx, cy + 2.0), Vector2(cx + 5.0, cy - 6.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.5)
 				scene.draw_line(Vector2(cx - 3.0, cy + 1.0), Vector2(cx + 2.0, cy + 6.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.5)
-				scene._draw_text_with_shadow("🪨", cx, cy, Color(1.0, 1.0, 1.0, 0.5), 14.0)
+				scene.draw_line(Vector2(cx - 8.0, cy - 5.0), Vector2(cx - 1.0, cy + 2.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.8)
+				scene.draw_line(Vector2(cx - 1.0, cy + 2.0), Vector2(cx + 8.0, cy - 6.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.8)
 
 static func draw_poison_fog(scene, board, state: Dictionary) -> void:
 	if board == null:
@@ -189,8 +200,13 @@ static func draw_poison_fog(scene, board, state: Dictionary) -> void:
 			var x: float = float(board.offset_x + col * board.cell_size)
 			var y: float = float(board.offset_y + row * board.cell_size)
 			var size: float = float(board.cell_size)
-			scene.draw_rect(Rect2(x + 1.0, y + 1.0, size - 2.0, size - 2.0), Color(0.31, 0.78, 0.31, pulse_opacity))
-			scene._draw_text_with_shadow("💀", x + size / 2.0, y + size / 2.0, Color(1.0, 1.0, 1.0, 0.5 + pulse_opacity), 10.0)
+			var fog_color := Color(0.23, 0.74, 0.38, pulse_opacity * 0.72)
+			scene._draw_rounded_rect(x + 2.0, y + 2.0, size - 4.0, size - 4.0, 7.0, fog_color)
+			scene.draw_arc(Vector2(x + size / 2.0, y + size / 2.0), size * (0.24 + pulse_opacity * 0.08), 0.0, TAU, 24, Color(0.82, 1.0, 0.62, pulse_opacity * 0.60), 1.8)
+			for i in range(3):
+				var angle := idle_time * 1.8 + float(i) * TAU / 3.0 + float(row + col) * 0.23
+				var mote_pos := Vector2(x + size / 2.0, y + size / 2.0) + Vector2(cos(angle), sin(angle * 0.9)) * (size * 0.18)
+				scene.draw_circle(mote_pos, 1.6 + float(i) * 0.35, Color(0.88, 1.0, 0.62, pulse_opacity * 0.58))
 
 static func draw_unlock_animations(scene, board, state: Dictionary) -> void:
 	var unlock_animations: Array = state.get("unlock_animations", [])
@@ -214,7 +230,10 @@ static func draw_unlock_animations(scene, board, state: Dictionary) -> void:
 		var cy: float = board_y + row * cell_size + cell_size / 2.0
 		var dirs: Array = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 		for d: Array in dirs:
-			scene._draw_text_with_shadow("⛓", cx + d[0] * dist, cy + d[1] * dist, Color(0.6, 0.6, 0.7, alpha), 10.0)
+			var start := Vector2(cx + d[0] * dist * 0.35, cy + d[1] * dist * 0.35)
+			var finish := Vector2(cx + d[0] * (dist + 8.0), cy + d[1] * (dist + 8.0))
+			scene.draw_line(start, finish, Color(0.95, 0.86, 0.62, alpha), 2.2)
+			scene.draw_circle(finish, 2.6, Color(0.40, 0.36, 0.45, alpha))
 
 static func draw_poison_fog_anims(scene, state: Dictionary) -> void:
 	for anim: Dictionary in state.get("poison_fog_spread_anims", []):
@@ -241,7 +260,9 @@ static func draw_poison_fog_anims(scene, state: Dictionary) -> void:
 		var cy: float = anim["y"] + 21.0
 		var dirs: Array = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 		for d: Array in dirs:
-			scene._draw_text_with_shadow("☁️", cx + d[0] * dist, cy + d[1] * dist, Color(0.31, 0.78, 0.31, alpha), 10.0)
+			var pos := Vector2(cx + d[0] * dist, cy + d[1] * dist)
+			scene.draw_circle(pos, 4.0 * (1.0 - progress), Color(0.82, 1.0, 0.62, alpha * 0.55))
+			scene.draw_line(pos - Vector2(4.0, 0.0), pos + Vector2(4.0, 0.0), Color(0.42, 0.90, 0.48, alpha), 1.4)
 
 static func draw_special_transform(scene, board, state: Dictionary) -> void:
 	var anim: Dictionary = state.get("special_transform_anim", {})
@@ -270,3 +291,41 @@ static func draw_special_transform(scene, board, state: Dictionary) -> void:
 	var gem_type: String = anim.get("type", "fire")
 	var gem_color: Color = state.get("gem_colors", {}).get(gem_type, state.get("colors", {}).get("white", Color.WHITE))
 	scene._draw_gem_animated(cx, cy, gem_type, gem_color, gem_scale, 1.0)
+
+static func _eliminate_scale(progress: float) -> float:
+	var p := clampf(progress, 0.0, 1.0)
+	if p < 0.42:
+		return lerpf(1.0, 1.30, _ease_out_back(p / 0.42))
+	var q := (p - 0.42) / 0.58
+	var squash := sin(q * PI) * 0.10
+	return lerpf(1.18, 0.08, _ease_in_cubic(q)) + squash
+
+static func _eliminate_alpha(progress: float) -> float:
+	var p := clampf(progress, 0.0, 1.0)
+	if p < 0.58:
+		return 1.0
+	return 1.0 - _ease_in_cubic((p - 0.58) / 0.42)
+
+static func _eliminate_brightness(progress: float) -> float:
+	var p := clampf(progress, 0.0, 1.0)
+	return sin(clampf(p / 0.72, 0.0, 1.0) * PI) * 0.55
+
+static func _falling_entry_for(falling_gems: Array, row: int, col: int, gem_type: String) -> Dictionary:
+	for entry in falling_gems:
+		if int(entry.get("row", -999)) == row and int(entry.get("col", -999)) == col and str(entry.get("type", "")) == gem_type:
+			return entry
+	return {}
+
+static func _ease_out_cubic(t: float) -> float:
+	var p := clampf(t, 0.0, 1.0)
+	return 1.0 - pow(1.0 - p, 3.0)
+
+static func _ease_in_cubic(t: float) -> float:
+	var p := clampf(t, 0.0, 1.0)
+	return p * p * p
+
+static func _ease_out_back(t: float) -> float:
+	var p := clampf(t, 0.0, 1.0)
+	var c1 := 1.70158
+	var c3 := c1 + 1.0
+	return 1.0 + c3 * pow(p - 1.0, 3.0) + c1 * pow(p - 1.0, 2.0)

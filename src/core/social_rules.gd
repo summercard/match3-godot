@@ -26,7 +26,7 @@ const PLACE_CONFIGS := {
 		"id": "sunny_yard",
 		"name": "暖阳广场",
 		"short": "暖阳",
-			"summary": "更容易激发活跃、勇敢或爆发型怪物。",
+			"summary": "更容易激发活跃、勇敢或爆发型精灵。",
 			"durationHours": 2.0,
 			"preferredElements": ["fire", "thunder", "wind"],
 		"preferredStyles": ["bold", "lively"],
@@ -36,7 +36,7 @@ const PLACE_CONFIGS := {
 		"id": "quiet_pond",
 		"name": "静水池",
 		"short": "静水",
-			"summary": "更适合稳重、安静或治愈型怪物沉淀关系。",
+			"summary": "更适合稳重、安静或治愈型精灵沉淀关系。",
 			"durationHours": 6.0,
 			"preferredElements": ["water", "ice", "void"],
 		"preferredStyles": ["steady", "quiet", "caring"],
@@ -60,7 +60,7 @@ const EVENT_CATALOG := [
 		"requiredTags": [],
 		"name": "草叶试探",
 		"theme": "陪伴",
-		"flavor": "两只怪物绕着草坪慢慢走了一圈，最后在同一块树荫下停住。",
+		"flavor": "两只精灵绕着草坪慢慢走了一圈，最后在同一块树荫下停住。",
 		"outcome": "双方留下初次气味记忆，下次同场所社交更容易读出偏好。",
 		"hook": "relation_memory"
 	},
@@ -84,7 +84,7 @@ const EVENT_CATALOG := [
 		"requiredTags": ["场所契合"],
 		"name": "树荫分享",
 		"theme": "陪伴",
-		"flavor": "一只怪物把更舒服的位置让出来，另一只没有退开，而是贴近了一点。",
+		"flavor": "一只精灵把更舒服的位置让出来，另一只没有退开，而是贴近了一点。",
 		"outcome": "关系进入稳定陪伴方向，适合作为长期社交搭档。",
 		"hook": "companion_growth"
 	},
@@ -132,8 +132,8 @@ const EVENT_CATALOG := [
 		"requiredTags": [],
 		"name": "水面倒影",
 		"theme": "安定",
-		"flavor": "两只怪物看着水面上的倒影，很久都没有打扰彼此。",
-		"outcome": "安静陪伴被记录，适合稳重或恢复型怪物继续培养关系。",
+		"flavor": "两只精灵看着水面上的倒影，很久都没有打扰彼此。",
+		"outcome": "安静陪伴被记录，适合稳重或恢复型精灵继续培养关系。",
 		"hook": "calm_memory"
 	},
 	{
@@ -144,7 +144,7 @@ const EVENT_CATALOG := [
 		"requiredTags": ["场所契合"],
 		"name": "池边守候",
 		"theme": "安定",
-		"flavor": "其中一只怪物伏在池边休息，另一只守在旁边，偶尔拨开靠近的浮叶。",
+		"flavor": "其中一只精灵伏在池边休息，另一只守在旁边，偶尔拨开靠近的浮叶。",
 		"outcome": "守候型关系增强，后续适合接守护、回复或陪伴成长。",
 		"hook": "ward_bond"
 	},
@@ -192,7 +192,7 @@ const EVENT_CATALOG := [
 		"requiredTags": ["属性相克"],
 		"name": "风暴前夕",
 		"theme": "警告",
-		"flavor": "草叶在两只怪物的对峙间被压成了弧线。空气中有什么正在积累。",
+		"flavor": "草叶在两只精灵的对峙间被压成了弧线。空气中有什么正在积累。",
 		"outcome": "警告：属性相克关系升温，侵蚀吞噬风险提升。",
 		"hook": "counter_escalation"
 	},
@@ -204,7 +204,7 @@ const EVENT_CATALOG := [
 		"requiredTags": [],
 		"name": "羁绊回声",
 		"theme": "羁绊",
-		"flavor": "短暂的沉默后，两只怪物同时回头，像是听见了只有彼此能懂的声音。",
+		"flavor": "短暂的沉默后，两只精灵同时回头，像是听见了只有彼此能懂的声音。",
 		"outcome": "羁绊级关系被记录，后续可以接入稀有事件、分支进化或捕捉稳定度。",
 		"hook": "bond_branch"
 	}

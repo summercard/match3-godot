@@ -7,7 +7,7 @@ extends Node
 
 const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
 
-## 战斗核心逻辑：玩家队伍/敌方怪物初始化、连锁伤害计算、
+## 战斗核心逻辑：玩家队伍/敌方精灵初始化、连锁伤害计算、
 ## BOSS多阶段、敌人技能系统、C4状态效果、队长技能、属性协同
 ## 单例模式：通过 static var instance 访问
 
@@ -21,7 +21,7 @@ signal enemy_skill_action(action_info: Dictionary)
 
 # ========== 实例变量 ==========
 var player_team: Array = []        # 玩家队伍 [{...stats}]
-var enemies: Array = []            # 敌方怪物 [{...stats}]
+var enemies: Array = []            # 敌方精灵 [{...stats}]
 var turn: int = 0
 var combo: int = 0                # 当前连锁数
 var total_damage_dealt: Dictionary = {}  # 按属性统计伤害

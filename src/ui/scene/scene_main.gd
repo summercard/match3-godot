@@ -12,12 +12,12 @@ const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_bu
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
 const BUTTON_DESCRIPTIONS := {
 	"start": "选择关卡，开始三消冒险战斗！",
-	"team": "编队你的怪物伙伴，打造最强阵容",
-	"album": "查看已收服的怪物图鉴",
+	"team": "编队你的精灵伙伴，打造最强阵容",
+	"album": "查看已收服的精灵图鉴",
 	"signin": "每日签到领取奖励",
 	"shop": "购买道具和装备",
 	"inventory": "查看和管理你的物品",
-	"ranch": "牧场挂机培养，怪物自动获得经验",
+	"ranch": "牧场挂机培养，精灵自动获得经验",
 	"achievement": "查看冒险成就进度",
 	"settings": "游戏设置和选项"
 }

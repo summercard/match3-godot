@@ -1,4 +1,4 @@
-# scene_ranch.gd - 怪物牧场
+# scene_ranch.gd - 精灵牧场
 # 美术包装：按概念图重排，image-2 牧场资产 + Canvas 绘制
 class_name SceneRanch
 extends Control
@@ -46,10 +46,10 @@ const RANCH_ASSETS := {
 	"next_round": "res://assets/images/ranch/ui_btn_next_round.png",
 	"pet_farm_nav_panel": "res://assets/images/ranch/ui_pet_farm_nav_panel.png",
 	"pet_farm_nav_selected": "res://assets/images/ranch/ui_pet_farm_nav_selected.png",
-	"pet_classroom": "res://assets/images/ranch/icon_pet_classroom.png",
-	"social_plaza": "res://assets/images/ranch/icon_social_plaza.png",
-	"pet_tab": "res://assets/images/ranch/icon_pet_tab.png",
-	"menu_tab": "res://assets/images/ranch/icon_menu_tab.png",
+	"pet_classroom": "res://assets/images/common_nav/icon_nav_classroom.png",
+	"social_plaza": "res://assets/images/common_nav/icon_nav_social.png",
+	"pet_tab": "res://assets/images/common_nav/icon_nav_pets.png",
+	"menu_tab": "res://assets/images/common_nav/icon_nav_menu.png",
 	"classroom_detail": "res://assets/images/ranch/ui_classroom_detail_panel.png",
 	"care_roster_panel": "res://assets/images/ranch/ui_care_roster_panel.png",
 	"social_place": "res://assets/images/ranch/ui_social_place_panel.png",
@@ -344,7 +344,7 @@ func _switch_to_ranch() -> void:
 func _toggle_care_focus_selected() -> void:
 	var instance_id := _selected_monster_id()
 	if instance_id.is_empty():
-		_show_status("先选择牧场中的怪物")
+		_show_status("先选择牧场中的精灵")
 		return
 	if _care_focus_instance_id == instance_id:
 		if _storage != null and _storage.has_method("clear_ranch_care_focus"):
@@ -420,7 +420,7 @@ func _try_social_action() -> void:
 		_show_status("社交进行中 %d%%" % int(SocialRulesScript.progress(place) * 100.0))
 		return
 	if not SocialRulesScript.can_start(place):
-		_show_status("需要放入两只怪物")
+		_show_status("需要放入两只精灵")
 		return
 	if _storage != null and _storage.has_method("start_social"):
 		var result: Dictionary = _storage.start_social(0)
@@ -605,7 +605,7 @@ func _collect_slot(slot_index: int) -> void:
 	var slot: Dictionary = _slots_data[slot_index]
 	var instance_id = slot.get("instance_id", null)
 	if instance_id == null:
-		_show_status("选择空位后从列表放入怪物")
+		_show_status("选择空位后从列表放入精灵")
 		return
 	var exp := int(_idle_exp_map.get(str(instance_id), 0))
 	if exp <= 0:
@@ -643,7 +643,7 @@ func _on_collect_pressed() -> void:
 func _on_evolve_pressed() -> void:
 	var info := _get_selected_evolution_info()
 	if info.is_empty():
-		_show_status("请选择已放置的怪物")
+		_show_status("请选择已放置的精灵")
 		return
 	if not bool(info.get("has_evolution", false)):
 		_show_status("当前形态无法进化")
@@ -718,9 +718,9 @@ func _draw_background() -> void:
 func _draw_header() -> void:
 	_draw_texture_contain(_tex(RANCH_ASSETS["back"]), BACK_RECT)
 	_draw_texture_contain(_tex(RANCH_ASSETS["header"]), Rect2(88.0, 13.0, 219.0, 53.0))
-	var title := "怪物牧场"
+	var title := "精灵牧场"
 	if _active_page == "classroom":
-		title = "怪物课堂"
+		title = "精灵课堂"
 	elif _active_page == "social":
 		title = "社交庭院"
 	_draw_text(title, DESIGN_W / 2.0, 50.0, C["text"], 23.0, 190.0)
@@ -787,7 +787,7 @@ func _draw_collect_row() -> void:
 	_draw_texture_contain(_tex(RANCH_ASSETS["collect_button"]), COLLECT_RECT)
 	_draw_text("收获", COLLECT_RECT.get_center().x, COLLECT_RECT.position.y + 29.0, Color(0.22, 0.12, 0.02), 16.0, COLLECT_RECT.size.x - 12.0)
 	_draw_asset_button(RANCH_FOCUS_RECT, "取消专注" if not _care_focus_instance_id.is_empty() else "专注培养")
-	_draw_asset_button(RANCH_CLASSROOM_RECT, "怪物课堂")
+	_draw_asset_button(RANCH_CLASSROOM_RECT, "精灵课堂")
 	_draw_asset_button(RANCH_SOCIAL_RECT, "社交庭院")
 
 func _draw_monster_list() -> void:
@@ -814,7 +814,7 @@ func _draw_classroom_detail() -> void:
 	if instance_id.is_empty() and not _captured_monsters.is_empty():
 		instance_id = _get_instance_id(_captured_monsters[0])
 	if instance_id.is_empty():
-		_draw_text("暂无怪物", CLASS_DETAIL_RECT.get_center().x, CLASS_DETAIL_RECT.position.y + 90.0, C["text_muted"], 14.0, 180.0)
+		_draw_text("暂无精灵", CLASS_DETAIL_RECT.get_center().x, CLASS_DETAIL_RECT.position.y + 90.0, C["text_muted"], 14.0, 180.0)
 		_draw_code_button(CLASS_EVOLVE_RECT, "进化", false)
 		return
 	var instance := _get_instance(instance_id)
@@ -899,7 +899,7 @@ func _draw_social_slot(slot_key: String, rect: Rect2, place: Dictionary) -> void
 	if selected:
 		_draw_texture_contain(_tex(RANCH_ASSETS["check"]), Rect2(rect.end.x - 23.0, rect.position.y + 3.0, 20.0, 20.0))
 	if instance_id.is_empty():
-		_draw_text("选择怪物", rect.get_center().x, rect.position.y + 58.0, C["text_muted"], 12.0, rect.size.x - 10.0)
+		_draw_text("选择精灵", rect.get_center().x, rect.position.y + 58.0, C["text_muted"], 12.0, rect.size.x - 10.0)
 		_draw_text(slot_key.replace("slot_", "").to_upper(), rect.get_center().x, rect.position.y + 84.0, C["text_muted"], 9.0, rect.size.x)
 		return
 	var instance := _get_instance(instance_id)
@@ -998,7 +998,7 @@ func _social_result_major_lines(result: Dictionary) -> Array:
 					var child_data: Dictionary = child
 					names.append(str(child_data.get("name", "复合幼体")))
 			if names.is_empty():
-				return ["产生了复合幼体计划，等待写入怪物池。"]
+				return ["产生了复合幼体计划，等待写入精灵池。"]
 			return [
 				"诞生 %d 只 Lv.1 复合幼体" % names.size(),
 				"新成员：%s" % "、".join(names.slice(0, 2)),
@@ -1008,7 +1008,7 @@ func _social_result_major_lines(result: Dictionary) -> Array:
 			if bool(major.get("protected", false)):
 				return [
 					"%s 出现侵蚀冲动" % str(major.get("aggressorName", "侵蚀者")),
-					"%s 已受保护，未从怪物池删除" % str(major.get("victimName", "伙伴")),
+					"%s 已受保护，未从精灵池删除" % str(major.get("victimName", "伙伴")),
 					"高风险确认流程尚未开启"
 				]
 			var effect: Dictionary = major.get("negativeEffect", {})
@@ -1232,7 +1232,7 @@ func _social_preview_text(place: Dictionary) -> String:
 			if str(last_major.get("type", "none")) != "none":
 				return "%s：%s" % [str(last_major.get("name", "上次结果")), str(last_major.get("summary", ""))]
 			return str(last.get("summary", "上次社交完成"))
-		return "放入两只怪物后开始社交"
+		return "放入两只精灵后开始社交"
 	var a := _get_instance(a_id)
 	var b := _get_instance(b_id)
 	if a.is_empty() or b.is_empty():
@@ -1255,7 +1255,7 @@ func _social_event_text(place: Dictionary) -> String:
 				return "%s：%s" % [str(last_major.get("name", "特殊结果")), str(last_major.get("rarity", "rare"))]
 			var event: Dictionary = last.get("event", {})
 			return "%s：%s" % [str(event.get("name", "上次事件")), str(last.get("relation_label", "关系"))]
-		return "选择两只怪物后预览事件"
+		return "选择两只精灵后预览事件"
 	var a := _get_instance(a_id)
 	var b := _get_instance(b_id)
 	if a.is_empty() or b.is_empty():

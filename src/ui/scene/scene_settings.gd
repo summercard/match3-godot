@@ -34,7 +34,7 @@ const SETTINGS_ASSETS := {
 	"tab_inactive": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
 	"button": "res://assets/images/inventory_new/ui_inventory_use_button.png",
 	"button_disabled": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
-	"gear": "res://assets/images/main/lobby_refresh/icon_settings_gear_v3.png",
+	"gear": "res://assets/images/common_nav/icon_nav_settings.png",
 	"notice": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
 }
 const SETTINGS_ROWS := [

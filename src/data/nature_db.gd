@@ -1,8 +1,8 @@
 class_name NatureDB
 extends RefCounted
 ## 性格系统数据库 - 从 js/data/natures.js 翻译
-## 每只怪物收服时随机获得性格，影响属性成长方向
-## 性格在收服时决定，无法更改 → 每只怪物都是独一无二的
+## 每只精灵收服时随机获得性格，影响属性成长方向
+## 性格在收服时决定，无法更改 → 每只精灵都是独一无二的
 
 # ========== 8种性格定义 ==========
 # boost: 加成属性 key (hp/atk/def/spd/skillDmg/critRate/dmgResist/all)

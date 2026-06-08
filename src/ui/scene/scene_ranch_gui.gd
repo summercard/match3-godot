@@ -523,7 +523,7 @@ func _social_background_path() -> String:
 
 func _evolution_stone_icon_path(item_id: String) -> String:
 	var element := item_id.trim_prefix("evolution_stone_")
-	var path := "res://assets/images/items/icon_stone_%s.png" % element
+	var path := "res://assets/images/items_new/icon_evolution_stone_%s.png" % element
 	return path if ResourceLoader.exists(path) else RANCH_ASSETS["exp"]
 
 func _sync_classroom_page() -> void:
@@ -675,7 +675,7 @@ func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary)
 	check.visible = selected
 	if instance_id.is_empty():
 		portrait.visible = false
-		name_label.text = "选择怪物"
+		name_label.text = "选择精灵"
 		detail_label.text = slot_key.replace("slot_", "").to_upper()
 		return
 	var instance := _get_instance(instance_id)

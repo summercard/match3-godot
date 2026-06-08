@@ -170,10 +170,10 @@ func combo_popup(parent: Control, text: String, position: Vector2, on_complete: 
 	_track_tween(tween)
 
 ## ============================================
-## 怪物 idle 动画
+## 精灵 idle 动画
 ## ============================================
 
-## 怪物轻微上下浮动
+## 精灵轻微上下浮动
 func monster_idle(node: Control, amplitude: float = 3.0, period: float = 1.5) -> Tween:
 	var original_y = node.position.y
 	var tween = get_tree().create_tween().bind_node(node).set_loops()

@@ -1,4 +1,4 @@
-# scene_album_gui.gd - 可在 Godot 编辑器中调整的怪物图鉴界面
+# scene_album_gui.gd - 可在 Godot 编辑器中调整的精灵图鉴界面
 # 列表交互改为分页，不再使用拖拽/滚轮滚动。
 class_name SceneAlbumGui
 extends "res://src/ui/scene/scene_album.gd"
@@ -195,7 +195,6 @@ func _sync_static_labels() -> void:
 	}
 	for path in nav_labels.keys():
 		_label(path).text = str(nav_labels[path])
-	_label("LobbyBottomNav/HomeButton/Glyph").text = "⌂"
 
 func _sync_resource_bar() -> void:
 	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}

@@ -1,10 +1,10 @@
 class_name MonsterDb
 extends RefCounted
-## 怪物数据库 - 从 js/battle/monsterData.js 翻译
+## 精灵数据库 - 从 js/battle/monsterData.js 翻译
 ##
 ## ⚠️ 数据修改指引 / DATA EDITOR GUIDE
 ## 本文件是代码形式的数据库，与 docs/怪物数据总表.csv 保持同步。
-## 如需新增/修改怪物数据，请：
+## 如需新增/修改精灵数据，请：
 ##   1. 在 docs/怪物数据总表.csv 中编辑（推荐，结构化）
 ##   2. 将 CSV 导出为 JSON 后手动转为 GDScript 常量
 ##   3. 或直接在本文件中编辑（需同步更新 CSV）
@@ -15,7 +15,7 @@ extends RefCounted
 ##   2. Export CSV to JSON, then convert to GDScript constants
 ##   3. Or edit this file directly (must sync with CSV)
 
-# ========== 怪物数据库 ==========
+# ========== 精灵数据库 ==========
 const MONSTER_DB: Dictionary = {
 	"monster_001": {
 		"id": "monster_001", "name": "小火龙", "element": "fire",
@@ -1073,11 +1073,11 @@ static func get_element_multiplier(atk_element: String, def_element: String) -> 
 		return 0.75
 	return 1.0
 
-## 根据幻想属性推导棋盘能量亲和，兼容旧怪物数据。
+## 根据幻想属性推导棋盘能量亲和，兼容旧精灵数据。
 static func get_board_affinity_from_element(element: String) -> String:
 	return str(BOARD_AFFINITY_FALLBACK.get(element, "fire"))
 
-## 获取怪物的棋盘能量亲和。新数据可显式写 boardAffinity，旧数据自动从 element 推导。
+## 获取精灵的棋盘能量亲和。新数据可显式写 boardAffinity，旧数据自动从 element 推导。
 static func get_board_affinity(monster: Dictionary) -> String:
 	var explicit := str(monster.get("boardAffinity", ""))
 	if not explicit.is_empty():
@@ -1118,7 +1118,7 @@ static func normalize_skill(skill: Dictionary) -> Dictionary:
 		result["multiplier"] = multiplier
 	return result
 
-## 获取怪物数据（支持等级/性格修正）
+## 获取精灵数据（支持等级/性格修正）
 ## JS: getMonsterStats(monsterId, level, natureId)
 static func get_monster_stats(monster_id: String, level: int = 1, nature_id: String = "") -> Dictionary:
 	var data: Dictionary = MONSTER_DB.get(monster_id, {})
@@ -1159,7 +1159,7 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		"leaderSkill": data.get("leaderSkill", "")
 	}
 
-## 快捷方法：根据ID获取怪物数据
+## 快捷方法：根据ID获取精灵数据
 static func get_monster(monster_id: String) -> Dictionary:
 	return with_board_affinity(MONSTER_DB.get(monster_id, {}))
 

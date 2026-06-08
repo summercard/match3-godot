@@ -52,9 +52,9 @@ func _run() -> void:
 	_assert((scene.get_node("LobbyBottomNav/PetsButton/Text") as Label).text == "图鉴", "album bottom nav labels should render as Chinese text")
 	_assert((scene.get_node("LobbyBottomNav/BattleButton/Text") as Label).text == "羁绊", "bottom nav should expose the bond album mode")
 	_assert((scene.get_node("LobbyBottomNav/ShopButton/Text") as Label).text == "目标", "bottom nav should expose the target album mode")
-	_assert((scene.get_node("LobbyBottomNav/PetsButton/Icon") as TextureRect).texture.resource_path.ends_with("icon_dex_nav_album.png"), "dex bottom nav should use a dedicated album icon")
-	_assert((scene.get_node("LobbyBottomNav/BattleButton/Icon") as TextureRect).texture.resource_path.ends_with("icon_dex_nav_bond.png"), "dex bottom nav should use a dedicated bond icon")
-	_assert((scene.get_node("LobbyBottomNav/ShopButton/Icon") as TextureRect).texture.resource_path.ends_with("icon_dex_nav_goal.png"), "dex bottom nav should use a dedicated target icon")
+	_assert((scene.get_node("LobbyBottomNav/PetsButton/Icon") as TextureRect).texture.resource_path.ends_with("common_nav/icon_nav_album.png"), "dex bottom nav should use the common album icon")
+	_assert((scene.get_node("LobbyBottomNav/BattleButton/Icon") as TextureRect).texture.resource_path.ends_with("common_nav/icon_nav_bond.png"), "dex bottom nav should use the common bond icon")
+	_assert((scene.get_node("LobbyBottomNav/ShopButton/Icon") as TextureRect).texture.resource_path.ends_with("common_nav/icon_nav_goal.png"), "dex bottom nav should use the common target icon")
 
 	var next := scene.get_node("AlbumPage/PageControls/NextButton") as BaseButton
 	next.pressed.emit()

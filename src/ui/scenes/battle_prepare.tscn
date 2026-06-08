@@ -1,18 +1,20 @@
 [gd_scene format=3 uid="uid://yyg32jgreiyw"]
 
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="alert_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_pill_blue.png" id="back"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="alert_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_back_button.png" id="back"]
 [ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="back_arrow"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/battle_garden_ruins_bg_blur.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="enemy_card"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_prepare_wood_banner.png" id="header"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="info_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="power_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_reward_card.png" id="reward_slot"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/background/bg_battle_prepare_garden.png" id="bg"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="enemy_card"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/fx_leaf_cluster_a.png" id="fx_sparkles"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_prepare_header.png" id="header"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="info_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_power_panel.png" id="power_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_reward_slot.png" id="reward_slot"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_reward_panel.png" id="reward_panel"]
 [ext_resource type="Script" uid="uid://4sa0f7ilpgt3" path="res://src/ui/scene/scene_battle_prepare_gui.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_battle_start_button_new.png" id="start_button"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_panel_large.png" id="synergy_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/ui/ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_start_button.png" id="start_button"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="synergy_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="team_card"]
 
 [node name="BattlePrepareGui" type="Control" unique_id=526108190]
 clip_contents = true
@@ -37,7 +39,7 @@ layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.18)
+color = Color(0.02, 0.05, 0.12, 0.05)
 
 [node name="Header" type="Control" parent="." unique_id=1860094280]
 anchors_preset = 0
@@ -62,6 +64,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Arrow" type="TextureRect" parent="Header/BackButton" unique_id=309577700]
+visible = false
 layout_mode = 0
 offset_left = 9.0
 offset_top = 9.0
@@ -111,12 +114,45 @@ text = "新手训练"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="SparklesLeft" type="TextureRect" parent="Header" unique_id=1835448968]
+layout_mode = 0
+offset_left = 61.0
+offset_top = 61.0
+offset_right = 109.0
+offset_bottom = 79.0
+mouse_filter = 2
+texture = ExtResource("fx_sparkles")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SparklesRight" type="TextureRect" parent="Header" unique_id=1031353724]
+layout_mode = 0
+offset_left = 313.0
+offset_top = 57.0
+offset_right = 355.0
+offset_bottom = 74.0
+mouse_filter = 2
+texture = ExtResource("fx_sparkles")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="EnemyPanel" type="Control" parent="." unique_id=1869854644]
 anchors_preset = 0
 offset_left = 15.0
 offset_top = 84.0
 offset_right = 360.0
 offset_bottom = 210.0
+
+[node name="Frame" type="TextureRect" parent="EnemyPanel" unique_id=1283074702]
+visible = false
+layout_mode = 0
+offset_top = 18.0
+offset_right = 327.0
+offset_bottom = 148.0
+mouse_filter = 2
+texture = ExtResource("info_panel")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Title" type="Label" parent="EnemyPanel" unique_id=1533095836]
 layout_mode = 0
@@ -181,7 +217,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -271,7 +307,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -361,7 +397,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -499,6 +535,17 @@ offset_top = 286.0
 offset_right = 360.0
 offset_bottom = 425.0
 
+[node name="Frame" type="TextureRect" parent="TeamPanel" unique_id=1550701726]
+visible = false
+layout_mode = 0
+offset_top = 15.0
+offset_right = 335.0
+offset_bottom = 139.0
+mouse_filter = 2
+texture = ExtResource("info_panel")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Title" type="Label" parent="TeamPanel" unique_id=672026550]
 layout_mode = 0
 offset_right = 345.0
@@ -575,7 +622,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -665,7 +712,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -755,7 +802,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "怪物"
+text = "精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -906,6 +953,15 @@ offset_left = 15.0
 offset_top = 546.0
 offset_right = 360.0
 offset_bottom = 585.0
+
+[node name="Frame" type="TextureRect" parent="RewardPreview" unique_id=1563906241]
+layout_mode = 0
+offset_right = 307.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("reward_panel")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Title" type="Label" parent="RewardPreview" unique_id=1041377093]
 layout_mode = 0

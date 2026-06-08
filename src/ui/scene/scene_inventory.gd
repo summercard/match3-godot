@@ -27,7 +27,7 @@ const USE_BTN_RECT := Rect2(275.0, 603.0, 78.0, 38.0)
 const INVENTORY_ASSETS := {
 	"bg": "res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png",
 	"back": "res://assets/images/album/ui_back_button.png",
-	"backpack": "res://assets/images/main/lobby_refresh/icon_inventory_bag_v3.png",
+	"backpack": "res://assets/images/common_nav/icon_nav_inventory.png",
 	"currency_chip": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
 	"tab_active": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
 	"tab_inactive": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
@@ -46,21 +46,21 @@ const INVENTORY_ASSETS := {
 }
 
 const ITEM_ICON_ASSETS := {
-	"capture_ball": "res://assets/images/inventory_new/icons/capture_ball.png",
-	"capture_ball_plus": "res://assets/images/inventory_new/icons/capture_ball_plus.png",
-	"exp_potion": "res://assets/images/inventory_new/icons/exp_potion.png",
-	"exp_crystal": "res://assets/images/inventory_new/icons/exp_potion.png",
-	"hp_potion": "res://assets/images/inventory_new/icons/hp_potion.png",
-	"gold_bag": "res://assets/images/inventory_new/icons/gold_bag.png",
-	"gold_chest": "res://assets/images/inventory_new/icons/gold_chest.png",
-	"evolution_stone_fire": "res://assets/images/inventory_new/icons/stone_fire.png",
-	"evolution_stone_water": "res://assets/images/inventory_new/icons/stone_water.png",
-	"evolution_stone_grass": "res://assets/images/inventory_new/icons/stone_grass.png",
-	"evolution_stone_thunder": "res://assets/images/inventory_new/icons/stone_thunder.png",
-	"evolution_stone_light": "res://assets/images/inventory_new/icons/stone_light.png",
-	"evolution_stone_earth": "res://assets/images/inventory_new/icons/stone_earth.png",
-	"evolution_stone_wind": "res://assets/images/inventory_new/icons/stone_wind.png",
-	"evolution_stone_dark": "res://assets/images/inventory_new/icons/stone_dark.png",
+	"capture_ball": "res://assets/images/items_new/icon_capture_ball.png",
+	"capture_ball_plus": "res://assets/images/items_new/icon_capture_ball_plus.png",
+	"exp_potion": "res://assets/images/items_new/icon_exp_potion.png",
+	"exp_crystal": "res://assets/images/items_new/icon_exp_crystal.png",
+	"hp_potion": "res://assets/images/items_new/icon_hp_potion.png",
+	"gold_bag": "res://assets/images/items_new/icon_gold_bag.png",
+	"gold_chest": "res://assets/images/items_new/icon_gold_chest.png",
+	"evolution_stone_fire": "res://assets/images/items_new/icon_evolution_stone_fire.png",
+	"evolution_stone_water": "res://assets/images/items_new/icon_evolution_stone_water.png",
+	"evolution_stone_grass": "res://assets/images/items_new/icon_evolution_stone_grass.png",
+	"evolution_stone_thunder": "res://assets/images/items_new/icon_evolution_stone_thunder.png",
+	"evolution_stone_light": "res://assets/images/items_new/icon_evolution_stone_light.png",
+	"evolution_stone_earth": "res://assets/images/items_new/icon_evolution_stone_earth.png",
+	"evolution_stone_wind": "res://assets/images/items_new/icon_evolution_stone_wind.png",
+	"evolution_stone_dark": "res://assets/images/items_new/icon_evolution_stone_dark.png",
 }
 
 const TABS := [
@@ -244,7 +244,7 @@ func _use_item(item_id: String) -> void:
 		"battle":
 			_show_toast("战斗道具请在战斗中使用")
 		"evolution":
-			_show_toast("进化石请在怪物进化中使用")
+			_show_toast("进化石请在精灵进化中使用")
 		_:
 			_show_toast("该道具暂时无法使用")
 	_inventory = _storage.load_inventory() if _storage else {}
@@ -476,4 +476,3 @@ func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float,
 		var y := pos.y + i * (font_size + 4.0)
 		draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, y + 2.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
 		draw_string(ThemeDB.fallback_font, Vector2(pos.x, y), lines[i], HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
-

@@ -18,7 +18,7 @@ const STAGES_DATA: Dictionary = {
 					"enemies": ["enemy_001"],
 					"enemyLevel": 1,
 					"rewards": {"gold": 45, "exp": 45},
-					"designGoal": "学会棋盘亲和会驱动对应怪物行动与技能充能。",
+					"designGoal": "学会棋盘亲和会驱动对应精灵行动与技能充能。",
 					"prepareHint": "消除炽能给小火龙充能；留意队伍卡片上的技能条。",
 					"battleHint": "先消除小火龙亲和的炽能，观察技能充能。",
 					"targetLesson": "board_affinity"

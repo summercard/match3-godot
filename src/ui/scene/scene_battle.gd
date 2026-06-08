@@ -20,8 +20,10 @@ const BattleCombatantRendererScript = preload("res://src/ui/components/battle_co
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
+const BattleFeedbackOverlayScript = preload("res://src/ui/components/battle_feedback_overlay.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
+const FX_ROUND_FONT: Font = preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
 
 ## 设计尺寸
 const DESIGN_W := 375.0
@@ -99,13 +101,13 @@ var _player_display_hp: Array[Dictionary] = []
 ## 宝石消除动画
 var _eliminating_gems: Array[Dictionary] = []  # [{row, col, timer, duration}]
 ## 宝石消除动画常量（匹配微信版两段式）
-const ELIMINATE_PHASE1: float = 0.1   # 阶段1：放大+闪白（100ms）
-const ELIMINATE_PHASE2: float = 0.15  # 阶段2：缩小+消失（150ms）
-const ELIMINATE_DURATION: float = ELIMINATE_PHASE1 + ELIMINATE_PHASE2  # 总时长 0.25s
+const ELIMINATE_PHASE1: float = 0.12  # 阶段1：果冻弹起
+const ELIMINATE_PHASE2: float = 0.18  # 阶段2：回缩淡出
+const ELIMINATE_DURATION: float = ELIMINATE_PHASE1 + ELIMINATE_PHASE2  # 总时长 0.30s
 
 ## 宝石下落动画
 var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
-const FALL_DURATION: float = 0.25
+const FALL_DURATION: float = 0.42
 
 ## 锁定宝石解锁动画队列
 var _unlock_animations: Array[Dictionary] = []  # [{row, col, x, y, timer, phase, maxTimer}]
@@ -174,7 +176,7 @@ var _board_shake_offset: Vector2 = Vector2.ZERO
 var _capture_effect_node: CaptureEffect = null
 var _capture_pending: bool = false          # 是否有待播放的收服特效
 var _capture_success: bool = false           # 收服是否成功
-var _capture_target: Dictionary = {}         # 收服目标怪物
+var _capture_target: Dictionary = {}         # 收服目标精灵
 var _capture_result_text: Dictionary = {}    # 收服结果文本
 var _capture_item_used: Dictionary = {}      # 使用的捕获道具
 var _capture_window: Dictionary = {}         # 本场用于结算的捕捉窗口
@@ -207,6 +209,7 @@ var _art_assets: Dictionary = {}
 var _art_ready: bool = false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
+var _feedback_overlay: Control = null
 
 var _pointer_down: bool = false
 var _pointer_start_pos: Vector2 = Vector2.ZERO
@@ -263,11 +266,11 @@ const POISON_FOG_COLORS := {
 
 ## 宝石 Emoji
 const GEM_EMOJI := {
-	"fire": "🔥",
-	"water": "💧",
-	"grass": "🌿",
-	"thunder": "⚡",
-	"light": "✨"
+	"fire": "火",
+	"water": "水",
+	"grass": "叶",
+	"thunder": "雷",
+	"light": "光"
 }
 
 ## ============================================
@@ -327,6 +330,8 @@ const BATTLE_FX_ASSETS := {
 	"damage_plate": "res://assets/images/battle/fx/fx_damage_plate.png",
 	"critical_plate": "res://assets/images/battle/fx/fx_critical_plate.png",
 	"heal_plate": "res://assets/images/battle/fx/fx_heal_plate.png",
+	"combo_word": "res://assets/images/battle/fx/fx_combo_word.png",
+	"damage_digits": "res://assets/images/battle/fx/fx_damage_digits.png",
 	"hit_spark": "res://assets/images/battle/fx/fx_hit_spark.png",
 	"shield_ring": "res://assets/images/battle/fx/fx_shield_ring.png",
 	"heal_ring": "res://assets/images/battle/fx/fx_heal_ring.png",
@@ -360,9 +365,21 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
+	_ensure_feedback_overlay()
 
 func _uses_editable_gui() -> bool:
 	return false
+
+func _ensure_feedback_overlay() -> void:
+	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
+		return
+	_feedback_overlay = BattleFeedbackOverlayScript.new()
+	_feedback_overlay.name = "TopFeedbackOverlay"
+	_feedback_overlay.set("owner_scene", self)
+	_feedback_overlay.z_index = 4096
+	_feedback_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_feedback_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_feedback_overlay)
 
 func init(data: Dictionary = {}) -> void:
 	var stage_data = data.get("stageData", null)
@@ -856,8 +873,6 @@ func _process_matches() -> void:
 	var matches: Array = match_context.get("matches", [])
 	
 	if not match_context.get("has_matches", false):
-		if _board.cascade_count >= 2:
-			_show_combo_popup(_board.cascade_count)
 		if _check_battle_end():
 			return
 		_start_enemy_turn()
@@ -865,6 +880,8 @@ func _process_matches() -> void:
 	
 	_state = BattleState.MATCHING
 	_board.cascade_count += 1
+	if _board.cascade_count >= 2:
+		_show_combo_popup(_board.cascade_count)
 	
 	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
 	var total_elim: int = match_context.get("total_elim", 0)
@@ -990,7 +1007,7 @@ func _process_matches() -> void:
 		var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
 		if not new_enemies.is_empty():
 			var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
-			_show_message("⚡ %s 进入激战状态！" % boss_name)
+			_show_message("%s 进入激战状态！" % boss_name)
 			_phase_transition_state = {
 				"phase": phase_transition.get("phase", 1),
 				"enemies": new_enemies,
@@ -1023,7 +1040,26 @@ func _process_matches() -> void:
 
 func _apply_gravity() -> void:
 	if _board:
-		_board.apply_gravity()
+		var movements: Array = _board.apply_gravity()
+		_falling_gems.clear()
+		var cell_size := float(_board.cell_size)
+		for move: Dictionary in movements:
+			var from_row := int(move.get("fromRow", 0))
+			var to_row := int(move.get("toRow", 0))
+			var col := int(move.get("col", 0))
+			var distance := absf(float(to_row - from_row))
+			var delay := clampf(float(col) * 0.012 + maxf(0.0, distance - 1.0) * 0.018, 0.0, 0.10)
+			_falling_gems.append({
+				"type": str(move.get("type", "")),
+				"row": to_row,
+				"col": col,
+				"from_y": float(_board.offset_y) + float(from_row) * cell_size + cell_size / 2.0,
+				"to_y": float(_board.offset_y) + float(to_row) * cell_size + cell_size / 2.0,
+				"timer": 0.0,
+				"delay": delay,
+				"duration": FALL_DURATION - 0.08,
+				"is_new": bool(move.get("isNew", false))
+			})
 
 ## 触发特殊消除动画（在对应延迟时调用，匹配微信版 setTimeout 链时序）
 func _trigger_special_elim(phase: Dictionary) -> void:
@@ -1036,13 +1072,13 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 	match type:
 		"explosion":
 			# 十字爆炸：延迟 100ms 后播放
-			_show_message("💥 十字爆炸！")
+			_show_message("十字爆裂！")
 			_trigger_element_glow("fire", Color(1.0, 0.4, 0.0, 0.15))
 			_trigger_element_ripple("fire", Color(1.0, 0.4, 0.0))
 			for enh in matches:
 				var cx: float = float(_board.offset_x + enh["col"] * cell_size + cell_size / 2.0)
 				var cy: float = float(_board.offset_y + enh["row"] * cell_size + cell_size / 2.0)
-				_floating_texts.append({"text": "💥", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 22.0, "timer": 0.0, "duration": 0.8})
+				_floating_texts.append({"text": "爆裂", "x": cx, "y": cy - 10.0, "color": C["gold"], "size": 15.0, "timer": 0.0, "duration": 0.8, "critical": true})
 		
 		"bomb":
 			# 炸弹消除：延迟 150ms 后播放
@@ -1052,8 +1088,8 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 				var cx: float = float(_board.offset_x + bomb["col"] * cell_size + cell_size / 2.0)
 				var cy: float = float(_board.offset_y + bomb["row"] * cell_size + cell_size / 2.0)
 				var shape: String = bomb.get("shape", "?")
-				_floating_texts.append({"text": "💣", "x": cx, "y": cy - 10.0, "color": C["white"], "size": 24.0, "timer": 0.0, "duration": 0.8})
-				_show_message("💣 %s形炸弹爆炸！" % shape)
+				_floating_texts.append({"text": "轰!", "x": cx, "y": cy - 10.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8, "critical": true})
+				_show_message("%s形范围弹跳！" % shape)
 		
 		"rainbow":
 			# 彩虹消除：延迟 200ms 后播放，全屏闪光 0.4s
@@ -1061,12 +1097,12 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 			_trigger_attack_shake()
 			_trigger_element_glow("rainbow", Color(1.0, 0.95, 0.9, 0.2))
 			for rainbow in matches:
-				_show_message("🌈 彩虹消除！清除全部%s！" % GEM_EMOJI.get(rainbow["type"], "💎"))
+				_show_message("虹光清屏！")
 				var match_cells: Array = rainbow.get("matchCells", rainbow.get("cells", []))
 				if match_cells.size() > 0:
 					var cx: float = float(_board.offset_x + match_cells[0]["col"] * cell_size + cell_size / 2.0)
 					var cy: float = float(_board.offset_y + match_cells[0]["row"] * cell_size + cell_size / 2.0)
-					_floating_texts.append({"text": "🌈", "x": cx, "y": cy - 15.0, "color": C["white"], "size": 28.0, "timer": 0.0, "duration": 1.0})
+					_floating_texts.append({"text": "清屏", "x": cx, "y": cy - 15.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 1.0, "critical": true})
 	
 	# 通用：每个受影响宝石的粒子 + 消除动画
 	var half_cell: float = float(_board.cell_size) / 2.0 if _board != null else 21.0
@@ -1076,21 +1112,21 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 		
 		_eliminating_gems.append({"row": g["row"], "col": g["col"], "timer": 0.0, "duration": ELIMINATE_DURATION})
 		
-		var emoji: String = "💥" if type == "explosion" else ("💣" if type == "bomb" else "🌈")
-		var emoji_size: float = 14.0 if type == "explosion" else (13.0 if type == "bomb" else 12.0)
+		var badge_text: String = "弹!" if type == "explosion" else ("跳!" if type == "bomb" else "亮!")
+		var badge_size: float = 11.5
 		var gem_y: float = g.get("y", half_cell)
 		_floating_texts.append({
-			"text": GEM_EMOJI.get(gem_type, emoji),
+			"text": badge_text,
 			"x": g.get("x", 0.0),
 			"y": gem_y - half_cell,
 			"color": GEM_COLORS.get(gem_type, C["white"]),
-			"size": emoji_size,
+			"size": badge_size,
 			"timer": 0.0,
 			"duration": 0.8
 		})
 
 ## 状态效果Emoji映射
-const STATUS_EMOJI := {"burn": "🔥", "freeze": "❄️", "poison": "☠️", "stun": "⚡"}
+const STATUS_EMOJI := {"burn": "灼", "freeze": "冰", "poison": "毒", "stun": "晕"}
 
 ## 状态效果名称
 const STATUS_LABEL := {"burn": "灼烧!", "freeze": "冰冻!", "poison": "中毒!", "stun": "眩晕!"}
@@ -1142,10 +1178,10 @@ func _start_enemy_turn() -> void:
 			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.25, "maxTimer": 0.25})
 		
 		elif log_type == "stun":
-			_show_message("⚡ %s 眩晕了，无法行动！" % enemy_name)
+			_show_message("%s 眩晕了，无法行动！" % enemy_name)
 		
 		elif log_type == "freeze":
-			_show_message("❄️ %s 冰冻中，ATK降低30%%！" % enemy_name)
+			_show_message("%s 冰冻中，ATK降低30%%！" % enemy_name)
 		
 		elif log_type.ends_with("_end"):
 			_show_message(log.get("message", ""))
@@ -1154,12 +1190,12 @@ func _start_enemy_turn() -> void:
 	for kill in result.get("dot_kills", []):
 		var idx: int = kill.get("enemy_index", -1)
 		var name: String = kill.get("enemy_name", "???")
-		_fall_messages.append({"text": "☠️ %s 被状态效果击杀！" % name, "timer": 1.5})
+		_fall_messages.append({"text": "%s 被状态效果击杀！" % name, "timer": 1.5})
 	
 	for action: Dictionary in result.get("actions", []):
 		# 蓄力回合：只显示蓄力提示，不显示伤害
 		if action.get("is_charging", false):
-			_show_message("⚡ %s 正在蓄力..." % action.get("attacker", ""))
+			_show_message("%s 正在蓄力..." % action.get("attacker", ""))
 			var attacker_idx := _find_enemy_index(action.get("attacker", ""))
 			if attacker_idx >= 0:
 				if not _boss_skill_visuals.has(attacker_idx):
@@ -1346,7 +1382,7 @@ func _trigger_inline_capture() -> void:
 			player["captureFails"] = consecutive_fails + 1
 		_storage.save_player(player)
 	
-	# 计算怪物在屏幕上的位置（敌方区域）
+	# 计算精灵在屏幕上的位置（敌方区域）
 	if target_idx < 0:
 		for i in range(enemies.size()):
 			if enemies[i] != null and enemies[i].get("id", "") == target_enemy.get("id", ""):
@@ -1370,7 +1406,6 @@ func _skip_inline_capture() -> void:
 	_capture_result_text = CaptureSystem.get_capture_skip_feedback("auto_off")
 	_capture_phase = "done"
 	_capture_waiting_for_effect = false
-	_show_message("未开启自动捕捉")
 
 func _trigger_inline_capture_miss() -> void:
 	if _battle == null:
@@ -1426,7 +1461,7 @@ func _consume_selected_capture_item() -> Dictionary:
 ## ============================================
 
 func _show_message(text: String) -> void:
-	_message_text = text
+	_message_text = _clean_battle_fx_text(text)
 	_message_timer = 1.5
 
 func _request_battle_fx(event: Dictionary) -> void:
@@ -1564,7 +1599,7 @@ func _on_skill_ready(monster: Dictionary) -> void:
 	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
 	var monster_name: String = monster.get("name", "伙伴")
 	var skill_name: String = monster.get("skill", {}).get("name", "技能")
-	_show_message("💫 %s 的 %s 充能完毕！" % [monster_name, skill_name])
+	_show_message("%s 的 %s 充能完毕！" % [monster_name, skill_name])
 
 	# 找到对应的玩家卡片位置
 	var team: Array = _battle.player_team if _battle != null else []
@@ -1573,7 +1608,7 @@ func _on_skill_ready(monster: Dictionary) -> void:
 			var card_x: float = 20.0 + i * 120.0 + 55.0
 			var card_y: float = 215.0
 			_floating_texts.append({
-				"text": "💫%s！" % skill_name,
+				"text": "%s!" % skill_name,
 				"x": card_x,
 				"y": card_y,
 				"color": C["gold"],
@@ -1607,17 +1642,17 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 		"charge_start":
 			vis["charge_timer"] = 999.0
 			vis["heal_floats"] = []  # 蓄力时清空治疗浮动记录
-			_show_message("⚡ %s 正在蓄力..." % enemy_name)
+			_show_message("%s 正在蓄力..." % enemy_name)
 		"charge_release":
 			vis["charge_timer"] = 0.0
 			var dmg_mult: float = event.get("damage_multiplier", 2.0)
-			_show_message("💥 %s 蓄力攻击！×%.1f" % [enemy_name, dmg_mult])
+			_show_message("%s 蓄力攻击！×%.1f" % [enemy_name, dmg_mult])
 			_trigger_attack_shake()
 			_screen_flash_timer = 0.3
 		"shield_appear":
 			vis["shield_hp"] = float(event.get("shield_hp", 0))
 			vis["shield_max_hp"] = float(event.get("shield_max_hp", 0))
-			_show_message("🛡️ %s 生成了护盾！" % enemy_name)
+			_show_message("%s 生成了护盾！" % enemy_name)
 		"heal":
 			var heal_amount: int = event.get("heal_amount", 0)
 			var ex: float = 15.0 + idx * 120.0 + 55.0
@@ -1632,7 +1667,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 				"duration": 1.0,
 				"critical": true
 			})
-			_show_message("💚 %s 回复了 %d HP！" % [enemy_name, heal_amount])
+			_show_message("%s 回复了 %d HP！" % [enemy_name, heal_amount])
 
 func _sync_boss_skill_visuals() -> void:
 	if _battle == null:
@@ -1797,6 +1832,8 @@ func _process(delta: float) -> void:
 	
 	# 每帧重绘
 	queue_redraw()
+	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
+		_feedback_overlay.queue_redraw()
 
 func _update_combo_popup(dt: float) -> void:
 	BattleAnimationControllerScript.update_combo_popup(_combo_popup, dt)
@@ -1875,21 +1912,9 @@ func _draw() -> void:
 	# 滑动轨迹
 	_draw_swipe_trail()
 	
-	# 浮动文字
-	_draw_floating_texts()
-	
-	# 连锁弹窗
-	_draw_combo_popup()
-	
-	# 倒下提示
-	_draw_fall_messages()
-
 	if not _uses_editable_gui():
 		# 独立底部捕捉控件，不绘制整块底栏背板。
 		_draw_bottom_capture_controls()
-	
-	# 中间消息
-	_draw_message()
 	
 	# 彩虹全屏闪光
 	if _rainbow_flash > 0:
@@ -1964,6 +1989,7 @@ func _board_render_state() -> Dictionary:
 		"poison_fog_spread_anims": _poison_fog_spread_anims,
 		"poison_fog_clear_anims": _poison_fog_clear_anims,
 		"special_transform_anim": _special_transform_anim,
+		"falling_gems": _falling_gems,
 		"eliminate_phase1": ELIMINATE_PHASE1,
 		"eliminate_phase2": ELIMINATE_PHASE2,
 		"eliminate_duration": ELIMINATE_DURATION
@@ -2059,52 +2085,56 @@ func _draw_gem_animated(cx: float, cy: float, gem_type: String, color: Color, sc
 	_draw_circle(cx - 2.0 * scale, cy - 2.0 * scale, radius * 0.5, Color(1.0, 1.0, 1.0, 0.3 * alpha))
 	
 	# Emoji
-	var emoji: String = GEM_EMOJI.get(gem_type, "💎")
+	var emoji: String = GEM_EMOJI.get(gem_type, "晶")
 	_draw_text_with_shadow(emoji, cx, cy, Color(1.0, 1.0, 1.0, alpha), 14.0)
 
 func _draw_selection() -> void:
-	if _selected_gem.x >= 0 and _selected_gem.y >= 0:
-		var cell_size := float(_board.cell_size) if _board != null else 42.0
-		var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
-		var board_y := float(_board.offset_y) if _board != null else 280.0
-		var sx := board_x + _selected_gem.x * cell_size
-		var sy := board_y + _selected_gem.y * cell_size
-		
-		var select_tex := _get_texture(BATTLE_FX_ASSETS["selected_cell"])
-		if select_tex:
-			var pulse_alpha := 0.62 + 0.30 * (sin(_selection_pulse * TAU / 0.6) + 1.0) / 2.0
-			_draw_texture_fit(select_tex, Rect2(sx - 8.0, sy - 8.0, cell_size + 16.0, cell_size + 16.0), pulse_alpha)
-			return
-		# 选中光环（脉冲动画）
-		var pulse_alpha := 0.3 + 0.5 * (sin(_selection_pulse * TAU / 0.6) + 1.0) / 2.0
-		var glow_color := Color(1.0, 0.85, 0.2, pulse_alpha)
-		var glow_size := 4.0
-		_draw_rounded_rect(sx - glow_size, sy - glow_size, cell_size + glow_size * 2, cell_size + glow_size * 2, 6.0, glow_color)
-		
-		# 原有的选择框
-		_draw_stroke_rect(sx, sy, cell_size, cell_size, 3.0, C["white"])
+	if _selected_gem.x < 0 or _selected_gem.y < 0:
+		return
+	var cell_size := float(_board.cell_size) if _board != null else 42.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 336.0) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else 280.0
+	var center := Vector2(
+		board_x + _board_shake_offset.x + float(_selected_gem.x) * cell_size + cell_size / 2.0,
+		board_y + _board_shake_offset.y + float(_selected_gem.y) * cell_size + cell_size / 2.0
+	)
+	var pulse := (sin(_selection_pulse * TAU / 0.72) + 1.0) * 0.5
+	var ring_radius := cell_size * 0.43 + pulse * 1.5
+	var main_alpha := 0.72 + pulse * 0.18
+	var shine_alpha := 0.30 + pulse * 0.20
+	draw_arc(center, ring_radius + 2.6, 0.0, TAU, 56, Color(0.18, 0.44, 0.68, 0.18), 4.8, true)
+	draw_arc(center, ring_radius, 0.0, TAU, 56, Color(1.0, 0.86, 0.24, main_alpha), 3.0, true)
+	draw_arc(center, ring_radius - 3.0, -0.15 * PI, 1.15 * PI, 56, Color(1.0, 1.0, 1.0, shine_alpha), 1.4, true)
+	for i in range(3):
+		var angle := _selection_pulse * 1.8 + float(i) * TAU / 3.0
+		var sparkle_pos := center + Vector2(cos(angle), sin(angle)) * (ring_radius + 4.0)
+		draw_circle(sparkle_pos, 1.5 + pulse * 0.6, Color(1.0, 0.95, 0.54, 0.55 + pulse * 0.20))
 
-func _draw_floating_texts() -> void:
+func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 	for ft in _floating_texts:
-		var text: String = ft.get("text", "")
+		var text: String = _clean_battle_fx_text(str(ft.get("text", "")))
+		if text.is_empty():
+			continue
 		var x: float = ft.get("x", 0.0)
 		var y: float = ft.get("y", 0.0)
 		var color: Color = ft.get("color", C["white"])
 		var size: float = ft.get("size", 16.0)
 		var duration: float = ft.get("duration", 1.0)
 		var timer: float = ft.get("timer", 0.0)
-		var fade: float = clampf(1.0 - maxf(0.0, timer - duration * 0.62) / maxf(0.01, duration * 0.38), 0.0, 1.0)
-		var plate_path := _floating_text_plate_path(text, ft)
-		if not plate_path.is_empty():
-			var plate_tex := _get_texture(plate_path)
-			if plate_tex:
-				var plate_w: float = clampf(size * 5.5, 82.0, 138.0)
-				var plate_h: float = clampf(size * 2.25, 34.0, 54.0)
-				_draw_texture_fit(plate_tex, Rect2(x - plate_w / 2.0, y - plate_h * 0.62, plate_w, plate_h), 0.92 * fade)
+		var progress: float = clampf(timer / maxf(0.01, duration), 0.0, 1.0)
+		var pop: float = 1.0 + sin(clampf(progress / 0.24, 0.0, 1.0) * PI) * (0.24 if ft.get("critical", false) else 0.16)
+		var float_y: float = y - 24.0 * (1.0 - pow(1.0 - progress, 2.0))
+		var wobble_x: float = sin(progress * TAU) * (2.2 if ft.get("critical", false) else 1.2)
+		var fade: float = clampf(1.0 - maxf(0.0, progress - 0.68) / 0.32, 0.0, 1.0)
 		color.a *= fade
-		_draw_text_with_shadow(text, x, y, color, size)
+		var style := "gold" if ft.get("critical", false) else _fx_text_style(text, color)
+		if _is_digit_fx_text(text):
+			_draw_digit_fx_text(canvas, text, x + wobble_x, float_y, size * pop, fade, style)
+		else:
+			_draw_soft_sparkles(canvas, Vector2(x + wobble_x, float_y - size * 0.90), color, fade, ft.get("critical", false))
+			_draw_fx_text(canvas, text, x + wobble_x, float_y, color, size * pop, 170.0, style)
 
-func _draw_combo_popup() -> void:
+func _draw_combo_popup(canvas: CanvasItem = self) -> void:
 	if not _combo_popup.has("combo"):
 		return
 	
@@ -2116,24 +2146,29 @@ func _draw_combo_popup() -> void:
 	if combo <= 0 or opacity <= 0.0:
 		return
 	
-	var box_w := 166.0 * scale
-	var box_h := 62.0 * scale
-	var banner_tex := _get_texture(BATTLE_UI_ASSETS["combo_banner"])
-	if banner_tex:
-		_draw_texture_fit(banner_tex, Rect2(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h), opacity)
-	else:
-		var bg_color := Color(0.0, 0.0, 0.0, 0.7 * opacity)
-		_draw_rounded_rect(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h, 12.0 * scale, bg_color)
+	var glow_color := Color(1.0, 0.92, 0.46, 0.20 * opacity)
+	canvas.draw_arc(Vector2(cx, cy - 1.0), 64.0 * scale, -0.18 * PI, 1.18 * PI, 42, glow_color, 3.0, true)
+	_draw_soft_sparkles(canvas, Vector2(cx, cy - 27.0 * scale), Color(1.0, 0.88, 0.36, opacity), opacity, combo >= 3)
 	
-	var text_color := Color(1.0, 0.85, 0.0, opacity)
-	_draw_text_with_shadow("%d连击！" % combo, cx, cy, text_color, 22.0 * scale, true)
+	_draw_combo_art_text(canvas, combo, cx, cy, scale, opacity)
 
-func _draw_fall_messages() -> void:
+func _draw_top_feedback_layer(canvas: CanvasItem = self) -> void:
+	_draw_floating_texts(canvas)
+	_draw_combo_popup(canvas)
+	_draw_fall_messages(canvas)
+	_draw_message(canvas)
+
+func _draw_fall_messages(canvas: CanvasItem = self) -> void:
 	for i in range(_fall_messages.size()):
 		var fm: Dictionary = _fall_messages[i]
+		var text := _clean_battle_fx_text(str(fm["text"]))
+		if text.is_empty():
+			continue
 		var alpha: float = mini(1.0, fm["timer"])
-		var text_color := Color(1.0, 0.4, 0.4, alpha)
-		_draw_text_with_shadow(fm["text"], DESIGN_W / 2.0, 300.0 + i * 25.0, text_color, 14.0)
+		var y := 300.0 + i * 25.0
+		var panel_w := clampf(FX_ROUND_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13.5).x + 42.0, 128.0, 260.0)
+		canvas.draw_line(Vector2(DESIGN_W / 2.0 - panel_w * 0.36, y + 9.0), Vector2(DESIGN_W / 2.0 + panel_w * 0.36, y + 5.0), Color(1.0, 0.70, 0.42, 0.34 * alpha), 2.0)
+		_draw_fx_text(canvas, text, DESIGN_W / 2.0, y + 3.0, Color(1.0, 0.54, 0.34, alpha), 13.5, panel_w - 22.0, "damage")
 
 func _draw_drag_preview() -> void:
 	if not _drag_preview.get("active", false) or _selected_gem.x < 0:
@@ -2430,21 +2465,36 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
 		return true
 
-func _draw_message() -> void:
+func _draw_message(canvas: CanvasItem = self) -> void:
 	if _message_timer <= 0:
 		return
 	
 	var alpha: float = mini(1.0, _message_timer)
+	var progress: float = clampf(1.0 - _message_timer / 1.5, 0.0, 1.0)
+	var is_turn_message := _is_turn_message(_message_text)
+	var is_major_message := is_turn_message or _is_major_battle_message(_message_text)
+	var pop: float = 1.0 + sin(clampf(progress / 0.24, 0.0, 1.0) * PI) * (0.16 if is_major_message else 0.08)
 	var toast_y: float = float(_board.offset_y) + 28.0 if _board != null else 328.0
-	var toast_tex := _get_texture(BATTLE_UI_ASSETS["toast_panel"])
-	if toast_tex:
-		_draw_texture_fit(toast_tex, Rect2(DESIGN_W / 2.0 - 112.0, toast_y - 15.0, 224.0, 30.0), 0.96 * alpha)
+	if is_turn_message:
+		toast_y = float(_board.offset_y) - 14.0 if _board != null else 276.0
+	elif is_major_message:
+		toast_y = float(_board.offset_y) + 12.0 if _board != null else 312.0
+	var base_text_size := 17.0 if is_turn_message else (14.5 if is_major_message else 12.2)
+	var text_w := FX_ROUND_FONT.get_string_size(_message_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, base_text_size).x
+	var toast_w := clampf(text_w + (76.0 if is_turn_message else 56.0), 186.0, 288.0) * pop
+	var toast_h := (44.0 if is_turn_message else (36.0 if is_major_message else 31.0)) * pop
+
+	var msg_style := _message_fx_style(_message_text)
+	var msg_color := _message_fx_color(_message_text, alpha)
+	if is_major_message:
+		_draw_soft_sparkles(canvas, Vector2(DESIGN_W / 2.0, toast_y - 9.0), msg_color, alpha, true)
+		canvas.draw_arc(Vector2(DESIGN_W / 2.0, toast_y + 1.0), (92.0 if is_turn_message else 74.0) * pop, -0.08 * PI, 1.08 * PI, 46, Color(msg_color.r, msg_color.g, msg_color.b, 0.22 * alpha), 2.6, true)
+		canvas.draw_circle(Vector2(DESIGN_W / 2.0 - toast_w * 0.42, toast_y - toast_h * 0.18), 2.4 * pop, Color(1.0, 1.0, 0.78, 0.55 * alpha))
+		canvas.draw_circle(Vector2(DESIGN_W / 2.0 + toast_w * 0.42, toast_y - toast_h * 0.20), 2.1 * pop, Color(1.0, 0.86, 0.42, 0.48 * alpha))
 	else:
-		_draw_rounded_rect(DESIGN_W / 2.0 - 104.0, toast_y - 13.0, 208.0, 26.0, 7.0, Color(0.03, 0.08, 0.16, 0.78))
-		_draw_stroke_rect(DESIGN_W / 2.0 - 101.0, toast_y - 10.0, 202.0, 20.0, 1.0, Color(0.36, 0.66, 0.95, 0.32))
-	
-	var text_color := Color(1.0, 1.0, 1.0, alpha)
-	_draw_text_with_shadow(_message_text, DESIGN_W / 2.0, toast_y + 4.0, text_color, 11.2, true)
+		canvas.draw_line(Vector2(DESIGN_W / 2.0 - toast_w * 0.28, toast_y + 12.0), Vector2(DESIGN_W / 2.0 + toast_w * 0.28, toast_y + 9.0), Color(msg_color.r, msg_color.g, msg_color.b, 0.22 * alpha), 1.6)
+
+	_draw_fx_text(canvas, _message_text, DESIGN_W / 2.0, toast_y + (7.0 if is_turn_message else 5.0), msg_color, base_text_size * pop, toast_w - 28.0, msg_style)
 
 func _draw_battle_end_overlay() -> void:
 	_draw_restore()
@@ -2526,8 +2576,8 @@ func _draw_phase_transition() -> void:
 	_draw_rounded_rect(DESIGN_W / 2.0 - 120, DESIGN_H / 2.0 - 30, 240, 60, 12.0, Color(0.0, 0.0, 0.0, 0.8))
 	
 	var fire_color := Color(1.0, 0.4, 0.1, alpha)
-	_draw_text_with_shadow("⚡ %s" % boss_name, DESIGN_W / 2.0, DESIGN_H / 2.0 - 5, fire_color, 16.0, true)
-	_draw_text_with_shadow("进入激战状态！", DESIGN_W / 2.0, DESIGN_H / 2.0 + 20, C["white"], 14.0)
+	_draw_fx_text(self, boss_name, DESIGN_W / 2.0, DESIGN_H / 2.0 - 3, fire_color, 16.0, 220.0, "damage")
+	_draw_fx_text(self, "进入激战状态!", DESIGN_W / 2.0, DESIGN_H / 2.0 + 22, Color(1.0, 0.86, 0.30, alpha), 14.0, 220.0, "gold")
 
 ## ============================================
 # 特殊元素渲染（锁定宝石、障碍物、毒雾）
@@ -2743,8 +2793,19 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 	draw_rect(Rect2(x, y + h - r, r, r), color)
 	draw_rect(Rect2(x + w - r, y + h - r, r, r), color)
 
+func _draw_rounded_rect_on(canvas: CanvasItem, x: float, y: float, w: float, h: float, r: float, color: Color) -> void:
+	canvas.draw_rect(Rect2(x + r, y, w - r * 2, h), color)
+	canvas.draw_rect(Rect2(x, y + r, w, h - r * 2), color)
+	canvas.draw_rect(Rect2(x, y, r, r), color)
+	canvas.draw_rect(Rect2(x + w - r, y, r, r), color)
+	canvas.draw_rect(Rect2(x, y + h - r, r, r), color)
+	canvas.draw_rect(Rect2(x + w - r, y + h - r, r, r), color)
+
 func _draw_rounded_rect_outline(x: float, y: float, w: float, h: float, r: float, color: Color, line_width: float = 2.0) -> void:
 	_draw_stroke_rect(x, y, w, h, line_width, color)
+
+func _draw_rounded_rect_outline_on(canvas: CanvasItem, x: float, y: float, w: float, h: float, r: float, color: Color, line_width: float = 2.0) -> void:
+	_draw_stroke_rect_on(canvas, x, y, w, h, line_width, color)
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, center: bool = false) -> void:
 	var font: Font = ThemeDB.fallback_font
@@ -2760,6 +2821,12 @@ func _draw_stroke_rect(x: float, y: float, w: float, h: float, line_width: float
 	draw_rect(Rect2(x, y + h - line_width, w, line_width), color)
 	draw_rect(Rect2(x, y, line_width, h), color)
 	draw_rect(Rect2(x + w - line_width, y, line_width, h), color)
+
+func _draw_stroke_rect_on(canvas: CanvasItem, x: float, y: float, w: float, h: float, line_width: float, color: Color) -> void:
+	canvas.draw_rect(Rect2(x, y, w, line_width), color)
+	canvas.draw_rect(Rect2(x, y + h - line_width, w, line_width), color)
+	canvas.draw_rect(Rect2(x, y, line_width, h), color)
+	canvas.draw_rect(Rect2(x + w - line_width, y, line_width, h), color)
 
 func _draw_circle(cx: float, cy: float, r: float, color: Color) -> void:
 	for dy in range(-int(r), int(r) + 1):
@@ -2783,6 +2850,11 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 	if tex == null:
 		return
 	draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
+
+func _draw_texture_fit_on(canvas: CanvasItem, tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	canvas.draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
 
 func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
@@ -2860,6 +2932,244 @@ func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
 	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
 
+func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 190.0, style: String = "normal") -> void:
+	if text.is_empty():
+		return
+	var safe_text := BattleUIFeedbackScript.fit_text(FX_ROUND_FONT, text, max_width, size)
+	var left := x - max_width / 2.0
+	var palette := _fx_text_palette(style, color)
+	var shadow: Color = palette["shadow"]
+	var outline: Color = palette["outline"]
+	var rim: Color = palette["rim"]
+	var fill: Color = palette["fill"]
+	var shine: Color = palette["shine"]
+	var alpha := color.a
+	shadow.a *= alpha
+	outline.a *= alpha
+	rim.a *= alpha
+	fill.a *= alpha
+	shine.a *= alpha
+	var outline_size := maxf(2.0, size * 0.15)
+	var rim_size := maxf(1.0, size * 0.07)
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.0, y + outline_size + 1.4), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	var outline_steps := [
+		Vector2(-outline_size, 0.0), Vector2(outline_size, 0.0),
+		Vector2(0.0, -outline_size), Vector2(0.0, outline_size),
+		Vector2(-outline_size * 0.72, -outline_size * 0.72),
+		Vector2(outline_size * 0.72, -outline_size * 0.72),
+		Vector2(-outline_size * 0.72, outline_size * 0.72),
+		Vector2(outline_size * 0.72, outline_size * 0.72)
+	]
+	for offset: Vector2 in outline_steps:
+		canvas.draw_string(FX_ROUND_FONT, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline)
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left - rim_size, y - rim_size), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, rim)
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.8, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left, y - size * 0.13), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size * 0.92, shine)
+
+func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, scale: float, opacity: float) -> void:
+	var combo_tex := _get_texture(BATTLE_FX_ASSETS["combo_word"])
+	if combo_tex:
+		var word_w := 154.0 * scale
+		var word_h := 77.0 * scale
+		_draw_texture_fit_on(canvas, combo_tex, Rect2(cx - 78.0 * scale, cy - 45.0 * scale, word_w, word_h), opacity)
+	else:
+		_draw_fx_text(canvas, "COMBO", cx - 4.0 * scale, cy + 2.0 * scale, Color(1.0, 0.72, 0.22, opacity), 24.0 * scale, 150.0 * scale, "combo_number")
+	_draw_fx_text(canvas, "x", cx + 65.0 * scale, cy + 18.0 * scale, Color(1.0, 0.67, 0.22, opacity), 15.0 * scale, 34.0 * scale, "combo_label")
+	_draw_digit_fx_text(canvas, str(combo), cx + 89.0 * scale, cy + 19.0 * scale, 19.0 * scale, opacity, "combo_number")
+	var accent := Color(1.0, 0.98, 0.62, 0.54 * opacity)
+	canvas.draw_line(Vector2(cx - 70.0 * scale, cy + 25.0 * scale), Vector2(cx + 72.0 * scale, cy + 17.0 * scale), accent, 2.0 * scale)
+	canvas.draw_circle(Vector2(cx - 76.0 * scale, cy - 14.0 * scale), 3.0 * scale, Color(1.0, 0.92, 0.35, 0.62 * opacity))
+	canvas.draw_circle(Vector2(cx + 82.0 * scale, cy - 18.0 * scale), 2.3 * scale, Color(1.0, 0.76, 0.34, 0.58 * opacity))
+
+func _is_digit_fx_text(text: String) -> bool:
+	if text.is_empty():
+		return false
+	for i in range(text.length()):
+		var ch := text.substr(i, 1)
+		if not _is_digit_char(ch) and not ["-", "+", "x", "×"].has(ch):
+			return false
+	return true
+
+func _draw_digit_fx_text(canvas: CanvasItem, text: String, x: float, y: float, size: float, opacity: float, style: String = "damage") -> void:
+	var atlas := _get_texture(BATTLE_FX_ASSETS["damage_digits"])
+	if atlas == null:
+		_draw_fx_text(canvas, text, x, y, Color(1.0, 0.76, 0.22, opacity), size, maxf(80.0, text.length() * size), style)
+		return
+	var cell_w := 72.0
+	var cell_h := 84.0
+	var target_h := maxf(24.0, size * 1.92)
+	var digit_w := target_h * 0.72
+	var sign_w := target_h * 0.42
+	var spacing := -target_h * 0.10
+	var total_w := 0.0
+	for i in range(text.length()):
+		var ch := text.substr(i, 1)
+		total_w += sign_w if ["-", "+", "x", "×"].has(ch) else digit_w
+		if i < text.length() - 1:
+			total_w += spacing
+	var left := x - total_w / 2.0
+	var tint := _digit_fx_tint(style, opacity)
+	for i in range(text.length()):
+		var ch := text.substr(i, 1)
+		var w := sign_w if ["-", "+", "x", "×"].has(ch) else digit_w
+		var center := Vector2(left + w / 2.0, y - target_h * 0.40)
+		if _is_digit_char(ch):
+			var digit := ch.unicode_at(0) - 48
+			var src := Rect2(digit * cell_w, 0.0, cell_w, cell_h)
+			var dst := Rect2(left, y - target_h * 0.92, digit_w, target_h)
+			canvas.draw_texture_rect_region(atlas, dst, src, tint)
+		elif ch == "-":
+			canvas.draw_line(center - Vector2(w * 0.32, 0.0), center + Vector2(w * 0.32, 0.0), Color(0.58, 0.20, 0.10, 0.82 * opacity), maxf(3.0, target_h * 0.14))
+			canvas.draw_line(center - Vector2(w * 0.28, 0.0), center + Vector2(w * 0.28, 0.0), Color(1.0, 0.77, 0.28, opacity), maxf(2.0, target_h * 0.09))
+		elif ch == "+":
+			var dark := Color(0.58, 0.20, 0.10, 0.82 * opacity)
+			var light := Color(1.0, 0.77, 0.28, opacity)
+			canvas.draw_line(center - Vector2(w * 0.32, 0.0), center + Vector2(w * 0.32, 0.0), dark, maxf(3.0, target_h * 0.14))
+			canvas.draw_line(center - Vector2(0.0, w * 0.32), center + Vector2(0.0, w * 0.32), dark, maxf(3.0, target_h * 0.14))
+			canvas.draw_line(center - Vector2(w * 0.28, 0.0), center + Vector2(w * 0.28, 0.0), light, maxf(2.0, target_h * 0.09))
+			canvas.draw_line(center - Vector2(0.0, w * 0.28), center + Vector2(0.0, w * 0.28), light, maxf(2.0, target_h * 0.09))
+		else:
+			_draw_fx_text(canvas, "x", center.x, y - target_h * 0.13, Color(1.0, 0.70, 0.22, opacity), size * 0.95, w + 8.0, "combo_label")
+		left += w + spacing
+
+func _is_digit_char(ch: String) -> bool:
+	if ch.is_empty():
+		return false
+	var code := ch.unicode_at(0)
+	return code >= 48 and code <= 57
+
+func _digit_fx_tint(style: String, opacity: float) -> Color:
+	match style:
+		"heal":
+			return Color(0.82, 1.0, 0.70, opacity)
+		"cool":
+			return Color(0.78, 0.94, 1.0, opacity)
+		_:
+			return Color(1.0, 1.0, 1.0, opacity)
+
+func _fx_text_style(text: String, color: Color) -> String:
+	if text.begins_with("+") or color.g > color.r + 0.16:
+		return "heal"
+	if text.begins_with("-") or color.r > 0.85:
+		return "damage"
+	if text.find("冰") != -1 or color.b > color.r + 0.20:
+		return "cool"
+	return "normal"
+
+func _fx_text_palette(style: String, base: Color) -> Dictionary:
+	match style:
+		"combo_number":
+			return {
+				"shadow": Color(0.58, 0.20, 0.07, 0.58),
+				"outline": Color(0.55, 0.17, 0.05, 0.95),
+				"rim": Color(1.0, 0.43, 0.12, 0.88),
+				"fill": Color(1.0, 0.93, 0.22, 1.0),
+				"shine": Color(1.0, 1.0, 0.86, 0.42)
+			}
+		"combo_label":
+			return {
+				"shadow": Color(0.46, 0.16, 0.08, 0.52),
+				"outline": Color(0.54, 0.19, 0.08, 0.92),
+				"rim": Color(1.0, 0.80, 0.30, 0.72),
+				"fill": Color(1.0, 0.58, 0.17, 1.0),
+				"shine": Color(1.0, 0.96, 0.68, 0.34)
+			}
+		"gold":
+			return {
+				"shadow": Color(0.38, 0.18, 0.05, 0.54),
+				"outline": Color(0.55, 0.23, 0.05, 0.92),
+				"rim": Color(1.0, 0.92, 0.40, 0.72),
+				"fill": Color(1.0, 0.78, 0.15, 1.0),
+				"shine": Color(1.0, 1.0, 0.82, 0.32)
+			}
+		"heal":
+			return {
+				"shadow": Color(0.04, 0.28, 0.18, 0.46),
+				"outline": Color(0.02, 0.36, 0.22, 0.88),
+				"rim": Color(0.72, 1.0, 0.62, 0.66),
+				"fill": Color(maxf(base.r, 0.36), maxf(base.g, 0.95), maxf(base.b, 0.42), 1.0),
+				"shine": Color(0.92, 1.0, 0.76, 0.30)
+			}
+		"damage":
+			return {
+				"shadow": Color(0.42, 0.06, 0.06, 0.54),
+				"outline": Color(0.58, 0.10, 0.09, 0.90),
+				"rim": Color(1.0, 0.67, 0.36, 0.66),
+				"fill": Color(maxf(base.r, 1.0), maxf(base.g, 0.30), maxf(base.b, 0.20), 1.0),
+				"shine": Color(1.0, 0.90, 0.72, 0.28)
+			}
+		"cool":
+			return {
+				"shadow": Color(0.05, 0.20, 0.38, 0.48),
+				"outline": Color(0.08, 0.30, 0.58, 0.88),
+				"rim": Color(0.70, 0.96, 1.0, 0.66),
+				"fill": Color(maxf(base.r, 0.38), maxf(base.g, 0.72), maxf(base.b, 1.0), 1.0),
+				"shine": Color(0.94, 1.0, 1.0, 0.30)
+			}
+		_:
+			return {
+				"shadow": Color(0.12, 0.14, 0.24, 0.48),
+				"outline": Color(0.22, 0.18, 0.34, 0.88),
+				"rim": Color(1.0, 0.94, 0.66, 0.52),
+				"fill": Color(maxf(base.r, 0.80), maxf(base.g, 0.80), maxf(base.b, 0.86), 1.0),
+				"shine": Color(1.0, 1.0, 1.0, 0.24)
+			}
+
+func _draw_soft_sparkles(canvas: CanvasItem, center: Vector2, color: Color, opacity: float, strong: bool = false) -> void:
+	var count := 4 if strong else 3
+	var radius := 28.0 if strong else 22.0
+	for i in range(count):
+		var angle := _idle_time * 1.5 + float(i) * TAU / float(count)
+		var pos := center + Vector2(cos(angle), sin(angle * 1.17)) * radius
+		var a := opacity * (0.40 + 0.20 * sin(_idle_time * 4.0 + float(i)))
+		var sparkle_color := Color(color.r, color.g, color.b, a)
+		canvas.draw_line(pos - Vector2(3.5, 0.0), pos + Vector2(3.5, 0.0), sparkle_color, 1.4)
+		canvas.draw_line(pos - Vector2(0.0, 3.5), pos + Vector2(0.0, 3.5), sparkle_color, 1.4)
+
+func _is_turn_message(text: String) -> bool:
+	return text == "你的回合" or text == "敌方回合" or text.ends_with("的回合")
+
+func _is_major_battle_message(text: String) -> bool:
+	return text.find("释放") != -1 \
+		or text.find("充能完毕") != -1 \
+		or text.find("效果拔群") != -1 \
+		or text.find("十字") != -1 \
+		or text.find("范围") != -1 \
+		or text.find("虹光") != -1 \
+		or text.find("解锁") != -1 \
+		or text.find("捕捉") != -1 \
+		or text.find("进入激战") != -1 \
+		or text.find("蓄力攻击") != -1 \
+		or text.find("生成了护盾") != -1
+
+func _message_fx_style(text: String) -> String:
+	if _is_turn_message(text):
+		return "gold" if text.contains("你的") else "cool"
+	if text.find("无法") != -1 or text.find("无效") != -1 or text.find("效果不佳") != -1 or text.find("侵蚀") != -1:
+		return "damage"
+	if text.find("回复") != -1 or text.find("恢复") != -1 or text.find("散开") != -1:
+		return "heal"
+	if text.find("冰冻") != -1 or text.find("护盾") != -1:
+		return "cool"
+	if text.find("效果拔群") != -1 or text.find("释放") != -1 or text.find("虹光") != -1 or text.find("十字") != -1 or text.find("范围") != -1 or text.find("解锁") != -1:
+		return "gold"
+	return "normal"
+
+func _message_fx_color(text: String, alpha: float) -> Color:
+	var style := _message_fx_style(text)
+	match style:
+		"gold":
+			return Color(1.0, 0.86, 0.20, alpha)
+		"cool":
+			return Color(0.62, 0.88, 1.0, alpha)
+		"damage":
+			return Color(1.0, 0.48, 0.32, alpha)
+		"heal":
+			return Color(0.54, 1.0, 0.55, alpha)
+		_:
+			return Color(1.0, 0.96, 0.82, alpha)
+
 func _draw_hp_bar(x: float, y: float, w: float, h: float, current: float, maximum: float, color: Color, element: String = "", show_orb: bool = false) -> void:
 	var radius := h * 0.5
 	var ratio: float = clampf(current / maximum, 0.0, 1.0) if maximum > 0 else 0.0
@@ -2903,9 +3213,41 @@ func _floating_text_plate_path(text: String, ft: Dictionary) -> String:
 		return BATTLE_FX_ASSETS["heal_plate"]
 	if ft.get("critical", false):
 		return BATTLE_FX_ASSETS["critical_plate"]
-	if text.begins_with("-") or text.begins_with("护") or text.begins_with("缚"):
+	if text.begins_with("-") or text.begins_with("护") or text.begins_with("缚") or text in ["爆裂", "轰!", "清屏", "破雾", "解锁", "破链"]:
 		return BATTLE_FX_ASSETS["damage_plate"]
 	return ""
+
+func _clean_battle_fx_text(text: String) -> String:
+	var cleaned := text.strip_edges()
+	var replacements := {
+		"💫": "",
+		"💥": "",
+		"💣": "",
+		"🌈": "",
+		"⚡": "",
+		"🛡️": "",
+		"💚": "",
+		"☠️": "",
+		"🧹": "",
+		"🔓": "",
+		"⛓️": "",
+		"🔥": "",
+		"❄️": "",
+		"💧": "",
+		"🌿": "",
+		"✨": "",
+		"💎": "",
+		"十字爆炸": "十字爆裂",
+		"炸弹爆炸": "范围弹跳",
+		"彩虹消除": "虹光清屏",
+		"毒雾扩散了": "毒雾轻轻扩散",
+		"毒雾伤害": "毒雾侵蚀",
+		"毒雾被清除了": "毒雾散开了",
+		"宝石解锁": "宝石解锁",
+	}
+	for key in replacements.keys():
+		cleaned = cleaned.replace(str(key), str(replacements[key]))
+	return cleaned.strip_edges()
 
 ## ============================================
 # 场景切换
@@ -3003,7 +3345,7 @@ func _update_fall_animations(delta: float) -> void:
 	for i in range(_falling_gems.size() - 1, -1, -1):
 		var fg: Dictionary = _falling_gems[i]
 		fg["timer"] += delta
-		if fg["timer"] >= fg["duration"]:
+		if fg["timer"] >= fg.get("duration", FALL_DURATION) + fg.get("delay", 0.0):
 			_falling_gems.remove_at(i)
 
 func _update_unlock_animations(delta: float) -> void:
@@ -3040,7 +3382,7 @@ func _process_poison_fog_turn() -> void:
 		for t in new_tiles:
 			_poison_fog_spread_anims.append({"row": t["row"], "col": t["col"], "x": t["x"], "y": t["y"], "timer": 0.0})
 		_request_battle_fx({"type": "poison_spread", "tiles": new_tiles})
-		_show_message("☠️ 毒雾扩散了！+%d格" % new_tiles.size())
+		_show_message("毒雾轻轻扩散！+%d格" % new_tiles.size())
 
 	var total_fog_damage: int = result.get("total_damage", 0)
 	if total_fog_damage <= 0:
@@ -3049,7 +3391,7 @@ func _process_poison_fog_turn() -> void:
 		var team_index: int = hit.get("team_index", -1)
 		var mx: float = 15.0 + float(team_index) * 120.0 + 55.0
 		_floating_texts.append({
-			"text": "-%d☠️" % hit.get("damage", 0),
+			"text": "-%d" % hit.get("damage", 0),
 			"x": mx, "y": 195.0,
 			"color": STATUS_COLORS.get("poison", C["danger"]),
 			"size": 16.0,
@@ -3057,7 +3399,7 @@ func _process_poison_fog_turn() -> void:
 			"duration": 0.8
 		})
 	_request_battle_fx({"type": "poison_damage", "hits": result.get("hits", []), "total_damage": total_fog_damage})
-	_show_message("☠️ 毒雾伤害！%d格 × 3%% = %d" % [result.get("fog_count", 0), total_fog_damage])
+	_show_message("毒雾侵蚀！%d格 × 3%% = %d" % [result.get("fog_count", 0), total_fog_damage])
 
 ## ============================================
 # 消除时的毒雾清除 & 锁定宝石解锁
@@ -3068,17 +3410,17 @@ func _check_poison_fog_clears(matches: Array) -> void:
 	var clears: Array = BattleHazardRulesScript.clear_poison_for_gems(_board, matches)
 	for clear in clears:
 		clear["timer"] = 0.0
-		_floating_texts.append({"text": "🧹清除!", "x": clear["x"], "y": clear["y"] - 15.0, "color": C["success"], "size": 14.0, "timer": 0.0, "duration": 0.8})
+		_floating_texts.append({"text": "破雾", "x": clear["x"], "y": clear["y"] - 15.0, "color": C["success"], "size": 13.0, "timer": 0.0, "duration": 0.8, "critical": true})
 	if clears.size() > 0:
 		_poison_fog_clear_anims.append_array(clears)
 		_request_battle_fx({"type": "poison_clear", "tiles": clears})
-		_show_message("🧹 毒雾被清除了！")
+		_show_message("毒雾散开了！")
 
 func _check_explosion_poison_fog(gems: Array) -> void:
 	"""特殊消除（爆炸/炸弹/彩虹）也检查毒雾清除"""
 	var clears: Array = BattleHazardRulesScript.clear_poison_for_gems(_board, gems)
 	for clear in clears:
-		_floating_texts.append({"text": "🧹", "x": clear["x"], "y": clear["y"] - 10.0, "color": C["success"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+		_floating_texts.append({"text": "散开", "x": clear["x"], "y": clear["y"] - 10.0, "color": C["success"], "size": 11.0, "timer": 0.0, "duration": 0.8})
 	if not clears.is_empty():
 		_request_battle_fx({"type": "poison_clear_special", "tiles": clears})
 
@@ -3088,10 +3430,10 @@ func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
 	for ur in unlock_results:
 		if ur.get("fullyUnlocked", false):
 			_unlock_animations.append({"row": ur["row"], "col": ur["col"], "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
-			_floating_texts.append({"text": "🔓解锁!", "x": ur["x"], "y": ur["y"] - 15.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8})
+			_floating_texts.append({"text": "解锁", "x": ur["x"], "y": ur["y"] - 15.0, "color": C["gold"], "size": 14.0, "timer": 0.0, "duration": 0.8, "critical": true})
 		else:
-			_floating_texts.append({"text": "⛓️×%d" % ur.get("remainingHP", 1), "x": ur["x"], "y": ur["y"] - 10.0, "color": C["text_muted"], "size": 12.0, "timer": 0.0, "duration": 0.8})
+			_floating_texts.append({"text": "破链×%d" % ur.get("remainingHP", 1), "x": ur["x"], "y": ur["y"] - 10.0, "color": C["text_muted"], "size": 11.0, "timer": 0.0, "duration": 0.8})
 	
 	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
 		_request_battle_fx({"type": "unlock", "results": unlock_results})
-		_show_message("🔓 宝石解锁！")
+		_show_message("宝石解锁！")
