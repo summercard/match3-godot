@@ -1,6 +1,6 @@
 extends Node
 ## 存档管理器 - 从 js/core/storage.js 翻译
-## 负责玩家数据、怪物Pokedex、队伍、道具、关卡进度、成就、签到、牧场等持久化
+## 负责玩家数据、精灵Pokedex、队伍、道具、关卡进度、成就、签到、牧场等持久化
 ## Godot 单例模式：AutoLoad 注册，或用 static var instance
 ##
 ## 翻译要点：
@@ -166,7 +166,7 @@ func add_gems(amount: int) -> bool:
 	save_player(player)
 	return true
 
-# ========== 怪物池与旧 Pokedex 兼容 ==========
+# ========== 精灵池与旧 Pokedex 兼容 ==========
 
 func _ensure_monster_pool_migrated() -> void:
 	var player: Dictionary = get_player()
@@ -427,7 +427,7 @@ func _sync_legacy_monster_fields(player: Dictionary) -> void:
 	player["captured"] = captured
 	player["pokedex"] = pokedex
 
-## 初始化怪物的兼容 pokedex 数据（新逻辑会保证至少有一个实例）
+## 初始化精灵的兼容 pokedex 数据（新逻辑会保证至少有一个实例）
 func init_monster_pokedex(monster_id: String, nature_id: String = "") -> Dictionary:
 	var instance := MonsterPool.get_first_instance_by_monster_id(get_monster_pool(), monster_id)
 	if instance.is_empty():
@@ -469,7 +469,7 @@ static func get_total_exp_for_level(level: int) -> int:
 		total += get_exp_for_level(l)
 	return total
 
-## 增加怪物经验，可触发升级
+## 增加精灵经验，可触发升级
 ## JS: addMonsterExp(monsterId, expGained)
 ## 返回: { leveledUp: bool, newLevel: int, oldLevel: int, expGained: int, currentExp: int }
 func add_monster_exp(monster_id: String, exp_gained: int) -> Dictionary:
@@ -533,7 +533,7 @@ func _resolve_team_ref(value: Variant) -> Variant:
 	var instance_id := _resolve_instance_id(ref_id)
 	return instance_id if not instance_id.is_empty() else null
 
-## 检查怪物是否在队伍中
+## 检查精灵是否在队伍中
 ## JS: isMonsterInTeam(monsterId)
 func is_monster_in_team(monster_id: String) -> bool:
 	var team: Dictionary = load_team()
@@ -620,7 +620,17 @@ func save_stage_progress(stage_id: String, stage_data: Dictionary) -> bool:
 ## 加载所有关卡进度
 ## JS: loadStageProgress()
 func load_stage_progress() -> Dictionary:
-	return _get_value("stageProgress", "data", {})
+	var progress: Dictionary = _normalize_stage_progress(_get_value("stageProgress", "data", {}))
+	var legacy_progress := _stage_progress_from_legacy_player()
+	var changed := false
+	for stage_id: String in legacy_progress.keys():
+		if not progress.has(stage_id):
+			progress[stage_id] = legacy_progress[stage_id]
+			changed = true
+	if changed:
+		_set_value("stageProgress", "data", progress)
+		_save_config()
+	return progress
 
 ## 保存关卡星级（只保留最高星级）
 ## JS: saveStageStars(stageId, stars)
@@ -732,6 +742,66 @@ func _stage_name(stage_id: String) -> String:
 		return ""
 	var stage := get_stage(stage_id)
 	return str(stage.get("name", stage_id))
+
+func _normalize_stage_progress(raw_progress) -> Dictionary:
+	var normalized: Dictionary = {}
+	if not raw_progress is Dictionary:
+		return normalized
+	var raw: Dictionary = raw_progress
+	for raw_stage_id in raw.keys():
+		var stage_id := str(raw_stage_id)
+		var raw_entry = raw.get(raw_stage_id, {})
+		if raw_entry is Dictionary:
+			var entry: Dictionary = raw_entry
+			var stars := clampi(int(entry.get("stars", 0)), 0, 3)
+			normalized[stage_id] = entry.duplicate(true)
+			normalized[stage_id]["stars"] = stars
+			normalized[stage_id]["cleared"] = bool(entry.get("cleared", false)) or stars > 0
+		elif raw_entry is bool and bool(raw_entry):
+			normalized[stage_id] = {"stars": 1, "cleared": true}
+		elif raw_entry is int or raw_entry is float:
+			var stars := clampi(int(raw_entry), 0, 3)
+			normalized[stage_id] = {"stars": stars, "cleared": stars > 0}
+	return normalized
+
+func _stage_progress_from_legacy_player() -> Dictionary:
+	if not _config.has_section_key("player", "data"):
+		return {}
+	var player: Dictionary = _get_value("player", "data", {})
+	var legacy = player.get("stageProgress", {})
+	if not legacy is Dictionary:
+		return {}
+	var chapter_num := int(legacy.get("chapter", 1))
+	var next_stage_num := int(legacy.get("stage", 1))
+	if chapter_num <= 1 and next_stage_num <= 1:
+		return {}
+
+	var migrated: Dictionary = {}
+	var chapters := get_stage_chapters()
+	for chapter_index: int in range(chapters.size()):
+		var chapter_no := chapter_index + 1
+		var chapter: Dictionary = chapters[chapter_index]
+		for stage: Dictionary in chapter.get("stages", []):
+			if str(stage.get("type", "normal")) == "elite":
+				continue
+			var stage_no := _stage_number_from_id(str(stage.get("id", "")))
+			if chapter_no < chapter_num or (chapter_no == chapter_num and stage_no > 0 and stage_no < next_stage_num):
+				migrated[str(stage.get("id", ""))] = {"stars": 1, "cleared": true}
+	return migrated
+
+func _stage_number_from_id(stage_id: String) -> int:
+	var parts := stage_id.split("_")
+	if parts.size() < 3:
+		return 0
+	var number_text := str(parts[2])
+	var digits := ""
+	for i: int in range(number_text.length()):
+		var ch := number_text.substr(i, 1)
+		if ch.is_valid_int():
+			digits += ch
+		else:
+			break
+	return int(digits) if not digits.is_empty() else 0
 
 func roll_drop() -> String:
 	return ItemDB.roll_drop()
@@ -1096,7 +1166,7 @@ func get_ranch_care_state(instance_id: String) -> Dictionary:
 		focus_id == instance_id
 	)
 
-## 收取单只怪物的挂机经验
+## 收取单只精灵的挂机经验
 ## JS: collectIdleExp(monsterId)
 func collect_idle_exp(monster_id: String) -> float:
 	var instance_id := _resolve_instance_id(monster_id)

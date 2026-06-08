@@ -80,7 +80,7 @@ const ACHIEVEMENTS: Array = [
 	{
 		"id": "ach_first_capture",
 		"name": "初次收服",
-		"desc": "收服第1只怪物",
+		"desc": "收服第1只精灵",
 		"icon": "🔮",
 		"category": "collect",
 		"target": 1,
@@ -90,8 +90,8 @@ const ACHIEVEMENTS: Array = [
 	},
 	{
 		"id": "ach_capture_5",
-		"name": "怪兽收藏家",
-		"desc": "收服5只不同怪物",
+		"name": "精灵收藏家",
+		"desc": "收服5只不同精灵",
 		"icon": "📚",
 		"category": "collect",
 		"target": 5,
@@ -101,8 +101,8 @@ const ACHIEVEMENTS: Array = [
 	},
 	{
 		"id": "ach_capture_10",
-		"name": "怪物大师",
-		"desc": "收服全部怪物",
+		"name": "精灵大师",
+		"desc": "收服全部精灵",
 		"icon": "👑",
 		"category": "collect",
 		"target": 5,
@@ -113,7 +113,7 @@ const ACHIEVEMENTS: Array = [
 	{
 		"id": "ach_first_evolve",
 		"name": "初次进化",
-		"desc": "首次进化怪物",
+		"desc": "首次进化精灵",
 		"icon": "✨",
 		"category": "collect",
 		"target": 1,
@@ -124,7 +124,7 @@ const ACHIEVEMENTS: Array = [
 	{
 		"id": "ach_evolve_5",
 		"name": "进化狂热",
-		"desc": "累计进化5只怪物",
+		"desc": "累计进化5只精灵",
 		"icon": "🌟",
 		"category": "collect",
 		"target": 5,

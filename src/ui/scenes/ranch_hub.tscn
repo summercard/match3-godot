@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dlu23xo10t2vq"]
 
 [ext_resource type="Script" uid="uid://bta68622dgta3" path="res://src/ui/scene/scene_ranch_gui.gd" id="1_ke1ks"]
-[ext_resource type="Texture2D" path="res://assets/images/ranch_optimized/bg_ranch_pasture_750.png" id="2_asi3g"]
+[ext_resource type="Texture2D" uid="uid://853vlov5qsw6" path="res://assets/images/ranch_optimized/bg_ranch_pasture_750.png" id="2_asi3g"]
 [ext_resource type="Texture2D" uid="uid://b6mrxkcfwhl5w" path="res://assets/images/ranch/ui_slot_occupied.png" id="3_4vts4"]
 [ext_resource type="Texture2D" uid="uid://kyu0nt3dpkuo" path="res://assets/images/ranch/ui_level_badge.png" id="4_reeqw"]
 [ext_resource type="Texture2D" uid="uid://djugnh1inxd71" path="res://assets/images/ranch/fx_leaf_sparkle_cluster.png" id="5_h6git"]
@@ -29,12 +29,13 @@
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="27_4kyrp"]
 [ext_resource type="Texture2D" uid="uid://wmi2nklh64v6" path="res://assets/images/ranch/ui_pet_farm_nav_panel.png" id="28_76x2r"]
 [ext_resource type="Texture2D" uid="uid://c8aamojsqoxli" path="res://assets/images/ranch/ui_pet_farm_nav_selected.png" id="29_ceena"]
-[ext_resource type="Texture2D" uid="uid://bhmpl5kylv0ga" path="res://assets/images/ranch/icon_pet_tab.png" id="30_h68c6"]
-[ext_resource type="Texture2D" uid="uid://bqvnxe6tuss1n" path="res://assets/images/ranch/icon_pet_classroom.png" id="31_gfw44"]
-[ext_resource type="Texture2D" uid="uid://j7mvnqwsdqwi" path="res://assets/images/ranch/icon_social_plaza.png" id="32_qnd86"]
-[ext_resource type="Texture2D" uid="uid://dyjbfmladd4un" path="res://assets/images/ranch/icon_menu_tab.png" id="33_l085d"]
-[ext_resource type="Texture2D" path="res://assets/images/ranch/fx_social_heart.png" id="34_social_heart"]
-[ext_resource type="Texture2D" path="res://assets/images/ranch/ui_social_bond_hearts.png" id="35_bond_hearts"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_pets.png" id="30_h68c6"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_classroom.png" id="31_gfw44"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_social.png" id="32_qnd86"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_menu.png" id="33_l085d"]
+[ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/ranch/fx_social_heart.png" id="34_social_heart"]
+[ext_resource type="Texture2D" uid="uid://bt5wxtiqbngt3" path="res://assets/images/ranch/ui_social_bond_hearts.png" id="35_bond_hearts"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_home.png" id="36_home_nav"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r8pwf"]
 bg_color = Color(1, 0.96, 0.84, 0.99)
@@ -140,8 +141,9 @@ script = ExtResource("1_ke1ks")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1357441767]
 layout_mode = 0
+offset_top = -144.0
 offset_right = 375.0
-offset_bottom = 667.0
+offset_bottom = 523.0
 mouse_filter = 2
 texture = ExtResource("2_asi3g")
 expand_mode = 1
@@ -1624,7 +1626,7 @@ offset_right = 112.0
 offset_bottom = 45.0
 theme_override_colors/font_color = Color(0.32, 0.16, 0.03, 1)
 theme_override_font_sizes/font_size = 13
-text = "怪物课堂"
+text = "精灵课堂"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1656,6 +1658,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ClassroomPage" type="Control" parent="Pages" unique_id=852056861]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -1702,7 +1705,7 @@ offset_right = 192.0
 offset_bottom = 101.0
 theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
 theme_override_font_sizes/font_size = 14
-text = "暂无怪物"
+text = "暂无精灵"
 
 [node name="Name" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=384115174]
 layout_mode = 0
@@ -2685,7 +2688,7 @@ offset_bottom = 268.0
 pivot_offset = Vector2(36, 12.5)
 ignore_texture_size = true
 
-[node name="SocialFrame" type="Panel" parent="Pages/SocialPage/PlacePanel/SwitchButton"]
+[node name="SocialFrame" type="Panel" parent="Pages/SocialPage/PlacePanel/SwitchButton" unique_id=479183639]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -2873,13 +2876,13 @@ texture = ExtResource("34_social_heart")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FxLayer" type="Control" parent="Pages/SocialPage/PlacePanel"]
-layout_mode = 0
+[node name="FxLayer" type="Control" parent="Pages/SocialPage/PlacePanel" unique_id=1948275054]
+anchors_preset = 0
 offset_right = 351.0
 offset_bottom = 270.0
 mouse_filter = 2
 
-[node name="HeartFx1" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+[node name="HeartFx1" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer" unique_id=806210976]
 visible = false
 layout_mode = 0
 offset_left = 151.0
@@ -2891,7 +2894,7 @@ texture = ExtResource("34_social_heart")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="HeartFx2" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+[node name="HeartFx2" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer" unique_id=988183964]
 visible = false
 layout_mode = 0
 offset_left = 181.0
@@ -2903,7 +2906,7 @@ texture = ExtResource("34_social_heart")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="HeartFx3" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+[node name="HeartFx3" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer" unique_id=1308248992]
 visible = false
 layout_mode = 0
 offset_left = 165.0
@@ -2915,7 +2918,7 @@ texture = ExtResource("34_social_heart")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="HeartFx4" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer"]
+[node name="HeartFx4" type="TextureRect" parent="Pages/SocialPage/PlacePanel/FxLayer" unique_id=679097474]
 visible = false
 layout_mode = 0
 offset_left = 194.0
@@ -4074,16 +4077,16 @@ mouse_filter = 2
 texture = ExtResource("29_ceena")
 expand_mode = 1
 
-[node name="Glyph" type="Label" parent="PetFarmBottomNav/Nav1" unique_id=1125156458]
+[node name="Icon" type="TextureRect" parent="PetFarmBottomNav/Nav1" unique_id=1125156458]
 layout_mode = 0
-offset_top = 2.0
-offset_right = 67.0
-offset_bottom = 33.0
-theme_override_colors/font_color = Color(0.52, 0.25, 0.05, 1)
-theme_override_font_sizes/font_size = 27
-text = "⌂"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("36_home_nav")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Text" type="Label" parent="PetFarmBottomNav/Nav1" unique_id=594671838]
 layout_mode = 0

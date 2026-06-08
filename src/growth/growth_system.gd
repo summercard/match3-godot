@@ -67,7 +67,7 @@ static func process_exp(pokedex_entry: Dictionary, exp_gained: int) -> Dictionar
 # 进化链: 幼年期(1) → 成长期(2) → 完全体(3)
 # 对应 JS: evolution.level 和 evolution.target
 static func get_evolution_stage(monster_id: String, current_level: int) -> Dictionary:
-	# 获取怪物数据
+	# 获取精灵数据
 	var monster_data = MonsterDb.get_monster(monster_id)
 	if not monster_data.has("evolution"):
 		return { "stage": 1, "can_evolve": false, "next_stage": 2, "evolve_level": -1, "target_id": "" }
@@ -92,7 +92,7 @@ static func get_evolution_stage(monster_id: String, current_level: int) -> Dicti
 		"evolved": current_level > evolve_level  # 已进化标志
 	}
 
-# 获取进化后怪物ID
+# 获取进化后精灵ID
 static func get_evolution_target(monster_id: String) -> String:
 	var monster_data = MonsterDb.get_monster(monster_id)
 	if monster_data.has("evolution"):
@@ -104,7 +104,7 @@ static func can_evolve(monster_id: String, current_level: int) -> bool:
 	var evo_data = get_evolution_stage(monster_id, current_level)
 	return evo_data["can_evolve"]
 
-# 执行进化（返回新怪物ID）
+# 执行进化（返回新精灵ID）
 static func do_evolve(monster_id: String) -> String:
 	return get_evolution_target(monster_id)
 

@@ -1,6 +1,41 @@
 [gd_scene format=3 uid="uid://c0p47wv7g1tyh"]
 
 [ext_resource type="Script" uid="uid://bmckci7vy30q6" path="res://src/ui/scene/scene_team_gui.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://0elna6vwymnb" path="res://assets/images/team_new/bg_team_hall.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="3_currency"]
+[ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="4_gold"]
+[ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="5_diamond"]
+[ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/ranch/fx_social_heart.png" id="6_heart"]
+[ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/main/lobby_refresh/icon_plus_v3.png" id="7_plus"]
+[ext_resource type="Texture2D" uid="uid://d0vsl4s2lgjbr" path="res://assets/images/team_new/ui_empty_pedestal_plus.png" id="8_empty_plus"]
+[ext_resource type="Texture2D" uid="uid://ivv7n7jnlj1d" path="res://assets/images/team_new/ui_leader_badge.png" id="9_leader_badge"]
+[ext_resource type="Texture2D" uid="uid://bescenerehs6r" path="res://assets/images/team_new/ui_pedestal_label.png" id="10_pedestal_label"]
+[ext_resource type="Texture2D" uid="uid://cinwvhr6y661f" path="res://assets/images/ranch/ui_care_roster_panel.png" id="11_panel"]
+[ext_resource type="Texture2D" uid="uid://dk4l42xmcflof" path="res://assets/images/ranch/ui_roster_card_ranch.png" id="12_roster_card"]
+[ext_resource type="Texture2D" uid="uid://uomxda6s6wcc" path="res://assets/images/ranch/icon_check_badge.png" id="13_check"]
+[ext_resource type="Texture2D" uid="uid://wmi2nklh64v6" path="res://assets/images/ranch/ui_pet_farm_nav_panel.png" id="14_nav_panel"]
+[ext_resource type="Texture2D" uid="uid://c8aamojsqoxli" path="res://assets/images/ranch/ui_pet_farm_nav_selected.png" id="15_nav_selected"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_home.png" id="16_nav_home"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_pets.png" id="17_nav_pets"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_battle.png" id="18_nav_battle"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_shop.png" id="19_nav_shop"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_menu.png" id="20_nav_menu"]
+[ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ranch/ui_btn_previous_round.png" id="21_page_prev"]
+[ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ranch/ui_btn_next_round.png" id="22_page_next"]
+[ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/main/lobby_refresh/icon_level_shield_v3.png" id="23_def"]
+[ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ranch/icon_exp_badge.png" id="24_spd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selection"]
+bg_color = Color(1, 0.82, 0.26, 0.08)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.82, 0.26, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [node name="Team" type="Control" unique_id=256271296]
 layout_mode = 3
@@ -9,4 +44,1223 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_right = 375.0
 offset_bottom = 667.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="." unique_id=881559009]
+layout_mode = 0
+offset_top = -47.0
+offset_right = 375.0
+offset_bottom = 620.0
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="TopVignette" type="ColorRect" parent="." unique_id=707679322]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 120.0
+mouse_filter = 2
+color = Color(0.18, 0.07, 0.02, 0.18)
+
+[node name="BottomVignette" type="ColorRect" parent="." unique_id=734726289]
+layout_mode = 0
+offset_top = 592.0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0.12, 0.05, 0.01, 0.22)
+
+[node name="CurrencyBar" type="Control" parent="." unique_id=559351676]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 58.0
+mouse_filter = 2
+
+[node name="GoldChip" type="Control" parent="CurrencyBar" unique_id=124683751]
+anchors_preset = 0
+offset_left = 15.0
+offset_top = 13.0
+offset_right = 127.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="CurrencyBar/GoldChip" unique_id=1005402225]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="CurrencyBar/GoldChip" unique_id=658866529]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 36.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("4_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="CurrencyBar/GoldChip" unique_id=2094795614]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 7.0
+offset_right = 94.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="CurrencyBar/GoldChip" unique_id=257518485]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 6.0
+offset_right = 110.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("7_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondChip" type="Control" parent="CurrencyBar" unique_id=1401874392]
+anchors_preset = 0
+offset_left = 132.0
+offset_top = 13.0
+offset_right = 244.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="CurrencyBar/DiamondChip" unique_id=1543339854]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="CurrencyBar/DiamondChip" unique_id=1527813444]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 36.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("5_diamond")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="CurrencyBar/DiamondChip" unique_id=1525236194]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 7.0
+offset_right = 94.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="CurrencyBar/DiamondChip" unique_id=622193367]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 6.0
+offset_right = 110.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("7_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeartChip" type="Control" parent="CurrencyBar" unique_id=1942541655]
+anchors_preset = 0
+offset_left = 249.0
+offset_top = 13.0
+offset_right = 361.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="CurrencyBar/HeartChip" unique_id=1698503542]
+layout_mode = 0
+offset_right = 112.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("3_currency")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="CurrencyBar/HeartChip" unique_id=505839917]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 36.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("6_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="CurrencyBar/HeartChip" unique_id=1245189140]
+layout_mode = 0
+offset_left = 35.0
+offset_top = 7.0
+offset_right = 94.0
+offset_bottom = 31.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "5 Full"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="CurrencyBar/HeartChip" unique_id=1640133735]
+layout_mode = 0
+offset_left = 86.0
+offset_top = 6.0
+offset_right = 110.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("7_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TeamSlots" type="Control" parent="." unique_id=2116984264]
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 386.0
+mouse_filter = 2
+
+[node name="Member1Slot" type="TextureButton" parent="TeamSlots" unique_id=942443935]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 188.0
+offset_right = 121.0
+offset_bottom = 348.0
+pivot_offset = Vector2(39, 80)
+
+[node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2011852903]
+layout_mode = 0
+offset_left = 1.0
+offset_top = -27.0
+offset_right = 79.0
+offset_bottom = 51.0
+scale = Vector2(0.8520866, 0.8520866)
+pivot_offset = Vector2(39, 39)
+mouse_filter = 2
+texture = ExtResource("8_empty_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=1355864503]
+visible = false
+layout_mode = 0
+offset_left = -4.0
+offset_top = 4.0
+offset_right = 82.0
+offset_bottom = 90.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Fallback" type="Label" parent="TeamSlots/Member1Slot" unique_id=1117105133]
+visible = false
+layout_mode = 0
+offset_top = 16.0
+offset_right = 78.0
+offset_bottom = 84.0
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeaderBadge" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=1611571080]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("9_leader_badge")
+
+[node name="LeaderText" type="Label" parent="TeamSlots/Member1Slot" unique_id=1934468344]
+visible = false
+layout_mode = 0
+
+[node name="Selection" type="Panel" parent="TeamSlots/Member1Slot" unique_id=757131685]
+visible = false
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 160.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
+
+[node name="Label" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2029213049]
+layout_mode = 0
+offset_left = -5.0
+offset_top = 121.0
+offset_right = 73.0
+offset_bottom = 149.0
+mouse_filter = 2
+texture = ExtResource("10_pedestal_label")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="TeamSlots/Member1Slot/Label" unique_id=4789592]
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 0.88, 0.66, 1)
+theme_override_font_sizes/font_size = 13
+text = "左位"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeaderSlot" type="TextureButton" parent="TeamSlots" unique_id=1354289769]
+layout_mode = 0
+offset_left = 128.0
+offset_top = 145.0
+offset_right = 247.0
+offset_bottom = 355.0
+pivot_offset = Vector2(59.5, 105)
+
+[node name="EmptyPlus" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=743580315]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 16.0
+offset_right = 93.0
+offset_bottom = 94.0
+scale = Vector2(0.9535238, 0.9535238)
+pivot_offset = Vector2(39, 39)
+mouse_filter = 2
+texture = ExtResource("8_empty_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=1552465044]
+visible = false
+layout_mode = 0
+offset_top = 21.0
+offset_right = 119.0
+offset_bottom = 140.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Fallback" type="Label" parent="TeamSlots/LeaderSlot" unique_id=416566291]
+visible = false
+layout_mode = 0
+offset_top = 25.0
+offset_right = 119.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 34
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeaderBadge" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=1966864138]
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 112.0
+offset_bottom = 55.0
+mouse_filter = 2
+texture = ExtResource("9_leader_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeaderText" type="Label" parent="TeamSlots/LeaderSlot" unique_id=749417123]
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 25.0
+offset_right = 112.0
+offset_bottom = 51.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Leader"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Selection" type="Panel" parent="TeamSlots/LeaderSlot" unique_id=807154052]
+visible = false
+layout_mode = 0
+offset_right = 119.0
+offset_bottom = 210.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
+
+[node name="Label" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=948266138]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 163.0
+offset_right = 94.0
+offset_bottom = 191.0
+mouse_filter = 2
+texture = ExtResource("10_pedestal_label")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="TeamSlots/LeaderSlot/Label" unique_id=1432886833]
+layout_mode = 0
+offset_right = 76.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 0.88, 0.66, 1)
+theme_override_font_sizes/font_size = 13
+text = "队长"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Member2Slot" type="TextureButton" parent="TeamSlots" unique_id=714256556]
+layout_mode = 0
+offset_left = 254.0
+offset_top = 188.0
+offset_right = 332.0
+offset_bottom = 348.0
+pivot_offset = Vector2(39, 80)
+
+[node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=102303894]
+layout_mode = 0
+offset_left = -1.0
+offset_top = -27.0
+offset_right = 77.0
+offset_bottom = 51.0
+scale = Vector2(0.9594732, 0.9594732)
+pivot_offset = Vector2(39, 39)
+mouse_filter = 2
+texture = ExtResource("8_empty_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=680454598]
+visible = false
+layout_mode = 0
+offset_left = -4.0
+offset_top = 4.0
+offset_right = 82.0
+offset_bottom = 90.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Fallback" type="Label" parent="TeamSlots/Member2Slot" unique_id=1182497416]
+visible = false
+layout_mode = 0
+offset_top = 16.0
+offset_right = 78.0
+offset_bottom = 84.0
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeaderBadge" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=2065459914]
+visible = false
+layout_mode = 0
+
+[node name="LeaderText" type="Label" parent="TeamSlots/Member2Slot" unique_id=1086156895]
+visible = false
+layout_mode = 0
+
+[node name="Selection" type="Panel" parent="TeamSlots/Member2Slot" unique_id=2133127440]
+visible = false
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 160.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
+
+[node name="Label" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=1537775982]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 121.0
+offset_right = 77.0
+offset_bottom = 149.0
+mouse_filter = 2
+texture = ExtResource("10_pedestal_label")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="TeamSlots/Member2Slot/Label" unique_id=182534648]
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 0.88, 0.66, 1)
+theme_override_font_sizes/font_size = 13
+text = "右位"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PowerPanel" type="TextureRect" parent="." unique_id=1510107033]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 351.0
+offset_right = 361.0
+offset_bottom = 417.0
+mouse_filter = 2
+texture = ExtResource("11_panel")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="PowerPanel" unique_id=1809100780]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 148.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.38, 0.21, 0.07, 1)
+theme_override_font_sizes/font_size = 14
+text = "Team Power"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="PowerPanel" unique_id=673538010]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 28.0
+offset_right = 47.0
+offset_bottom = 57.0
+mouse_filter = 2
+texture = ExtResource("18_nav_battle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Power" type="Label" parent="PowerPanel" unique_id=1124050440]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 26.0
+offset_right = 145.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(0.92, 0.32, 0.08, 1)
+theme_override_font_sizes/font_size = 25
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stats" type="Control" parent="PowerPanel" unique_id=979237984]
+anchors_preset = 0
+offset_right = 347.0
+offset_bottom = 66.0
+mouse_filter = 2
+
+[node name="Hp" type="Control" parent="PowerPanel/Stats" unique_id=57738706]
+anchors_preset = 0
+offset_left = 144.0
+offset_top = 20.0
+offset_right = 198.0
+offset_bottom = 54.0
+
+[node name="Icon" type="TextureRect" parent="PowerPanel/Stats/Hp" unique_id=725789058]
+layout_mode = 0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+texture = ExtResource("6_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PowerPanel/Stats/Hp" unique_id=840209688]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 58.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.33, 0.19, 0.07, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Atk" type="Control" parent="PowerPanel/Stats" unique_id=573232030]
+anchors_preset = 0
+offset_left = 200.0
+offset_top = 20.0
+offset_right = 254.0
+offset_bottom = 54.0
+
+[node name="Icon" type="TextureRect" parent="PowerPanel/Stats/Atk" unique_id=1174707904]
+layout_mode = 0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+texture = ExtResource("18_nav_battle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PowerPanel/Stats/Atk" unique_id=1996291583]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 58.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.33, 0.19, 0.07, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Def" type="Control" parent="PowerPanel/Stats" unique_id=362535730]
+anchors_preset = 0
+offset_left = 254.0
+offset_top = 20.0
+offset_right = 308.0
+offset_bottom = 54.0
+
+[node name="Icon" type="TextureRect" parent="PowerPanel/Stats/Def" unique_id=192716823]
+layout_mode = 0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+texture = ExtResource("23_def")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PowerPanel/Stats/Def" unique_id=1878570816]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 58.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.33, 0.19, 0.07, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spd" type="Control" parent="PowerPanel/Stats" unique_id=893159796]
+anchors_preset = 0
+offset_left = 303.0
+offset_top = 20.0
+offset_right = 347.0
+offset_bottom = 54.0
+
+[node name="Icon" type="TextureRect" parent="PowerPanel/Stats/Spd" unique_id=1939758339]
+layout_mode = 0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+texture = ExtResource("24_spd")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="PowerPanel/Stats/Spd" unique_id=1831653168]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 50.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.33, 0.19, 0.07, 1)
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RosterPanel" type="TextureRect" parent="." unique_id=1699353568]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 420.0
+offset_right = 361.0
+offset_bottom = 548.0
+mouse_filter = 2
+texture = ExtResource("11_panel")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="RosterPanel" unique_id=768518960]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 8.0
+offset_right = 275.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(0.38, 0.21, 0.07, 1)
+theme_override_font_sizes/font_size = 20
+text = "Choose Pets"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="RosterPanel" unique_id=1469103548]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 2.0
+offset_right = 273.0
+offset_bottom = 18.0
+theme_override_colors/font_color = Color(0.48, 0.27, 0.09, 1)
+theme_override_font_sizes/font_size = 10
+text = "选择精灵加入队伍"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EmptyLabel" type="Label" parent="RosterPanel" unique_id=1090692960]
+layout_mode = 0
+offset_left = 67.0
+offset_top = 58.0
+offset_right = 274.0
+offset_bottom = 81.0
+theme_override_colors/font_color = Color(0.5, 0.31, 0.14, 1)
+theme_override_font_sizes/font_size = 14
+text = "暂无可编队精灵"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Cards" type="Control" parent="RosterPanel" unique_id=356217972]
+anchors_preset = 0
+offset_right = 347.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+[node name="Card1" type="TextureButton" parent="RosterPanel/Cards" unique_id=1505644062]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 17.0
+offset_top = 36.0
+offset_right = 70.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card1" unique_id=900274124]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card1" unique_id=925805966]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card1" unique_id=571217801]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card1" unique_id=614892046]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card2" type="TextureButton" parent="RosterPanel/Cards" unique_id=1792814723]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 74.0
+offset_top = 36.0
+offset_right = 127.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card2" unique_id=977174940]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card2" unique_id=1464526428]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card2" unique_id=357235318]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card2" unique_id=281328799]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card3" type="TextureButton" parent="RosterPanel/Cards" unique_id=510328015]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 131.0
+offset_top = 36.0
+offset_right = 184.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card3" unique_id=57448657]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card3" unique_id=671381026]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card3" unique_id=1261810820]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card3" unique_id=919030829]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card4" type="TextureButton" parent="RosterPanel/Cards" unique_id=1956369834]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 188.0
+offset_top = 36.0
+offset_right = 241.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card4" unique_id=1670963256]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card4" unique_id=56608811]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card4" unique_id=444541229]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card4" unique_id=1021574191]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card5" type="TextureButton" parent="RosterPanel/Cards" unique_id=1490759725]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 245.0
+offset_top = 36.0
+offset_right = 298.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card5" unique_id=1682855732]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card5" unique_id=456652416]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card5" unique_id=1256552406]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card5" unique_id=2082951979]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Card6" type="TextureButton" parent="RosterPanel/Cards" unique_id=771879513]
+modulate = Color(1, 1, 1, 0.42)
+layout_mode = 0
+offset_left = 302.0
+offset_top = 36.0
+offset_right = 355.0
+offset_bottom = 116.0
+pivot_offset = Vector2(26.5, 40)
+disabled = true
+
+[node name="Frame" type="TextureRect" parent="RosterPanel/Cards/Card6" unique_id=1760971978]
+layout_mode = 0
+offset_right = 53.0
+offset_bottom = 80.0
+mouse_filter = 2
+texture = ExtResource("12_roster_card")
+expand_mode = 1
+
+[node name="Portrait" type="TextureRect" parent="RosterPanel/Cards/Card6" unique_id=646712654]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 7.0
+offset_right = 47.0
+offset_bottom = 50.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Check" type="TextureRect" parent="RosterPanel/Cards/Card6" unique_id=1545860098]
+visible = false
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 54.0
+offset_bottom = 75.0
+mouse_filter = 2
+texture = ExtResource("13_check")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Level" type="Label" parent="RosterPanel/Cards/Card6" unique_id=1379830234]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 53.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PageControls" type="Control" parent="RosterPanel" unique_id=1092560752]
+anchors_preset = 0
+offset_left = 56.0
+offset_top = 133.0
+offset_right = 291.0
+offset_bottom = 171.0
+
+[node name="PreviousButton" type="TextureButton" parent="RosterPanel/PageControls" unique_id=1511015937]
+layout_mode = 0
+offset_right = 38.0
+offset_bottom = 38.0
+pivot_offset = Vector2(19, 19)
+
+[node name="Icon" type="TextureRect" parent="RosterPanel/PageControls/PreviousButton" unique_id=1989928742]
+layout_mode = 0
+offset_right = 38.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("21_page_prev")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PageLabel" type="Label" parent="RosterPanel/PageControls" unique_id=904343387]
+layout_mode = 0
+offset_left = 56.0
+offset_right = 179.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.46, 0.26, 0.08, 1)
+theme_override_font_sizes/font_size = 12
+text = "1 / 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextButton" type="TextureButton" parent="RosterPanel/PageControls" unique_id=1039668682]
+layout_mode = 0
+offset_left = 197.0
+offset_right = 235.0
+offset_bottom = 38.0
+pivot_offset = Vector2(19, 19)
+
+[node name="Icon" type="TextureRect" parent="RosterPanel/PageControls/NextButton" unique_id=928960771]
+layout_mode = 0
+offset_right = 38.0
+offset_bottom = 38.0
+mouse_filter = 2
+texture = ExtResource("22_page_next")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomNav" type="TextureRect" parent="." unique_id=625178228]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 602.0
+offset_right = 368.0
+offset_bottom = 663.0
+mouse_filter = 2
+texture = ExtResource("14_nav_panel")
+expand_mode = 1
+
+[node name="HomeButton" type="TextureButton" parent="BottomNav" unique_id=1951983990]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 77.0
+offset_bottom = 56.0
+pivot_offset = Vector2(32.5, 23)
+
+[node name="Selected" type="TextureRect" parent="BottomNav/HomeButton" unique_id=1655751836]
+visible = false
+layout_mode = 0
+offset_left = 4.0
+offset_top = -7.0
+offset_right = 61.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("15_nav_selected")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomNav/HomeButton" unique_id=603951333]
+layout_mode = 0
+offset_left = 17.0
+offset_top = -2.0
+offset_right = 48.0
+offset_bottom = 29.0
+mouse_filter = 2
+texture = ExtResource("16_nav_home")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/HomeButton" unique_id=2134495647]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 65.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "主页"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PetsButton" type="TextureButton" parent="BottomNav" unique_id=652899754]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 10.0
+offset_right = 145.0
+offset_bottom = 56.0
+pivot_offset = Vector2(32.5, 23)
+
+[node name="Selected" type="TextureRect" parent="BottomNav/PetsButton" unique_id=1393678556]
+visible = false
+layout_mode = 0
+offset_left = 4.0
+offset_top = -7.0
+offset_right = 61.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("15_nav_selected")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomNav/PetsButton" unique_id=1328514479]
+layout_mode = 0
+offset_left = 17.0
+offset_top = -2.0
+offset_right = 48.0
+offset_bottom = 29.0
+mouse_filter = 2
+texture = ExtResource("17_nav_pets")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/PetsButton" unique_id=1192010344]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 65.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "农场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BattleButton" type="TextureButton" parent="BottomNav" unique_id=868325627]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 10.0
+offset_right = 213.0
+offset_bottom = 56.0
+pivot_offset = Vector2(32.5, 23)
+
+[node name="Selected" type="TextureRect" parent="BottomNav/BattleButton" unique_id=1012001863]
+layout_mode = 0
+offset_left = 4.0
+offset_top = -7.0
+offset_right = 61.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("15_nav_selected")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomNav/BattleButton" unique_id=2076222304]
+layout_mode = 0
+offset_left = 17.0
+offset_top = -2.0
+offset_right = 48.0
+offset_bottom = 29.0
+mouse_filter = 2
+texture = ExtResource("18_nav_battle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/BattleButton" unique_id=1688770703]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 65.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "战场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ShopButton" type="TextureButton" parent="BottomNav" unique_id=1145433387]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 10.0
+offset_right = 281.0
+offset_bottom = 56.0
+pivot_offset = Vector2(32.5, 23)
+
+[node name="Selected" type="TextureRect" parent="BottomNav/ShopButton" unique_id=650885347]
+visible = false
+layout_mode = 0
+offset_left = 4.0
+offset_top = -7.0
+offset_right = 61.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("15_nav_selected")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomNav/ShopButton" unique_id=1700056521]
+layout_mode = 0
+offset_left = 17.0
+offset_top = -2.0
+offset_right = 48.0
+offset_bottom = 29.0
+mouse_filter = 2
+texture = ExtResource("19_nav_shop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/ShopButton" unique_id=631252591]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 65.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "商店"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MenuButton" type="TextureButton" parent="BottomNav" unique_id=1422549145]
+layout_mode = 0
+offset_left = 284.0
+offset_top = 10.0
+offset_right = 349.0
+offset_bottom = 56.0
+pivot_offset = Vector2(32.5, 23)
+
+[node name="Selected" type="TextureRect" parent="BottomNav/MenuButton" unique_id=168400924]
+visible = false
+layout_mode = 0
+offset_left = 4.0
+offset_top = -7.0
+offset_right = 61.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("15_nav_selected")
+expand_mode = 1
+
+[node name="Icon" type="TextureRect" parent="BottomNav/MenuButton" unique_id=795955031]
+layout_mode = 0
+offset_left = 17.0
+offset_top = -2.0
+offset_right = 48.0
+offset_bottom = 29.0
+mouse_filter = 2
+texture = ExtResource("20_nav_menu")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/MenuButton" unique_id=1073297565]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 65.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.32, 0.18, 0.06, 1)
+theme_override_font_sizes/font_size = 12
+text = "菜单"
+horizontal_alignment = 1
+vertical_alignment = 1

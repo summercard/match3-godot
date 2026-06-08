@@ -1,9 +1,9 @@
 # ============================================
-# ui/scene/scene_evolve.gd - 怪物进化场景
+# ui/scene/scene_evolve.gd - 精灵进化场景
 # 翻译自: js/ui/sceneEvolve.js
 # 重构: 纯代码驱动，删除所有 @onready
 # ============================================
-# 怪物进化界面，支持：
+# 精灵进化界面，支持：
 # - 进化素材选择（优先通过instanceId传入，兼容monsterId）
 # - 进化预览（前后对比）
 # - 进化条件检查（等级+道具）
@@ -278,7 +278,7 @@ func init(data: Dictionary = {}) -> void:
 	}
 	evolution_report = {}
 
-	# 获取怪物数据
+	# 获取精灵数据
 	var MonsterDB = load("res://src/data/monster_db.gd")
 	if monster_id and MonsterDB:
 		monster_data = MonsterDB.get_monster(monster_id).duplicate()
@@ -348,7 +348,7 @@ func _update_monster_card(container: VBoxContainer, data: Dictionary) -> void:
 		container.add_child(empty)
 		return
 
-	# 怪物卡片面板
+	# 精灵卡片面板
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(120, 140)
 
@@ -584,9 +584,9 @@ func _execute_evolution() -> void:
 			return
 		evolution_report = result.get("evolutionReport", {})
 	else:
-		# 兼容旧入口：没有实例时不再直接改写 captured/team/pokedex，避免破坏怪物池。
+		# 兼容旧入口：没有实例时不再直接改写 captured/team/pokedex，避免破坏精灵池。
 		can_evolve = false
-		condition_text = "缺少怪物实例"
+		condition_text = "缺少精灵实例"
 		_update_condition()
 		return
 
@@ -619,7 +619,7 @@ func _update_complete_ui() -> void:
 	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
 	_complete_vbox.add_child(title)
 
-	# 进化后的怪物卡片
+	# 进化后的精灵卡片
 	_update_monster_card_to_container(_complete_vbox, evolved_monster)
 
 	# 属性变化

@@ -3,6 +3,8 @@ class_name SceneResultGui
 extends "res://src/ui/scene/scene_result.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
+const ResultConfettiLayerScript := preload("res://src/ui/components/result_confetti_layer.gd")
 
 const STAR_PATHS := ["StarRow/Star1", "StarRow/Star2", "StarRow/Star3"]
 const REWARD_SLOT_PATHS := [
@@ -30,12 +32,15 @@ const NORMAL_RESULT_NODES := [
 
 var _capture_success_time := 0.0
 var _capture_success_last_visible := false
+var _win_confetti_layer: Control = null
 
 func _ready() -> void:
 	name = "SceneResult"
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(true)
+	_setup_win_confetti_fx()
+	CartoonTypographyScript.apply(self, "lobby")
 	_connect_gui_actions()
 	_sync_gui()
 
@@ -58,12 +63,30 @@ func _gui_input(_event: InputEvent) -> void:
 	pass
 
 func _connect_gui_actions() -> void:
-	_connect_button("Buttons/BackButton", _on_back_btn_pressed)
-	_connect_button("Buttons/NextButton", _on_next_btn_pressed)
-	_connect_button("Buttons/RetryButton", _on_retry_btn_pressed)
+	_connect_button("Buttons/BackButton", _on_result_back_pressed)
+	_connect_button("Buttons/NextButton", _on_result_next_pressed)
+	_connect_button("Buttons/RetryButton", _on_result_retry_pressed)
 	_connect_button("CaptureSuccessLayer/Buttons/ConfirmButton", _on_capture_confirm_pressed)
 	_connect_button("CaptureSuccessLayer/Buttons/ViewDexButton", _on_capture_dex_pressed)
 	_attach_gui_feedback()
+
+func _setup_win_confetti_fx() -> void:
+	var win_fx := get_node_or_null("WinFx") as Control
+	if win_fx == null:
+		return
+	for path in ["ConfettiLeft", "ConfettiRight"]:
+		var legacy := win_fx.get_node_or_null(path) as CanvasItem
+		if legacy != null:
+			legacy.visible = false
+	_win_confetti_layer = ResultConfettiLayerScript.new()
+	_win_confetti_layer.name = "ConfettiFx"
+	_win_confetti_layer.z_index = 3
+	_win_confetti_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_win_confetti_layer.offset_left = 0.0
+	_win_confetti_layer.offset_top = 0.0
+	_win_confetti_layer.offset_right = 0.0
+	_win_confetti_layer.offset_bottom = 0.0
+	win_fx.add_child(_win_confetti_layer)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -83,7 +106,7 @@ func _attach_gui_feedback() -> void:
 			continue
 		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 		button.add_child(feedback)
-		var profile := CartoonButtonFeedback.Profile.PRIMARY if path.contains("CaptureSuccessLayer") else CartoonButtonFeedback.Profile.NAV
+		var profile := CartoonButtonFeedback.Profile.PRIMARY if path.begins_with("Buttons/") or path.contains("CaptureSuccessLayer") else CartoonButtonFeedback.Profile.NAV
 		feedback.setup(button, profile)
 
 func _should_show_capture_success() -> bool:
@@ -234,15 +257,9 @@ func _sync_battle_info() -> void:
 	var turn_count := int(_battle_result.get("turnCount", 0))
 	var max_turns := int(_battle_result.get("maxTurns", 20))
 	_label("BattleInfo/TurnLabel").text = "回合 %d / %d" % [turn_count, max_turns]
-	var enemies: Array = _battle_result.get("enemies", [])
-	var defeated := enemies.filter(func(e): return e and int(e.get("hp", 0)) <= 0)
-	var alive := enemies.filter(func(e): return e and int(e.get("hp", 0)) > 0)
-	if not defeated.is_empty():
-		_label("BattleInfo/EnemyLabel").text = "击败：" + " / ".join(defeated.map(func(e): return str(e.get("name", e.get("emoji", "")))))
-	elif not alive.is_empty():
-		_label("BattleInfo/EnemyLabel").text = "仍在场：" + " / ".join(alive.map(func(e): return str(e.get("name", e.get("emoji", "")))))
-	else:
-		_label("BattleInfo/EnemyLabel").text = ""
+	var enemy_label := _label("BattleInfo/EnemyLabel")
+	enemy_label.text = ""
+	enemy_label.visible = false
 
 func _sync_capture_panel() -> void:
 	var panel := _node("CaptureResultPanel")
@@ -321,16 +338,8 @@ func _sync_exp_panel() -> void:
 		(card.get_node("Exp") as Label).text = exp_text
 
 func _sync_levelups() -> void:
-	_node("LevelUpPanel").visible = not _level_ups.is_empty()
-	_node("SweepUnlocked").visible = _stars >= 3 and _level_ups.is_empty()
-	if _level_ups.is_empty():
-		return
-	var first: Dictionary = _level_ups[0]
-	_label("LevelUpPanel/Text").text = "%s Lv.%d -> Lv.%d" % [
-		str(first.get("monsterId", "?")),
-		int(first.get("oldLevel", 0)),
-		int(first.get("newLevel", 0)),
-	]
+	_node("LevelUpPanel").visible = false
+	_node("SweepUnlocked").visible = false
 
 func _sync_buttons() -> void:
 	_node("Buttons/BackButton").visible = _is_win or _has_next_stage
@@ -339,6 +348,15 @@ func _sync_buttons() -> void:
 	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else ("返回关卡" if _is_win else "重试")
 	_label("Buttons/NextButton/Text").text = "下一关"
 	_label("Buttons/RetryButton/Text").text = "再来一次" if _is_win else "重试"
+
+func _on_result_back_pressed() -> void:
+	_run_after_result_button_feedback(func(): _on_back_btn_pressed())
+
+func _on_result_next_pressed() -> void:
+	_run_after_result_button_feedback(func(): _on_next_btn_pressed())
+
+func _on_result_retry_pressed() -> void:
+	_run_after_result_button_feedback(func(): _on_retry_btn_pressed())
 
 func _on_capture_confirm_pressed() -> void:
 	_run_after_capture_button_feedback(func(): _on_back_btn_pressed())
@@ -354,6 +372,9 @@ func _on_capture_dex_pressed() -> void:
 	)
 
 func _run_after_capture_button_feedback(action: Callable) -> void:
+	_run_after_result_button_feedback(action)
+
+func _run_after_result_button_feedback(action: Callable) -> void:
 	var tree := get_tree()
 	if tree == null:
 		action.call()

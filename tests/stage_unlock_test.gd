@@ -38,6 +38,30 @@ func _run() -> void:
 	_expect(save_manager.is_stage_unlocked("stage_2_4e"), "elite branch should unlock from the previous main stage")
 	_expect(save_manager.is_stage_unlocked("stage_2_5"), "boss should not require optional elite clear")
 
+	save_manager.clear_all_data()
+	save_manager.save_player({
+		"level": 1,
+		"gold": 0,
+		"gems": 0,
+		"exp": 0,
+		"team": ["monster_001", "monster_002", "monster_003"],
+		"captured": ["monster_001", "monster_002", "monster_003"],
+		"monster_pool": [],
+		"monsterPoolVersion": 0,
+		"stageProgress": {"chapter": 2, "stage": 1},
+		"pokedex": {}
+	})
+	_expect(save_manager.is_stage_unlocked("stage_2_1"), "legacy player progress should unlock the first stage of chapter 2")
+	_expect(save_manager.is_stage_cleared("stage_1_5"), "legacy player progress should migrate cleared prerequisite stages")
+
+	save_manager.clear_all_data()
+	save_manager.save_stage_stars("stage_1_1", 3)
+	var player: Dictionary = save_manager.load_player()
+	player["stageProgress"] = {"chapter": 1, "stage": 3}
+	save_manager.save_player(player)
+	_expect(save_manager.get_stage_stars("stage_1_1") == 3, "legacy migration should not lower existing stars")
+	_expect(save_manager.is_stage_unlocked("stage_1_3"), "legacy progress should merge missing cleared stages with existing stage progress")
+
 	_finish()
 
 

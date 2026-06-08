@@ -3,7 +3,7 @@
 # 翻译自: minigame-1/js/ui/sceneBattlePrepare.js
 # ============================================
 # 核心职责：
-# - 队伍编辑（怪物选择 / 排序）
+# - 队伍编辑（精灵选择 / 排序）
 # - 阵型选择（攻击 / 防御 / 平衡）
 # - 战斗道具携带
 # - 开始战斗按钮
@@ -42,33 +42,38 @@ const BTN_Y := 593.0
 
 ## 战斗准备美术资产
 const PREPARE_ASSETS := {
-	"bg": "res://assets/images/battle_flow_new/battle_garden_ruins_bg_blur.png",
-	"back_button": "res://assets/images/battle_flow_new/ui/ui_pill_blue.png",
+	"bg": "res://assets/images/battle_prepare_new/background/bg_battle_prepare_garden.png",
+	"back_button": "res://assets/images/battle_prepare_new/ui/ui_back_button.png",
 	"back_arrow": "res://assets/images/battle_flow_new/icons/icon_back_arrow.png",
-	"header": "res://assets/images/battle_flow_new/ui/ui_prepare_wood_banner.png",
-	"team_card": "res://assets/images/battle_flow_new/ui/ui_monster_card.png",
-	"enemy_card": "res://assets/images/battle_flow_new/ui/ui_monster_card.png",
-	"power_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
-	"info_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
-	"synergy_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
-	"start_button": "res://assets/images/battle_flow_new/ui/ui_battle_start_button_new.png",
-	"start_button_ready": "res://assets/images/battle_flow_new/ui/ui_battle_start_button_new.png",
-	"start_button_disabled": "res://assets/images/battle_flow_new/ui/ui_btn_blue.png",
-	"alert_panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
-	"reward_slot": "res://assets/images/battle_flow_new/ui/ui_reward_card.png",
-	"chip": "res://assets/images/battle_flow_new/ui/ui_pill_blue.png",
+	"currency_chip": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
+	"diamond": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
+	"heart": "res://assets/images/ranch/fx_social_heart.png",
+	"plus": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
+	"settings": "res://assets/images/main/lobby_refresh/ui_settings_button_v3.png",
+	"header": "res://assets/images/battle_prepare_new/ui/ui_prepare_header.png",
+	"team_card": "res://assets/images/battle_prepare_new/ui/ui_monster_card.png",
+	"enemy_card": "res://assets/images/battle_prepare_new/ui/ui_monster_card.png",
+	"power_panel": "res://assets/images/battle_prepare_new/ui/ui_power_panel.png",
+	"info_panel": "res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png",
+	"synergy_panel": "res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png",
+	"start_button": "res://assets/images/battle_prepare_new/ui/ui_start_button.png",
+	"start_button_ready": "res://assets/images/battle_prepare_new/ui/ui_start_button.png",
+	"start_button_disabled": "res://assets/images/battle_prepare_new/ui/ui_start_button.png",
+	"alert_panel": "res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png",
+	"reward_slot": "res://assets/images/battle_prepare_new/ui/ui_reward_slot.png",
+	"chip": "res://assets/images/battle_prepare_new/ui/ui_reward_slot.png",
 	"sword": "res://assets/images/battle_flow_new/icons/icon_sword_cross.png",
-	"gold": "res://assets/images/battle_flow_new/icons/icon_gold_coin.png",
-	"exp": "res://assets/images/battle_flow_new/icons/icon_exp_badge.png",
-	"capture_ball": "res://assets/images/battle_flow_new/icons/icon_capture_ball.png",
+	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
+	"exp": "res://assets/images/items_new/icon_exp_potion.png",
+	"capture_ball": "res://assets/images/items_new/icon_capture_ball.png",
 }
 
 const ELEMENT_ICON_ASSETS := {
-	"fire": "res://assets/images/battle_flow_new/icons/icon_element_fire.png",
-	"water": "res://assets/images/battle_flow_new/icons/icon_element_water.png",
-	"grass": "res://assets/images/battle_flow_new/icons/icon_element_grass.png",
-	"thunder": "res://assets/images/battle_flow_new/icons/icon_element_thunder.png",
-	"light": "res://assets/images/battle_flow_new/icons/icon_element_light.png",
+	"fire": "res://assets/images/stage/icon_gem_fire.png",
+	"water": "res://assets/images/stage/icon_gem_water.png",
+	"grass": "res://assets/images/stage/icon_gem_grass.png",
+	"thunder": "res://assets/images/stage/icon_gem_thunder.png",
+	"light": "res://assets/images/stage/icon_gem_light.png",
 }
 
 ## 单例
@@ -486,7 +491,7 @@ func _render_player_team() -> void:
 		_draw_card_border(Rect2(x + 2.0, card_y + 2.0, card_w - 4.0, card_h - 4.0), 1.5, Color(elem_color.r, elem_color.g, elem_color.b, 0.85))
 		
 		_draw_monster_portrait(monster, Rect2(x + 22.0, card_y + 9.0, 52.0, 50.0))
-		_draw_text_with_shadow(monster.get("name", "怪物"), x + card_w / 2.0, card_y + 70.0, C["white"], FONT_SIZES["small"], true, card_w - 12.0)
+		_draw_text_with_shadow(monster.get("name", "精灵"), x + card_w / 2.0, card_y + 70.0, C["white"], FONT_SIZES["small"], true, card_w - 12.0)
 		
 		# 属性标签
 		_draw_element_badge(board_affinity, x + 9.0, card_y + 80.0)

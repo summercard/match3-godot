@@ -6,7 +6,7 @@ class_name LeaderSkillDb
 extends RefCounted
 
 # 队长技能数据库（17个技能）
-# ★3(稀有)及以上的怪物才拥有队长技能
+# ★3(稀有)及以上的精灵才拥有队长技能
 # 队长 = 队伍第1个槽位（index 0），被动效果持续整场战斗
 const LEADER_SKILLS: Dictionary = {
 	# ===== 属性攻击加成：同属性宝石伤害+30% =====

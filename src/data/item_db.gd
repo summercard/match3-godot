@@ -5,13 +5,13 @@
 class_name ItemDB
 extends RefCounted
 
-# 道具数据库（16个道具）
+# 道具数据库（15个道具）
 const ITEMS_DB: Dictionary = {
 	# ========== 捕获相关 ==========
 	"capture_ball": {
 		"id": "capture_ball",
 		"name": "捕获球",
-		"desc": "增加收服怪物的概率",
+		"desc": "增加收服精灵的概率",
 		"type": "capture",
 		"emoji": "🔴",
 		"rarity": 1,
@@ -141,7 +141,7 @@ const ITEMS_DB: Dictionary = {
 	"evolution_stone_earth": {
 		"id": "evolution_stone_earth",
 		"name": "土之进化石",
-		"desc": "土属性怪物进化所需",
+		"desc": "土属性精灵进化所需",
 		"type": "evolution",
 		"emoji": "🪨",
 		"rarity": 2,
@@ -150,7 +150,7 @@ const ITEMS_DB: Dictionary = {
 	"evolution_stone_wind": {
 		"id": "evolution_stone_wind",
 		"name": "风之进化石",
-		"desc": "风属性怪物进化所需",
+		"desc": "风属性精灵进化所需",
 		"type": "evolution",
 		"emoji": "🌪️",
 		"rarity": 2,
@@ -159,7 +159,7 @@ const ITEMS_DB: Dictionary = {
 	"evolution_stone_dark": {
 		"id": "evolution_stone_dark",
 		"name": "暗之进化石",
-		"desc": "暗属性怪物进化所需",
+		"desc": "暗属性精灵进化所需",
 		"type": "evolution",
 		"emoji": "🌑",
 		"rarity": 2,

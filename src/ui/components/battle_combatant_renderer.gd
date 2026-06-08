@@ -8,6 +8,8 @@ static func draw_enemies(scene, battle, state: Dictionary) -> void:
 		return
 	if battle.enemies.size() == 1:
 		var enemy: Dictionary = battle.enemies[0]
+		if enemy == null:
+			return
 		draw_enemy_stage(scene, battle, state, enemy.get("name", "敌人"), maxi(enemy.get("hp", 0), 0), maxi(enemy.get("maxHP", 1), 1), enemy)
 		return
 	var enemy_count: int = mini(battle.enemies.size(), 3)
@@ -23,6 +25,10 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
 	var is_boss: bool = enemy.get("isBoss", false)
+	if hp <= 0:
+		var defeat_y: float = 176.0 if is_boss else 170.0
+		_ensure_enemy_defeat_fx(scene, state, 0, Vector2(design_w / 2.0, defeat_y), colors.get("danger", Color.RED))
+		return
 	scene._draw_text_with_shadow(name, design_w / 2.0, 83.0, colors.get("text_primary", Color.WHITE), 13.0, true)
 	scene._draw_hp_bar(196.0, 91.0, 150.0, 14.0, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
 	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], 271.0, 102.0, colors.get("white", Color.WHITE), 8.0, true)
@@ -30,7 +36,7 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	if monster_tex:
 		var boss_scale: float = 170.0 if is_boss else 128.0
 		var monster_y: float = 104.0 if is_boss else 111.0
-		scene._draw_texture_contain(monster_tex, Rect2(design_w / 2.0 - boss_scale / 2.0, monster_y + sin(idle_time * TAU / 1.8) * 3.0, boss_scale, boss_scale), 1.0 if hp > 0 else 0.35)
+		scene._draw_texture_contain(monster_tex, Rect2(design_w / 2.0 - boss_scale / 2.0, monster_y + sin(idle_time * TAU / 1.8) * 3.0, boss_scale, boss_scale), 1.0)
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), design_w / 2.0, 168.0, colors.get("white", Color.WHITE), 50.0)
 	_draw_boss_visuals(scene, state, design_w / 2.0 - 55.0, 120.0, 0, hp)
@@ -44,23 +50,21 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 	var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == index)
 	var has_flash: bool = flash.size() > 0
 	var cx: float = x + slot_w / 2.0
+	if hp <= 0:
+		_ensure_enemy_defeat_fx(scene, state, index, Vector2(cx, y + 48.0), colors.get("danger", Color.RED))
+		return
 	if has_flash:
 		var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.6
 		_draw_hit_spark(scene, Vector2(cx, y + 42.0), 82.0, flash_alpha)
 
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
-		scene._draw_texture_contain(monster_tex, Rect2(cx - sprite_size / 2.0, y + 11.0 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, sprite_size, sprite_size), 1.0 if hp > 0 else 0.35)
+		scene._draw_texture_contain(monster_tex, Rect2(cx - sprite_size / 2.0, y + 11.0 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, sprite_size, sprite_size), 1.0)
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), cx, y + 43.0, colors.get("white", Color.WHITE), 34.0)
 	scene._draw_text_with_shadow(name, cx, y + 14.0, colors.get("text_primary", Color.WHITE), 10.4, true)
 	scene._draw_hp_bar(x + 7.0, y + 80.0, slot_w - 14.0, 10.0, float(hp), float(max_hp), colors.get("danger", Color.RED))
 	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], cx, y + 89.0, colors.get("white", Color.WHITE), 7.4, true)
-
-	var defeated_enemies: Array = state.get("defeated_enemies", [])
-	if hp <= 0 and not defeated_enemies.has(index):
-		defeated_enemies.append(index)
-		scene._spawn_defeat_particles(cx, y + 48.0, colors.get("danger", Color.RED))
 
 	_draw_boss_visuals(scene, state, x, y, index, hp)
 	_draw_enemy_status(scene, battle, state, x, y, index, hp, slot_w)
@@ -203,6 +207,13 @@ static func _draw_enemy_status(scene, battle, state: Dictionary, x: float, y: fl
 	status_color.a = blink_alpha
 	scene._draw_text_with_shadow("%s%d" % [emoji, turns], x + card_w - 10.0, y - 2.0, status_color, 11.0)
 
+static func _ensure_enemy_defeat_fx(scene, state: Dictionary, index: int, center: Vector2, color: Color) -> void:
+	var defeated_enemies: Array = state.get("defeated_enemies", [])
+	if defeated_enemies.has(index):
+		return
+	defeated_enemies.append(index)
+	scene._spawn_defeat_particles(center.x, center.y, color)
+
 static func draw_team(scene, battle, state: Dictionary) -> void:
 	if battle == null:
 		return
@@ -218,7 +229,12 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})
 	if battle.enemies.size() == 1:
 		var enemy: Dictionary = battle.enemies[0]
+		if enemy == null:
+			return
 		var hp: int = maxi(enemy.get("hp", 0), 0)
+		if hp <= 0:
+			_ensure_enemy_defeat_fx(scene, state, 0, Vector2(state.get("design_w", 375.0) / 2.0, 170.0), colors.get("danger", Color.RED))
+			return
 		_draw_boss_visuals(scene, state, state.get("design_w", 375.0) / 2.0 - 55.0, 120.0, 0, hp)
 		_draw_enemy_status(scene, battle, state, state.get("design_w", 375.0) / 2.0 - 55.0, 120.0, 0, hp, 110.0)
 	else:
@@ -232,14 +248,13 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 			var x: float = stage_slots[i].x
 			var y: float = stage_slots[i].y
 			var cx: float = x + 48.0
+			if hp <= 0:
+				_ensure_enemy_defeat_fx(scene, state, i, Vector2(cx, y + 48.0), colors.get("danger", Color.RED))
+				continue
 			var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == i)
 			if not flash.is_empty():
 				var flash_alpha: float = flash[0]["timer"] / flash[0]["maxTimer"] * 0.6
 				_draw_hit_spark(scene, Vector2(cx, y + 42.0), 82.0, flash_alpha)
-			var defeated_enemies: Array = state.get("defeated_enemies", [])
-			if hp <= 0 and not defeated_enemies.has(i):
-				defeated_enemies.append(i)
-				scene._spawn_defeat_particles(cx, y + 48.0, colors.get("danger", Color.RED))
 			_draw_boss_visuals(scene, state, x, y, i, hp)
 			_draw_enemy_status(scene, battle, state, x, y, i, hp, 96.0)
 	for i in range(mini(battle.player_team.size(), 3)):

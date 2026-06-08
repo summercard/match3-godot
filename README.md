@@ -1,6 +1,6 @@
-# Match3 Godot Mobile Game
+# 萌灵消消大冒险
 
-Godot 4.6 vertical mobile match-3 battle game with monster collection, team building, capture windows, stage mechanics, growth, evolution, ranch, shop, inventory, achievements, sign-in, and tutorial flows.
+Godot 4.6 vertical mobile match-3 battle game with spirit collection, team building, capture windows, stage mechanics, growth, evolution, ranch, shop, inventory, achievements, sign-in, and tutorial flows.
 
 ## Runtime Layout
 

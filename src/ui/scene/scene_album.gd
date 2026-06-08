@@ -1,4 +1,4 @@
-# scene_album.gd - 怪物图鉴场景
+# scene_album.gd - 精灵图鉴场景
 # 美术包装：image-2 拆分资产 + Canvas 绘制
 class_name SceneAlbum
 extends Control

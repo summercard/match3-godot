@@ -28,10 +28,11 @@
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ranch/icon_exp_badge.png" id="36_energy"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="37_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://bgqu7cmyj23b6" path="res://assets/images/album/ui_dex_bottom_nav_selected.png" id="38_nav_selected"]
-[ext_resource type="Texture2D" uid="uid://3gkursyvtld" path="res://assets/images/album/icon_dex_nav_album.png" id="40_pets"]
-[ext_resource type="Texture2D" uid="uid://kswiohbxlplg" path="res://assets/images/album/icon_dex_nav_bond.png" id="41_battle"]
-[ext_resource type="Texture2D" uid="uid://lis8ex81701o" path="res://assets/images/album/icon_dex_nav_goal.png" id="42_shop"]
-[ext_resource type="Texture2D" uid="uid://dyjbfmladd4un" path="res://assets/images/ranch/icon_menu_tab.png" id="43_menu"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_home.png" id="39_home"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_album.png" id="40_pets"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_bond.png" id="41_battle"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_goal.png" id="42_shop"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_menu.png" id="43_menu"]
 [ext_resource type="Texture2D" uid="uid://wmq7knkq0xkj" path="res://assets/images/album/ui_dex_page_prev.png" id="44_dex_prev"]
 [ext_resource type="Texture2D" uid="uid://b7b6342surasa" path="res://assets/images/album/ui_dex_page_next.png" id="45_dex_next"]
 [ext_resource type="Texture2D" uid="uid://b102vvut68pah" path="res://assets/images/album/portraits/monster_001_album_thumb.png" id="46_monster_001"]
@@ -323,9 +324,9 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_title")
 [node name="Title" type="Label" parent="Header" unique_id=727782132]
 layout_mode = 0
 offset_left = 91.0
-offset_top = 68.0
+offset_top = 71.0
 offset_right = 284.0
-offset_bottom = 106.0
+offset_bottom = 109.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
@@ -772,8 +773,6 @@ mouse_filter = 2
 
 [node name="Card1" type="TextureButton" parent="AlbumPage/Grid" unique_id=4729073]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 103.0
 offset_bottom = 158.0
 scale = Vector2(0.55, 0.55)
@@ -927,7 +926,6 @@ stretch_mode = 5
 [node name="Card2" type="TextureButton" parent="AlbumPage/Grid" unique_id=1903615037]
 layout_mode = 0
 offset_left = 68.0
-offset_top = 0.0
 offset_right = 171.0
 offset_bottom = 158.0
 scale = Vector2(0.55, 0.55)
@@ -1081,7 +1079,6 @@ stretch_mode = 5
 [node name="Card3" type="TextureButton" parent="AlbumPage/Grid" unique_id=1690346694]
 layout_mode = 0
 offset_left = 136.0
-offset_top = 0.0
 offset_right = 239.0
 offset_bottom = 158.0
 scale = Vector2(0.55, 0.55)
@@ -1235,7 +1232,6 @@ stretch_mode = 5
 [node name="Card4" type="TextureButton" parent="AlbumPage/Grid" unique_id=1227069289]
 layout_mode = 0
 offset_left = 204.0
-offset_top = 0.0
 offset_right = 307.0
 offset_bottom = 158.0
 scale = Vector2(0.55, 0.55)
@@ -1389,7 +1385,6 @@ stretch_mode = 5
 [node name="Card5" type="TextureButton" parent="AlbumPage/Grid" unique_id=1179121093]
 layout_mode = 0
 offset_left = 272.0
-offset_top = 0.0
 offset_right = 375.0
 offset_bottom = 158.0
 scale = Vector2(0.55, 0.55)
@@ -1542,7 +1537,6 @@ stretch_mode = 5
 
 [node name="Card6" type="TextureButton" parent="AlbumPage/Grid" unique_id=150639648]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 102.0
 offset_right = 103.0
 offset_bottom = 260.0
@@ -2312,7 +2306,6 @@ stretch_mode = 5
 
 [node name="Card11" type="TextureButton" parent="AlbumPage/Grid" unique_id=1065981800]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 204.0
 offset_right = 103.0
 offset_bottom = 362.0
@@ -5023,16 +5016,16 @@ pivot_offset = Vector2(33.5, 28.5)
 mouse_default_cursor_shape = 2
 flat = true
 
-[node name="Glyph" type="Label" parent="LobbyBottomNav/HomeButton" unique_id=310479679]
+[node name="Icon" type="TextureRect" parent="LobbyBottomNav/HomeButton" unique_id=310479679]
 layout_mode = 0
-offset_top = 2.0
-offset_right = 67.0
-offset_bottom = 33.0
-theme_override_colors/font_color = Color(0.52, 0.25, 0.05, 1)
-theme_override_font_sizes/font_size = 27
-text = "⌂"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 49.0
+offset_bottom = 35.0
+mouse_filter = 2
+texture = ExtResource("39_home")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/HomeButton" unique_id=1029839991]
 layout_mode = 0

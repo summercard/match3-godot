@@ -8,7 +8,7 @@ extends RefCounted
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
 const MonsterDbScript = preload("res://src/data/monster_db.gd")
 
-## 怪物收服逻辑：收服概率计算、战斗评价星级
+## 精灵收服逻辑：收服概率计算、战斗评价星级
 ## 作为工具类（静态方法），不需要 extends Node
 ## 使用 RefCounted 轻量对象
 
@@ -112,11 +112,11 @@ static func calc_taming_window(remaining_hp: float, max_hp: float, options: Dict
 ## 收服概率 = baseCaptureRate × (1 - currentHP/maxHP) × levelBonus
 ## levelBonus = 1 + (playerLevel - enemyLevel) × 0.05  (上限 1.5x)
 ##
-## @param remaining_hp - 怪物剩余血量
-## @param max_hp - 怪物最大血量
+## @param remaining_hp - 精灵剩余血量
+## @param max_hp - 精灵最大血量
 ## @param player_level - 玩家等级
 ## @param enemy_level - 敌人等级
-## @param rarity - 怪物稀有度 1-5
+## @param rarity - 精灵稀有度 1-5
 ## @param options - 额外选项字典
 ## @option stage_id - 当前关卡ID（用于新手保护）
 ## @option consecutive_fails - 连续收服失败次数

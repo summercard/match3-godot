@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dws8wae6sgtuq" path="res://assets/images/main/lobby_refresh/ui_player_status_card_v3.png" id="4_player_card"]
 [ext_resource type="Texture2D" uid="uid://dmkrosm0ge0ib" path="res://assets/images/main/lobby_refresh/icon_avatar_slime_v3.png" id="5_avatar"]
 [ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/main/lobby_refresh/icon_level_shield_v3.png" id="6_level"]
-[ext_resource type="Script" path="res://src/ui/components/lobby_experience_bar.gd" id="7_exp_bar"]
+[ext_resource type="Script" uid="uid://c2xy5uovk5uyv" path="res://src/ui/components/lobby_experience_bar.gd" id="7_exp_bar"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png" id="8_currency"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png" id="9_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="10_diamond"]
@@ -19,11 +19,11 @@
 [ext_resource type="Texture2D" uid="uid://dfkl83jl7tvt0" path="res://assets/images/main/lobby_refresh/ui_entry_ranch_v3.png" id="17_ranch_entry"]
 [ext_resource type="Texture2D" uid="uid://scamfhbqqsp3" path="res://assets/images/main/lobby_refresh/ui_start_adventure_v3.png" id="18_start"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="19_bottom_nav"]
-[ext_resource type="Texture2D" uid="uid://cm5qw1ps05mpl" path="res://assets/images/main/lobby_refresh/icon_album_book_v3.png" id="20_album"]
-[ext_resource type="Texture2D" uid="uid://cw6t51d6rrafl" path="res://assets/images/main/lobby_refresh/icon_inventory_bag_v3.png" id="21_inventory"]
-[ext_resource type="Texture2D" uid="uid://2s1cvrpev0p7" path="res://assets/images/main/lobby_refresh/icon_achievement_trophy_v3.png" id="22_achievement"]
-[ext_resource type="Texture2D" uid="uid://bgimnmu4qhwn" path="res://assets/images/main/lobby_refresh/icon_settings_gear_v3.png" id="23_settings_gear"]
-[ext_resource type="Texture2D" uid="uid://buogqmac3onxn" path="res://assets/images/main/lobby_refresh/icon_signin_calendar_v3.png" id="24_signin"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_album.png" id="20_album"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_inventory.png" id="21_inventory"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_achievement.png" id="22_achievement"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_settings.png" id="23_settings_gear"]
+[ext_resource type="Texture2D" path="res://assets/images/common_nav/icon_nav_signin.png" id="24_signin"]
 [ext_resource type="Texture2D" uid="uid://c68f3npcjpdk7" path="res://assets/images/main/ui_notification_dot_v2.png" id="25_notice"]
 
 [node name="MainLobby" type="Control" unique_id=194569078]
@@ -134,8 +134,8 @@ text = "28"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExperienceTrack" type="Control" parent="Header"]
-layout_mode = 0
+[node name="ExperienceTrack" type="Control" parent="Header" unique_id=911767861]
+anchors_preset = 0
 offset_left = 66.0
 offset_top = 38.0
 offset_right = 122.0
@@ -144,14 +144,13 @@ mouse_filter = 2
 
 [node name="ExperienceFill" type="Control" parent="Header" unique_id=878699461]
 unique_name_in_owner = true
-layout_mode = 0
+anchors_preset = 0
 offset_left = 66.0
 offset_top = 38.0
 offset_right = 122.0
 offset_bottom = 55.0
 mouse_filter = 2
 script = ExtResource("7_exp_bar")
-fill_color = Color(0.46, 0.86, 0.16, 1)
 
 [node name="ExpValue" type="Label" parent="Header" unique_id=623275096]
 unique_name_in_owner = true

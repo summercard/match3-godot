@@ -1,6 +1,7 @@
-@tool
 class_name SceneTeamGui
 extends "res://src/ui/scene/scene_team.gd"
+
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/team_new/bg_team_hall.png",
@@ -17,40 +18,41 @@ const GUI_ASSETS := {
 	"roster_card": "res://assets/images/ranch/ui_roster_card_ranch.png",
 	"roster_card_selected": "res://assets/images/ranch/ui_roster_card_ranch_selected.png",
 	"check": "res://assets/images/ranch/icon_check_badge.png",
-	"level_badge": "res://assets/images/ranch/ui_level_badge.png",
 	"nav_panel": "res://assets/images/ranch/ui_pet_farm_nav_panel.png",
 	"nav_selected": "res://assets/images/ranch/ui_pet_farm_nav_selected.png",
-	"nav_home": "res://assets/images/team_new/icon_nav_home.png",
-	"nav_pets": "res://assets/images/team_new/icon_nav_pets.png",
-	"nav_battle": "res://assets/images/team_new/icon_nav_battle.png",
-	"nav_shop": "res://assets/images/team_new/icon_nav_shop.png",
-	"nav_menu": "res://assets/images/ranch/icon_menu_tab.png",
+	"nav_home": "res://assets/images/common_nav/icon_nav_home.png",
+	"nav_pets": "res://assets/images/common_nav/icon_nav_pets.png",
+	"nav_battle": "res://assets/images/common_nav/icon_nav_battle.png",
+	"nav_shop": "res://assets/images/common_nav/icon_nav_shop.png",
+	"nav_menu": "res://assets/images/common_nav/icon_nav_menu.png",
 	"page_prev": "res://assets/images/ranch/ui_btn_previous_round.png",
 	"page_next": "res://assets/images/ranch/ui_btn_next_round.png",
 	"hp": "res://assets/images/ranch/fx_social_heart.png",
-	"atk": "res://assets/images/team_new/icon_nav_battle.png",
+	"atk": "res://assets/images/common_nav/icon_nav_battle.png",
 	"def": "res://assets/images/main/lobby_refresh/icon_level_shield_v3.png",
 	"spd": "res://assets/images/ranch/icon_exp_badge.png",
 }
 
 const GUI_ROSTER_PAGE_SIZE := 6
-const TEAM_SLOT_RECTS := {
-	"member1": Rect2(43.0, 188.0, 78.0, 160.0),
-	"leader": Rect2(128.0, 145.0, 119.0, 210.0),
-	"member2": Rect2(254.0, 188.0, 78.0, 160.0),
+const SLOT_PATHS := {
+	"member1": "TeamSlots/Member1Slot",
+	"leader": "TeamSlots/LeaderSlot",
+	"member2": "TeamSlots/Member2Slot",
 }
-const TEAM_SLOT_CENTERS := {
-	"member1": Vector2(82.0, 305.0),
-	"leader": Vector2(187.5, 294.0),
-	"member2": Vector2(293.0, 305.0),
-}
-const ROSTER_RECTS := [
-	Rect2(31.0, 505.0, 53.0, 80.0),
-	Rect2(88.0, 505.0, 53.0, 80.0),
-	Rect2(145.0, 505.0, 53.0, 80.0),
-	Rect2(202.0, 505.0, 53.0, 80.0),
-	Rect2(259.0, 505.0, 53.0, 80.0),
-	Rect2(316.0, 505.0, 53.0, 80.0),
+const ROSTER_PATHS := [
+	"RosterPanel/Cards/Card1",
+	"RosterPanel/Cards/Card2",
+	"RosterPanel/Cards/Card3",
+	"RosterPanel/Cards/Card4",
+	"RosterPanel/Cards/Card5",
+	"RosterPanel/Cards/Card6",
+]
+const NAV_PATHS := [
+	"BottomNav/HomeButton",
+	"BottomNav/PetsButton",
+	"BottomNav/BattleButton",
+	"BottomNav/ShopButton",
+	"BottomNav/MenuButton",
 ]
 const NAV_ITEMS := [
 	{"id": "home", "label": "主页", "icon": "nav_home", "scene": "main"},
@@ -60,82 +62,118 @@ const NAV_ITEMS := [
 	{"id": "menu", "label": "菜单", "icon": "nav_menu", "scene": "settings"},
 ]
 
-var _nav_rects: Array[Rect2] = []
-var _pressed_fx_rect := Rect2()
-var _pressed_fx_timer := 0.0
-var _pressed_fx_duration := 0.20
-
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	set_process(true)
+	set_process(false)
 	_update_slots_layout()
+	_connect_gui_actions()
+	_attach_gui_feedback()
+	_sync_gui()
+
+
+func init(data: Dictionary = {}) -> void:
+	super.init(data)
+	_sync_gui()
 
 
 func _process(delta: float) -> void:
-	super._process(delta)
-	if _pressed_fx_timer > 0.0:
-		_pressed_fx_timer = maxf(0.0, _pressed_fx_timer - delta)
-		queue_redraw()
+	_time_acc += delta
+	_sync_empty_slot_pulses()
+	if not _has_empty_slot():
+		set_process(false)
+
+
+func _draw() -> void:
+	pass
+
+
+func _gui_input(_event: InputEvent) -> void:
+	pass
 
 
 func _update_slots_layout() -> void:
 	_slots = [
-		{"key": "member1", "rect": TEAM_SLOT_RECTS["member1"], "label": "左位"},
-		{"key": "leader", "rect": TEAM_SLOT_RECTS["leader"], "label": "队长"},
-		{"key": "member2", "rect": TEAM_SLOT_RECTS["member2"], "label": "右位"},
+		{"key": "member1", "rect": Rect2(43.0, 188.0, 78.0, 160.0), "label": "左位"},
+		{"key": "leader", "rect": Rect2(128.0, 145.0, 119.0, 210.0), "label": "队长"},
+		{"key": "member2", "rect": Rect2(254.0, 188.0, 78.0, 160.0), "label": "右位"},
 	]
 	_roster_prev_btn = Rect2(70.0, 585.0, 38.0, 38.0)
 	_roster_next_btn = Rect2(267.0, 585.0, 38.0, 38.0)
-	_nav_rects.clear()
-	for i in NAV_ITEMS.size():
-		_nav_rects.append(Rect2(19.0 + i * 68.0, 612.0, 65.0, 46.0))
 
 
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed:
-			_on_gui_tap(event.position)
-		accept_event()
-	elif event is InputEventScreenTouch and event.pressed:
-		_on_gui_tap(event.position)
-		accept_event()
+func _get_roster_page_count() -> int:
+	return maxi(1, ceili(float(_get_display_monsters().size()) / float(GUI_ROSTER_PAGE_SIZE)))
 
 
-func _on_gui_tap(pos: Vector2) -> void:
-	for i in _nav_rects.size():
-		if _nav_rects[i].has_point(pos):
-			_flash_button(_nav_rects[i])
-			_save_team()
-			_change_scene_after_feedback(str(NAV_ITEMS[i]["scene"]))
-			return
-	if _roster_prev_btn.has_point(pos):
-		_flash_button(_roster_prev_btn)
-		_turn_roster_page(-1)
+func _connect_gui_actions() -> void:
+	if not has_node("TeamSlots"):
 		return
-	if _roster_next_btn.has_point(pos):
-		_flash_button(_roster_next_btn)
-		_turn_roster_page(1)
+	for key in SLOT_PATHS.keys():
+		_connect_button(str(SLOT_PATHS[key]), _on_slot_pressed.bind(str(key)))
+	for i in ROSTER_PATHS.size():
+		_connect_button(ROSTER_PATHS[i], _on_roster_card_pressed.bind(i))
+	_connect_button("RosterPanel/PageControls/PreviousButton", _on_previous_page_pressed)
+	_connect_button("RosterPanel/PageControls/NextButton", _on_next_page_pressed)
+	for i in NAV_PATHS.size():
+		_connect_button(NAV_PATHS[i], _on_nav_pressed.bind(str(NAV_ITEMS[i].get("scene", "main"))))
+
+
+func _connect_button(path: String, action: Callable) -> void:
+	var button := get_node_or_null(path) as BaseButton
+	if button != null and not button.pressed.is_connected(action):
+		button.pressed.connect(action)
+
+
+func _attach_gui_feedback() -> void:
+	for path in SLOT_PATHS.values():
+		_add_feedback(str(path), CartoonButtonFeedback.Profile.ENTRY)
+	for path in ROSTER_PATHS:
+		_add_feedback(path, CartoonButtonFeedback.Profile.ENTRY)
+	for path in NAV_PATHS:
+		_add_feedback(path, CartoonButtonFeedback.Profile.NAV)
+	_add_feedback("RosterPanel/PageControls/PreviousButton", CartoonButtonFeedback.Profile.ICON)
+	_add_feedback("RosterPanel/PageControls/NextButton", CartoonButtonFeedback.Profile.ICON)
+
+
+func _add_feedback(path: String, profile: int) -> void:
+	var button := get_node_or_null(path) as BaseButton
+	if button == null or button.has_node("CartoonFeedback"):
 		return
-	for slot: Dictionary in _slots:
-		var rect: Rect2 = slot["rect"]
-		if rect.has_point(pos):
-			_flash_button(rect)
-			_handle_slot_tap(str(slot["key"]))
-			_save_team()
-			return
-	var idx := _get_monster_index_at_pos(pos)
+	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+	button.add_child(feedback)
+	feedback.setup(button, profile)
+
+
+func _on_slot_pressed(slot_key: String) -> void:
+	_handle_slot_tap(slot_key)
+	_save_team()
+	_sync_gui()
+
+
+func _on_roster_card_pressed(visible_index: int) -> void:
 	var visible := _get_display_monsters()
-	if idx >= 0 and idx < visible.size():
-		_flash_button(ROSTER_RECTS[idx - _roster_page * GUI_ROSTER_PAGE_SIZE])
-		_assign_to_slot(_get_instance_id(visible[idx]))
-		_save_team()
+	var index := _roster_page * GUI_ROSTER_PAGE_SIZE + visible_index
+	if index < 0 or index >= visible.size():
+		return
+	_assign_to_slot(_get_instance_id(visible[index]))
+	_save_team()
+	_sync_gui()
 
 
-func _flash_button(rect: Rect2) -> void:
-	_pressed_fx_rect = rect
-	_pressed_fx_timer = _pressed_fx_duration
-	queue_redraw()
+func _on_previous_page_pressed() -> void:
+	_turn_roster_page(-1)
+	_sync_gui()
+
+
+func _on_next_page_pressed() -> void:
+	_turn_roster_page(1)
+	_sync_gui()
+
+
+func _on_nav_pressed(scene_name: String) -> void:
+	_save_team()
+	_change_scene_after_feedback(scene_name)
 
 
 func _change_scene_after_feedback(scene_name: String) -> void:
@@ -143,169 +181,143 @@ func _change_scene_after_feedback(scene_name: String) -> void:
 	_change_to_scene(scene_name)
 
 
-func _get_roster_page_count() -> int:
-	return maxi(1, ceili(float(_get_display_monsters().size()) / float(GUI_ROSTER_PAGE_SIZE)))
-
-
-func _clamp_roster_page() -> void:
-	_roster_page = clampi(_roster_page, 0, _get_roster_page_count() - 1)
-
-
-func _get_monster_index_at_pos(pos: Vector2) -> int:
-	for i in ROSTER_RECTS.size():
-		if ROSTER_RECTS[i].has_point(pos):
-			return _roster_page * GUI_ROSTER_PAGE_SIZE + i
-	return -1
-
-
-func _draw() -> void:
-	var font := ThemeDB.fallback_font
+func _sync_gui() -> void:
+	if not is_inside_tree() or not has_node("TeamSlots"):
+		return
 	_clamp_roster_page()
-	_draw_texture_cover(_gui_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
-	_draw_texture_gradient_vignette()
-	_draw_currency_bar(font)
-	_draw_team_slots(font)
-	_draw_power_panel(font)
-	_draw_pet_roster(font)
-	_draw_bottom_nav(font)
-	_draw_press_feedback()
+	_sync_currency_bar()
+	_sync_team_slots()
+	_sync_power_panel()
+	_sync_pet_roster()
+	_sync_bottom_nav()
+	_sync_empty_slot_pulses()
+	set_process(_has_empty_slot())
 
 
-func _draw_texture_gradient_vignette() -> void:
-	draw_rect(Rect2(0.0, 0.0, DESIGN_W, 120.0), Color(0.18, 0.07, 0.02, 0.18), true)
-	draw_rect(Rect2(0.0, 592.0, DESIGN_W, 75.0), Color(0.12, 0.05, 0.01, 0.22), true)
-
-
-func _draw_currency_bar(font: Font) -> void:
+func _sync_currency_bar() -> void:
 	var player := _load_player_data()
-	var chips := [
-		{"icon": "gold", "value": _format_number(int(player.get("gold", 0))), "rect": Rect2(15.0, 13.0, 112.0, 38.0)},
-		{"icon": "diamond", "value": _format_number(int(player.get("diamond", player.get("gems", 0)))), "rect": Rect2(132.0, 13.0, 112.0, 38.0)},
-		{"icon": "heart", "value": "%s Full" % str(player.get("stamina", player.get("energy", 5))), "rect": Rect2(249.0, 13.0, 112.0, 38.0)},
-	]
-	for chip in chips:
-		var rect: Rect2 = chip["rect"]
-		_draw_texture_fit(_gui_tex("currency"), rect)
-		_draw_texture_contain(_gui_tex(str(chip["icon"])), Rect2(rect.position.x + 8.0, rect.position.y + 5.0, 28.0, 28.0))
-		_draw_text(font, str(chip["value"]), rect.position.x + 70.0, rect.position.y + 26.0, Color(0.32, 0.18, 0.06), 14.0)
-		_draw_texture_contain(_gui_tex("plus"), Rect2(rect.end.x - 26.0, rect.position.y + 6.0, 24.0, 24.0))
+	var values := {
+		"GoldChip": _format_number(int(player.get("gold", 0))),
+		"DiamondChip": _format_number(int(player.get("diamond", player.get("gems", 0)))),
+		"HeartChip": "%s Full" % str(player.get("stamina", player.get("energy", 5))),
+	}
+	for chip_name in values.keys():
+		_label("CurrencyBar/%s/Amount" % chip_name).text = str(values[chip_name])
 
 
-func _draw_team_slots(font: Font) -> void:
+func _sync_team_slots() -> void:
 	for slot: Dictionary in _slots:
 		var key := str(slot["key"])
-		var center: Vector2 = TEAM_SLOT_CENTERS[key]
+		var slot_node := get_node(str(SLOT_PATHS[key])) as TextureButton
 		var value: Variant = _team.get(key, null)
 		var instance_id := "" if value == null else str(value)
-		if instance_id.is_empty():
-			var pulse := 0.90 + sin(_time_acc * 3.1 + center.x) * 0.06
-			var size := 78.0 * pulse
-			_draw_texture_contain(_gui_tex("empty_plus"), Rect2(center.x - size * 0.5, 238.0 - size * 0.5, size, size), 0.92)
-		else:
-			var portrait_size := 118.0 if key == "leader" else 92.0
-			var y := 236.0 if key == "leader" else 250.0
-			_draw_monster_portrait(instance_id, Rect2(center.x - portrait_size * 0.5, y - portrait_size * 0.5, portrait_size, portrait_size))
-			if key == "leader":
-				_draw_texture_contain(_gui_tex("leader_badge"), Rect2(center.x - 53.0, 151.0, 106.0, 49.0))
-				_draw_text(font, "Leader", center.x, 185.0, Color.WHITE, 16.0)
-		var label_rect := Rect2(center.x - 38.0, 341.0 if key == "leader" else 349.0, 76.0, 28.0)
-		var label_draw_rect := _feedback_rect(label_rect)
-		_draw_texture_fit(_gui_tex("pedestal_label"), label_draw_rect)
-		_draw_text(font, str(slot["label"]), label_draw_rect.get_center().x, label_draw_rect.position.y + 20.0, Color(1.0, 0.88, 0.66), 13.0)
-		if _selected_slot == key:
-			_draw_rounded_rect_outline(slot["rect"].position.x, slot["rect"].position.y, slot["rect"].size.x, slot["rect"].size.y, 16.0, Color(1.0, 0.82, 0.26, 0.95), 3.0)
+		var occupied := not instance_id.is_empty()
+		(slot_node.get_node("EmptyPlus") as TextureRect).visible = not occupied
+		(slot_node.get_node("Portrait") as TextureRect).visible = occupied
+		(slot_node.get_node("Fallback") as Label).visible = false
+		(slot_node.get_node("Selection") as Panel).visible = _selected_slot == key
+		(slot_node.get_node("LeaderBadge") as TextureRect).visible = key == "leader" and occupied
+		(slot_node.get_node("LeaderText") as Label).visible = key == "leader" and occupied
+		(slot_node.get_node("Label/Text") as Label).text = str(slot["label"])
+		if not occupied:
+			continue
+		var portrait := slot_node.get_node("Portrait") as TextureRect
+		var monster_id := _get_monster_id(instance_id)
+		portrait.texture = _get_monster_texture(monster_id)
+		if portrait.texture == null:
+			var md := _get_monster_data(monster_id)
+			(slot_node.get_node("Fallback") as Label).text = str(md.get("emoji", "?"))
+			(slot_node.get_node("Fallback") as Label).visible = true
 
 
-func _draw_power_panel(font: Font) -> void:
-	var rect := Rect2(14.0, 391.0, 347.0, 66.0)
-	_draw_texture_fit(_gui_tex("power_panel"), rect)
-	_draw_text(font, "Team Power", 82.0, 414.0, Color(0.38, 0.21, 0.07), 14.0)
-	_draw_texture_contain(_gui_tex("nav_battle"), Rect2(32.0, 419.0, 29.0, 29.0))
-	_draw_text(font, _format_number(_calc_team_power()), 97.0, 443.0, Color(0.92, 0.32, 0.08), 25.0)
+func _sync_empty_slot_pulses() -> void:
+	if not is_inside_tree() or not has_node("TeamSlots"):
+		return
+	for key in SLOT_PATHS.keys():
+		var value: Variant = _team.get(str(key), null)
+		if value != null and not str(value).is_empty():
+			continue
+		var slot_node := get_node(str(SLOT_PATHS[key])) as TextureButton
+		var empty := slot_node.get_node("EmptyPlus") as TextureRect
+		empty.pivot_offset = empty.size * 0.5
+		var pulse := 0.90 + sin(_time_acc * 3.1 + slot_node.position.x) * 0.06
+		empty.scale = Vector2.ONE * pulse
+
+
+func _has_empty_slot() -> bool:
+	for key in SLOT_PATHS.keys():
+		var value: Variant = _team.get(str(key), null)
+		if value == null or str(value).is_empty():
+			return true
+	return false
+
+
+func _sync_power_panel() -> void:
+	_label("PowerPanel/Title").text = "Team Power"
+	_label("PowerPanel/Power").text = _format_number(_calc_team_power())
 	var totals := _calc_team_totals()
-	var stats := [
-		{"icon": "hp", "value": totals["hp"], "x": 181.0},
-		{"icon": "atk", "value": totals["atk"], "x": 237.0},
-		{"icon": "def", "value": totals["def"], "x": 291.0},
-		{"icon": "spd", "value": totals["spd"], "x": 340.0},
-	]
-	for stat in stats:
-		_draw_texture_contain(_gui_tex(str(stat["icon"])), Rect2(float(stat["x"]) - 37.0, 421.0, 23.0, 23.0))
-		_draw_text(font, _format_number(int(stat["value"])), float(stat["x"]), 441.0, Color(0.33, 0.19, 0.07), 12.0)
+	for stat_key in ["hp", "atk", "def", "spd"]:
+		_label("PowerPanel/Stats/%s/Value" % stat_key.capitalize()).text = _format_number(int(totals.get(stat_key, 0)))
 
 
-func _draw_pet_roster(font: Font) -> void:
-	var panel := Rect2(14.0, 469.0, 347.0, 128.0)
-	_draw_texture_fit(_gui_tex("roster_panel"), panel)
-	_draw_text(font, "Choose Pets", DESIGN_W / 2.0, 497.0, Color(0.38, 0.21, 0.07), 20.0)
-	_draw_text(font, "选择精灵加入队伍", DESIGN_W / 2.0, 516.0, Color(0.48, 0.27, 0.09), 10.0)
+func _sync_pet_roster() -> void:
+	_label("RosterPanel/Title").text = "Choose Pets"
+	_label("RosterPanel/Subtitle").text = "选择精灵加入队伍"
 	var visible := _get_display_monsters()
 	var start := _roster_page * GUI_ROSTER_PAGE_SIZE
-	for i in ROSTER_RECTS.size():
+	for i in ROSTER_PATHS.size():
+		var card := get_node(ROSTER_PATHS[i]) as TextureButton
 		var index := start + i
-		var rect: Rect2 = ROSTER_RECTS[i]
-		var draw_rect := _feedback_rect(rect)
 		if index >= visible.size():
-			_draw_texture_fit(_gui_tex("roster_card"), draw_rect, 0.42)
-			continue
-		var instance: Dictionary = visible[index]
-		var instance_id := _get_instance_id(instance)
-		var monster_id := _get_monster_id(instance)
-		var in_team := _team.values().has(instance_id)
-		_draw_texture_fit(_gui_tex("roster_card_selected" if in_team else "roster_card"), draw_rect)
-		_draw_monster_portrait(monster_id, Rect2(draw_rect.position.x + 6.0, draw_rect.position.y + 7.0, draw_rect.size.x - 12.0, 43.0))
-		if in_team:
-			_draw_texture_contain(_gui_tex("check"), Rect2(draw_rect.end.x - 19.0, draw_rect.end.y - 25.0, 20.0, 20.0))
-		var lvl := _get_real_level(instance_id)
-		_draw_text(font, "Lv.%d" % lvl, draw_rect.get_center().x, draw_rect.position.y + 71.0, Color(0.43, 0.24, 0.07), 10.0)
-	if visible.is_empty():
-		_draw_text(font, "暂无可编队精灵", DESIGN_W / 2.0, 556.0, Color(0.50, 0.31, 0.14), 14.0)
-	_draw_roster_page_controls_gui(font)
+			_sync_empty_roster_card(card)
+		else:
+			_sync_roster_card(card, visible[index])
+	_label("RosterPanel/EmptyLabel").visible = visible.is_empty()
+	_sync_roster_page_controls()
 
 
-func _draw_roster_page_controls_gui(font: Font) -> void:
+func _sync_roster_card(card: TextureButton, instance: Dictionary) -> void:
+	var instance_id := _get_instance_id(instance)
+	var monster_id := _get_monster_id(instance)
+	var in_team := _team.values().has(instance_id)
+	card.disabled = false
+	card.modulate.a = 1.0
+	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card_selected" if in_team else "roster_card")
+	(card.get_node("Portrait") as TextureRect).texture = _get_monster_texture(monster_id)
+	(card.get_node("Check") as TextureRect).visible = in_team
+	(card.get_node("Level") as Label).text = "Lv.%d" % _get_real_level(instance_id)
+
+
+func _sync_empty_roster_card(card: TextureButton) -> void:
+	card.disabled = true
+	card.modulate.a = 0.42
+	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
+	(card.get_node("Portrait") as TextureRect).texture = null
+	(card.get_node("Check") as TextureRect).visible = false
+	(card.get_node("Level") as Label).text = ""
+
+
+func _sync_roster_page_controls() -> void:
 	var page_count := _get_roster_page_count()
-	if page_count <= 1:
+	var show_controls := page_count > 1
+	_node("RosterPanel/PageControls").visible = show_controls
+	if not show_controls:
 		return
-	_draw_texture_contain(_gui_tex("page_prev"), _roster_prev_btn, 1.0 if _roster_page > 0 else 0.42)
-	_draw_texture_contain(_gui_tex("page_next"), _roster_next_btn, 1.0 if _roster_page < page_count - 1 else 0.42)
-	_draw_text(font, "%d / %d" % [_roster_page + 1, page_count], DESIGN_W / 2.0, 610.0, Color(0.46, 0.26, 0.08), 12.0)
+	_label("RosterPanel/PageControls/PageLabel").text = "%d / %d" % [_roster_page + 1, page_count]
+	var prev := get_node("RosterPanel/PageControls/PreviousButton") as TextureButton
+	var next := get_node("RosterPanel/PageControls/NextButton") as TextureButton
+	prev.disabled = _roster_page <= 0
+	next.disabled = _roster_page >= page_count - 1
+	prev.modulate.a = 0.42 if prev.disabled else 1.0
+	next.modulate.a = 0.42 if next.disabled else 1.0
 
 
-func _draw_bottom_nav(font: Font) -> void:
-	_draw_texture_fit(_gui_tex("nav_panel"), Rect2(7.0, 602.0, 361.0, 61.0))
-	for i in NAV_ITEMS.size():
-		var rect: Rect2 = _nav_rects[i]
-		var draw_rect := _feedback_rect(rect)
+func _sync_bottom_nav() -> void:
+	for i in NAV_PATHS.size():
 		var item: Dictionary = NAV_ITEMS[i]
-		var selected := str(item["id"]) == "battle"
-		if selected:
-			_draw_texture_fit(_gui_tex("nav_selected"), Rect2(draw_rect.position.x + 4.0, draw_rect.position.y - 7.0, draw_rect.size.x - 8.0, draw_rect.size.y + 9.0))
-		_draw_texture_contain(_gui_tex(str(item["icon"])), Rect2(draw_rect.position.x + 17.0, draw_rect.position.y - 2.0, 31.0, 31.0))
-		_draw_text(font, str(item["label"]), draw_rect.get_center().x, draw_rect.position.y + 42.0, Color(0.32, 0.18, 0.06), 12.0)
-
-
-func _draw_press_feedback() -> void:
-	if _pressed_fx_timer <= 0.0:
-		return
-	var t := 1.0 - _pressed_fx_timer / _pressed_fx_duration
-	var alpha := (1.0 - t) * 0.40
-	var center := _pressed_fx_rect.get_center()
-	var radius := maxf(_pressed_fx_rect.size.x, _pressed_fx_rect.size.y) * (0.52 + t * 0.30)
-	draw_arc(center, radius, 0.0, TAU, 32, Color(1.0, 0.78, 0.24, alpha), 2.0)
-	for i in range(6):
-		var angle := TAU * float(i) / 6.0 + t * 0.35
-		var dir := Vector2.from_angle(angle)
-		draw_line(center + dir * (radius + 3.0), center + dir * (radius + 9.0 + t * 8.0), Color(1.0, 0.82, 0.28, alpha), 1.2)
-
-
-func _feedback_rect(rect: Rect2) -> Rect2:
-	if _pressed_fx_timer <= 0.0 or rect != _pressed_fx_rect:
-		return rect
-	var t := 1.0 - _pressed_fx_timer / _pressed_fx_duration
-	var scale := 0.92 + sin(t * PI) * 0.11
-	var size := rect.size * scale
-	return Rect2(rect.get_center() - size * 0.5, size)
+		var button := get_node(NAV_PATHS[i]) as TextureButton
+		(button.get_node("Selected") as TextureRect).visible = str(item.get("id", "")) == "battle"
+		(button.get_node("Text") as Label).text = str(item.get("label", ""))
 
 
 func _calc_team_totals() -> Dictionary:
@@ -336,5 +348,17 @@ func _format_number(value: int) -> String:
 	return text + out
 
 
+func _get_monster_texture(monster_id: String) -> Texture2D:
+	return _get_texture(MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team"))
+
+
 func _gui_tex(key: String) -> Texture2D:
 	return _get_texture(str(GUI_ASSETS.get(key, "")))
+
+
+func _node(path: NodePath) -> Control:
+	return get_node(path) as Control
+
+
+func _label(path: NodePath) -> Label:
+	return get_node(path) as Label

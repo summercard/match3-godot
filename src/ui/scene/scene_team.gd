@@ -480,7 +480,7 @@ func _on_tap(x: float, y: float) -> void:
 			_handle_slot_tap(s["key"])
 			return
 	
-	# 怪物列表点击
+	# 精灵列表点击
 	var monster_idx := _get_monster_index_at_pos(pos)
 	var visible_monsters := _get_display_monsters()
 	if monster_idx >= 0 and monster_idx < visible_monsters.size():
@@ -506,7 +506,7 @@ func _handle_confirm_tap(pos: Vector2) -> void:
 
 func _handle_slot_tap(slot_key: String) -> void:
 	if _team.get(slot_key) != null:
-		# 有怪物 → 清空
+		# 有精灵 → 清空
 		_team[slot_key] = null
 		if _selected_slot == slot_key:
 			_selected_slot = ""
@@ -541,7 +541,7 @@ func _assign_to_slot(monster_id: String) -> void:
 		# 替换目标槽位
 		var existing: Variant = _team[_selected_slot]
 		_team[_selected_slot] = monster_id
-		# 防止重复：如果其他槽已有这个怪物，交换
+		# 防止重复：如果其他槽已有这个精灵，交换
 		for key in ["leader", "member1", "member2"]:
 			if key != _selected_slot and _team[key] == monster_id:
 				_team[key] = existing
@@ -597,7 +597,7 @@ func _draw() -> void:
 	# 空引导提示
 	if _anim_state["show_guide"]:
 		var alpha := 0.6 + sin(t * 3.0) * 0.4
-		_draw_text(font, "点击开始冒险，赢取你的第一只怪物", DESIGN_W / 2.0, 63.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 12.0)
+		_draw_text(font, "点击开始冒险，赢取你的第一只精灵", DESIGN_W / 2.0, 63.0, Color(C["gold"].r, C["gold"].g, C["gold"].b, alpha), 12.0)
 	
 	# 渲染槽位
 	for s: Dictionary in _slots:
@@ -607,7 +607,7 @@ func _draw() -> void:
 	_draw_bond_summary(font)
 	_draw_roster_toolbar(font)
 	
-	# 渲染怪物列表
+	# 渲染精灵列表
 	_draw_monster_list(font, t)
 	
 	# 底部主操作：不展示尚未实现的分解入口。
@@ -679,7 +679,7 @@ func _draw_bond_summary(font: Font) -> void:
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, color)
 	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, C["gold"] if active else Color(0.22, 0.36, 0.62, 0.82), 1.0)
 	var title := str(bond.get("name", "羁绊"))
-	var summary := str(bond.get("summary", "选择怪物查看羁绊方向。"))
+	var summary := str(bond.get("summary", "选择精灵查看羁绊方向。"))
 	_draw_text_in_rect(font, "分支：%s" % title, Rect2(rect.position.x + 8.0, rect.position.y + 1.0, 104.0, 19.0), C["gold"] if active else C["text_secondary"], 11.0, 10.0)
 	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 1.0, 231.0, 19.0), C["text_primary"] if active else C["text_muted"], 10.0, 9.0)
 
@@ -786,7 +786,7 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 			_draw_text(font, label, cx, new_y + new_h / 2.0, C["text_muted"], 9.0)
 	else:
 		# 空槽位
-		var slot_label_text := "选择怪物" if is_selected else label
+		var slot_label_text := "选择精灵" if is_selected else label
 		var text_color := C["gold"] if is_selected else C["text_muted"]
 		_draw_texture_contain(_tex("empty_slot"), Rect2(cx - 29.0, new_y + 30.0, 58.0, 68.0), 0.55)
 		_draw_text(font, slot_label_text, cx, new_y + 116.0, text_color, 12.0)
@@ -825,7 +825,7 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		var card_tex := _tex(card_key)
 		_draw_texture_fit(card_tex, Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
 
-		# 怪物头像
+		# 精灵头像
 		_draw_monster_portrait(monster_id, Rect2(card_x + 16.0, card_y + 6.0, 42.0, 42.0))
 
 		# 用卡片自身的干净底纹替换装饰暗星，不添加会切断边框的实色底。

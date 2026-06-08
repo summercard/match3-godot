@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://blp18i051o24k" path="res://assets/images/battle_prepare/ui_reward_slot.png" id="16_reward_slot"]
 [ext_resource type="Texture2D" uid="uid://cegre0vtwf1vr" path="res://assets/images/main/icon_gold_v2.png" id="17_gold"]
 [ext_resource type="Texture2D" uid="uid://chc525plghdv7" path="res://assets/images/main/icon_exp_star.png" id="18_exp"]
-[ext_resource type="Texture2D" uid="uid://br3iocipe2326" path="res://assets/images/items/icon_item_capture_ball.png" id="19_ball"]
+[ext_resource type="Texture2D" path="res://assets/images/items_new/icon_capture_ball.png" id="19_ball"]
 [ext_resource type="Texture2D" uid="uid://cd08ellr4qh2k" path="res://assets/images/battle/gems/gem_fire.png" id="20_fire"]
 [ext_resource type="Texture2D" uid="uid://ddnh202wcwlym" path="res://assets/images/battle/gems/gem_water.png" id="21_water"]
 [ext_resource type="Texture2D" uid="uid://scqeqipchinb" path="res://assets/images/battle/gems/gem_grass.png" id="22_grass"]
