@@ -19,24 +19,19 @@ func _run() -> void:
 	_expect(not save_manager.is_stage_unlocked("stage_1_2"), "second stage should be locked before stage 1-1 is cleared")
 	_expect(not save_manager.is_stage_unlocked("stage_2_1"), "chapter 2 should be locked before chapter 1 boss is cleared")
 
-	save_manager.save_stage_stars("stage_1_1", 1)
-	_expect(save_manager.is_stage_unlocked("stage_1_2"), "clearing stage 1-1 should unlock stage 1-2")
+	for stage_no in range(1, 11):
+		save_manager.save_stage_stars("stage_1_%d" % stage_no, 1)
+		_expect(save_manager.is_stage_unlocked("stage_1_%d" % (stage_no + 1)), "clearing a stage should unlock the next stage")
+	_expect(not save_manager.is_stage_unlocked("stage_2_1"), "chapter 2 should still require stage 1-12 boss")
 
-	save_manager.save_stage_stars("stage_1_2", 1)
-	save_manager.save_stage_stars("stage_1_3", 1)
-	save_manager.save_stage_stars("stage_1_4", 1)
-	_expect(not save_manager.is_stage_unlocked("stage_2_1"), "chapter 2 should still require stage 1-5 boss")
-	save_manager.save_stage_stars("stage_1_5", 1)
+	save_manager.save_stage_stars("stage_1_11", 1)
+	_expect(save_manager.is_stage_unlocked("stage_1_12"), "stage 1-12 boss should unlock after stage 1-11")
+	save_manager.save_stage_stars("stage_1_12", 1)
 	_expect(save_manager.is_stage_unlocked("stage_2_1"), "clearing chapter 1 boss should unlock chapter 2")
 
-	var elite_state: Dictionary = save_manager.get_stage_unlock_state("stage_2_4e")
-	_expect(not bool(elite_state.get("unlocked", true)), "chapter 2 elite should be locked before stage 2-4")
 	save_manager.save_stage_stars("stage_2_1", 1)
-	save_manager.save_stage_stars("stage_2_2", 1)
-	save_manager.save_stage_stars("stage_2_3", 1)
-	save_manager.save_stage_stars("stage_2_4", 1)
-	_expect(save_manager.is_stage_unlocked("stage_2_4e"), "elite branch should unlock from the previous main stage")
-	_expect(save_manager.is_stage_unlocked("stage_2_5"), "boss should not require optional elite clear")
+	_expect(save_manager.is_stage_unlocked("stage_2_2"), "chapter 2 should use the same mainline unlock chain")
+	_expect(not save_manager.is_stage_unlocked("stage_2_4e"), "removed elite branch ids should stay locked as missing stages")
 
 	save_manager.clear_all_data()
 	save_manager.save_player({
@@ -52,7 +47,7 @@ func _run() -> void:
 		"pokedex": {}
 	})
 	_expect(save_manager.is_stage_unlocked("stage_2_1"), "legacy player progress should unlock the first stage of chapter 2")
-	_expect(save_manager.is_stage_cleared("stage_1_5"), "legacy player progress should migrate cleared prerequisite stages")
+	_expect(save_manager.is_stage_cleared("stage_1_12"), "legacy player progress should migrate the new chapter boss prerequisite")
 
 	save_manager.clear_all_data()
 	save_manager.save_stage_stars("stage_1_1", 3)

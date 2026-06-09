@@ -86,7 +86,7 @@ func _run() -> void:
 
 	var stage_db = StageDBScript.new()
 	var boss_battle = BattleManagerScript.new()
-	boss_battle.init(["monster_001"], [], 5, 3, stage_db.get_stage("stage_1_5"), "stage_1_5")
+	boss_battle.init(["monster_001"], [], 5, 3, stage_db.get_stage("stage_1_12"), "stage_1_12")
 	boss_battle.enemies[0]["hp"] = int(boss_battle.enemies[0].get("maxHP", 1) * 0.5)
 	var phase_result: Dictionary = boss_battle.process_match_result({}, 1)
 	var phase_config: Dictionary = phase_result.get("phase_transition", {})

@@ -7,23 +7,6 @@ const TARGET_FPS: int = 60
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
 
 # 场景映射：场景名 → 脚本路径
-const SCENE_MAP: Dictionary = {
-	"start": "res://src/ui/scene/scene_start.gd",
-	"main": "res://src/ui/scene/scene_main.gd",
-	"battle_prepare": "res://src/ui/scene/scene_battle_prepare.gd",
-	"battle": "res://src/ui/scene/scene_battle.gd",
-	"result": "res://src/ui/scene/scene_result.gd",
-	"team": "res://src/ui/scene/scene_team.gd",
-	"album": "res://src/ui/scene/scene_album.gd",
-	"evolve": "res://src/ui/scene/scene_evolve.gd",
-	"shop": "res://src/ui/scene/scene_shop.gd",
-	"inventory": "res://src/ui/scene/scene_inventory.gd",
-	"achievement": "res://src/ui/scene/scene_achievement.gd",
-	"settings": "res://src/ui/scene/scene_settings.gd",
-	"sign_in": "res://src/ui/scene/scene_sign_in.gd",
-	"tutorial": "res://src/ui/scene/scene_tutorial.gd",
-}
-
 const PACKED_SCENE_MAP: Dictionary = {
 	"start": "res://src/ui/scenes/start_screen.tscn",
 	"main": "res://src/ui/scenes/main_lobby.tscn",
@@ -39,6 +22,8 @@ const PACKED_SCENE_MAP: Dictionary = {
 	"achievement": "res://src/ui/scenes/achievement.tscn",
 	"settings": "res://src/ui/scenes/settings.tscn",
 	"sign_in": "res://src/ui/scenes/sign_in.tscn",
+	"tutorial": "res://src/ui/scenes/tutorial.tscn",
+	"evolve": "res://src/ui/scenes/evolve.tscn",
 }
 
 var _current_scene: Control = null
@@ -92,30 +77,21 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 		_current_scene.queue_free()
 		_current_scene = null
 	
-	# 加载新场景
-	if not SCENE_MAP.has(scene_name) and not PACKED_SCENE_MAP.has(scene_name):
-		push_error("场景不存在: " + scene_name)
+	# Load scenes only from PackedScene files.
+	if not PACKED_SCENE_MAP.has(scene_name):
+		push_error("Scene not found: " + scene_name)
 		return
 	
 	var scene_node: Control = null
-	if PACKED_SCENE_MAP.has(scene_name):
-		var packed_path: String = PACKED_SCENE_MAP[scene_name]
-		var packed_scene: PackedScene = load(packed_path) as PackedScene
-		if packed_scene == null:
-			push_error("无法加载场景: " + packed_path)
-			return
-		scene_node = packed_scene.instantiate() as Control
-	else:
-		var script_path: String = SCENE_MAP[scene_name]
-		var script: GDScript = load(script_path) as GDScript
-		if script == null:
-			push_error("无法加载脚本: " + script_path)
-			return
-		scene_node = Control.new()
-		scene_node.set_script(script)
+	var packed_path: String = PACKED_SCENE_MAP[scene_name]
+	var packed_scene: PackedScene = load(packed_path) as PackedScene
+	if packed_scene == null:
+		push_error("Cannot load scene: " + packed_path)
+		return
+	scene_node = packed_scene.instantiate() as Control
 
 	if scene_node == null:
-		push_error("无法实例化场景: " + scene_name)
+		push_error("Cannot instantiate scene: " + scene_name)
 		return
 
 	scene_node.anchor_left = 0.0

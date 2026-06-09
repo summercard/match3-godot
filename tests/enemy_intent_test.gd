@@ -35,7 +35,7 @@ func _test_intent_rules_direct() -> void:
 func _test_boss_charge_intents() -> void:
 	var stage_db := StageDBScript.new()
 	var battle := BattleManagerScript.new()
-	battle.init(["monster_001", "monster_002", "monster_003"], [], 5, 3, stage_db.get_stage("stage_1_5"), "stage_1_5")
+	battle.init(["monster_001", "monster_002", "monster_003"], [], 5, 3, stage_db.get_stage("stage_1_12"), "stage_1_12")
 	for monster: Dictionary in battle.player_team:
 		monster["hp"] = 9999
 		monster["maxHP"] = 9999
@@ -70,8 +70,8 @@ func _test_battle_scene_exposes_intents() -> void:
 
 	var stage_db := StageDBScript.new()
 	main.switch_scene("battle", {
-		"stageId": "stage_1_5",
-		"stageData": stage_db.get_stage("stage_1_5")
+		"stageId": "stage_1_12",
+		"stageData": stage_db.get_stage("stage_1_12")
 	})
 	await process_frame
 	var battle_scene: Control = main.get_current_scene()

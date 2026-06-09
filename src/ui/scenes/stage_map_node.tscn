@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://glsitdt0led0" path="res://assets/images/stage/node_normal.png" id="1_node"]
 [ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/stage/icon_star_dim.png" id="2_star"]
-[ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/album/ui_btn_secondary_blue.png" id="3_button"]
+[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="3_button"]
 
 [node name="StageSlot" type="TextureButton" unique_id=2057963764]
 offset_right = 80.0
@@ -83,24 +83,24 @@ horizontal_alignment = 1
 [node name="SweepButton" type="Button" parent="." unique_id=445424070]
 visible = false
 layout_mode = 0
-offset_left = 48.0
-offset_top = -8.0
-offset_right = 98.0
-offset_bottom = 24.0
+offset_left = 42.0
+offset_top = -7.0
+offset_right = 106.0
+offset_bottom = 23.0
 flat = true
 
 [node name="Frame" type="TextureRect" parent="SweepButton" unique_id=1474638891]
 layout_mode = 0
-offset_right = 50.0
-offset_bottom = 32.0
+offset_right = 106.0
+offset_bottom = 23.0
 mouse_filter = 2
 texture = ExtResource("3_button")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="SweepButton" unique_id=561978509]
 layout_mode = 0
-offset_right = 50.0
-offset_bottom = 32.0
+offset_right = 106.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
