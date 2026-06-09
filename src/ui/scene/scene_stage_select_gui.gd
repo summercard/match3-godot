@@ -4,17 +4,17 @@ class_name SceneStageSelectGui
 extends "res://src/ui/scene/scene_stage_select.gd"
 
 const CHAPTER_MAP_NODES := {
-	"chapter_1": "ChapterMaps/Chapter01Grassland",
-	"chapter_2": "ChapterMaps/Chapter02FireValley",
-	"chapter_3": "ChapterMaps/Chapter03MysticForest",
-	"chapter_4": "ChapterMaps/Chapter04EclipseCanopy",
-	"chapter_5": "ChapterMaps/Chapter05ThunderTemple",
-	"chapter_6": "ChapterMaps/Chapter06FrostThrone",
-	"chapter_7": "ChapterMaps/Chapter07VoidDomain",
-	"chapter_8": "ChapterMaps/Chapter08TemporalRift",
-	"chapter_9": "ChapterMaps/Chapter09StarlitTemple",
-	"chapter_10": "ChapterMaps/Chapter10ChaosDomain",
-	"chapter_11": "ChapterMaps/Chapter11RadiantTemple",
+	"chapter_1": "MapScroll/ChapterMaps/Chapter01Grassland",
+	"chapter_2": "MapScroll/ChapterMaps/Chapter02FireValley",
+	"chapter_3": "MapScroll/ChapterMaps/Chapter03MysticForest",
+	"chapter_4": "MapScroll/ChapterMaps/Chapter04EclipseCanopy",
+	"chapter_5": "MapScroll/ChapterMaps/Chapter05ThunderTemple",
+	"chapter_6": "MapScroll/ChapterMaps/Chapter06FrostThrone",
+	"chapter_7": "MapScroll/ChapterMaps/Chapter07VoidDomain",
+	"chapter_8": "MapScroll/ChapterMaps/Chapter08TemporalRift",
+	"chapter_9": "MapScroll/ChapterMaps/Chapter09StarlitTemple",
+	"chapter_10": "MapScroll/ChapterMaps/Chapter10ChaosDomain",
+	"chapter_11": "MapScroll/ChapterMaps/Chapter11RadiantTemple",
 }
 const DOT_PATHS := [
 	"Header/Dots/Dot1", "Header/Dots/Dot2", "Header/Dots/Dot3",
@@ -24,14 +24,35 @@ const DOT_PATHS := [
 ]
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.75, 0.88)
+const MAP_SCROLL_DRAG_THRESHOLD: float = 8.0
+const DEFAULT_STAR_LIT_PATH := "res://assets/images/stage/icon_star_lit.png"
+const DEFAULT_STAR_DIM_PATH := "res://assets/images/stage/icon_star_lit.png"
+const CHAPTER_01_STAR_PATH := "res://assets/images/stage/chapter_01_new/star_gold_new.png"
 
 var _chapter_map: Control = null
 var _chapter_map_id: String = ""
+var _chapter_maps_content: Control = null
+var _map_scroll: ScrollContainer = null
+var _cloud_layer_far: Control = null
+var _cloud_layer_near: Control = null
+var _bottom_prev_map_btn: TextureButton = null
+var _bottom_return_btn: TextureButton = null
+var _bottom_next_map_btn: TextureButton = null
+var _scroll_pointer_active: bool = false
+var _scroll_dragging: bool = false
+var _scroll_start_pos: Vector2 = Vector2.ZERO
+var _scroll_last_pos: Vector2 = Vector2.ZERO
+var _scroll_ignore_tap_once: bool = false
 
 func _ready() -> void:
 	super._ready()
 	_connect_shell_actions()
 	_sync_gui()
+
+func initialize(game: Node, data: Dictionary = {}) -> void:
+	super.initialize(game, data)
+	_sync_gui()
+	_scroll_map_to_start()
 
 func _create_ui() -> void:
 	_back_btn = get_node("Header/BackButton") as TextureButton
@@ -41,8 +62,15 @@ func _create_ui() -> void:
 	_chapter_name_label = get_node("Header/ChapterName") as Label
 	_star_label = get_node("Header/StarValue") as Label
 	_header_panel = get_node("Bindings/HeaderPanel") as PanelContainer
-	_stage_container = get_node("ChapterMaps") as Control
+	_stage_container = get_node("MapScroll/ChapterMaps") as Control
+	_chapter_maps_content = _stage_container
+	_map_scroll = get_node("MapScroll") as ScrollContainer
+	_cloud_layer_far = get_node_or_null("CloudLayerFar") as Control
+	_cloud_layer_near = get_node_or_null("CloudLayerNear") as Control
 	_reward_panel = get_node("Bindings/RewardPanel") as PanelContainer
+	_bottom_prev_map_btn = get_node("BottomNav/PrevMapButton") as TextureButton
+	_bottom_return_btn = get_node("BottomNav/ReturnButton") as TextureButton
+	_bottom_next_map_btn = get_node("BottomNav/NextMapButton") as TextureButton
 	_dots_container = get_node("Bindings/DotsContainer") as HBoxContainer
 	_sweep_dialog = get_node("PopupLayer/SweepDialog") as Control
 	_sweep_title_label = get_node("PopupLayer/SweepDialog/TitleLabel") as Label
@@ -55,11 +83,17 @@ func _create_ui() -> void:
 	_sweep_anim_title_label = get_node("PopupLayer/SweepResult/TitleLabel") as Label
 	_sweep_anim_gold_label = get_node("PopupLayer/SweepResult/GoldLabel") as Label
 	_sweep_anim_exp_label = get_node("PopupLayer/SweepResult/ExpLabel") as Label
+	var vertical_bar := _map_scroll.get_v_scroll_bar()
+	if vertical_bar != null and not vertical_bar.value_changed.is_connected(_on_map_scroll_changed):
+		vertical_bar.value_changed.connect(_on_map_scroll_changed)
 
 func _connect_shell_actions() -> void:
 	_connect_button(_back_btn, _on_back_btn_pressed)
 	_connect_button(_prev_chapter_btn, _on_prev_chapter_btn_pressed)
 	_connect_button(_next_chapter_btn, _on_next_chapter_btn_pressed)
+	_connect_button(_bottom_prev_map_btn, _on_prev_chapter_btn_pressed)
+	_connect_button(_bottom_return_btn, _on_back_btn_pressed)
+	_connect_button(_bottom_next_map_btn, _on_next_chapter_btn_pressed)
 	_connect_button(_sweep_confirm_btn, _do_sweep_confirm)
 	_connect_button(_sweep_cancel_btn, _on_sweep_cancel_pressed)
 	var shade := get_node("PopupLayer/Shade") as ColorRect
@@ -73,6 +107,64 @@ func _connect_button(button: BaseButton, action: Callable) -> void:
 func _gui_input(_event: InputEvent) -> void:
 	# The editable chapter map buttons own all touch input.
 	pass
+
+func _input(event: InputEvent) -> void:
+	if _map_scroll == null or _sweep_dialog_active or _sweep_anim_active:
+		return
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_begin_map_scroll_drag(event.position)
+		else:
+			_finish_map_scroll_drag()
+	elif event is InputEventScreenDrag:
+		_update_map_scroll_drag(event.position, event.relative)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_begin_map_scroll_drag(event.position)
+		else:
+			_finish_map_scroll_drag()
+	elif event is InputEventMouseMotion and _scroll_pointer_active and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		_update_map_scroll_drag(event.position, event.relative)
+
+func _begin_map_scroll_drag(position: Vector2) -> void:
+	if not _map_scroll.get_global_rect().has_point(position):
+		return
+	_scroll_pointer_active = true
+	_scroll_dragging = false
+	_scroll_start_pos = position
+	_scroll_last_pos = position
+
+func _update_map_scroll_drag(position: Vector2, relative: Vector2) -> void:
+	if not _scroll_pointer_active:
+		return
+	if not _scroll_dragging and position.distance_to(_scroll_start_pos) >= MAP_SCROLL_DRAG_THRESHOLD:
+		_scroll_dragging = true
+		_scroll_ignore_tap_once = true
+	if _scroll_dragging:
+		_map_scroll.scroll_vertical -= int(round(relative.y))
+		_scroll_last_pos = position
+		_update_cloud_parallax(float(_map_scroll.scroll_vertical))
+		get_viewport().set_input_as_handled()
+
+func _finish_map_scroll_drag() -> void:
+	if not _scroll_pointer_active:
+		return
+	var was_dragging := _scroll_dragging
+	_scroll_pointer_active = false
+	_scroll_dragging = false
+	if was_dragging:
+		_scroll_ignore_tap_once = true
+		get_viewport().set_input_as_handled()
+		call_deferred("_clear_scroll_tap_suppression")
+
+func _clear_scroll_tap_suppression() -> void:
+	_scroll_ignore_tap_once = false
+
+func _should_ignore_pressed_after_scroll() -> bool:
+	if not _scroll_ignore_tap_once:
+		return false
+	_scroll_ignore_tap_once = false
+	return true
 
 func _draw() -> void:
 	# Formal map display is provided by chapter .tscn files, not Canvas drawing.
@@ -97,10 +189,16 @@ func _update_header() -> void:
 	_sync_map_nodes()
 
 func _update_chapter_buttons() -> void:
-	_prev_chapter_btn.visible = _current_chapter_index > 0
+	_prev_chapter_btn.visible = false
 	_prev_chapter_btn.disabled = _current_chapter_index <= 0
-	_next_chapter_btn.visible = _current_chapter_index < _chapters.size() - 1
+	_next_chapter_btn.visible = false
 	_next_chapter_btn.disabled = _current_chapter_index >= _chapters.size() - 1
+	if _bottom_prev_map_btn != null:
+		_bottom_prev_map_btn.disabled = _current_chapter_index <= 0
+		_bottom_prev_map_btn.modulate.a = 0.48 if _bottom_prev_map_btn.disabled else 1.0
+	if _bottom_next_map_btn != null:
+		_bottom_next_map_btn.disabled = _current_chapter_index >= _chapters.size() - 1
+		_bottom_next_map_btn.modulate.a = 0.48 if _bottom_next_map_btn.disabled else 1.0
 
 func _update_page_dots() -> void:
 	for i in DOT_PATHS.size():
@@ -110,7 +208,7 @@ func _update_page_dots() -> void:
 		dot.size = Vector2(10.0, 6.0) if i == _current_chapter_index else Vector2(5.0, 5.0)
 
 func _sync_gui() -> void:
-	if not is_inside_tree() or not has_node("ChapterMaps"):
+	if not is_inside_tree() or not has_node("MapScroll/ChapterMaps"):
 		return
 	_ensure_chapter_map()
 	_sync_map_nodes()
@@ -128,7 +226,55 @@ func _ensure_chapter_map() -> void:
 		(get_node(path) as Control).visible = path == map_path
 	_chapter_map = get_node(map_path) as Control
 	_chapter_map_id = chapter_id
+	_prepare_chapter_map_scroll_extent()
+	_scroll_map_to_start()
 	_connect_chapter_map_actions()
+
+func _prepare_chapter_map_scroll_extent() -> void:
+	if _chapter_map == null:
+		return
+	var map_height := _chapter_map_scroll_height()
+	if _chapter_maps_content != null:
+		_chapter_maps_content.custom_minimum_size = Vector2(DESIGN_W, map_height)
+		_chapter_maps_content.size = Vector2(DESIGN_W, map_height)
+	_chapter_map.custom_minimum_size = Vector2(DESIGN_W, map_height)
+	_chapter_map.size = Vector2(DESIGN_W, map_height)
+	for child_path in ["Background", "PathDecorations", "StageNodes"]:
+		if _chapter_map.has_node(child_path):
+			var child := _chapter_map.get_node(child_path) as Control
+			if child.size.y < map_height:
+				child.size = Vector2(DESIGN_W, map_height)
+
+func _chapter_map_scroll_height() -> float:
+	if _chapter_map != null:
+		return maxf(maxf(_chapter_map.custom_minimum_size.y, _chapter_map.size.y), _map_scroll.size.y if _map_scroll != null else 0.0)
+	if _chapter_maps_content != null:
+		return maxf(_chapter_maps_content.custom_minimum_size.y, _chapter_maps_content.size.y)
+	return DESIGN_H
+
+func _scroll_map_to_start() -> void:
+	if _map_scroll == null:
+		return
+	_map_scroll.scroll_horizontal = 0
+	_map_scroll.scroll_vertical = 0
+	_update_cloud_parallax(0.0)
+	call_deferred("_scroll_map_to_bottom")
+
+func _scroll_map_to_bottom() -> void:
+	if _map_scroll == null:
+		return
+	_map_scroll.scroll_horizontal = 0
+	_map_scroll.scroll_vertical = int(_chapter_map_scroll_height())
+	_update_cloud_parallax(float(_map_scroll.scroll_vertical))
+
+func _on_map_scroll_changed(value: float) -> void:
+	_update_cloud_parallax(value)
+
+func _update_cloud_parallax(scroll_value: float) -> void:
+	if _cloud_layer_far != null:
+		_cloud_layer_far.position = Vector2(-scroll_value * 0.035, -scroll_value * 0.055)
+	if _cloud_layer_near != null:
+		_cloud_layer_near.position = Vector2(scroll_value * 0.055, -scroll_value * 0.105)
 
 func _connect_chapter_map_actions() -> void:
 	for index in _stage_buttons().size():
@@ -143,10 +289,13 @@ func _stage_buttons() -> Array[TextureButton]:
 	var result: Array[TextureButton] = []
 	if _chapter_map == null:
 		return result
-	for index in 5:
-		var path := "StageNodes/Stage%02d" % (index + 1)
-		if _chapter_map.has_node(path):
-			result.append(_chapter_map.get_node(path) as TextureButton)
+	if not _chapter_map.has_node("StageNodes"):
+		return result
+	var stage_nodes := _chapter_map.get_node("StageNodes") as Control
+	for child: Node in stage_nodes.get_children():
+		if child is TextureButton and str(child.name).begins_with("Stage"):
+			result.append(child as TextureButton)
+	result.sort_custom(func(a: TextureButton, b: TextureButton): return str(a.name) < str(b.name))
 	return result
 
 func _boss_button() -> TextureButton:
@@ -177,6 +326,7 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	(button.get_node("StageNumber") as Label).modulate = TEXT_WHITE if enabled else TEXT_MUTED
 	var lock_state := button.get_node("LockState") as Label
 	lock_state.visible = not enabled
+	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	(button.get_node("SweepButton") as Button).visible = enabled and bool(card.get("can_sweep", false))
 
@@ -184,15 +334,26 @@ func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
 	button.disabled = not enabled
 	button.modulate.a = 1.0 if enabled else 0.82
+	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	(button.get_node("LockState") as Label).visible = not enabled
+
+func _sync_selection_ring(button: TextureButton, enabled: bool) -> void:
+	if not button.has_node("SelectionRing"):
+		return
+	var ring := button.get_node("SelectionRing") as TextureRect
+	ring.visible = enabled
+	ring.modulate.a = 0.72 if enabled else 0.0
 
 func _sync_stars(container: Control, count: int, enabled: bool) -> void:
 	for i in 3:
 		var star := container.get_node("Star%02d" % (i + 1)) as TextureRect
-		var path := "res://assets/images/stage/icon_star_lit.png" if i < count else "res://assets/images/stage/icon_star_dim.png"
+		var lit := i < count
+		var path := DEFAULT_STAR_LIT_PATH if lit else DEFAULT_STAR_DIM_PATH
+		if _chapter_map_id == "chapter_1":
+			path = CHAPTER_01_STAR_PATH
 		star.texture = _get_texture(path)
-		star.modulate.a = 1.0 if enabled and i < count else 0.45
+		star.modulate.a = 1.0 if enabled and lit else 0.32
 
 func _boss_card() -> Dictionary:
 	for card: Dictionary in _cards:
@@ -204,16 +365,22 @@ func _active_stage_cards() -> Array:
 	return _cards.filter(func(card): return not bool(card.get("is_boss", false)))
 
 func _on_stage_pressed(index: int) -> void:
+	if _should_ignore_pressed_after_scroll():
+		return
 	var cards := _active_stage_cards()
 	if index < cards.size() and bool(cards[index].get("enabled", false)):
 		stage_selected.emit(str(cards[index].get("id", "")), cards[index].get("stage_data", {}), _current_chapter_index)
 
 func _on_sweep_pressed(index: int) -> void:
+	if _should_ignore_pressed_after_scroll():
+		return
 	var cards := _active_stage_cards()
 	if index < cards.size() and bool(cards[index].get("enabled", false)) and bool(cards[index].get("can_sweep", false)):
 		_show_sweep_dialog(str(cards[index].get("id", "")), str(cards[index].get("text", "")))
 
 func _on_boss_pressed() -> void:
+	if _should_ignore_pressed_after_scroll():
+		return
 	var card := _boss_card()
 	if not card.is_empty() and bool(card.get("enabled", false)):
 		stage_selected.emit(str(card.get("id", "")), card.get("stage_data", {}), _current_chapter_index)

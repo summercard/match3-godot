@@ -4,6 +4,9 @@ extends RefCounted
 ## 包含所有章节与关卡数据，供 BattleManager、SaveManager 引用
 
 const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")
+const STAGES_PER_CHAPTER := 12
+const NORMAL_STAGES_PER_CHAPTER := 11
+const BOSS_STAGE_NO := 12
 
 # ========== 关卡数据库 ==========
 const STAGES_DATA: Dictionary = {
@@ -767,15 +770,16 @@ const STAGES_DATA: Dictionary = {
 func get_chapter(chapter_id: String) -> Dictionary:
 	for ch: Dictionary in STAGES_DATA["chapters"]:
 		if ch["id"] == chapter_id:
-			return ChapterMechanicRulesScript.enrich_chapter(ch)
+			return ChapterMechanicRulesScript.enrich_chapter(_expanded_chapter(ch))
 	return {}
 
 ## 按 stage_id 获取关卡数据（遍历所有章节），未找到返回空字典
 func get_stage(stage_id: String) -> Dictionary:
 	for ch: Dictionary in STAGES_DATA["chapters"]:
-		for st: Dictionary in ch["stages"]:
+		var chapter := _expanded_chapter(ch)
+		for st: Dictionary in chapter["stages"]:
 			if st["id"] == stage_id:
-				return ChapterMechanicRulesScript.enrich_stage(st, ChapterMechanicRulesScript.enrich_chapter(ch))
+				return ChapterMechanicRulesScript.enrich_stage(st, ChapterMechanicRulesScript.enrich_chapter(chapter))
 	return {}
 
 ## 获取章节总数
@@ -793,5 +797,246 @@ func get_stages_in_chapter(chapter_id: String) -> Array:
 func get_chapters() -> Array:
 	var chapters: Array = []
 	for ch: Dictionary in STAGES_DATA["chapters"]:
-		chapters.append(ChapterMechanicRulesScript.enrich_chapter(ch))
+		chapters.append(ChapterMechanicRulesScript.enrich_chapter(_expanded_chapter(ch)))
 	return chapters
+
+static func _expanded_chapter(raw_chapter: Dictionary) -> Dictionary:
+	var chapter := raw_chapter.duplicate(true)
+	chapter["stages"] = _build_chapter_stages(chapter)
+	return chapter
+
+static func _build_chapter_stages(chapter: Dictionary) -> Array:
+	var chapter_num := _chapter_number(chapter)
+	var normal_seeds: Array = []
+	var boss_seed: Dictionary = {}
+	for raw_stage: Dictionary in chapter.get("stages", []):
+		var stage_type := str(raw_stage.get("type", "normal"))
+		if stage_type == "boss":
+			boss_seed = raw_stage
+		elif stage_type != "elite":
+			normal_seeds.append(raw_stage)
+	if normal_seeds.is_empty():
+		normal_seeds.append({
+			"id": "stage_%d_1" % chapter_num,
+			"name": "Stage %d-01" % chapter_num,
+			"type": "normal",
+			"enemies": [_fallback_enemy_id(chapter_num)],
+			"enemyLevel": _normal_enemy_level(chapter_num, 1),
+			"rewards": _normal_rewards(chapter_num, 1)
+		})
+
+	var enemy_pool := _enemy_pool_from_seeds(normal_seeds, chapter_num)
+	var stages: Array = []
+	for stage_no in range(1, NORMAL_STAGES_PER_CHAPTER + 1):
+		var seed: Dictionary = normal_seeds[(stage_no - 1) % normal_seeds.size()]
+		var stage := seed.duplicate(true)
+		stage["id"] = "stage_%d_%d" % [chapter_num, stage_no]
+		stage["type"] = "normal"
+		stage["stageNo"] = stage_no
+		if stage_no > normal_seeds.size():
+			stage["name"] = "Stage %d-%02d" % [chapter_num, stage_no]
+		stage["enemies"] = _enemy_group_for_stage(enemy_pool, stage_no)
+		stage["enemyLevel"] = _normal_enemy_level(chapter_num, stage_no)
+		stage["rewards"] = _merge_rewards(stage.get("rewards", {}), _normal_rewards(chapter_num, stage_no), chapter_num, stage_no, false)
+		stage["designGoal"] = _normal_design_goal(chapter_num, stage_no)
+		stage["prepareHint"] = _normal_prepare_hint(chapter_num, stage_no)
+		stage["battleHint"] = _normal_battle_hint(chapter_num, stage_no)
+		if stage_no > normal_seeds.size():
+			stage["targetLesson"] = _normal_target_lesson(stage_no)
+		elif not stage.has("targetLesson"):
+			stage["targetLesson"] = _normal_target_lesson(stage_no)
+		_clear_generated_pressure(stage)
+		_apply_stage_pressure(stage, chapter_num, stage_no, false)
+		stages.append(stage)
+
+	stages.append(_build_boss_stage(chapter, boss_seed, enemy_pool))
+	return stages
+
+static func _build_boss_stage(chapter: Dictionary, boss_seed: Dictionary, enemy_pool: Array) -> Dictionary:
+	var chapter_num := _chapter_number(chapter)
+	var boss := boss_seed.duplicate(true) if not boss_seed.is_empty() else {}
+	var boss_id := _boss_monster_id(chapter_num)
+	boss["id"] = "stage_%d_%d" % [chapter_num, BOSS_STAGE_NO]
+	boss["name"] = "Boss %d-%02d" % [chapter_num, BOSS_STAGE_NO]
+	boss["type"] = "boss"
+	boss["stageNo"] = BOSS_STAGE_NO
+	boss["enemyLevel"] = _boss_enemy_level(chapter_num)
+	if not boss.has("phases") or (boss.get("phases", []) as Array).is_empty():
+		boss["phases"] = [
+			{"phase": 1, "enemies": [boss_id], "trigger": "on_enter", "hpMultiplier": 1.08 + chapter_num * 0.02},
+			{"phase": 2, "enemies": [boss_id], "trigger": "hp_50", "hpMultiplier": 1.32 + chapter_num * 0.03}
+		]
+	else:
+		var phases: Array = []
+		for phase: Dictionary in boss.get("phases", []):
+			var phase_copy := phase.duplicate(true)
+			phase_copy["enemies"] = [boss_id]
+			if int(phase_copy.get("phase", 1)) == 1:
+				phase_copy["hpMultiplier"] = maxf(float(phase_copy.get("hpMultiplier", 1.0)), 1.08 + chapter_num * 0.02)
+			elif int(phase_copy.get("phase", 1)) == 2:
+				phase_copy["hpMultiplier"] = maxf(float(phase_copy.get("hpMultiplier", 1.3)), 1.32 + chapter_num * 0.03)
+			phases.append(phase_copy)
+		boss["phases"] = phases
+	boss["enemies"] = [boss_id] if MonsterDb.has_monster(boss_id) else _enemy_group_for_stage(enemy_pool, BOSS_STAGE_NO)
+	boss["rewards"] = _merge_rewards(boss.get("rewards", {}), _boss_rewards(chapter_num), chapter_num, BOSS_STAGE_NO, true)
+	boss["designGoal"] = "Chapter %d boss: test the full chapter mechanic with a two-phase pressure spike." % chapter_num
+	boss["prepareHint"] = "Read the boss intent, keep guard/control skills ready, and save burst for the phase change."
+	boss["battleHint"] = "Stabilize before half HP, then spend charged skills to break the second phase quickly."
+	boss["targetLesson"] = "boss_break"
+	_clear_generated_pressure(boss)
+	_apply_stage_pressure(boss, chapter_num, BOSS_STAGE_NO, true)
+	return boss
+
+static func _chapter_number(chapter: Dictionary) -> int:
+	var chapter_id := str(chapter.get("id", "chapter_1"))
+	var parts := chapter_id.split("_")
+	if parts.size() >= 2:
+		return maxi(1, int(parts[1]))
+	return 1
+
+static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
+	var chapter_base := 1 + (chapter_num - 1) * 5
+	return chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
+
+static func _boss_enemy_level(chapter_num: int) -> int:
+	return 1 + (chapter_num - 1) * 5 + 6
+
+static func _normal_rewards(chapter_num: int, stage_no: int) -> Dictionary:
+	return {
+		"gold": 45 + (chapter_num - 1) * 18 + (stage_no - 1) * 12,
+		"exp": 45 + (chapter_num - 1) * 12 + (stage_no - 1) * 9
+	}
+
+static func _boss_rewards(chapter_num: int) -> Dictionary:
+	var last_normal := _normal_rewards(chapter_num, NORMAL_STAGES_PER_CHAPTER)
+	return {
+		"gold": int(last_normal.get("gold", 0)) + 80 + chapter_num * 12,
+		"exp": int(last_normal.get("exp", 0)) + 55 + chapter_num * 8
+	}
+
+static func _merge_rewards(seed_rewards: Dictionary, target_rewards: Dictionary, chapter_num: int, stage_no: int, is_boss: bool) -> Dictionary:
+	var rewards := target_rewards.duplicate(true)
+	if seed_rewards.has("guaranteedItems"):
+		rewards["guaranteedItems"] = seed_rewards.get("guaranteedItems", []).duplicate(true)
+	if chapter_num == 1 and stage_no == 2:
+		rewards["guaranteedItems"] = [{"id": "capture_ball", "count": 1}]
+	if chapter_num == 1 and is_boss:
+		rewards["guaranteedItems"] = [{"id": "capture_ball_plus", "count": 1}]
+	return rewards
+
+static func _enemy_pool_from_seeds(normal_seeds: Array, chapter_num: int) -> Array:
+	var pool: Array = []
+	for seed: Dictionary in normal_seeds:
+		for enemy_id in seed.get("enemies", []):
+			var id := str(enemy_id)
+			if not id.is_empty() and not pool.has(id):
+				pool.append(id)
+	if pool.is_empty():
+		pool.append(_fallback_enemy_id(chapter_num))
+	return pool
+
+static func _enemy_group_for_stage(pool: Array, stage_no: int) -> Array:
+	var count := 1
+	if stage_no >= 3 and stage_no <= 5:
+		count = 2
+	elif stage_no >= 6:
+		count = 3
+	var group: Array = []
+	for offset in count:
+		group.append(pool[(stage_no + offset - 1) % pool.size()])
+	return group
+
+static func _fallback_enemy_id(chapter_num: int) -> String:
+	var enemy_num := mini(46, maxi(1, (chapter_num - 1) * 4 + 1))
+	return "enemy_%03d" % enemy_num
+
+static func _boss_monster_id(chapter_num: int) -> String:
+	return "monster_boss_%03d" % chapter_num
+
+static func _normal_target_lesson(stage_no: int) -> String:
+	if stage_no <= 2:
+		return "basic_flow"
+	if stage_no <= 5:
+		return "mechanic_intro"
+	if stage_no <= 8:
+		return "mechanic_combo"
+	return "boss_setup"
+
+static func _normal_design_goal(chapter_num: int, stage_no: int) -> String:
+	return "Chapter %d stage %02d: scale enemy count, board pressure, and reward pacing toward the boss." % [chapter_num, stage_no]
+
+static func _normal_prepare_hint(chapter_num: int, stage_no: int) -> String:
+	if stage_no <= 3:
+		return "Use this stage to read enemy intent and build stable matches before spending skills."
+	if stage_no <= 8:
+		return "Check the board pressure first, then decide whether to clear hazards or focus damage."
+	return "Pre-boss stage: preserve HP and enter the next fight with a clear skill plan."
+
+static func _normal_battle_hint(chapter_num: int, stage_no: int) -> String:
+	if stage_no <= 3:
+		return "Prioritize clean 3-matches and charge the team evenly."
+	if stage_no <= 8:
+		return "Clear pressure tiles when they block cascades; attack when the lane opens."
+	return "Control the strongest enemy before it attacks, then burst the weakest target."
+
+static func _clear_generated_pressure(stage: Dictionary) -> void:
+	stage.erase("obstacles")
+	stage.erase("lockedGems")
+	stage.erase("poisonFog")
+	stage.erase("eliteMultiplier")
+	stage.erase("bossLayers")
+
+static func _apply_stage_pressure(stage: Dictionary, chapter_num: int, stage_no: int, is_boss: bool) -> void:
+	if chapter_num in [2, 3, 7, 10] and stage_no >= 5:
+		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
+	if chapter_num in [4, 5, 8, 10] and stage_no >= 5:
+		stage["lockedGems"] = _locked_pattern(stage_no, is_boss)
+	if chapter_num in [6, 7, 9, 11] and stage_no >= 5:
+		stage["poisonFog"] = _fog_pattern(stage_no, is_boss)
+
+static func _rock_pattern(stage_no: int, is_boss: bool) -> Array:
+	var hp := 3 if is_boss or stage_no >= 10 else 2
+	var positions := [
+		{"row": 1, "col": 2}, {"row": 1, "col": 5},
+		{"row": 3, "col": 1}, {"row": 3, "col": 6},
+		{"row": 5, "col": 2}, {"row": 5, "col": 5}
+	]
+	if is_boss:
+		positions.append_array([{"row": 2, "col": 3}, {"row": 2, "col": 4}, {"row": 4, "col": 3}, {"row": 4, "col": 4}])
+	var result: Array = []
+	var take := mini(positions.size(), 3 + int(stage_no / 2))
+	for i in take:
+		var pos: Dictionary = positions[i]
+		result.append({"row": pos["row"], "col": pos["col"], "type": "rock", "hp": hp})
+	return result
+
+static func _locked_pattern(stage_no: int, is_boss: bool) -> Array:
+	var hp := 2 if is_boss or stage_no >= 9 else 1
+	var positions := [
+		{"row": 0, "col": 1}, {"row": 0, "col": 6},
+		{"row": 2, "col": 3}, {"row": 2, "col": 4},
+		{"row": 5, "col": 3}, {"row": 5, "col": 4},
+		{"row": 7, "col": 1}, {"row": 7, "col": 6}
+	]
+	var result: Array = []
+	var take := mini(positions.size(), 2 + int(stage_no / 2))
+	for i in take:
+		var pos: Dictionary = positions[i]
+		result.append({"row": pos["row"], "col": pos["col"], "hp": hp})
+	return result
+
+static func _fog_pattern(stage_no: int, is_boss: bool) -> Dictionary:
+	var positions := [
+		{"row": 1, "col": 1}, {"row": 1, "col": 6},
+		{"row": 3, "col": 2}, {"row": 3, "col": 5},
+		{"row": 5, "col": 1}, {"row": 5, "col": 6},
+		{"row": 6, "col": 3}, {"row": 6, "col": 4}
+	]
+	var take := mini(positions.size(), 2 + int(stage_no / 2))
+	var tiles: Array = []
+	for i in take:
+		tiles.append((positions[i] as Dictionary).duplicate(true))
+	return {
+		"tiles": tiles,
+		"spreadInterval": 2 if is_boss else maxi(3, 7 - int(stage_no / 2))
+	}

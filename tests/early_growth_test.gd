@@ -16,9 +16,9 @@ func _run() -> void:
 
 	var stage_db = load("res://src/data/stage_db.gd").new()
 	var stage_1_1: Dictionary = stage_db.get_stage("stage_1_1")
-	var stage_1_5: Dictionary = stage_db.get_stage("stage_1_5")
+	var stage_1_12: Dictionary = stage_db.get_stage("stage_1_12")
 	_expect(int(stage_1_1.get("rewards", {}).get("exp", 0)) >= 45, "stage_1_1 should give visible early exp")
-	_expect(int(stage_1_5.get("rewards", {}).get("exp", 0)) >= 120, "chapter 1 boss should give a strong early reward")
+	_expect(int(stage_1_12.get("rewards", {}).get("exp", 0)) >= 120, "chapter 1 boss should give a strong early reward")
 
 	var exp_needed_level_1: int = save_manager.get_exp_for_level(1)
 	_expect(exp_needed_level_1 <= 90, "level 1 exp requirement should allow early level-up feedback")

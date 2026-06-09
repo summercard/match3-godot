@@ -1,26 +1,26 @@
 [gd_scene format=3 uid="uid://c2dvyeijd2b7u"]
 
 [ext_resource type="Script" uid="uid://dhxxynogkgxr3" path="res://src/ui/scene/scene_stage_select_gui.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://dmy5pwiwhcgih" path="res://assets/images/stage/ui_header_bar.png" id="3_header"]
-[ext_resource type="Texture2D" uid="uid://cm4jnnqu7lam5" path="res://assets/images/stage/ui_back_button.png" id="4_back"]
-[ext_resource type="Texture2D" uid="uid://cer2lr0gs3dnp" path="res://assets/images/stage/icon_back_arrow.png" id="5_back_arrow"]
-[ext_resource type="Texture2D" uid="uid://cbbj4w1kv74xi" path="res://assets/images/stage/ui_arrow_button.png" id="6_arrow_button"]
-[ext_resource type="Texture2D" uid="uid://cx2v2jx2rl4ge" path="res://assets/images/stage/icon_prev_arrow.png" id="7_prev"]
-[ext_resource type="Texture2D" uid="uid://bcg7iju0r67x0" path="res://assets/images/stage/icon_next_arrow.png" id="8_next"]
-[ext_resource type="Texture2D" uid="uid://bqtxpcrs2gnb" path="res://assets/images/stage/icon_chapter_badge.png" id="9_badge"]
-[ext_resource type="Texture2D" uid="uid://k7ip7n4bgier" path="res://assets/images/stage/icon_star_lit.png" id="10_star"]
+[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png" id="3_header"]
+[ext_resource type="Texture2D" path="res://assets/images/inventory/ui_back_button.png" id="4_back"]
+[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_icon_badge.png" id="9_badge"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/chapter_01_new/star_gold_new.png" id="10_star"]
 [ext_resource type="Texture2D" uid="uid://bet0ett8i3hmo" path="res://assets/images/stage/ui_reward_panel_clean.png" id="15_reward"]
-[ext_resource type="Texture2D" uid="uid://blp18i051o24k" path="res://assets/images/battle_prepare/ui_reward_slot.png" id="16_reward_slot"]
-[ext_resource type="Texture2D" uid="uid://cegre0vtwf1vr" path="res://assets/images/main/icon_gold_v2.png" id="17_gold"]
-[ext_resource type="Texture2D" uid="uid://chc525plghdv7" path="res://assets/images/main/icon_exp_star.png" id="18_exp"]
-[ext_resource type="Texture2D" path="res://assets/images/items_new/icon_capture_ball.png" id="19_ball"]
-[ext_resource type="Texture2D" uid="uid://cd08ellr4qh2k" path="res://assets/images/battle/gems/gem_fire.png" id="20_fire"]
-[ext_resource type="Texture2D" uid="uid://ddnh202wcwlym" path="res://assets/images/battle/gems/gem_water.png" id="21_water"]
-[ext_resource type="Texture2D" uid="uid://scqeqipchinb" path="res://assets/images/battle/gems/gem_grass.png" id="22_grass"]
-[ext_resource type="Texture2D" uid="uid://dfp071qcvp8ve" path="res://assets/images/battle/gems/gem_thunder.png" id="23_thunder"]
-[ext_resource type="Texture2D" uid="uid://p1fyaemjgef8" path="res://assets/images/battle/gems/gem_light.png" id="24_light"]
-[ext_resource type="Texture2D" uid="uid://frjj2tjjs1y7" path="res://assets/images/ranch/ui_btn_collect_gold.png" id="25_gold_btn"]
-[ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/album/ui_btn_secondary_blue.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gold_coin.png" id="17_gold"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_exp_badge.png" id="18_exp"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_capture_ball.png" id="19_ball"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_fire.png" id="20_fire"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_water.png" id="21_water"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_grass.png" id="22_grass"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_thunder.png" id="23_thunder"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_light.png" id="24_light"]
+[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="25_gold_btn"]
+[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="27_nav_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/result_refresh/ui_btn_blue.png" id="28_nav_blue"]
+[ext_resource type="Texture2D" path="res://assets/images/result_refresh/ui_btn_gold.png" id="29_nav_gold"]
+[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="30_nav_arrow"]
+[ext_resource type="Texture2D" path="res://assets/images/stage/chapter_01_new/cloud_soft_01.png" id="31_cloud"]
 [ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_grassland.tscn" id="chapter_01_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
 [ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
@@ -42,283 +42,323 @@ offset_bottom = 667.0
 mouse_filter = 1
 script = ExtResource("1_script")
 
-[node name="ChapterMaps" type="Control" parent="." unique_id=1266953437]
+[node name="MapScroll" type="ScrollContainer" parent="." unique_id=1266953437]
 anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 1
+clip_contents = true
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+scroll_deadzone = 8
+
+[node name="ChapterMaps" type="Control" parent="MapScroll"]
+custom_minimum_size = Vector2(375, 1280)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Chapter01Grassland" parent="MapScroll/ChapterMaps" unique_id=2044910982 instance=ExtResource("chapter_01_scene")]
+visible = false
+layout_mode = 0
+
+[node name="Chapter02FireValley" parent="MapScroll/ChapterMaps" unique_id=315406483 instance=ExtResource("chapter_02_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter03MysticForest" parent="MapScroll/ChapterMaps" unique_id=976449952 instance=ExtResource("chapter_03_scene")]
+visible = false
+layout_mode = 0
+
+[node name="Chapter04EclipseCanopy" parent="MapScroll/ChapterMaps" unique_id=924509359 instance=ExtResource("chapter_04_scene")]
+visible = false
+layout_mode = 0
+
+[node name="Chapter05ThunderTemple" parent="MapScroll/ChapterMaps" unique_id=191119368 instance=ExtResource("chapter_05_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter06FrostThrone" parent="MapScroll/ChapterMaps" unique_id=952459069 instance=ExtResource("chapter_06_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter07VoidDomain" parent="MapScroll/ChapterMaps" unique_id=295859020 instance=ExtResource("chapter_07_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter08TemporalRift" parent="MapScroll/ChapterMaps" unique_id=280571989 instance=ExtResource("chapter_08_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter09StarlitTemple" parent="MapScroll/ChapterMaps" unique_id=1831753647 instance=ExtResource("chapter_09_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter10ChaosDomain" parent="MapScroll/ChapterMaps" unique_id=1386337963 instance=ExtResource("chapter_10_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="Chapter11RadiantTemple" parent="MapScroll/ChapterMaps" unique_id=1784110683 instance=ExtResource("chapter_11_scene")]
+visible = false
+anchors_preset = 0
+
+[node name="CloudLayerFar" type="Control" parent="."]
+layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 
-[node name="Chapter01Grassland" parent="ChapterMaps" unique_id=2044910982 instance=ExtResource("chapter_01_scene")]
-visible = false
+[node name="Cloud01" type="TextureRect" parent="CloudLayerFar"]
 layout_mode = 0
+offset_left = -42.0
+offset_top = 112.0
+offset_right = 128.0
+offset_bottom = 183.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.42)
+texture = ExtResource("31_cloud")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Chapter02FireValley" parent="ChapterMaps" unique_id=315406483 instance=ExtResource("chapter_02_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter03MysticForest" parent="ChapterMaps" unique_id=976449952 instance=ExtResource("chapter_03_scene")]
-visible = false
+[node name="Cloud02" type="TextureRect" parent="CloudLayerFar"]
 layout_mode = 0
+offset_left = 248.0
+offset_top = 78.0
+offset_right = 398.0
+offset_bottom = 141.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.36)
+texture = ExtResource("31_cloud")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Chapter04EclipseCanopy" parent="ChapterMaps" unique_id=924509359 instance=ExtResource("chapter_04_scene")]
-visible = false
+[node name="CloudLayerNear" type="Control" parent="."]
 layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
 
-[node name="Chapter05ThunderTemple" parent="ChapterMaps" unique_id=191119368 instance=ExtResource("chapter_05_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter06FrostThrone" parent="ChapterMaps" unique_id=952459069 instance=ExtResource("chapter_06_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter07VoidDomain" parent="ChapterMaps" unique_id=295859020 instance=ExtResource("chapter_07_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter08TemporalRift" parent="ChapterMaps" unique_id=280571989 instance=ExtResource("chapter_08_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter09StarlitTemple" parent="ChapterMaps" unique_id=1831753647 instance=ExtResource("chapter_09_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter10ChaosDomain" parent="ChapterMaps" unique_id=1386337963 instance=ExtResource("chapter_10_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="Chapter11RadiantTemple" parent="ChapterMaps" unique_id=1784110683 instance=ExtResource("chapter_11_scene")]
-visible = false
-anchors_preset = 0
-
-[node name="RewardPanel" type="Control" parent="." unique_id=2077951878]
-anchors_preset = 0
-offset_left = 17.0
-offset_top = 566.0
-offset_right = 358.0
-offset_bottom = 650.0
-
-[node name="Frame" type="NinePatchRect" parent="RewardPanel" unique_id=1698122232]
+[node name="Cloud03" type="TextureRect" parent="CloudLayerNear"]
 layout_mode = 0
-offset_right = 341.0
-offset_bottom = 84.0
-texture = ExtResource("15_reward")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+offset_left = 214.0
+offset_top = 396.0
+offset_right = 410.0
+offset_bottom = 478.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.30)
+texture = ExtResource("31_cloud")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="RewardPanel" unique_id=2009913060]
+[node name="Cloud04" type="TextureRect" parent="CloudLayerNear"]
 layout_mode = 0
-offset_left = 86.0
-offset_top = 10.0
-offset_right = 255.0
+offset_left = -74.0
+offset_top = 500.0
+offset_right = 120.0
+offset_bottom = 581.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.26)
+texture = ExtResource("31_cloud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomNav" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 10.0
+offset_top = 573.0
+offset_right = 365.0
+offset_bottom = 661.0
+
+[node name="Panel" type="TextureRect" parent="BottomNav"]
+layout_mode = 0
+offset_right = 355.0
+offset_bottom = 88.0
+mouse_filter = 2
+texture = ExtResource("27_nav_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PrevMapButton" type="TextureButton" parent="BottomNav"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 22.0
+offset_right = 122.0
+offset_bottom = 62.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="BottomNav/PrevMapButton"]
+layout_mode = 0
+offset_right = 94.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("28_nav_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Arrow" type="TextureRect" parent="BottomNav/PrevMapButton"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 9.0
+offset_right = 30.0
 offset_bottom = 31.0
-theme_override_colors/font_color = Color(0.86, 0.92, 1, 1)
-theme_override_font_sizes/font_size = 13
-text = "通关奖励"
+mouse_filter = 2
+texture = ExtResource("30_nav_arrow")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/PrevMapButton"]
+layout_mode = 0
+offset_left = 24.0
+offset_right = 88.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+text = "上一张"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Items" type="Control" parent="RewardPanel" unique_id=2052054417]
-anchors_preset = 0
-offset_left = 27.0
-offset_top = 38.0
-offset_right = 314.0
-offset_bottom = 73.0
-
-[node name="Item1" type="TextureRect" parent="RewardPanel/Items" unique_id=512331758]
+[node name="ReturnButton" type="TextureButton" parent="BottomNav"]
 layout_mode = 0
-offset_right = 32.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
+offset_left = 129.0
+offset_top = 16.0
+offset_right = 226.0
+offset_bottom = 66.0
+ignore_texture_size = true
 
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item1" unique_id=476361622]
+[node name="Frame" type="TextureRect" parent="BottomNav/ReturnButton"]
 layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("17_gold")
+offset_right = 97.0
+offset_bottom = 50.0
+mouse_filter = 2
+texture = ExtResource("29_nav_gold")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Item2" type="TextureRect" parent="RewardPanel/Items" unique_id=1771092073]
+[node name="Text" type="Label" parent="BottomNav/ReturnButton"]
 layout_mode = 0
-offset_left = 39.0
-offset_right = 71.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
+offset_right = 97.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.23, 0.11, 0.03, 1)
+theme_override_colors/font_outline_color = Color(1, 0.92, 0.45, 0.35)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+text = "返回"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item2" unique_id=1215242882]
+[node name="NextMapButton" type="TextureButton" parent="BottomNav"]
 layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("18_exp")
+offset_left = 233.0
+offset_top = 22.0
+offset_right = 327.0
+offset_bottom = 62.0
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="BottomNav/NextMapButton"]
+layout_mode = 0
+offset_right = 94.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("28_nav_blue")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Item3" type="TextureRect" parent="RewardPanel/Items" unique_id=465060678]
+[node name="Arrow" type="TextureRect" parent="BottomNav/NextMapButton"]
 layout_mode = 0
-offset_left = 78.0
-offset_right = 110.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item3" unique_id=1847524029]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("19_ball")
+offset_left = 64.0
+offset_top = 9.0
+offset_right = 86.0
+offset_bottom = 31.0
+mouse_filter = 2
+texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
+flip_h = true
 
-[node name="Item4" type="TextureRect" parent="RewardPanel/Items" unique_id=1959883992]
+[node name="Text" type="Label" parent="BottomNav/NextMapButton"]
 layout_mode = 0
-offset_left = 117.0
-offset_right = 149.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item4" unique_id=1898430099]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("20_fire")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Item5" type="TextureRect" parent="RewardPanel/Items" unique_id=693905579]
-layout_mode = 0
-offset_left = 156.0
-offset_right = 188.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item5" unique_id=322657776]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("21_water")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Item6" type="TextureRect" parent="RewardPanel/Items" unique_id=1461728319]
-layout_mode = 0
-offset_left = 195.0
-offset_right = 227.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item6" unique_id=1951747791]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("22_grass")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Item7" type="TextureRect" parent="RewardPanel/Items" unique_id=576836820]
-layout_mode = 0
-offset_left = 234.0
-offset_right = 266.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item7" unique_id=991169481]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("23_thunder")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Item8" type="TextureRect" parent="RewardPanel/Items" unique_id=1746931660]
-layout_mode = 0
-offset_left = 273.0
-offset_right = 305.0
-offset_bottom = 34.0
-texture = ExtResource("16_reward_slot")
-expand_mode = 1
-
-[node name="Icon" type="TextureRect" parent="RewardPanel/Items/Item8" unique_id=763981840]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 27.0
-offset_bottom = 27.0
-texture = ExtResource("24_light")
-expand_mode = 1
-stretch_mode = 5
+offset_left = 6.0
+offset_right = 70.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+text = "下一张"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Header" type="Control" parent="." unique_id=2083169124]
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 86.0
+offset_bottom = 98.0
+
+[node name="TopScrim" type="ColorRect" parent="Header"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 96.0
+mouse_filter = 2
+color = Color(0.02, 0.08, 0.14, 0.14)
 
 [node name="BackButton" type="TextureButton" parent="Header" unique_id=14658475]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 12.0
-offset_right = 65.0
-offset_bottom = 68.0
+offset_left = 13.0
+offset_top = 22.0
+offset_right = 61.0
+offset_bottom = 70.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Header/BackButton" unique_id=233296432]
 layout_mode = 0
-offset_right = 56.0
-offset_bottom = 56.0
+offset_right = 48.0
+offset_bottom = 48.0
 mouse_filter = 2
 texture = ExtResource("4_back")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Arrow" type="TextureRect" parent="Header/BackButton" unique_id=1807170880]
+visible = false
 layout_mode = 0
-offset_left = 10.0
-offset_top = 11.0
-offset_right = 42.0
-offset_bottom = 43.0
+offset_left = 11.0
+offset_top = 12.0
+offset_right = 43.0
+offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("5_back_arrow")
+texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Bar" type="TextureRect" parent="Header" unique_id=1696465741]
 layout_mode = 0
-offset_left = 76.0
-offset_top = 12.0
-offset_right = 362.0
-offset_bottom = 78.0
+offset_left = 64.0
+offset_top = 11.0
+offset_right = 372.0
+offset_bottom = 76.0
 mouse_filter = 2
 texture = ExtResource("3_header")
 expand_mode = 1
+stretch_mode = 5
+
+[node name="GemDeco" type="TextureRect" parent="Header"]
+visible = false
+layout_mode = 0
+offset_left = 218.0
+offset_top = 0.0
+offset_right = 338.0
+offset_bottom = 54.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.82)
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Badge" type="TextureRect" parent="Header" unique_id=1696856939]
 layout_mode = 0
-offset_left = 89.0
-offset_top = 26.0
-offset_right = 127.0
-offset_bottom = 68.0
+offset_left = 84.0
+offset_top = 21.0
+offset_right = 129.0
+offset_bottom = 66.0
 mouse_filter = 2
 texture = ExtResource("9_badge")
 expand_mode = 1
@@ -326,55 +366,65 @@ stretch_mode = 5
 
 [node name="Number" type="Label" parent="Header/Badge" unique_id=567334668]
 layout_mode = 0
-offset_right = 38.0
-offset_bottom = 42.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "9"
+offset_right = 45.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.28, 0.45, 0.8, 1)
+theme_override_font_sizes/font_size = 17
+text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.95)
+theme_override_constants/outline_size = 2
 
 [node name="ChapterTitle" type="Label" parent="Header" unique_id=701966155]
 layout_mode = 0
-offset_left = 132.0
-offset_top = 29.0
-offset_right = 196.0
-offset_bottom = 52.0
-theme_override_colors/font_color = Color(0.92, 0.82, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "第9章"
+offset_left = 135.0
+offset_top = 20.0
+offset_right = 197.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.3, 0.95, 0.34, 1)
+theme_override_font_sizes/font_size = 16
+text = ""
+theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
+theme_override_constants/outline_size = 3
 
 [node name="ChapterName" type="Label" parent="Header" unique_id=1383989028]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 38.0
-offset_right = 290.0
-offset_bottom = 61.0
+offset_left = 202.0
+offset_top = 20.0
+offset_right = 340.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "星耀圣殿"
+theme_override_font_sizes/font_size = 18
+text = ""
+theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
+theme_override_constants/outline_size = 4
+horizontal_alignment = 1
 
 [node name="StarIcon" type="TextureRect" parent="Header" unique_id=1370045107]
 layout_mode = 0
-offset_left = 131.0
-offset_top = 51.0
-offset_right = 149.0
-offset_bottom = 69.0
+offset_left = 140.0
+offset_top = 47.0
+offset_right = 160.0
+offset_bottom = 67.0
 mouse_filter = 2
 texture = ExtResource("10_star")
 expand_mode = 1
 
 [node name="StarValue" type="Label" parent="Header" unique_id=530526879]
 layout_mode = 0
-offset_left = 154.0
-offset_top = 49.0
-offset_right = 228.0
-offset_bottom = 71.0
+offset_left = 163.0
+offset_top = 47.0
+offset_right = 247.0
+offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 15
 text = "0/18"
+theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
+theme_override_constants/outline_size = 3
 
 [node name="PreviousButton" type="TextureButton" parent="Header" unique_id=1346864934]
+visible = false
 layout_mode = 0
 offset_left = 20.0
 offset_top = 94.0
@@ -387,7 +437,7 @@ layout_mode = 0
 offset_right = 34.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("6_arrow_button")
+texture = ExtResource("28_nav_blue")
 expand_mode = 1
 
 [node name="Arrow" type="TextureRect" parent="Header/PreviousButton" unique_id=982385365]
@@ -397,10 +447,11 @@ offset_top = 6.0
 offset_right = 28.0
 offset_bottom = 28.0
 mouse_filter = 2
-texture = ExtResource("7_prev")
+texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 
 [node name="NextButton" type="TextureButton" parent="Header" unique_id=2016766189]
+visible = false
 layout_mode = 0
 offset_left = 326.0
 offset_top = 94.0
@@ -413,7 +464,7 @@ layout_mode = 0
 offset_right = 34.0
 offset_bottom = 34.0
 mouse_filter = 2
-texture = ExtResource("6_arrow_button")
+texture = ExtResource("28_nav_blue")
 expand_mode = 1
 
 [node name="Arrow" type="TextureRect" parent="Header/NextButton" unique_id=1444326267]
@@ -423,7 +474,7 @@ offset_top = 6.0
 offset_right = 28.0
 offset_bottom = 28.0
 mouse_filter = 2
-texture = ExtResource("8_next")
+texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 
 [node name="Dots" type="Control" parent="Header" unique_id=2064253588]
@@ -547,31 +598,57 @@ offset_top = 23.0
 offset_right = 240.0
 offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 1)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 18
-text = "确认扫荡"
+text = ""
 horizontal_alignment = 1
+
+[node name="GoldIcon" type="TextureRect" parent="PopupLayer/SweepDialog"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 62.0
+offset_right = 68.0
+offset_bottom = 88.0
+mouse_filter = 2
+texture = ExtResource("17_gold")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="GoldLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=1010015902]
 layout_mode = 0
-offset_left = 28.0
+offset_left = 70.0
 offset_top = 67.0
-offset_right = 133.0
+offset_right = 138.0
 offset_bottom = 91.0
 theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = "+120 金币"
-horizontal_alignment = 1
+text = ""
+
+[node name="ExpIcon" type="TextureRect" parent="PopupLayer/SweepDialog"]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 62.0
+offset_right = 174.0
+offset_bottom = 88.0
+mouse_filter = 2
+texture = ExtResource("18_exp")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ExpLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=2132634597]
 layout_mode = 0
-offset_left = 137.0
+offset_left = 176.0
 offset_top = 67.0
-offset_right = 242.0
+offset_right = 244.0
 offset_bottom = 91.0
-theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
+theme_override_colors/font_color = Color(0.74, 0.9, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = "+80 经验"
-horizontal_alignment = 1
+text = ""
 
 [node name="RuleLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=822395860]
 layout_mode = 0
@@ -581,7 +658,7 @@ offset_right = 252.0
 offset_bottom = 113.0
 theme_override_colors/font_color = Color(0.66, 0.78, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "3 星扫荡收益 80%"
+text = ""
 horizontal_alignment = 1
 
 [node name="ConfirmBtn" type="Button" parent="PopupLayer/SweepDialog" unique_id=1642853623]
@@ -599,12 +676,15 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("25_gold_btn")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="Text" type="Label" parent="PopupLayer/SweepDialog/ConfirmBtn" unique_id=42870000]
 layout_mode = 0
 offset_right = 100.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(0.25, 0.14, 0.03, 1)
+theme_override_colors/font_outline_color = Color(1, 0.92, 0.45, 0.45)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
 text = "扫荡"
 horizontal_alignment = 1
@@ -633,6 +713,8 @@ layout_mode = 0
 offset_right = 100.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
 text = "取消"
 horizontal_alignment = 1
@@ -664,7 +746,7 @@ offset_right = 245.0
 offset_bottom = 80.0
 theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
 theme_override_font_sizes/font_size = 22
-text = "扫荡完成！"
+text = ""
 horizontal_alignment = 1
 
 [node name="GoldLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=689188983]
@@ -675,7 +757,7 @@ offset_right = 238.0
 offset_bottom = 117.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "+0 金币"
+text = ""
 horizontal_alignment = 1
 
 [node name="ExpLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=996239423]

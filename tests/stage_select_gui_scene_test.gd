@@ -20,40 +20,92 @@ func _run() -> void:
 	scene.init({"chapterIndex": 8})
 
 	_expect(scene.scene_file_path == "res://src/ui/scenes/stage_select_map.tscn", "stage select should be an editable PackedScene")
-	_expect((scene.get_node("ChapterMaps/Chapter09StarlitTemple") as Control).scene_file_path == "res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn", "chapter 9 should be an independent editable PackedScene")
+	var map_scroll := scene.get_node("MapScroll") as ScrollContainer
+	_expect(map_scroll != null, "chapter maps should be hosted in a vertical scroll container")
+	_expect(map_scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED, "map should not allow desktop horizontal scrollbar behavior")
+	_expect(map_scroll.vertical_scroll_mode == ScrollContainer.SCROLL_MODE_SHOW_NEVER, "map should hide the desktop-style vertical scrollbar")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).custom_minimum_size.y > map_scroll.size.y, "active chapter map should be taller than the visible viewport")
+	await process_frame
+	_expect(map_scroll.scroll_vertical > 0, "chapter map should start at the bottom for mobile upward progression")
+	map_scroll.scroll_vertical = 120
+	await process_frame
+	_expect(map_scroll.scroll_vertical > 0, "chapter map scroll position should be movable at runtime")
+	map_scroll.scroll_vertical = 0
+	await process_frame
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = Vector2(180.0, 420.0)
+	scene._input(press)
+	var drag := InputEventMouseMotion.new()
+	drag.button_mask = MOUSE_BUTTON_MASK_LEFT
+	drag.position = Vector2(180.0, 300.0)
+	drag.relative = Vector2(0.0, -120.0)
+	scene._input(drag)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = Vector2(180.0, 300.0)
+	scene._input(release)
+	await process_frame
+	_expect(map_scroll.scroll_vertical > 0, "press-dragging the map should scroll vertically without a visible scrollbar")
+	_expect((scene.get_node("CloudLayerNear") as Control).position.length() > 0.0, "foreground cloud layer should move subtly with map dragging")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).scene_file_path == "res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn", "chapter 9 should be an independent editable PackedScene")
 	for path in [
-		"ChapterMaps/Chapter01Grassland/Background",
-		"ChapterMaps/Chapter09StarlitTemple/Background",
-		"ChapterMaps/Chapter11RadiantTemple/BossStage",
+		"MapScroll/ChapterMaps/Chapter01Grassland/Background",
+		"MapScroll/ChapterMaps/Chapter09StarlitTemple/Background",
+		"MapScroll/ChapterMaps/Chapter11RadiantTemple/BossStage",
 		"Header/BackButton",
-		"ChapterMaps/Chapter01Grassland/StageNodes/Stage01",
-		"ChapterMaps/Chapter09StarlitTemple/StageNodes/Stage05",
-		"ChapterMaps/Chapter08TemporalRift/BossStage",
-		"ChapterMaps/Chapter09StarlitTemple/BossStage",
-		"RewardPanel/Items/Item1",
+		"MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01",
+		"MapScroll/ChapterMaps/Chapter09StarlitTemple/StageNodes/Stage05",
+		"MapScroll/ChapterMaps/Chapter08TemporalRift/BossStage",
+		"MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage",
+		"BottomNav/PrevMapButton",
+		"BottomNav/ReturnButton",
+		"BottomNav/NextMapButton",
+		"CloudLayerFar/Cloud01",
+		"CloudLayerNear/Cloud03",
 		"PopupLayer/SweepDialog/ConfirmBtn",
 	]:
 		_expect(scene.has_node(path), "editable map node should exist: %s" % path)
 
-	_expect((scene.get_node("ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter 9 should show its independent editable map group")
-	_expect(not (scene.get_node("ChapterMaps/Chapter08TemporalRift") as Control).visible, "inactive chapter maps should stay hidden")
-	_expect((scene.get_node("ChapterMaps/Chapter09StarlitTemple/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_09_starlit_temple.png"), "chapter 9 group should carry its own formal background")
-	_expect((scene.get_node("ChapterMaps/Chapter09StarlitTemple/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.contains("chapter_09_star"), "chapter 9 group should carry its own themed platform asset")
-	var star_frame := scene.get_node("ChapterMaps/Chapter09StarlitTemple/BossStage/Platform") as TextureRect
+	_expect(not scene.has_node("RewardPanel"), "old reward panel should be removed from the map")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/Background") as TextureRect).texture.resource_path.ends_with("bg_chapter_01_grassland_540x960.png"), "chapter 1 should use the optimized formal background")
+	_expect((scene.get_node("Header/Bar") as TextureRect).texture.resource_path.ends_with("ui_shop_title_plaque_image2.png"), "top chapter info bar should reuse the shop title plaque art")
+	_expect((scene.get_node("Header/BackButton/Frame") as TextureRect).texture.resource_path.ends_with("ui_back_button.png"), "top back button should reuse the inventory back button art")
+	_expect((scene.get_node("Header/Badge") as TextureRect).texture.resource_path.ends_with("ui_inventory_icon_badge.png"), "chapter badge should reuse the inventory badge art")
+	_expect((scene.get_node("BottomNav/Panel") as TextureRect).texture.resource_path.contains("lobby_refresh"), "bottom nav should stay on the existing navigation art")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter 9 should show its independent editable map group")
+	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "inactive chapter maps should stay hidden")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_09_starlit_temple.png"), "chapter 9 group should carry its own formal background")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.contains("chapter_09_star"), "chapter 9 group should carry its own themed platform asset")
+	var star_frame := scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage/Platform") as TextureRect
 	_expect(star_frame.size.x >= 200.0 and star_frame.size.y >= 260.0, "chapter 9 boss platform should remain large and editable")
 
 	(scene.get_node("Header/PreviousButton") as TextureButton).pressed.emit()
-	_expect((scene.get_node("ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent temporal map group")
-	_expect(not (scene.get_node("ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter switch should hide the previous map group")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent temporal map group")
+	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter switch should hide the previous map group")
+	(scene.get_node("BottomNav/NextMapButton") as TextureButton).pressed.emit()
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "bottom next map button should switch to the next background")
 
 	scene.init({"chapterIndex": 0})
-	(scene.get_node("ChapterMaps/Chapter01Grassland/StageNodes/Stage01") as TextureButton).pressed.emit()
+	await process_frame
+	_expect((scene.get_node("BottomNav/PrevMapButton") as TextureButton).disabled, "bottom previous map button should be disabled on the first chapter")
+	_expect(scene.has_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11"), "chapter 1 should dynamically render eleven normal stage nodes")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("node_base_gold.png"), "chapter 1 normal stages should use the new gold base asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11/StageNumber") as Label).text == "11", "chapter 1 should render the eleventh normal stage node")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("boss_base_dark.png"), "chapter 1 boss should use the new boss base asset")
+	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/BossArt"), "chapter 1 boss should not keep the old boss art overlay")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SelectionRing") as TextureRect).texture.resource_path.ends_with("selection_ring_pink.png"), "chapter 1 stages should carry the new selection ring asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/Stars/Star01") as TextureRect).texture.resource_path.ends_with("star_gold_new.png"), "chapter 1 stars should use the new formal star asset")
+	(scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01") as TextureButton).pressed.emit()
 	_expect(_selected_stage_id == "stage_1_1", "editable stage button should preserve enter-stage behavior")
 
 	save_manager.save_stage_stars("stage_1_1", 3)
 	scene.init({"chapterIndex": 0})
-	var sweep := scene.get_node("ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SweepButton") as Button
+	var sweep := scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SweepButton") as Button
 	_expect(sweep.visible, "cleared stage should reveal its editable sweep button")
+	_expect((sweep.get_node("Frame") as NinePatchRect).texture.resource_path.ends_with("ui_inventory_use_button.png"), "sweep button should reuse the inventory action button art")
 	sweep.pressed.emit()
 	_expect((scene.get_node("PopupLayer/SweepDialog") as Control).visible, "sweep action should reveal the GUI dialog")
 	_expect((scene.get_node("PopupLayer/SweepDialog/ExpLabel") as Label).text.contains("经验"), "GUI dialog should retain sweep reward feedback")
