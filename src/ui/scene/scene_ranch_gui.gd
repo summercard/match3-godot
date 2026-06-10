@@ -553,7 +553,7 @@ func _sync_classroom_page() -> void:
 		var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
 		var target_name := str(target.get("name", "最终形态")) if not target.is_empty() else "最终形态"
 		var level := int(instance.get("level", 1))
-		var target_stats := MonsterDb.get_monster_stats(target_id, level, str(instance.get("nature", ""))) if not target_id.is_empty() else {}
+		var target_stats := StatCalculator.calc(target_id, level, str(instance.get("nature", ""))) if not target_id.is_empty() else {}
 		var required_level := int(info.get("required_level", 1))
 		var item_count := int(info.get("item_count", 0))
 		var required_item := str(info.get("required_item", ""))

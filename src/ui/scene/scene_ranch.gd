@@ -1131,7 +1131,13 @@ func _get_instance(instance_id: String) -> Dictionary:
 func _get_instance_stats(instance_id: String) -> Dictionary:
 	if _storage != null and _storage.has_method("get_instance_stats"):
 		return _storage.get_instance_stats(instance_id)
-	return MonsterDb.get_monster_stats(_get_monster_id(instance_id), _get_monster_level(instance_id))
+	# 统一公式：牧场预览也走 StatCalculator（保持 nature 兼容）
+	var instance := _get_monster_instance(instance_id)
+	return StatCalculator.calc(
+		_get_monster_id(instance_id),
+		_get_monster_level(instance_id),
+		str(instance.get("nature", ""))
+	)
 
 func _get_selected_evolution_info() -> Dictionary:
 	var instance_id := _class_selected_instance_id if _active_page == "classroom" else _selected_monster_id()

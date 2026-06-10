@@ -25,7 +25,6 @@ func _run() -> void:
 		"Background",
 		"TopHud/TurnBadge/Value",
 		"TopHud/SpeedButton",
-		"TopHud/SettingsButton",
 		"Combatants/SingleEnemy/Portrait",
 		"Combatants/SingleEnemy/HpFrameBase",
 		"Combatants/Players/Player1/HpBar",

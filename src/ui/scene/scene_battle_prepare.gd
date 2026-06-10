@@ -49,7 +49,6 @@ const PREPARE_ASSETS := {
 	"diamond": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
 	"heart": "res://assets/images/ranch/fx_social_heart.png",
 	"plus": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
-	"settings": "res://assets/images/main/lobby_refresh/ui_settings_button_v3.png",
 	"header": "res://assets/images/battle_prepare_new/ui/ui_prepare_header.png",
 	"team_card": "res://assets/images/battle_prepare_new/ui/ui_monster_card.png",
 	"enemy_card": "res://assets/images/battle_prepare_new/ui/ui_monster_card.png",
@@ -221,7 +220,8 @@ func _load_player_team() -> void:
 		var monster_id: String = team_data.get(slot, "")
 		if monster_id == "":
 			continue
-		var monster: Dictionary = MonsterDBScript.get_monster_stats(monster_id, level)
+		# 统一公式：玩家准备预览走 StatCalculator
+		var monster: Dictionary = StatCalculator.calc(monster_id, level)
 		if not monster.is_empty():
 			monster["power"] = monster.get("hp", 0) + monster.get("atk", 0) + monster.get("def", 0) + monster.get("spd", 0)
 			_player_team.append(monster)
@@ -229,11 +229,15 @@ func _load_player_team() -> void:
 func _load_enemy_team() -> void:
 	_enemy_team = []
 	var enemy_ids: Array = _stage_data.get("enemies", ["enemy_001", "enemy_002", "enemy_003"])
+	# ★ 主人定：关卡没设 enemyLevel 时兑底 3，记录 isFallback 供 UI 提示
 	var enemy_level: int = _stage_data.get("enemyLevel", 3)
+	var is_fallback: bool = not _stage_data.has("enemyLevel") or int(_stage_data.get("enemyLevel", 0)) <= 0
 	for enemy_id: String in enemy_ids:
-		var enemy: Dictionary = MonsterDBScript.get_monster_stats(enemy_id, enemy_level)
+		# 准备预览用中性性格（不 random，避免预览跳跳）
+		var enemy: Dictionary = StatCalculator.calc(enemy_id, enemy_level)
 		if not enemy.is_empty():
 			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0) + enemy.get("spd", 0)
+			enemy["_isFallbackLevel"] = is_fallback  # 告诉 UI 是不是兑底值
 			_enemy_team.append(enemy)
 
 func _get_team_total_power(team: Array) -> int:
@@ -569,12 +573,17 @@ func _render_enemy_team() -> void:
 		
 		var name_color: Color = C["danger"] if is_boss else C["white"]
 		_draw_text_with_shadow(enemy.get("name", "敌人"), x + card_w / 2.0, card_y + 63.0, name_color, FONT_SIZES["small"], true, card_w - 10.0)
-		
-		_draw_text_with_shadow("Lv.%d" % enemy.get("level", 1), x + card_w / 2.0, card_y + 77.0, C["text_muted"], 9.0, false, 52.0)
-		
-		# 属性标签
-		_draw_element_badge(enemy.get("element", ""), x + 8.0, card_y + 83.0, 18.0)
-		
+
+		# 等级与兑底提示：主人定，要清晰可见
+		var lv_text: String = "Lv.%d" % enemy.get("level", 1)
+		if enemy.get("_isFallbackLevel", false):
+			lv_text += " *"
+		var lv_color: Color = C["warning"] if enemy.get("_isFallbackLevel", false) else C["text_muted"]
+		_draw_text_with_shadow(lv_text, x + card_w / 2.0, card_y + 76.0, lv_color, 10.0, true, 60.0)
+
+		# 属性标签（避开 Lv 文字）
+		_draw_element_badge(enemy.get("element", ""), x + 8.0, card_y + 86.0, 16.0)
+
 		_draw_text_with_shadow("%d" % enemy.get("power", 0), x + card_w / 2.0, card_y + 100.0, C["gold"], FONT_SIZES["tiny"], true, 50.0)
 
 func _render_element_hint() -> void:

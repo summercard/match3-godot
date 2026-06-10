@@ -277,7 +277,8 @@ static func remove_instance(pool: Array, instance_id: String) -> bool:
 static func get_instance_stats(instance: Dictionary) -> Dictionary:
 	if instance.is_empty():
 		return {}
-	return MonsterDb.get_monster_stats(
+	# 统一公式：玩家宠物也走 StatCalculator（与敌人共用同一张表）
+	return StatCalculator.calc(
 		str(instance.get("monsterId", "")),
 		int(instance.get("level", 1)),
 		str(instance.get("nature", ""))

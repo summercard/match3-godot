@@ -895,11 +895,13 @@ static func _chapter_number(chapter: Dictionary) -> int:
 	return 1
 
 static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
-	var chapter_base := 1 + (chapter_num - 1) * 5
+	# ★ 主人定 2026-06-10：ch1 起步 Lv5，每章 +5 递增，每章内 9 关平拹 5 级
+	var chapter_base := 5 + (chapter_num - 1) * 5
 	return chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
 
 static func _boss_enemy_level(chapter_num: int) -> int:
-	return 1 + (chapter_num - 1) * 5 + 6
+	# ★ 主人定 2026-06-10：ch1 Boss = Lv20（跨度 15），每章 Boss +5
+	return 5 + (chapter_num - 1) * 5 + 15
 
 static func _normal_rewards(chapter_num: int, stage_no: int) -> Dictionary:
 	return {

@@ -56,17 +56,16 @@ var _player: Dictionary = {
 func _ready() -> void:
 	instance = self
 	CartoonTypographyScript.apply(self, "lobby")
+	# 大厅 BGM
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("play_bgm"):
+		am.call("play_bgm", "bgm_town")
 	for button_name in BUTTON_IDS:
 		var button := get_node("%" + button_name) as TextureButton
 		var button_id: String = BUTTON_IDS[button_name]
 		_attach_button_feedback(button, _feedback_profile(button_id))
 		button.pressed.connect(_queue_button_pressed.bind(button_id))
 		button.tooltip_text = BUTTON_DESCRIPTIONS[button_id]
-	var settings_top_button := get_node_or_null("Header/SettingsTopButton") as TextureButton
-	if settings_top_button != null:
-		_attach_button_feedback(settings_top_button, CartoonButtonFeedback.Profile.ICON)
-		settings_top_button.pressed.connect(_queue_button_pressed.bind("settings"))
-		settings_top_button.tooltip_text = BUTTON_DESCRIPTIONS["settings"]
 	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus"]:
 		var plus_button := get_node_or_null(plus_path) as TextureButton
 		if plus_button != null:

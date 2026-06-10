@@ -981,6 +981,10 @@ func _get_date_minus_days(days: int) -> String:
 func save_settings(data: Dictionary) -> bool:
 	_set_value("settings", "data", data)
 	_save_config()
+	# 通知 AudioManager 同步 soundOn / musicOn
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("_sync_with_settings"):
+		am.call("_sync_with_settings")
 	return true
 
 ## 加载设置

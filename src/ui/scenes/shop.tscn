@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png" id="5_diamond"]
 [ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/main/lobby_refresh/icon_plus_v3.png" id="6_plus"]
 [ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/ranch/fx_social_heart.png" id="7_heart"]
-[ext_resource type="Texture2D" uid="uid://ds531ylm048xq" path="res://assets/images/main/lobby_refresh/ui_settings_button_v3.png" id="8_settings"]
 [ext_resource type="Texture2D" uid="uid://q7o0wp1k2j6e" path="res://assets/images/shop/concept/icon_shop_category_gems.png" id="9_cat_gems"]
 [ext_resource type="Texture2D" uid="uid://c35o42p0oriw7" path="res://assets/images/shop/concept/icon_shop_category_coins.png" id="10_cat_coins"]
 [ext_resource type="Texture2D" uid="uid://cp0em14cj5t77" path="res://assets/images/shop/concept/icon_shop_category_hearts.png" id="11_cat_hearts"]
@@ -268,23 +267,6 @@ offset_right = 107.0
 offset_bottom = 32.0
 mouse_filter = 2
 texture = ExtResource("6_plus")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SettingsButton" type="TextureButton" parent="Header" unique_id=1540028394]
-layout_mode = 0
-offset_left = 345.0
-offset_top = 10.0
-offset_right = 373.0
-offset_bottom = 38.0
-ignore_texture_size = true
-
-[node name="Frame" type="TextureRect" parent="Header/SettingsButton" unique_id=636898195]
-layout_mode = 0
-offset_right = 28.0
-offset_bottom = 28.0
-mouse_filter = 2
-texture = ExtResource("8_settings")
 expand_mode = 1
 stretch_mode = 5
 
