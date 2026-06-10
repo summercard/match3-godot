@@ -82,7 +82,6 @@ func _connect_gui_actions() -> void:
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(str(TABS[i].get("id", "recommend"))))
 	for i in CARD_PATHS.size():
 		_connect_button(CARD_PATHS[i], _on_card_pressed.bind(i))
-	_connect_button("Header/SettingsButton", _go_to_scene.bind("settings"))
 	_connect_button("ProductGrid/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("ProductGrid/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("PopupOverlay/Panel/CloseButton", _on_popup_cancel_pressed)
@@ -347,7 +346,6 @@ func _attach_shop_feedback() -> void:
 		"Tabs/Hearts",
 		"Tabs/Boosters",
 		"Tabs/Chest",
-		"Header/SettingsButton",
 		"ProductGrid/PageControls/PreviousButton",
 		"ProductGrid/PageControls/NextButton",
 		"PopupOverlay/Panel/CloseButton",
@@ -371,8 +369,6 @@ func _attach_shop_feedback() -> void:
 			profile = CartoonButtonFeedback.Profile.PRIMARY
 		elif entry_paths.has(path):
 			profile = CartoonButtonFeedback.Profile.ENTRY
-		elif path == "Header/SettingsButton":
-			profile = CartoonButtonFeedback.Profile.ICON
 		feedback.setup(button, profile)
 
 func _play_enter_animation() -> void:

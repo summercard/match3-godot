@@ -19,7 +19,7 @@ func _run() -> void:
 		_expect(loaded_lobby.has_node("%PlayerName"), "editable player-name node should exist")
 		_expect(loaded_lobby.has_node("%ExperienceFill"), "editable experience fill node should exist")
 		_expect(loaded_lobby.has_node("Header/ExperienceTrack"), "owner level card should expose the experience track")
-		_expect(loaded_lobby.has_node("Header/SettingsTopButton"), "concept lobby should expose the top settings shortcut")
+		_expect(not loaded_lobby.has_node("Header/SettingsTopButton"), "concept lobby should not expose a duplicate top settings shortcut")
 		_expect(loaded_lobby.has_node("BottomNav/Panel"), "concept lobby should expose the bottom navigation panel")
 		var particles := loaded_lobby.get_node("Particles")
 		var effect_profile: Dictionary = particles.call("get_effect_profile")
@@ -71,11 +71,7 @@ func _run() -> void:
 	_expect(start_label.get_theme_font_size("font_size") >= 32, "start text should be large and readable")
 	_expect(nav_label.get_theme_font("font") != null, "bottom navigation text should use the shared cartoon font")
 	_expect(nav_label.get_theme_font_size("font_size") >= 15, "bottom navigation text should be larger than the old compact labels")
-	var top_settings := lobby.get_node("Header/SettingsTopButton") as TextureButton
-	_expect(top_settings.has_node("CartoonFeedback"), "top settings shortcut should expose cartoon feedback")
-	top_settings.pressed.emit()
-	await create_timer(0.17).timeout
-	_expect(emitted_ids.back() == "settings", "top settings shortcut should preserve the settings navigation id")
+	_expect(not lobby.has_node("Header/SettingsTopButton"), "top settings shortcut should be removed")
 	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus"]:
 		var plus_button := lobby.get_node(plus_path) as TextureButton
 		_expect(plus_button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % plus_path)

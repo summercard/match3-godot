@@ -88,6 +88,12 @@ var _enemy_attack_timer: float = 0.0
 ## 受击闪烁
 var _hit_flashes: Array[Dictionary] = []
 
+## 玩家宠物弹动动画（主人定 2026-06-10：攻击时往前弹一下回位）
+var _player_lunge_anims: Array[Dictionary] = []
+
+## 弹道动画（主人定 2026-06-10：同属性颜色弹道飞向目标）
+var _bullet_anims: Array[Dictionary] = []
+
 ## 倒下提示
 var _fall_messages: Array[Dictionary] = []
 
@@ -204,6 +210,30 @@ var _stage_data: Dictionary = {}
 var _stage_id: String = ""
 var _input_test_only: bool = false
 
+## 音频辅助（直接走 autoload，避免每处重复 get_node）
+func _am() -> Node:
+	return get_node_or_null("/root/AudioManager")
+
+func _sfx(key: String) -> void:
+	var am := _am()
+	if am != null and am.has_method("play_sfx"):
+		am.call("play_sfx", key)
+
+func _sfx_combo(level: int) -> void:
+	var am := _am()
+	if am != null and am.has_method("play_combo"):
+		am.call("play_combo", level)
+
+func _sfx_attack_by_element(element: String) -> void:
+	var am := _am()
+	if am != null and am.has_method("play_attack_by_element"):
+		am.call("play_attack_by_element", element)
+
+func _sfx_match_by_element(element: String) -> void:
+	var am := _am()
+	if am != null and am.has_method("play_match_by_element"):
+		am.call("play_match_by_element", element)
+
 ## 美术资源
 var _art_assets: Dictionary = {}
 var _art_ready: bool = false
@@ -307,7 +337,6 @@ const BATTLE_UI_ASSETS := {
 	"top_scrim": "res://assets/images/battle/ui/ui_top_scrim.png",
 	"turn_badge": "res://assets/images/battle/ui/ui_turn_badge.png",
 	"speed_button": "res://assets/images/battle/ui/ui_speed_button.png",
-	"settings_button": "res://assets/images/battle/ui/ui_settings_button.png",
 	"board_frame": "res://assets/images/battle/ui/ui_board_frame.png",
 	"board_cell": "res://assets/images/battle/ui/ui_board_cell.png",
 	"footer_panel": "res://assets/images/battle/ui/ui_footer_panel.png",
@@ -385,10 +414,17 @@ func init(data: Dictionary = {}) -> void:
 	var stage_data = data.get("stageData", null)
 	var stage_id = data.get("stageId", "stage_1_1")
 	_input_test_only = data.get("inputTestOnly", false)
-	
+
+	# 进入战斗：切到 battle BGM
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("play_bgm"):
+		am.call("play_bgm", "bgm_battle")
+
 	_selected_gem = Vector2i(-1, -1)
 	_hit_flashes = []
 	_fall_messages = []
+	_player_lunge_anims = []
+	_bullet_anims = []
 	_enemy_display_hp = []
 	_player_display_hp = []
 	_boss_skill_visuals = {}
@@ -702,8 +738,9 @@ func _on_tap(x: float, y: float) -> void:
 	
 	if _selected_gem.x < 0:
 		_selected_gem = Vector2i(pos["col"], pos["row"])
+		_sfx("ui_tile_select_leaf")
 		return
-	
+
 	var dr: int = abs(_selected_gem.y - pos["row"])
 	var dc: int = abs(_selected_gem.x - pos["col"])
 	if dr + dc == 1:
@@ -745,6 +782,11 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		else:
 			_show_message("技能暂时无法释放")
 		return
+	# 玩家技能释放音（按释放者元素选攻击音）
+	var attacker_idx: int = _find_player_index(result.get("attacker", ""))
+	if attacker_idx >= 0 and _battle != null and attacker_idx < _battle.player_team.size():
+		var attacker: Dictionary = _battle.player_team[attacker_idx]
+		_sfx_attack_by_element(str(attacker.get("element", "fire")))
 	var skill_name: String = result.get("skill_name", result.get("skillName", "技能"))
 	var attacker: String = result.get("attacker", "伙伴")
 	var damage: int = result.get("remaining_damage", result.get("remainingDamage", result.get("damage", 0)))
@@ -784,6 +826,10 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		})
 	for effect: Dictionary in result.get("effect_logs", result.get("effectLogs", [])):
 		var kind := str(effect.get("kind", ""))
+		if kind == "heal":
+			_sfx("battle_heal_leaf_bubble")
+		elif kind == "guard":
+			_sfx("battle_shield_soft_bloom")
 		if kind == "heal" or kind == "guard":
 			var player_idx := _find_player_index(str(effect.get("target_id", "")), str(effect.get("target", "")))
 			var card_rect := _get_player_card_rect(player_idx) if player_idx >= 0 else Rect2(DESIGN_W / 2.0 - 55.0, 187.0, 110.0, 58.0)
@@ -845,12 +891,15 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 	if not _board.swap(r1, c1, r2, c2):
 		_state = BattleState.IDLE
 		_show_message("无法交换")
+		_sfx("ui_invalid_move_bouncy")
 		return
+	_sfx("ui_tile_swap_soft")
 	var match_result: Dictionary = _board.find_matches()
 	if match_result.get("gems", []).is_empty():
 		_board.swap(r1, c1, r2, c2)
 		_state = BattleState.IDLE
 		_show_message("无效交换")
+		_sfx("ui_invalid_move_bouncy")
 		return
 	_battle.turn_count += 1
 	if _input_test_only:
@@ -882,12 +931,13 @@ func _process_matches() -> void:
 	_board.cascade_count += 1
 	if _board.cascade_count >= 2:
 		_show_combo_popup(_board.cascade_count)
-	
+		_sfx_combo(_board.cascade_count)
+
 	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
 	var total_elim: int = match_context.get("total_elim", 0)
 	if total_elim >= 5 or _board.cascade_count >= 4:
 		_board_shake_timer = 0.3
-	
+
 	# ===== 第1步：记录普通消除宝石（动画用）=====
 	_eliminating_gems.clear()
 	for m in matches:
@@ -900,7 +950,16 @@ func _process_matches() -> void:
 	var explosion_gems: Array = match_context.get("explosion_gems", [])
 	var bomb_gems: Array = match_context.get("bomb_gems", [])
 	var rainbow_gems: Array = match_context.get("rainbow_gems", [])
-	
+
+	# ===== 消除音：按首个消除宝石的元素选音效；高连锁/高消除数给更重的 5 消版本 =====
+	var first_gem: Dictionary = (matches[0] if not matches.is_empty() else {})
+	var first_type: String = str(first_gem.get("type", "fire"))
+	_sfx_match_by_element(first_type)
+	if total_elim >= 5 or _board.cascade_count >= 4:
+		_sfx("powerup_burst_soft")
+	if not explosion_gems.is_empty() or not bomb_gems.is_empty() or not rainbow_gems.is_empty():
+		_sfx("powerup_created_star")
+
 	# ===== 第3步：构建分时消除动画队列（四段 setTimeout 链，匹配微信版 804-830 行时序）=====
 	_special_elim_phases.clear()
 	_special_elim_phases.append_array(match_context.get("special_phases", []))
@@ -1218,6 +1277,12 @@ func _start_enemy_turn() -> void:
 				popup_x = 15.0 + target_idx * 120.0 + 55.0
 				popup_y = 218.0
 				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
+			# 敌人攻击音（按敌人元素）
+			var enemy_idx: int = _find_enemy_index(action.get("attacker", ""))
+			if enemy_idx >= 0 and enemy_idx < _battle.enemies.size():
+				var enemy_unit: Dictionary = _battle.enemies[enemy_idx]
+				_sfx_attack_by_element(str(enemy_unit.get("element", "fire")))
+			_sfx("battle_player_hit_cushion")
 			# 伤害数字加入队列（依次弹出，延迟编排）
 			var entry: Dictionary = {
 				"text": "-%d" % action.get("damage", 0),
@@ -1286,8 +1351,11 @@ func _begin_battle_end_overlay() -> void:
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
 	if _battle != null and _battle.battle_result == "win":
 		_slowmotion_timer = 0.5
+		_sfx("battle_victory_fresh_fanfare")
 	else:
 		_slowmotion_timer = 0.0
+		_sfx("battle_defeat_gentle")
+		_sfx("player_ko_soft_fall")
 
 ## ============================================
 # 收服特效 inline 播放（Phase 4: 移回 battle inline）
@@ -1563,6 +1631,29 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 	if target_idx >= 0:
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
 
+	# ★ 主人定 2026-06-10：我方宠物弹动 + 同属性弹道
+	if info_type != "active_skill":  # 主动技能已经有弹道，只补常规攻击
+		var attacker_idx: int = _find_player_index(attacker_name)
+		if attacker_idx >= 0:
+			# 1) 玩家宠物往前弹一下回位（0.3s）
+			_player_lunge_anims.append({
+				"playerIndex": attacker_idx,
+				"timer": 0.0,
+				"duration": 0.3,
+				"maxDuration": 0.3,
+			})
+			# 2) 同属性弹道 飞向目标
+			if target_idx >= 0:
+				var element: String = str(damage_info.get("element", "fire"))
+				_bullet_anims.append({
+					"playerIndex": attacker_idx,
+					"targetIndex": target_idx,
+					"element": element,
+					"timer": 0.0,
+					"duration": 0.4,
+					"maxDuration": 0.4,
+				})
+
 func _on_enemy_attacked(action_info: Dictionary) -> void:
 	"""处理 BattleManager.enemy_attacked 信号，显示敌人攻击伤害"""
 	var damage: int = action_info.get("damage", 0)
@@ -1743,7 +1834,11 @@ func _process(delta: float) -> void:
 	
 	# 更新受击闪烁
 	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, effective_delta)
-	
+
+	# ★ 主人定 2026-06-10：更新玩家宠物弹动 + 弹道动画
+	BattleAnimationControllerScript.tick_timed_entries(_player_lunge_anims, effective_delta)
+	BattleAnimationControllerScript.tick_timed_entries(_bullet_anims, effective_delta)
+
 	# 更新倒下提示
 	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, effective_delta)
 	
@@ -1966,6 +2061,8 @@ func _combatant_render_state() -> Dictionary:
 		"colors": C,
 		"idle_time": _idle_time,
 		"hit_flashes": _hit_flashes,
+		"player_lunge_anims": _player_lunge_anims,
+		"bullet_anims": _bullet_anims,
 		"defeated_enemies": _defeated_enemies,
 		"boss_skill_visuals": _boss_skill_visuals,
 		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
@@ -2005,7 +2102,6 @@ func _draw_title_bar() -> void:
 	var max_turns: int = _battle.max_turns if _battle != null else 20
 	var turn_tex := _get_texture(BATTLE_UI_ASSETS["turn_badge"])
 	var speed_tex := _get_texture(BATTLE_UI_ASSETS["speed_button"])
-	var settings_tex := _get_texture(BATTLE_UI_ASSETS["settings_button"])
 	if turn_tex:
 		_draw_texture_contain(turn_tex, Rect2(9.0, 5.0, 72.0, 48.0), 1.0)
 	else:
@@ -2017,11 +2113,7 @@ func _draw_title_bar() -> void:
 	else:
 		_draw_rounded_rect(287.0, 9.0, 38.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
 	_draw_text_with_shadow("x2", 306.0, 40.0, C["white"], 9.5, true)
-	if settings_tex:
-		_draw_texture_contain(settings_tex, Rect2(330.0, 5.0, 42.0, 48.0), 1.0)
-	else:
-		_draw_rounded_rect(333.0, 9.0, 30.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
-	
+
 	# BOSS阶段指示器
 	if _battle != null:
 		var status: Dictionary = _battle.get_status()

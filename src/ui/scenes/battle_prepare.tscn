@@ -1,20 +1,17 @@
 [gd_scene format=3 uid="uid://yyg32jgreiyw"]
 
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="alert_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_back_button.png" id="back"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="back_arrow"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/background/bg_battle_prepare_garden.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="enemy_card"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/fx_leaf_cluster_a.png" id="fx_sparkles"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_prepare_header.png" id="header"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="info_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_power_panel.png" id="power_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_reward_slot.png" id="reward_slot"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_reward_panel.png" id="reward_panel"]
+[ext_resource type="Texture2D" uid="uid://dt6wfqinj0dl4" path="res://assets/images/battle_prepare_new/ui/ui_back_button.png" id="back"]
+[ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="back_arrow"]
+[ext_resource type="Texture2D" uid="uid://dvjddhwwm7ijb" path="res://assets/images/battle_prepare_new/background/bg_battle_prepare_garden.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://cbjn1tgxp8jgt" path="res://assets/images/battle_prepare_new/ui/fx_leaf_cluster_a.png" id="fx_sparkles"]
+[ext_resource type="Texture2D" uid="uid://c280xukf15hi8" path="res://assets/images/battle_prepare_new/ui/ui_prepare_header.png" id="header"]
+[ext_resource type="Texture2D" uid="uid://vevgwefd4xem" path="res://assets/images/battle_prepare_new/ui/ui_power_panel.png" id="power_panel"]
+[ext_resource type="Texture2D" uid="uid://dnsjcm4cpmwcl" path="res://assets/images/battle_prepare_new/ui/ui_reward_panel.png" id="reward_panel"]
+[ext_resource type="Texture2D" uid="uid://c8y0rpgb2rabt" path="res://assets/images/battle_prepare_new/ui/ui_reward_slot.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://4sa0f7ilpgt3" path="res://src/ui/scene/scene_battle_prepare_gui.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_start_button.png" id="start_button"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="synergy_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" uid="uid://djpjofcvb55lq" path="res://assets/images/battle_prepare_new/ui/ui_start_button.png" id="start_button"]
+[ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="synergy_panel"]
+[ext_resource type="Texture2D" uid="uid://cbuoorml6pq8o" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="team_card"]
 
 [node name="BattlePrepareGui" type="Control" unique_id=526108190]
 clip_contents = true
@@ -150,7 +147,7 @@ offset_top = 18.0
 offset_right = 327.0
 offset_bottom = 148.0
 mouse_filter = 2
-texture = ExtResource("info_panel")
+texture = ExtResource("synergy_panel")
 expand_mode = 1
 stretch_mode = 5
 
@@ -183,7 +180,7 @@ layout_mode = 0
 offset_right = 88.0
 offset_bottom = 104.0
 mouse_filter = 2
-texture = ExtResource("enemy_card")
+texture = ExtResource("team_card")
 expand_mode = 1
 stretch_mode = 5
 
@@ -223,10 +220,10 @@ vertical_alignment = 1
 
 [node name="Level" type="Label" parent="EnemyPanel/Cards/EnemyCard1" unique_id=1722222726]
 layout_mode = 0
-offset_left = 38.0
-offset_top = 78.0
-offset_right = 80.0
-offset_bottom = 96.0
+offset_left = 24.0
+offset_top = 6.0
+offset_right = 66.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -273,7 +270,7 @@ layout_mode = 0
 offset_right = 88.0
 offset_bottom = 104.0
 mouse_filter = 2
-texture = ExtResource("enemy_card")
+texture = ExtResource("team_card")
 expand_mode = 1
 stretch_mode = 5
 
@@ -313,10 +310,10 @@ vertical_alignment = 1
 
 [node name="Level" type="Label" parent="EnemyPanel/Cards/EnemyCard2" unique_id=1127552185]
 layout_mode = 0
-offset_left = 38.0
-offset_top = 78.0
-offset_right = 80.0
-offset_bottom = 96.0
+offset_left = 22.0
+offset_top = 4.0
+offset_right = 64.0
+offset_bottom = 22.0
 theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -363,7 +360,7 @@ layout_mode = 0
 offset_right = 88.0
 offset_bottom = 104.0
 mouse_filter = 2
-texture = ExtResource("enemy_card")
+texture = ExtResource("team_card")
 expand_mode = 1
 stretch_mode = 5
 
@@ -403,10 +400,10 @@ vertical_alignment = 1
 
 [node name="Level" type="Label" parent="EnemyPanel/Cards/EnemyCard3" unique_id=1595616263]
 layout_mode = 0
-offset_left = 38.0
-offset_top = 78.0
-offset_right = 80.0
-offset_bottom = 96.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 65.0
+offset_bottom = 22.0
 theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -542,7 +539,7 @@ offset_top = 15.0
 offset_right = 335.0
 offset_bottom = 139.0
 mouse_filter = 2
-texture = ExtResource("info_panel")
+texture = ExtResource("synergy_panel")
 expand_mode = 1
 stretch_mode = 5
 
@@ -859,7 +856,7 @@ layout_mode = 0
 offset_right = 345.0
 offset_bottom = 68.0
 mouse_filter = 2
-texture = ExtResource("info_panel")
+texture = ExtResource("synergy_panel")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1150,7 +1147,7 @@ offset_top = 294.0
 offset_right = 318.0
 offset_bottom = 374.0
 mouse_filter = 2
-texture = ExtResource("alert_panel")
+texture = ExtResource("synergy_panel")
 expand_mode = 1
 stretch_mode = 5
 

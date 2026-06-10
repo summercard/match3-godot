@@ -35,8 +35,12 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
 		var boss_scale: float = 170.0 if is_boss else 128.0
+		# ★ 主人定 2026-06-10：phase 2 体型 ×1.5（在原 boss_scale 基础上）
+		var visual_scale: float = float(enemy.get("_visualScale", 1.0))
+		var final_size: float = boss_scale * visual_scale
 		var monster_y: float = 104.0 if is_boss else 111.0
-		scene._draw_texture_contain(monster_tex, Rect2(design_w / 2.0 - boss_scale / 2.0, monster_y + sin(idle_time * TAU / 1.8) * 3.0, boss_scale, boss_scale), 1.0)
+		# 体型变大后以中心点为锚，避免乱跳
+		scene._draw_texture_contain(monster_tex, Rect2(design_w / 2.0 - final_size / 2.0, monster_y - (final_size - boss_scale) * 0.3 + sin(idle_time * TAU / 1.8) * 3.0, final_size, final_size), 1.0)
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), design_w / 2.0, 168.0, colors.get("white", Color.WHITE), 50.0)
 	_draw_boss_visuals(scene, state, design_w / 2.0 - 55.0, 120.0, 0, hp)
@@ -59,7 +63,10 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
-		scene._draw_texture_contain(monster_tex, Rect2(cx - sprite_size / 2.0, y + 11.0 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, sprite_size, sprite_size), 1.0)
+		# ★ 主人定 2026-06-10：phase 2 体型 ×1.5
+		var visual_scale: float = float(enemy.get("_visualScale", 1.0))
+		var final_sprite_size: float = sprite_size * visual_scale
+		scene._draw_texture_contain(monster_tex, Rect2(cx - final_sprite_size / 2.0, y + 11.0 - (final_sprite_size - sprite_size) * 0.3 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, final_sprite_size, final_sprite_size), 1.0)
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), cx, y + 43.0, colors.get("white", Color.WHITE), 34.0)
 	scene._draw_text_with_shadow(name, cx, y + 14.0, colors.get("text_primary", Color.WHITE), 10.4, true)
@@ -265,6 +272,66 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 		if not flash.is_empty():
 			_draw_hit_spark(scene, Vector2(18.0 + i * 116.0 + 53.0, 253.0), 78.0, 0.62)
 
+	# ★ 主人定 2026-06-10：弹道动画（同属性颜色，从玩家弹向目标）
+	_draw_bullet_anims(scene, state)
+
+static func _draw_bullet_anims(scene, state: Dictionary) -> void:
+	var bullets: Array = state.get("bullet_anims", [])
+	if bullets.is_empty():
+		return
+	var canvas: CanvasItem = scene
+	var stage_slot_y: float = 80.0
+	for anim in bullets:
+		var player_idx: int = int(anim.get("playerIndex", -1))
+		var target_idx: int = int(anim.get("targetIndex", -1))
+		if player_idx < 0 or target_idx < 0:
+			continue
+		var t: float = clampf(float(anim.get("timer", 0.0)) / float(anim.get("maxDuration", 0.4)), 0.0, 1.0)
+		# 起点：玩家宠物位置
+		var start_x: float = 18.0 + player_idx * 116.0 + 53.0
+		var start_y: float = 250.0
+		# 终点：敌人位置（单 boss 或多怪 头/Boss）
+		var end_x: float = 187.5
+		var end_y: float = 175.0
+		var battle = scene._battle if scene != null else null
+		if battle != null:
+			var enemies_size: int = battle.enemies.size()
+			if enemies_size > 1:
+				var slots = _multi_enemy_slots(mini(enemies_size, 3))
+				if target_idx < slots.size():
+					end_x = slots[target_idx].x + 48.0
+					end_y = slots[target_idx].y + 48.0
+			else:
+				end_x = state.get("design_w", 375.0) / 2.0
+				end_y = 175.0
+		# 插值位置（带越走越快的函数）
+		var eased_t: float = 1.0 - pow(1.0 - t, 2.0)
+		var cur_x: float = lerpf(start_x, end_x, eased_t)
+		var cur_y: float = lerpf(start_y, end_y, eased_t)
+		# 弹道颜色（同属性）
+		var element: String = str(anim.get("element", "fire"))
+		var bullet_color: Color = _element_color(element)
+		# 弹道尺寸：后期略小（模拟飞行衰减）
+		var bullet_size: float = lerpf(16.0, 8.0, t)
+		# 透明度：后期衰减
+		var alpha: float = 1.0 - t * 0.3
+		# 画发光圈
+		canvas.draw_circle(Vector2(cur_x, cur_y), bullet_size * 1.6, Color(bullet_color.r, bullet_color.g, bullet_color.b, 0.35 * alpha))
+		# 画核心
+		canvas.draw_circle(Vector2(cur_x, cur_y), bullet_size, Color(bullet_color.r, bullet_color.g, bullet_color.b, 0.85 * alpha))
+		# 画亮点
+		canvas.draw_circle(Vector2(cur_x, cur_y), bullet_size * 0.45, Color(1, 1, 1, 0.85 * alpha))
+		# 画轨迹尾巴（4 个递减的圆点）
+		for i in range(4):
+			var trail_t: float = eased_t - (i + 1) * 0.05
+			if trail_t < 0.0:
+				continue
+			var trail_x: float = lerpf(start_x, end_x, trail_t)
+			var trail_y: float = lerpf(start_y, end_y, trail_t)
+			var trail_alpha: float = (1.0 - i * 0.22) * 0.4 * (1.0 - t)
+			var trail_size: float = bullet_size * (1.0 - i * 0.18)
+			canvas.draw_circle(Vector2(trail_x, trail_y), trail_size, Color(bullet_color.r, bullet_color.g, bullet_color.b, trail_alpha))
+
 static func draw_player_card(scene, battle, state: Dictionary, x: float, y: float, index: int, name: String, hp: int, max_hp: int, monster: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
@@ -273,11 +340,24 @@ static func draw_player_card(scene, battle, state: Dictionary, x: float, y: floa
 	if not flash.is_empty():
 		_draw_hit_spark(scene, Vector2(x + card_w / 2.0, y + 35.0), 78.0, 0.62)
 
+	# ★ 主人定 2026-06-10：玩家宠物弹动偏移（往前走一下回位）
+	var lunge_offset_y: float = 0.0
+	var lunge_anims: Array = state.get("player_lunge_anims", [])
+	for anim in lunge_anims:
+		if int(anim.get("playerIndex", -1)) == index:
+			var t: float = float(anim.get("timer", 0.0)) / float(anim.get("maxDuration", 0.3))
+			# 0 → 0.4 期间从 0 到 -16（往上往目标弹），0.4 → 1.0 期间回位
+			if t < 0.4:
+				lunge_offset_y = -16.0 * (t / 0.4)
+			else:
+				lunge_offset_y = -16.0 * (1.0 - (t - 0.4) / 0.6)
+			break
+
 	var monster_tex: Texture2D = scene._get_monster_texture(monster)
 	if monster_tex:
-		scene._draw_texture_contain(monster_tex, Rect2(x + 8.0, y + 3.0 + sin(idle_time * TAU / 1.5) * 1.2, 90.0, 58.0), 1.0 if hp > 0 else 0.35)
+		scene._draw_texture_contain(monster_tex, Rect2(x + 8.0, y + 3.0 + lunge_offset_y + sin(idle_time * TAU / 1.5) * 1.2, 90.0, 58.0), 1.0 if hp > 0 else 0.35)
 	else:
-		scene._draw_text_with_shadow(monster.get("emoji", "👾"), x + 53.0, y + 36.0, colors.get("white", Color.WHITE), 31.0)
+		scene._draw_text_with_shadow(monster.get("emoji", "👾"), x + 53.0, y + 36.0 + lunge_offset_y, colors.get("white", Color.WHITE), 31.0)
 	scene._draw_text_with_shadow(name, x + card_w / 2.0, y + 8.0, colors.get("text_primary", Color.WHITE), 10.0)
 	scene._draw_hp_bar(x + 4.0, y + 52.0, card_w - 8.0, 11.0, float(hp), float(max_hp), colors.get("success", Color.GREEN))
 	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 61.0, colors.get("white", Color.WHITE), 7.4, true)

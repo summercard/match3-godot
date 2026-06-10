@@ -13,7 +13,6 @@
 [ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/main/lobby_refresh/icon_plus_v3.png" id="11_plus"]
 [ext_resource type="Texture2D" uid="uid://vdants1nwxss" path="res://assets/images/main/lobby_refresh/ui_trophy_capsule_v3.png" id="12_trophy_capsule"]
 [ext_resource type="Texture2D" uid="uid://juqei62ypmlc" path="res://assets/images/main/lobby_refresh/icon_trophy_score_v3.png" id="13_trophy"]
-[ext_resource type="Texture2D" uid="uid://ds531ylm048xq" path="res://assets/images/main/lobby_refresh/ui_settings_button_v3.png" id="14_settings"]
 [ext_resource type="Texture2D" uid="uid://bdc3tphg7nwn5" path="res://assets/images/main/lobby_refresh/ui_entry_shop_v3.png" id="15_shop_entry"]
 [ext_resource type="Texture2D" uid="uid://cchkq1ji5vvc3" path="res://assets/images/main/lobby_refresh/ui_entry_inn_v3.png" id="16_inn_entry"]
 [ext_resource type="Texture2D" uid="uid://dfkl83jl7tvt0" path="res://assets/images/main/lobby_refresh/ui_entry_ranch_v3.png" id="17_ranch_entry"]
@@ -306,17 +305,6 @@ theme_override_font_sizes/font_size = 8
 text = "15,680"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="SettingsTopButton" type="TextureButton" parent="Header" unique_id=21274050]
-layout_mode = 0
-offset_left = 344.0
-offset_top = 14.0
-offset_right = 374.0
-offset_bottom = 44.0
-texture_normal = ExtResource("14_settings")
-texture_pressed = ExtResource("14_settings")
-ignore_texture_size = true
-stretch_mode = 0
 
 [node name="PrimaryButtons" type="Control" parent="." unique_id=1916736131]
 anchors_preset = 0

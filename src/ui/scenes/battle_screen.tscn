@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/battle/ui/ui_item_slot_selected.png" id="item_selected"]
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://d0n4xhqf1hcnu" path="res://assets/images/battle/ui/ui_settings_button.png" id="settings_button"]
 [ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/battle/ui/ui_speed_button.png" id="speed_button"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/battle/ui/ui_turn_badge.png" id="turn_badge"]
 
@@ -103,17 +102,6 @@ theme_override_font_sizes/font_size = 10
 text = "x2"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="SettingsButton" type="TextureRect" parent="TopHud" unique_id=593486601]
-layout_mode = 0
-offset_left = 330.0
-offset_top = 5.0
-offset_right = 372.0
-offset_bottom = 53.0
-mouse_filter = 2
-texture = ExtResource("settings_button")
-expand_mode = 1
-stretch_mode = 5
 
 [node name="BossPhase" type="Label" parent="TopHud" unique_id=810267290]
 visible = false

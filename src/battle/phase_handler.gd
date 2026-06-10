@@ -70,7 +70,8 @@ func check_phase_transition() -> Dictionary:
 
 ## 执行阶段转换
 ## 返回新敌人列表
-func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1) -> Array:
+## hp_ratio: 旧敌人当前 HP 比例（0.0~1.0），主人定 2026-06-10：进入二阶段不拉满血
+func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp_ratio: float = 0.0) -> Array:
 	_current_phase += 1
 
 	var hp_mult: float = phase_config.get("hpMultiplier", 1.3)
@@ -78,12 +79,21 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1) ->
 	var new_enemies: Array = []
 
 	for enemy_id in new_enemy_ids:
-		var monster: Dictionary = MonsterDb.get_monster_stats(enemy_id, enemy_level)
+		# ★ 阶段转换时也走 calc_enemy：每阶段重 random 性格
+		var monster: Dictionary = StatCalculator.calc_enemy(enemy_id, enemy_level)
 		if not monster.is_empty():
-			monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
-			monster["hp"] = monster["maxHP"]
+			var new_max_hp := int(monster.get("maxHP", 0) * hp_mult)
+			monster["maxHP"] = new_max_hp
+			# ★ 主人定 A：保留旧血量比例，不再“回满血”
+			# hp_ratio=0 表示传参人没提供，则兑底拉满（保持旧默认行为）
+			if hp_ratio > 0.0:
+				monster["hp"] = maxi(1, int(new_max_hp * hp_ratio))
+			else:
+				monster["hp"] = new_max_hp
 			monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 			monster["def"] = int(monster.get("def", 0) * hp_mult)
+			# ★ 主人定 2026-06-10：二阶段体型变大 50%
+			monster["_visualScale"] = 1.5
 		new_enemies.append(monster)
 
 	# 重置敌人技能状态

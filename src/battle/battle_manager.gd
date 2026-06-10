@@ -78,7 +78,11 @@ func _exit_tree() -> void:
 
 # ========== 初始化 ==========
 func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1, e_level: int = 1, s_data: Variant = null, s_id: String = "") -> void:
-	var player_units: Array = player_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, p_level))
+	# 玩家ID列表入口：用 StatCalculator + 现有 nature 查表（兼容没传 nature 的旧路径）
+	var player_units: Array = player_monster_ids.map(func(id):
+		# 如果调用方后续传过来的 player_team_stats 已带 nature，这里会保留 nature
+		return StatCalculator.calc(id, p_level)
+	)
 	init_with_player_team(player_units, enemy_monster_ids, p_level, e_level, s_data, s_id)
 
 func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p_level: int = 1, e_level: int = 1, s_data: Variant = null, s_id: String = "") -> void:
@@ -101,15 +105,19 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 		if not phase1.is_empty():
 			var hp_mult: float = phase1.get("hpMultiplier", 1.0)
 			enemies = phase1.get("enemies", []).map(func(id):
-				var monster = MonsterDb.get_monster_stats(id, e_level)
-				if monster != null and hp_mult != 1.0:
+				# ★ 主人定：敌人每次出现 random 性格（捕获后才知道）
+				var monster = StatCalculator.calc_enemy(id, e_level)
+				if not monster.is_empty() and hp_mult != 1.0:
 					monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 					monster["hp"] = monster["maxHP"]
 					monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 				return monster
 			)
 	else:
-		enemies = enemy_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, e_level))
+		enemies = enemy_monster_ids.map(func(id):
+			# ★ 主人定：敌人每次出现 random 性格
+			return StatCalculator.calc_enemy(id, e_level)
+		)
 
 	turn = 0
 	combo = 0
@@ -797,7 +805,17 @@ func get_enemies() -> Array:
 
 
 func execute_phase_transition(phase_config: Dictionary) -> Array:
-	var new_enemies: Array = _phase_handler.execute_phase_transition(phase_config, enemy_level)
+	# ★ 主人定 A：计算旧怪血量比例，进阶段后保留比例，不再“回满血”
+	var hp_ratio := 0.0
+	if not enemies.is_empty():
+		var total_old_hp := 0
+		var total_old_max_hp := 0
+		for e: Dictionary in enemies:
+			total_old_hp += int(e.get("hp", 0))
+			total_old_max_hp += int(e.get("maxHP", 0))
+		if total_old_max_hp > 0:
+			hp_ratio = clampf(float(total_old_hp) / float(total_old_max_hp), 0.0, 1.0)
+	var new_enemies: Array = _phase_handler.execute_phase_transition(phase_config, enemy_level, hp_ratio)
 	if new_enemies.is_empty():
 		return []
 

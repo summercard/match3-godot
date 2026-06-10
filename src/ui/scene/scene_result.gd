@@ -143,14 +143,26 @@ func _process(delta: float) -> void:
 	
 	# 动画序列
 	if _star_anim_progress < 1.0:
+		if _star_anim_progress == 0.0 and _is_win:
+			var am := get_node_or_null("/root/AudioManager")
+			if am != null and am.has_method("play_sfx"):
+				am.call("play_sfx", "powerup_created_star")
 		_star_anim_progress = minf(1.0, _star_anim_progress + delta * 2.5)
 	elif _reward_anim_progress < 1.0:
+		if _reward_anim_progress == 0.0 and _is_win:
+			var am := get_node_or_null("/root/AudioManager")
+			if am != null and am.has_method("play_sfx"):
+				am.call("play_sfx", "reward_coin_soft")
 		_reward_anim_progress = minf(1.0, _reward_anim_progress + delta * 2.0)
 	elif _exp_anim_progress < 1.0:
+		if _exp_anim_progress == 0.0 and _is_win:
+			var am := get_node_or_null("/root/AudioManager")
+			if am != null and am.has_method("play_sfx"):
+				am.call("play_sfx", "battle_heal_leaf_bubble")
 		_exp_anim_progress = minf(1.0, _exp_anim_progress + delta * 2.0)
 	elif _button_anim_progress < 1.0:
 		_button_anim_progress = minf(1.0, _button_anim_progress + delta * 3.0)
-	
+
 	queue_redraw()
 
 # ==================== 初始化（保持原有逻辑） ====================
@@ -209,6 +221,10 @@ func _normalize_battle_result(result: Dictionary) -> Dictionary:
 
 func init(data: Dictionary = {}) -> void:
 	var game := get_node_or_null("/root/GameManager")
+	# 结算页：切回 town BGM（lobby 上下文）；具体胜负 sting 由 _process 内的动画钩子播放
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("play_bgm"):
+		am.call("play_bgm", "bgm_town")
 	initialize(game, data)
 
 func _calc_stars() -> void:
@@ -364,9 +380,15 @@ func _save_rewards() -> void:
 	_add_monster_exp_from_battle()
 	if _captured and not _capture_target.is_empty() and _capture_target.has("id"):
 		if _storage.has_method("add_monster_instance"):
+			# ★ 主人定：捕获时保留敌人身上 random 出来的性格
+			# 这是“捕获赌脸”乐趣的关键点：每次重打、同一只怪可能出不同性格
+			var captured_nature: String = str(_capture_target.get("nature", ""))
+			if captured_nature.is_empty():
+				captured_nature = NatureDB.random_nature()  # 兑底：万一敌人没性格也能 random
 			_storage.add_monster_instance(str(_capture_target["id"]), {
 				"source": "capture",
-				"level": maxi(1, int(_battle_result.get("enemyLevel", 1)))
+				"level": maxi(1, int(_battle_result.get("enemyLevel", 1))),
+				"nature": captured_nature,
 			})
 		else:
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}

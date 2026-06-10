@@ -134,7 +134,8 @@ static func on_level_up(monster_id: String, new_level: int) -> void:
 # 获取战力估算
 # ============================================
 static func calc_power(monster_id: String, level: int) -> int:
-	var stats = MonsterDb.get_monster_stats(monster_id, level)
+	# 统一公式：战力估算也走 StatCalculator
+	var stats = StatCalculator.calc(monster_id, level)
 	if stats.is_empty():
 		return 0
 	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))

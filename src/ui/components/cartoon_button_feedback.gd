@@ -145,6 +145,10 @@ func _on_button_up() -> void:
 func _on_pressed() -> void:
 	if _burst_enabled:
 		_play_burst()
+	if _profile == Profile.PRIMARY or _profile == Profile.ENTRY:
+		var am := get_node_or_null("/root/AudioManager")
+		if am != null and am.has_method("play_sfx"):
+			am.play_sfx("ui_button_soft_pop")
 
 
 func _animate_to(scale_factor: float, rotation_degrees: float, duration: float, transition: int, easing: int) -> void:

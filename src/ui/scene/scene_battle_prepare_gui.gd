@@ -35,6 +35,10 @@ func _ready() -> void:
 	_ensure_concept_nodes()
 	_connect_gui_actions()
 	_sync_gui()
+	# 进入准备：切到 town BGM（lobby 上下文）
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("play_bgm"):
+		am.call("play_bgm", "bgm_town")
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
@@ -85,18 +89,6 @@ func _ensure_concept_nodes() -> void:
 		_create_resource_chip(top_bar, "GoldChip", "gold")
 		_create_resource_chip(top_bar, "DiamondChip", "diamond")
 		_create_resource_chip(top_bar, "HeartChip", "heart")
-		var settings := TextureButton.new()
-		settings.name = "SettingsButton"
-		settings.ignore_texture_size = true
-		settings.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		top_bar.add_child(settings)
-		var settings_icon := TextureRect.new()
-		settings_icon.name = "Icon"
-		settings_icon.texture = _prepare_texture("settings")
-		settings_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		settings_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		settings_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		settings.add_child(settings_icon)
 	_create_panel_bg("EnemyPanel", "Bg", _rounded_style(STAGE_PANEL, Color(0.93, 0.62, 0.24, 1.0), 2, 14))
 	if not has_node("EnemyPanel/ElementPill"):
 		var pill := Panel.new()
@@ -273,9 +265,6 @@ func _apply_concept_layout() -> void:
 	_set_top_chip_rect("TopResourceBar/GoldChip", 54, 10, 94, 32)
 	_set_top_chip_rect("TopResourceBar/DiamondChip", 154, 10, 84, 32)
 	_set_top_chip_rect("TopResourceBar/HeartChip", 244, 10, 82, 32)
-	_set_rect("TopResourceBar/SettingsButton", 331, 9, 36, 36)
-	_set_local_rect("TopResourceBar/SettingsButton/Icon", 0, 0, 36, 36)
-
 	_set_rect("Header", 0, 0, 375, 118)
 	_set_rect("Header/BackButton", 10, 9, 44, 44)
 	_set_local_rect("Header/BackButton/Frame", 0, 0, 44, 44)

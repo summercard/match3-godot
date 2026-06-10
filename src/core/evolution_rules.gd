@@ -25,8 +25,9 @@ static func build_preview(instance: Dictionary) -> Dictionary:
 	var level := int(instance.get("level", 1))
 	var nature := str(instance.get("nature", ""))
 	var target := MonsterDb.get_monster(target_id)
-	var old_stats := MonsterDb.get_monster_stats(monster_id, level, nature)
-	var new_stats := MonsterDb.get_monster_stats(target_id, level, nature)
+	# 统一公式：进化预览也走 StatCalculator
+	var old_stats := StatCalculator.calc(monster_id, level, nature)
+	var new_stats := StatCalculator.calc(target_id, level, nature)
 	var insight: Dictionary = instance.get("evolutionInsight", {})
 	var report := _build_report_core(monster, target, old_stats, new_stats, insight)
 	report["has_evolution"] = true
@@ -44,8 +45,9 @@ static func build_report(before_instance: Dictionary, after_instance: Dictionary
 	var nature := str(after_instance.get("nature", before_instance.get("nature", "")))
 	var old_monster := MonsterDb.get_monster(old_id)
 	var new_monster := MonsterDb.get_monster(new_id)
-	var old_stats := MonsterDb.get_monster_stats(old_id, level, nature)
-	var new_stats := MonsterDb.get_monster_stats(new_id, level, nature)
+	# 统一公式：进化前后对比也走 StatCalculator
+	var old_stats := StatCalculator.calc(old_id, level, nature)
+	var new_stats := StatCalculator.calc(new_id, level, nature)
 	var insight: Dictionary = before_instance.get("evolutionInsight", {})
 	var report := _build_report_core(old_monster, new_monster, old_stats, new_stats, insight)
 	report["oldMonsterId"] = old_id

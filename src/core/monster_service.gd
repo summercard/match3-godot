@@ -7,7 +7,7 @@ static func get_template(monster_id: String) -> Dictionary:
 	return MonsterDb.get_monster(monster_id).duplicate(true)
 
 static func get_template_stats(monster_id: String, level: int = 1, nature_id: String = "") -> Dictionary:
-	return MonsterDb.get_monster_stats(monster_id, level, nature_id)
+	return StatCalculator.calc(monster_id, level, nature_id)
 
 static func get_instance_view(instance_id: String, storage: Node = null) -> Dictionary:
 	var sm := _storage(storage)
@@ -46,7 +46,7 @@ static func get_species_album_view(monster_id: String, storage: Node = null) -> 
 	var representative := _pick_representative(instances)
 	var level := int(representative.get("level", 1)) if not representative.is_empty() else 1
 	var nature := str(representative.get("nature", "")) if not representative.is_empty() else ""
-	var stats := MonsterDb.get_monster_stats(monster_id, level, nature)
+	var stats := StatCalculator.calc(monster_id, level, nature)
 	return {
 		"monsterId": monster_id,
 		"template": template,
@@ -105,7 +105,7 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 		"capturedAt": int(instance.get("capturedAt", 0)),
 		"source": str(instance.get("source", "")),
 		"favorite": bool(instance.get("favorite", false)),
-		"stats": MonsterDb.get_monster_stats(monster_id, level, nature_id),
+		"stats": StatCalculator.calc(monster_id, level, nature_id),
 		"skill": template.get("skill", {}).duplicate(true),
 		"leaderSkill": str(template.get("leaderSkill", "")),
 		"evolution": template.get("evolution", {}).duplicate(true),
