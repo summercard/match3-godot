@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://bgbquhjn6flga"]
 
-[ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/stage/icon_path_dot.png" id="11_path"]
-[ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/stage/chapter_01_new/star_gold_new.png" id="11_star_dim"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" uid="uid://ds6htx6jjmwwl" path="res://assets/images/stage/chapter_01_new/bg_chapter_01_grassland_540x960.png" id="c01_background"]
-[ext_resource type="Texture2D" uid="uid://6yc7mb6yl3pq" path="res://assets/images/stage/chapter_01_new/boss_base_dark.png" id="c01_boss_platform"]
-[ext_resource type="Texture2D" uid="uid://cxwxy00xftu6v" path="res://assets/images/stage/chapter_01_new/selection_ring_pink.png" id="c01_selection_ring"]
-[ext_resource type="Texture2D" uid="uid://b7e2s5urlokg3" path="res://assets/images/stage/chapter_01_new/node_base_gold.png" id="c01_stage04"]
+[ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
+[ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/ui/icons/stage_star_gold_new.png" id="11_star_dim"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" uid="uid://ds6htx6jjmwwl" path="res://assets/images/maps/backgrounds/stage_bg_chapter_01_grassland_540x960.png" id="c01_background"]
+[ext_resource type="Texture2D" uid="uid://6yc7mb6yl3pq" path="res://assets/images/maps/boss/stage_boss_base_dark.png" id="c01_boss_platform"]
+[ext_resource type="Texture2D" uid="uid://cxwxy00xftu6v" path="res://assets/images/maps/nodes/stage_selection_ring_pink.png" id="c01_selection_ring"]
+[ext_resource type="Texture2D" uid="uid://b7e2s5urlokg3" path="res://assets/images/maps/nodes/stage_node_base_gold.png" id="c01_stage04"]
 
 [node name="Chapter01Grassland" type="Control" unique_id=1557975011]
 custom_minimum_size = Vector2(375, 1280)

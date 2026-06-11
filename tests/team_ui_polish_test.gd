@@ -7,7 +7,7 @@ func _init() -> void:
 
 func _run() -> void:
 	var scene := Control.new()
-	scene.set_script(load("res://src/ui/scene/scene_team.gd"))
+	scene.set_script(load("res://src/ui/controllers/team_logic.gd"))
 	scene.size = Vector2(375.0, 667.0)
 	root.add_child(scene)
 	scene.call("init", {})

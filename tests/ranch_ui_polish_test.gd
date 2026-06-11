@@ -8,7 +8,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var ranch: Control = load("res://src/ui/scene/scene_ranch.gd").new()
+	var ranch: Control = load("res://src/ui/controllers/ranch_logic.gd").new()
 	root.add_child(ranch)
 	var constants: Dictionary = ranch.get_script().get_script_constant_map()
 

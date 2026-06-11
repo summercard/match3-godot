@@ -1,7 +1,7 @@
 # scene_album_gui.gd - 可在 Godot 编辑器中调整的精灵图鉴界面
 # 列表交互改为分页，不再使用拖拽/滚轮滚动。
 class_name SceneAlbumGui
-extends "res://src/ui/scene/scene_album.gd"
+extends "res://src/ui/controllers/album_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const LockedSilhouetteShader := preload("res://src/ui/shaders/album_locked_silhouette.gdshader")
@@ -451,10 +451,17 @@ func _element_texture(element: String) -> Texture2D:
 
 func _monster_texture(id: String, variant: String) -> Texture2D:
 	if variant == "album":
-		var album_path := "res://assets/images/album/portraits/%s_album_thumb.png" % id
+		var album_path := _album_portrait_path(id)
 		if ResourceLoader.exists(album_path):
 			return _tex(album_path)
 	return _tex(MonsterArtDBScript.get_art_path(id, variant))
+
+func _album_portrait_path(monster_id: String) -> String:
+	if monster_id.begins_with("monster_boss_"):
+		return "res://assets/images/monsters/boss/%s_album_thumb.png" % monster_id
+	if monster_id.begins_with("enemy_"):
+		return "res://assets/images/monsters/enemy/%s_album_thumb.png" % monster_id
+	return "res://assets/images/monsters/monster/%s_album_thumb.png" % monster_id
 
 func _node(path: String) -> Control:
 	return get_node(path) as Control

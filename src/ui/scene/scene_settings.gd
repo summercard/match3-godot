@@ -23,19 +23,19 @@ const CONFIRM_YES := Rect2(64.0, 363.0, 112.0, 42.0)
 const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
 
 const SETTINGS_ASSETS := {
-	"bg": "res://assets/images/main/lobby_refresh/main_lobby_bg_day_v3.png",
-	"back": "res://assets/images/ranch/ui_btn_previous_round.png",
-	"header": "res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png",
-	"title_ribbon": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
-	"panel": "res://assets/images/inventory_new/ui_inventory_panel.png",
-	"row": "res://assets/images/inventory_new/ui_inventory_detail_panel.png",
-	"row_alt": "res://assets/images/inventory_new/ui_inventory_detail_panel.png",
-	"tab_active": "res://assets/images/inventory_new/ui_inventory_tab_active.png",
-	"tab_inactive": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
-	"button": "res://assets/images/inventory_new/ui_inventory_use_button.png",
-	"button_disabled": "res://assets/images/inventory_new/ui_inventory_tab_normal.png",
-	"gear": "res://assets/images/common_nav/icon_nav_settings.png",
-	"notice": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
+	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"back": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
+	"header": "res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png",
+	"title_ribbon": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_active.png",
+	"panel": "res://assets/images/ui/panels/inventory_new_ui_inventory_panel.png",
+	"row": "res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png",
+	"row_alt": "res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png",
+	"tab_active": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_active.png",
+	"tab_inactive": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_normal.png",
+	"button": "res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png",
+	"button_disabled": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_normal.png",
+	"gear": "res://assets/images/ui/icons/common_nav_icon_nav_settings.png",
+	"notice": "res://assets/images/ui/icons/main_icon_plus_v3.png",
 }
 const SETTINGS_ROWS := [
 	{

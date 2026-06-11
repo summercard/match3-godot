@@ -1,12 +1,14 @@
 class_name BattleUIFeedback
 extends RefCounted
 
-static func shake_offset(timer: float, duration: float = 0.2, amplitude: float = 4.0) -> Vector2:
+static func shake_offset(timer: float, duration: float = 0.18, amplitude: float = 2.4) -> Vector2:
+	# ★ 主人定 2026-06-11：缩减震动为轻抖动（amp 9→2.4，去垂直分量）
+	# 攻击主反馈交给 attacker 弹性放大，避免与受击退位叠加过激
 	if timer <= 0.0 or duration <= 0.0:
 		return Vector2.ZERO
 	var intensity: float = clampf(timer / duration, 0.0, 1.0)
-	var wave: float = sin(timer * TAU / 0.05)
-	return Vector2(wave * amplitude * intensity, 0.0)
+	var wave_x: float = sin(timer * TAU / 0.05)
+	return Vector2(wave_x * amplitude * intensity, 0.0)
 
 static func fit_text(font: Font, text: String, max_width: float, size: float) -> String:
 	if text.is_empty() or max_width <= 0.0:

@@ -158,7 +158,7 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_003": {
 		"id": "enemy_003", "name": "草精灵", "element": "grass",
-		"rarity": 1, "emoji": "🍃",
+		"rarity": 1, "emoji": "🍃", "isElite": true,
 		"baseHP": 32, "baseATK": 10, "baseDEF": 7, "baseSPD": 12,
 		"skill": { "name": "叶刃", "cost": 5, "multiplier": 1.5 }
 	},
@@ -252,7 +252,7 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_007": {
 		"id": "enemy_007", "name": "暗蛛", "element": "dark",
-		"rarity": 1, "emoji": "🕷️",
+		"rarity": 1, "emoji": "🕷️", "isElite": true,
 		"baseHP": 41, "baseATK": 10, "baseDEF": 10, "baseSPD": 20,
 		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 }
 	},
@@ -341,7 +341,7 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_011": {
 		"id": "enemy_011", "name": "暗幽灵", "element": "dark",
-		"rarity": 1, "emoji": "👻",
+		"rarity": 1, "emoji": "👻", "isElite": true,
 		"baseHP": 36, "baseATK": 10, "baseDEF": 13, "baseSPD": 25,
 		"skill": { "name": "穿体", "cost": 5, "multiplier": 2.0 }
 	},
@@ -415,7 +415,7 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_014": {
 		"id": "enemy_014", "name": "雷鹰", "element": "thunder",
-		"rarity": 1, "emoji": "🦅",
+		"rarity": 1, "emoji": "🦅", "isElite": true,
 		"baseHP": 41, "baseATK": 10, "baseDEF": 17, "baseSPD": 26,
 		"skill": { "name": "雷翼斩", "cost": 5, "multiplier": 2.0 }
 	},
@@ -427,7 +427,7 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_016": {
 		"id": "enemy_016", "name": "雷光元素", "element": "thunder",
-		"rarity": 1, "emoji": "💡",
+		"rarity": 1, "emoji": "💡", "isElite": true,
 		"baseHP": 39, "baseATK": 10, "baseDEF": 17, "baseSPD": 22,
 		"skill": { "name": "元素雷电", "cost": 5, "multiplier": 2.2 }
 	},
@@ -521,13 +521,13 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_020": {
 		"id": "enemy_020", "name": "极地熊", "element": "ice",
-		"rarity": 1, "emoji": "🐻",
+		"rarity": 1, "emoji": "🐻", "isElite": true,
 		"baseHP": 39, "baseATK": 10, "baseDEF": 22, "baseSPD": 10,
 		"skill": { "name": "冰掌", "cost": 5, "multiplier": 1.6 }
 	},
 	"enemy_021": {
 		"id": "enemy_021", "name": "冰翼龙", "element": "ice",
-		"rarity": 1, "emoji": "🐉",
+		"rarity": 1, "emoji": "🐉", "isElite": true,
 		"baseHP": 45, "baseATK": 10, "baseDEF": 22, "baseSPD": 22,
 		"skill": { "name": "冰息", "cost": 5, "multiplier": 2.0 }
 	},
@@ -606,13 +606,13 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_025": {
 		"id": "enemy_025", "name": "暗蚀兽", "element": "void",
-		"rarity": 1, "emoji": "🐺",
+		"rarity": 1, "emoji": "🐺", "isElite": true,
 		"baseHP": 43, "baseATK": 10, "baseDEF": 28, "baseSPD": 14,
 		"skill": { "name": "暗蚀", "cost": 5, "multiplier": 1.7 }
 	},
 	"enemy_026": {
 		"id": "enemy_026", "name": "虚空元素", "element": "void",
-		"rarity": 1, "emoji": "🌀",
+		"rarity": 1, "emoji": "🌀", "isElite": true,
 		"baseHP": 46, "baseATK": 10, "baseDEF": 28, "baseSPD": 20,
 		"skill": { "name": "虚空弹", "cost": 5, "multiplier": 2.1 }
 	},
@@ -691,13 +691,13 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_030": {
 		"id": "enemy_030", "name": "虚空噬时兽", "element": "temporal",
-		"rarity": 1, "emoji": "🦎",
+		"rarity": 1, "emoji": "🦎", "isElite": true,
 		"baseHP": 57, "baseATK": 11, "baseDEF": 36, "baseSPD": 20,
 		"skill": { "name": "时间啃噬", "cost": 5, "multiplier": 1.9 }
 	},
 	"enemy_031": {
 		"id": "enemy_031", "name": "时空元素", "element": "temporal",
-		"rarity": 1, "emoji": "🌀",
+		"rarity": 1, "emoji": "🌀", "isElite": true,
 		"baseHP": 52, "baseATK": 11, "baseDEF": 35, "baseSPD": 22,
 		"skill": { "name": "时空弹", "cost": 5, "multiplier": 2.1 }
 	},
@@ -776,13 +776,13 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_035": {
 		"id": "enemy_035", "name": "星蚀兽", "element": "star",
-		"rarity": 1, "emoji": "🦎",
+		"rarity": 1, "emoji": "🦎", "isElite": true,
 		"baseHP": 60, "baseATK": 11, "baseDEF": 43, "baseSPD": 22,
 		"skill": { "name": "星蚀", "cost": 5, "multiplier": 2.0 }
 	},
 	"enemy_036": {
 		"id": "enemy_036", "name": "星耀元素", "element": "star",
-		"rarity": 1, "emoji": "💫",
+		"rarity": 1, "emoji": "💫", "isElite": true,
 		"baseHP": 68, "baseATK": 11, "baseDEF": 44, "baseSPD": 24,
 		"skill": { "name": "星弹", "cost": 5, "multiplier": 2.2 }
 	},
@@ -855,19 +855,19 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_039": {
 		"id": "enemy_039", "name": "混沌祭司", "element": "chaos",
-		"rarity": 1, "emoji": "🕯️",
+		"rarity": 1, "emoji": "🕯️", "isElite": true,
 		"baseHP": 69, "baseATK": 12, "baseDEF": 51, "baseSPD": 16,
 		"skill": { "name": "混沌祈福", "cost": 5, "multiplier": 1.8 }
 	},
 	"enemy_040": {
 		"id": "enemy_040", "name": "混沌噬星兽", "element": "chaos",
-		"rarity": 1, "emoji": "🦎",
+		"rarity": 1, "emoji": "🦎", "isElite": true,
 		"baseHP": 79, "baseATK": 12, "baseDEF": 53, "baseSPD": 24,
 		"skill": { "name": "星蚀混沌", "cost": 5, "multiplier": 2.2 }
 	},
 	"enemy_041": {
 		"id": "enemy_041", "name": "混沌元素", "element": "chaos",
-		"rarity": 1, "emoji": "🌀",
+		"rarity": 1, "emoji": "🌀", "isElite": true,
 		"baseHP": 76, "baseATK": 12, "baseDEF": 52, "baseSPD": 26,
 		"skill": { "name": "混沌弹", "cost": 5, "multiplier": 2.1 }
 	},
@@ -968,19 +968,19 @@ const MONSTER_DB: Dictionary = {
 	},
 	"enemy_044": {
 		"id": "enemy_044", "name": "光耀祭司", "element": "light",
-		"rarity": 1, "emoji": "🕯️",
+		"rarity": 1, "emoji": "🕯️", "isElite": true,
 		"baseHP": 94, "baseATK": 13, "baseDEF": 63, "baseSPD": 18,
 		"skill": { "name": "光祈", "cost": 5, "multiplier": 1.9 }
 	},
 	"enemy_045": {
 		"id": "enemy_045", "name": "光蚀兽", "element": "light",
-		"rarity": 1, "emoji": "🦎",
+		"rarity": 1, "emoji": "🦎", "isElite": true,
 		"baseHP": 78, "baseATK": 13, "baseDEF": 61, "baseSPD": 26,
 		"skill": { "name": "光蚀", "cost": 5, "multiplier": 2.0 }
 	},
 	"enemy_046": {
 		"id": "enemy_046", "name": "光耀元素", "element": "light",
-		"rarity": 1, "emoji": "💫",
+		"rarity": 1, "emoji": "💫", "isElite": true,
 		"baseHP": 89, "baseATK": 13, "baseDEF": 62, "baseSPD": 28,
 		"skill": { "name": "光弹", "cost": 5, "multiplier": 2.2 }
 	},

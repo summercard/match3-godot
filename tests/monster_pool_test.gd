@@ -45,7 +45,7 @@ func _run() -> void:
 	_expect((view.get("bondTraits", []) as Array).size() >= 3, "MonsterService should include bond traits")
 	_expect(view.get("identity", {}).has("ecology"), "MonsterService should include ecology identity")
 
-	var ranch_scene = load("res://src/ui/scene/scene_ranch.gd").new()
+	var ranch_scene = load("res://src/ui/controllers/ranch_logic.gd").new()
 	root.add_child(ranch_scene)
 	ranch_scene.init()
 	ranch_scene._slots_data[0]["placed_at"] = (Time.get_unix_time_from_system() - 3600.0) * 1000.0

@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SceneBattlePrepareScript = preload("res://src/ui/scene/scene_battle_prepare.gd")
+const SceneBattlePrepareScript = preload("res://src/ui/controllers/battle_prepare_logic.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
 
 var _failures: Array[String] = []

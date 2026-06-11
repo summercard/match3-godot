@@ -11,7 +11,7 @@ static func draw_board_background(scene, design_w: float, board = null) -> void:
 		board_y = float(board.offset_y)
 	var board_w: float = cell_size * 8.0
 	var board_h: float = cell_size * 8.0
-	var frame_tex: Texture2D = scene._get_texture("res://assets/images/battle/ui/ui_board_frame.png")
+	var frame_tex: Texture2D = scene._get_texture("res://assets/images/ui/misc/battle_ui_board_frame.png")
 	if frame_tex:
 		scene._draw_texture_fit(frame_tex, Rect2(board_x - 12.0, board_y - 12.0, board_w + 24.0, board_h + 24.0), 1.0)
 	else:
@@ -28,7 +28,7 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 		cell_size = float(board.cell_size)
 		board_x = float(board.offset_x) + board_shake_offset.x
 		board_y = float(board.offset_y) + board_shake_offset.y
-	var cell_tex: Texture2D = scene._get_texture("res://assets/images/battle/ui/ui_board_cell.png")
+	var cell_tex: Texture2D = scene._get_texture("res://assets/images/ui/misc/battle_ui_board_cell.png")
 
 	for row in range(8):
 		for col in range(8):
@@ -132,7 +132,7 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
-			var lock_tex: Texture2D = scene._get_texture("res://assets/images/battle/gems/gem_locked_tile.png")
+			var lock_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_gem_locked_tile.png")
 			if lock_tex:
 				scene._draw_texture_fit(lock_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.96)
 				continue
@@ -166,7 +166,7 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
-			var rock_path := "res://assets/images/battle/gems/obstacle_rock_full.png" if ob.get("hp", 2) >= 2 else "res://assets/images/battle/gems/obstacle_rock_cracked.png"
+			var rock_path := "res://assets/images/ui/gems/obstacles_obstacle_rock_full.png" if ob.get("hp", 2) >= 2 else "res://assets/images/ui/gems/obstacles_obstacle_rock_cracked.png"
 			var rock_tex: Texture2D = scene._get_texture(rock_path)
 			if rock_tex:
 				scene._draw_texture_fit(rock_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.98)

@@ -46,13 +46,17 @@ static func get_species_album_view(monster_id: String, storage: Node = null) -> 
 	var representative := _pick_representative(instances)
 	var level := int(representative.get("level", 1)) if not representative.is_empty() else 1
 	var nature := str(representative.get("nature", "")) if not representative.is_empty() else ""
-	var stats := StatCalculator.calc(monster_id, level, nature)
+	# ★ 主人定 2026-06-11：图鉴显示也尊重 instance.isElite
+	var is_elite: bool = bool(representative.get("isElite", template.get("isElite", false))) if not representative.is_empty() else bool(template.get("isElite", false))
+	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
+	var stats: Dictionary = StatCalculator.calc_with_tier(monster_id, level, nature, tier)
 	return {
 		"monsterId": monster_id,
 		"template": template,
 		"owned": not instances.is_empty(),
 		"ownedCount": instances.size(),
 		"representative": representative,
+		"isElite": is_elite,
 		"stats": stats,
 		"art": MonsterArtDB.get_art_bundle(monster_id),
 	}
@@ -69,6 +73,8 @@ static func get_battle_unit_from_instance(instance_id: String, storage: Node = n
 	stats["level"] = view.get("level", 1)
 	stats["nature"] = view.get("nature", "")
 	stats["art"] = view.get("art", {})
+	# ★ 主人定 2026-06-11：把 isElite 也透传到战斗单元（用于战前/战中标记）
+	stats["isElite"] = view.get("isElite", false)
 	return stats
 
 static func build_instance_view(instance: Dictionary) -> Dictionary:
@@ -82,6 +88,10 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var nature := NatureDB.get_nature(nature_id)
 	var level := int(instance.get("level", 1))
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(template)
+	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier（HP×5, ATK+20%）
+	var is_elite: bool = bool(instance.get("isElite", template.get("isElite", false)))
+	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
+	var stats: Dictionary = StatCalculator.calc_with_tier(monster_id, level, nature_id, tier)
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,
@@ -105,7 +115,8 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 		"capturedAt": int(instance.get("capturedAt", 0)),
 		"source": str(instance.get("source", "")),
 		"favorite": bool(instance.get("favorite", false)),
-		"stats": StatCalculator.calc(monster_id, level, nature_id),
+		"isElite": is_elite,
+		"stats": stats,
 		"skill": template.get("skill", {}).duplicate(true),
 		"leaderSkill": str(template.get("leaderSkill", "")),
 		"evolution": template.get("evolution", {}).duplicate(true),

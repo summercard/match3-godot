@@ -79,8 +79,8 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 	var new_enemies: Array = []
 
 	for enemy_id in new_enemy_ids:
-		# ★ 阶段转换时也走 calc_enemy：每阶段重 random 性格
-		var monster: Dictionary = StatCalculator.calc_enemy(enemy_id, enemy_level)
+		# ★ 阶段转换时也走 calc_enemy_auto：每阶段重 random 性格 + 读 MONSTER_DB.isElite
+		var monster: Dictionary = StatCalculator.calc_enemy_auto(enemy_id, enemy_level)
 		if not monster.is_empty():
 			var new_max_hp := int(monster.get("maxHP", 0) * hp_mult)
 			monster["maxHP"] = new_max_hp
@@ -92,6 +92,10 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 				monster["hp"] = new_max_hp
 			monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 			monster["def"] = int(monster.get("def", 0) * hp_mult)
+			# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite（会被下面 phase 2 ×1.5 覆盖）
+			if bool(MonsterDb.MONSTER_DB.get(enemy_id, {}).get("isElite", false)):
+				monster["_visualScale"] = 1.2
+				monster["isElite"] = true
 			# ★ 主人定 2026-06-10：二阶段体型变大 50%
 			monster["_visualScale"] = 1.5
 		new_enemies.append(monster)

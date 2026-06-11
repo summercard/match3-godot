@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://cr6a6i5kodk7m"]
 
-[ext_resource type="Texture2D" uid="uid://c1vhx6cwsyvym" path="res://assets/images/battle/battle_bg_forest_ruins.png" id="bg"]
-[ext_resource type="Texture2D" uid="uid://cbbvkb1ckwkv8" path="res://assets/images/battle/ui/ui_capture_toggle_off.png" id="capture_toggle"]
+[ext_resource type="Texture2D" uid="uid://c1vhx6cwsyvym" path="res://assets/images/maps/backgrounds/battle_bg_forest_ruins.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://cbbvkb1ckwkv8" path="res://assets/images/ui/buttons/battle_ui_capture_toggle_off.png" id="capture_toggle"]
 [ext_resource type="PackedScene" uid="uid://y280sjcpnwtf" path="res://src/ui/scenes/battle/enemy_slot.tscn" id="enemy_slot"]
 [ext_resource type="PackedScene" uid="uid://d2u36y1wnlpla" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
-[ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/battle/ui/ui_item_slot_selected.png" id="item_selected"]
+[ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/ui/slots/battle_ui_item_slot_selected.png" id="item_selected"]
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/battle/ui/ui_speed_button.png" id="speed_button"]
-[ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/battle/ui/ui_turn_badge.png" id="turn_badge"]
+[ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/ui/buttons/battle_ui_speed_button.png" id="speed_button"]
+[ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
 
 [node name="BattleScreenGui" type="Control" unique_id=807451328]
 clip_contents = true

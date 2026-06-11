@@ -9,6 +9,9 @@ static func generate_instance_id() -> String:
 static func create_instance(monster_id: String, options: Dictionary = {}) -> Dictionary:
 	var template: Dictionary = MonsterDb.get_monster(monster_id)
 	var now_ms := int(Time.get_unix_time_from_system() * 1000.0)
+	# 主人定 2026-06-11：捕获时把 MONSTER_DB.isElite 一起带进 instance
+	# 没传 isElite 时默认读 MONSTER_DB（兼容老存档）
+	var default_elite: bool = bool(template.get("isElite", false))
 	return normalize_instance({
 		"instanceId": str(options.get("instanceId", generate_instance_id())),
 		"monsterId": monster_id,
@@ -29,6 +32,7 @@ static func create_instance(monster_id: String, options: Dictionary = {}) -> Dic
 		"capturedAt": int(options.get("capturedAt", now_ms)),
 		"source": str(options.get("source", "capture")),
 		"favorite": bool(options.get("favorite", false)),
+		"isElite": bool(options.get("isElite", default_elite)),
 	})
 
 static func normalize_instance(value: Variant) -> Dictionary:
@@ -77,6 +81,8 @@ static func normalize_instance(value: Variant) -> Dictionary:
 		"capturedAt": _normalize_timestamp_ms(captured_at),
 		"source": str(data.get("source", "migration")),
 		"favorite": bool(data.get("favorite", false)),
+		# 老存档没存 isElite 时，回退读 MONSTER_DB（默认 false）
+		"isElite": bool(data.get("isElite", template.get("isElite", false))),
 	}
 
 static func _derive_gender(instance_id: String, monster_id: String) -> String:

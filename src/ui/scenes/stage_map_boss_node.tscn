@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cko67qkbhlwfs"]
 
-[ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/stage/boss_badge.png" id="1_badge"]
-[ext_resource type="Texture2D" uid="uid://cua112u0uug48" path="res://assets/images/stage/boss_flower.png" id="2_art"]
-[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/stage/icon_star_dim.png" id="3_star"]
+[ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/maps/boss/stage_boss_badge.png" id="1_badge"]
+[ext_resource type="Texture2D" uid="uid://cua112u0uug48" path="res://assets/images/monsters/boss/boss_flower.png" id="2_art"]
+[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/ui/icons/stage_icon_star_dim.png" id="3_star"]
 
 [node name="BossButton" type="TextureButton" unique_id=2140221094]
 offset_right = 126.0

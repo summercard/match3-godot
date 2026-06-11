@@ -30,6 +30,10 @@ const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const BATTLE_BOARD_CELL_SIZE := 39
 const BATTLE_BOARD_Y := 300
+const ATTACK_CUE_DURATION := 0.58
+const ATTACK_IMPACT_DELAY := 0.24
+const ATTACK_RECOVERY_DELAY := 0.16
+const MATCH_CHAIN_TAIL_WAIT_MAX := 0.72
 
 ## 状态枚举
 enum BattleState {
@@ -93,6 +97,18 @@ var _player_lunge_anims: Array[Dictionary] = []
 
 ## 弹道动画（主人定 2026-06-10：同属性颜色弹道飞向目标）
 var _bullet_anims: Array[Dictionary] = []
+
+## 攻击者弹性放大动画（★ 主人定 2026-06-11：小幅度弹性放大作为攻击主反馈）
+## 每条记录：{isEnemy, index, timer, duration, maxDuration}，progress 0→1
+var _attacker_elastic_anims: Array[Dictionary] = []
+
+## 倒下过渡动画（★ 主人定 2026-06-11：先怪物图消失，再幽灵从下冲上渐显）
+## 每条记录：{isEnemy, index, timer, duration, maxDuration}，覆盖 (hp<=0) 的瞬时切换
+var _defeat_transitions: Array[Dictionary] = []
+
+## 攻击观察提示：高亮攻击者、目标和弹道方向
+var _attack_cues: Array[Dictionary] = []
+var _suppress_enemy_attack_signal_visuals := false
 
 ## 倒下提示
 var _fall_messages: Array[Dictionary] = []
@@ -322,67 +338,66 @@ func _add_background(image_path: String) -> void:
 
 ## 宝石图片路径映射
 const GEM_IMAGE_PATHS := {
-	"fire": "res://assets/images/battle/gems/gem_fire.png",
-	"water": "res://assets/images/battle/gems/gem_water.png",
-	"grass": "res://assets/images/battle/gems/gem_grass.png",
-	"thunder": "res://assets/images/battle/gems/gem_thunder.png",
-	"light": "res://assets/images/battle/gems/gem_light.png"
+	"fire": "res://assets/images/ui/gems/battle_gem_fire.png",
+	"water": "res://assets/images/ui/gems/battle_gem_water.png",
+	"grass": "res://assets/images/ui/gems/battle_gem_grass.png",
+	"thunder": "res://assets/images/ui/gems/battle_gem_thunder.png",
+	"light": "res://assets/images/ui/gems/battle_gem_light.png"
 }
 
-const BATTLE_BG_PATH := "res://assets/images/battle_flow_new/battle_garden_ruins_bg.png"
+const BATTLE_BG_PATH := "res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png"
 
 const BATTLE_UI_ASSETS := {
-	"toast_panel": "res://assets/images/battle/ui/ui_battle_toast_panel.png",
-	"combo_banner": "res://assets/images/battle/ui/ui_combo_banner.png",
-	"top_scrim": "res://assets/images/battle/ui/ui_top_scrim.png",
-	"turn_badge": "res://assets/images/battle/ui/ui_turn_badge.png",
-	"speed_button": "res://assets/images/battle/ui/ui_speed_button.png",
-	"board_frame": "res://assets/images/battle/ui/ui_board_frame.png",
-	"board_cell": "res://assets/images/battle/ui/ui_board_cell.png",
-	"footer_panel": "res://assets/images/battle/ui/ui_footer_panel.png",
-	"capture_toggle_off": "res://assets/images/battle/ui/ui_capture_toggle_off.png",
-	"capture_toggle_on": "res://assets/images/battle/ui/ui_capture_toggle_on.png",
-	"item_slot": "res://assets/images/battle/ui/ui_item_slot.png",
-	"item_slot_selected": "res://assets/images/battle/ui/ui_item_slot_selected.png",
-	"item_capture_ball": "res://assets/images/battle/ui/icon_capture_ball.png",
-	"item_capture_ball_plus": "res://assets/images/battle/ui/icon_capture_ball_plus.png",
-	"item_hp_potion": "res://assets/images/battle/ui/icon_hp_potion.png",
-	"hp_frame": "res://assets/images/battle/ui/ui_hp_frame.png",
-	"hp_frame_overlay": "res://assets/images/battle/ui/ui_hp_frame_overlay.png",
-	"hp_fill_green": "res://assets/images/battle/ui/ui_hp_fill_green.png",
-	"hp_fill_red": "res://assets/images/battle/ui/ui_hp_fill_red.png",
-	"hp_fill_blue": "res://assets/images/battle/ui/ui_hp_fill_blue.png",
-	"hp_fill_gold": "res://assets/images/battle/ui/ui_hp_fill_gold.png"
+	"toast_panel": "res://assets/images/ui/panels/battle_ui_battle_toast_panel.png",
+	"combo_banner": "res://assets/images/ui/panels/battle_ui_combo_banner.png",
+	"top_scrim": "res://assets/images/ui/panels/battle_ui_top_scrim.png",
+	"turn_badge": "res://assets/images/ui/icons/battle_ui_turn_badge.png",
+	"speed_button": "res://assets/images/ui/buttons/battle_ui_speed_button.png",
+	"board_frame": "res://assets/images/ui/misc/battle_ui_board_frame.png",
+	"board_cell": "res://assets/images/ui/misc/battle_ui_board_cell.png",
+	"footer_panel": "res://assets/images/ui/panels/battle_ui_footer_panel.png",
+	"capture_toggle_off": "res://assets/images/ui/buttons/battle_ui_capture_toggle_off.png",
+	"capture_toggle_on": "res://assets/images/ui/buttons/battle_ui_capture_toggle_on.png",
+	"item_slot": "res://assets/images/ui/slots/battle_ui_item_slot.png",
+	"item_slot_selected": "res://assets/images/ui/slots/battle_ui_item_slot_selected.png",
+	"item_capture_ball": "res://assets/images/ui/icons/battle_icon_capture_ball.png",
+	"item_capture_ball_plus": "res://assets/images/ui/icons/battle_icon_capture_ball_plus.png",
+	"item_hp_potion": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
+	"hp_frame": "res://assets/images/ui/bars/battle_ui_hp_frame.png",
+	"hp_frame_overlay": "res://assets/images/ui/bars/battle_ui_hp_frame_overlay.png",
+	"hp_fill_green": "res://assets/images/ui/bars/battle_ui_hp_fill_green.png",
+	"hp_fill_red": "res://assets/images/ui/bars/battle_ui_hp_fill_red.png",
+	"hp_fill_blue": "res://assets/images/ui/bars/battle_ui_hp_fill_blue.png",
+	"hp_fill_gold": "res://assets/images/ui/bars/battle_ui_hp_fill_gold.png"
 }
 
 const BATTLE_FX_ASSETS := {
-	"damage_plate": "res://assets/images/battle/fx/fx_damage_plate.png",
-	"critical_plate": "res://assets/images/battle/fx/fx_critical_plate.png",
-	"heal_plate": "res://assets/images/battle/fx/fx_heal_plate.png",
-	"combo_word": "res://assets/images/battle/fx/fx_combo_word.png",
-	"damage_digits": "res://assets/images/battle/fx/fx_damage_digits.png",
-	"hit_spark": "res://assets/images/battle/fx/fx_hit_spark.png",
-	"shield_ring": "res://assets/images/battle/fx/fx_shield_ring.png",
-	"heal_ring": "res://assets/images/battle/fx/fx_heal_ring.png",
-	"charge_aura": "res://assets/images/battle/fx/fx_charge_aura.png",
-	"stage_ring_cyan": "res://assets/images/battle/fx/fx_stage_ring_cyan.png",
-	"stage_ring_green": "res://assets/images/battle/fx/fx_stage_ring_green.png",
-	"stage_ring_fire": "res://assets/images/battle/fx/fx_stage_ring_fire.png",
-	"stage_ring_void": "res://assets/images/battle/fx/fx_stage_ring_void.png",
-	"selected_cell": "res://assets/images/battle/fx/fx_selected_cell.png",
-	"gem_pop": "res://assets/images/battle/fx/fx_gem_pop.png"
+	"damage_plate": "res://assets/images/effects/battle_fx_damage_plate.png",
+	"critical_plate": "res://assets/images/effects/battle_fx_critical_plate.png",
+	"heal_plate": "res://assets/images/effects/battle_fx_heal_plate.png",
+	"combo_word": "res://assets/images/effects/battle_fx_combo_word.png",
+	"damage_digits": "res://assets/images/effects/battle_fx_damage_digits.png",
+	"shield_ring": "res://assets/images/effects/battle_fx_shield_ring.png",
+	"heal_ring": "res://assets/images/effects/battle_fx_heal_ring.png",
+	"charge_aura": "res://assets/images/effects/battle_fx_charge_aura.png",
+	"stage_ring_cyan": "res://assets/images/effects/battle_fx_stage_ring_cyan.png",
+	"stage_ring_green": "res://assets/images/effects/battle_fx_stage_ring_green.png",
+	"stage_ring_fire": "res://assets/images/effects/battle_fx_stage_ring_fire.png",
+	"stage_ring_void": "res://assets/images/effects/battle_fx_stage_ring_void.png",
+	"selected_cell": "res://assets/images/effects/battle_fx_selected_cell.png",
+	"gem_pop": "res://assets/images/effects/battle_fx_gem_pop.png"
 }
 
 const BATTLE_RESULT_OVERLAY_ASSETS := {
-	"victory_banner": "res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png",
-	"defeat_banner": "res://assets/images/battle_flow_new/ui/ui_battle_victory_plaque.png",
-	"panel": "res://assets/images/battle_flow_new/ui/ui_panel_large.png",
-	"button_continue": "res://assets/images/battle_flow_new/ui/ui_battle_continue_button.png",
-	"capture_plaque": "res://assets/images/battle_flow_new/ui/ui_capture_status_plaque.png",
-	"tap_strip": "res://assets/images/battle_flow_new/ui/ui_battle_continue_button.png",
-	"victory_burst": "res://assets/images/battle_flow_new/ui/fx_golden_burst.png",
-	"defeat_smoke": "res://assets/images/battle_flow_new/ui/fx_sparkles.png",
-	"underline": "res://assets/images/battle_flow_new/ui/fx_sparkles.png"
+	"victory_banner": "res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png",
+	"defeat_banner": "res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png",
+	"panel": "res://assets/images/ui/panels/battle_flow_new_ui_panel_large.png",
+	"button_continue": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
+	"capture_plaque": "res://assets/images/ui/panels/battle_flow_new_ui_capture_status_plaque.png",
+	"tap_strip": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
+	"victory_burst": "res://assets/images/effects/battle_flow_new_fx_golden_burst.png",
+	"defeat_smoke": "res://assets/images/effects/battle_flow_new_fx_sparkles.png",
+	"underline": "res://assets/images/effects/battle_flow_new_fx_sparkles.png"
 }
 
 ## 宝石 TextureRect 缓存
@@ -425,6 +440,8 @@ func init(data: Dictionary = {}) -> void:
 	_fall_messages = []
 	_player_lunge_anims = []
 	_bullet_anims = []
+	_attack_cues = []
+	_suppress_enemy_attack_signal_visuals = false
 	_enemy_display_hp = []
 	_player_display_hp = []
 	_boss_skill_visuals = {}
@@ -792,17 +809,20 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	var damage: int = result.get("remaining_damage", result.get("remainingDamage", result.get("damage", 0)))
 	var shield_absorbed: int = result.get("shield_absorbed", result.get("shieldAbsorbed", 0))
 	var target_idx: int = result.get("target_index", result.get("targetIndex", -1))
+	if target_idx < 0:
+		target_idx = _find_enemy_index(result.get("target", ""))
+	var skill_element := str(result.get("element", "fire"))
+	if attacker_idx >= 0 and target_idx >= 0:
+		_start_attack_cue(false, attacker_idx, true, target_idx, skill_element, "%s 释放 %s → %s" % [attacker, skill_name, result.get("target", "敌人")], true)
 	_show_message("%s 释放 %s！" % [attacker, skill_name])
 	_screen_flash_timer = 0.18
 	_trigger_attack_shake()
-	if target_idx < 0:
-		target_idx = _find_enemy_index(result.get("target", ""))
 	var popup_x: float = DESIGN_W / 2.0
 	var popup_y: float = 95.0
 	if target_idx >= 0:
 		popup_x = 25.0 + target_idx * 120.0 + 55.0
 		popup_y = 80.0
-		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.3, "maxTimer": 0.3})
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.42, "maxTimer": 0.42})
 	if damage > 0:
 		_floating_texts.append({
 			"text": "-%d" % damage,
@@ -924,6 +944,9 @@ func _process_matches() -> void:
 	if not match_context.get("has_matches", false):
 		if _check_battle_end():
 			return
+		await _wait_for_player_resolution_tail()
+		if _check_battle_end():
+			return
 		_start_enemy_turn()
 		return
 	
@@ -988,10 +1011,17 @@ func _process_matches() -> void:
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
 	for log: Dictionary in result.get("damage_log", []):
 		var log_damage: int = log.get("damage", 0)
-		var log_effective: bool = log.get("isEffective", false)
-		var log_weak: bool = log.get("isWeak", false)
+		var log_effective: bool = bool(log.get("isEffective", log.get("is_effective", false)))
+		var log_weak: bool = bool(log.get("isWeak", log.get("is_weak", false)))
 		var log_target: String = log.get("target", "")
-		var log_died: bool = log.get("targetDied", false)
+		var log_died: bool = bool(log.get("targetDied", log.get("target_died", false)))
+		var log_attacker: String = str(log.get("attacker", "伙伴"))
+		var log_element: String = str(log.get("element", "fire"))
+		var attacker_idx := _find_player_index(log_attacker)
+		var target_idx := _find_enemy_index(log_target)
+		if attacker_idx >= 0 and target_idx >= 0:
+			_sfx_attack_by_element(log_element)
+			await _play_attack_observation(false, attacker_idx, true, target_idx, log_element, "%s → %s" % [log_attacker, log_target], log_effective)
 		
 		# 克制提示
 		if log_effective:
@@ -1003,7 +1033,6 @@ func _process_matches() -> void:
 		var popup_color: Color = C["fire"] if log_effective else (C["text_muted"] if log_weak else C["gold"])
 		var popup_size: float = 24.0 if log_effective else (12.0 if log_weak else 18.0)
 		
-		var target_idx := _find_enemy_index(log_target)
 		if target_idx >= 0:
 			var ex := 25.0 + target_idx * 120.0 + 55.0
 			var ey := 80.0
@@ -1017,7 +1046,7 @@ func _process_matches() -> void:
 				"critical": log_effective
 			})
 			if not log_died:
-				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.4, "maxTimer": 0.4})
 				_trigger_attack_shake()
 			if log_died:
 				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
@@ -1031,8 +1060,10 @@ func _process_matches() -> void:
 				"timer": 0.0,
 				"duration": 0.8
 			})
-			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
+			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.4, "maxTimer": 0.4})
 			_trigger_attack_shake()
+		if attacker_idx >= 0 and target_idx >= 0:
+			await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
 	
 	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
 	var all_special_gems: Array = removal_result.get("special_gems", explosion_gems + bomb_gems + rainbow_gems)
@@ -1096,6 +1127,25 @@ func _process_matches() -> void:
 	_state = BattleState.FALLING
 	await get_tree().create_timer(FALL_DURATION).timeout
 	_process_matches()
+
+func _wait_for_player_resolution_tail() -> void:
+	await get_tree().process_frame
+	var waited := 0.0
+	while _has_pending_player_resolution_fx() and waited < MATCH_CHAIN_TAIL_WAIT_MAX:
+		await get_tree().create_timer(0.03).timeout
+		waited += 0.03
+
+func _has_pending_player_resolution_fx() -> bool:
+	return (
+		not _falling_gems.is_empty()
+		or not _hit_flashes.is_empty()
+		or not _attack_cues.is_empty()
+		or not _bullet_anims.is_empty()
+		or not _player_lunge_anims.is_empty()
+		or not _attacker_elastic_anims.is_empty()
+		or not _damage_popup_queue.is_empty()
+		or _attack_shake_timer > 0.0
+	)
 
 func _apply_gravity() -> void:
 	if _board:
@@ -1209,7 +1259,9 @@ func _start_enemy_turn() -> void:
 	if _battle == null:
 		_state = BattleState.IDLE
 		return
+	_suppress_enemy_attack_signal_visuals = true
 	var result: Dictionary = _battle.enemy_action()
+	_suppress_enemy_attack_signal_visuals = false
 	
 	# 处理状态效果日志（DoT弹出、stun提示、效果消失）
 	for log in result.get("status_logs", []):
@@ -1234,7 +1286,7 @@ func _start_enemy_turn() -> void:
 				"duration": 0.8
 			})
 			# 受击闪烁
-			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.25, "maxTimer": 0.25})
+			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.4, "maxTimer": 0.4})
 		
 		elif log_type == "stun":
 			_show_message("%s 眩晕了，无法行动！" % enemy_name)
@@ -1273,15 +1325,19 @@ func _start_enemy_turn() -> void:
 			var target_idx := _find_player_index(action.get("target", ""))
 			var popup_x: float = 80.0
 			var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
+			var enemy_idx: int = _find_enemy_index(action.get("attacker", ""))
+			var action_element := str(action.get("element", "fire"))
+			if enemy_idx >= 0 and target_idx >= 0:
+				_sfx_attack_by_element(action_element)
+				var attack_label := "%s → %s" % [action.get("attacker", "敌人"), action.get("target", "伙伴")]
+				if action.get("is_charged", false):
+					attack_label = "%s 蓄力攻击 → %s" % [action.get("attacker", "敌人"), action.get("target", "伙伴")]
+				await _play_attack_observation(true, enemy_idx, false, target_idx, action_element, attack_label, action.get("is_charged", false))
 			if target_idx >= 0:
 				popup_x = 15.0 + target_idx * 120.0 + 55.0
 				popup_y = 218.0
-				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
+				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
 			# 敌人攻击音（按敌人元素）
-			var enemy_idx: int = _find_enemy_index(action.get("attacker", ""))
-			if enemy_idx >= 0 and enemy_idx < _battle.enemies.size():
-				var enemy_unit: Dictionary = _battle.enemies[enemy_idx]
-				_sfx_attack_by_element(str(enemy_unit.get("element", "fire")))
 			_sfx("battle_player_hit_cushion")
 			# 伤害数字加入队列（依次弹出，延迟编排）
 			var entry: Dictionary = {
@@ -1309,6 +1365,8 @@ func _start_enemy_turn() -> void:
 				})
 			if action.get("is_weakened", false):
 				_show_message("%s 被束缚，伤害降低" % action.get("attacker", "敌人"))
+			if enemy_idx >= 0 and target_idx >= 0:
+				await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
 	
 	await get_tree().create_timer(0.8).timeout
 	_enemy_attacks = []
@@ -1549,9 +1607,96 @@ func _show_combo_popup(combo: int) -> void:
 		_trigger_attack_shake()
 
 func _trigger_attack_shake() -> void:
-	_attack_shake_timer = 0.2
-	_attack_flash_timer = 0.1
+	# ★ 主人定 2026-06-11：缩短震动（0.28→0.18），去掉白闪，攻击主反馈改由 attacker 弹性放大承担
+	_attack_shake_timer = 0.18
+	_attack_flash_timer = 0.0
 	_attack_shake_offset_x = 0.0
+
+# ★ 主人定 2026-06-11：清理同 combatant 的旧 elastic anim，避免快速连击时叠加
+func _remove_elastic_anim(is_enemy: bool, index: int) -> void:
+	for i in range(_attacker_elastic_anims.size() - 1, -1, -1):
+		var entry: Dictionary = _attacker_elastic_anims[i]
+		if bool(entry.get("isEnemy", false)) == is_enemy and int(entry.get("index", -1)) == index:
+			_attacker_elastic_anims.remove_at(i)
+
+# ★ 主人定 2026-06-11：检测新出现的倒下，登记进 _defeat_transitions
+# 怪物图先消失（0.20s）→ 短暂空隙（0.10s）→ 幽灵从下冲上 + 渐显（0.40s）→ 稳定
+# 总时长 0.70s
+func _scan_new_defeats() -> void:
+	if _battle == null:
+		return
+	for i in range(_battle.enemies.size()):
+		var enemy: Dictionary = _battle.enemies[i]
+		if enemy == null:
+			continue
+		if maxi(int(enemy.get("hp", 0)), 0) <= 0 and not _has_defeat_transition(true, i):
+			_defeat_transitions.append({
+				"isEnemy": true,
+				"index": i,
+				"timer": 0.70,
+				"duration": 0.70,
+				"maxDuration": 0.70,
+			})
+	for i in range(_battle.player_team.size()):
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null:
+			continue
+		if maxi(int(monster.get("hp", 0)), 0) <= 0 and not _has_defeat_transition(false, i):
+			_defeat_transitions.append({
+				"isEnemy": false,
+				"index": i,
+				"timer": 0.70,
+				"duration": 0.70,
+				"maxDuration": 0.70,
+			})
+
+func _has_defeat_transition(is_enemy: bool, index: int) -> bool:
+	for entry in _defeat_transitions:
+		if bool(entry.get("isEnemy", false)) == is_enemy and int(entry.get("index", -1)) == index:
+			return true
+	return false
+
+func _tick_defeat_transitions(dt: float) -> void:
+	for entry in _defeat_transitions:
+		entry["timer"] = maxf(0.0, float(entry.get("timer", 0.0)) - dt)
+
+func _start_attack_cue(attacker_is_enemy: bool, attacker_idx: int, target_is_enemy: bool, target_idx: int, element: String, label: String, charged: bool = false) -> void:
+	if attacker_idx < 0 or target_idx < 0:
+		return
+	_attack_cues.append({
+		"attacker_is_enemy": attacker_is_enemy,
+		"attacker_index": attacker_idx,
+		"target_is_enemy": target_is_enemy,
+		"target_index": target_idx,
+		"element": element,
+		"label": label,
+		"charged": charged,
+		"timer": ATTACK_CUE_DURATION,
+		"duration": ATTACK_CUE_DURATION
+	})
+	# ★ 主人定 2026-06-11：攻击者小幅度弹性放大（缩放到 1.08→0.97→1.0 持续 0.32s）
+	# 适用于玩家和敌人；先清理掉同 combatant 的旧 anim 避免叠加
+	_remove_elastic_anim(attacker_is_enemy, attacker_idx)
+	_attacker_elastic_anims.append({
+		"isEnemy": attacker_is_enemy,
+		"index": attacker_idx,
+		"timer": 0.32,
+		"duration": 0.32,
+		"maxDuration": 0.32,
+	})
+	if not attacker_is_enemy:
+		_player_lunge_anims.append({
+			"playerIndex": attacker_idx,
+			"timer": ATTACK_CUE_DURATION,
+			"duration": ATTACK_CUE_DURATION,
+			"maxDuration": ATTACK_CUE_DURATION
+		})
+
+func _play_attack_observation(attacker_is_enemy: bool, attacker_idx: int, target_is_enemy: bool, target_idx: int, element: String, label: String, charged: bool = false) -> void:
+	_start_attack_cue(attacker_is_enemy, attacker_idx, target_is_enemy, target_idx, element, label, charged)
+	if not label.is_empty():
+		_show_message(label)
+	await get_tree().create_timer(ATTACK_IMPACT_DELAY).timeout
 
 func _trigger_element_glow(element_type: String, glow_color: Color) -> void:
 	_element_glow = {"type": element_type, "timer": 0.5, "color": glow_color}
@@ -1629,7 +1774,7 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 
 	# 敌人受击闪烁
 	if target_idx >= 0:
-		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.4, "maxTimer": 0.4})
 
 	# ★ 主人定 2026-06-10：我方宠物弹动 + 同属性弹道
 	if info_type != "active_skill":  # 主动技能已经有弹道，只补常规攻击
@@ -1656,6 +1801,8 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 
 func _on_enemy_attacked(action_info: Dictionary) -> void:
 	"""处理 BattleManager.enemy_attacked 信号，显示敌人攻击伤害"""
+	if _suppress_enemy_attack_signal_visuals:
+		return
 	var damage: int = action_info.get("damage", 0)
 	if damage <= 0:
 		return
@@ -1671,7 +1818,7 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 	if target_idx >= 0:
 		popup_x = 15.0 + target_idx * 120.0 + 55.0
 		popup_y = 218.0
-		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
+		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
 
 	if _damage_popup_queue.size() < 5:
 		_damage_popup_queue.append({
@@ -1838,6 +1985,11 @@ func _process(delta: float) -> void:
 	# ★ 主人定 2026-06-10：更新玩家宠物弹动 + 弹道动画
 	BattleAnimationControllerScript.tick_timed_entries(_player_lunge_anims, effective_delta)
 	BattleAnimationControllerScript.tick_timed_entries(_bullet_anims, effective_delta)
+	BattleAnimationControllerScript.tick_timed_entries(_attack_cues, effective_delta)
+	# ★ 主人定 2026-06-11：attacker 弹性放大 + 倒下过渡
+	BattleAnimationControllerScript.tick_timed_entries(_attacker_elastic_anims, effective_delta)
+	_scan_new_defeats()
+	_tick_defeat_transitions(effective_delta)
 
 	# 更新倒下提示
 	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, effective_delta)
@@ -1959,10 +2111,8 @@ func _draw() -> void:
 	if not _uses_editable_gui():
 		_draw_background()
 	
-	# 攻击白闪
-	if _attack_flash_timer > 0:
-		var alpha: float = _attack_flash_timer / 0.1 * 0.3
-		draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(1.0, 1.0, 1.0, alpha))
+	# 攻击白闪（★ 2026-06-11：移除，避免压过退位动画）
+	# 攻击主反馈改由 attacker 弹性放大承担
 	
 	if not _uses_editable_gui():
 		# 标题栏
@@ -2063,7 +2213,10 @@ func _combatant_render_state() -> Dictionary:
 		"hit_flashes": _hit_flashes,
 		"player_lunge_anims": _player_lunge_anims,
 		"bullet_anims": _bullet_anims,
+		"attack_cues": _attack_cues,
 		"defeated_enemies": _defeated_enemies,
+		"attacker_elastic_anims": _attacker_elastic_anims,
+		"defeat_transitions": _defeat_transitions,
 		"boss_skill_visuals": _boss_skill_visuals,
 		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
 		"status_emoji": STATUS_EMOJI,
@@ -3013,7 +3166,7 @@ func _draw_special_transform() -> void:
 	BattleBoardRendererScript.draw_special_transform(self, _board, _board_render_state())
 
 func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: float = 1.0) -> void:
-	var panel_tex := _get_texture("res://assets/images/battle/ui/ui_panel_dark_large.png")
+	var panel_tex := _get_texture("res://assets/images/ui/panels/battle_ui_panel_dark_large.png")
 	if panel_tex:
 		_draw_texture_fit(panel_tex, Rect2(x, y, w, h), opacity)
 	else:
@@ -3394,6 +3547,9 @@ func destroy() -> void:
 	_defeat_explosions.clear()
 	_victory_particles.clear()
 	_defeated_enemies.clear()
+	# ★ 主人定 2026-06-11：清理攻击者弹性 + 倒下过渡
+	_attacker_elastic_anims.clear()
+	_defeat_transitions.clear()
 	_screen_flash_timer = 0.0
 	_rainbow_flash = 0.0
 	_board_shake_timer = 0.0

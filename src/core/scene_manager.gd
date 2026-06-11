@@ -25,7 +25,7 @@ func _ready() -> void:
 func _warm_team_assets() -> void:
 	if _team_assets_warmed:
 		return
-	var script := load("res://src/ui/scene/scene_team.gd") as GDScript
+	var script := load("res://src/ui/controllers/team_logic.gd") as GDScript
 	if script != null and script.has_method("warm_assets"):
 		script.call("warm_assets")
 	_team_assets_warmed = true

@@ -14,6 +14,17 @@ extends RefCounted
 
 const MAX_LEVEL: int = 100  # 等级封顶：宠物/敌人共用上限（主人定 2026-06-10）
 
+## 敌人强度等级（在 base/level/nature 全部计算完成后应用）
+## 主人定 2026-06-11：
+##   - 敌方普通怪：HP × 2
+##   - 敌方精英怪：HP × 5，ATK + 20%
+##   - 我方（calc()）保持不变
+const NORMAL_ENEMY_HP_MULT: float = 2.0
+const ELITE_ENEMY_HP_MULT: float = 5.0
+const ELITE_ENEMY_ATK_BONUS: float = 0.20
+
+enum EnemyTier { NORMAL, ELITE }
+
 ## 等级成长系数（线性，与原公式完全一致）
 static func growth_mult(level: int, rarity: int) -> float:
 	if level <= 1:
@@ -66,7 +77,50 @@ static func calc(monster_id: String, level: int, nature_id: String = "", rarity_
 		"isBoss": bool(data.get("isBoss", false)),
 	}
 
-## 给敌人用的便捷：随机一个性格 + 套上等级
-static func calc_enemy(monster_id: String, level: int) -> Dictionary:
+## 给敌人用的便捷：随机一个性格 + 套上等级 + 应用 tier 系数
+## tier: EnemyTier.NORMAL（默认）→ HP × 2
+##       EnemyTier.ELITE        → HP × 5，ATK + 20%
+static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NORMAL) -> Dictionary:
 	var nature := NatureDB.random_nature()  # ★ 主人定的：每次 random
-	return calc(monster_id, level, nature)
+	var stats := calc(monster_id, level, nature)
+	return _apply_tier_modifier(stats, tier)
+
+## 精英怪便捷：HP × 5，ATK + 20%
+static func calc_elite_enemy(monster_id: String, level: int) -> Dictionary:
+	return calc_enemy(monster_id, level, EnemyTier.ELITE)
+
+## 自动从 MONSTER_DB 读 isElite 决定 tier
+##   - MONSTER_DB[id].isElite == true  → EnemyTier.ELITE  (HP × 5，ATK + 20%)
+##   - 其余                              → EnemyTier.NORMAL (HP × 2)
+## 找不到怪物 → 返回 {}（与 calc() 一致）
+static func calc_enemy_auto(monster_id: String, level: int) -> Dictionary:
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
+	if data.is_empty():
+		return {}
+	var tier := EnemyTier.ELITE if bool(data.get("isElite", false)) else EnemyTier.NORMAL
+	return calc_enemy(monster_id, level, tier)
+
+## ★ 玩家路径 + tier 系数
+## 用于「捕获后的精英宠物」：保留 HP×5 / ATK+20%
+## 默认 tier = NORMAL（HP×2），与 calc() 不调用时完全一致；
+## 当 instance.isElite == true 时传 EnemyTier.ELITE。
+## 找不到怪 / 空 dict → 直接返回空（不抛错）
+static func calc_with_tier(monster_id: String, level: int, nature_id: String = "", tier: int = EnemyTier.NORMAL) -> Dictionary:
+	var stats := calc(monster_id, level, nature_id)
+	if stats.is_empty():
+		return stats
+	return _apply_tier_modifier(stats, tier)
+
+## 应用敌人 tier 系数（在 calc() 全部属性算完之后再乘）
+## 同时被 calc_enemy() 和 calc_with_tier() 共用
+static func _apply_tier_modifier(stats: Dictionary, tier: int) -> Dictionary:
+	if stats.is_empty():
+		return stats
+	if tier == EnemyTier.ELITE:
+		stats["hp"] = int(stats["hp"] * ELITE_ENEMY_HP_MULT)
+		stats["maxHP"] = stats["hp"]
+		stats["atk"] = int(stats["atk"] * (1.0 + ELITE_ENEMY_ATK_BONUS))
+	else:
+		stats["hp"] = int(stats["hp"] * NORMAL_ENEMY_HP_MULT)
+		stats["maxHP"] = stats["hp"]
+	return stats

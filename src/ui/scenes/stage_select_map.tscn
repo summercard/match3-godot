@@ -1,26 +1,19 @@
 [gd_scene format=3 uid="uid://c2dvyeijd2b7u"]
 
 [ext_resource type="Script" uid="uid://dhxxynogkgxr3" path="res://src/ui/scene/scene_stage_select_gui.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/images/shop/concept/image2/ui_shop_title_plaque_image2.png" id="3_header"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory/ui_back_button.png" id="4_back"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_icon_badge.png" id="9_badge"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/chapter_01_new/star_gold_new.png" id="10_star"]
-[ext_resource type="Texture2D" uid="uid://bet0ett8i3hmo" path="res://assets/images/stage/ui_reward_panel_clean.png" id="15_reward"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gold_coin.png" id="17_gold"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_exp_badge.png" id="18_exp"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_capture_ball.png" id="19_ball"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_fire.png" id="20_fire"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_water.png" id="21_water"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_grass.png" id="22_grass"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_thunder.png" id="23_thunder"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/icon_gem_light.png" id="24_light"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="25_gold_btn"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" path="res://assets/images/main/lobby_refresh/ui_bottom_nav_panel_v3.png" id="27_nav_panel"]
-[ext_resource type="Texture2D" path="res://assets/images/result_refresh/ui_btn_blue.png" id="28_nav_blue"]
-[ext_resource type="Texture2D" path="res://assets/images/result_refresh/ui_btn_gold.png" id="29_nav_gold"]
-[ext_resource type="Texture2D" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="30_nav_arrow"]
-[ext_resource type="Texture2D" path="res://assets/images/stage/chapter_01_new/cloud_soft_01.png" id="31_cloud"]
+[ext_resource type="Texture2D" uid="uid://c5cgebmxk6kau" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="3_header"]
+[ext_resource type="Texture2D" uid="uid://vmk7pma3ouuh" path="res://assets/images/ui/buttons/inventory_ui_back_button.png" id="4_back"]
+[ext_resource type="Texture2D" uid="uid://b4664lgl7171o" path="res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png" id="9_badge"]
+[ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/ui/icons/stage_star_gold_new.png" id="10_star"]
+[ext_resource type="Texture2D" uid="uid://bet0ett8i3hmo" path="res://assets/images/ui/panels/stage_ui_reward_panel_clean.png" id="15_reward"]
+[ext_resource type="Texture2D" uid="uid://blaj6jv7lhhum" path="res://assets/images/ui/icons/stage_icon_gold_coin.png" id="17_gold"]
+[ext_resource type="Texture2D" uid="uid://cydrpsgqhdrja" path="res://assets/images/ui/icons/stage_icon_exp_badge.png" id="18_exp"]
+[ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="27_nav_panel"]
+[ext_resource type="Texture2D" uid="uid://cxor28yddwp1v" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue.png" id="28_nav_blue"]
+[ext_resource type="Texture2D" uid="uid://bijxnq5hqgoqv" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold.png" id="29_nav_gold"]
+[ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png" id="30_nav_arrow"]
+[ext_resource type="Texture2D" uid="uid://dsaff3weo4xfy" path="res://assets/images/maps/nodes/stage_cloud_soft_01.png" id="31_cloud"]
 [ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_grassland.tscn" id="chapter_01_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
 [ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
@@ -43,16 +36,14 @@ mouse_filter = 1
 script = ExtResource("1_script")
 
 [node name="MapScroll" type="ScrollContainer" parent="." unique_id=1266953437]
-anchors_preset = 0
+layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
-mouse_filter = 1
-clip_contents = true
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 3
 scroll_deadzone = 8
 
-[node name="ChapterMaps" type="Control" parent="MapScroll"]
+[node name="ChapterMaps" type="Control" parent="MapScroll" unique_id=1798629684]
 custom_minimum_size = Vector2(375, 1280)
 layout_mode = 2
 mouse_filter = 2
@@ -101,74 +92,74 @@ anchors_preset = 0
 visible = false
 anchors_preset = 0
 
-[node name="CloudLayerFar" type="Control" parent="."]
-layout_mode = 0
+[node name="CloudLayerFar" type="Control" parent="." unique_id=617528148]
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 
-[node name="Cloud01" type="TextureRect" parent="CloudLayerFar"]
+[node name="Cloud01" type="TextureRect" parent="CloudLayerFar" unique_id=866065568]
+modulate = Color(1, 1, 1, 0.42)
 layout_mode = 0
 offset_left = -42.0
 offset_top = 112.0
 offset_right = 128.0
 offset_bottom = 183.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.42)
 texture = ExtResource("31_cloud")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Cloud02" type="TextureRect" parent="CloudLayerFar"]
+[node name="Cloud02" type="TextureRect" parent="CloudLayerFar" unique_id=2061116367]
+modulate = Color(1, 1, 1, 0.36)
 layout_mode = 0
 offset_left = 248.0
 offset_top = 78.0
 offset_right = 398.0
 offset_bottom = 141.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.36)
 texture = ExtResource("31_cloud")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CloudLayerNear" type="Control" parent="."]
-layout_mode = 0
+[node name="CloudLayerNear" type="Control" parent="." unique_id=197252281]
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 
-[node name="Cloud03" type="TextureRect" parent="CloudLayerNear"]
+[node name="Cloud03" type="TextureRect" parent="CloudLayerNear" unique_id=1701906767]
+modulate = Color(1, 1, 1, 0.3)
 layout_mode = 0
 offset_left = 214.0
 offset_top = 396.0
 offset_right = 410.0
 offset_bottom = 478.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.30)
 texture = ExtResource("31_cloud")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Cloud04" type="TextureRect" parent="CloudLayerNear"]
+[node name="Cloud04" type="TextureRect" parent="CloudLayerNear" unique_id=1935678833]
+modulate = Color(1, 1, 1, 0.26)
 layout_mode = 0
 offset_left = -74.0
 offset_top = 500.0
 offset_right = 120.0
 offset_bottom = 581.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.26)
 texture = ExtResource("31_cloud")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BottomNav" type="Control" parent="."]
+[node name="BottomNav" type="Control" parent="." unique_id=11177729]
 anchors_preset = 0
 offset_left = 10.0
 offset_top = 573.0
 offset_right = 365.0
 offset_bottom = 661.0
 
-[node name="Panel" type="TextureRect" parent="BottomNav"]
+[node name="Panel" type="TextureRect" parent="BottomNav" unique_id=2142451859]
 layout_mode = 0
 offset_right = 355.0
 offset_bottom = 88.0
@@ -177,7 +168,7 @@ texture = ExtResource("27_nav_panel")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PrevMapButton" type="TextureButton" parent="BottomNav"]
+[node name="PrevMapButton" type="TextureButton" parent="BottomNav" unique_id=512823073]
 layout_mode = 0
 offset_left = 28.0
 offset_top = 22.0
@@ -185,7 +176,7 @@ offset_right = 122.0
 offset_bottom = 62.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="BottomNav/PrevMapButton"]
+[node name="Frame" type="TextureRect" parent="BottomNav/PrevMapButton" unique_id=1341124827]
 layout_mode = 0
 offset_right = 94.0
 offset_bottom = 40.0
@@ -194,7 +185,7 @@ texture = ExtResource("28_nav_blue")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Arrow" type="TextureRect" parent="BottomNav/PrevMapButton"]
+[node name="Arrow" type="TextureRect" parent="BottomNav/PrevMapButton" unique_id=1321634204]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 9.0
@@ -205,7 +196,7 @@ texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/PrevMapButton"]
+[node name="Text" type="Label" parent="BottomNav/PrevMapButton" unique_id=2059397413]
 layout_mode = 0
 offset_left = 24.0
 offset_right = 88.0
@@ -218,7 +209,7 @@ text = "上一张"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ReturnButton" type="TextureButton" parent="BottomNav"]
+[node name="ReturnButton" type="TextureButton" parent="BottomNav" unique_id=1980823847]
 layout_mode = 0
 offset_left = 129.0
 offset_top = 16.0
@@ -226,7 +217,7 @@ offset_right = 226.0
 offset_bottom = 66.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="BottomNav/ReturnButton"]
+[node name="Frame" type="TextureRect" parent="BottomNav/ReturnButton" unique_id=65204610]
 layout_mode = 0
 offset_right = 97.0
 offset_bottom = 50.0
@@ -235,7 +226,7 @@ texture = ExtResource("29_nav_gold")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/ReturnButton"]
+[node name="Text" type="Label" parent="BottomNav/ReturnButton" unique_id=1201495619]
 layout_mode = 0
 offset_right = 97.0
 offset_bottom = 50.0
@@ -247,7 +238,7 @@ text = "返回"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NextMapButton" type="TextureButton" parent="BottomNav"]
+[node name="NextMapButton" type="TextureButton" parent="BottomNav" unique_id=702731354]
 layout_mode = 0
 offset_left = 233.0
 offset_top = 22.0
@@ -255,7 +246,7 @@ offset_right = 327.0
 offset_bottom = 62.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="BottomNav/NextMapButton"]
+[node name="Frame" type="TextureRect" parent="BottomNav/NextMapButton" unique_id=2046895596]
 layout_mode = 0
 offset_right = 94.0
 offset_bottom = 40.0
@@ -264,7 +255,7 @@ texture = ExtResource("28_nav_blue")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Arrow" type="TextureRect" parent="BottomNav/NextMapButton"]
+[node name="Arrow" type="TextureRect" parent="BottomNav/NextMapButton" unique_id=839634591]
 layout_mode = 0
 offset_left = 64.0
 offset_top = 9.0
@@ -276,7 +267,7 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="Text" type="Label" parent="BottomNav/NextMapButton"]
+[node name="Text" type="Label" parent="BottomNav/NextMapButton" unique_id=1580534066]
 layout_mode = 0
 offset_left = 6.0
 offset_right = 70.0
@@ -294,7 +285,7 @@ anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 98.0
 
-[node name="TopScrim" type="ColorRect" parent="Header"]
+[node name="TopScrim" type="ColorRect" parent="Header" unique_id=367042694]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 96.0
@@ -341,15 +332,14 @@ texture = ExtResource("3_header")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GemDeco" type="TextureRect" parent="Header"]
+[node name="GemDeco" type="TextureRect" parent="Header" unique_id=974613912]
 visible = false
+modulate = Color(1, 1, 1, 0.82)
 layout_mode = 0
 offset_left = 218.0
-offset_top = 0.0
 offset_right = 338.0
 offset_bottom = 54.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.82)
 expand_mode = 1
 stretch_mode = 5
 
@@ -369,12 +359,12 @@ layout_mode = 0
 offset_right = 45.0
 offset_bottom = 45.0
 theme_override_colors/font_color = Color(0.28, 0.45, 0.8, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.95)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 17
 text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.95)
-theme_override_constants/outline_size = 2
 
 [node name="ChapterTitle" type="Label" parent="Header" unique_id=701966155]
 layout_mode = 0
@@ -383,10 +373,9 @@ offset_top = 20.0
 offset_right = 197.0
 offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.3, 0.95, 0.34, 1)
-theme_override_font_sizes/font_size = 16
-text = ""
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 
 [node name="ChapterName" type="Label" parent="Header" unique_id=1383989028]
 layout_mode = 0
@@ -395,10 +384,9 @@ offset_top = 20.0
 offset_right = 340.0
 offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
-text = ""
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
 theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
 [node name="StarIcon" type="TextureRect" parent="Header" unique_id=1370045107]
@@ -418,10 +406,10 @@ offset_top = 47.0
 offset_right = 247.0
 offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "0/18"
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+text = "0/18"
 
 [node name="PreviousButton" type="TextureButton" parent="Header" unique_id=1346864934]
 visible = false
@@ -561,6 +549,7 @@ offset_bottom = 5.0
 color = Color(1, 1, 1, 0.34)
 
 [node name="PopupLayer" type="Control" parent="." unique_id=978015749]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -601,10 +590,9 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 1)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 18
-text = ""
 horizontal_alignment = 1
 
-[node name="GoldIcon" type="TextureRect" parent="PopupLayer/SweepDialog"]
+[node name="GoldIcon" type="TextureRect" parent="PopupLayer/SweepDialog" unique_id=918039620]
 layout_mode = 0
 offset_left = 42.0
 offset_top = 62.0
@@ -625,9 +613,8 @@ theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = ""
 
-[node name="ExpIcon" type="TextureRect" parent="PopupLayer/SweepDialog"]
+[node name="ExpIcon" type="TextureRect" parent="PopupLayer/SweepDialog" unique_id=1866972403]
 layout_mode = 0
 offset_left = 148.0
 offset_top = 62.0
@@ -648,7 +635,6 @@ theme_override_colors/font_color = Color(0.74, 0.9, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = ""
 
 [node name="RuleLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=822395860]
 layout_mode = 0
@@ -658,7 +644,6 @@ offset_right = 252.0
 offset_bottom = 113.0
 theme_override_colors/font_color = Color(0.66, 0.78, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = ""
 horizontal_alignment = 1
 
 [node name="ConfirmBtn" type="Button" parent="PopupLayer/SweepDialog" unique_id=1642853623]
@@ -674,7 +659,7 @@ layout_mode = 0
 offset_right = 100.0
 offset_bottom = 40.0
 mouse_filter = 2
-texture = ExtResource("25_gold_btn")
+texture = ExtResource("26_blue_btn")
 expand_mode = 1
 stretch_mode = 5
 
@@ -746,7 +731,6 @@ offset_right = 245.0
 offset_bottom = 80.0
 theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
 theme_override_font_sizes/font_size = 22
-text = ""
 horizontal_alignment = 1
 
 [node name="GoldLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=689188983]
@@ -757,7 +741,6 @@ offset_right = 238.0
 offset_bottom = 117.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = ""
 horizontal_alignment = 1
 
 [node name="ExpLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=996239423]

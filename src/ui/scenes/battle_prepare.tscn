@@ -1,17 +1,24 @@
 [gd_scene format=3 uid="uid://yyg32jgreiyw"]
 
-[ext_resource type="Texture2D" uid="uid://dt6wfqinj0dl4" path="res://assets/images/battle_prepare_new/ui/ui_back_button.png" id="back"]
-[ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/battle_flow_new/icons/icon_back_arrow.png" id="back_arrow"]
-[ext_resource type="Texture2D" uid="uid://dvjddhwwm7ijb" path="res://assets/images/battle_prepare_new/background/bg_battle_prepare_garden.png" id="bg"]
-[ext_resource type="Texture2D" uid="uid://cbjn1tgxp8jgt" path="res://assets/images/battle_prepare_new/ui/fx_leaf_cluster_a.png" id="fx_sparkles"]
-[ext_resource type="Texture2D" uid="uid://c280xukf15hi8" path="res://assets/images/battle_prepare_new/ui/ui_prepare_header.png" id="header"]
-[ext_resource type="Texture2D" uid="uid://vevgwefd4xem" path="res://assets/images/battle_prepare_new/ui/ui_power_panel.png" id="power_panel"]
-[ext_resource type="Texture2D" uid="uid://dnsjcm4cpmwcl" path="res://assets/images/battle_prepare_new/ui/ui_reward_panel.png" id="reward_panel"]
-[ext_resource type="Texture2D" uid="uid://c8y0rpgb2rabt" path="res://assets/images/battle_prepare_new/ui/ui_reward_slot.png" id="reward_slot"]
+[ext_resource type="Texture2D" uid="uid://dt6wfqinj0dl4" path="res://assets/images/ui/buttons/battle_prepare_new_ui_back_button.png" id="back"]
+[ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png" id="back_arrow"]
+[ext_resource type="Texture2D" uid="uid://dvjddhwwm7ijb" path="res://assets/images/ui/backgrounds/battle_prepare_new_bg_battle_prepare_garden.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://cbjn1tgxp8jgt" path="res://assets/images/effects/battle_prepare_new_fx_leaf_cluster_a.png" id="fx_sparkles"]
+[ext_resource type="Texture2D" uid="uid://c280xukf15hi8" path="res://assets/images/ui/bars/battle_prepare_new_ui_prepare_header.png" id="header"]
+[ext_resource type="Texture2D" uid="uid://vevgwefd4xem" path="res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png" id="power_panel"]
+[ext_resource type="Texture2D" uid="uid://dnsjcm4cpmwcl" path="res://assets/images/ui/panels/battle_prepare_new_ui_reward_panel.png" id="reward_panel"]
+[ext_resource type="Texture2D" uid="uid://c8y0rpgb2rabt" path="res://assets/images/ui/slots/battle_prepare_new_ui_reward_slot.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://4sa0f7ilpgt3" path="res://src/ui/scene/scene_battle_prepare_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://djpjofcvb55lq" path="res://assets/images/battle_prepare_new/ui/ui_start_button.png" id="start_button"]
-[ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/battle_prepare_new/ui/ui_mechanic_panel.png" id="synergy_panel"]
-[ext_resource type="Texture2D" uid="uid://cbuoorml6pq8o" path="res://assets/images/battle_prepare_new/ui/ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" uid="uid://djpjofcvb55lq" path="res://assets/images/ui/buttons/battle_prepare_new_ui_start_button.png" id="start_button"]
+[ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png" id="synergy_panel"]
+[ext_resource type="Texture2D" uid="uid://cbuoorml6pq8o" path="res://assets/images/ui/cards/battle_prepare_new_ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="currency_chip"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="gold_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="diamond_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/effects/ranch_fx_social_heart.png" id="heart_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_plus_v3.png" id="plus_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_sword_cross.png" id="sword_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/gems/stage_icon_gem_fire.png" id="element_fire"]
 
 [node name="BattlePrepareGui" type="Control" unique_id=526108190]
 clip_contents = true
@@ -133,12 +140,183 @@ texture = ExtResource("fx_sparkles")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="TopResourceBar" type="Control" parent="."]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 50.0
+mouse_filter = 2
+
+[node name="GoldChip" type="Control" parent="TopResourceBar"]
+layout_mode = 0
+offset_left = 54.0
+offset_top = 10.0
+offset_right = 148.0
+offset_bottom = 42.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="TopResourceBar/GoldChip"]
+layout_mode = 0
+offset_right = 94.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("currency_chip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="TopResourceBar/GoldChip"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("gold_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="TopResourceBar/GoldChip"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 3.0
+offset_right = 71.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "12,350"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="TopResourceBar/GoldChip"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 4.0
+offset_right = 91.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("plus_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DiamondChip" type="Control" parent="TopResourceBar"]
+layout_mode = 0
+offset_left = 154.0
+offset_top = 10.0
+offset_right = 238.0
+offset_bottom = 42.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="TopResourceBar/DiamondChip"]
+layout_mode = 0
+offset_right = 84.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("currency_chip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="TopResourceBar/DiamondChip"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("diamond_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="TopResourceBar/DiamondChip"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 3.0
+offset_right = 61.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "2,548"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="TopResourceBar/DiamondChip"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 4.0
+offset_right = 81.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("plus_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeartChip" type="Control" parent="TopResourceBar"]
+layout_mode = 0
+offset_left = 244.0
+offset_top = 10.0
+offset_right = 326.0
+offset_bottom = 42.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="TopResourceBar/HeartChip"]
+layout_mode = 0
+offset_right = 82.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("currency_chip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="TopResourceBar/HeartChip"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 4.0
+offset_right = 29.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("heart_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="TopResourceBar/HeartChip"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 3.0
+offset_right = 59.0
+offset_bottom = 29.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "5  满"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="TextureRect" parent="TopResourceBar/HeartChip"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 4.0
+offset_right = 79.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("plus_icon")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="EnemyPanel" type="Control" parent="." unique_id=1869854644]
 anchors_preset = 0
 offset_left = 15.0
 offset_top = 84.0
 offset_right = 360.0
 offset_bottom = 210.0
+
+[node name="Bg" type="Panel" parent="EnemyPanel"]
+layout_mode = 0
+offset_right = 323.0
+offset_bottom = 158.0
+mouse_filter = 2
 
 [node name="Frame" type="TextureRect" parent="EnemyPanel" unique_id=1283074702]
 visible = false
@@ -161,6 +339,63 @@ theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 12
 text = "敌方信息"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ElementPill" type="Panel" parent="EnemyPanel"]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 76.0
+offset_right = 103.0
+offset_bottom = 103.0
+mouse_filter = 2
+
+[node name="ElementIcon" type="TextureRect" parent="EnemyPanel"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 78.0
+offset_right = 49.0
+offset_bottom = 100.0
+mouse_filter = 2
+texture = ExtResource("element_fire")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ElementText" type="Label" parent="EnemyPanel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 78.0
+offset_right = 95.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "火系"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PowerIcon" type="TextureRect" parent="EnemyPanel"]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 112.0
+offset_right = 48.0
+offset_bottom = 139.0
+mouse_filter = 2
+texture = ExtResource("sword_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PowerCaption" type="Label" parent="EnemyPanel"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 111.0
+offset_right = 122.0
+offset_bottom = 129.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 11
+text = "敌方战力"
 vertical_alignment = 1
 
 [node name="Cards" type="Control" parent="EnemyPanel" unique_id=736365846]
@@ -446,6 +681,12 @@ offset_top = 218.0
 offset_right = 360.0
 offset_bottom = 275.0
 
+[node name="Bg" type="Panel" parent="PowerPanel"]
+layout_mode = 0
+offset_right = 325.0
+offset_bottom = 74.0
+mouse_filter = 2
+
 [node name="Frame" type="TextureRect" parent="PowerPanel" unique_id=1843051713]
 layout_mode = 0
 offset_left = -19.0
@@ -531,6 +772,13 @@ offset_left = 15.0
 offset_top = 286.0
 offset_right = 360.0
 offset_bottom = 425.0
+
+[node name="Bg" type="Panel" parent="TeamPanel"]
+layout_mode = 0
+offset_top = 18.0
+offset_right = 335.0
+offset_bottom = 139.0
+mouse_filter = 2
 
 [node name="Frame" type="TextureRect" parent="TeamPanel" unique_id=1550701726]
 visible = false
@@ -950,6 +1198,12 @@ offset_left = 15.0
 offset_top = 546.0
 offset_right = 360.0
 offset_bottom = 585.0
+
+[node name="Bg" type="Panel" parent="RewardPreview"]
+layout_mode = 0
+offset_right = 319.0
+offset_bottom = 86.0
+mouse_filter = 2
 
 [node name="Frame" type="TextureRect" parent="RewardPreview" unique_id=1563906241]
 layout_mode = 0

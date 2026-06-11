@@ -1,24 +1,24 @@
 # scene_ranch_gui.gd - 可在 Godot 编辑器中调整的精灵牧场界面控制器
 # 玩法与存档逻辑沿用 SceneRanch；此脚本仅将动态数据绑定到 .tscn 节点。
 class_name SceneRanchGui
-extends "res://src/ui/scene/scene_ranch.gd"
+extends "res://src/ui/controllers/ranch_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const PAGE_BACKGROUNDS := {
-	"ranch": "res://assets/images/ranch_optimized/bg_ranch_pasture_750.png",
-	"classroom": "res://assets/images/ranch_optimized/bg_pet_academy_750.png",
-	"social": "res://assets/images/ranch_optimized/bg_social_meadow_yard_750.png",
+	"ranch": "res://assets/images/ui/backgrounds/ranch_optimized_bg_ranch_pasture_750.png",
+	"classroom": "res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png",
+	"social": "res://assets/images/ui/backgrounds/ranch_optimized_bg_social_meadow_yard_750.png",
 }
 const SOCIAL_PLACE_BACKGROUNDS := {
-	"meadow_yard": "res://assets/images/ranch_optimized/bg_social_meadow_yard_750.png",
-	"sunny_yard": "res://assets/images/ranch_optimized/bg_social_sunny_yard_750.png",
-	"quiet_pond": "res://assets/images/ranch_optimized/bg_social_quiet_pond_750.png",
+	"meadow_yard": "res://assets/images/ui/backgrounds/ranch_optimized_bg_social_meadow_yard_750.png",
+	"sunny_yard": "res://assets/images/ui/backgrounds/ranch_optimized_bg_social_sunny_yard_750.png",
+	"quiet_pond": "res://assets/images/ui/backgrounds/ranch_optimized_bg_social_quiet_pond_750.png",
 }
 const LOBBY_ASSETS := {
-	"currency": "res://assets/images/main/lobby_refresh/ui_currency_capsule_v3.png",
-	"gold": "res://assets/images/main/lobby_refresh/icon_gold_coin_v3.png",
-	"gems": "res://assets/images/main/lobby_refresh/icon_diamond_gem_v3.png",
-	"plus": "res://assets/images/main/lobby_refresh/icon_plus_v3.png",
+	"currency": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
+	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
+	"gems": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
+	"plus": "res://assets/images/ui/icons/main_icon_plus_v3.png",
 }
 const RANCH_CARD_PATHS := [
 	"Pages/RanchPage/RosterPanel/Card1",
@@ -523,7 +523,7 @@ func _social_background_path() -> String:
 
 func _evolution_stone_icon_path(item_id: String) -> String:
 	var element := item_id.trim_prefix("evolution_stone_")
-	var path := "res://assets/images/items_new/icon_evolution_stone_%s.png" % element
+	var path := "res://assets/images/ui/gems/items_new_icon_evolution_stone_%s.png" % element
 	return path if ResourceLoader.exists(path) else RANCH_ASSETS["exp"]
 
 func _sync_classroom_page() -> void:
@@ -553,7 +553,7 @@ func _sync_classroom_page() -> void:
 		var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
 		var target_name := str(target.get("name", "最终形态")) if not target.is_empty() else "最终形态"
 		var level := int(instance.get("level", 1))
-		var target_stats := StatCalculator.calc(target_id, level, str(instance.get("nature", ""))) if not target_id.is_empty() else {}
+		var target_stats := StatCalculator.calc_with_tier(target_id, level, str(instance.get("nature", "")), StatCalculator.EnemyTier.ELITE if bool(instance.get("isElite", MonsterDb.MONSTER_DB.get(target_id, {}).get("isElite", false))) else StatCalculator.EnemyTier.NORMAL) if not target_id.is_empty() else {}
 		var required_level := int(info.get("required_level", 1))
 		var item_count := int(info.get("item_count", 0))
 		var required_item := str(info.get("required_item", ""))
@@ -564,7 +564,7 @@ func _sync_classroom_page() -> void:
 		portrait.texture = _portrait_texture(instance_id)
 		target_portrait.texture = _monster_portrait_texture(target_id)
 		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
-		(panel.get_node("Name") as Label).text = str(monster.get("name", monster_id))
+		(panel.get_node("Name") as Label).text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", monster_id))]
 		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [level, _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
 		(panel.get_node("TargetName") as Label).text = target_name
 		(panel.get_node("TargetLevel") as Label).text = "进化后 · Lv.%d" % level if not target.is_empty() else "已是最终形态"
@@ -682,7 +682,7 @@ func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary)
 	var monster := MonsterDb.get_monster(str(instance.get("monsterId", "")))
 	portrait.visible = true
 	portrait.texture = _portrait_texture(instance_id)
-	name_label.text = str(monster.get("name", ""))
+	name_label.text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))]
 	detail_label.text = "%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))]
 
 func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
@@ -712,7 +712,7 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 	var instance := _get_instance(instance_id)
 	_set_texture(card.get_node("Frame") as TextureRect, _tex(RANCH_ASSETS["roster_card_selected" if selected else "roster_card"]))
 	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
-	_set_text(card.get_node("Name") as Label, str(monster.get("name", "")))
+	_set_text(card.get_node("Name") as Label, "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))])
 	var detail := "Lv.%d" % _get_monster_level(instance_id)
 	if context != "ranch":
 		var element: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
@@ -775,13 +775,20 @@ func _monster_portrait_texture(monster_id: String) -> Texture2D:
 func _portrait_path(monster_id: String) -> String:
 	if _portrait_path_cache.has(monster_id):
 		return str(_portrait_path_cache[monster_id])
-	var album_path := "res://assets/images/album/portraits/%s_album_thumb.png" % monster_id
+	var album_path := _album_portrait_path(monster_id)
 	if ResourceLoader.exists(album_path):
 		_portrait_path_cache[monster_id] = album_path
 		return album_path
 	var fallback := MonsterArtDBScript.get_art_path(monster_id, "ranch")
 	_portrait_path_cache[monster_id] = fallback
 	return fallback
+
+func _album_portrait_path(monster_id: String) -> String:
+	if monster_id.begins_with("monster_boss_"):
+		return "res://assets/images/monsters/boss/%s_album_thumb.png" % monster_id
+	if monster_id.begins_with("enemy_"):
+		return "res://assets/images/monsters/enemy/%s_album_thumb.png" % monster_id
+	return "res://assets/images/monsters/monster/%s_album_thumb.png" % monster_id
 
 func _button_label(button: TextureButton) -> Label:
 	return button.get_node("Text") as Label

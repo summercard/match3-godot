@@ -1,7 +1,10 @@
 # scene_stage_select_gui.gd - 可在 Godot 编辑器中逐章调整的章节大地图界面
 # 数据、解锁与扫荡规则沿用 SceneStageSelect；每个大章使用独立的 .tscn 地图文件。
 class_name SceneStageSelectGui
-extends "res://src/ui/scene/scene_stage_select.gd"
+extends "res://src/ui/controllers/stage_select_logic.gd"
+
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const AnimationHelperScript := preload("res://src/engine/animation_player.gd")
 
 const CHAPTER_MAP_NODES := {
 	"chapter_1": "MapScroll/ChapterMaps/Chapter01Grassland",
@@ -25,9 +28,9 @@ const DOT_PATHS := [
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.75, 0.88)
 const MAP_SCROLL_DRAG_THRESHOLD: float = 8.0
-const DEFAULT_STAR_LIT_PATH := "res://assets/images/stage/icon_star_lit.png"
-const DEFAULT_STAR_DIM_PATH := "res://assets/images/stage/icon_star_lit.png"
-const CHAPTER_01_STAR_PATH := "res://assets/images/stage/chapter_01_new/star_gold_new.png"
+const DEFAULT_STAR_LIT_PATH := "res://assets/images/ui/icons/stage_icon_star_lit.png"
+const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/stage_icon_star_lit.png"
+const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 
 var _chapter_map: Control = null
 var _chapter_map_id: String = ""
@@ -43,6 +46,15 @@ var _scroll_dragging: bool = false
 var _scroll_start_pos: Vector2 = Vector2.ZERO
 var _scroll_last_pos: Vector2 = Vector2.ZERO
 var _scroll_ignore_tap_once: bool = false
+var _shade_visible_state := false
+var _sweep_dialog_anim_state := false
+var _sweep_result_anim_state := false
+var _anim: AnimationHelper = null
+
+func _get_anim() -> AnimationHelper:
+	if _anim == null:
+		_anim = get_node_or_null("/root/AnimationHelper") as AnimationHelper
+	return _anim
 
 func _ready() -> void:
 	super._ready()
@@ -99,10 +111,24 @@ func _connect_shell_actions() -> void:
 	var shade := get_node("PopupLayer/Shade") as ColorRect
 	if not shade.gui_input.is_connected(_on_popup_shade_input):
 		shade.gui_input.connect(_on_popup_shade_input)
+	_attach_button_feedback(_back_btn, CartoonButtonFeedback.Profile.ICON)
+	_attach_button_feedback(_bottom_prev_map_btn, CartoonButtonFeedback.Profile.NAV, false)
+	_attach_button_feedback(_bottom_return_btn, CartoonButtonFeedback.Profile.ENTRY)
+	_attach_button_feedback(_bottom_next_map_btn, CartoonButtonFeedback.Profile.NAV, false)
+	_attach_button_feedback(_sweep_confirm_btn, CartoonButtonFeedback.Profile.PRIMARY)
+	_attach_button_feedback(_sweep_cancel_btn, CartoonButtonFeedback.Profile.NAV, false)
 
 func _connect_button(button: BaseButton, action: Callable) -> void:
 	if not button.pressed.is_connected(action):
 		button.pressed.connect(action)
+
+func _attach_button_feedback(button: BaseButton, profile: int, burst_enabled: bool = true) -> void:
+	if button == null or button.has_node("CartoonFeedback"):
+		return
+	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
+	button.add_child(feedback)
+	feedback.setup(button, profile)
+	feedback.set_burst_enabled(burst_enabled)
 
 func _gui_input(_event: InputEvent) -> void:
 	# The editable chapter map buttons own all touch input.
@@ -201,11 +227,22 @@ func _update_chapter_buttons() -> void:
 		_bottom_next_map_btn.modulate.a = 0.48 if _bottom_next_map_btn.disabled else 1.0
 
 func _update_page_dots() -> void:
+	var anim := _get_anim()
 	for i in DOT_PATHS.size():
 		var dot := get_node(DOT_PATHS[i]) as ColorRect
 		dot.visible = i < _chapters.size()
-		dot.color = Color(1.0, 0.82, 0.18, 1.0) if i == _current_chapter_index else Color(1.0, 1.0, 1.0, 0.34)
-		dot.size = Vector2(10.0, 6.0) if i == _current_chapter_index else Vector2(5.0, 5.0)
+		var target_color: Color = Color(1.0, 0.82, 0.18, 1.0) if i == _current_chapter_index else Color(1.0, 1.0, 1.0, 0.34)
+		var target_size: Vector2 = Vector2(10.0, 6.0) if i == _current_chapter_index else Vector2(5.0, 5.0)
+		if dot.color != target_color:
+			if anim != null:
+				anim.tween_property(dot, "color", dot.color, target_color, 0.25, "ease_out")
+			else:
+				dot.color = target_color
+		if dot.size != target_size:
+			if anim != null:
+				anim.tween_property(dot, "size", dot.size, target_size, 0.25, "ease_out")
+			else:
+				dot.size = target_size
 
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("MapScroll/ChapterMaps"):
@@ -284,6 +321,12 @@ func _connect_chapter_map_actions() -> void:
 	var boss_button := _boss_button()
 	if boss_button != null:
 		_connect_button(boss_button, _on_boss_pressed)
+	for stage_button in _stage_buttons():
+		_attach_button_feedback(stage_button, CartoonButtonFeedback.Profile.NAV, false)
+		_attach_button_feedback(stage_button.get_node_or_null("SweepButton") as BaseButton, CartoonButtonFeedback.Profile.ICON, false)
+	var boss := _boss_button()
+	if boss != null:
+		_attach_button_feedback(boss, CartoonButtonFeedback.Profile.ENTRY, false)
 
 func _stage_buttons() -> Array[TextureButton]:
 	var result: Array[TextureButton] = []
@@ -414,6 +457,47 @@ func _update_sweep_animation(delta: float) -> void:
 	_sync_popup_visibility()
 
 func _sync_popup_visibility() -> void:
-	(get_node("PopupLayer/Shade") as ColorRect).visible = _sweep_dialog_active or _sweep_anim_active
-	_sweep_dialog.visible = _sweep_dialog_active
-	_sweep_anim_overlay.visible = _sweep_anim_active
+	var shade := get_node("PopupLayer/Shade") as ColorRect
+	var want_shade := _sweep_dialog_active or _sweep_anim_active
+	var want_dialog := _sweep_dialog_active
+	var want_result := _sweep_anim_active
+	var anim := _get_anim()
+
+	if want_shade and not _shade_visible_state:
+		_shade_visible_state = true
+		shade.visible = true
+		if anim != null:
+			shade.modulate.a = 0.0
+			anim.tween_property(shade, "modulate:a", 0.0, 0.48, 0.25, "ease_out")
+		else:
+			shade.modulate.a = 0.48
+	elif not want_shade and _shade_visible_state:
+		_shade_visible_state = false
+		shade.visible = false
+		shade.modulate.a = 0.0
+
+	if want_dialog and not _sweep_dialog_anim_state:
+		_sweep_dialog_anim_state = true
+		if anim != null:
+			anim.pop_in(_sweep_dialog, 0.28)
+		else:
+			_sweep_dialog.visible = true
+	elif not want_dialog and _sweep_dialog_anim_state:
+		_sweep_dialog_anim_state = false
+		if anim != null and _sweep_dialog.visible:
+			anim.pop_out(_sweep_dialog, 0.18)
+		else:
+			_sweep_dialog.visible = false
+
+	if want_result and not _sweep_result_anim_state:
+		_sweep_result_anim_state = true
+		if anim != null:
+			anim.pop_in(_sweep_anim_overlay, 0.30)
+		else:
+			_sweep_anim_overlay.visible = true
+	elif not want_result and _sweep_result_anim_state:
+		_sweep_result_anim_state = false
+		if anim != null and _sweep_anim_overlay.visible:
+			anim.pop_out(_sweep_anim_overlay, 0.20)
+		else:
+			_sweep_anim_overlay.visible = false

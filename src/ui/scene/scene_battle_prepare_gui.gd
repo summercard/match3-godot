@@ -1,6 +1,6 @@
 # scene_battle_prepare_gui.gd - 可在 Godot 编辑器中调整的战斗准备界面
 class_name SceneBattlePrepareGui
-extends "res://src/ui/scene/scene_battle_prepare.gd"
+extends "res://src/ui/controllers/battle_prepare_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 
@@ -80,6 +80,7 @@ func _attach_button_feedback(button: BaseButton, profile: int) -> void:
 	feedback.setup(button, profile)
 
 func _ensure_concept_nodes() -> void:
+	# 兼容旧场景文件的兜底；新视觉节点应保留在 battle_prepare.tscn 中。
 	if not has_node("TopResourceBar"):
 		var top_bar := Control.new()
 		top_bar.name = "TopResourceBar"
@@ -90,12 +91,14 @@ func _ensure_concept_nodes() -> void:
 		_create_resource_chip(top_bar, "DiamondChip", "diamond")
 		_create_resource_chip(top_bar, "HeartChip", "heart")
 	_create_panel_bg("EnemyPanel", "Bg", _rounded_style(STAGE_PANEL, Color(0.93, 0.62, 0.24, 1.0), 2, 14))
-	if not has_node("EnemyPanel/ElementPill"):
-		var pill := Panel.new()
+	var pill_style := _rounded_style(Color(1.0, 0.92, 0.72, 0.92), Color(0.93, 0.60, 0.25, 1.0), 2, 12)
+	var pill := get_node_or_null("EnemyPanel/ElementPill") as Panel
+	if pill == null:
+		pill = Panel.new()
 		pill.name = "ElementPill"
-		pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		pill.add_theme_stylebox_override("panel", _rounded_style(Color(1.0, 0.92, 0.72, 0.92), Color(0.93, 0.60, 0.25, 1.0), 2, 12))
 		_node("EnemyPanel").add_child(pill)
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill.add_theme_stylebox_override("panel", pill_style)
 	if not has_node("EnemyPanel/ElementText"):
 		var element_text := Label.new()
 		element_text.name = "ElementText"
@@ -131,13 +134,15 @@ func _ensure_concept_nodes() -> void:
 
 func _create_panel_bg(parent_path: NodePath, node_name: String, style: StyleBoxFlat) -> void:
 	var parent := get_node_or_null(parent_path) as Control
-	if parent == null or parent.has_node(node_name):
+	if parent == null:
 		return
-	var bg := Panel.new()
-	bg.name = node_name
+	var bg := parent.get_node_or_null(node_name) as Panel
+	if bg == null:
+		bg = Panel.new()
+		bg.name = node_name
+		parent.add_child(bg)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bg.add_theme_stylebox_override("panel", style)
-	parent.add_child(bg)
 	parent.move_child(bg, 0)
 
 func _create_resource_chip(parent: Control, node_name: String, icon_key: String) -> void:
@@ -459,7 +464,9 @@ func _style_label(path: NodePath, color: Color, outline_color: Color, outline_si
 func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(monster, "team" if is_team else "battle")
-	(card.get_node("Name") as Label).text = str(monster.get("name", "精灵"))
+	# ★ 主人定 2026-06-11：精英宠物/精英怪名字前缀 ★精英
+	var elite_prefix: String = "★精英 " if bool(monster.get("isElite", false)) else ""
+	(card.get_node("Name") as Label).text = "%s%s" % [elite_prefix, str(monster.get("name", "精灵"))]
 	(card.get_node("Level") as Label).text = "Lv.%d" % int(monster.get("level", 1))
 	var power := int(monster.get("power", 0))
 	(card.get_node("Power") as Label).text = "战力 %d" % power if is_team else "%d" % power

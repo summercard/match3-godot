@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d2u36y1wnlpla"]
 
 [ext_resource type="Script" uid="uid://e8d055pley2n" path="res://src/ui/components/battle_hp_bar.gd" id="hp_bar"]
-[ext_resource type="Texture2D" uid="uid://ckj73sky5lin" path="res://assets/images/battle/ui/ui_hp_frame.png" id="hp_frame_base"]
-[ext_resource type="Texture2D" uid="uid://d28scdfx8ucde" path="res://assets/images/battle/ui/ui_hp_frame_overlay.png" id="hp_frame_overlay"]
+[ext_resource type="Texture2D" uid="uid://ckj73sky5lin" path="res://assets/images/ui/bars/battle_ui_hp_frame.png" id="hp_frame_base"]
+[ext_resource type="Texture2D" uid="uid://d28scdfx8ucde" path="res://assets/images/ui/bars/battle_ui_hp_frame_overlay.png" id="hp_frame_overlay"]
 
 [node name="EnemyStageSlot" type="Control" unique_id=1823308843]
 layout_mode = 3

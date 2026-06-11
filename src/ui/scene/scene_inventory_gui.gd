@@ -1,7 +1,7 @@
 # scene_inventory_gui.gd - 可在 Godot 编辑器中调整的背包界面
 # 物品区改为固定分页，不再依赖拖拽滚动。
 class_name SceneInventoryGui
-extends "res://src/ui/scene/scene_inventory.gd"
+extends "res://src/ui/controllers/inventory_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const PAGE_SIZE := 15

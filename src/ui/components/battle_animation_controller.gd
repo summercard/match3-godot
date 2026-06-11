@@ -42,12 +42,13 @@ static func update_combo_popup(combo_popup: Dictionary, dt: float) -> void:
 			combo_popup.clear()
 
 static func update_attack_shake(timer: float, flash_timer: float, dt: float) -> Dictionary:
+	# ★ 主人定 2026-06-11：缩减震动幅度（9→2.4），去掉垂直分量和屏幕白闪
 	if timer <= 0.0:
-		return {"timer": 0.0, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": 0.0}
+		return {"timer": 0.0, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": 0.0, "offset_y": 0.0}
 	timer = maxf(0.0, timer - dt)
 	var shake_speed := TAU / 0.05
-	var offset_x := sin(timer * shake_speed) * 4.0
-	return {"timer": timer, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": offset_x}
+	var offset_x := sin(timer * shake_speed) * 2.4
+	return {"timer": timer, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": offset_x, "offset_y": 0.0}
 
 static func update_hp_display(trackers: Array, dt: float) -> void:
 	for i in range(trackers.size() - 1, -1, -1):

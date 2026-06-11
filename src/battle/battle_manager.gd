@@ -106,17 +106,28 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 			var hp_mult: float = phase1.get("hpMultiplier", 1.0)
 			enemies = phase1.get("enemies", []).map(func(id):
 				# ★ 主人定：敌人每次出现 random 性格（捕获后才知道）
-				var monster = StatCalculator.calc_enemy(id, e_level)
+				#   用 calc_enemy_auto 读 MONSTER_DB.isElite 自动走精英系数
+				var monster = StatCalculator.calc_enemy_auto(id, e_level)
 				if not monster.is_empty() and hp_mult != 1.0:
 					monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 					monster["hp"] = monster["maxHP"]
 					monster["atk"] = int(monster.get("atk", 0) * hp_mult)
+				# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite 给渲染层
+				if not monster.is_empty() and bool(MonsterDb.MONSTER_DB.get(id, {}).get("isElite", false)):
+					monster["_visualScale"] = 1.2
+					monster["isElite"] = true
 				return monster
 			)
 	else:
 		enemies = enemy_monster_ids.map(func(id):
 			# ★ 主人定：敌人每次出现 random 性格
-			return StatCalculator.calc_enemy(id, e_level)
+			#   用 calc_enemy_auto 读 MONSTER_DB.isElite 自动走精英系数
+			var monster = StatCalculator.calc_enemy_auto(id, e_level)
+			# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite 给渲染层
+			if not monster.is_empty() and bool(MonsterDb.MONSTER_DB.get(id, {}).get("isElite", false)):
+				monster["_visualScale"] = 1.2
+				monster["isElite"] = true
+			return monster
 		)
 
 	turn = 0

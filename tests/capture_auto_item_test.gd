@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SceneResultScript = preload("res://src/ui/scene/scene_result.gd")
+const SceneResultScript = preload("res://src/ui/controllers/result_logic.gd")
 
 var _failures: Array[String] = []
 

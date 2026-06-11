@@ -1,6 +1,6 @@
 # scene_result_gui.gd - 可在 Godot 编辑器中调整的战斗结算与捕捉结果界面
 class_name SceneResultGui
-extends "res://src/ui/scene/scene_result.gd"
+extends "res://src/ui/controllers/result_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
@@ -359,7 +359,12 @@ func _on_result_retry_pressed() -> void:
 	_run_after_result_button_feedback(func(): _on_retry_btn_pressed())
 
 func _on_capture_confirm_pressed() -> void:
-	_run_after_capture_button_feedback(func(): _on_back_btn_pressed())
+	_run_after_capture_button_feedback(func():
+		if _is_win and _has_next_stage:
+			_on_next_btn_pressed()
+		else:
+			_on_back_btn_pressed()
+	)
 
 func _on_capture_dex_pressed() -> void:
 	var monster_id := str(_capture_target.get("monsterId", _capture_target.get("id", "")))

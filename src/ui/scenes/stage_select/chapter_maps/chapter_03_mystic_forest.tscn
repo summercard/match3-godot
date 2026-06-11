@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://dpatys4nklud1"]
 
-[ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/stage/icon_path_dot.png" id="11_path"]
-[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/stage/icon_star_dim.png" id="11_star_dim"]
-[ext_resource type="Texture2D" path="res://assets/images/inventory_new/ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" uid="uid://bdl0f7rlost1l" path="res://assets/images/stage/stage_map_bg_chapter_03_mystic_forest.png" id="c03_background"]
-[ext_resource type="Texture2D" uid="uid://cf6vm4ml75m8e" path="res://assets/images/battle/monsters/monster_boss_004_dark.png" id="c03_boss_art"]
-[ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/stage/boss_badge.png" id="c03_boss_platform"]
-[ext_resource type="Texture2D" uid="uid://dxu0kdnkp1h3s" path="res://assets/images/stage/node_crystal.png" id="c03_stage04"]
-[ext_resource type="Texture2D" uid="uid://glsitdt0led0" path="res://assets/images/stage/node_normal.png" id="c03_stage05"]
+[ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
+[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/ui/icons/stage_icon_star_dim.png" id="11_star_dim"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" uid="uid://bdl0f7rlost1l" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_03_mystic_forest.png" id="c03_background"]
+[ext_resource type="Texture2D" uid="uid://cf6vm4ml75m8e" path="res://assets/images/monsters/boss/monster_boss_004_dark.png" id="c03_boss_art"]
+[ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/maps/boss/stage_boss_badge.png" id="c03_boss_platform"]
+[ext_resource type="Texture2D" uid="uid://dxu0kdnkp1h3s" path="res://assets/images/maps/nodes/stage_node_crystal.png" id="c03_stage04"]
+[ext_resource type="Texture2D" uid="uid://glsitdt0led0" path="res://assets/images/maps/nodes/stage_node_normal.png" id="c03_stage05"]
 
 [node name="Chapter03MysticForest" type="Control" unique_id=223268287]
 custom_minimum_size = Vector2(375, 1280)

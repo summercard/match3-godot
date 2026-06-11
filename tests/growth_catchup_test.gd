@@ -1,8 +1,8 @@
 extends SceneTree
 
 const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
-const SceneResultScript = preload("res://src/ui/scene/scene_result.gd")
-const SceneTeamScript = preload("res://src/ui/scene/scene_team.gd")
+const SceneResultScript = preload("res://src/ui/controllers/result_logic.gd")
+const SceneTeamScript = preload("res://src/ui/controllers/team_logic.gd")
 
 var _failures: Array[String] = []
 

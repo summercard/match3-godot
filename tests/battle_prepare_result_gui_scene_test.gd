@@ -111,8 +111,8 @@ func _run() -> void:
 		var button := missed_result.get_node(button_path) as TextureButton
 		var frame := button.get_node("Frame") as TextureRect
 		_expect(button.size.y >= 50.0 and frame.size == button.size, "%s frame should fit its button without cropping" % button_path)
-	_expect((missed_result.get_node("Buttons/NextButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/result_refresh/ui_btn_gold_full.png", "next button should use the completed original-style next texture")
-	_expect((missed_result.get_node("Buttons/RetryButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/result_refresh/ui_btn_blue_full.png", "retry button should use the completed original-style retry texture")
+	_expect((missed_result.get_node("Buttons/NextButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png", "next button should use the completed original-style next texture")
+	_expect((missed_result.get_node("Buttons/RetryButton/Frame") as TextureRect).texture.resource_path == "res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png", "retry button should use the completed original-style retry texture")
 	for star_path in ["StarRow/Star1", "StarRow/Star2", "StarRow/Star3"]:
 		var star := missed_result.get_node(star_path) as TextureRect
 		_expect(star.size.x >= 52.0 and star.size.y >= 56.0, "%s should have enough room for the large star art" % star_path)
