@@ -48,9 +48,17 @@ const INVENTORY_ASSETS := {
 const ITEM_ICON_ASSETS := {
 	"capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
 	"capture_ball_plus": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
+	"capture_ball_elite": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
 	"exp_potion": "res://assets/images/ui/icons/items_new_icon_exp_potion.png",
 	"exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
 	"hp_potion": "res://assets/images/ui/icons/items_new_icon_hp_potion.png",
+	"hp_potion_large": "res://assets/images/ui/icons/items_new_icon_hp_potion.png",
+	"guard_charm": "res://assets/images/ui/gems/items_new_icon_evolution_stone_light.png",
+	"rock_hammer": "res://assets/images/ui/gems/items_new_icon_evolution_stone_earth.png",
+	"rock_hammer_plus": "res://assets/images/ui/gems/items_new_icon_evolution_stone_earth.png",
+	"unlock_key": "res://assets/images/ui/gems/items_new_icon_evolution_stone_thunder.png",
+	"mist_cleanser": "res://assets/images/ui/gems/items_new_icon_evolution_stone_water.png",
+	"focus_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
 	"gold_bag": "res://assets/images/ui/icons/items_new_icon_gold_bag.png",
 	"gold_chest": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"evolution_stone_fire": "res://assets/images/ui/gems/items_new_icon_evolution_stone_fire.png",
@@ -83,6 +91,7 @@ var _player: Dictionary = {}
 var _item_list: Array = []
 var _selected_item: Dictionary = {}
 var _capture_settings: Dictionary = {}
+var _equipped_battle_items: Array = []
 var _toast_text: String = ""
 var _toast_timer: float = 0.0
 var _scroll_offset: float = 0.0
@@ -102,7 +111,8 @@ func init(data: Dictionary = {}) -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
-	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else {"autoCapture": false, "equippedItem": ""}
+	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else {"autoCapture": false, "equippedItem": "", "equippedBattleItems": []}
+	_equipped_battle_items = _load_equipped_battle_items()
 	_active_tab = data.get("tab", "all")
 	_selected_item = {}
 	_toast_text = ""
@@ -242,6 +252,15 @@ func _use_item(item_id: String) -> void:
 			else:
 				_show_toast("捕捉球可在战斗中选择")
 		"battle":
+			_toggle_battle_item_equip(item_id)
+			_inventory = _storage.load_inventory() if _storage else {}
+			_player = _storage.load_player() if _storage else {}
+			_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else _capture_settings
+			_equipped_battle_items = _load_equipped_battle_items()
+			_build_item_list()
+			_scroll_offset = minf(_scroll_offset, _get_max_scroll_offset())
+			queue_redraw()
+			return
 			_show_toast("战斗道具请在战斗中使用")
 		"evolution":
 			_show_toast("进化石请在精灵进化中使用")
@@ -250,9 +269,69 @@ func _use_item(item_id: String) -> void:
 	_inventory = _storage.load_inventory() if _storage else {}
 	_player = _storage.load_player() if _storage else {}
 	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else _capture_settings
+	_equipped_battle_items = _load_equipped_battle_items()
 	_build_item_list()
 	_scroll_offset = minf(_scroll_offset, _get_max_scroll_offset())
 	queue_redraw()
+
+
+func _load_equipped_battle_items() -> Array:
+	var result: Array = []
+	var source: Array = _capture_settings.get("equippedBattleItems", [])
+	var inventory: Dictionary = _inventory
+	for value in source:
+		var item_id := str(value)
+		if result.size() >= 3:
+			break
+		if item_id.is_empty() or item_id in result:
+			continue
+		if int(inventory.get(item_id, 0)) <= 0:
+			continue
+		var item_data: Dictionary = ItemDB.get_item(item_id)
+		if str(item_data.get("type", "")) != "battle":
+			continue
+		result.append(item_id)
+	return result
+
+
+func _toggle_battle_item_equip(item_id: String) -> void:
+	if item_id.is_empty() or not _storage or not _storage.has_method("save_capture_settings"):
+		return
+	var item_data: Dictionary = ItemDB.get_item(item_id)
+	if str(item_data.get("type", "")) != "battle":
+		return
+	if item_id in _equipped_battle_items:
+		_equipped_battle_items.erase(item_id)
+		_show_toast("已卸下 %s" % str(item_data.get("name", "道具")))
+	else:
+		if _equipped_battle_items.size() >= 3:
+			_equipped_battle_items.remove_at(0)
+		_equipped_battle_items.append(item_id)
+		_show_toast("已装备 %s" % str(item_data.get("name", "道具")))
+	_capture_settings["equippedBattleItems"] = _equipped_battle_items.duplicate()
+	_storage.save_capture_settings(_capture_settings)
+
+
+func _equip_battle_item_to_slot(item_id: String, slot_idx: int) -> void:
+	if item_id.is_empty() or slot_idx < 0 or slot_idx >= 3 or not _storage or not _storage.has_method("save_capture_settings"):
+		return
+	var item_data: Dictionary = ItemDB.get_item(item_id)
+	if str(item_data.get("type", "")) != "battle":
+		return
+	if item_id in _equipped_battle_items:
+		_equipped_battle_items.erase(item_id)
+	while _equipped_battle_items.size() <= slot_idx:
+		_equipped_battle_items.append("")
+	_equipped_battle_items[slot_idx] = item_id
+	var compact: Array = []
+	for value in _equipped_battle_items:
+		var equipped_id := str(value)
+		if not equipped_id.is_empty() and not compact.has(equipped_id):
+			compact.append(equipped_id)
+	_equipped_battle_items = compact
+	_capture_settings["equippedBattleItems"] = _equipped_battle_items.duplicate()
+	_storage.save_capture_settings(_capture_settings)
+	_show_toast("已装备 %s" % str(item_data.get("name", "道具")))
 
 
 func _show_toast(text: String) -> void:

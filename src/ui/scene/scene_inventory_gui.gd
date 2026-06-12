@@ -38,6 +38,11 @@ const TAB_PATHS := [
 	"Tabs/Materials",
 	"Tabs/Gems",
 ]
+const BATTLE_SLOT_PATHS := [
+	"DetailPanel/BattleSlots/Slot1",
+	"DetailPanel/BattleSlots/Slot2",
+	"DetailPanel/BattleSlots/Slot3",
+]
 
 var _inventory_page := 0
 
@@ -75,6 +80,8 @@ func _connect_gui_actions() -> void:
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(str(TABS[i].get("id", "all"))))
 	for i in SLOT_PATHS.size():
 		_connect_button(SLOT_PATHS[i], _on_slot_pressed.bind(i))
+	for i in BATTLE_SLOT_PATHS.size():
+		_connect_button(BATTLE_SLOT_PATHS[i], _on_battle_slot_pressed.bind(i))
 	_connect_button("GridPanel/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("GridPanel/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("DetailPanel/UseButton", _on_use_pressed)
@@ -110,6 +117,18 @@ func _on_next_page_pressed() -> void:
 	_inventory_page = mini(_max_inventory_page(), _inventory_page + 1)
 	_sync_gui()
 
+func _on_battle_slot_pressed(slot_idx: int) -> void:
+	if _selected_item.is_empty():
+		return
+	var item_id := str(_selected_item.get("id", ""))
+	var item_data: Dictionary = _selected_item.get("data", {})
+	if str(item_data.get("type", "")) != "battle":
+		return
+	_equip_battle_item_to_slot(item_id, slot_idx)
+	_capture_settings = _storage.load_capture_settings() if _storage and _storage.has_method("load_capture_settings") else _capture_settings
+	_equipped_battle_items = _load_equipped_battle_items()
+	_sync_gui()
+
 func _on_use_pressed() -> void:
 	if _selected_item.is_empty():
 		return
@@ -137,6 +156,7 @@ func _sync_gui() -> void:
 	_sync_grid()
 	_sync_page_controls()
 	_sync_detail()
+	_sync_battle_slots()
 	_sync_toast()
 	_maybe_play_entry()
 
@@ -228,6 +248,7 @@ func _sync_detail() -> void:
 	var item_id := str(_selected_item.get("id", ""))
 	var item_type := str(item_data.get("type", ""))
 	var equipped := item_type == "capture" and str(_capture_settings.get("equippedItem", "")) == item_id
+	var battle_equipped := item_type == "battle" and item_id in _equipped_battle_items
 	(get_node("DetailPanel/Content/IconFrame/Icon") as TextureRect).texture = _get_item_texture(item_id)
 	_label("DetailPanel/Content/IconFrame/Rarity").text = _rarity_label(int(item_data.get("rarity", 1)))
 	_label("DetailPanel/Content/Name").text = str(item_data.get("name", ""))
@@ -239,6 +260,29 @@ func _sync_detail() -> void:
 	use_button.disabled = false
 	use_button.modulate.a = 1.0
 	_label("DetailPanel/UseButton/Text").text = "装备" if item_type == "capture" and not equipped else ("已装备" if item_type == "capture" else "使用")
+
+	if item_type == "capture":
+		_label("DetailPanel/Content/EquipState").text = "捕获球 %s" % ("已激活" if equipped else "未激活")
+		_label("DetailPanel/UseButton/Text").text = "已激活" if equipped else "激活"
+	elif item_type == "battle":
+		_label("DetailPanel/Content/EquipState").text = "战斗槽 %s" % ("已装备" if battle_equipped else "%d/3" % _equipped_battle_items.size())
+		_label("DetailPanel/UseButton/Text").text = "卸下" if battle_equipped else "装备"
+	else:
+		_label("DetailPanel/Content/EquipState").text = ""
+		_label("DetailPanel/UseButton/Text").text = "使用"
+
+func _sync_battle_slots() -> void:
+	if not has_node("DetailPanel/BattleSlots"):
+		return
+	_label("DetailPanel/BattleSlots/Title").text = "战斗道具"
+	for i in BATTLE_SLOT_PATHS.size():
+		var path: String = str(BATTLE_SLOT_PATHS[i])
+		var slot := get_node(path) as TextureButton
+		var item_id := str(_equipped_battle_items[i]) if i < _equipped_battle_items.size() else ""
+		var selected := not _selected_item.is_empty() and item_id == str(_selected_item.get("id", ""))
+		(slot.get_node("Frame") as TextureRect).texture = _tex("slot_selected" if selected else "slot")
+		(slot.get_node("Icon") as TextureRect).texture = _get_item_texture(item_id) if not item_id.is_empty() else null
+		(slot.get_node("Index") as Label).text = str(i + 1) if item_id.is_empty() else ""
 
 func _sync_toast() -> void:
 	var toast := _node("Toast")
@@ -280,6 +324,8 @@ func _attach_inventory_feedback() -> void:
 		"DetailPanel/UseButton",
 	]
 	for path in SLOT_PATHS:
+		paths.append(path)
+	for path in BATTLE_SLOT_PATHS:
 		paths.append(path)
 	for path in paths:
 		var button := get_node_or_null(path) as BaseButton

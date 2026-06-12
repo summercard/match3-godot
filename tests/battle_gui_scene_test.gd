@@ -30,16 +30,30 @@ func _run() -> void:
 		"Combatants/Players/Player1/HpBar",
 		"Combatants/Players/Player1/HpFrameBase",
 		"BottomControls/CaptureToggle/Image",
+		"BottomControls/Item1/Base",
 		"BottomControls/Item1/Icon",
+		"BottomControls/Item2/Base",
+		"BottomControls/Item2/Icon",
+		"BottomControls/Item3/Base",
+		"BottomControls/Item3/Icon",
+		"BottomControls/Item4/Base",
+		"BottomControls/Item4/Icon",
+		"BottomControls/Item5/Base",
+		"BottomControls/Item5/Icon",
+		"ItemConfirmLayer/Panel/CancelButton",
+		"ItemConfirmLayer/Panel/UseButton",
 	]:
 		_expect(battle.has_node(path), "battle GUI node should exist: %s" % path)
+	_expect((battle.get_node("BottomControls/Item1") as Control).visible, "first capture ball slot should remain visible")
+	_expect((battle.get_node("BottomControls/Item2") as Control).visible, "second capture ball slot should remain visible")
+	_expect((battle.get_node("BottomControls/Item5") as Control).visible, "third active item slot should remain visible")
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
 
 	main.switch_scene("battle", {
-		"stageId": "stage_3_3",
-		"stageData": stage_db.get_stage("stage_3_3"),
+		"stageId": "stage_3_6",
+		"stageData": stage_db.get_stage("stage_3_6"),
 		"inputTestOnly": true,
 	})
 	await process_frame

@@ -13,14 +13,19 @@ const PLAYER_PATHS := [
 	"Combatants/Players/Player3",
 ]
 const ITEM_PATHS := [
+	"BottomControls/Item3",
+	"BottomControls/Item4",
+	"BottomControls/Item5",
+]
+const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item1",
 	"BottomControls/Item2",
-	"BottomControls/Item3",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
 
 func _ready() -> void:
 	super._ready()
+	_connect_item_confirm_buttons()
 	_portrait_defeat_ghost_cache.clear()
 	_portrait_base_scale_cache.clear()
 	_portrait_base_global_center_cache.clear()
@@ -45,6 +50,15 @@ func _sync_gui() -> void:
 	_sync_enemy_slots()
 	_sync_player_slots()
 	_sync_bottom_controls()
+	_sync_item_confirm_popup()
+
+func _connect_item_confirm_buttons() -> void:
+	var cancel := get_node_or_null("ItemConfirmLayer/Panel/CancelButton") as BaseButton
+	if cancel != null and not cancel.pressed.is_connected(_cancel_hotbar_item_confirm):
+		cancel.pressed.connect(_cancel_hotbar_item_confirm)
+	var confirm := get_node_or_null("ItemConfirmLayer/Panel/UseButton") as BaseButton
+	if confirm != null and not confirm.pressed.is_connected(_confirm_hotbar_item_use):
+		confirm.pressed.connect(_confirm_hotbar_item_use)
 
 func _sync_top_hud() -> void:
 	_label("TopHud/TurnBadge/Value").text = "%d/%d" % [_battle.turn_count, _battle.max_turns]
@@ -128,11 +142,17 @@ func _sync_bottom_controls() -> void:
 	var toggle_key := "capture_toggle_on" if _auto_capture_enabled else "capture_toggle_off"
 	_texture("BottomControls/CaptureToggle/Image").texture = _get_texture(BATTLE_UI_ASSETS[toggle_key])
 	_label("BottomControls/CaptureToggle/Badge").text = "开" if _auto_capture_enabled else "关"
+	_sync_capture_item_slots()
 	for i in ITEM_PATHS.size():
 		var slot := _control(ITEM_PATHS[i])
 		var item: Dictionary = _hotbar_items[i] if i < _hotbar_items.size() else {}
 		var has_item := not item.is_empty() and int(item.get("count", 0)) > 0
-		slot.visible = has_item
+		slot.visible = true
+		if slot.has_node("Base"):
+			(slot.get_node("Base") as TextureRect).modulate.a = 1.0 if has_item else 0.72
+		_texture("%s/Icon" % ITEM_PATHS[i]).texture = null
+		_texture("%s/Selection" % ITEM_PATHS[i]).visible = false
+		_label("%s/Badge" % ITEM_PATHS[i]).visible = false
 		if not has_item:
 			continue
 		var item_id := str(item.get("id", ""))
@@ -143,10 +163,56 @@ func _sync_bottom_controls() -> void:
 		badge.visible = count > 1
 		badge.text = str(count)
 
+func _sync_capture_item_slots() -> void:
+	for i in CAPTURE_ITEM_PATHS.size():
+		var path: String = str(CAPTURE_ITEM_PATHS[i])
+		var slot := _control(path)
+		var item: Dictionary = _capture_slot_items[i] if i < _capture_slot_items.size() else {}
+		var has_item := not item.is_empty() and int(item.get("count", 0)) > 0
+		slot.visible = true
+		if slot.has_node("Base"):
+			(slot.get_node("Base") as TextureRect).modulate.a = 1.0 if has_item else 0.72
+		_texture("%s/Icon" % path).texture = null
+		_texture("%s/Selection" % path).visible = false
+		_label("%s/Badge" % path).visible = false
+		if not has_item:
+			continue
+		var item_id := str(item.get("id", ""))
+		_texture("%s/Icon" % path).texture = _get_texture(_item_icon_asset_path(item_id))
+		_texture("%s/Selection" % path).visible = item_id == _equipped_capture_item_id
+		var count := int(item.get("count", 0))
+		var badge := _label("%s/Badge" % path)
+		badge.visible = count > 1
+		badge.text = str(count)
+
+func _sync_item_confirm_popup() -> void:
+	var layer := get_node_or_null("ItemConfirmLayer") as Control
+	if layer == null:
+		return
+	var visible := _pending_hotbar_slot >= 0 and _pending_hotbar_slot < _hotbar_items.size()
+	layer.visible = visible
+	if not visible:
+		return
+	var item: Dictionary = _hotbar_items[_pending_hotbar_slot]
+	var item_id := str(item.get("id", ""))
+	var def: Dictionary = ItemDB.get_item(item_id)
+	_texture("ItemConfirmLayer/Panel/IconFrame/Icon").texture = _get_texture(_item_icon_asset_path(item_id))
+	_label("ItemConfirmLayer/Panel/Title").text = "使用道具"
+	_label("ItemConfirmLayer/Panel/Name").text = str(def.get("name", "道具"))
+	_label("ItemConfirmLayer/Panel/Desc").text = str(def.get("desc", ""))
+	_label("ItemConfirmLayer/Panel/Count").text = "拥有: %d" % int(item.get("count", 0))
+	_label("ItemConfirmLayer/Panel/CancelButton/Text").text = "取消"
+	_label("ItemConfirmLayer/Panel/UseButton/Text").text = "使用"
+
 func _get_capture_toggle_rect(base_y: float) -> Rect2:
 	if is_inside_tree() and has_node("BottomControls/CaptureToggle"):
 		return _control_rect("BottomControls/CaptureToggle")
 	return super._get_capture_toggle_rect(base_y)
+
+func _get_capture_item_slot_rect(base_y: float, slot_idx: int) -> Rect2:
+	if is_inside_tree() and slot_idx >= 0 and slot_idx < CAPTURE_ITEM_PATHS.size():
+		return _control_rect(CAPTURE_ITEM_PATHS[slot_idx])
+	return super._get_capture_item_slot_rect(base_y, slot_idx)
 
 func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
 	if is_inside_tree() and slot_idx >= 0 and slot_idx < ITEM_PATHS.size():

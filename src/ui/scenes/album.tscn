@@ -13,9 +13,10 @@
 [ext_resource type="Texture2D" uid="uid://xhc6jp06wm0k" path="res://assets/images/ui/gems/album_icon_element_earth.png" id="11_b1baw"]
 [ext_resource type="Texture2D" uid="uid://brukjoa21gi6" path="res://assets/images/ui/gems/album_icon_element_wind.png" id="12_084vh"]
 [ext_resource type="Texture2D" uid="uid://c4tvmhvfh5c0t" path="res://assets/images/ui/gems/album_icon_element_dark.png" id="13_cw21g"]
-[ext_resource type="Texture2D" uid="uid://dwvva1s4hnyr4" path="res://assets/images/ui/cards/album_ui_roster_card_green.png" id="14_usnmi"]
+[ext_resource type="Texture2D" uid="uid://dk4l42xmcflof" path="res://assets/images/ui/cards/ranch_ui_roster_card_ranch.png" id="14_usnmi"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/ui/icons/album_icon_lock.png" id="15_7dl6j"]
 [ext_resource type="Texture2D" uid="uid://bv7yc7bt4mon7" path="res://assets/images/ui/icons/album_icon_star_dim.png" id="16_qr0pi"]
+[ext_resource type="FontFile" uid="uid://5r4yem5wbcsp" path="res://assets/fonts/ZCOOLKuaiLe-Regular.ttf" id="17_card_font"]
 [ext_resource type="Texture2D" uid="uid://b6t57fnwq57pl" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="22_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://ddagefyigajtj" path="res://assets/images/ui/icons/album_icon_evolution_arrows.png" id="26_40u1r"]
 [ext_resource type="Texture2D" uid="uid://hh60i528nnsx" path="res://assets/images/ui/buttons/album_ui_dex_mode_tab_normal.png" id="29_42nqe"]
@@ -28,11 +29,11 @@
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="36_energy"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="37_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://bgqu7cmyj23b6" path="res://assets/images/ui/icons/album_ui_dex_bottom_nav_selected.png" id="38_nav_selected"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="39_home"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_album.png" id="40_pets"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_bond.png" id="41_battle"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_goal.png" id="42_shop"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="43_menu"]
+[ext_resource type="Texture2D" uid="uid://u1nmo0dbthgh" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="39_home"]
+[ext_resource type="Texture2D" uid="uid://bw1jaf0yyn5aw" path="res://assets/images/ui/icons/common_nav_icon_nav_album.png" id="40_pets"]
+[ext_resource type="Texture2D" uid="uid://dd2jpaw5qefp7" path="res://assets/images/ui/icons/common_nav_icon_nav_bond.png" id="41_battle"]
+[ext_resource type="Texture2D" uid="uid://bpo8jem45ohj8" path="res://assets/images/ui/icons/common_nav_icon_nav_goal.png" id="42_shop"]
+[ext_resource type="Texture2D" uid="uid://65c54i6uf8si" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="43_menu"]
 [ext_resource type="Texture2D" uid="uid://wmq7knkq0xkj" path="res://assets/images/ui/buttons/album_ui_dex_page_prev.png" id="44_dex_prev"]
 [ext_resource type="Texture2D" uid="uid://b7b6342surasa" path="res://assets/images/ui/buttons/album_ui_dex_page_next.png" id="45_dex_next"]
 [ext_resource type="Texture2D" uid="uid://b102vvut68pah" path="res://assets/images/monsters/monster/monster_001_album_thumb.png" id="46_monster_001"]
@@ -765,35 +766,36 @@ clip_text = true
 
 [node name="Grid" type="Control" parent="AlbumPage" unique_id=1767716641]
 anchors_preset = 0
-offset_left = 18.0
-offset_top = 88.0
-offset_right = 357.0
-offset_bottom = 410.0
+offset_left = 3.0
+offset_top = 68.0
+offset_right = 342.0
+offset_bottom = 390.0
 mouse_filter = 2
 
 [node name="Card1" type="TextureButton" parent="AlbumPage/Grid" unique_id=4729073]
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card1" unique_id=1827138616]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -828,10 +830,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1553138912]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("46_monster_001")
 expand_mode = 1
@@ -850,20 +852,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card1" unique_id=1954602652]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "小火龙"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card1" unique_id=1739109005]
 visible = false
@@ -926,27 +932,28 @@ stretch_mode = 5
 [node name="Card2" type="TextureButton" parent="AlbumPage/Grid" unique_id=1903615037]
 layout_mode = 0
 offset_left = 68.0
-offset_right = 171.0
+offset_right = 166.0
 offset_bottom = 158.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card2" unique_id=1907863278]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -981,10 +988,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=2116424614]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("47_monster_002")
 expand_mode = 1
@@ -1003,20 +1010,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card2" unique_id=1536046624]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "火恐龙"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card2" unique_id=756522731]
 visible = false
@@ -1079,27 +1090,28 @@ stretch_mode = 5
 [node name="Card3" type="TextureButton" parent="AlbumPage/Grid" unique_id=1690346694]
 layout_mode = 0
 offset_left = 136.0
-offset_right = 239.0
+offset_right = 234.0
 offset_bottom = 158.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card3" unique_id=1404831583]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1134,10 +1146,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=519393906]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("48_monster_003")
 expand_mode = 1
@@ -1156,20 +1168,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card3" unique_id=4087368]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "火灵虎"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card3" unique_id=1897073409]
 visible = false
@@ -1232,27 +1248,28 @@ stretch_mode = 5
 [node name="Card4" type="TextureButton" parent="AlbumPage/Grid" unique_id=1227069289]
 layout_mode = 0
 offset_left = 204.0
-offset_right = 307.0
+offset_right = 302.0
 offset_bottom = 158.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card4" unique_id=1659122511]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1287,10 +1304,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=2059624272]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("49_monster_004")
 expand_mode = 1
@@ -1309,20 +1326,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card4" unique_id=1535736026]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "烈焰龙"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card4" unique_id=977457942]
 visible = false
@@ -1385,27 +1406,28 @@ stretch_mode = 5
 [node name="Card5" type="TextureButton" parent="AlbumPage/Grid" unique_id=1179121093]
 layout_mode = 0
 offset_left = 272.0
-offset_right = 375.0
+offset_right = 370.0
 offset_bottom = 158.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card5" unique_id=131352247]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1440,10 +1462,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1794412542]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("50_monster_005")
 expand_mode = 1
@@ -1462,20 +1484,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card5" unique_id=218995326]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "水泡龟"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card5" unique_id=1132138957]
 visible = false
@@ -1538,27 +1564,28 @@ stretch_mode = 5
 [node name="Card6" type="TextureButton" parent="AlbumPage/Grid" unique_id=150639648]
 layout_mode = 0
 offset_top = 102.0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 260.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card6" unique_id=512290940]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1593,10 +1620,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=1767153147]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("51_monster_006")
 expand_mode = 1
@@ -1615,20 +1642,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card6" unique_id=148400778]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "深海龟"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card6" unique_id=1646327885]
 visible = false
@@ -1692,27 +1723,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 68.0
 offset_top = 102.0
-offset_right = 171.0
+offset_right = 166.0
 offset_bottom = 260.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card7" unique_id=1516134750]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card7" unique_id=769214643]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1747,10 +1779,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card7" unique_id=1886405722]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("52_monster_007")
 expand_mode = 1
@@ -1769,20 +1801,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card7" unique_id=535131609]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "水龟仔"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card7" unique_id=1622020028]
 visible = false
@@ -1846,27 +1882,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 136.0
 offset_top = 102.0
-offset_right = 239.0
+offset_right = 234.0
 offset_bottom = 260.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card8" unique_id=2116465743]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card8" unique_id=1304171889]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -1901,10 +1938,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card8" unique_id=835766060]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("53_monster_008")
 expand_mode = 1
@@ -1923,20 +1960,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card8" unique_id=1139480275]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "水箭龟"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card8" unique_id=947422281]
 visible = false
@@ -2000,27 +2041,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 204.0
 offset_top = 102.0
-offset_right = 307.0
+offset_right = 302.0
 offset_bottom = 260.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card9" unique_id=1511414470]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card9" unique_id=710660394]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2055,10 +2097,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card9" unique_id=123624084]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("54_monster_009")
 expand_mode = 1
@@ -2077,20 +2119,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card9" unique_id=1895389575]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "冰啾兽"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card9" unique_id=1171157318]
 visible = false
@@ -2154,27 +2200,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 272.0
 offset_top = 102.0
-offset_right = 375.0
+offset_right = 370.0
 offset_bottom = 260.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card10" unique_id=2053015839]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card10" unique_id=1724053971]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2209,10 +2256,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card10" unique_id=1413303214]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("55_monster_010")
 expand_mode = 1
@@ -2231,20 +2278,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card10" unique_id=1109762696]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "冰甲龙"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card10" unique_id=506006084]
 visible = false
@@ -2307,27 +2358,28 @@ stretch_mode = 5
 [node name="Card11" type="TextureButton" parent="AlbumPage/Grid" unique_id=1065981800]
 layout_mode = 0
 offset_top = 204.0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 362.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card11" unique_id=850595974]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card11" unique_id=1195617374]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2362,10 +2414,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card11" unique_id=732980285]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("56_monster_011")
 expand_mode = 1
@@ -2384,20 +2436,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card11" unique_id=28274618]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "深渊海马王"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card11" unique_id=1636060927]
 visible = false
@@ -2461,27 +2517,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 68.0
 offset_top = 204.0
-offset_right = 171.0
+offset_right = 166.0
 offset_bottom = 362.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card12" unique_id=1360028350]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card12" unique_id=2079484310]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2516,10 +2573,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card12" unique_id=1383450017]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("57_monster_012")
 expand_mode = 1
@@ -2538,20 +2595,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card12" unique_id=1411820843]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "翠精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card12" unique_id=1504171016]
 visible = false
@@ -2615,27 +2676,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 136.0
 offset_top = 204.0
-offset_right = 239.0
+offset_right = 234.0
 offset_bottom = 362.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card13" unique_id=398643517]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card13" unique_id=1231413006]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2670,10 +2732,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card13" unique_id=1470317383]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("58_monster_013")
 expand_mode = 1
@@ -2692,20 +2754,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card13" unique_id=134551140]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "草苗儿"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card13" unique_id=514724815]
 visible = false
@@ -2769,27 +2835,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 204.0
 offset_top = 204.0
-offset_right = 307.0
+offset_right = 302.0
 offset_bottom = 362.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card14" unique_id=730994600]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card14" unique_id=1435971012]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2824,10 +2891,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card14" unique_id=1990862198]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("59_monster_014")
 expand_mode = 1
@@ -2846,20 +2913,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card14" unique_id=1160243241]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "妙蛙草"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card14" unique_id=1495536063]
 visible = false
@@ -2923,27 +2994,28 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 272.0
 offset_top = 204.0
-offset_right = 375.0
+offset_right = 370.0
 offset_bottom = 362.0
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.64, 0.64)
+pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card15" unique_id=722085236]
-visible = false
 layout_mode = 0
-offset_right = 103.0
+offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card15" unique_id=1631701756]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 156.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 93.0
+offset_bottom = 148.0
 mouse_filter = 2
 color = Color(1, 0.82, 0.17, 0.16)
 
@@ -2978,10 +3050,10 @@ clip_text = true
 
 [node name="Portrait" type="TextureRect" parent="AlbumPage/Grid/Card15" unique_id=744360633]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 101.0
-offset_bottom = 145.0
+offset_left = 4.0
+offset_top = 10.0
+offset_right = 94.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("60_monster_015")
 expand_mode = 1
@@ -3000,20 +3072,24 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="AlbumPage/Grid/Card15" unique_id=442248474]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 101.0
-offset_right = 95.0
-offset_bottom = 124.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+offset_left = 7.0
+offset_top = 120.0
+offset_right = 91.0
+offset_bottom = 144.0
+theme_override_colors/font_color = Color(0.44, 0.24, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.76, 0.85)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("17_card_font")
+theme_override_font_sizes/font_size = 15
+text = "花叶兽"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+text_overrun_behavior = 3
 
 [node name="Stars" type="Control" parent="AlbumPage/Grid/Card15" unique_id=858916025]
 visible = false

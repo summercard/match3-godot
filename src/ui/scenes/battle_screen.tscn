@@ -5,10 +5,15 @@
 [ext_resource type="PackedScene" uid="uid://y280sjcpnwtf" path="res://src/ui/scenes/battle/enemy_slot.tscn" id="enemy_slot"]
 [ext_resource type="PackedScene" uid="uid://d2u36y1wnlpla" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
 [ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/ui/slots/battle_ui_item_slot_selected.png" id="item_selected"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/slots/battle_ui_item_slot.png" id="item_slot"]
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/ui/buttons/battle_ui_speed_button.png" id="speed_button"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png" id="popup_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="button_blue"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/capture_success_new_ui_button_green.png" id="button_green"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png" id="icon_frame"]
 
 [node name="BattleScreenGui" type="Control" unique_id=807451328]
 clip_contents = true
@@ -234,6 +239,15 @@ offset_right = 106.0
 offset_bottom = 661.0
 mouse_filter = 2
 
+[node name="Base" type="TextureRect" parent="BottomControls/Item1"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_slot")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Selection" type="TextureRect" parent="BottomControls/Item1" unique_id=606224822]
 visible = false
 layout_mode = 0
@@ -273,6 +287,15 @@ offset_top = 622.0
 offset_right = 152.0
 offset_bottom = 661.0
 mouse_filter = 2
+
+[node name="Base" type="TextureRect" parent="BottomControls/Item2"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Selection" type="TextureRect" parent="BottomControls/Item2" unique_id=738385169]
 visible = false
@@ -314,6 +337,15 @@ offset_right = 198.0
 offset_bottom = 661.0
 mouse_filter = 2
 
+[node name="Base" type="TextureRect" parent="BottomControls/Item3"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_slot")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Selection" type="TextureRect" parent="BottomControls/Item3" unique_id=1449281424]
 visible = false
 layout_mode = 0
@@ -345,3 +377,279 @@ theme_override_font_sizes/font_size = 18
 text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Item4" type="Control" parent="BottomControls"]
+anchors_preset = 0
+offset_left = 205.0
+offset_top = 622.0
+offset_right = 244.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Base" type="TextureRect" parent="BottomControls/Item4"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Selection" type="TextureRect" parent="BottomControls/Item4"]
+visible = false
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_selected")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="BottomControls/Item4"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/Item4"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Item5" type="Control" parent="BottomControls"]
+anchors_preset = 0
+offset_left = 251.0
+offset_top = 622.0
+offset_right = 290.0
+offset_bottom = 661.0
+mouse_filter = 2
+
+[node name="Base" type="TextureRect" parent="BottomControls/Item5"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Selection" type="TextureRect" parent="BottomControls/Item5"]
+visible = false
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("item_selected")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="BottomControls/Item5"]
+layout_mode = 0
+offset_right = 39.0
+offset_bottom = 39.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Badge" type="Label" parent="BottomControls/Item5"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemConfirmLayer" type="Control" parent="."]
+visible = false
+z_index = 80
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 0
+
+[node name="Shade" type="ColorRect" parent="ItemConfirmLayer"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0.12, 0.07, 0.03, 0.42)
+
+[node name="Panel" type="Control" parent="ItemConfirmLayer"]
+layout_mode = 0
+offset_left = 54.0
+offset_top = 214.0
+offset_right = 321.0
+offset_bottom = 431.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_right = 267.0
+offset_bottom = 217.0
+mouse_filter = 2
+texture = ExtResource("popup_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 20.0
+offset_right = 229.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "使用道具"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="IconFrame" type="Control" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 62.0
+offset_right = 104.0
+offset_bottom = 140.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="ItemConfirmLayer/Panel/IconFrame"]
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="ItemConfirmLayer/Panel/IconFrame"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 15.0
+offset_right = 60.0
+offset_bottom = 57.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 66.0
+offset_right = 238.0
+offset_bottom = 91.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_font_sizes/font_size = 17
+text = "道具"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Desc" type="Label" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 94.0
+offset_right = 238.0
+offset_bottom = 131.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 12
+text = "确认使用该道具"
+vertical_alignment = 1
+autowrap_mode = 3
+clip_text = true
+
+[node name="Count" type="Label" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 132.0
+offset_right = 224.0
+offset_bottom = 154.0
+theme_override_colors/font_color = Color(0.86, 0.32, 0.08, 1)
+theme_override_font_sizes/font_size = 12
+text = "拥有: 0"
+vertical_alignment = 1
+clip_text = true
+
+[node name="CancelButton" type="TextureButton" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 162.0
+offset_right = 118.0
+offset_bottom = 203.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ItemConfirmLayer/Panel/CancelButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ItemConfirmLayer/Panel/CancelButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0.22, 0.38, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "取消"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="UseButton" type="TextureButton" parent="ItemConfirmLayer/Panel"]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 162.0
+offset_right = 230.0
+offset_bottom = 203.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="ItemConfirmLayer/Panel/UseButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_green")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="ItemConfirmLayer/Panel/UseButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.36, 0.08, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "使用"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true

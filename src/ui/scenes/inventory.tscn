@@ -1597,6 +1597,142 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
+[node name="BattleSlots" type="Control" parent="DetailPanel"]
+layout_mode = 0
+offset_left = 124.0
+offset_top = 115.0
+offset_right = 250.0
+offset_bottom = 140.0
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="DetailPanel/BattleSlots"]
+layout_mode = 0
+offset_top = -2.0
+offset_right = 54.0
+offset_bottom = 22.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "战斗道具"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Slot1" type="TextureButton" parent="DetailPanel/BattleSlots"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = -4.0
+offset_right = 84.0
+offset_bottom = 22.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("10_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot1"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 11
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="TextureButton" parent="DetailPanel/BattleSlots"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = -4.0
+offset_right = 114.0
+offset_bottom = 22.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("10_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot2"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 11
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="TextureButton" parent="DetailPanel/BattleSlots"]
+layout_mode = 0
+offset_left = 118.0
+offset_top = -4.0
+offset_right = 144.0
+offset_bottom = 22.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+texture = ExtResource("10_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot3"]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 11
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Toast" type="Control" parent="." unique_id=661497116]
 visible = false
 z_index = 50

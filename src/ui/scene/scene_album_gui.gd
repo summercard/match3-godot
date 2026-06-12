@@ -264,9 +264,8 @@ func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	var id := str(monster.get("id", ""))
 	var element := str(monster.get("element", "grass"))
 	var unlocked := _is_captured(id)
-	var frame := card.get_node("Frame") as TextureRect
-	frame.visible = false
-	(card.get_node("SelectedFrame") as ColorRect).visible = false
+	var selected_frame := card.get_node("SelectedFrame") as ColorRect
+	selected_frame.visible = id == _selected_monster_id
 	var element_icon := card.get_node("ElementIcon") as TextureRect
 	element_icon.visible = false
 	element_icon.texture = _element_texture(element)
@@ -274,7 +273,6 @@ func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	number.visible = false
 	number.text = "%03d" % [index + 1]
 	var name_label := card.get_node("Name") as Label
-	name_label.visible = false
 	name_label.text = str(monster.get("name", "???")) if unlocked else "???"
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.visible = true

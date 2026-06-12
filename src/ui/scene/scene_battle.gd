@@ -34,6 +34,7 @@ const ATTACK_CUE_DURATION := 0.58
 const ATTACK_IMPACT_DELAY := 0.24
 const ATTACK_RECOVERY_DELAY := 0.16
 const MATCH_CHAIN_TAIL_WAIT_MAX := 0.72
+const HOTBAR_SLOT_COUNT := 3
 
 ## 状态枚举
 enum BattleState {
@@ -217,9 +218,12 @@ var _element_ripple: Dictionary = {
 
 ## 道具快捷栏（Phase 14）
 var _hotbar_items: Array[Dictionary] = []       # [{id, count}, ...] 最多3个
+var _capture_slot_items: Array = []
 var _selected_hotbar_slot: int = -1             # 当前选中的格子索引
+var _pending_hotbar_slot: int = -1
 var _auto_capture_enabled: bool = false
 var _equipped_capture_item_id: String = ""
+var _equipped_battle_item_ids: Array = []
 
 ## 关卡数据
 var _stage_data: Dictionary = {}
@@ -363,6 +367,11 @@ const BATTLE_UI_ASSETS := {
 	"item_capture_ball": "res://assets/images/ui/icons/battle_icon_capture_ball.png",
 	"item_capture_ball_plus": "res://assets/images/ui/icons/battle_icon_capture_ball_plus.png",
 	"item_hp_potion": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
+	"item_exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
+	"item_stone_earth": "res://assets/images/ui/gems/items_new_icon_evolution_stone_earth.png",
+	"item_stone_light": "res://assets/images/ui/gems/items_new_icon_evolution_stone_light.png",
+	"item_stone_thunder": "res://assets/images/ui/gems/items_new_icon_evolution_stone_thunder.png",
+	"item_stone_water": "res://assets/images/ui/gems/items_new_icon_evolution_stone_water.png",
 	"hp_frame": "res://assets/images/ui/bars/battle_ui_hp_frame.png",
 	"hp_frame_overlay": "res://assets/images/ui/bars/battle_ui_hp_frame_overlay.png",
 	"hp_fill_green": "res://assets/images/ui/bars/battle_ui_hp_fill_green.png",
@@ -762,6 +771,10 @@ func _on_tap(x: float, y: float) -> void:
 		return
 
 	# 优先检测道具快捷栏点击
+	if _pending_hotbar_slot >= 0:
+		_try_tap_item_confirm_popup(x, y)
+		return
+
 	if _try_tap_hotbar(x, y):
 		return
 
@@ -2504,11 +2517,13 @@ func _draw_bottom_bar() -> void:
 	_draw_text_with_shadow(status_text, 334.0, bottom_y + 14.0, state_color, 9.0, true)
 	_draw_capture_window_hint(bottom_y)
 	_draw_capture_toggle(bottom_y)
+	_draw_capture_item_slots(bottom_y)
 	_draw_item_hotbar(bottom_y)
 
 func _draw_bottom_capture_controls() -> void:
 	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 619.0
 	_draw_capture_toggle(bottom_y)
+	_draw_capture_item_slots(bottom_y)
 	_draw_item_hotbar(bottom_y)
 
 func _draw_capture_window_hint(base_y: float) -> void:
@@ -2544,26 +2559,27 @@ func _draw_capture_toggle(base_y: float) -> void:
 	_draw_bottom_button_badge(rect, "开" if _auto_capture_enabled else "关")
 
 func _draw_item_hotbar(base_y: float) -> void:
-	"""绘制底部道具快捷栏（3格）"""
+	"""绘制底部道具快捷栏"""
 
-	for i in range(3):
+	for i in range(HOTBAR_SLOT_COUNT):
 		var slot_rect := _get_hotbar_slot_rect(base_y, i)
 		var item: Dictionary = _hotbar_items[i] if i < _hotbar_items.size() else {}
 		var has_item: bool = not item.is_empty() and item.get("count", 0) > 0
+		var is_selected := _is_hotbar_item_selected(i, item)
+		var slot_key := "item_slot_selected" if is_selected else "item_slot"
+		var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
+		if slot_tex:
+			_draw_texture_fit(slot_tex, slot_rect, 1.0 if has_item else 0.72)
 		if not has_item:
+			draw_circle(slot_rect.get_center(), 4.0, Color(1.0, 1.0, 1.0, 0.28))
 			continue
 
-		var is_selected := _is_hotbar_item_selected(i, item)
 		if has_item:
 			var item_def: Dictionary = ItemDB.get_item(item["id"])
 			var icon_tex := _get_texture(_item_icon_asset_path(str(item["id"])))
 			if icon_tex:
 				_draw_texture_contain(icon_tex, slot_rect, 1.0)
 			else:
-				var slot_key := "item_slot_selected" if is_selected else "item_slot"
-				var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
-				if slot_tex:
-					_draw_texture_fit(slot_tex, slot_rect, 1.0)
 				var emoji: String = item_def.get("emoji", "?")
 				_draw_text(emoji, slot_rect.get_center().x, slot_rect.position.y + 13.0, C["white"], 13.5, true)
 			if is_selected:
@@ -2574,6 +2590,26 @@ func _draw_item_hotbar(base_y: float) -> void:
 			if count > 1:
 				_draw_bottom_button_badge(slot_rect, str(count))
 
+func _draw_capture_item_slots(base_y: float) -> void:
+	for i in range(2):
+		var slot_rect := _get_capture_item_slot_rect(base_y, i)
+		var item: Dictionary = _capture_slot_items[i] if i < _capture_slot_items.size() else {}
+		var has_item := not item.is_empty() and int(item.get("count", 0)) > 0
+		var item_id := str(item.get("id", ""))
+		var selected := has_item and item_id == _equipped_capture_item_id
+		var slot_tex := _get_texture(BATTLE_UI_ASSETS["item_slot_selected" if selected else "item_slot"])
+		if slot_tex:
+			_draw_texture_fit(slot_tex, slot_rect, 1.0 if has_item else 0.72)
+		if not has_item:
+			draw_circle(slot_rect.get_center(), 4.0, Color(1.0, 1.0, 1.0, 0.28))
+			continue
+		var icon_tex := _get_texture(_item_icon_asset_path(item_id))
+		if icon_tex:
+			_draw_texture_contain(icon_tex, slot_rect, 1.0)
+		var count := int(item.get("count", 0))
+		if count > 1:
+			_draw_bottom_button_badge(slot_rect, str(count))
+
 func _draw_bottom_button_badge(rect: Rect2, label: String) -> void:
 	var badge_center := Vector2(rect.end.x - 4.0, rect.end.y - 4.0)
 	draw_circle(badge_center, 8.0, Color(0.92, 0.20, 0.36, 1.0))
@@ -2583,28 +2619,40 @@ func _draw_bottom_button_badge(rect: Rect2, label: String) -> void:
 func _get_capture_toggle_rect(base_y: float) -> Rect2:
 	return Rect2(18.0, base_y + 3.0, 39.0, 39.0)
 
-func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
+func _get_capture_item_slot_rect(base_y: float, slot_idx: int) -> Rect2:
 	var slot_size: float = 39.0
 	var slot_gap: float = 7.0
 	var start_x: float = 67.0
 	return Rect2(start_x + slot_idx * (slot_size + slot_gap), base_y + 3.0, slot_size, slot_size)
 
+func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
+	var slot_size: float = 39.0
+	var slot_gap: float = 7.0
+	var start_x: float = 159.0
+	return Rect2(start_x + slot_idx * (slot_size + slot_gap), base_y + 3.0, slot_size, slot_size)
+
 func _item_icon_asset_path(item_id: String) -> String:
 	if item_id == "capture_ball":
 		return BATTLE_UI_ASSETS["item_capture_ball"]
-	if item_id == "capture_ball_plus":
+	if item_id == "capture_ball_plus" or item_id == "capture_ball_elite":
 		return BATTLE_UI_ASSETS["item_capture_ball_plus"]
-	if item_id == "hp_potion":
+	if item_id == "hp_potion" or item_id == "hp_potion_large":
 		return BATTLE_UI_ASSETS["item_hp_potion"]
+	if item_id == "guard_charm":
+		return BATTLE_UI_ASSETS["item_stone_light"]
+	if item_id == "rock_hammer" or item_id == "rock_hammer_plus":
+		return BATTLE_UI_ASSETS["item_stone_earth"]
+	if item_id == "unlock_key":
+		return BATTLE_UI_ASSETS["item_stone_thunder"]
+	if item_id == "mist_cleanser":
+		return BATTLE_UI_ASSETS["item_stone_water"]
+	if item_id == "focus_crystal":
+		return BATTLE_UI_ASSETS["item_exp_crystal"]
 	return ""
 
 func _is_hotbar_item_selected(slot_idx: int, item: Dictionary) -> bool:
 	if item.is_empty() or item.get("count", 0) <= 0:
 		return false
-	var item_id := str(item.get("id", ""))
-	var item_def: Dictionary = ItemDB.get_item(item_id)
-	if str(item_def.get("type", "")) == "capture":
-		return item_id == _equipped_capture_item_id
 	return _selected_hotbar_slot == slot_idx
 
 func _load_hotbar_items() -> void:
@@ -2612,8 +2660,23 @@ func _load_hotbar_items() -> void:
 	_hotbar_items.clear()
 	if not _storage or not _storage.has_method("load_inventory"):
 		return
-	var inventory: Dictionary = _storage.load_inventory()
+	var equipped_inventory: Dictionary = _storage.load_inventory()
+	_load_capture_slot_items(equipped_inventory)
+	for equipped_id in _equipped_battle_item_ids:
+		var item_id := str(equipped_id)
+		var count: int = int(equipped_inventory.get(item_id, 0))
+		if count <= 0:
+			continue
+		var def: Dictionary = ItemDB.get_item(item_id)
+		if str(def.get("type", "")) != "battle":
+			continue
+		_hotbar_items.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1), "type": "battle"})
+		if _hotbar_items.size() >= HOTBAR_SLOT_COUNT:
+			break
+	_selected_hotbar_slot = -1
+	return
 	# 收集所有 type 为 capture 或 battle 的道具
+	var inventory: Dictionary = {}
 	var candidates: Array[Dictionary] = []
 	for item_id in inventory:
 		var count: int = inventory[item_id]
@@ -2630,10 +2693,10 @@ func _load_hotbar_items() -> void:
 		if a_equipped != b_equipped:
 			return a_equipped
 		if str(a.get("type", "")) != str(b.get("type", "")):
-			return str(a.get("type", "")) == "capture"
+			return str(a.get("type", "")) == "battle"
 		return a["rarity"] > b["rarity"] or (a["rarity"] == b["rarity"] and a["count"] > b["count"])
 	)
-	for i in range(mini(candidates.size(), 3)):
+	for i in range(mini(candidates.size(), HOTBAR_SLOT_COUNT)):
 		_hotbar_items.append(candidates[i])
 	_selected_hotbar_slot = -1
 	for i in range(_hotbar_items.size()):
@@ -2642,18 +2705,58 @@ func _load_hotbar_items() -> void:
 			break
 
 func _load_capture_preferences() -> void:
-	var settings := {"autoCapture": false, "equippedItem": ""}
+	var settings := {"autoCapture": false, "equippedItem": "", "equippedBattleItems": []}
 	if _storage and _storage.has_method("load_capture_settings"):
 		settings = _storage.load_capture_settings()
 	_auto_capture_enabled = bool(settings.get("autoCapture", false))
 	_equipped_capture_item_id = str(settings.get("equippedItem", ""))
+	_equipped_battle_item_ids = _sanitize_equipped_battle_items(settings.get("equippedBattleItems", []))
+
+func _load_capture_slot_items(inventory: Dictionary) -> void:
+	_capture_slot_items.clear()
+	var ordered_ids: Array = ["capture_ball", "capture_ball_plus", "capture_ball_elite"]
+	if not _equipped_capture_item_id.is_empty() and int(inventory.get(_equipped_capture_item_id, 0)) > 0:
+		var equipped_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
+		if str(equipped_def.get("type", "")) == "capture":
+			_capture_slot_items.append({
+				"id": _equipped_capture_item_id,
+				"count": int(inventory.get(_equipped_capture_item_id, 0)),
+				"rarity": equipped_def.get("rarity", 1),
+				"type": "capture"
+			})
+	for item_id in ordered_ids:
+		if _capture_slot_items.size() >= 2:
+			break
+		if str(item_id) == _equipped_capture_item_id:
+			continue
+		var count := int(inventory.get(item_id, 0))
+		if count <= 0:
+			continue
+		var def: Dictionary = ItemDB.get_item(item_id)
+		if str(def.get("type", "")) != "capture":
+			continue
+		_capture_slot_items.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1), "type": "capture"})
 
 func _save_capture_preferences() -> void:
 	if _storage and _storage.has_method("save_capture_settings"):
 		_storage.save_capture_settings({
 			"autoCapture": _auto_capture_enabled,
-			"equippedItem": _equipped_capture_item_id
+			"equippedItem": _equipped_capture_item_id,
+			"equippedBattleItems": _equipped_battle_item_ids.duplicate()
 		})
+
+func _sanitize_equipped_battle_items(source: Array) -> Array:
+	var result: Array = []
+	for value in source:
+		var item_id := str(value)
+		if result.size() >= HOTBAR_SLOT_COUNT:
+			break
+		if item_id.is_empty() or result.has(item_id):
+			continue
+		var def: Dictionary = ItemDB.get_item(item_id)
+		if str(def.get("type", "")) == "battle":
+			result.append(item_id)
+	return result
 
 func _try_tap_hotbar(x: float, y: float) -> bool:
 	"""检测独立底部捕捉控件，不依赖整块底栏背板。"""
@@ -2671,7 +2774,10 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 		queue_redraw()
 		return true
 
-	for i in range(3):
+	if _try_tap_capture_item_slots(x, y, bottom_y):
+		return true
+
+	for i in range(HOTBAR_SLOT_COUNT):
 		var slot_rect := _get_hotbar_slot_rect(bottom_y, i)
 		if not slot_rect.has_point(Vector2(x, y)):
 			continue
@@ -2680,6 +2786,9 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 		var item: Dictionary = _hotbar_items[i]
 		if item.is_empty() or item.get("count", 0) <= 0:
 			return false
+		_selected_hotbar_slot = i
+		_open_hotbar_item_confirm(i)
+		return true
 		var def: Dictionary = ItemDB.get_item(item["id"])
 		if str(def.get("type", "")) == "capture":
 			_try_use_item_at_slot(i)
@@ -2691,6 +2800,84 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 		_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
 		return true
 	return false
+
+func _try_tap_capture_item_slots(x: float, y: float, bottom_y: float) -> bool:
+	for i in range(2):
+		var slot_rect := _get_capture_item_slot_rect(bottom_y, i)
+		if not slot_rect.has_point(Vector2(x, y)):
+			continue
+		if i >= _capture_slot_items.size():
+			return false
+		var item: Dictionary = _capture_slot_items[i]
+		if item.is_empty() or int(item.get("count", 0)) <= 0:
+			return false
+		var item_id := str(item.get("id", ""))
+		var def: Dictionary = ItemDB.get_item(item_id)
+		if str(def.get("type", "")) != "capture":
+			return false
+		_equipped_capture_item_id = item_id
+		_save_capture_preferences()
+		var bonus := float(def.get("effect", {}).get("captureBonus", 0.0))
+		_show_message("已激活 %s +%.0f%%" % [str(def.get("name", "捕获球")), bonus * 100.0])
+		queue_redraw()
+		if has_method("_sync_gui"):
+			call("_sync_gui")
+		return true
+	return false
+
+func _open_hotbar_item_confirm(slot_idx: int) -> void:
+	if slot_idx < 0 or slot_idx >= _hotbar_items.size():
+		return
+	_pending_hotbar_slot = slot_idx
+	var item: Dictionary = _hotbar_items[slot_idx]
+	var def: Dictionary = ItemDB.get_item(str(item.get("id", "")))
+	_show_message("是否使用 %s？" % str(def.get("name", "道具")))
+	if has_method("_sync_gui"):
+		call("_sync_gui")
+	queue_redraw()
+
+func _cancel_hotbar_item_confirm() -> void:
+	_pending_hotbar_slot = -1
+	queue_redraw()
+	if has_method("_sync_gui"):
+		call("_sync_gui")
+
+func _confirm_hotbar_item_use() -> bool:
+	var slot_idx := _pending_hotbar_slot
+	if slot_idx < 0:
+		return false
+	_pending_hotbar_slot = -1
+	var used := _try_use_item_at_slot(slot_idx)
+	queue_redraw()
+	if has_method("_sync_gui"):
+		call("_sync_gui")
+	return used
+
+func _try_tap_item_confirm_popup(x: float, y: float) -> bool:
+	var point := Vector2(x, y)
+	if _item_confirm_use_rect().has_point(point):
+		_confirm_hotbar_item_use()
+		return true
+	if _item_confirm_cancel_rect().has_point(point):
+		_cancel_hotbar_item_confirm()
+		return true
+	return true
+
+func _item_confirm_use_rect() -> Rect2:
+	return _control_local_rect_or_fallback("ItemConfirmLayer/Panel/UseButton", Rect2(204.0, 376.0, 80.0, 41.0))
+
+func _item_confirm_cancel_rect() -> Rect2:
+	return _control_local_rect_or_fallback("ItemConfirmLayer/Panel/CancelButton", Rect2(92.0, 376.0, 80.0, 41.0))
+
+func _control_local_rect_or_fallback(path: NodePath, fallback: Rect2) -> Rect2:
+	if not is_inside_tree() or not has_node(path):
+		return fallback
+	var node := get_node(path) as Control
+	if node == null:
+		return fallback
+	var root_inverse := get_global_transform_with_canvas().affine_inverse()
+	var origin := root_inverse * node.get_global_transform_with_canvas().origin
+	return Rect2(origin, node.size)
 
 func _try_use_item_at_slot(slot_idx: int) -> bool:
 	"""尝试使用指定快捷栏格子中的道具，返回是否处理了"""
@@ -2711,30 +2898,255 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		queue_redraw()
 		return true
 	elif item_type == "battle":
-		# HP药水 → 恢复队伍50%HP
 		if _state != BattleState.IDLE:
 			_show_message("当前无法使用道具")
 			return true
-		var heal_ratio: float = def.get("effect", {}).get("healRatio", 0.5)
-		var healed: int = 0
-		for monster: Dictionary in _battle.player_team:
-			if monster == null or monster.is_empty():
-				continue
-			var max_hp: int = monster.get("maxHP", 100)
-			var cur_hp: int = monster.get("hp", max_hp)
-			var add: int = int(max_hp * heal_ratio)
-			monster["hp"] = mini(cur_hp + add, max_hp)
-			healed += add
-		_show_message("使用 %s，恢复 %d HP" % [def.get("name", "HP药水"), healed])
-		_storage.use_item(item_id, 1) if _storage else null
-		item["count"] -= 1
-		if item["count"] <= 0:
-			_hotbar_items.remove_at(slot_idx)
-		_selected_hotbar_slot = -1
+		if not _has_hotbar_item_available(item_id):
+			return true
+		var effect: Dictionary = def.get("effect", {})
+		var used := false
+		if effect.has("healRatio"):
+			used = _use_hotbar_heal(def, effect)
+		elif effect.has("guardReduction"):
+			used = _use_hotbar_guard(def, effect)
+		elif effect.has("obstacleDamage"):
+			used = _use_hotbar_obstacle_damage(def, effect)
+		elif effect.has("unlockDamage"):
+			used = _use_hotbar_unlock(def, effect)
+		elif effect.has("clearPoisonCount"):
+			used = _use_hotbar_clear_poison(def, effect)
+		elif effect.has("chargeGain"):
+			used = _use_hotbar_charge(def, effect)
+		else:
+			_show_message("%s 暂时无法使用" % def.get("name", "道具"))
+			return true
+		if used:
+			_consume_hotbar_item(item_id, slot_idx)
 		return true
 	else:
 		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
 		return true
+
+func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
+	if _battle == null:
+		return false
+	var heal_ratio := float(effect.get("healRatio", 0.5))
+	var healed := 0
+	for i in range(_battle.player_team.size()):
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null or monster.is_empty() or int(monster.get("hp", 0)) <= 0:
+			continue
+		var max_hp := int(monster.get("maxHP", 100))
+		var cur_hp := int(monster.get("hp", max_hp))
+		var add := maxi(1, int(round(float(max_hp) * heal_ratio)))
+		var next_hp := mini(cur_hp + add, max_hp)
+		var actual := next_hp - cur_hp
+		if actual <= 0:
+			continue
+		monster["hp"] = next_hp
+		healed += actual
+		var card := _get_player_card_rect(i)
+		_floating_texts.append({"text": "+%d" % actual, "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["heal_green"], "size": 15.0, "timer": 0.0, "duration": 0.8})
+	if healed <= 0:
+		_show_message("队伍生命已满")
+		return false
+	_show_message("使用 %s，恢复 %d HP" % [def.get("name", "HP药水"), healed])
+	_sfx("battle_heal_leaf_bubble")
+	return true
+
+func _use_hotbar_guard(def: Dictionary, effect: Dictionary) -> bool:
+	if _battle == null:
+		return false
+	var reduction := clampf(float(effect.get("guardReduction", 0.25)), 0.0, 0.8)
+	var turns := maxi(1, int(effect.get("guardTurns", 1)))
+	var guards_var: Variant = _battle.get("player_guards")
+	var guards: Dictionary = guards_var.duplicate(true) if guards_var is Dictionary else {}
+	var applied := 0
+	for i in range(_battle.player_team.size()):
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null or monster.is_empty() or int(monster.get("hp", 0)) <= 0:
+			continue
+		var monster_id := str(monster.get("id", ""))
+		if monster_id.is_empty():
+			continue
+		guards[monster_id] = {"reduction": reduction, "turns": turns}
+		applied += 1
+		var card := _get_player_card_rect(i)
+		_floating_texts.append({"text": "护-%d%%" % int(round(reduction * 100.0)), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["shield"], "size": 14.0, "timer": 0.0, "duration": 0.9})
+	if applied <= 0:
+		_show_message("没有可守护的队员")
+		return false
+	_battle.set("player_guards", guards)
+	_show_message("使用 %s，全队获得护盾" % def.get("name", "护符"))
+	_sfx("battle_shield_soft_bloom")
+	return true
+
+func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
+	if _board == null:
+		return false
+	var target_count := maxi(1, int(effect.get("targetCount", 3)))
+	if bool(effect.get("clearAllObstacles", false)):
+		target_count = _board.rows * _board.cols
+	var damage := maxi(1, int(effect.get("obstacleDamage", 1)))
+	var touched := 0
+	var destroyed := 0
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			if touched >= target_count:
+				break
+			if not _board.is_obstacle(row, col):
+				continue
+			touched += 1
+			var broke := false
+			for _step in range(damage):
+				if _board.damage_obstacle(row, col):
+					broke = true
+					break
+			var center := _board_cell_center(row, col)
+			_floating_texts.append({"text": "破岩", "x": center.x, "y": center.y - 12.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.75})
+			if broke:
+				destroyed += 1
+				spawn_obstacle_destroy_particles(row, col)
+		if touched >= target_count:
+			break
+	if touched <= 0:
+		_show_message("当前没有岩石障碍")
+		return false
+	if destroyed > 0:
+		_apply_gravity()
+	_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
+	queue_redraw()
+	return true
+
+func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
+	if _board == null:
+		return false
+	var target_count := maxi(1, int(effect.get("targetCount", 3)))
+	var damage := maxi(1, int(effect.get("unlockDamage", 1)))
+	var touched := 0
+	var unlocked := 0
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			if touched >= target_count:
+				break
+			if not _board.is_locked(row, col):
+				continue
+			touched += 1
+			var result: Dictionary = {}
+			for _step in range(damage):
+				result = _board.unlock_gem(row, col)
+				if result.get("fullyUnlocked", false):
+					break
+			var center := _board_cell_center(row, col)
+			var text := "解锁" if result.get("fullyUnlocked", false) else "破链"
+			_floating_texts.append({"text": text, "x": center.x, "y": center.y - 12.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.75})
+			if result.get("fullyUnlocked", false):
+				unlocked += 1
+				_unlock_animations.append({"row": row, "col": col, "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
+		if touched >= target_count:
+			break
+	if touched <= 0:
+		_show_message("当前没有锁链宝石")
+		return false
+	_show_message("使用 %s，解除 %d 处锁链" % [def.get("name", "钥匙"), maxi(touched, unlocked)])
+	queue_redraw()
+	return true
+
+func _use_hotbar_clear_poison(def: Dictionary, effect: Dictionary) -> bool:
+	if _board == null:
+		return false
+	var target_count := maxi(1, int(effect.get("clearPoisonCount", 5)))
+	var cleared := 0
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			if cleared >= target_count:
+				break
+			if not _board.is_poison_fog(row, col):
+				continue
+			_board.clear_poison_fog(row, col)
+			cleared += 1
+			var center := _board_cell_center(row, col)
+			_poison_fog_clear_anims.append({"row": row, "col": col, "x": center.x, "y": center.y, "timer": 0.0})
+			_floating_texts.append({"text": "净雾", "x": center.x, "y": center.y - 12.0, "color": C["success"], "size": 13.0, "timer": 0.0, "duration": 0.75})
+		if cleared >= target_count:
+			break
+	if cleared <= 0:
+		_show_message("当前没有毒雾")
+		return false
+	_show_message("使用 %s，清除 %d 格毒雾" % [def.get("name", "净雾露"), cleared])
+	queue_redraw()
+	return true
+
+func _use_hotbar_charge(def: Dictionary, effect: Dictionary) -> bool:
+	if _battle == null:
+		return false
+	var gain := maxi(1, int(effect.get("chargeGain", 1)))
+	var charges_var: Variant = _battle.get("skill_charges")
+	var charges: Dictionary = charges_var.duplicate(true) if charges_var is Dictionary else {}
+	var total_gain := 0
+	for i in range(_battle.player_team.size()):
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null or monster.is_empty() or int(monster.get("hp", 0)) <= 0 or not monster.has("skill"):
+			continue
+		var monster_id := str(monster.get("id", ""))
+		var skill: Dictionary = monster.get("skill", {})
+		var cost := int(skill.get("cost", 999))
+		var before := int(charges.get(monster_id, 0))
+		var after := mini(cost, before + gain)
+		if after <= before:
+			continue
+		charges[monster_id] = after
+		total_gain += after - before
+		var card := _get_player_card_rect(i)
+		_floating_texts.append({"text": "+%d 能量" % (after - before), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.85})
+	if total_gain <= 0:
+		_show_message("技能能量已满")
+		return false
+	_battle.set("skill_charges", charges)
+	_show_message("使用 %s，补充 %d 点能量" % [def.get("name", "水晶"), total_gain])
+	queue_redraw()
+	return true
+
+func _consume_hotbar_item(item_id: String, slot_idx: int) -> bool:
+	if _storage and _storage.has_method("use_item"):
+		if not _storage.use_item(item_id, 1):
+			_show_message("道具数量不足")
+			_load_hotbar_items()
+			_refresh_hotbar_ui()
+			return false
+		_load_hotbar_items()
+	elif slot_idx >= 0 and slot_idx < _hotbar_items.size():
+		var item: Dictionary = _hotbar_items[slot_idx]
+		item["count"] = int(item.get("count", 0)) - 1
+		if int(item.get("count", 0)) <= 0:
+			_hotbar_items.remove_at(slot_idx)
+		else:
+			_hotbar_items[slot_idx] = item
+	_selected_hotbar_slot = -1
+	_pending_hotbar_slot = -1
+	_refresh_hotbar_ui()
+	return true
+
+func _has_hotbar_item_available(item_id: String) -> bool:
+	if _storage and _storage.has_method("load_inventory"):
+		var inventory: Dictionary = _storage.load_inventory()
+		if int(inventory.get(item_id, 0)) <= 0:
+			_show_message("道具数量不足")
+			_load_hotbar_items()
+			_refresh_hotbar_ui()
+			return false
+	return true
+
+func _refresh_hotbar_ui() -> void:
+	queue_redraw()
+	if has_method("_sync_gui"):
+		call("_sync_gui")
+
+func _board_cell_center(row: int, col: int) -> Vector2:
+	if _board == null:
+		return Vector2.ZERO
+	var cell_size := float(_board.cell_size)
+	return Vector2(float(_board.offset_x) + float(col) * cell_size + cell_size / 2.0, float(_board.offset_y) + float(row) * cell_size + cell_size / 2.0)
 
 func _draw_message(canvas: CanvasItem = self) -> void:
 	if _message_timer <= 0:

@@ -67,7 +67,7 @@ func _get_visible_shop_items() -> Array:
 			continue
 		if _active_tab == "coins" and item_type != "gold":
 			continue
-		if _active_tab == "hearts" and item_id != "hp_potion":
+		if _active_tab == "hearts" and not item.get("effect", {}).has("healRatio"):
 			continue
 		if _active_tab == "boosters" and not (item_type in ["capture", "exp", "battle"]):
 			continue
@@ -292,7 +292,7 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 	(card.get_node("Price/Icon") as TextureRect).texture = _tex(currency_key)
 	(card.get_node("Price/Text") as Label).text = str(shop_item.get("price", 0))
 	if card.has_node("BestRibbon"):
-		(card.get_node("BestRibbon") as Control).visible = item_id in ["gold_chest", "evolution_stone_light", "evolution_stone_dark"]
+		(card.get_node("BestRibbon") as Control).visible = item_id in ["gold_chest", "capture_ball_elite", "focus_crystal", "evolution_stone_light", "evolution_stone_dark"]
 		if card.has_node("BestRibbon/Text"):
 			(card.get_node("BestRibbon/Text") as Label).text = "超值"
 	card.disabled = false

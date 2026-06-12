@@ -211,6 +211,13 @@ func _seed_inventory_demo(main: Control) -> void:
 		"exp_potion": 8,
 		"exp_crystal": 2,
 		"hp_potion": 5,
+		"hp_potion_large": 2,
+		"guard_charm": 2,
+		"rock_hammer": 2,
+		"rock_hammer_plus": 1,
+		"unlock_key": 2,
+		"mist_cleanser": 2,
+		"focus_crystal": 1,
 		"gold_bag": 4,
 		"gold_chest": 1,
 		"evolution_stone_fire": 2,
@@ -275,6 +282,24 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
 	if battle_scene == null:
 		return
+	if _read_arg("--battle-demo-hotbar=", "1") != "0":
+		var demo_capture_slots: Array = [
+			{"id": "capture_ball", "count": 2, "rarity": 1, "type": "capture"},
+			{"id": "capture_ball_plus", "count": 1, "rarity": 2, "type": "capture"},
+		]
+		var demo_hotbar: Array[Dictionary] = [
+			{"id": "hp_potion_large", "count": 2, "rarity": 2, "type": "battle"},
+			{"id": "guard_charm", "count": 2, "rarity": 2, "type": "battle"},
+			{"id": "rock_hammer", "count": 3, "rarity": 2, "type": "battle"},
+		]
+		battle_scene.set("_capture_slot_items", demo_capture_slots)
+		battle_scene.set("_equipped_capture_item_id", "capture_ball")
+		battle_scene.set("_hotbar_items", demo_hotbar)
+		if _read_arg("--battle-item-confirm=", "0") == "1":
+			battle_scene.set("_selected_hotbar_slot", 0)
+			battle_scene.set("_pending_hotbar_slot", 0)
+		if battle_scene.has_method("_sync_gui"):
+			battle_scene.call("_sync_gui")
 	if _read_arg("--battle-art-aspect-qa=", "0") == "1":
 		_seed_battle_art_aspect_qa(battle_scene)
 	if _read_arg("--battle-demo-hp=", "0") == "1":

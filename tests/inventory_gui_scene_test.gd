@@ -19,6 +19,9 @@ func _run() -> void:
 	_assert(scene.has_node("GridPanel/Slots/Slot1"), "slot nodes should be editable")
 	_assert(scene.has_node("GridPanel/PageControls/NextButton"), "page buttons should exist")
 	_assert(scene.has_node("DetailPanel/UseButton"), "use button should be editable")
+	_assert(scene.has_node("DetailPanel/BattleSlots/Slot1"), "battle equip slot 1 should be editable")
+	_assert(scene.has_node("DetailPanel/BattleSlots/Slot2"), "battle equip slot 2 should be editable")
+	_assert(scene.has_node("DetailPanel/BattleSlots/Slot3"), "battle equip slot 3 should be editable")
 
 	scene.set("_inventory", {
 		"capture_ball": 3,

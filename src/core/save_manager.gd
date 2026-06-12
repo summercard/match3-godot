@@ -995,7 +995,8 @@ func load_settings() -> Dictionary:
 		"musicOn": true,
 		"capture": {
 			"autoCapture": false,
-			"equippedItem": ""
+			"equippedItem": "",
+			"equippedBattleItems": []
 		},
 		"version": "v0.1.0"
 	})
@@ -1005,7 +1006,8 @@ func load_capture_settings() -> Dictionary:
 	var capture: Dictionary = settings.get("capture", {})
 	return {
 		"autoCapture": bool(capture.get("autoCapture", false)),
-		"equippedItem": str(capture.get("equippedItem", ""))
+		"equippedItem": str(capture.get("equippedItem", "")),
+		"equippedBattleItems": capture.get("equippedBattleItems", [])
 	}
 
 func save_capture_settings(capture_settings: Dictionary) -> bool:
@@ -1015,6 +1017,8 @@ func save_capture_settings(capture_settings: Dictionary) -> bool:
 		capture["autoCapture"] = bool(capture_settings.get("autoCapture", false))
 	if capture_settings.has("equippedItem"):
 		capture["equippedItem"] = str(capture_settings.get("equippedItem", ""))
+	if capture_settings.has("equippedBattleItems"):
+		capture["equippedBattleItems"] = capture_settings.get("equippedBattleItems", [])
 	settings["capture"] = capture
 	return save_settings(settings)
 
