@@ -4,6 +4,16 @@ class_name SceneInventoryGui
 extends "res://src/ui/controllers/inventory_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+
+# === 背包入场动画时间线 ===
+const ENTRY_HEADER_DELAY := 0.00
+const ENTRY_TABS_DELAY := 0.14
+const ENTRY_GRID_DELAY := 0.22
+const ENTRY_DETAIL_DELAY := 0.34
+const ENTRY_DURATION := 0.32
+const ENTRY_DETAIL_DURATION := 0.28
+var _entry_played: bool = false
+
 const PAGE_SIZE := 15
 const SLOT_PATHS := [
 	"GridPanel/Slots/Slot1",
@@ -128,6 +138,7 @@ func _sync_gui() -> void:
 	_sync_page_controls()
 	_sync_detail()
 	_sync_toast()
+	_maybe_play_entry()
 
 func _sync_static_labels() -> void:
 	for i in TAB_PATHS.size():
@@ -306,3 +317,57 @@ func _node(path: NodePath) -> Control:
 
 func _label(path: NodePath) -> Label:
 	return get_node(path) as Label
+
+# 背包入场序列：Header → Tabs → GridPanel → DetailPanel
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) Header：上方 28px 滑入 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null:
+		var header_rest_y := header.position.y
+		header.position.y = header_rest_y - 28.0
+		header.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_HEADER_DELAY)
+		tween.tween_property(header, "modulate:a", 1.0, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(header, "position:y", header_rest_y, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) Tabs：scale 弹缩 + 淡入
+	var tabs := get_node_or_null("Tabs") as Control
+	if tabs != null:
+		tabs.pivot_offset = Vector2(tabs.size.x * 0.5, tabs.size.y * 0.5)
+		tabs.scale = Vector2(0.85, 0.85)
+		tabs.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_TABS_DELAY)
+		tween.tween_property(tabs, "modulate:a", 1.0, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(tabs, "scale", Vector2(1.06, 1.06), 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(tabs, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 3) GridPanel：从下方 24px 滑入 + 淡入
+	var grid := get_node_or_null("GridPanel") as Control
+	if grid != null:
+		var grid_rest_y := grid.position.y
+		grid.position.y = grid_rest_y + 24.0
+		grid.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_GRID_DELAY)
+		tween.tween_property(grid, "modulate:a", 1.0, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(grid, "position:y", grid_rest_y, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 4) DetailPanel：scale 弹缩 + 淡入
+	var detail := get_node_or_null("DetailPanel") as Control
+	if detail != null and detail.visible:
+		detail.pivot_offset = Vector2(detail.size.x * 0.5, detail.size.y * 0.5)
+		detail.scale = Vector2(0.88, 0.88)
+		detail.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_DETAIL_DELAY)
+		tween.tween_property(detail, "modulate:a", 1.0, ENTRY_DETAIL_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(detail, "scale", Vector2(1.04, 1.04), ENTRY_DETAIL_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(detail, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

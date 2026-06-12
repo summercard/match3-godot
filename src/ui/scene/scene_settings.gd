@@ -5,6 +5,8 @@ extends Control
 
 signal back_pressed()
 
+const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const BACK_RECT := Rect2(10.0, 10.0, 58.0, 58.0)
@@ -107,6 +109,15 @@ var confirm_dialog := false
 var reset_success := false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
+var _round_font_normal: Font = null
+var _round_font_bold: Font = null
+
+# === 设置入场动画状态（_draw 风格）===
+const ENTRY_DURATION := 0.42
+const ENTRY_TOP_OFFSET_START := 26.0
+const ENTRY_BOTTOM_OFFSET_START := 22.0
+var _entry_t := 0.0
+var _process_enabled := false
 
 
 func _init(game_ref: Node = null) -> void:
@@ -115,6 +126,9 @@ func _init(game_ref: Node = null) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_process_enabled = true
+	set_process(true)
+	self.modulate.a = 0.0  # 入场动画起点：透明
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -279,17 +293,60 @@ func _hit_segment(row: Dictionary, row_rect: Rect2, point: Vector2) -> String:
 	return str(options[idx].get("value", ""))
 
 
+func _process(delta: float) -> void:
+	if not _process_enabled:
+		return
+	if _entry_t < ENTRY_DURATION:
+		_entry_t = minf(_entry_t + delta, ENTRY_DURATION)
+		# 整体淡入
+		if _entry_t < ENTRY_DURATION:
+			self.modulate.a = ease(_entry_t / ENTRY_DURATION, -1.5)
+		else:
+			self.modulate.a = 1.0
+		queue_redraw()
+	else:
+		_process_enabled = false
+		set_process(false)
+
+
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
 	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.02, 0.08, 0.24), true)
+	# 顶部：header 从上方滑入
+	var top_off := _entry_top_offset()
+	if top_off != 0.0:
+		draw_set_transform(Vector2(0.0, top_off))
 	_draw_header()
+	if top_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
+	# 中间内容：跟随整体淡入
 	_draw_main_panel()
 	_draw_about_panel()
+	# 底部：reset/default 按钮从下方滑入
+	var bottom_off := _entry_bottom_offset()
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2(0.0, bottom_off))
 	_draw_bottom_buttons()
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
 	if confirm_dialog:
 		_draw_confirm_dialog()
 	if reset_success:
 		_draw_toast("数据已重置")
+
+
+func _entry_top_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return -ENTRY_TOP_OFFSET_START * (1.0 - ease(progress, -1.5))
+
+
+func _entry_bottom_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return ENTRY_BOTTOM_OFFSET_START * (1.0 - ease(progress, -1.5))
 
 
 func _draw_header() -> void:
@@ -417,13 +474,29 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 
-func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, _bold: bool = false, width: float = 160.0) -> void:
+func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var font := _get_round_font(bold)
 	var size_i := int(font_size)
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0 + 1.0, y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
 
 
-func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, _bold: bool = false, width: float = 160.0) -> void:
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	var font := _get_round_font(bold)
 	var size_i := int(font_size)
-	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
-	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+
+
+func _get_round_font(bold: bool) -> Font:
+	if bold:
+		if _round_font_bold == null:
+			var f := FontVariation.new()
+			f.base_font = _RoundFontSrc
+			f.set("variation_embolden", 0.95)
+			_round_font_bold = f
+		return _round_font_bold
+	if _round_font_normal == null:
+		var f := FontVariation.new()
+		f.base_font = _RoundFontSrc
+		f.set("variation_embolden", 0.45)
+		_round_font_normal = f
+	return _round_font_normal

@@ -34,6 +34,21 @@ var _capture_success_time := 0.0
 var _capture_success_last_visible := false
 var _win_confetti_layer: Control = null
 
+# === 胜利结算入场动画状态 ===
+const STAR_ENTRY_SCALE := 1.7
+const STAR_ENTRY_DURATION := 0.22
+const STAR_ENTRY_STAGGER := 0.16
+const STAR_ENTRY_START := 0.20
+const SLOT_ENTRY_START := 0.55
+const SLOT_ENTRY_STAGGER := 0.10
+const EXP_ENTRY_START := 0.85
+const EXP_ENTRY_STAGGER := 0.10
+const BUTTONS_ENTRY_START := 1.10
+const BANNER_DURATION := 0.22
+const SLOT_DURATION := 0.18
+var _normal_entry_played: bool = false
+var _normal_entry_phase: int = 0  # 0=未开始 1=横幅 2=战斗信息 3=星星 4=奖励 5=经验 6=按钮 7=完成
+
 func _ready() -> void:
 	name = "SceneResult"
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -199,6 +214,114 @@ func _restart_capture_success_entry() -> void:
 		tween.parallel().tween_property(node, "scale", Vector2(1.04, 1.04), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(node, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
+# 胜利结算（无捕获成功）入场序列：横幅 → 战斗信息 → 星星依次弹跳 → 奖励槽 → 经验卡 → 按钮
+func _maybe_play_normal_entry() -> void:
+	if _normal_entry_played:
+		return
+	if not _is_win or _should_show_capture_success():
+		return
+	if not is_inside_tree():
+		return
+	_normal_entry_played = true
+	_normal_entry_phase = 1
+	_play_normal_entry()
+
+func _play_normal_entry() -> void:
+	# 1) 横幅：从小放大 + 淡入
+	var banner := get_node_or_null("Banner") as Control
+	if banner != null:
+		banner.pivot_offset = banner.size * 0.5
+		banner.scale = Vector2(0.85, 0.85)
+		banner.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_property(banner, "modulate:a", 1.0, BANNER_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(banner, "scale", Vector2(1.05, 1.05), BANNER_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(banner, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 2
+	# 2) 战斗信息条：上浮 + 淡入
+	var info := get_node_or_null("BattleInfo") as Control
+	if info != null:
+		var info_rest_y := info.position.y
+		info.position.y = info_rest_y + 12.0
+		info.modulate.a = 0.0
+		var info_tween := create_tween()
+		info_tween.tween_interval(0.18)
+		info_tween.tween_property(info, "modulate:a", 1.0, 0.20).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		info_tween.parallel().tween_property(info, "position:y", info_rest_y, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 3
+	# 3) 星星：从大变到正常，依次延迟启动
+	for i in STAR_PATHS.size():
+		var star := get_node_or_null(STAR_PATHS[i]) as TextureRect
+		if star == null:
+			continue
+		star.pivot_offset = star.size * 0.5
+		var is_lit := i < _stars
+		if is_lit:
+			star.scale = Vector2.ONE * STAR_ENTRY_SCALE
+		else:
+			star.scale = Vector2.ONE
+		star.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(STAR_ENTRY_START + float(i) * STAR_ENTRY_STAGGER)
+		if is_lit:
+			tween.tween_property(star, "modulate:a", 1.0, STAR_ENTRY_DURATION * 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.parallel().tween_property(star, "scale", Vector2.ONE * 1.15, STAR_ENTRY_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tween.tween_property(star, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			if i == 0:
+				var on_first_pop := func() -> void:
+					var am := get_node_or_null("/root/AudioManager")
+					if am != null and am.has_method("play_sfx"):
+						am.call("play_sfx", "powerup_created_star")
+				tween.tween_callback(on_first_pop)
+		else:
+			tween.tween_property(star, "modulate:a", 0.55, STAR_ENTRY_DURATION * 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 4
+	# 4) 奖励槽：从下方弹入 + 淡入（仅可见槽位）
+	for i in REWARD_SLOT_PATHS.size():
+		var slot := _node(REWARD_SLOT_PATHS[i])
+		if not slot.visible:
+			continue
+		slot.pivot_offset = Vector2(slot.size.x * 0.5, slot.size.y)
+		slot.scale = Vector2(0.6, 0.6)
+		slot.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(SLOT_ENTRY_START + float(i) * SLOT_ENTRY_STAGGER)
+		tween.tween_property(slot, "modulate:a", 1.0, SLOT_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(slot, "scale", Vector2(1.08, 1.08), SLOT_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(slot, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 5
+	# 5) 经验卡：同奖励槽节奏
+	for i in EXP_CARD_PATHS.size():
+		var card := _node(EXP_CARD_PATHS[i])
+		if not card.visible:
+			continue
+		card.pivot_offset = Vector2(card.size.x * 0.5, card.size.y)
+		card.scale = Vector2(0.6, 0.6)
+		card.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(EXP_ENTRY_START + float(i) * EXP_ENTRY_STAGGER)
+		tween.tween_property(card, "modulate:a", 1.0, SLOT_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(card, "scale", Vector2(1.08, 1.08), SLOT_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(card, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 6
+	# 6) 按钮组：上滑 + 淡入
+	var buttons := get_node_or_null("Buttons") as Control
+	if buttons != null:
+		var buttons_rest_y := buttons.position.y
+		buttons.position.y = buttons_rest_y + 22.0
+		buttons.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(BUTTONS_ENTRY_START)
+		tween.tween_property(buttons, "modulate:a", 1.0, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(buttons, "position:y", buttons_rest_y, 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	_normal_entry_phase = 7
+
 func _update_capture_success_animation(delta: float) -> void:
 	if not _should_show_capture_success():
 		return
@@ -241,6 +364,7 @@ func _sync_gui() -> void:
 	_sync_levelups()
 	_sync_buttons()
 	_sync_capture_success_layer()
+	_maybe_play_normal_entry()
 
 func _sync_banner() -> void:
 	var banner_key := "victory_banner" if _is_win else "defeat_banner"

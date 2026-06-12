@@ -63,12 +63,31 @@ const TEXT_GOLD := Color(1.0, 0.84, 0.25)
 const DYNAMIC_GUI_INTERVAL := 1.0
 const STATUS_GUI_INTERVAL := 1.0 / 15.0
 
+# 子页面入场动画（参考胜利界面：奖励槽从下方弹入 + 淡入）
+const SUBPAGE_ENTRY_DURATION := 0.20
+const SUBPAGE_ENTRY_OFFSET_Y := 14.0
+const SUBPAGE_CARD_START := 0.05
+const SUBPAGE_CARD_STAGGER := 0.05
+const SUBPAGE_CARD_DURATION := 0.22
+const SUBPAGE_BTN_DELAY := 0.30
+const SUBPAGE_BTN_DURATION := 0.20
+
+# 首次进入旅馆（hub 级别）入场：Header / ResourceBar / BottomNav 整体 stagger
+const HUB_HEADER_DURATION := 0.22
+const HUB_RESOURCE_DURATION := 0.22
+const HUB_NAV_START := 0.18
+const HUB_NAV_STAGGER := 0.04
+const HUB_NAV_DURATION := 0.18
+
 var _dynamic_gui_tick: float = 0.0
 var _status_gui_tick: float = 0.0
 var _social_page: int = 0
 var _toast_tween: Tween = null
 var _social_heart_fx_running: bool = false
 var _social_heart_tweens: Array[Tween] = []
+var _subpage_entry_tweens: Array[Tween] = []
+var _hub_entry_tweens: Array[Tween] = []
+var _hub_entry_played: bool = false
 var _portrait_path_cache: Dictionary = {}
 
 func _ready() -> void:
@@ -77,10 +96,14 @@ func _ready() -> void:
 	_connect_gui_actions()
 	_attach_interaction_feedback()
 	_sync_gui()
+	_play_subpage_entry(_active_page)
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
 	_sync_gui()
+	# 在 _sync_gui 之后才能 _play_hub_entry：因为 _sync_gui 内部的 _sync_pet_farm_bottom_nav
+	# 会把 Nav button.modulate 覆盖为 WHITE。_hub_entry_played 守卫保证只播一次。
+	_play_hub_entry()
 
 func initialize(game: Node) -> void:
 	super.initialize(game)
@@ -243,6 +266,7 @@ func _switch_to_ranch() -> void:
 	_active_page = "ranch"
 	_dragging_class_list = false
 	_sync_gui()
+	_play_subpage_entry("ranch")
 
 func _switch_to_classroom() -> void:
 	_active_page = "classroom"
@@ -250,12 +274,14 @@ func _switch_to_classroom() -> void:
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
 	_update_class_scroll_limit()
 	_sync_gui()
+	_play_subpage_entry("classroom")
 
 func _switch_to_social() -> void:
 	_active_page = "social"
 	_dragging_class_list = false
 	_update_class_scroll_limit()
 	_sync_gui()
+	_play_subpage_entry("social")
 
 func _refresh_ranch_view() -> void:
 	_calc_idle_exp()
@@ -473,6 +499,233 @@ func _play_toast_feedback() -> void:
 	_toast_tween = create_tween()
 	_toast_tween.tween_property(toast, "scale", Vector2(1.12, 1.12), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_toast_tween.tween_property(toast, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+# 首次进入旅馆 hub：Header / ResourceBar / BottomNav 5 个 nav 按钮 stagger
+# 只在第一次进入时播放；后续子页面切换仅触发 _play_subpage_entry
+func _play_hub_entry() -> void:
+	if _hub_entry_played:
+		return
+	if not is_inside_tree():
+		return
+	_hub_entry_played = true
+	_kill_hub_entry_tweens()
+
+	# Header：从顶部滑下 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null and header.visible:
+		var orig_h_y := header.position.y
+		header.position.y = orig_h_y - 12.0
+		header.modulate.a = 0.0
+		var h_tween := create_tween()
+		h_tween.tween_property(header, "modulate:a", 1.0, HUB_HEADER_DURATION) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		h_tween.parallel().tween_property(header, "position:y", orig_h_y, HUB_HEADER_DURATION) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_hub_entry_tweens.append(h_tween)
+
+	# PetFarmResourceBar：从顶部滑下 + 淡入（比 Header 稍迟）
+	var res_bar := get_node_or_null("PetFarmResourceBar") as Control
+	if res_bar != null and res_bar.visible:
+		var orig_r_y := res_bar.position.y
+		res_bar.position.y = orig_r_y - 10.0
+		res_bar.modulate.a = 0.0
+		var r_tween := create_tween()
+		r_tween.tween_interval(0.05)
+		r_tween.tween_property(res_bar, "modulate:a", 1.0, HUB_RESOURCE_DURATION) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		r_tween.parallel().tween_property(res_bar, "position:y", orig_r_y, HUB_RESOURCE_DURATION) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_hub_entry_tweens.append(r_tween)
+
+	# PetFarmBottomNav 5 个按钮：scale bounce 0.7 → 1.08 → 1.0 + 淡入，依次错开
+	var nav := get_node_or_null("PetFarmBottomNav") as Control
+	if nav != null and nav.visible:
+		for i in 5:
+			var btn := nav.get_node_or_null("Nav%d" % (i + 1)) as Control
+			if btn == null or not btn.visible:
+				continue
+			btn.pivot_offset = btn.size * 0.5
+			btn.scale = Vector2(0.7, 0.7)
+			btn.modulate.a = 0.0
+			var n_tween := create_tween()
+			n_tween.tween_interval(HUB_NAV_START + HUB_NAV_STAGGER * float(i))
+			n_tween.tween_property(btn, "modulate:a", 1.0, HUB_NAV_DURATION) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			n_tween.parallel().tween_property(btn, "scale", Vector2(1.08, 1.08), HUB_NAV_DURATION) \
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			n_tween.tween_property(btn, "scale", Vector2.ONE, 0.08) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_hub_entry_tweens.append(n_tween)
+
+func _kill_hub_entry_tweens() -> void:
+	for t in _hub_entry_tweens:
+		if t != null and t.is_valid():
+			t.kill()
+	_hub_entry_tweens.clear()
+
+# 子页面入场动画：参考胜利界面的奖励槽节奏
+# 1) 整页：上浮 + 淡入
+# 2) 卡片：从下方弹入 + 淡入（依次错开）
+# 3) 底部按钮组：上滑 + 淡入
+# 注意：仅修改 modulate.a / scale / position，不改 .visible，保证可见性测试不被破坏
+func _play_subpage_entry(page_name: String) -> void:
+	if not is_inside_tree() or not has_node("Pages"):
+		return
+	var page := get_node_or_null("Pages/%s" % _subpage_node_suffix(page_name)) as Control
+	if page == null:
+		return
+
+	# 先停掉旧的入场 tween（防止连续切换时叠态）
+	_kill_subpage_entry_tweens()
+
+	# === 1) 整页上浮 + 淡入 ===
+	var orig_page_pos := page.position
+	page.position = orig_page_pos + Vector2(0, SUBPAGE_ENTRY_OFFSET_Y)
+	page.modulate.a = 0.0
+	var page_tween := create_tween()
+	page_tween.tween_property(page, "modulate:a", 1.0, SUBPAGE_ENTRY_DURATION) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	page_tween.parallel().tween_property(page, "position:y", orig_page_pos.y, SUBPAGE_ENTRY_DURATION) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_subpage_entry_tweens.append(page_tween)
+
+	# === 2) 卡片：从下方弹入 + 淡入，依次错开 ===
+	for i in _subpage_card_paths_for(page_name).size():
+		var card_path: String = _subpage_card_paths_for(page_name)[i]
+		var card := get_node_or_null(card_path) as Control
+		if card == null or not card.visible:
+			continue
+		# 锁定/半透明的卡片不参与入场，保持原状态
+		if card.modulate.a < 0.9:
+			continue
+		card.pivot_offset = Vector2(card.size.x * 0.5, card.size.y)
+		card.scale = Vector2(0.6, 0.6)
+		card.modulate.a = 0.0
+		var card_tween := create_tween()
+		card_tween.tween_interval(SUBPAGE_CARD_START + float(i) * SUBPAGE_CARD_STAGGER)
+		card_tween.tween_property(card, "modulate:a", 1.0, SUBPAGE_CARD_DURATION) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		card_tween.parallel().tween_property(card, "scale", Vector2(1.08, 1.08), SUBPAGE_CARD_DURATION) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		card_tween.tween_property(card, "scale", Vector2.ONE, 0.08) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_subpage_entry_tweens.append(card_tween)
+
+	# === 3) 底部按钮组：上滑 + 淡入 ===
+	var btns := page.get_node_or_null("BottomButtons") as Control
+	if btns != null and btns.visible:
+		var orig_btn_y := btns.position.y
+		btns.position.y = orig_btn_y + 12.0
+		btns.modulate.a = 0.0
+		var btn_tween := create_tween()
+		btn_tween.tween_interval(SUBPAGE_BTN_DELAY)
+		btn_tween.tween_property(btns, "modulate:a", 1.0, SUBPAGE_BTN_DURATION)
+		btn_tween.parallel().tween_property(btns, "position:y", orig_btn_y, SUBPAGE_BTN_DURATION) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_subpage_entry_tweens.append(btn_tween)
+
+	# === 4) 子页面专属面板 stagger ===
+	_play_subpage_extras(page, page_name)
+
+# 各子页面专属的面板/槽位入场：
+#   - ranch：5 个 Slot 依次 scale pop + CollectRow 上滑
+#   - classroom：DetailPanel 从左侧滑入 + 淡入
+#   - social：PlacePanel 左滑入 + BondPanel 右滑入
+func _play_subpage_extras(page: Control, page_name: String) -> void:
+	match page_name:
+		"ranch":
+			for i in SLOT_PATHS.size():
+				var slot := get_node_or_null(SLOT_PATHS[i]) as Control
+				if slot == null or not slot.visible:
+					continue
+				slot.pivot_offset = slot.size * 0.5
+				slot.scale = Vector2(0.75, 0.75)
+				slot.modulate.a = 0.0
+				var s_tween := create_tween()
+				s_tween.tween_interval(0.08 + float(i) * 0.04)
+				s_tween.tween_property(slot, "modulate:a", 1.0, 0.18) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				s_tween.parallel().tween_property(slot, "scale", Vector2(1.06, 1.06), 0.18) \
+					.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				s_tween.tween_property(slot, "scale", Vector2.ONE, 0.08) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				_subpage_entry_tweens.append(s_tween)
+			var collect := page.get_node_or_null("CollectRow") as Control
+			if collect != null and collect.visible:
+				var orig_c_y := collect.position.y
+				collect.position.y = orig_c_y + 10.0
+				collect.modulate.a = 0.0
+				var c_tween := create_tween()
+				c_tween.tween_interval(0.22)
+				c_tween.tween_property(collect, "modulate:a", 1.0, 0.20) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				c_tween.parallel().tween_property(collect, "position:y", orig_c_y, 0.20) \
+					.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				_subpage_entry_tweens.append(c_tween)
+		"classroom":
+			var detail := page.get_node_or_null("DetailPanel") as Control
+			if detail != null and detail.visible:
+				var orig_d_x := detail.position.x
+				detail.position.x = orig_d_x - 16.0
+				detail.modulate.a = 0.0
+				var d_tween := create_tween()
+				d_tween.tween_interval(0.06)
+				d_tween.tween_property(detail, "modulate:a", 1.0, 0.22) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				d_tween.parallel().tween_property(detail, "position:x", orig_d_x, 0.22) \
+					.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				_subpage_entry_tweens.append(d_tween)
+		"social":
+			var place := page.get_node_or_null("PlacePanel") as Control
+			if place != null and place.visible:
+				var orig_p_x := place.position.x
+				place.position.x = orig_p_x - 14.0
+				place.modulate.a = 0.0
+				var p_tween := create_tween()
+				p_tween.tween_interval(0.06)
+				p_tween.tween_property(place, "modulate:a", 1.0, 0.22) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				p_tween.parallel().tween_property(place, "position:x", orig_p_x, 0.22) \
+					.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				_subpage_entry_tweens.append(p_tween)
+			var bond := page.get_node_or_null("BondPanel") as Control
+			if bond != null and bond.visible:
+				var orig_b_x := bond.position.x
+				bond.position.x = orig_b_x + 14.0
+				bond.modulate.a = 0.0
+				var b_tween := create_tween()
+				b_tween.tween_interval(0.12)
+				b_tween.tween_property(bond, "modulate:a", 1.0, 0.22) \
+					.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				b_tween.parallel().tween_property(bond, "position:x", orig_b_x, 0.22) \
+					.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				_subpage_entry_tweens.append(b_tween)
+
+func _kill_subpage_entry_tweens() -> void:
+	for t in _subpage_entry_tweens:
+		if t != null and t.is_valid():
+			t.kill()
+	_subpage_entry_tweens.clear()
+
+func _subpage_node_suffix(page_name: String) -> String:
+	match page_name:
+		"ranch":
+			return "RanchPage"
+		"classroom":
+			return "ClassroomPage"
+		"social":
+			return "SocialPage"
+	return ""
+
+func _subpage_card_paths_for(page_name: String) -> PackedStringArray:
+	match page_name:
+		"ranch":
+			return RANCH_CARD_PATHS
+		"classroom":
+			return CLASS_CARD_PATHS
+		"social":
+			return SOCIAL_CARD_PATHS
+	return PackedStringArray()
 
 func _attach_interaction_feedback() -> void:
 	var paths := [

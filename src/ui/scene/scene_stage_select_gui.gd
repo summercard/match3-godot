@@ -50,6 +50,8 @@ var _shade_visible_state := false
 var _sweep_dialog_anim_state := false
 var _sweep_result_anim_state := false
 var _anim: AnimationHelper = null
+var _focus_stage_id: String = ""
+var _focus_scroll_applied: bool = false
 
 func _get_anim() -> AnimationHelper:
 	if _anim == null:
@@ -62,9 +64,15 @@ func _ready() -> void:
 	_sync_gui()
 
 func initialize(game: Node, data: Dictionary = {}) -> void:
+	_focus_stage_id = str(data.get("focusStageId", ""))
+	_focus_scroll_applied = false
 	super.initialize(game, data)
 	_sync_gui()
 	_scroll_map_to_start()
+	# _scroll_map_to_start 内部 call_deferred 了 _scroll_map_to_bottom。
+	# 我们也用 call_deferred 排到它之后执行，确保 focus 滚动不会被打回底部。
+	if not _focus_stage_id.is_empty():
+		call_deferred("_scroll_map_to_focus", _focus_stage_id)
 
 func _create_ui() -> void:
 	_back_btn = get_node("Header/BackButton") as TextureButton
@@ -251,6 +259,60 @@ func _sync_gui() -> void:
 	_sync_map_nodes()
 	_sync_popup_visibility()
 
+## 从大厅点击"开始冒险"时，会附带 focusStageId。把 chapter map
+## 滚动到该台子可见位置。仅当用户没手动滚动过、且目标在当前章节时生效。
+func _maybe_apply_focus_scroll() -> void:
+	if _focus_scroll_applied:
+		return
+	if _focus_stage_id.is_empty():
+		return
+	if _map_scroll == null or _chapter_map == null:
+		return
+	if not _scroll_pointer_active:
+		_scroll_map_to_focus(_focus_stage_id)
+		_focus_scroll_applied = true
+
+func _scroll_map_to_focus(stage_id: String) -> void:
+	if stage_id.is_empty():
+		return
+	var target_button: Control = _find_stage_button(stage_id)
+	if target_button == null:
+		return
+	# 把 stage 节点投影到 chapter map 的局部坐标
+	var stage_nodes := _chapter_map.get_node_or_null("StageNodes")
+	var stage_nodes_offset := Vector2.ZERO
+	if stage_nodes != null:
+		stage_nodes_offset = stage_nodes.position
+	var target_y := target_button.position.y + stage_nodes_offset.y + target_button.size.y * 0.5
+	var view_h := _map_scroll.size.y
+	# 真正可滚动的最大值是 ScrollContainer 内部 VScrollBar.max_value
+	# (= content_height - viewport_height)，不是 chapter map 的整体高度。
+	var max_scroll: float = 0.0
+	var v_bar: VScrollBar = _map_scroll.get_v_scroll_bar()
+	if v_bar != null:
+		max_scroll = float(v_bar.max_value)
+	else:
+		max_scroll = maxf(0.0, _chapter_map_scroll_height() - view_h)
+	var desired := target_y - view_h * 0.5
+	_map_scroll.scroll_vertical = clampf(desired, 0.0, max_scroll)
+	_update_cloud_parallax(float(_map_scroll.scroll_vertical))
+
+## 按 stage_id 在当前章节里找对应的 TextureButton（含 BossStage）
+func _find_stage_button(stage_id: String) -> Control:
+	if _cards.is_empty():
+		return null
+	var boss_card := _boss_card()
+	if not boss_card.is_empty() and str(boss_card.get("id", "")) == stage_id:
+		return _boss_button()
+	var stage_cards: Array = _cards.filter(func(card): return not bool(card.get("is_boss", false)))
+	var buttons := _stage_buttons()
+	for i in stage_cards.size():
+		if i >= buttons.size():
+			break
+		if str(stage_cards[i].get("id", "")) == stage_id:
+			return buttons[i]
+	return null
+
 func _ensure_chapter_map() -> void:
 	var chapter_id := str(_current_chapter().get("id", ""))
 	if chapter_id.is_empty() or chapter_id == _chapter_map_id:
@@ -324,9 +386,110 @@ func _connect_chapter_map_actions() -> void:
 	for stage_button in _stage_buttons():
 		_attach_button_feedback(stage_button, CartoonButtonFeedback.Profile.NAV, false)
 		_attach_button_feedback(stage_button.get_node_or_null("SweepButton") as BaseButton, CartoonButtonFeedback.Profile.ICON, false)
+		_ensure_portrait_node(stage_button, _STAGE_PORTRAIT_FALLBACK_POS, _STAGE_PORTRAIT_SIZE)
 	var boss := _boss_button()
 	if boss != null:
 		_attach_button_feedback(boss, CartoonButtonFeedback.Profile.ENTRY, false)
+		_ensure_portrait_node(boss, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
+
+# 普通关卡台子的画像尺寸（位置由 _apply_stage_portrait 动态按台子中心计算）
+const _STAGE_PORTRAIT_SIZE := Vector2(64.0, 56.0)
+# Boss 台子的画像尺寸
+const _BOSS_PORTRAIT_SIZE := Vector2(106.0, 96.0)
+# 首帧 fallback 位置（_apply_*_portrait 会在 _sync 时按台子尺寸重设为"底部对准中心"）
+const _STAGE_PORTRAIT_FALLBACK_POS := Vector2(8.0, -2.0)
+const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(36.0, 32.0)
+
+## 动态为关卡台子添加怪物画像 TextureRect；只创建一次，避免重复堆叠。
+## 位置由 _apply_stage_portrait / _apply_boss_portrait 按台子尺寸动态计算（底部对准台子中心）。
+func _ensure_portrait_node(button: TextureButton, fallback_pos: Vector2, portrait_size: Vector2) -> TextureRect:
+	if button == null:
+		return null
+	if button.has_node("MonsterPortrait"):
+		return button.get_node("MonsterPortrait") as TextureRect
+	var portrait := TextureRect.new()
+	portrait.name = "MonsterPortrait"
+	portrait.position = fallback_pos
+	portrait.size = portrait_size
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.visible = false
+	button.add_child(portrait)
+	return portrait
+
+## 从 card 中取出该关卡的"招牌"怪物 ID：普通关卡取第一个 enemy；
+## 多阶段 Boss 取第一阶段第一个 enemy；找不到返回空串。
+func _feature_enemy_id(card: Dictionary) -> String:
+	var stage_data: Dictionary = card.get("stage_data", {})
+	if stage_data.is_empty():
+		return ""
+	var enemies: Array = stage_data.get("enemies", [])
+	if not enemies.is_empty():
+		return str(enemies[0])
+	for phase: Dictionary in stage_data.get("phases", []):
+		var phase_enemies: Array = phase.get("enemies", [])
+		if not phase_enemies.is_empty():
+			return str(phase_enemies[0])
+	return ""
+
+## 把招牌怪物的画像同步到台子上的 MonsterPortrait。
+## 显示规则：已解锁但未通关（stars==0）的关卡，把招牌怪物原色画像放在台子中心，
+## 让怪物看起来"坐在台子上"。已锁定（enabled==false）或已通关（stars>0）的关卡不显示。
+func _apply_stage_portrait(button: TextureButton, card: Dictionary) -> void:
+	var portrait := _ensure_portrait_node(button, _STAGE_PORTRAIT_FALLBACK_POS, _STAGE_PORTRAIT_SIZE)
+	if portrait == null:
+		return
+	var enabled := bool(card.get("enabled", true))
+	var stars := int(card.get("stars", 0))
+	if not enabled or stars > 0:
+		portrait.visible = false
+		portrait.texture = null
+		return
+	var monster_id := _feature_enemy_id(card)
+	var path := MonsterArtDB.get_battle_portrait_path(monster_id) if not monster_id.is_empty() else ""
+	if path.is_empty() or not ResourceLoader.exists(path):
+		portrait.visible = false
+		portrait.texture = null
+		return
+	portrait.texture = load(path)
+	# 保留原色（白 modulate = 无修改）
+	portrait.modulate = Color(1, 1, 1, 1)
+	# 动态定位：图片底部对准台子中心，水平居中
+	_center_portrait_on_pedestal(button, portrait)
+	portrait.visible = true
+
+func _apply_boss_portrait(button: TextureButton, card: Dictionary) -> void:
+	var portrait := _ensure_portrait_node(button, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
+	if portrait == null:
+		return
+	var enabled := bool(card.get("enabled", true))
+	var stars := int(card.get("stars", 0))
+	if not enabled or stars > 0:
+		portrait.visible = false
+		portrait.texture = null
+		return
+	var monster_id := _feature_enemy_id(card)
+	var path := MonsterArtDB.get_battle_portrait_path(monster_id) if not monster_id.is_empty() else ""
+	if path.is_empty() or not ResourceLoader.exists(path):
+		portrait.visible = false
+		portrait.texture = null
+		return
+	portrait.texture = load(path)
+	portrait.modulate = Color(1, 1, 1, 1)
+	_center_portrait_on_pedestal(button, portrait)
+	portrait.visible = true
+
+## 把 portrait 放在台子中心：图片底部贴着 button 垂直中线，水平居中。
+## 这样怪物画像看起来像坐在台子上（露出台子上半部分）。
+func _center_portrait_on_pedestal(button: TextureButton, portrait: TextureRect) -> void:
+	var btn_size: Vector2 = button.size
+	var port_size: Vector2 = portrait.size
+	# bottom-of-portrait at vertical-midline of button: position.y = mid - height
+	portrait.position = Vector2(
+		(btn_size.x - port_size.x) * 0.5,
+		btn_size.y * 0.5 - port_size.y
+	)
 
 func _stage_buttons() -> Array[TextureButton]:
 	var result: Array[TextureButton] = []
@@ -367,11 +530,13 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	button.modulate.a = 1.0 if enabled else 0.80
 	(button.get_node("StageNumber") as Label).text = str(card.get("stage_no", ""))
 	(button.get_node("StageNumber") as Label).modulate = TEXT_WHITE if enabled else TEXT_MUTED
+	(button.get_node("StageNumber") as Label).visible = enabled
 	var lock_state := button.get_node("LockState") as Label
 	lock_state.visible = not enabled
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	(button.get_node("SweepButton") as Button).visible = enabled and bool(card.get("can_sweep", false))
+	_apply_stage_portrait(button, card)
 
 func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
@@ -380,6 +545,7 @@ func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	(button.get_node("LockState") as Label).visible = not enabled
+	_apply_boss_portrait(button, card)
 
 func _sync_selection_ring(button: TextureButton, enabled: bool) -> void:
 	if not button.has_node("SelectionRing"):

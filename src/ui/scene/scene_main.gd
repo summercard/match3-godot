@@ -10,6 +10,15 @@ signal button_pressed(btn_id: String)
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
+
+# === 大厅入场动画时间线 ===
+const ENTRY_HEADER_DELAY := 0.00
+const ENTRY_PRIMARY_DELAY := 0.22
+const ENTRY_NAV_DELAY := 0.38
+const ENTRY_HEADER_DURATION := 0.34
+const ENTRY_PRIMARY_DURATION := 0.30
+const ENTRY_NAV_DURATION := 0.34
+var _entry_played: bool = false
 const BUTTON_DESCRIPTIONS := {
 	"start": "选择关卡，开始三消冒险战斗！",
 	"team": "编队你的精灵伙伴，打造最强阵容",
@@ -73,6 +82,7 @@ func _ready() -> void:
 			plus_button.pressed.connect(_queue_button_pressed.bind("shop"))
 			plus_button.tooltip_text = BUTTON_DESCRIPTIONS["shop"]
 	_update_player_display()
+	_maybe_play_entry()
 
 func init(_data: Dictionary = {}) -> void:
 	_load_player_data()
@@ -107,6 +117,59 @@ func _update_player_display() -> void:
 
 func _on_button_pressed(button_id: String) -> void:
 	button_pressed.emit(button_id)
+
+# 大厅入场序列：Header 从上方 → PrimaryButtons 弹入（StartButton 从大到小）→ BottomNav 从下方
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) Header：上方 30px 滑入 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null:
+		var header_rest_y := header.position.y
+		header.position.y = header_rest_y - 30.0
+		header.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_HEADER_DELAY)
+		tween.tween_property(header, "modulate:a", 1.0, ENTRY_HEADER_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(header, "position:y", header_rest_y, ENTRY_HEADER_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) PrimaryButtons 容器：scale 弹缩 + 淡入（除 StartButton 外的按钮保持这个）
+	var primary := get_node_or_null("PrimaryButtons") as Control
+	if primary != null:
+		primary.pivot_offset = Vector2(primary.size.x * 0.5, primary.size.y * 0.5)
+		primary.scale = Vector2(0.85, 0.85)
+		primary.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_PRIMARY_DELAY)
+		tween.tween_property(primary, "modulate:a", 1.0, ENTRY_PRIMARY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(primary, "scale", Vector2(1.06, 1.06), ENTRY_PRIMARY_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(primary, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 3) StartButton：从大到小弹入（独立于 PrimaryButtons 的 pop）
+	var start := get_node_or_null("PrimaryButtons/StartButton") as Control
+	if start != null:
+		start.pivot_offset = start.size * 0.5
+		start.scale = Vector2(1.25, 1.25)
+		start.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_PRIMARY_DELAY + 0.08)
+		tween.tween_property(start, "modulate:a", 1.0, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(start, "scale", Vector2.ONE, 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# 4) BottomNav：下方 30px 滑入 + 淡入
+	var nav := get_node_or_null("BottomNav") as Control
+	if nav != null:
+		var nav_rest_y := nav.position.y
+		nav.position.y = nav_rest_y + 30.0
+		nav.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_NAV_DELAY)
+		tween.tween_property(nav, "modulate:a", 1.0, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(nav, "position:y", nav_rest_y, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _queue_button_pressed(button_id: String) -> void:
 	if _navigation_queued:

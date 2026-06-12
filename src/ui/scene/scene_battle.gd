@@ -395,10 +395,36 @@ const BATTLE_RESULT_OVERLAY_ASSETS := {
 	"button_continue": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
 	"capture_plaque": "res://assets/images/ui/panels/battle_flow_new_ui_capture_status_plaque.png",
 	"tap_strip": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
-	"victory_burst": "res://assets/images/effects/battle_flow_new_fx_golden_burst.png",
-	"defeat_smoke": "res://assets/images/effects/battle_flow_new_fx_sparkles.png",
-	"underline": "res://assets/images/effects/battle_flow_new_fx_sparkles.png"
+	"victory_burst": "res://assets/images/effects/battle_flow_new_fx_golden_burst.png"
 }
+
+# === 战局结束弹窗（胜利/失败）入场动画（参考胜利界面奖励槽节奏）===
+# 元素依次进入：背景遮罩 → 爆发光晕 → 主横幅 + 标题 → 面板 → 收服状态 → 点击条
+# 总时长约束 ≤ 0.72s（_go_to_result 等待时长）
+const BATTLE_END_BG_START := 0.00
+const BATTLE_END_BG_DURATION := 0.18
+const BATTLE_END_BURST_START := 0.04
+const BATTLE_END_BURST_DURATION := 0.32
+const BATTLE_END_BURST_SCALE_START := 0.70
+const BATTLE_END_BURST_OFFSET_Y := 12.0
+const BATTLE_END_BANNER_START := 0.08
+const BATTLE_END_BANNER_DURATION := 0.28
+const BATTLE_END_BANNER_SCALE_START := 0.80
+const BATTLE_END_BANNER_OFFSET_Y := -22.0
+const BATTLE_END_PANEL_START := 0.14
+const BATTLE_END_PANEL_DURATION := 0.24
+const BATTLE_END_PANEL_SCALE_START := 0.92
+const BATTLE_END_UNDERLINE_START := 0.28
+const BATTLE_END_UNDERLINE_DURATION := 0.24
+const BATTLE_END_PLAQUE_START := 0.36
+const BATTLE_END_PLAQUE_DURATION := 0.22
+const BATTLE_END_PLAQUE_SCALE_START := 0.78
+const BATTLE_END_TAP_START := 0.46
+const BATTLE_END_TAP_DURATION := 0.22
+const BATTLE_END_TAP_SCALE_START := 0.85
+const BATTLE_END_TAP_OFFSET_Y := 10.0
+# 弹窗入场总时长
+const BATTLE_END_TOTAL_DURATION := 0.70
 
 ## 宝石 TextureRect 缓存
 var _gem_icon_pool: Array[TextureRect] = []
@@ -2741,38 +2767,139 @@ func _draw_message(canvas: CanvasItem = self) -> void:
 
 	_draw_fx_text(canvas, _message_text, DESIGN_W / 2.0, toast_y + (7.0 if is_turn_message else 5.0), msg_color, base_text_size * pop, toast_w - 28.0, msg_style)
 
+# === 战局结束弹窗：元素级入场 transform 辅助 ===
+# ease(s, 0.0) 在 Godot 4.6 始终返回 0，phase 2 改用 ease(s, -1.0)（线性）
+func _overlay_bounce_scale(local_t: float, start_scale: float, overshoot: float) -> float:
+	if local_t <= 0.0:
+		return start_scale
+	if local_t >= 1.0:
+		return 1.0
+	if local_t < 0.6:
+		var p := local_t / 0.6
+		return lerpf(start_scale, overshoot, ease(p, -1.5))
+	else:
+		var p := (local_t - 0.6) / 0.4
+		return lerpf(overshoot, 1.0, ease(p, -1.0))
+
+func _overlay_ease_offset(local_t: float, total_offset: float) -> float:
+	if local_t <= 0.0:
+		return total_offset
+	if local_t >= 1.0:
+		return 0.0
+	return total_offset * (1.0 - ease(local_t, -1.5))
+
+# 给定元素起始时间 + 时长 + 起始 scale + overshoot + 起始 Y 偏移，返回 {alpha, scale, offset_y}
+func _overlay_xform(start: float, duration: float, start_scale: float, overshoot: float, offset_y: float) -> Dictionary:
+	var t := _battle_end_overlay_timer
+	if t < start:
+		return {"alpha": 0.0, "scale": start_scale, "offset_y": offset_y}
+	var local_t := (t - start) / duration
+	if local_t >= 1.0:
+		return {"alpha": 1.0, "scale": 1.0, "offset_y": 0.0}
+	return {
+		"alpha": clampf(ease(local_t, -1.5), 0.0, 1.0),
+		"scale": _overlay_bounce_scale(local_t, start_scale, overshoot),
+		"offset_y": _overlay_ease_offset(local_t, offset_y),
+	}
+
+# 横向伸展（如下划线光晕）：从 0 宽度展到完整
+func _overlay_stretch_x(start: float, duration: float) -> Dictionary:
+	var t := _battle_end_overlay_timer
+	if t < start:
+		return {"alpha": 0.0, "scale_x": 0.0}
+	var local_t := (t - start) / duration
+	if local_t >= 1.0:
+		return {"alpha": 1.0, "scale_x": 1.0}
+	return {
+		"alpha": clampf(ease(local_t, -1.5), 0.0, 1.0),
+		"scale_x": ease(local_t, -1.0),  # 线性展开
+	}
+
+# 纯 fade 元素（背景遮罩）
+func _overlay_fade(start: float, duration: float) -> float:
+	var t := _battle_end_overlay_timer
+	if t < start:
+		return 0.0
+	var local_t := (t - start) / duration
+	if local_t >= 1.0:
+		return 1.0
+	return ease(local_t, -1.5)
+
+# 围绕 center 做 scale 矩阵（供 _draw_texture_centered 之前用）
+func _make_centered_scale_xform(center: Vector2, scale: float) -> Transform2D:
+	var x := Transform2D()
+	x = x.translated(Vector2(-center.x, -center.y))
+	x = x.scaled(Vector2(scale, scale))
+	x = x.translated(center)
+	return x
+
+# 围绕 center 做 (scale_x, 1.0) 横向 stretch 矩阵
+func _make_centered_stretch_x_xform(center: Vector2, scale_x: float) -> Transform2D:
+	var x := Transform2D()
+	x = x.translated(Vector2(-center.x, -center.y))
+	x = x.scaled(Vector2(scale_x, 1.0))
+	x = x.translated(center)
+	return x
+
+# 围绕 center 做 (scale, scale) 缩放并叠加 (0, offset_y) 偏移
+func _make_centered_scale_offset_xform(center: Vector2, scale: float, offset_y: float) -> Transform2D:
+	var x := Transform2D()
+	x = x.translated(Vector2(-center.x, -center.y - offset_y))
+	x = x.scaled(Vector2(scale, scale))
+	x = x.translated(Vector2(center.x, center.y + offset_y))
+	return x
+
 func _draw_battle_end_overlay() -> void:
 	_draw_restore()
 	var is_win: bool = _battle != null and _battle.battle_result == "win"
 	var t: float = _battle_end_overlay_timer
-	var fade: float = clampf(t / 0.22, 0.0, 1.0)
-	var panel_alpha: float = clampf((t - 0.12) / 0.28, 0.0, 1.0)
 	var banner_y: float = DESIGN_H / 2.0 - 142.0
-	
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66 * fade))
-	
+	var panel_center := Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 34.0)
+	var banner_center := Vector2(DESIGN_W / 2.0, banner_y)
+	var burst_center := Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 108.0)
+	var plaque_center := Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 30.0)
+	var tap_center := Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0)
+	var underline_center := Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 10.0)
+
+	# 1) 背景遮罩：纯 fade
+	var bg_alpha: float = _overlay_fade(BATTLE_END_BG_START, BATTLE_END_BG_DURATION)
+	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66 * bg_alpha))
+
+	# 2) Victory burst：scale bounce + 上滑 + fade（仅胜利显示）
 	if is_win:
+		var burst_xform: Dictionary = _overlay_xform(BATTLE_END_BURST_START, BATTLE_END_BURST_DURATION, BATTLE_END_BURST_SCALE_START, 1.08, BATTLE_END_BURST_OFFSET_Y)
 		var burst_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["victory_burst"])
-		_draw_texture_centered(burst_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 108.0), Vector2(218.0, 136.0), 0.58 * fade)
-		_draw_victory_particles(fade, true)
-	else:
-		var smoke_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["defeat_smoke"])
-		_draw_texture_fit(smoke_tex, Rect2(-50.0, DESIGN_H / 2.0 - 55.0, 475.0, 154.0), 0.92 * fade)
-	
+		draw_set_transform_matrix(_make_centered_scale_offset_xform(burst_center, burst_xform["scale"], burst_xform["offset_y"]))
+		_draw_texture_centered(burst_tex, burst_center, Vector2(218.0, 136.0), 0.58 * burst_xform["alpha"])
+		draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_victory_particles(bg_alpha, true)
+	# 失败界面去掉 "defeat_smoke" 星星条带（原本贴图路径错配到 sparkles，已删除）
+
+	# 3) Panel 面板：scale 0.92→1.0 + fade
+	var panel_xform: Dictionary = _overlay_xform(BATTLE_END_PANEL_START, BATTLE_END_PANEL_DURATION, BATTLE_END_PANEL_SCALE_START, 1.0, 0.0)
 	var panel_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["panel"])
-	_draw_texture_centered(panel_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 34.0), Vector2(292.0, 158.0), panel_alpha)
-	
+	draw_set_transform_matrix(_make_centered_scale_xform(panel_center, panel_xform["scale"]))
+	_draw_texture_centered(panel_tex, panel_center, Vector2(292.0, 158.0), panel_xform["alpha"])
+	draw_set_transform_matrix(Transform2D.IDENTITY)
+
+	# 4) Banner 条幅：scale bounce + 上滑 + fade；标题文字跟随矩阵一起 pop
+	var banner_xform: Dictionary = _overlay_xform(BATTLE_END_BANNER_START, BATTLE_END_BANNER_DURATION, BATTLE_END_BANNER_SCALE_START, 1.05, BATTLE_END_BANNER_OFFSET_Y)
 	var banner_path: String = BATTLE_RESULT_OVERLAY_ASSETS["victory_banner"] if is_win else BATTLE_RESULT_OVERLAY_ASSETS["defeat_banner"]
 	var banner_tex := _get_texture(banner_path)
-	_draw_texture_centered(banner_tex, Vector2(DESIGN_W / 2.0, banner_y), Vector2(316.0, 114.0), fade)
-	
+	draw_set_transform_matrix(_make_centered_scale_offset_xform(banner_center, banner_xform["scale"], banner_xform["offset_y"]))
+	_draw_texture_centered(banner_tex, banner_center, Vector2(316.0, 114.0), banner_xform["alpha"])
 	var title_text := "胜利" if is_win else "失败"
 	var title_color: Color = C["gold"] if is_win else Color(0.78, 0.78, 0.86)
 	_draw_text_with_shadow(title_text, DESIGN_W / 2.0, banner_y + 11.0, title_color, 25.0, true)
-	
-	var underline_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["underline"])
-	_draw_texture_centered(underline_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 - 10.0), Vector2(220.0, 39.0), 0.85 * panel_alpha)
-	
+	draw_set_transform_matrix(Transform2D.IDENTITY)
+
+	# 5) 下划线光晕：横向伸展
+	var underline_xform: Dictionary = _overlay_stretch_x(BATTLE_END_UNDERLINE_START, BATTLE_END_UNDERLINE_DURATION)
+	draw_set_transform_matrix(_make_centered_stretch_x_xform(underline_center, underline_xform["scale_x"]))
+	_draw_underline_glow(underline_center, 110.0, 0.85 * underline_xform["alpha"])
+	draw_set_transform_matrix(Transform2D.IDENTITY)
+
+	# 6) Capture plaque / state text：scale bounce + fade
 	var state_text := "点击查看结算"
 	var state_color: Color = C["text_muted"]
 	if _capture_phase != "done" and _capture_phase != "":
@@ -2781,21 +2908,32 @@ func _draw_battle_end_overlay() -> void:
 	elif not _capture_result_text.is_empty():
 		state_text = _clean_battle_end_status_text(str(_capture_result_text.get("title", state_text)))
 		state_color = C["success"] if _capture_success else Color(0.52, 0.67, 0.86)
-	
+
 	if not _capture_result_text.is_empty():
+		var plaque_xform: Dictionary = _overlay_xform(BATTLE_END_PLAQUE_START, BATTLE_END_PLAQUE_DURATION, BATTLE_END_PLAQUE_SCALE_START, 1.05, 0.0)
 		var plaque_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["capture_plaque"])
-		_draw_texture_centered(plaque_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 30.0), Vector2(218.0, 54.0), panel_alpha)
+		draw_set_transform_matrix(_make_centered_scale_xform(plaque_center, plaque_xform["scale"]))
+		_draw_texture_centered(plaque_tex, plaque_center, Vector2(218.0, 54.0), plaque_xform["alpha"])
 		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 36.0, state_color, 14.0, true)
+		draw_set_transform_matrix(Transform2D.IDENTITY)
 	else:
+		# 没有 plaque 时仅 state text 用 pop
+		var state_xform: Dictionary = _overlay_xform(BATTLE_END_PLAQUE_START, BATTLE_END_PLAQUE_DURATION, BATTLE_END_PLAQUE_SCALE_START, 1.05, 0.0)
+		draw_set_transform_matrix(_make_centered_scale_xform(Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0), state_xform["scale"]))
 		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0, state_color, 15.0, true)
-	
+		draw_set_transform_matrix(Transform2D.IDENTITY)
+
+	# 7) Tap strip / 继续按钮：scale bounce + 上滑 + fade
+	var tap_xform: Dictionary = _overlay_xform(BATTLE_END_TAP_START, BATTLE_END_TAP_DURATION, BATTLE_END_TAP_SCALE_START, 1.06, BATTLE_END_TAP_OFFSET_Y)
+	draw_set_transform_matrix(_make_centered_scale_offset_xform(tap_center, tap_xform["scale"], tap_xform["offset_y"]))
 	if _capture_phase == "done" or _capture_phase == "":
 		var tap_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["tap_strip"])
-		_draw_texture_centered(tap_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(194.0, 54.0), 0.92 * panel_alpha)
+		_draw_texture_centered(tap_tex, tap_center, Vector2(194.0, 54.0), 0.92 * tap_xform["alpha"])
 		_draw_text_with_shadow("点击继续", DESIGN_W / 2.0, DESIGN_H / 2.0 + 96.0, C["white"], 13.0)
 	else:
 		var button_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["button_continue"])
-		_draw_texture_centered(button_tex, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), Vector2(194.0, 54.0), 0.65 * panel_alpha)
+		_draw_texture_centered(button_tex, tap_center, Vector2(194.0, 54.0), 0.65 * tap_xform["alpha"])
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 	_draw_restore()
 
 func _clean_battle_end_status_text(text: String) -> String:
@@ -3127,6 +3265,27 @@ func _draw_texture_centered(tex: Texture2D, center: Vector2, size: Vector2, opac
 	if tex == null:
 		return
 	_draw_texture_fit(tex, Rect2(center - size / 2.0, size), opacity)
+
+## 战斗结算面板下划线：渐变金色细横线（替代原本的 sparkles 星星条带）
+func _draw_underline_glow(center: Vector2, half_width: float, alpha: float = 1.0) -> void:
+	var line_y := center.y
+	var line_h := 1.6
+	# 主体横线：暗金渐变（中央亮，向两侧暗）
+	var grad_steps := 12
+	for i in range(grad_steps):
+		var t0: float = float(i) / float(grad_steps)
+		var t1: float = float(i + 1) / float(grad_steps)
+		var x0: float = lerpf(-half_width, half_width, t0)
+		var x1: float = lerpf(-half_width, half_width, t1)
+		var edge_fade: float = 1.0 - pow(absf((t0 + t1) * 0.5 - 0.5) * 2.0, 1.6)
+		var col := Color(0.96, 0.78, 0.36, 0.78 * alpha * edge_fade)
+		draw_rect(Rect2(center.x + x0, line_y, x1 - x0, line_h), col)
+	# 中央高光：细一点的白金色短线
+	var glow_w: float = half_width * 0.45
+	draw_rect(Rect2(center.x - glow_w, line_y - 0.5, glow_w * 2.0, line_h + 1.0), Color(1.0, 0.92, 0.66, 0.55 * alpha))
+	# 上下光晕
+	draw_rect(Rect2(center.x - half_width * 0.85, line_y - 2.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
+	draw_rect(Rect2(center.x - half_width * 0.85, line_y + line_h + 1.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
 
 func _draw_element_glow() -> void:
 	if _element_glow.get("timer", 0.0) <= 0.0:

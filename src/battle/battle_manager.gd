@@ -136,6 +136,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	battle_over = false
 	battle_result = ""
 	turn_count = 0
+	max_turns = _stage_max_turns(s_data)
 
 	player_level = p_level
 	enemy_level = e_level
@@ -634,6 +635,14 @@ func _get_player_monster(monster_id: String) -> Dictionary:
 		if monster != null and monster.get("id", "") == monster_id:
 			return monster
 	return {}
+
+
+func _stage_max_turns(s_data: Variant) -> int:
+	if s_data != null and s_data is Dictionary:
+		var stage: Dictionary = s_data
+		var value := int(stage.get("maxTurns", stage.get("max_turns", 20)))
+		return clampi(value, 1, 999)
+	return 20
 
 
 # ========== 敌方行动 ==========

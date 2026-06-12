@@ -3,6 +3,7 @@ class_name SceneAchievementGui
 extends "res://src/ui/controllers/achievement_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
@@ -95,6 +96,13 @@ var _press_rect := Rect2()
 var _press_timer := 0.0
 var _press_duration := 0.20
 var _enter_t := 0.0
+var _round_font_normal: Font = null
+
+# === 成就入场动画状态（_draw 风格：用 modulate + draw_set_transform）===
+const ENTRY_DURATION := 0.42
+const ENTRY_TOP_OFFSET_START := 24.0
+const ENTRY_BOTTOM_OFFSET_START := 30.0
+var _entry_t := 0.0
 
 
 func _ready() -> void:
@@ -103,6 +111,7 @@ func _ready() -> void:
 	_init_data()
 	set_process(true)
 	_rebuild_button_rects()
+	self.modulate.a = 0.0  # 入场动画起点：透明
 
 
 func init(data: Dictionary = {}) -> void:
@@ -115,6 +124,14 @@ func init(data: Dictionary = {}) -> void:
 
 func _process(delta: float) -> void:
 	_enter_t += delta
+	_entry_t = minf(_entry_t + delta, ENTRY_DURATION)
+	# 应用整体淡入
+	if _entry_t < ENTRY_DURATION:
+		var alpha_progress := _entry_t / ENTRY_DURATION
+		self.modulate.a = ease(alpha_progress, -1.5)
+	else:
+		if self.modulate.a < 1.0:
+			self.modulate.a = 1.0
 	if _press_timer > 0.0:
 		_press_timer = maxf(0.0, _press_timer - delta)
 	if _toast_timer > 0.0:
@@ -221,17 +238,44 @@ func _play_feedback(rect: Rect2) -> void:
 
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	var font := _get_round_font()
 	_draw_texture_cover(_gui_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
 	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(1.0, 0.86, 0.48, 0.09), true)
+	# 顶部区域：货币 + Header，从上方滑入
+	var top_off := _entry_top_offset()
+	if top_off != 0.0:
+		draw_set_transform(Vector2(0.0, top_off))
 	_draw_top_currency(font)
 	_draw_gui_header(font)
+	if top_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
+	# 中间内容：跟随整体淡入
 	_draw_summary_panel(font)
 	_draw_tabs_gui(font)
 	_draw_achievement_list(font)
+	# 底部导航：从下方滑入
+	var bottom_off := _entry_bottom_offset()
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2(0.0, bottom_off))
 	_draw_bottom_nav(font)
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
 	_draw_toast_gui(font)
 	_draw_press_feedback()
+
+
+func _entry_top_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return -ENTRY_TOP_OFFSET_START * (1.0 - ease(progress, -1.5))
+
+
+func _entry_bottom_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return ENTRY_BOTTOM_OFFSET_START * (1.0 - ease(progress, -1.5))
 
 
 func _draw_top_currency(font: Font) -> void:
@@ -331,7 +375,7 @@ func _draw_progress_bar_gui(rect: Rect2, ratio: float, label: String) -> void:
 	ratio = clampf(ratio, 0.0, 1.0)
 	_draw_round_rect(rect, 6.0, Color(0.79, 0.61, 0.34, 0.35))
 	_draw_round_rect(Rect2(rect.position, Vector2(rect.size.x * ratio, rect.size.y)), 6.0, Color(0.38, 0.82, 0.18, 0.95))
-	_draw_center_text(ThemeDB.fallback_font, label, rect.get_center() + Vector2(0.0, 4.0), Color.WHITE, 9.0, rect.size.x)
+	_draw_center_text(_get_round_font(), label, rect.get_center() + Vector2(0.0, 4.0), Color.WHITE, 9.0, rect.size.x)
 
 
 func _draw_bottom_nav(font: Font) -> void:
@@ -494,13 +538,20 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
 
 func _draw_center_text(font: Font, text: String, center: Vector2, color: Color, size: float, width: float) -> void:
 	var left := center.x - width * 0.5
-	draw_string(font, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, int(size), Color(0.22, 0.10, 0.02, 0.38))
 	draw_string(font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, int(size), color)
 
 
 func _draw_text_left_gui(font: Font, text: String, pos: Vector2, color: Color, size: float, width: float) -> void:
-	draw_string(font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, int(size), Color(0.22, 0.10, 0.02, 0.28))
 	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, int(size), color)
+
+
+func _get_round_font() -> Font:
+	if _round_font_normal == null:
+		var f := FontVariation.new()
+		f.base_font = _RoundFontSrc
+		f.set("variation_embolden", 0.45)
+		_round_font_normal = f
+	return _round_font_normal
 
 
 func _draw_round_rect(rect: Rect2, radius: float, color: Color) -> void:

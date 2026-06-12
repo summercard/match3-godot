@@ -6,6 +6,8 @@ extends Control
 signal back_pressed()
 signal sign_in_complete(reward: Dictionary)
 
+const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
 const PARTICLE_COUNT := 34
@@ -84,11 +86,42 @@ var _animation_complete := false
 var _particles: Array = []
 var _floating_rewards: Array = []
 var _texture_cache: Dictionary = {}
+var _round_font_normal: Font = null
+var _round_font_bold: Font = null
+
+# === 签到入场动画状态（_draw 风格）===
+const ENTRY_DURATION := 0.42  # 全局淡入时长
+const ENTRY_TOTAL_DURATION := 1.30  # 入场总时长（含元素依次入场）
+const ENTRY_TOP_OFFSET_START := 26.0
+const ENTRY_BOTTOM_OFFSET_START := 26.0
+var _entry_t := 0.0
+
+# === 元素级入场（参考胜利界面奖励槽节奏）===
+# hero 面板（连续签到 + 今日奖励）：顶部滑下
+const HERO_ENTRY_START := 0.10
+const HERO_ENTRY_DURATION := 0.32
+const HERO_ENTRY_OFFSET_Y := -18.0
+# 7 张周奖励卡片：依次 scale bounce + 上滑
+const WEEK_CARD_START := 0.22
+const WEEK_CARD_STAGGER := 0.05
+const WEEK_CARD_DURATION := 0.32
+const WEEK_CARD_SCALE_START := 0.55
+const WEEK_CARD_OFFSET_Y := 16.0
+# 月度累计面板：从下方滑入
+const MONTH_PANEL_START := 0.50
+const MONTH_PANEL_DURATION := 0.32
+const MONTH_PANEL_OFFSET_Y := 22.0
+# 4 个里程碑宝箱：依次 scale bounce
+const MILESTONE_START := 0.62
+const MILESTONE_STAGGER := 0.07
+const MILESTONE_DURATION := 0.30
+const MILESTONE_SCALE_START := 0.5
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_storage = get_node_or_null("/root/SaveManager")
+	self.modulate.a = 0.0  # 入场动画起点：透明
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -176,18 +209,115 @@ func _process(dt: float) -> void:
 		r["life"] -= dt
 		if r["life"] <= 0.0:
 			_floating_rewards.remove_at(i)
+	# 入场动画推进（包含全局淡入和元素依次入场）
+	if _entry_t < ENTRY_TOTAL_DURATION:
+		_entry_t = minf(_entry_t + dt, ENTRY_TOTAL_DURATION)
+		# 全局淡入（0..ENTRY_DURATION 区间）
+		var fade_t := _entry_t / ENTRY_DURATION
+		if fade_t < 1.0:
+			self.modulate.a = ease(fade_t, -1.5)
+		else:
+			self.modulate.a = 1.0
 	queue_redraw()
 
 
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT))
 	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(1.0, 0.86, 0.48, 0.10), true)
+	# 顶部：header 从上方滑入
+	var top_off := _entry_top_offset()
+	if top_off != 0.0:
+		draw_set_transform(Vector2(0.0, top_off))
 	_draw_header()
+	if top_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
+	# 中间内容：跟随整体淡入
 	_draw_hero()
 	_draw_week_rewards()
 	_draw_month_rewards()
+	# 底部：claim_area 从下方滑入
+	var bottom_off := _entry_bottom_offset()
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2(0.0, bottom_off))
 	_draw_claim_area()
+	if bottom_off != 0.0:
+		draw_set_transform(Vector2.ZERO)
 	_draw_effects()
+
+
+func _entry_top_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return -ENTRY_TOP_OFFSET_START * (1.0 - ease(progress, -1.5))
+
+
+func _entry_bottom_offset() -> float:
+	if _entry_t >= ENTRY_DURATION:
+		return 0.0
+	var progress := _entry_t / ENTRY_DURATION
+	return ENTRY_BOTTOM_OFFSET_START * (1.0 - ease(progress, -1.5))
+
+
+# === 元素级入场：通用缓动 + bounce scale ===
+# 将 local_t (0..1) 映射为从 total_offset 平滑回到 0 的偏移量
+func _ease_offset(local_t: float, total_offset: float) -> float:
+	if local_t <= 0.0:
+		return total_offset
+	if local_t >= 1.0:
+		return 0.0
+	return total_offset * (1.0 - ease(local_t, -1.5))
+
+# 卡片 bounce 缩放：start_scale → overshoot → 1.0（参考胜利界面奖励槽节奏）
+# 注：Godot 4.6 的 ease(s, 0.0) 始终返回 0，因此 phase 2 用 ease(s, -1.0) 做线性插值
+func _bounce_scale(local_t: float, start_scale: float, overshoot: float) -> float:
+	if local_t <= 0.0:
+		return start_scale
+	if local_t >= 1.0:
+		return 1.0
+	if local_t < 0.6:
+		var p := local_t / 0.6
+		return lerpf(start_scale, overshoot, ease(p, -1.5))
+	else:
+		var p := (local_t - 0.6) / 0.4
+		return lerpf(overshoot, 1.0, ease(p, -1.0))
+
+
+# === 各元素 entry transform ===
+func _hero_entry_offset_y() -> float:
+	if _entry_t < HERO_ENTRY_START:
+		return HERO_ENTRY_OFFSET_Y
+	var local_t := (_entry_t - HERO_ENTRY_START) / HERO_ENTRY_DURATION
+	return _ease_offset(local_t, HERO_ENTRY_OFFSET_Y)
+
+func _week_card_xform(index: int) -> Dictionary:
+	var start := WEEK_CARD_START + float(index) * WEEK_CARD_STAGGER
+	if _entry_t < start:
+		return {"offset_y": WEEK_CARD_OFFSET_Y, "scale": WEEK_CARD_SCALE_START}
+	var local_t := (_entry_t - start) / WEEK_CARD_DURATION
+	if local_t >= 1.0:
+		return {"offset_y": 0.0, "scale": 1.0}
+	return {
+		"offset_y": _ease_offset(local_t, WEEK_CARD_OFFSET_Y),
+		"scale": _bounce_scale(local_t, WEEK_CARD_SCALE_START, 1.08),
+	}
+
+func _month_panel_offset_y() -> float:
+	if _entry_t < MONTH_PANEL_START:
+		return MONTH_PANEL_OFFSET_Y
+	var local_t := (_entry_t - MONTH_PANEL_START) / MONTH_PANEL_DURATION
+	return _ease_offset(local_t, MONTH_PANEL_OFFSET_Y)
+
+func _milestone_xform(index: int) -> Dictionary:
+	var start := MILESTONE_START + float(index) * MILESTONE_STAGGER
+	if _entry_t < start:
+		return {"scale": MILESTONE_SCALE_START}
+	var local_t := (_entry_t - start) / MILESTONE_DURATION
+	if local_t >= 1.0:
+		return {"scale": 1.0}
+	return {
+		"scale": _bounce_scale(local_t, MILESTONE_SCALE_START, 1.12),
+	}
 
 func _draw_header() -> void:
 	_draw_texture_fit(_tex("back"), BACK_RECT)
@@ -195,6 +325,15 @@ func _draw_header() -> void:
 	_draw_text("每日签到", HEADER_RECT.get_center().x, HEADER_RECT.position.y + 34.0, C["white"], 24.0, true, 170.0)
 
 func _draw_hero() -> void:
+	var offset_y := _hero_entry_offset_y()
+	if offset_y != 0.0:
+		draw_set_transform(Vector2(0.0, offset_y))
+		_draw_hero_inner()
+		draw_set_transform(Vector2.ZERO)
+	else:
+		_draw_hero_inner()
+
+func _draw_hero_inner() -> void:
 	_draw_texture_fit(_tex("month_panel"), HERO_RECT)
 	_draw_texture_contain(_tex("calendar"), Rect2(28.0, 88.0, 88.0, 82.0))
 	_draw_texture_contain(_tex("mascot"), Rect2(255.0, 76.0, 88.0, 100.0))
@@ -215,6 +354,16 @@ func _draw_week_rewards() -> void:
 		var today := day == current_day
 		var signed := day <= signed_limit
 		var rect := _day_rect(i)
+		var xform := _week_card_xform(i)
+		var scale := float(xform.get("scale", 1.0))
+		# 通过矩阵缩放（绕卡片中心）让卡片内容（纹理 + 文字）一起缩放
+		if scale != 1.0:
+			var center := rect.position + rect.size * 0.5
+			var x := Transform2D()
+			x = x.translated(Vector2(-center.x, -center.y))
+			x = x.scaled(Vector2(scale, scale))
+			x = x.translated(center)
+			draw_set_transform_matrix(x)
 		var card_key := "day_card_today" if today else ("day_card" if i % 2 == 0 else "day_card_alt")
 		if day > signed_limit + 1 and not today:
 			card_key = "day_card_locked"
@@ -227,24 +376,41 @@ func _draw_week_rewards() -> void:
 		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 20.0, Color(0.43, 0.24, 0.07), 17.0, true, rect.size.x - 12.0)
 		if signed:
 			_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 10.0, rect.position.y + rect.size.y - 47.0, rect.size.x - 20.0, 34.0), 0.92)
+		if scale != 1.0:
+			draw_set_transform_matrix(Transform2D.IDENTITY)
 
 func _draw_month_rewards() -> void:
-	_draw_texture_fit(_tex("month_panel"), MONTH_RECT)
-	_draw_texture_fit(_tex("month_ribbon"), Rect2(74.0, 448.0, 228.0, 40.0))
-	_draw_text("本月累计签到奖励", 188.0, 474.0, C["white"], 15.0, true, 180.0)
+	var panel_offset_y := _month_panel_offset_y()
+	# 月度面板 + 内容（不包括里程碑宝箱，宝箱有自己的 bounce）：整体从下方滑入
+	_draw_texture_fit(_tex("month_panel"), Rect2(MONTH_RECT.position + Vector2(0, panel_offset_y), MONTH_RECT.size))
+	_draw_texture_fit(_tex("month_ribbon"), Rect2(74.0, 448.0 + panel_offset_y, 228.0, 40.0))
+	_draw_text("本月累计签到奖励", 188.0, 474.0 + panel_offset_y, C["white"], 15.0, true, 180.0)
 	var total := int(_sign_in_data.get("totalDays", 0))
 	var month_count := clampi(total % 29, 0, 28)
 	if total > 0 and total % 28 == 0:
 		month_count = 28
-	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0, 76.0, 70.0))
-	_draw_text("本月已签到 %d/28 天" % month_count, 205.0, 505.0, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
-	_draw_texture_fit(_tex("progress"), Rect2(108.0, 548.0, 230.0, 26.0))
+	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0 + panel_offset_y, 76.0, 70.0))
+	_draw_text("本月已签到 %d/28 天" % month_count, 205.0, 505.0 + panel_offset_y, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
+	_draw_texture_fit(_tex("progress"), Rect2(108.0, 548.0 + panel_offset_y, 230.0, 26.0))
+	# 里程碑宝箱：每个有自己的 bounce scale（缩放中心随面板上移）
 	for i in range(MILESTONES.size()):
 		var m: Dictionary = MILESTONES[i]
 		var x := 128.0 + i * 64.0
+		var xform := _milestone_xform(i)
+		var scale := float(xform.get("scale", 1.0))
+		var orig_chest := Rect2(x - 22.0, 518.0, 44.0, 34.0)
+		var center := orig_chest.position + orig_chest.size * 0.5 + Vector2(0, panel_offset_y)
+		if scale != 1.0:
+			var xf := Transform2D()
+			xf = xf.translated(Vector2(-center.x, -center.y))
+			xf = xf.scaled(Vector2(scale, scale))
+			xf = xf.translated(center)
+			draw_set_transform_matrix(xf)
 		var reached := month_count >= int(m["day"])
-		_draw_texture_contain(_tex(str(m["icon"])), Rect2(x - 22.0, 518.0, 44.0, 34.0), 1.0 if reached else 0.55)
-		_draw_text("%d天" % int(m["day"]), x, 583.0, C["green"] if reached else C["muted"], 12.0, true, 42.0)
+		_draw_texture_contain(_tex(str(m["icon"])), orig_chest, 1.0 if reached else 0.55)
+		if scale != 1.0:
+			draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_text("%d天" % int(m["day"]), x, 583.0 + panel_offset_y, C["green"] if reached else C["muted"], 12.0, true, 42.0)
 
 func _draw_claim_area() -> void:
 	var key := "claim_button" if _can_sign_in else "claim_disabled"
@@ -332,7 +498,21 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 180.0) -> void:
-	var font := ThemeDB.fallback_font
-	var shadow := C["shadow"]
-	draw_string(font, Vector2(x - width / 2.0 + 1.0, y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow)
+	var font := _get_round_font(bold)
 	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)
+
+
+func _get_round_font(bold: bool) -> Font:
+	if bold:
+		if _round_font_bold == null:
+			var f := FontVariation.new()
+			f.base_font = _RoundFontSrc
+			f.set("variation_embolden", 0.95)
+			_round_font_bold = f
+		return _round_font_bold
+	if _round_font_normal == null:
+		var f := FontVariation.new()
+		f.base_font = _RoundFontSrc
+		f.set("variation_embolden", 0.45)
+		_round_font_normal = f
+	return _round_font_normal

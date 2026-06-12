@@ -133,6 +133,7 @@ const RATE_LIMIT_MS := {
 
 ## ========== 状态 ==========
 var _muted: bool = false
+var _bgm_muted: bool = false
 var _sfx_volume_db: float = 0.0   # 叠加在 SFX 库自带 volume_db 之上
 var _bgm_volume_db: float = -6.0  # BGM 主音量
 var _sfx_bus: AudioStreamPlayer = null
@@ -159,9 +160,10 @@ func _sync_with_settings() -> void:
 	var storage := get_node_or_null("/root/SaveManager")
 	if storage == null:
 		return
-	if storage.has_method("get_setting"):
-		var sound_on: bool = bool(storage.get_setting("soundOn", true))
-		var music_on: bool = bool(storage.get_setting("musicOn", true))
+	if storage.has_method("load_settings"):
+		var settings: Dictionary = storage.load_settings()
+		var sound_on: bool = bool(settings.get("soundOn", true))
+		var music_on: bool = bool(settings.get("musicOn", true))
 		set_mute(not sound_on)
 		set_bgm_mute(not music_on)
 
@@ -226,6 +228,9 @@ func play_bgm(event_key: String, volume_db: float = INF) -> void:
 	if "loop" in stream:
 		stream.set("loop", bool(entry.get("loop", false)))
 	_bgm_player.volume_db = volume_db if volume_db != INF else _bgm_volume_db
+	# 若已设置过静音，强制覆盖新启动 BGM 的音量
+	if _bgm_muted:
+		_bgm_player.volume_db = -80.0
 	if not _bgm_player.playing:
 		_bgm_player.play()
 
@@ -234,23 +239,32 @@ func stop_bgm() -> void:
 	if _bgm_player != null and _bgm_player.playing:
 		_bgm_player.stop()
 
-## 设置全局静音（SFX）
+## 设置全局静音（SFX）。通过静音整个 SFX 音频总线实现，对所有
+## 后续 SFX 播放（无论是否新创建 AudioStreamPlayer）立即生效。
 func set_mute(muted: bool) -> void:
 	if _muted == muted:
 		return
 	_muted = muted
+	var bus_idx := AudioServer.get_bus_index("SFX")
+	if bus_idx >= 0:
+		AudioServer.set_bus_mute(bus_idx, muted)
+	# 兼容旧的占位 _sfx_bus（不再使用，但保留赋值避免引用空对象）
 	if _sfx_bus != null:
 		_sfx_bus.volume_db = -80.0 if muted else 0.0
 	mute_changed.emit(muted)
 
-## 设置 BGM 静音
+## 设置 BGM 静音。始终记录 _bgm_muted 状态，下次 play_bgm 时也会读取。
 func set_bgm_mute(muted: bool) -> void:
+	_bgm_muted = muted
 	if _bgm_player == null:
 		return
 	_bgm_player.volume_db = -80.0 if muted else _bgm_volume_db
 
 func is_muted() -> bool:
 	return _muted
+
+func is_bgm_muted() -> bool:
+	return _bgm_muted
 
 ## 元素 → 攻击音效
 func play_attack_by_element(element: String) -> void:

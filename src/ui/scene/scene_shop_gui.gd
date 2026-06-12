@@ -374,6 +374,7 @@ func _attach_shop_feedback() -> void:
 func _play_enter_animation() -> void:
 	if not is_inside_tree():
 		return
+	# 1) TitlePlaque：原有的弹跳 pop
 	if has_node("TitlePlaque"):
 		var title := _node("TitlePlaque")
 		title.pivot_offset = title.size * 0.5
@@ -381,6 +382,32 @@ func _play_enter_animation() -> void:
 		var title_tween := create_tween()
 		title_tween.tween_property(title, "scale", Vector2(1.04, 1.04), 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		title_tween.tween_property(title, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# 2) Header 三个货币 chip：依次淡入 + 下滑
+	var chip_paths := ["Header/GoldChip", "Header/DiamondChip", "Header/EnergyChip"]
+	for i in chip_paths.size():
+		var chip := get_node_or_null(chip_paths[i]) as Control
+		if chip == null or not chip.visible:
+			continue
+		var orig_y := chip.position.y
+		chip.position.y = orig_y - 10.0
+		chip.modulate.a = 0.0
+		chip.pivot_offset = chip.size * 0.5
+		var chip_tween := create_tween()
+		chip_tween.tween_interval(0.04 + 0.05 * float(i))
+		chip_tween.tween_property(chip, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		chip_tween.parallel().tween_property(chip, "position:y", orig_y, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# 3) Tabs 5 个标签：依次 scale pop（保持原 modulate.a 不动，避免破坏 _sync_tabs 的视觉）
+	for i in TAB_PATHS.size():
+		var tab := get_node_or_null(TAB_PATHS[i]) as Control
+		if tab == null or not tab.visible:
+			continue
+		tab.pivot_offset = tab.size * 0.5
+		tab.scale = Vector2(0.82, 0.82)
+		var tab_tween := create_tween()
+		tab_tween.tween_interval(0.10 + 0.04 * float(i))
+		tab_tween.tween_property(tab, "scale", Vector2(1.08, 1.08), 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tab_tween.tween_property(tab, "scale", Vector2.ONE, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# 4) ProductGrid 卡片：保留原始 stagger
 	for i in CARD_PATHS.size():
 		var card := get_node_or_null(CARD_PATHS[i]) as Control
 		if card == null or not card.visible:
@@ -390,6 +417,28 @@ func _play_enter_animation() -> void:
 		var tween := create_tween()
 		tween.tween_interval(0.015 * float(i))
 		tween.tween_property(card, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# 5) PageControls：左右翻页按钮一起 scale pop
+	var page_ctrl := get_node_or_null("ProductGrid/PageControls") as Control
+	if page_ctrl != null and page_ctrl.visible:
+		page_ctrl.pivot_offset = page_ctrl.size * 0.5
+		page_ctrl.scale = Vector2(0.88, 0.88)
+		page_ctrl.modulate.a = 0.0
+		var pc_tween := create_tween()
+		pc_tween.tween_interval(0.26)
+		pc_tween.tween_property(page_ctrl, "modulate:a", 1.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		pc_tween.parallel().tween_property(page_ctrl, "scale", Vector2(1.05, 1.05), 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		pc_tween.tween_property(page_ctrl, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# 6) BottomNav HomeButton：上滑 + 淡入
+	var home_btn := get_node_or_null("BottomNav/HomeButton") as Control
+	if home_btn != null and home_btn.visible:
+		var orig_home_y := home_btn.position.y
+		home_btn.position.y = orig_home_y + 10.0
+		home_btn.modulate.a = 0.0
+		home_btn.pivot_offset = home_btn.size * 0.5
+		var home_tween := create_tween()
+		home_tween.tween_interval(0.30)
+		home_tween.tween_property(home_btn, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		home_tween.parallel().tween_property(home_btn, "position:y", orig_home_y, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _play_tab_switch_motion() -> void:
 	for i in CARD_PATHS.size():

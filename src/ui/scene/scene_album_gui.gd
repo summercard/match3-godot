@@ -5,6 +5,15 @@ extends "res://src/ui/controllers/album_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const LockedSilhouetteShader := preload("res://src/ui/shaders/album_locked_silhouette.gdshader")
+
+# === 图鉴入场动画时间线 ===
+const ENTRY_BAR_DELAY := 0.00
+const ENTRY_HEADER_DELAY := 0.10
+const ENTRY_PAGES_DELAY := 0.22
+const ENTRY_NAV_DELAY := 0.36
+const ENTRY_DURATION := 0.32
+const ENTRY_NAV_DURATION := 0.34
+var _entry_played: bool = false
 const PAGE_SIZE := 15
 const CARD_PATHS := [
 	"AlbumPage/Grid/Card1",
@@ -175,6 +184,7 @@ func _sync_gui() -> void:
 	_sync_header()
 	_sync_pages()
 	_sync_tabs()
+	_maybe_play_entry()
 
 func _sync_static_labels() -> void:
 	_node("Header/BackButton").visible = false
@@ -488,3 +498,58 @@ func _locked_portrait_material() -> ShaderMaterial:
 
 func _label(path: NodePath) -> Label:
 	return get_node(path) as Label
+
+# 图鉴入场序列：资源条 → Header → 内容页 → 底部导航
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) 资源条：上方 28px 滑入 + 淡入
+	var bar := get_node_or_null("AlbumResourceBar") as Control
+	if bar != null:
+		var bar_rest_y := bar.position.y
+		bar.position.y = bar_rest_y - 28.0
+		bar.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_BAR_DELAY)
+		tween.tween_property(bar, "modulate:a", 1.0, 0.30).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(bar, "position:y", bar_rest_y, 0.30).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) Header：上方 28px 滑入 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null:
+		var header_rest_y := header.position.y
+		header.position.y = header_rest_y - 28.0
+		header.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_HEADER_DELAY)
+		tween.tween_property(header, "modulate:a", 1.0, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(header, "position:y", header_rest_y, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 3) 内容页容器（AlbumPage / BondPage / CollectionPage / DetailPanel）—— 仅 pop 当前可见的
+	for path in ["AlbumPage", "BondPage", "CollectionPage", "DetailPanel"]:
+		var page := get_node_or_null(path) as Control
+		if page == null or not page.visible:
+			continue
+		page.pivot_offset = Vector2(page.size.x * 0.5, page.size.y * 0.5)
+		page.scale = Vector2(0.88, 0.88)
+		page.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_PAGES_DELAY)
+		tween.tween_property(page, "modulate:a", 1.0, ENTRY_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(page, "scale", Vector2(1.04, 1.04), ENTRY_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(page, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 4) BottomNav：下方 30px 滑入 + 淡入
+	var nav := get_node_or_null("LobbyBottomNav") as Control
+	if nav != null:
+		var nav_rest_y := nav.position.y
+		nav.position.y = nav_rest_y + 30.0
+		nav.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_NAV_DELAY)
+		tween.tween_property(nav, "modulate:a", 1.0, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(nav, "position:y", nav_rest_y, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

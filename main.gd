@@ -160,8 +160,37 @@ func _on_scene_button_pressed(btn_id: String) -> void:
 		"achievement": "achievement",
 		"settings": "settings"
 	}
-	if targets.has(btn_id):
-		_request_scene_switch(targets[btn_id])
+	if not targets.has(btn_id):
+		return
+	var data: Dictionary = {}
+	if btn_id == "start":
+		data = _resolve_latest_stage()
+	_request_scene_switch(targets[btn_id], data)
+
+## 计算用户当前可玩的"最新关卡"：
+## 找到第一个 unlocked 且未 cleared 的关卡；都打完则回退到第一章第一关。
+## 返回 Dictionary { "chapterIndex": int, "focusStageId": String }。
+func _resolve_latest_stage() -> Dictionary:
+	var save_manager := get_node_or_null("/root/SaveManager")
+	if save_manager == null:
+		return {"chapterIndex": 0, "focusStageId": ""}
+	if not save_manager.has_method("get_stage_chapters"):
+		return {"chapterIndex": 0, "focusStageId": ""}
+	var chapters: Array = save_manager.call("get_stage_chapters")
+	if chapters.is_empty():
+		return {"chapterIndex": 0, "focusStageId": ""}
+	for ci in chapters.size():
+		var chapter: Dictionary = chapters[ci]
+		var stages: Array = chapter.get("stages", [])
+		for si in stages.size():
+			var stage: Dictionary = stages[si]
+			var stage_id: String = str(stage.get("id", ""))
+			var unlocked: bool = bool(save_manager.call("is_stage_unlocked", stage_id))
+			var cleared: bool = bool(save_manager.call("is_stage_cleared", stage_id))
+			if unlocked and not cleared:
+				return {"chapterIndex": ci, "focusStageId": stage_id}
+	# 全部通关或无存档：回到第一章第一关，让 stage_select 自己用默认滚动
+	return {"chapterIndex": 0, "focusStageId": ""}
 
 func _on_stage_selected(stage_id: String, stage_data: Dictionary, chapter_index: int) -> void:
 	_request_scene_switch("battle_prepare", {

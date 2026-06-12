@@ -837,6 +837,7 @@ static func _build_chapter_stages(chapter: Dictionary) -> Array:
 			stage["name"] = "Stage %d-%02d" % [chapter_num, stage_no]
 		stage["enemies"] = _enemy_group_for_stage(enemy_pool, stage_no)
 		stage["enemyLevel"] = _normal_enemy_level(chapter_num, stage_no)
+		stage["maxTurns"] = _normal_max_turns(chapter_num, stage_no)
 		stage["rewards"] = _merge_rewards(stage.get("rewards", {}), _normal_rewards(chapter_num, stage_no), chapter_num, stage_no, false)
 		stage["designGoal"] = _normal_design_goal(chapter_num, stage_no)
 		stage["prepareHint"] = _normal_prepare_hint(chapter_num, stage_no)
@@ -861,6 +862,7 @@ static func _build_boss_stage(chapter: Dictionary, boss_seed: Dictionary, enemy_
 	boss["type"] = "boss"
 	boss["stageNo"] = BOSS_STAGE_NO
 	boss["enemyLevel"] = _boss_enemy_level(chapter_num)
+	boss["maxTurns"] = _boss_max_turns(chapter_num)
 	if not boss.has("phases") or (boss.get("phases", []) as Array).is_empty():
 		boss["phases"] = [
 			{"phase": 1, "enemies": [boss_id], "trigger": "on_enter", "hpMultiplier": 1.08 + chapter_num * 0.02},
@@ -903,23 +905,41 @@ static func _boss_enemy_level(chapter_num: int) -> int:
 	# ★ 主人定 2026-06-10：ch1 Boss = Lv20（跨度 15），每章 Boss +5
 	return 5 + (chapter_num - 1) * 5 + 15
 
+static func _normal_max_turns(chapter_num: int, stage_no: int) -> int:
+	# 普通关仍保持短节奏；中后期机制关给少量读盘/清障空间。
+	return 16 + int(floor(float(chapter_num - 1) * 0.6)) + int(floor(float(stage_no - 1) / 4.0))
+
+static func _boss_max_turns(chapter_num: int) -> int:
+	# Boss 不削血量，用回合预算承载两阶段厚度；后期额外给认真玩家试错空间。
+	var late_extra := maxi(0, chapter_num - 6) * 12
+	if chapter_num >= 10:
+		late_extra += 12
+	return 42 + (chapter_num - 1) * 9 + late_extra
+
+static func _chapter_reward_multiplier(chapter_num: int) -> float:
+	# Ch1-Ch2 保持新手节奏；从 Ch3 起逐章抬高成长，避免中后期只靠重复扫荡补等级。
+	return 1.0 + float(maxi(0, chapter_num - 2)) * 0.06
+
 static func _normal_rewards(chapter_num: int, stage_no: int) -> Dictionary:
+	var mult := _chapter_reward_multiplier(chapter_num)
 	return {
-		"gold": 45 + (chapter_num - 1) * 18 + (stage_no - 1) * 12,
-		"exp": 45 + (chapter_num - 1) * 12 + (stage_no - 1) * 9
+		"gold": int(round(float(45 + (chapter_num - 1) * 18 + (stage_no - 1) * 12) * mult)),
+		"exp": int(round(float(45 + (chapter_num - 1) * 12 + (stage_no - 1) * 9) * mult))
 	}
 
 static func _boss_rewards(chapter_num: int) -> Dictionary:
 	var last_normal := _normal_rewards(chapter_num, NORMAL_STAGES_PER_CHAPTER)
 	return {
-		"gold": int(last_normal.get("gold", 0)) + 80 + chapter_num * 12,
-		"exp": int(last_normal.get("exp", 0)) + 55 + chapter_num * 8
+		"gold": int(last_normal.get("gold", 0)) + 120 + chapter_num * 18,
+		"exp": int(last_normal.get("exp", 0)) + 90 + chapter_num * 14
 	}
 
 static func _merge_rewards(seed_rewards: Dictionary, target_rewards: Dictionary, chapter_num: int, stage_no: int, is_boss: bool) -> Dictionary:
 	var rewards := target_rewards.duplicate(true)
 	if seed_rewards.has("guaranteedItems"):
 		rewards["guaranteedItems"] = seed_rewards.get("guaranteedItems", []).duplicate(true)
+	if chapter_num == 1 and stage_no == 1:
+		rewards["guaranteedItems"] = [{"id": "capture_ball", "count": 1}]
 	if chapter_num == 1 and stage_no == 2:
 		rewards["guaranteedItems"] = [{"id": "capture_ball", "count": 1}]
 	if chapter_num == 1 and is_boss:

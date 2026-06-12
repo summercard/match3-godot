@@ -32,15 +32,15 @@ stretch_mode = 6
 z_index = -1
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 72.0
+offset_bottom = 84.0
 mouse_filter = 2
 
 [node name="TurnBadge" type="Control" parent="TopHud" unique_id=708575208]
 anchors_preset = 0
 offset_left = 9.0
-offset_top = 5.0
+offset_top = 2.0
 offset_right = 81.0
-offset_bottom = 53.0
+offset_bottom = 62.0
 mouse_filter = 2
 
 [node name="Image" type="TextureRect" parent="TopHud/TurnBadge" unique_id=1337029866]
@@ -54,26 +54,26 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="TopHud/TurnBadge" unique_id=1243297738]
 layout_mode = 0
-offset_top = 5.0
+offset_top = 2.0
 offset_right = 72.0
-offset_bottom = 22.0
+offset_bottom = 26.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
 text = "回合"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="TopHud/TurnBadge" unique_id=515103777]
 layout_mode = 0
-offset_top = 18.0
+offset_top = 28.0
 offset_right = 72.0
-offset_bottom = 43.0
+offset_bottom = 60.0
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 28
 text = "0/20"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -91,14 +91,14 @@ stretch_mode = 5
 
 [node name="SpeedLabel" type="Label" parent="TopHud" unique_id=1652010195]
 layout_mode = 0
-offset_left = 285.0
-offset_top = 27.0
-offset_right = 327.0
-offset_bottom = 48.0
+offset_left = 282.0
+offset_top = 22.0
+offset_right = 330.0
+offset_bottom = 50.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
 text = "x2"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -106,14 +106,14 @@ vertical_alignment = 1
 [node name="BossPhase" type="Label" parent="TopHud" unique_id=810267290]
 visible = false
 layout_mode = 0
-offset_left = 270.0
-offset_top = 53.0
+offset_left = 262.0
+offset_top = 55.0
 offset_right = 374.0
-offset_bottom = 70.0
+offset_bottom = 80.0
 theme_override_colors/font_color = Color(1, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 20
 text = "阶段 1/1"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -214,14 +214,14 @@ stretch_mode = 5
 
 [node name="Badge" type="Label" parent="BottomControls/CaptureToggle" unique_id=1366279616]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 43.0
-offset_bottom = 43.0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 18
 text = "关"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -254,14 +254,14 @@ stretch_mode = 5
 
 [node name="Badge" type="Label" parent="BottomControls/Item1" unique_id=1365865181]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 43.0
-offset_bottom = 43.0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 18
 text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -294,14 +294,14 @@ stretch_mode = 5
 
 [node name="Badge" type="Label" parent="BottomControls/Item2" unique_id=1842045315]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 43.0
-offset_bottom = 43.0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 18
 text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -334,14 +334,14 @@ stretch_mode = 5
 
 [node name="Badge" type="Label" parent="BottomControls/Item3" unique_id=386701086]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 43.0
-offset_bottom = 43.0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 48.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.05, 0.12, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 18
 text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1

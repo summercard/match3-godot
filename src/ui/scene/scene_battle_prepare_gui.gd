@@ -19,6 +19,22 @@ const REWARD_SLOT_PATHS := [
 	"RewardPreview/Slots/RewardSlot2",
 	"RewardPreview/Slots/RewardSlot3",
 ]
+
+# === 入场动画时间线 ===
+const ENTRY_HEADER_DELAY := 0.00
+const ENTRY_RESOURCE_DELAY := 0.10
+const ENTRY_ENEMY_DELAY := 0.22
+const ENTRY_POWER_DELAY := 0.34
+const ENTRY_TEAM_CARD_DELAY := 0.48
+const ENTRY_TEAM_CARD_STAGGER := 0.10
+const ENTRY_REWARD_DELAY := 0.80
+const ENTRY_REWARD_STAGGER := 0.10
+const ENTRY_BUTTON_DELAY := 1.00
+const ENTRY_SLIDE_DURATION := 0.34
+const ENTRY_POP_DURATION := 0.30
+const ENTRY_CARD_DURATION := 0.24
+const ENTRY_BUTTON_DURATION := 0.26
+var _entry_played: bool = false
 const BROWN_TEXT := Color(0.34, 0.16, 0.05, 1.0)
 const BROWN_DARK := Color(0.22, 0.09, 0.03, 1.0)
 const CREAM_OUTLINE := Color(1.0, 0.88, 0.56, 0.88)
@@ -229,6 +245,7 @@ func _sync_gui() -> void:
 	_sync_rewards()
 	_sync_start_button()
 	_sync_alert()
+	_maybe_play_entry()
 
 func _sync_enemy_cards() -> void:
 	_label("EnemyPanel/Title").text = "敌方信息"
@@ -551,6 +568,96 @@ func _sync_alert() -> void:
 	if not has_node("AlertPopup"):
 		return
 	_node("AlertPopup").visible = _show_empty_team_alert
+
+# 战斗准备面板入场序列：Header → 顶部资源 → 敌方 → 战力 → 队伍卡 → 奖励 → 开始按钮
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) Header：上方 30px 滑入 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null:
+		var header_rest_y := header.position.y
+		header.position.y = header_rest_y - 30.0
+		header.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_HEADER_DELAY)
+		tween.tween_property(header, "modulate:a", 1.0, ENTRY_SLIDE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(header, "position:y", header_rest_y, ENTRY_SLIDE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) 顶部资源条：上方 20px 滑入 + 淡入
+	var top_bar := get_node_or_null("TopResourceBar") as Control
+	if top_bar != null:
+		var top_rest_y := top_bar.position.y
+		top_bar.position.y = top_rest_y - 20.0
+		top_bar.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_RESOURCE_DELAY)
+		tween.tween_property(top_bar, "modulate:a", 1.0, 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(top_bar, "position:y", top_rest_y, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 3) 敌方面板：下方 24px 滑入 + 淡入
+	var enemy_panel := get_node_or_null("EnemyPanel") as Control
+	if enemy_panel != null:
+		var enemy_rest_y := enemy_panel.position.y
+		enemy_panel.position.y = enemy_rest_y + 24.0
+		enemy_panel.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_ENEMY_DELAY)
+		tween.tween_property(enemy_panel, "modulate:a", 1.0, ENTRY_SLIDE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(enemy_panel, "position:y", enemy_rest_y, ENTRY_SLIDE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 4) 战力对比面板：scale 弹缩 + 淡入
+	var power_panel := get_node_or_null("PowerPanel") as Control
+	if power_panel != null:
+		power_panel.pivot_offset = power_panel.size * 0.5
+		power_panel.scale = Vector2(0.85, 0.85)
+		power_panel.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_POWER_DELAY)
+		tween.tween_property(power_panel, "modulate:a", 1.0, ENTRY_POP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(power_panel, "scale", Vector2(1.06, 1.06), ENTRY_POP_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(power_panel, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 5) 我方队伍卡：底部 pivot 弹入，依次错位
+	for i in TEAM_CARD_PATHS.size():
+		var card := _node(TEAM_CARD_PATHS[i])
+		if not card.visible:
+			continue
+		card.pivot_offset = Vector2(card.size.x * 0.5, card.size.y)
+		card.scale = Vector2(0.6, 0.6)
+		card.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_TEAM_CARD_DELAY + float(i) * ENTRY_TEAM_CARD_STAGGER)
+		tween.tween_property(card, "modulate:a", 1.0, ENTRY_CARD_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(card, "scale", Vector2(1.08, 1.08), ENTRY_CARD_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(card, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 6) 奖励预览槽位：底部 pivot 弹入，依次错位
+	for i in REWARD_SLOT_PATHS.size():
+		var slot := _node(REWARD_SLOT_PATHS[i])
+		slot.pivot_offset = Vector2(slot.size.x * 0.5, slot.size.y)
+		slot.scale = Vector2(0.6, 0.6)
+		slot.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_REWARD_DELAY + float(i) * ENTRY_REWARD_STAGGER)
+		tween.tween_property(slot, "modulate:a", 1.0, ENTRY_CARD_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(slot, "scale", Vector2(1.08, 1.08), ENTRY_CARD_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(slot, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 7) 开始按钮：从大到小弹入 + 淡入（起始放大 1.25，靠 TRANS_BACK 轻微 undershoot 收敛到 1.0）
+	var start := get_node_or_null("StartButton") as Control
+	if start != null:
+		start.pivot_offset = start.size * 0.5
+		start.scale = Vector2(1.25, 1.25)
+		start.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_BUTTON_DELAY)
+		tween.tween_property(start, "modulate:a", 1.0, ENTRY_BUTTON_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(start, "scale", Vector2.ONE, ENTRY_BUTTON_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _prepare_texture(key: String) -> Texture2D:
 	return _get_texture(str(PREPARE_ASSETS.get(key, "")))

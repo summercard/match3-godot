@@ -23,7 +23,6 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_achievement.png" id="22_achievement"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_settings.png" id="23_settings_gear"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_signin.png" id="24_signin"]
-[ext_resource type="Texture2D" uid="uid://c68f3npcjpdk7" path="res://assets/images/ui/icons/main_ui_notification_dot_v2.png" id="25_notice"]
 
 [node name="MainLobby" type="Control" unique_id=194569078]
 clip_contents = true
@@ -489,16 +488,6 @@ text = "背包"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Notice" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=886777775]
-layout_mode = 0
-offset_left = 48.0
-offset_top = 2.0
-offset_right = 62.0
-offset_bottom = 16.0
-mouse_filter = 2
-texture = ExtResource("25_notice")
-expand_mode = 1
-
 [node name="AchievementButton" type="TextureButton" parent="BottomNav" unique_id=606235016]
 unique_name_in_owner = true
 layout_mode = 0
@@ -590,13 +579,3 @@ theme_override_font_sizes/font_size = 12
 text = "签到"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="Notice" type="TextureRect" parent="BottomNav/SigninButton" unique_id=1846830305]
-layout_mode = 0
-offset_left = 48.0
-offset_top = 2.0
-offset_right = 62.0
-offset_bottom = 16.0
-mouse_filter = 2
-texture = ExtResource("25_notice")
-expand_mode = 1
