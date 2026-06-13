@@ -22,6 +22,8 @@ const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item2",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
+const BOSS_BATTLE_VISUAL_SCALE: float = 2.0
+const BOSS_STATUS_OFFSET_Y: float = -56.0
 const BATTLE_END_OVERLAY_PATH := NodePath("BattleEndOverlay")
 const BATTLE_END_TITLE_PATH := NodePath("BattleEndOverlay/Banner/Title")
 const BATTLE_END_STATUS_PATH := NodePath("BattleEndOverlay/StatusGroup/StatusLabel")
@@ -228,8 +230,9 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void
 		return
 	var hp := maxi(int(unit.get("hp", 0)), 0)
 	var max_hp := maxi(int(unit.get("maxHP", 1)), 1)
+	_apply_combatant_status_offset(slot, bool(unit.get("isBoss", false)) and hp > 0)
 	var portrait := slot.get_node("Portrait") as TextureRect
-	_apply_portrait_visual_scale(portrait, float(unit.get("_visualScale", 1.0)) if hp > 0 else 1.0)
+	_apply_portrait_visual_scale(portrait, _combatant_portrait_scale(unit, hp))
 	portrait.texture = _get_monster_texture(unit) if hp > 0 else _get_texture(DEFEATED_GHOST_ASSET)
 	portrait.modulate.a = 1.0
 	var is_elite := bool(unit.get("isElite", false))
@@ -243,6 +246,15 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void
 	(slot.get_node("HpText") as Label).text = "%d/%d" % [hp, max_hp]
 
 var _portrait_base_rect_cache: Dictionary = {}
+var _status_base_rect_cache: Dictionary = {}
+
+func _combatant_portrait_scale(unit: Dictionary, hp: int) -> float:
+	if hp <= 0:
+		return 1.0
+	var scale := float(unit.get("_visualScale", 1.0))
+	if bool(unit.get("isBoss", false)):
+		scale *= BOSS_BATTLE_VISUAL_SCALE
+	return scale
 
 func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) -> void:
 	var portrait_id := portrait.get_instance_id()
@@ -257,6 +269,19 @@ func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) ->
 	portrait.pivot_offset = scaled_size * 0.5
 	_portrait_base_pos_cache[portrait_id] = scaled_pos
 	_portrait_base_global_center_cache[portrait_id] = _portrait_current_global_center(portrait)
+
+func _apply_combatant_status_offset(slot: Control, is_boss: bool) -> void:
+	var offset := Vector2(0.0, BOSS_STATUS_OFFSET_Y if is_boss else 0.0)
+	for node_name in ["Name", "HpBar", "HpFrameBase", "HpFrame", "HpText", "Beads", "Orb"]:
+		var node := slot.get_node_or_null(node_name) as Control
+		if node == null:
+			continue
+		var node_id := node.get_instance_id()
+		if not _status_base_rect_cache.has(node_id):
+			_status_base_rect_cache[node_id] = Rect2(node.position, node.size)
+		var base_rect: Rect2 = _status_base_rect_cache[node_id]
+		node.position = base_rect.position + offset
+		node.size = base_rect.size
 
 func _hp_system_color(fill_color: String) -> Color:
 	match fill_color:

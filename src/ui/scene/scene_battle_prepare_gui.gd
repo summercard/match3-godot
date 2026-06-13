@@ -248,15 +248,21 @@ func _sync_gui() -> void:
 	_maybe_play_entry()
 
 func _sync_enemy_cards() -> void:
-	_label("EnemyPanel/Title").text = "敌方信息"
 	_set_visible("EnemyPanel/Frame", false)
+	var is_boss := not _enemy_team.is_empty() and bool((_enemy_team[0] as Dictionary).get("isBoss", false))
+	_label("EnemyPanel/Title").text = "敌方信息"
+	_set_visible("EnemyPanel/Title", not is_boss)
+	_set_enemy_panel_info_visible(not is_boss)
 	for i in ENEMY_CARD_PATHS.size():
 		var card := _node(ENEMY_CARD_PATHS[i])
 		card.visible = i == 0 and not _enemy_team.is_empty()
 		if i != 0 or _enemy_team.is_empty():
 			continue
 		var enemy: Dictionary = _enemy_team[i]
-		_set_enemy_hero_card(card, enemy)
+		if bool(enemy.get("isBoss", false)):
+			_set_enemy_boss_card(card, enemy)
+		else:
+			_set_enemy_hero_card(card, enemy)
 
 func _sync_team_cards() -> void:
 	_label("TeamPanel/Title").text = "我方队伍"
@@ -437,6 +443,18 @@ func _layout_enemy_hero_card(path: String) -> void:
 	_style_label(path + "/Power", RED_TEXT, Color.WHITE, 1)
 	_style_label(path + "/Stars", GOLD_TEXT, Color(0.46, 0.22, 0.04, 0.65), 1)
 
+func _layout_enemy_boss_card(path: String) -> void:
+	_set_rect(path, 0, 0, 323, 158)
+	_set_visible(path + "/Frame", false)
+	_set_local_rect(path + "/Portrait", 5, -42, 312, 216)
+	_set_local_rect(path + "/Name", 16, 124, 291, 32)
+	_set_local_rect(path + "/Level", 0, 0, 1, 1)
+	_set_local_rect(path + "/Power", 0, 0, 1, 1)
+	_set_local_rect(path + "/ElementBadge", 0, 0, 1, 1)
+	_set_local_rect(path + "/Stars", 0, 0, 1, 1)
+	_set_font(path + "/Name", 24)
+	_style_label(path + "/Name", Color.WHITE, Color(0.55, 0.08, 0.02, 0.96), 3)
+
 func _set_top_chip_rect(path: NodePath, x: float, y: float, w: float, h: float) -> void:
 	_set_rect(path, x, y, w, h)
 	_set_local_rect(String(path) + "/Frame", 0, 0, w, h)
@@ -463,6 +481,19 @@ func _set_visible(path: NodePath, visible: bool) -> void:
 	var item := get_node_or_null(path) as CanvasItem
 	if item != null:
 		item.visible = visible
+
+func _set_enemy_panel_info_visible(visible: bool) -> void:
+	for path in ["EnemyPanel/ElementPill", "EnemyPanel/ElementIcon", "EnemyPanel/ElementText", "EnemyPanel/PowerIcon", "EnemyPanel/PowerCaption"]:
+		_set_visible(path, visible)
+
+func _set_enemy_card_details_visible(card: Control, visible: bool) -> void:
+	for child_name in ["Level", "Power", "Stars"]:
+		var item := card.get_node_or_null(child_name) as CanvasItem
+		if item != null:
+			item.visible = visible
+	var badge := card.get_node_or_null("ElementBadge") as CanvasItem
+	if badge != null:
+		badge.visible = false
 
 func _set_label_align(path: NodePath, align: HorizontalAlignment) -> void:
 	var label := get_node_or_null(path) as Label
@@ -495,6 +526,8 @@ func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> voi
 	badge.texture = _element_texture(element)
 
 func _set_enemy_hero_card(card: Control, enemy: Dictionary) -> void:
+	_layout_enemy_hero_card(str(card.get_path()).trim_prefix(str(get_path()) + "/"))
+	_set_enemy_card_details_visible(card, true)
 	_set_monster_card(card, enemy, false)
 	var element := MonsterDBScript.get_board_affinity(enemy)
 	var element_name: String = MonsterDBScript.BOARD_AFFINITY_NAMES.get(element, _get_element_name(element))
@@ -504,6 +537,17 @@ func _set_enemy_hero_card(card: Control, enemy: Dictionary) -> void:
 	(card.get_node("Power") as Label).text = "%d" % int(enemy.get("power", 0))
 	var stars := card.get_node("Stars") as Label
 	stars.text = "★".repeat(clampi(int(enemy.get("rarity", 1)), 1, 5))
+
+func _set_enemy_boss_card(card: Control, enemy: Dictionary) -> void:
+	_layout_enemy_boss_card(str(card.get_path()).trim_prefix(str(get_path()) + "/"))
+	_set_enemy_card_details_visible(card, false)
+	var portrait := card.get_node("Portrait") as TextureRect
+	portrait.texture = _monster_texture(enemy, "battle")
+	var name_label := card.get_node("Name") as Label
+	name_label.visible = true
+	name_label.text = str(enemy.get("name", "BOSS"))
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 func _sync_power_panel() -> void:
 	var player_power := _get_team_total_power(_player_team)

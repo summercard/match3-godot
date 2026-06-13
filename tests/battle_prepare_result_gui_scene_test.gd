@@ -28,19 +28,28 @@ func _run() -> void:
 		"AlertPopup",
 	]:
 		_expect(prepare.has_node(path), "battle prepare GUI node should exist: %s" % path)
+	var normal_enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
+	var normal_enemy_portrait := normal_enemy_card.get_node("Portrait") as Control
+	var normal_enemy_portrait_size := normal_enemy_portrait.size
+	_expect((prepare.get_node("EnemyPanel/ElementPill") as Control).visible, "normal enemy panel should show element info")
+	_expect((normal_enemy_card.get_node("Level") as Control).visible, "normal enemy card should show level")
+	_expect((normal_enemy_card.get_node("Power") as Control).visible, "normal enemy card should show power")
 	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
 	_expect(_started_stage_id == "stage_1_1", "editable start button should preserve battle start behavior")
-	prepare.init({"stageId": "stage_2_5"})
+	prepare.init({"stageId": "stage_2_12"})
 	var enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
 	var enemy_name := enemy_card.get_node("Name") as Control
 	var enemy_level := enemy_card.get_node("Level") as Control
 	var enemy_power := enemy_card.get_node("Power") as Control
 	var enemy_portrait := enemy_card.get_node("Portrait") as Control
 	var enemy_stars := enemy_card.get_node("Stars") as Control
-	_expect(enemy_name.position.x == enemy_level.position.x, "boss enemy name and level should share a tidy left column")
-	_expect(enemy_portrait.position.x >= enemy_name.position.x + enemy_name.size.x + 6.0, "boss enemy portrait should not overlap the text column")
-	_expect(enemy_portrait.position.y + enemy_portrait.size.y <= enemy_stars.position.y, "boss enemy portrait should leave room for the rarity row")
-	_expect(enemy_power.position.x >= 45.0 and enemy_power.position.x + enemy_power.size.x <= 130.0, "boss enemy power should stay aligned in the left info column")
+	_expect(not (prepare.get_node("EnemyPanel/Title") as Control).visible, "boss enemy panel should hide the ordinary title")
+	_expect(not (prepare.get_node("EnemyPanel/ElementPill") as Control).visible, "boss enemy panel should hide element info")
+	_expect(not enemy_level.visible and not enemy_power.visible and not enemy_stars.visible, "boss enemy card should hide ordinary enemy details")
+	_expect((enemy_name as Label).text == "烈焰龙", "boss enemy card should show boss name")
+	_expect(enemy_name.size.x >= 280.0, "boss enemy name should be centered across the panel")
+	_expect(enemy_name.position.y >= 120.0, "boss enemy name should sit below the portrait")
+	_expect(enemy_portrait.size.x >= normal_enemy_portrait_size.x * 2.0 and enemy_portrait.size.y >= normal_enemy_portrait_size.y * 2.0, "boss enemy portrait should be at least twice the normal enemy portrait size")
 	prepare.queue_free()
 	await process_frame
 

@@ -52,6 +52,21 @@ func _run() -> void:
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
+	var normal_enemy_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
+	var normal_enemy_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
+
+	main.switch_scene("battle", {
+		"stageId": "stage_2_12",
+		"stageData": stage_db.get_stage("stage_2_12"),
+		"inputTestOnly": true,
+	})
+	await process_frame
+	await process_frame
+	battle = main.get_current_scene()
+	var boss_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
+	var boss_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
+	_expect(boss_portrait_size.x >= normal_enemy_portrait_size.x * 2.0 and boss_portrait_size.y >= normal_enemy_portrait_size.y * 2.0, "boss battle portrait should be at least twice the normal single enemy size")
+	_expect(boss_hp_y <= normal_enemy_hp_y - 40.0, "boss battle hp frame should move upward without affecting normal enemies")
 
 	main.switch_scene("battle", {
 		"stageId": "stage_3_6",

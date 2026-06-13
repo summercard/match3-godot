@@ -2,6 +2,11 @@ class_name BattleCombatantRenderer
 extends RefCounted
 
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
+const SINGLE_ENEMY_SPRITE_SIZE := 128.0
+const SINGLE_BOSS_SPRITE_SIZE := 256.0
+const MULTI_ENEMY_SPRITE_SIZE := 62.0
+const MULTI_BOSS_SPRITE_SIZE := 124.0
+const SINGLE_BOSS_STATUS_OFFSET_Y := -56.0
 
 static func draw_enemies(scene, battle, state: Dictionary) -> void:
 	var design_w: float = state.get("design_w", 375.0)
@@ -40,15 +45,16 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 		return
 	# ★ 主人定 2026-06-11：攻击者弹性放大
 	var elastic := _attacker_elastic_factor(state, true, 0)
-	scene._draw_text_with_shadow(name, design_w / 2.0, 83.0, colors.get("text_primary", Color.WHITE), 13.0, true)
-	scene._draw_hp_bar(196.0, 91.0, 150.0, 14.0, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], 271.0, 102.0, colors.get("white", Color.WHITE), 8.0, true)
+	var status_offset_y := SINGLE_BOSS_STATUS_OFFSET_Y if is_boss else 0.0
+	scene._draw_text_with_shadow(name, design_w / 2.0, 83.0 + status_offset_y, colors.get("text_primary", Color.WHITE), 13.0, true)
+	scene._draw_hp_bar(196.0, 91.0 + status_offset_y, 150.0, 14.0, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
+	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], 271.0, 102.0 + status_offset_y, colors.get("white", Color.WHITE), 8.0, true)
 	# ★ 主人定 2026-06-11：精英怪在血条前加 ★ 精英 标识
 	if bool(enemy.get("isElite", false)):
-		scene._draw_text_with_shadow("★精英", 178.0, 102.0, colors.get("gold", Color(1.0, 0.82, 0.18, 1.0)), 9.5, true)
+		scene._draw_text_with_shadow("★精英", 178.0, 102.0 + status_offset_y, colors.get("gold", Color(1.0, 0.82, 0.18, 1.0)), 9.5, true)
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
-		var boss_scale: float = 170.0 if is_boss else 128.0
+		var boss_scale: float = SINGLE_BOSS_SPRITE_SIZE if is_boss else SINGLE_ENEMY_SPRITE_SIZE
 		# ★ 主人定 2026-06-10：phase 2 体型 ×1.5（在原 boss_scale 基础上）
 		var visual_scale: float = float(enemy.get("_visualScale", 1.0))
 		var final_size: float = boss_scale * visual_scale * elastic
@@ -68,7 +74,7 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
 	var slot_w: float = 96.0
-	var sprite_size: float = 70.0 if enemy.get("isBoss", false) else 62.0
+	var sprite_size: float = MULTI_BOSS_SPRITE_SIZE if enemy.get("isBoss", false) else MULTI_ENEMY_SPRITE_SIZE
 	var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == index)
 	var has_flash: bool = flash.size() > 0
 	var cx: float = x + slot_w / 2.0
@@ -176,7 +182,7 @@ static func _enemy_sprite_center(enemy: Dictionary, index: int, battle, state: D
 	var enemy_count: int = battle.enemies.size() if battle != null else 1
 	if enemy_count <= 1:
 		# 单 Boss / 单怪 stage 布局
-		var boss_scale: float = 170.0 if is_boss else 128.0
+		var boss_scale: float = SINGLE_BOSS_SPRITE_SIZE if is_boss else SINGLE_ENEMY_SPRITE_SIZE
 		var final_size: float = boss_scale * visual_scale
 		var base_y: float = 104.0 if is_boss else 111.0
 		var top_y: float = base_y - (final_size - boss_scale) * 0.3 + sin(idle_time * TAU / 1.8) * 3.0
@@ -187,7 +193,7 @@ static func _enemy_sprite_center(enemy: Dictionary, index: int, battle, state: D
 		return Vector2(design_w / 2.0, 170.0)
 	var slot_x: float = slots[index].x
 	var slot_y: float = slots[index].y
-	var sprite_size: float = 70.0 if is_boss else 62.0
+	var sprite_size: float = MULTI_BOSS_SPRITE_SIZE if is_boss else MULTI_ENEMY_SPRITE_SIZE
 	var final_sprite_size: float = sprite_size * visual_scale
 	var top_y: float = slot_y + 11.0 - (final_sprite_size - sprite_size) * 0.3 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4
 	return Vector2(slot_x + 48.0, top_y + final_sprite_size / 2.0)
