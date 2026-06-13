@@ -304,12 +304,12 @@ func _apply_concept_layout() -> void:
 	_set_rect("EnemyPanel", 26, 119, 323, 158)
 	_set_local_rect("EnemyPanel/Bg", 0, 0, 323, 158)
 	_set_visible("EnemyPanel/Frame", false)
-	_set_rect("EnemyPanel/Title", 13, 12, 88, 25)
-	_set_rect("EnemyPanel/ElementPill", 21, 76, 82, 27)
-	_set_rect("EnemyPanel/ElementIcon", 27, 78, 22, 22)
-	_set_rect("EnemyPanel/ElementText", 48, 78, 47, 22)
-	_set_rect("EnemyPanel/PowerIcon", 21, 112, 27, 27)
-	_set_rect("EnemyPanel/PowerCaption", 52, 111, 70, 18)
+	_set_rect("EnemyPanel/Title", 18, 10, 96, 24)
+	_set_rect("EnemyPanel/ElementPill", 18, 92, 96, 25)
+	_set_rect("EnemyPanel/ElementIcon", 25, 94, 21, 21)
+	_set_rect("EnemyPanel/ElementText", 47, 94, 58, 21)
+	_set_rect("EnemyPanel/PowerIcon", 19, 123, 25, 25)
+	_set_rect("EnemyPanel/PowerCaption", 48, 118, 72, 18)
 	_set_font("EnemyPanel/Title", 18)
 	_set_font("EnemyPanel/ElementText", 12)
 	_set_font("EnemyPanel/PowerCaption", 11)
@@ -421,17 +421,17 @@ func _layout_monster_card(path: String, x: float, y: float, w: float, h: float, 
 func _layout_enemy_hero_card(path: String) -> void:
 	_set_rect(path, 0, 0, 323, 158)
 	_set_visible(path + "/Frame", false)
-	_set_local_rect(path + "/Portrait", 145, 4, 160, 145)
-	_set_local_rect(path + "/ElementBadge", 30, 79, 22, 22)
+	_set_local_rect(path + "/Portrait", 143, 21, 156, 108)
+	_set_local_rect(path + "/ElementBadge", 24, 94, 21, 21)
 	_set_visible(path + "/ElementBadge", false)
-	_set_local_rect(path + "/Name", 23, 41, 118, 31)
-	_set_local_rect(path + "/Level", 24, 68, 118, 21)
-	_set_local_rect(path + "/Power", 71, 127, 58, 24)
-	_set_local_rect(path + "/Stars", 145, 138, 160, 15)
-	_set_font(path + "/Name", 24)
-	_set_font(path + "/Level", 16)
+	_set_local_rect(path + "/Name", 18, 39, 119, 28)
+	_set_local_rect(path + "/Level", 18, 66, 119, 21)
+	_set_local_rect(path + "/Power", 47, 132, 82, 22)
+	_set_local_rect(path + "/Stars", 143, 132, 156, 17)
+	_set_font(path + "/Name", 22)
+	_set_font(path + "/Level", 15)
 	_set_font(path + "/Power", 20)
-	_set_font(path + "/Stars", 9)
+	_set_font(path + "/Stars", 10)
 	_style_label(path + "/Name", BROWN_DARK, Color.WHITE, 1)
 	_style_label(path + "/Level", BROWN_DARK, Color.WHITE, 1)
 	_style_label(path + "/Power", RED_TEXT, Color.WHITE, 1)
@@ -482,8 +482,11 @@ func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> voi
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(monster, "team" if is_team else "battle")
 	# ★ 主人定 2026-06-11：精英宠物/精英怪名字前缀 ★精英
-	var elite_prefix: String = "★精英 " if bool(monster.get("isElite", false)) else ""
-	(card.get_node("Name") as Label).text = "%s%s" % [elite_prefix, str(monster.get("name", "精灵"))]
+	var is_elite := bool(monster.get("isElite", false))
+	var elite_prefix: String = "★精英 " if is_elite else ""
+	var name_label := card.get_node("Name") as Label
+	name_label.text = "%s%s" % [elite_prefix, str(monster.get("name", "精灵"))]
+	name_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.10, 1.0) if is_elite else (BROWN_TEXT if is_team else BROWN_DARK))
 	(card.get_node("Level") as Label).text = "Lv.%d" % int(monster.get("level", 1))
 	var power := int(monster.get("power", 0))
 	(card.get_node("Power") as Label).text = "战力 %d" % power if is_team else "%d" % power

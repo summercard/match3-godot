@@ -43,9 +43,9 @@ func _run() -> void:
 	# 1) TopHud 信息文字（应加倍）
 	# 原本：Title=10, Value=14, SpeedLabel=10, BossPhase=10
 	# 加倍后 line_height 应等于 2*原 line_height - 1
-	_check_doubled(battle.get_node("TopHud/TurnBadge/Title"), 10, "TurnBadge/Title (回合)")
-	_check_doubled(battle.get_node("TopHud/TurnBadge/Value"), 14, "TurnBadge/Value (回合数)")
-	_check_doubled(battle.get_node("TopHud/SpeedLabel"), 10, "SpeedLabel (x2)")
+	# 主人定 2026-06-13：回合 Title/Value 由 20/28 缩到 13/20，SpeedLabel 已移除
+	_check_within(battle.get_node("TopHud/TurnBadge/Title"), 10, 17, "TurnBadge/Title (回合)")
+	_check_within(battle.get_node("TopHud/TurnBadge/Value"), 14, 24, "TurnBadge/Value (回合数)")
 	_check_doubled(battle.get_node("TopHud/BossPhase"), 10, "BossPhase (阶段)")
 
 	# 2) BottomControls Badges 信息文字（应加倍，原 9）
@@ -87,6 +87,16 @@ func _check_doubled(label: Label, original_font_size: int, debug_name: String) -
 	var min_required: int = int(round(float(original_lh) * 1.8))
 	_check(lh >= min_required, "%s: line_height should be at least %d (>=1.8x of %d), got %d" % [
 		debug_name, min_required, original_lh, lh
+	])
+
+# 检查 label 的 line_height 落在指定范围内（适配被明确调小或调大的字号）
+func _check_within(label: Label, original_font_size: int, target_font_size: int, debug_name: String) -> void:
+	var lh: int = int(label.get_line_height())
+	# line_height ≈ font_size + 默认间距（这里用 1），允许 ±2 容差
+	var min_lh: int = target_font_size - 1
+	var max_lh: int = target_font_size + 3
+	_check(lh >= min_lh and lh <= max_lh, "%s: line_height should be within [%d, %d] for font_size=%d, got %d" % [
+		debug_name, min_lh, max_lh, target_font_size, lh
 	])
 
 # 检查 Name label 保持不变（用基线值，不依赖 .tscn 中的小字号 override）

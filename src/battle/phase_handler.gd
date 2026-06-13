@@ -21,6 +21,9 @@ var _current_phase: int = 1
 var _phase_configs: Array = []
 var _triggered_phases: Dictionary = {}  # { phaseNum: true }
 
+const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
+const ELITE_VISUAL_SCALE: float = 1.2
+
 
 func _init(bm: Node = null) -> void:
 	battle_manager = bm
@@ -76,11 +79,14 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 
 	var hp_mult: float = phase_config.get("hpMultiplier", 1.3)
 	var new_enemy_ids: Array = phase_config.get("enemies", [])
+	var random_elite_chance := _random_elite_chance(phase_config)
 	var new_enemies: Array = []
 
 	for enemy_id in new_enemy_ids:
-		# ★ 阶段转换时也走 calc_enemy_auto：每阶段重 random 性格 + 读 MONSTER_DB.isElite
-		var monster: Dictionary = StatCalculator.calc_enemy_auto(enemy_id, enemy_level)
+		var enemy_id_str := str(enemy_id)
+		var is_elite := _should_spawn_elite(enemy_id_str, random_elite_chance)
+		var tier := StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
+		var monster: Dictionary = StatCalculator.calc_enemy(enemy_id_str, enemy_level, tier)
 		if not monster.is_empty():
 			var new_max_hp := int(monster.get("maxHP", 0) * hp_mult)
 			monster["maxHP"] = new_max_hp
@@ -92,10 +98,10 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 				monster["hp"] = new_max_hp
 			monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 			monster["def"] = int(monster.get("def", 0) * hp_mult)
-			# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite（会被下面 phase 2 ×1.5 覆盖）
-			if bool(MonsterDb.MONSTER_DB.get(enemy_id, {}).get("isElite", false)):
-				monster["_visualScale"] = 1.2
+			if is_elite:
+				monster["_visualScale"] = ELITE_VISUAL_SCALE
 				monster["isElite"] = true
+				monster["_eliteSource"] = "random"
 			# ★ 主人定 2026-06-10：二阶段体型变大 50%
 			monster["_visualScale"] = 1.5
 		new_enemies.append(monster)
@@ -134,6 +140,25 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 		battle_manager.emit_signal("phase_transitioned", _current_phase, new_enemies)
 
 	return new_enemies
+
+
+func _should_spawn_elite(enemy_id: String, random_elite_chance: float) -> bool:
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
+	if data.is_empty():
+		return false
+	if bool(data.get("isBoss", false)):
+		return false
+	return randf() < clampf(random_elite_chance, 0.0, 1.0)
+
+
+func _random_elite_chance(phase_config: Dictionary) -> float:
+	if bool(phase_config.get("disableRandomElite", false)):
+		return 0.0
+	if phase_config.has("randomEliteChance"):
+		return clampf(float(phase_config.get("randomEliteChance", 0.0)), 0.0, 1.0)
+	if phase_config.has("eliteChance"):
+		return clampf(float(phase_config.get("eliteChance", 0.0)), 0.0, 1.0)
+	return DEFAULT_RANDOM_ELITE_CHANCE
 
 
 ## 根据阶段号查找配置

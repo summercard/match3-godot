@@ -39,6 +39,14 @@ const COMMON_ASSETS := {
 	"gold": "res://assets/images/ui/icons/battle_flow_new_icon_gold_coin.png",
 	"exp": "res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png",
 	"capture_ball": "res://assets/images/ui/icons/battle_flow_new_icon_capture_ball.png",
+	"item_capture": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
+	"item_capture_plus": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
+	"item_exp": "res://assets/images/ui/icons/items_new_icon_exp_potion.png",
+	"item_exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
+	"item_gold": "res://assets/images/ui/icons/items_new_icon_gold_bag.png",
+	"item_gold_chest": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
+	"item_hp": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
+	"item_generic": "res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png",
 	"gem_fire": "res://assets/images/ui/gems/battle_flow_new_icon_element_fire.png",
 	"gem_grass": "res://assets/images/ui/gems/battle_flow_new_icon_element_grass.png",
 	"gem_water": "res://assets/images/ui/gems/battle_flow_new_icon_element_water.png",
@@ -353,15 +361,18 @@ func _calc_rewards() -> void:
 	_rewards["item_count"] = 0
 	var first_item: Dictionary = RewardRulesScript.get_first_guaranteed_item(stage_rewards)
 	if _is_win and not first_item.is_empty():
-		_rewards["item"] = str(first_item.get("id", ""))
-		_rewards["item_name"] = _rewards["item"]
+		var item_id := str(first_item.get("id", ""))
+		var item_def := ItemDBScript.get_item(item_id)
+		_rewards["item"] = item_id
+		_rewards["item_name"] = str(item_def.get("name", item_id))
 		_rewards["item_count"] = maxi(1, int(first_item.get("count", 1)))
 	elif _is_win and randf() < 0.3:
 		if _storage and _storage.has_method("roll_drop"):
 			var item_id: String = _storage.roll_drop()
 			if not item_id.is_empty():
+				var item_def := ItemDBScript.get_item(item_id)
 				_rewards["item"] = item_id
-				_rewards["item_name"] = item_id
+				_rewards["item_name"] = str(item_def.get("name", item_id))
 				_rewards["item_count"] = 1
 
 func _setup_buttons() -> void:
@@ -390,7 +401,7 @@ func _save_rewards() -> void:
 				"level": maxi(1, int(_battle_result.get("enemyLevel", 1))),
 				"nature": captured_nature,
 				# ★ 主人定 2026-06-11：捕获精英怪 → 宠物也是精英（保留 HP×5/ATK+20%）
-				"isElite": bool(MonsterDb.MONSTER_DB.get(_capture_target["id"], {}).get("isElite", false)),
+				"isElite": bool(_capture_target.get("isElite", MonsterDb.MONSTER_DB.get(_capture_target["id"], {}).get("isElite", false))),
 			})
 		else:
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
@@ -401,12 +412,7 @@ func _save_rewards() -> void:
 				_storage.save_player(player) if _storage.has_method("save_player") else null
 				_storage.init_monster_pokedex(_capture_target["id"]) if _storage.has_method("init_monster_pokedex") else null
 	if _rewards["item"] and _storage.has_method("add_item"):
-		var item_count := 1
-		var guaranteed_items: Array = _battle_result.get("stageRewards", {}).get("guaranteedItems", [])
-		for item: Dictionary in guaranteed_items:
-			if str(item.get("id", "")) == str(_rewards["item"]):
-				item_count = maxi(1, int(item.get("count", 1)))
-				break
+		var item_count := maxi(1, int(_rewards.get("item_count", 1)))
 		_storage.add_item(_rewards["item"], item_count)
 	var rewards: Dictionary = _storage.load_rewards() if _storage.has_method("load_rewards") else {}
 	rewards["totalGoldEarned"] = rewards.get("totalGoldEarned", 0) + _rewards["gold"]
@@ -414,7 +420,7 @@ func _save_rewards() -> void:
 	if _captured:
 		rewards["captureCount"] = rewards.get("captureCount", 0) + 1
 	if _rewards["item"]:
-		rewards["totalItemsGained"] = rewards.get("totalItemsGained", 0) + 1
+		rewards["totalItemsGained"] = rewards.get("totalItemsGained", 0) + maxi(1, int(_rewards.get("item_count", 1)))
 	_storage.save_rewards(rewards) if _storage.has_method("save_rewards") else null
 	_record_achievement_progress()
 
@@ -759,7 +765,11 @@ func _draw_rewards_section(font: Font, y: float) -> void:
 		{"icon": "exp", "amount": "+%d" % _rewards["exp"], "color": C["thunder"]},
 	]
 	if _rewards["item"]:
-		reward_items.append({"icon": "capture_ball", "amount": "x%d" % maxi(1, int(_rewards.get("item_count", 1))), "color": C["text_primary"]})
+		reward_items.append({
+			"icon": _get_reward_item_icon_key(str(_rewards.get("item", ""))),
+			"amount": "%s x%d" % [str(_rewards.get("item_name", _rewards.get("item", "道具"))), maxi(1, int(_rewards.get("item_count", 1)))],
+			"color": C["text_primary"]
+		})
 	elif _is_win:
 		reward_items.append({"icon": "gem_grass", "amount": "x2", "color": Color(0.65, 1.0, 0.45)})
 	
@@ -774,6 +784,25 @@ func _draw_rewards_section(font: Font, y: float) -> void:
 		_draw_texture_fit(_tex("reward_slot"), Rect2(x, y + 34.0 + bounce, slot_w, 56.0))
 		_draw_texture_fit(_tex(item["icon"]), Rect2(x + 13.0, y + 43.0 + bounce, 28.0, 28.0))
 		_draw_centered_text(font, item["amount"], x + slot_w / 2.0, y + 91.0, item["color"], 11.0)
+
+func _get_reward_item_icon_key(item_id: String) -> String:
+	match item_id:
+		"capture_ball":
+			return "item_capture"
+		"capture_ball_plus", "capture_ball_elite":
+			return "item_capture_plus"
+		"exp_potion":
+			return "item_exp"
+		"exp_crystal":
+			return "item_exp_crystal"
+		"gold_bag":
+			return "item_gold"
+		"gold_chest":
+			return "item_gold_chest"
+		"hp_potion", "hp_potion_large":
+			return "item_hp"
+		_:
+			return "item_generic"
 
 func _draw_exp_section(font: Font, y: float) -> void:
 	_draw_texture_fit(_tex("team_exp_panel"), Rect2(16.0, y, DESIGN_W - 32.0, 116.0), 0.95)

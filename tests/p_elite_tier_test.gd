@@ -30,12 +30,12 @@ func _init() -> void:
 	print("  ✓ ELITE tier OK")
 
 	# 4) MonsterPool.create_instance 默认带 isElite（从模板继承）
-	var inst_normal = MonsterPool.create_instance("monster_001")
+	var inst_normal = MonsterPool.create_instance("monster_001", {"nature": "brave"})
 	print("\n[Pool] monster_001 (非精英) isElite=%s" % str(inst_normal.get("isElite", null)))
 	assert(inst_normal.get("isElite", true) == false, "monster_001 不应是精英")
 
 	# 5) 强制 isElite=true 创建实例
-	var inst_elite = MonsterPool.create_instance("monster_001", {"isElite": true})
+	var inst_elite = MonsterPool.create_instance("monster_001", {"isElite": true, "nature": "brave"})
 	print("[Pool] monster_001 (强制精英) isElite=%s" % str(inst_elite.get("isElite", null)))
 	assert(inst_elite.get("isElite", false) == true, "强制精英应保留 isElite=true")
 

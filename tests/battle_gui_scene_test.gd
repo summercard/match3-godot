@@ -24,7 +24,9 @@ func _run() -> void:
 	for path in [
 		"Background",
 		"TopHud/TurnBadge/Value",
-		"TopHud/SpeedButton",
+		"TopHud/PauseButton",
+		"PauseDialog/Panel/ResumeButton",
+		"PauseDialog/Panel/QuitButton",
 		"Combatants/SingleEnemy/Portrait",
 		"Combatants/SingleEnemy/HpFrameBase",
 		"Combatants/Players/Player1/HpBar",

@@ -172,7 +172,7 @@ func init(data: Dictionary = {}) -> void:
 	_stage_id = data.get("stageId", "stage_1_1")
 	
 	# 优先使用传入的 stageData；否则从关卡数据查找
-	if data.get("stageData") and data.get("stageData", {}).get("enemies"):
+	if data.get("stageData") is Dictionary and not (data.get("stageData") as Dictionary).is_empty():
 		_stage_data = data["stageData"]
 	else:
 		_stage_data = _lookup_stage_data(_stage_id)
@@ -228,19 +228,50 @@ func _load_player_team() -> void:
 
 func _load_enemy_team() -> void:
 	_enemy_team = []
-	var enemy_ids: Array = _stage_data.get("enemies", ["enemy_001", "enemy_002", "enemy_003"])
+	var enemy_ids: Array = _get_preview_enemy_ids(_stage_data)
 	# ★ 主人定：关卡没设 enemyLevel 时兑底 3，记录 isFallback 供 UI 提示
-	var enemy_level: int = _stage_data.get("enemyLevel", 3)
 	var is_fallback: bool = not _stage_data.has("enemyLevel") or int(_stage_data.get("enemyLevel", 0)) <= 0
+	var enemy_level: int = 3 if is_fallback else int(_stage_data.get("enemyLevel", 3))
 	for enemy_id: String in enemy_ids:
-		# 准备预览用中性性格（不 random，避免预览跳跳）
-		var enemy: Dictionary = StatCalculator.calc(enemy_id, enemy_level)
+		var preview_elite := _should_preview_elite(enemy_id)
+		var tier := StatCalculator.EnemyTier.ELITE if preview_elite else StatCalculator.EnemyTier.NORMAL
+		var enemy: Dictionary = StatCalculator.calc_enemy(enemy_id, enemy_level, tier)
 		if not enemy.is_empty():
 			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0) + enemy.get("spd", 0)
 			enemy["_isFallbackLevel"] = is_fallback  # 告诉 UI 是不是兑底值
 			# ★ 主人定 2026-06-11：让战前 UI 也能看出敌方精英怪
-			enemy["isElite"] = bool(MonsterDb.MONSTER_DB.get(enemy_id, {}).get("isElite", false))
+			enemy["isElite"] = preview_elite
+			if preview_elite:
+				enemy["_visualScale"] = 1.2
 			_enemy_team.append(enemy)
+
+func _get_preview_enemy_ids(stage_data: Dictionary) -> Array:
+	var direct_enemies: Array = stage_data.get("enemies", [])
+	if not direct_enemies.is_empty():
+		return direct_enemies
+	var phases: Array = stage_data.get("phases", [])
+	if not phases.is_empty():
+		var first_phase: Dictionary = phases[0]
+		var phase_enemies: Array = first_phase.get("enemies", [])
+		if not phase_enemies.is_empty():
+			return phase_enemies
+	return ["enemy_001", "enemy_002", "enemy_003"]
+
+func _should_preview_elite(enemy_id: String) -> bool:
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
+	if data.is_empty() or bool(data.get("isBoss", false)):
+		return false
+	var chance := _preview_random_elite_chance(_stage_data)
+	return chance >= 1.0
+
+func _preview_random_elite_chance(stage_data: Dictionary) -> float:
+	if bool(stage_data.get("disableRandomElite", false)):
+		return 0.0
+	if stage_data.has("randomEliteChance"):
+		return clampf(float(stage_data.get("randomEliteChance", 0.0)), 0.0, 1.0)
+	if stage_data.has("eliteChance"):
+		return clampf(float(stage_data.get("eliteChance", 0.0)), 0.0, 1.0)
+	return 0.0
 
 func _get_team_total_power(team: Array) -> int:
 	var total := 0

@@ -14,6 +14,12 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="button_blue"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/capture_success_new_ui_button_green.png" id="button_green"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png" id="icon_frame"]
+[ext_resource type="Texture2D" path="res://assets/images/effects/battle_flow_new_fx_golden_burst.png" id="victory_burst"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png" id="victory_banner"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/battle_flow_new_ui_panel_large.png" id="result_panel"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/battle_flow_new_ui_capture_status_plaque.png" id="capture_plaque"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png" id="continue_button"]
+[ext_resource type="FontFile" path="res://assets/fonts/ZCOOLKuaiLe-Regular.ttf" id="round_font"]
 
 [node name="BattleScreenGui" type="Control" unique_id=807451328]
 clip_contents = true
@@ -59,52 +65,51 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="TopHud/TurnBadge" unique_id=1243297738]
 layout_mode = 0
-offset_top = 2.0
+offset_top = 4.0
 offset_right = 72.0
-offset_bottom = 26.0
+offset_bottom = 22.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 13
 text = "回合"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="TopHud/TurnBadge" unique_id=515103777]
 layout_mode = 0
-offset_top = 28.0
+offset_top = 22.0
 offset_right = 72.0
-offset_bottom = 60.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 20
 text = "0/20"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpeedButton" type="TextureRect" parent="TopHud" unique_id=1876612873]
+[node name="PauseButton" type="TextureButton" parent="TopHud" unique_id=1876612873]
 layout_mode = 0
-offset_left = 285.0
+offset_left = 315.0
 offset_top = 5.0
-offset_right = 327.0
+offset_right = 357.0
 offset_bottom = 53.0
-mouse_filter = 2
-texture = ExtResource("speed_button")
-expand_mode = 1
-stretch_mode = 5
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+texture_normal = ExtResource("speed_button")
 
-[node name="SpeedLabel" type="Label" parent="TopHud" unique_id=1652010195]
+[node name="PauseIcon" type="Label" parent="TopHud/PauseButton" unique_id=1652010195]
 layout_mode = 0
-offset_left = 282.0
-offset_top = 22.0
-offset_right = 330.0
-offset_bottom = 50.0
+offset_left = 0.0
+offset_top = 18.0
+offset_right = 42.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 20
-text = "x2"
+theme_override_font_sizes/font_size = 18
+text = "||"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -650,6 +655,274 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 text = "使用"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BattleEndOverlay" type="Control" parent="."]
+visible = false
+z_index = 4096
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.66)
+
+[node name="Burst" type="TextureRect" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 78.5
+offset_top = 159.5
+offset_right = 296.5
+offset_bottom = 295.5
+mouse_filter = 2
+texture = ExtResource("victory_burst")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Banner" type="Control" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 29.5
+offset_top = 140.5
+offset_right = 345.5
+offset_bottom = 254.5
+mouse_filter = 2
+
+[node name="Image" type="TextureRect" parent="BattleEndOverlay/Banner"]
+layout_mode = 0
+offset_right = 316.0
+offset_bottom = 114.0
+mouse_filter = 2
+texture = ExtResource("victory_banner")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="BattleEndOverlay/Banner"]
+layout_mode = 0
+offset_left = 73.0
+offset_top = 4.0
+offset_right = 243.0
+offset_bottom = 72.0
+theme_override_fonts/font = ExtResource("round_font")
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 44
+text = "胜利"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Underline" type="ColorRect" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 322.0
+offset_right = 281.0
+offset_bottom = 324.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.42, 0.55)
+
+[node name="Panel" type="TextureRect" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 41.5
+offset_top = 292.5
+offset_right = 333.5
+offset_bottom = 450.5
+mouse_filter = 2
+texture = ExtResource("result_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StatusGroup" type="Control" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 78.5
+offset_top = 334.5
+offset_right = 296.5
+offset_bottom = 388.5
+mouse_filter = 2
+
+[node name="Plaque" type="TextureRect" parent="BattleEndOverlay/StatusGroup"]
+layout_mode = 0
+offset_right = 218.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("capture_plaque")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StatusLabel" type="Label" parent="BattleEndOverlay/StatusGroup"]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 11.0
+offset_right = 195.0
+offset_bottom = 43.0
+theme_override_fonts/font = ExtResource("round_font")
+theme_override_colors/font_color = Color(0.31, 0.78, 0.31, 1)
+theme_override_font_sizes/font_size = 16
+text = "收服成功"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="ContinueButton" type="Control" parent="BattleEndOverlay"]
+layout_mode = 0
+offset_left = 90.5
+offset_top = 401.5
+offset_right = 284.5
+offset_bottom = 455.5
+mouse_filter = 2
+
+[node name="Image" type="TextureRect" parent="BattleEndOverlay/ContinueButton"]
+layout_mode = 0
+offset_right = 194.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("continue_button")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BattleEndOverlay/ContinueButton"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 13.0
+offset_right = 167.0
+offset_bottom = 41.0
+theme_override_fonts/font = ExtResource("round_font")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "点击继续"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="PauseDialog" type="Control" parent="."]
+visible = false
+z_index = 4096
+process_mode = 3
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 0
+
+[node name="Shade" type="ColorRect" parent="PauseDialog"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="Control" parent="PauseDialog"]
+layout_mode = 0
+offset_left = 54.0
+offset_top = 214.0
+offset_right = 321.0
+offset_bottom = 431.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="PauseDialog/Panel"]
+layout_mode = 0
+offset_right = 267.0
+offset_bottom = 217.0
+mouse_filter = 2
+texture = ExtResource("popup_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="PauseDialog/Panel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 22.0
+offset_right = 229.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 22
+text = "游戏暂停"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Hint" type="Label" parent="PauseDialog/Panel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 70.0
+offset_right = 237.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 13
+text = "是否继续本局游戏？"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+clip_text = true
+
+[node name="ResumeButton" type="TextureButton" parent="PauseDialog/Panel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 138.0
+offset_right = 118.0
+offset_bottom = 179.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="PauseDialog/Panel/ResumeButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_green")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PauseDialog/Panel/ResumeButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.36, 0.08, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "继续"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="QuitButton" type="TextureButton" parent="PauseDialog/Panel"]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 138.0
+offset_right = 230.0
+offset_bottom = 179.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="PauseDialog/Panel/QuitButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="PauseDialog/Panel/QuitButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0.22, 0.38, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "回到大厅"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true

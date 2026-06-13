@@ -32,6 +32,15 @@ const DEFAULT_STAR_LIT_PATH := "res://assets/images/ui/icons/stage_icon_star_lit
 const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/stage_icon_star_lit.png"
 const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 
+# === 大地图入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
+const ENTRY_HEADER_DELAY := 0.00
+const ENTRY_NAV_DELAY := 0.38
+const ENTRY_HEADER_DURATION := 0.34
+const ENTRY_NAV_DURATION := 0.34
+const ENTRY_HEADER_SLIDE := 30.0
+const ENTRY_NAV_SLIDE := 30.0
+var _entry_played: bool = false
+
 var _chapter_map: Control = null
 var _chapter_map_id: String = ""
 var _chapter_maps_content: Control = null
@@ -62,6 +71,7 @@ func _ready() -> void:
 	super._ready()
 	_connect_shell_actions()
 	_sync_gui()
+	_maybe_play_entry()
 
 func initialize(game: Node, data: Dictionary = {}) -> void:
 	_focus_stage_id = str(data.get("focusStageId", ""))
@@ -137,6 +147,36 @@ func _attach_button_feedback(button: BaseButton, profile: int, burst_enabled: bo
 	button.add_child(feedback)
 	feedback.setup(button, profile)
 	feedback.set_burst_enabled(burst_enabled)
+
+# 大地图入场序列：Header 从上方滑入 + 淡入，BottomNav 从下方滑入 + 淡入
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) Header：上方 30px 滑入 + 淡入
+	var header := get_node_or_null("Header") as Control
+	if header != null:
+		var header_rest_y := header.position.y
+		header.position.y = header_rest_y - ENTRY_HEADER_SLIDE
+		header.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_HEADER_DELAY)
+		tween.tween_property(header, "modulate:a", 1.0, ENTRY_HEADER_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(header, "position:y", header_rest_y, ENTRY_HEADER_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) BottomNav：下方 30px 滑入 + 淡入
+	var nav := get_node_or_null("BottomNav") as Control
+	if nav != null:
+		var nav_rest_y := nav.position.y
+		nav.position.y = nav_rest_y + ENTRY_NAV_SLIDE
+		nav.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_NAV_DELAY)
+		tween.tween_property(nav, "modulate:a", 1.0, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(nav, "position:y", nav_rest_y, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _gui_input(_event: InputEvent) -> void:
 	# The editable chapter map buttons own all touch input.

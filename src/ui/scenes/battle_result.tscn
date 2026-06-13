@@ -34,6 +34,7 @@ mouse_filter = 1
 script = ExtResource("script")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1156930113]
+z_index = -10
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -43,11 +44,12 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="Shade" type="ColorRect" parent="." unique_id=747442968]
+z_index = -5
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.34)
+color = Color(0.02, 0.05, 0.12, 0.18)
 
 [node name="WinFx" type="Control" parent="." unique_id=1739148844]
 anchors_preset = 0
@@ -107,13 +109,13 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Banner" unique_id=1683066956]
 layout_mode = 0
 offset_left = 54.0
-offset_top = 62.0
+offset_top = 45.0
 offset_right = 309.0
-offset_bottom = 110.0
+offset_bottom = 105.0
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 30
+theme_override_colors/font_outline_color = Color(0.30, 0.13, 0.04, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 36
 text = "战斗胜利"
 horizontal_alignment = 1
 vertical_alignment = 1

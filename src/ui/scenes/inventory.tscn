@@ -1511,9 +1511,9 @@ clip_text = true
 [node name="Type" type="Label" parent="DetailPanel/Content" unique_id=188279821]
 layout_mode = 0
 offset_left = 256.0
-offset_top = 20.0
+offset_top = 8.0
 offset_right = 334.0
-offset_bottom = 43.0
+offset_bottom = 31.0
 theme_override_colors/font_color = Color(0.86, 0.32, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
@@ -1527,9 +1527,9 @@ clip_text = true
 [node name="Desc" type="Label" parent="DetailPanel/Content" unique_id=166140813]
 layout_mode = 0
 offset_left = 124.0
-offset_top = 47.0
+offset_top = 46.0
 offset_right = 321.0
-offset_bottom = 88.0
+offset_bottom = 87.0
 theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
 theme_override_font_sizes/font_size = 12
 vertical_alignment = 1
@@ -1539,9 +1539,9 @@ clip_text = true
 [node name="Count" type="Label" parent="DetailPanel/Content" unique_id=1809328510]
 layout_mode = 0
 offset_left = 124.0
-offset_top = 99.0
+offset_top = 76.0
 offset_right = 212.0
-offset_bottom = 123.0
+offset_bottom = 100.0
 theme_override_colors/font_color = Color(0.86, 0.32, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
@@ -1554,9 +1554,9 @@ clip_text = true
 [node name="EquipState" type="Label" parent="DetailPanel/Content" unique_id=2012414441]
 layout_mode = 0
 offset_left = 210.0
-offset_top = 99.0
+offset_top = 78.0
 offset_right = 295.0
-offset_bottom = 123.0
+offset_bottom = 102.0
 theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
@@ -1568,9 +1568,9 @@ clip_text = true
 [node name="UseButton" type="TextureButton" parent="DetailPanel" unique_id=1023572439]
 layout_mode = 0
 offset_left = 263.0
-offset_top = 54.0
+offset_top = 36.0
 offset_right = 336.0
-offset_bottom = 91.0
+offset_bottom = 73.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
@@ -1597,15 +1597,15 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="BattleSlots" type="Control" parent="DetailPanel"]
-layout_mode = 0
-offset_left = 124.0
-offset_top = 115.0
-offset_right = 250.0
-offset_bottom = 140.0
+[node name="BattleSlots" type="Control" parent="DetailPanel" unique_id=806364050]
+anchors_preset = 0
+offset_left = 172.0
+offset_top = 109.0
+offset_right = 298.0
+offset_bottom = 134.0
 mouse_filter = 2
 
-[node name="Title" type="Label" parent="DetailPanel/BattleSlots"]
+[node name="Title" type="Label" parent="DetailPanel/BattleSlots" unique_id=978322951]
 layout_mode = 0
 offset_top = -2.0
 offset_right = 54.0
@@ -1619,7 +1619,7 @@ text = "战斗道具"
 vertical_alignment = 1
 clip_text = true
 
-[node name="Slot1" type="TextureButton" parent="DetailPanel/BattleSlots"]
+[node name="Slot1" type="TextureButton" parent="DetailPanel/BattleSlots" unique_id=2060452338]
 layout_mode = 0
 offset_left = 58.0
 offset_top = -4.0
@@ -1628,7 +1628,7 @@ offset_bottom = 22.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1"]
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1" unique_id=1603851921]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
@@ -1637,7 +1637,7 @@ texture = ExtResource("10_slot")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1"]
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot1" unique_id=1161303459]
 layout_mode = 0
 offset_left = 3.0
 offset_top = 3.0
@@ -1647,7 +1647,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot1"]
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot1" unique_id=266804881]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
@@ -1657,7 +1657,7 @@ text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Slot2" type="TextureButton" parent="DetailPanel/BattleSlots"]
+[node name="Slot2" type="TextureButton" parent="DetailPanel/BattleSlots" unique_id=1305699374]
 layout_mode = 0
 offset_left = 88.0
 offset_top = -4.0
@@ -1666,7 +1666,7 @@ offset_bottom = 22.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2"]
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2" unique_id=1595475705]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
@@ -1675,7 +1675,7 @@ texture = ExtResource("10_slot")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2"]
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot2" unique_id=6741892]
 layout_mode = 0
 offset_left = 3.0
 offset_top = 3.0
@@ -1685,7 +1685,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot2"]
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot2" unique_id=24501684]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
@@ -1695,7 +1695,7 @@ text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Slot3" type="TextureButton" parent="DetailPanel/BattleSlots"]
+[node name="Slot3" type="TextureButton" parent="DetailPanel/BattleSlots" unique_id=1837705570]
 layout_mode = 0
 offset_left = 118.0
 offset_top = -4.0
@@ -1704,7 +1704,7 @@ offset_bottom = 22.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3"]
+[node name="Frame" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3" unique_id=104088072]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
@@ -1713,7 +1713,7 @@ texture = ExtResource("10_slot")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3"]
+[node name="Icon" type="TextureRect" parent="DetailPanel/BattleSlots/Slot3" unique_id=390072356]
 layout_mode = 0
 offset_left = 3.0
 offset_top = 3.0
@@ -1723,7 +1723,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot3"]
+[node name="Index" type="Label" parent="DetailPanel/BattleSlots/Slot3" unique_id=453196532]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0

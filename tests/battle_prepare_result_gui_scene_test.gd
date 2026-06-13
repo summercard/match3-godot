@@ -30,6 +30,17 @@ func _run() -> void:
 		_expect(prepare.has_node(path), "battle prepare GUI node should exist: %s" % path)
 	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
 	_expect(_started_stage_id == "stage_1_1", "editable start button should preserve battle start behavior")
+	prepare.init({"stageId": "stage_2_5"})
+	var enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
+	var enemy_name := enemy_card.get_node("Name") as Control
+	var enemy_level := enemy_card.get_node("Level") as Control
+	var enemy_power := enemy_card.get_node("Power") as Control
+	var enemy_portrait := enemy_card.get_node("Portrait") as Control
+	var enemy_stars := enemy_card.get_node("Stars") as Control
+	_expect(enemy_name.position.x == enemy_level.position.x, "boss enemy name and level should share a tidy left column")
+	_expect(enemy_portrait.position.x >= enemy_name.position.x + enemy_name.size.x + 6.0, "boss enemy portrait should not overlap the text column")
+	_expect(enemy_portrait.position.y + enemy_portrait.size.y <= enemy_stars.position.y, "boss enemy portrait should leave room for the rarity row")
+	_expect(enemy_power.position.x >= 45.0 and enemy_power.position.x + enemy_power.size.x <= 130.0, "boss enemy power should stay aligned in the left info column")
 	prepare.queue_free()
 	await process_frame
 
@@ -42,7 +53,7 @@ func _run() -> void:
 		"maxTurns": 20,
 		"playerLevel": 5,
 		"enemyLevel": 3,
-		"stageRewards": {"gold": 80, "exp": 30, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
+		"stageRewards": {"gold": 80, "exp": 30, "guaranteedItems": [{"id": "capture_ball_plus", "count": 2}]},
 		"playerTeam": [
 			{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "hp": 20, "maxHP": 20},
 			{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 3, "hp": 18, "maxHP": 18},
@@ -52,7 +63,7 @@ func _run() -> void:
 		],
 		"capture_played_inline": true,
 		"captured": true,
-		"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1},
+		"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1, "isElite": true},
 		"capture_result_text": {"title": "收服成功", "reason": "窗口稳定"},
 		"capture_item_used": {"name": "捕捉球"},
 		"capture_window": {"label": "稳定", "stability": 0.82},
@@ -78,6 +89,11 @@ func _run() -> void:
 		_expect(result.has_node(path), "battle result GUI node should exist: %s" % path)
 	_expect((result.get_node("CaptureSuccessLayer") as Control).visible, "capture success layer should show captured result")
 	_expect(not (result.get_node("CaptureResultPanel") as Control).visible, "old capture pet panel should be hidden behind success layer")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Amount") as Label).text == "超级捕获球 x2", "result reward slot should name the same item it grants")
+	var inventory_after_result: Dictionary = save_manager.load_inventory() if save_manager != null else {}
+	_expect(int(inventory_after_result.get("capture_ball_plus", 0)) == 2, "result should grant the same guaranteed item count shown in the reward slot")
+	var captured_instances: Array = save_manager.get_instances_by_monster_id("enemy_001") if save_manager != null and save_manager.has_method("get_instances_by_monster_id") else []
+	_expect(not captured_instances.is_empty() and bool((captured_instances[0] as Dictionary).get("isElite", false)), "captured random elite target should keep isElite on the owned instance")
 	result.queue_free()
 	await process_frame
 

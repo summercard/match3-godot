@@ -67,6 +67,9 @@ var stage_id: String = ""
 var player_level: int = 1
 var enemy_level: int = 1
 
+const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
+const ELITE_VISUAL_SCALE: float = 1.2
+
 # ========== 单例模式 ==========
 static var instance: BattleManager
 
@@ -104,30 +107,14 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 		var phase1: Dictionary = stage_phases[0] if stage_phases.size() > 0 else {}
 		if not phase1.is_empty():
 			var hp_mult: float = phase1.get("hpMultiplier", 1.0)
+			var elite_chance: float = _random_elite_chance(stage_data, phase1)
 			enemies = phase1.get("enemies", []).map(func(id):
-				# ★ 主人定：敌人每次出现 random 性格（捕获后才知道）
-				#   用 calc_enemy_auto 读 MONSTER_DB.isElite 自动走精英系数
-				var monster = StatCalculator.calc_enemy_auto(id, e_level)
-				if not monster.is_empty() and hp_mult != 1.0:
-					monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
-					monster["hp"] = monster["maxHP"]
-					monster["atk"] = int(monster.get("atk", 0) * hp_mult)
-				# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite 给渲染层
-				if not monster.is_empty() and bool(MonsterDb.MONSTER_DB.get(id, {}).get("isElite", false)):
-					monster["_visualScale"] = 1.2
-					monster["isElite"] = true
-				return monster
+				return _build_enemy_unit(str(id), e_level, hp_mult, elite_chance)
 			)
 	else:
+		var elite_chance: float = _random_elite_chance(stage_data)
 		enemies = enemy_monster_ids.map(func(id):
-			# ★ 主人定：敌人每次出现 random 性格
-			#   用 calc_enemy_auto 读 MONSTER_DB.isElite 自动走精英系数
-			var monster = StatCalculator.calc_enemy_auto(id, e_level)
-			# ★ 主人定 2026-06-11：精英怪体型 +20% + 暴露 isElite 给渲染层
-			if not monster.is_empty() and bool(MonsterDb.MONSTER_DB.get(id, {}).get("isElite", false)):
-				monster["_visualScale"] = 1.2
-				monster["isElite"] = true
-			return monster
+			return _build_enemy_unit(str(id), e_level, 1.0, elite_chance)
 		)
 
 	turn = 0
@@ -187,6 +174,49 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	# 连接 EnemySkillSystem 的特定信号到 BattleManager
 	_connect_enemy_skill_signals()
+
+
+func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, random_elite_chance: float = 0.0) -> Dictionary:
+	var is_elite := _should_spawn_elite(enemy_id, random_elite_chance)
+	var tier := StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
+	var monster := StatCalculator.calc_enemy(enemy_id, level, tier)
+	if monster.is_empty():
+		return monster
+	if hp_mult != 1.0:
+		monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
+		monster["hp"] = monster["maxHP"]
+		monster["atk"] = int(monster.get("atk", 0) * hp_mult)
+	if is_elite:
+		monster["_visualScale"] = ELITE_VISUAL_SCALE
+		monster["isElite"] = true
+		monster["_eliteSource"] = "random"
+	return monster
+
+
+func _should_spawn_elite(enemy_id: String, random_elite_chance: float) -> bool:
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
+	if data.is_empty():
+		return false
+	if bool(data.get("isBoss", false)):
+		return false
+	return randf() < clampf(random_elite_chance, 0.0, 1.0)
+
+
+func _random_elite_chance(stage: Variant, phase: Dictionary = {}) -> float:
+	if stage == null or not (stage is Dictionary):
+		return 0.0
+	var stage_dict: Dictionary = stage
+	if bool(stage_dict.get("disableRandomElite", false)) or bool(phase.get("disableRandomElite", false)):
+		return 0.0
+	if phase.has("randomEliteChance"):
+		return clampf(float(phase.get("randomEliteChance", 0.0)), 0.0, 1.0)
+	if phase.has("eliteChance"):
+		return clampf(float(phase.get("eliteChance", 0.0)), 0.0, 1.0)
+	if stage_dict.has("randomEliteChance"):
+		return clampf(float(stage_dict.get("randomEliteChance", 0.0)), 0.0, 1.0)
+	if stage_dict.has("eliteChance"):
+		return clampf(float(stage_dict.get("eliteChance", 0.0)), 0.0, 1.0)
+	return DEFAULT_RANDOM_ELITE_CHANCE
 
 
 # ========== 属性协同加成 ==========

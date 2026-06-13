@@ -60,16 +60,22 @@ func _test_boss_layers() -> void:
 
 func _test_prepare_ui_reads_mechanic() -> void:
 	var stage_db := StageDBScript.new()
+	var boss_stage: Dictionary = stage_db.get_stage("stage_2_12")
 	var scene: Control = SceneBattlePrepareScript.new()
 	root.add_child(scene)
 	scene.init({
 		"stageId": "stage_2_12",
-		"stageData": stage_db.get_stage("stage_2_12")
+		"stageData": boss_stage
 	})
 	var summary: String = scene.call("_get_stage_mechanic_summary")
 	var hint: String = scene.call("_get_element_hint")
 	_expect(not summary.is_empty(), "battle prepare should summarize chapter mechanic")
 	_expect(hint.contains("Boss"), "battle prepare hint should include boss layer summary")
+	var phase_enemies: Array = (boss_stage.get("phases", [])[0] as Dictionary).get("enemies", [])
+	var preview_enemy_ids: Array = scene.call("_get_preview_enemy_ids", boss_stage)
+	var enemy_team: Array = scene.get("_enemy_team")
+	_expect(preview_enemy_ids == phase_enemies, "battle prepare boss preview should use phase 1 enemies")
+	_expect(not enemy_team.is_empty() and str((enemy_team[0] as Dictionary).get("id", "")) == str(phase_enemies[0]), "battle prepare displayed boss should match battle phase 1 enemy")
 	scene.queue_free()
 
 

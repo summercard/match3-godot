@@ -424,7 +424,10 @@ func _sync_rewards() -> void:
 		{"icon": "exp", "amount": "+%d" % int(_rewards.get("exp", 0))},
 	]
 	if _rewards.get("item", null):
-		reward_items.append({"icon": "capture_ball", "amount": "x%d" % maxi(1, int(_rewards.get("item_count", 1)))})
+		reward_items.append({
+			"icon": _get_reward_item_icon_key(str(_rewards.get("item", ""))),
+			"amount": "%s x%d" % [str(_rewards.get("item_name", _rewards.get("item", "道具"))), maxi(1, int(_rewards.get("item_count", 1)))]
+		})
 	elif _is_win:
 		reward_items.append({"icon": "gem_grass", "amount": "x2"})
 	for i in REWARD_SLOT_PATHS.size():

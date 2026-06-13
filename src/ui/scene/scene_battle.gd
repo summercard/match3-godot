@@ -449,13 +449,16 @@ func _ready() -> void:
 func _uses_editable_gui() -> bool:
 	return false
 
+func _uses_editable_battle_end_overlay() -> bool:
+	return false
+
 func _ensure_feedback_overlay() -> void:
 	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
 		return
 	_feedback_overlay = BattleFeedbackOverlayScript.new()
 	_feedback_overlay.name = "TopFeedbackOverlay"
 	_feedback_overlay.set("owner_scene", self)
-	_feedback_overlay.z_index = 4096
+	_feedback_overlay.z_index = 3000
 	_feedback_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_feedback_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_feedback_overlay)
@@ -2218,8 +2221,8 @@ func _draw() -> void:
 	# 特殊宝石激活动画
 	_draw_special_transform()
 
-	# 战斗结束覆盖必须最后绘制，避免白闪、彩虹闪、波纹盖在胜负 UI 上。
-	if _state == BattleState.BATTLE_END:
+	# 战斗结束覆盖由 TopFeedbackOverlay 绘制，保证压住 GUI 子节点；这里仅作兜底。
+	if _state == BattleState.BATTLE_END and (_feedback_overlay == null or not is_instance_valid(_feedback_overlay)):
 		_draw_restore()
 		_draw_battle_end_overlay()
 		
@@ -2441,6 +2444,8 @@ func _draw_top_feedback_layer(canvas: CanvasItem = self) -> void:
 	_draw_combo_popup(canvas)
 	_draw_fall_messages(canvas)
 	_draw_message(canvas)
+	if _state == BattleState.BATTLE_END and not _uses_editable_battle_end_overlay():
+		_draw_battle_end_overlay(canvas)
 
 func _draw_fall_messages(canvas: CanvasItem = self) -> void:
 	for i in range(_fall_messages.size()):
@@ -3261,8 +3266,8 @@ func _make_centered_scale_offset_xform(center: Vector2, scale: float, offset_y: 
 	x = x.translated(Vector2(center.x, center.y + offset_y))
 	return x
 
-func _draw_battle_end_overlay() -> void:
-	_draw_restore()
+func _draw_battle_end_overlay(canvas: CanvasItem = self) -> void:
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 	var is_win: bool = _battle != null and _battle.battle_result == "win"
 	var t: float = _battle_end_overlay_timer
 	var banner_y: float = DESIGN_H / 2.0 - 142.0
@@ -3275,41 +3280,41 @@ func _draw_battle_end_overlay() -> void:
 
 	# 1) 背景遮罩：纯 fade
 	var bg_alpha: float = _overlay_fade(BATTLE_END_BG_START, BATTLE_END_BG_DURATION)
-	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66 * bg_alpha))
+	canvas.draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.66 * bg_alpha))
 
 	# 2) Victory burst：scale bounce + 上滑 + fade（仅胜利显示）
 	if is_win:
 		var burst_xform: Dictionary = _overlay_xform(BATTLE_END_BURST_START, BATTLE_END_BURST_DURATION, BATTLE_END_BURST_SCALE_START, 1.08, BATTLE_END_BURST_OFFSET_Y)
 		var burst_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["victory_burst"])
-		draw_set_transform_matrix(_make_centered_scale_offset_xform(burst_center, burst_xform["scale"], burst_xform["offset_y"]))
-		_draw_texture_centered(burst_tex, burst_center, Vector2(218.0, 136.0), 0.58 * burst_xform["alpha"])
-		draw_set_transform_matrix(Transform2D.IDENTITY)
-		_draw_victory_particles(bg_alpha, true)
+		canvas.draw_set_transform_matrix(_make_centered_scale_offset_xform(burst_center, burst_xform["scale"], burst_xform["offset_y"]))
+		_draw_texture_centered_on(canvas, burst_tex, burst_center, Vector2(218.0, 136.0), 0.58 * burst_xform["alpha"])
+		canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_victory_particles(bg_alpha, true, canvas)
 	# 失败界面去掉 "defeat_smoke" 星星条带（原本贴图路径错配到 sparkles，已删除）
 
 	# 3) Panel 面板：scale 0.92→1.0 + fade
 	var panel_xform: Dictionary = _overlay_xform(BATTLE_END_PANEL_START, BATTLE_END_PANEL_DURATION, BATTLE_END_PANEL_SCALE_START, 1.0, 0.0)
 	var panel_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["panel"])
-	draw_set_transform_matrix(_make_centered_scale_xform(panel_center, panel_xform["scale"]))
-	_draw_texture_centered(panel_tex, panel_center, Vector2(292.0, 158.0), panel_xform["alpha"])
-	draw_set_transform_matrix(Transform2D.IDENTITY)
+	canvas.draw_set_transform_matrix(_make_centered_scale_xform(panel_center, panel_xform["scale"]))
+	_draw_texture_centered_on(canvas, panel_tex, panel_center, Vector2(292.0, 158.0), panel_xform["alpha"])
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 	# 4) Banner 条幅：scale bounce + 上滑 + fade；标题文字跟随矩阵一起 pop
 	var banner_xform: Dictionary = _overlay_xform(BATTLE_END_BANNER_START, BATTLE_END_BANNER_DURATION, BATTLE_END_BANNER_SCALE_START, 1.05, BATTLE_END_BANNER_OFFSET_Y)
 	var banner_path: String = BATTLE_RESULT_OVERLAY_ASSETS["victory_banner"] if is_win else BATTLE_RESULT_OVERLAY_ASSETS["defeat_banner"]
 	var banner_tex := _get_texture(banner_path)
-	draw_set_transform_matrix(_make_centered_scale_offset_xform(banner_center, banner_xform["scale"], banner_xform["offset_y"]))
-	_draw_texture_centered(banner_tex, banner_center, Vector2(316.0, 114.0), banner_xform["alpha"])
+	canvas.draw_set_transform_matrix(_make_centered_scale_offset_xform(banner_center, banner_xform["scale"], banner_xform["offset_y"]))
+	_draw_texture_centered_on(canvas, banner_tex, banner_center, Vector2(316.0, 114.0), banner_xform["alpha"])
 	var title_text := "胜利" if is_win else "失败"
 	var title_color: Color = C["gold"] if is_win else Color(0.78, 0.78, 0.86)
-	_draw_text_with_shadow(title_text, DESIGN_W / 2.0, banner_y + 11.0, title_color, 25.0, true)
-	draw_set_transform_matrix(Transform2D.IDENTITY)
+	_draw_battle_end_text_on(canvas, title_text, Vector2(DESIGN_W / 2.0, banner_y - 3.0), title_color, 44.0, 170.0)
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 	# 5) 下划线光晕：横向伸展
 	var underline_xform: Dictionary = _overlay_stretch_x(BATTLE_END_UNDERLINE_START, BATTLE_END_UNDERLINE_DURATION)
-	draw_set_transform_matrix(_make_centered_stretch_x_xform(underline_center, underline_xform["scale_x"]))
-	_draw_underline_glow(underline_center, 110.0, 0.85 * underline_xform["alpha"])
-	draw_set_transform_matrix(Transform2D.IDENTITY)
+	canvas.draw_set_transform_matrix(_make_centered_stretch_x_xform(underline_center, underline_xform["scale_x"]))
+	_draw_underline_glow_on(canvas, underline_center, 110.0, 0.85 * underline_xform["alpha"])
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 	# 6) Capture plaque / state text：scale bounce + fade
 	var state_text := "点击查看结算"
@@ -3324,29 +3329,28 @@ func _draw_battle_end_overlay() -> void:
 	if not _capture_result_text.is_empty():
 		var plaque_xform: Dictionary = _overlay_xform(BATTLE_END_PLAQUE_START, BATTLE_END_PLAQUE_DURATION, BATTLE_END_PLAQUE_SCALE_START, 1.05, 0.0)
 		var plaque_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["capture_plaque"])
-		draw_set_transform_matrix(_make_centered_scale_xform(plaque_center, plaque_xform["scale"]))
-		_draw_texture_centered(plaque_tex, plaque_center, Vector2(218.0, 54.0), plaque_xform["alpha"])
-		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 36.0, state_color, 14.0, true)
-		draw_set_transform_matrix(Transform2D.IDENTITY)
+		canvas.draw_set_transform_matrix(_make_centered_scale_xform(plaque_center, plaque_xform["scale"]))
+		_draw_texture_centered_on(canvas, plaque_tex, plaque_center, Vector2(218.0, 54.0), plaque_xform["alpha"])
+		_draw_battle_end_text_on(canvas, state_text, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 30.0), state_color, 16.0, 172.0)
+		canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 	else:
 		# 没有 plaque 时仅 state text 用 pop
 		var state_xform: Dictionary = _overlay_xform(BATTLE_END_PLAQUE_START, BATTLE_END_PLAQUE_DURATION, BATTLE_END_PLAQUE_SCALE_START, 1.05, 0.0)
-		draw_set_transform_matrix(_make_centered_scale_xform(Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0), state_xform["scale"]))
-		_draw_text_with_shadow(state_text, DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0, state_color, 15.0, true)
-		draw_set_transform_matrix(Transform2D.IDENTITY)
+		canvas.draw_set_transform_matrix(_make_centered_scale_xform(Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0), state_xform["scale"]))
+		_draw_battle_end_text_on(canvas, state_text, Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 28.0), state_color, 16.0, 172.0)
+		canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 	# 7) Tap strip / 继续按钮：scale bounce + 上滑 + fade
 	var tap_xform: Dictionary = _overlay_xform(BATTLE_END_TAP_START, BATTLE_END_TAP_DURATION, BATTLE_END_TAP_SCALE_START, 1.06, BATTLE_END_TAP_OFFSET_Y)
-	draw_set_transform_matrix(_make_centered_scale_offset_xform(tap_center, tap_xform["scale"], tap_xform["offset_y"]))
+	canvas.draw_set_transform_matrix(_make_centered_scale_offset_xform(tap_center, tap_xform["scale"], tap_xform["offset_y"]))
 	if _capture_phase == "done" or _capture_phase == "":
 		var tap_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["tap_strip"])
-		_draw_texture_centered(tap_tex, tap_center, Vector2(194.0, 54.0), 0.92 * tap_xform["alpha"])
-		_draw_text_with_shadow("点击继续", DESIGN_W / 2.0, DESIGN_H / 2.0 + 96.0, C["white"], 13.0)
+		_draw_texture_centered_on(canvas, tap_tex, tap_center, Vector2(194.0, 54.0), 0.92 * tap_xform["alpha"])
+		_draw_battle_end_text_on(canvas, "点击继续", Vector2(DESIGN_W / 2.0, DESIGN_H / 2.0 + 91.0), C["white"], 15.0, 140.0)
 	else:
 		var button_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["button_continue"])
-		_draw_texture_centered(button_tex, tap_center, Vector2(194.0, 54.0), 0.65 * tap_xform["alpha"])
-	draw_set_transform_matrix(Transform2D.IDENTITY)
-	_draw_restore()
+		_draw_texture_centered_on(canvas, button_tex, tap_center, Vector2(194.0, 54.0), 0.65 * tap_xform["alpha"])
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 func _clean_battle_end_status_text(text: String) -> String:
 	var cleaned := text.strip_edges()
@@ -3559,9 +3563,11 @@ func _draw_defeat_particles() -> void:
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
 		_draw_circle(p["x"], p["y"], size, color)
 
-func _draw_victory_particles(opacity: float = 1.0, overlay_pass: bool = false) -> void:
+func _draw_victory_particles(opacity: float = 1.0, overlay_pass: bool = false, canvas: CanvasItem = null) -> void:
 	if _state == BattleState.BATTLE_END and not overlay_pass:
 		return
+	if canvas == null:
+		canvas = self
 	for p: Dictionary in _victory_particles:
 		var progress: float = 1.0 - p["life"] / p["max_life"]
 		var alpha: float = clampf((1.0 - progress * 0.55) * opacity, 0.0, 1.0)
@@ -3571,10 +3577,10 @@ func _draw_victory_particles(opacity: float = 1.0, overlay_pass: bool = false) -
 		var y: float = p["y"]
 		var angle: float = p.get("angle", 0.0) + progress * p.get("spin", 0.0)
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
-		draw_set_transform(Vector2(x, y), angle, Vector2.ONE)
-		draw_rect(Rect2(-w * 0.5, -h * 0.5, w, h), color)
-		draw_rect(Rect2(-w * 0.32, -h * 0.45, maxf(1.0, w * 0.22), h * 0.9), Color(1.0, 1.0, 1.0, alpha * 0.22))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		canvas.draw_set_transform(Vector2(x, y), angle, Vector2.ONE)
+		canvas.draw_rect(Rect2(-w * 0.5, -h * 0.5, w, h), color)
+		canvas.draw_rect(Rect2(-w * 0.32, -h * 0.45, maxf(1.0, w * 0.22), h * 0.9), Color(1.0, 1.0, 1.0, alpha * 0.22))
+		canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 ## ============================================
 # 辅助绘制方法
@@ -3678,6 +3684,11 @@ func _draw_texture_centered(tex: Texture2D, center: Vector2, size: Vector2, opac
 		return
 	_draw_texture_fit(tex, Rect2(center - size / 2.0, size), opacity)
 
+func _draw_texture_centered_on(canvas: CanvasItem, tex: Texture2D, center: Vector2, size: Vector2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	_draw_texture_fit_on(canvas, tex, Rect2(center - size / 2.0, size), opacity)
+
 ## 战斗结算面板下划线：渐变金色细横线（替代原本的 sparkles 星星条带）
 func _draw_underline_glow(center: Vector2, half_width: float, alpha: float = 1.0) -> void:
 	var line_y := center.y
@@ -3698,6 +3709,23 @@ func _draw_underline_glow(center: Vector2, half_width: float, alpha: float = 1.0
 	# 上下光晕
 	draw_rect(Rect2(center.x - half_width * 0.85, line_y - 2.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
 	draw_rect(Rect2(center.x - half_width * 0.85, line_y + line_h + 1.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
+
+func _draw_underline_glow_on(canvas: CanvasItem, center: Vector2, half_width: float, alpha: float = 1.0) -> void:
+	var line_y := center.y
+	var line_h := 1.6
+	var grad_steps := 12
+	for i in range(grad_steps):
+		var t0: float = float(i) / float(grad_steps)
+		var t1: float = float(i + 1) / float(grad_steps)
+		var x0: float = lerpf(-half_width, half_width, t0)
+		var x1: float = lerpf(-half_width, half_width, t1)
+		var edge_fade: float = 1.0 - pow(absf((t0 + t1) * 0.5 - 0.5) * 2.0, 1.6)
+		var col := Color(0.96, 0.78, 0.36, 0.78 * alpha * edge_fade)
+		canvas.draw_rect(Rect2(center.x + x0, line_y, x1 - x0, line_h), col)
+	var glow_w: float = half_width * 0.45
+	canvas.draw_rect(Rect2(center.x - glow_w, line_y - 0.5, glow_w * 2.0, line_h + 1.0), Color(1.0, 0.92, 0.66, 0.55 * alpha))
+	canvas.draw_rect(Rect2(center.x - half_width * 0.85, line_y - 2.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
+	canvas.draw_rect(Rect2(center.x - half_width * 0.85, line_y + line_h + 1.5, half_width * 1.7, 0.8), Color(1.0, 0.86, 0.42, 0.22 * alpha))
 
 func _draw_element_glow() -> void:
 	if _element_glow.get("timer", 0.0) <= 0.0:
@@ -3748,6 +3776,17 @@ func _draw_panel(x: float, y: float, w: float, h: float, color: Color, opacity: 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
 	BattleUIFeedbackScript.draw_text_with_shadow(self, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
 
+func _draw_text_with_shadow_on(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
+	BattleUIFeedbackScript.draw_text_with_shadow(canvas, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
+
+func _draw_battle_end_text_on(canvas: CanvasItem, text: String, center: Vector2, color: Color, size: float, max_width: float) -> void:
+	if text.is_empty():
+		return
+	var safe_text := BattleUIFeedbackScript.fit_text(FX_ROUND_FONT, text, max_width, size)
+	var left := center.x - max_width / 2.0
+	var baseline_y := center.y + (FX_ROUND_FONT.get_ascent(size) - FX_ROUND_FONT.get_descent(size)) * 0.5
+	canvas.draw_string(FX_ROUND_FONT, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, color)
+
 func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 190.0, style: String = "normal") -> void:
 	if text.is_empty():
 		return
@@ -3786,17 +3825,17 @@ func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: 
 func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, scale: float, opacity: float) -> void:
 	var combo_tex := _get_texture(BATTLE_FX_ASSETS["combo_word"])
 	if combo_tex:
-		var word_w := 154.0 * scale
-		var word_h := 77.0 * scale
-		_draw_texture_fit_on(canvas, combo_tex, Rect2(cx - 78.0 * scale, cy - 45.0 * scale, word_w, word_h), opacity)
+		var tex_size := combo_tex.get_size()
+		var word_h := 54.0 * scale
+		var word_w := word_h * (tex_size.x / maxf(1.0, tex_size.y))
+		_draw_texture_fit_on(canvas, combo_tex, Rect2(cx - 112.0 * scale, cy - 42.0 * scale, word_w, word_h), opacity)
 	else:
-		_draw_fx_text(canvas, "COMBO", cx - 4.0 * scale, cy + 2.0 * scale, Color(1.0, 0.72, 0.22, opacity), 24.0 * scale, 150.0 * scale, "combo_number")
-	_draw_fx_text(canvas, "x", cx + 65.0 * scale, cy + 18.0 * scale, Color(1.0, 0.67, 0.22, opacity), 15.0 * scale, 34.0 * scale, "combo_label")
-	_draw_digit_fx_text(canvas, str(combo), cx + 89.0 * scale, cy + 19.0 * scale, 19.0 * scale, opacity, "combo_number")
+		_draw_fx_text(canvas, "COMBO", cx - 24.0 * scale, cy + 1.0 * scale, Color(1.0, 0.72, 0.22, opacity), 27.0 * scale, 172.0 * scale, "combo_number")
+	_draw_digit_fx_text(canvas, "x%d" % combo, cx + 105.0 * scale, cy + 10.0 * scale, 56.0 * scale, opacity, "combo_number")
 	var accent := Color(1.0, 0.98, 0.62, 0.54 * opacity)
-	canvas.draw_line(Vector2(cx - 70.0 * scale, cy + 25.0 * scale), Vector2(cx + 72.0 * scale, cy + 17.0 * scale), accent, 2.0 * scale)
-	canvas.draw_circle(Vector2(cx - 76.0 * scale, cy - 14.0 * scale), 3.0 * scale, Color(1.0, 0.92, 0.35, 0.62 * opacity))
-	canvas.draw_circle(Vector2(cx + 82.0 * scale, cy - 18.0 * scale), 2.3 * scale, Color(1.0, 0.76, 0.34, 0.58 * opacity))
+	canvas.draw_line(Vector2(cx - 96.0 * scale, cy + 20.0 * scale), Vector2(cx + 158.0 * scale, cy + 10.0 * scale), accent, 2.2 * scale)
+	canvas.draw_circle(Vector2(cx - 103.0 * scale, cy - 15.0 * scale), 3.2 * scale, Color(1.0, 0.92, 0.35, 0.62 * opacity))
+	canvas.draw_circle(Vector2(cx + 178.0 * scale, cy - 18.0 * scale), 2.5 * scale, Color(1.0, 0.76, 0.34, 0.58 * opacity))
 
 func _is_digit_fx_text(text: String) -> bool:
 	if text.is_empty():

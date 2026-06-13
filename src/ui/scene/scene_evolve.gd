@@ -63,6 +63,14 @@ const ELEMENT_NAMES: Dictionary = {
 	"light": "光", "earth": "土", "wind": "风", "dark": "暗"
 }
 
+# === 进化界面入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
+const ENTRY_TOP_DELAY := 0.00
+const ENTRY_BOTTOM_DELAY := 0.38
+const ENTRY_TOP_DURATION := 0.34
+const ENTRY_BOTTOM_DURATION := 0.34
+const ENTRY_SLIDE := 30.0
+var _entry_played: bool = false
+
 # ============ 生命周期 ============
 
 var _bg_texture: ColorRect
@@ -80,6 +88,7 @@ func _ready() -> void:
 	name = "SceneEvolve"
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_create_ui()
+	_maybe_play_entry()
 
 func _create_ui() -> void:
 	# ---- VBox 主容器 ----
@@ -109,6 +118,33 @@ func _create_ui() -> void:
 	_particle_container.name = "ParticleContainer"
 	_particle_container.visible = false
 	add_child(_particle_container)
+
+# 进化界面入场序列：VBox 容器整体上滑 + 淡入；Header / Buttons 再做一次错峰 alpha 强调
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) 整个 VBox 从下方 30px 滑入 + 淡入（VBoxContainer 本身在 root，不受布局约束）
+	var vbox := get_node_or_null("VBox") as Control
+	if vbox != null:
+		var vbox_rest_y := vbox.position.y
+		vbox.position.y = vbox_rest_y + ENTRY_SLIDE
+		vbox.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_TOP_DELAY)
+		tween.tween_property(vbox, "modulate:a", 1.0, ENTRY_TOP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(vbox, "position:y", vbox_rest_y, ENTRY_TOP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) Buttons 在 VBox 内，单独用 modulate 错峰淡入（不动 position，避免 VBox 重排冲突）
+	var bottom := get_node_or_null("VBox/Buttons") as Control
+	if bottom != null:
+		bottom.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_BOTTOM_DELAY)
+		tween.tween_property(bottom, "modulate:a", 1.0, ENTRY_BOTTOM_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _build_header(parent: VBoxContainer) -> void:
 	var header := HBoxContainer.new()

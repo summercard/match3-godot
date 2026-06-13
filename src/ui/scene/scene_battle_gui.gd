@@ -22,19 +22,44 @@ const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item2",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
+const BATTLE_END_OVERLAY_PATH := NodePath("BattleEndOverlay")
+const BATTLE_END_TITLE_PATH := NodePath("BattleEndOverlay/Banner/Title")
+const BATTLE_END_STATUS_PATH := NodePath("BattleEndOverlay/StatusGroup/StatusLabel")
+const BATTLE_END_CONTINUE_TEXT_PATH := NodePath("BattleEndOverlay/ContinueButton/Text")
+const PAUSE_DIALOG_PATH := NodePath("PauseDialog")
+const PAUSE_BUTTON_PATH := NodePath("TopHud/PauseButton")
+
+# === 战斗界面入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
+const ENTRY_TOP_DELAY := 0.00
+const ENTRY_NAV_DELAY := 0.38
+const ENTRY_TOP_DURATION := 0.34
+const ENTRY_NAV_DURATION := 0.34
+const ENTRY_TOP_SLIDE := 30.0
+const ENTRY_NAV_SLIDE := 30.0
+var _entry_played: bool = false
+var _battle_end_overlay_base_positions: Dictionary = {}
+var _paused_by_player: bool = false
 
 func _ready() -> void:
 	super._ready()
 	_connect_item_confirm_buttons()
+	_connect_pause_buttons()
 	_portrait_defeat_ghost_cache.clear()
 	_portrait_base_scale_cache.clear()
 	_portrait_base_global_center_cache.clear()
 	_portrait_hit_flash_overlay_cache.clear()
 	_sync_gui()
+	_maybe_play_entry()
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
 	_sync_gui()
+
+func _exit_tree() -> void:
+	# 避免玩家在暂停态退出场景时残留 paused 状态
+	if is_instance_valid(get_tree()) and get_tree().paused:
+		get_tree().paused = false
+	_paused_by_player = false
 
 func _process(delta: float) -> void:
 	super._process(delta)
@@ -42,6 +67,9 @@ func _process(delta: float) -> void:
 
 func _uses_editable_gui() -> bool:
 	return true
+
+func _uses_editable_battle_end_overlay() -> bool:
+	return has_node(BATTLE_END_OVERLAY_PATH)
 
 func _sync_gui() -> void:
 	if not is_inside_tree() or _battle == null:
@@ -51,6 +79,7 @@ func _sync_gui() -> void:
 	_sync_player_slots()
 	_sync_bottom_controls()
 	_sync_item_confirm_popup()
+	_sync_battle_end_overlay()
 
 func _connect_item_confirm_buttons() -> void:
 	var cancel := get_node_or_null("ItemConfirmLayer/Panel/CancelButton") as BaseButton
@@ -59,6 +88,87 @@ func _connect_item_confirm_buttons() -> void:
 	var confirm := get_node_or_null("ItemConfirmLayer/Panel/UseButton") as BaseButton
 	if confirm != null and not confirm.pressed.is_connected(_confirm_hotbar_item_use):
 		confirm.pressed.connect(_confirm_hotbar_item_use)
+
+func _connect_pause_buttons() -> void:
+	var pause_btn := get_node_or_null(PAUSE_BUTTON_PATH) as BaseButton
+	if pause_btn != null and not pause_btn.pressed.is_connected(_on_pause_button_pressed):
+		pause_btn.pressed.connect(_on_pause_button_pressed)
+	var resume_btn := get_node_or_null("PauseDialog/Panel/ResumeButton") as BaseButton
+	if resume_btn != null and not resume_btn.pressed.is_connected(_on_resume_button_pressed):
+		resume_btn.pressed.connect(_on_resume_button_pressed)
+	var quit_btn := get_node_or_null("PauseDialog/Panel/QuitButton") as BaseButton
+	if quit_btn != null and not quit_btn.pressed.is_connected(_on_quit_button_pressed):
+		quit_btn.pressed.connect(_on_quit_button_pressed)
+
+func _on_pause_button_pressed() -> void:
+	# 战斗结束后禁用暂停入口（结算层接管输入）
+	if _state == BattleState.BATTLE_END:
+		return
+	if _paused_by_player:
+		return
+	var dialog := get_node_or_null(PAUSE_DIALOG_PATH) as Control
+	if dialog == null:
+		return
+	dialog.visible = true
+	dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_paused_by_player = true
+	get_tree().paused = true
+
+func _on_resume_button_pressed() -> void:
+	_resume_from_pause()
+
+func _resume_from_pause() -> void:
+	var dialog := get_node_or_null(PAUSE_DIALOG_PATH) as Control
+	if dialog != null:
+		dialog.visible = false
+		dialog.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_paused_by_player = false
+	if is_instance_valid(get_tree()):
+		get_tree().paused = false
+
+func _on_quit_button_pressed() -> void:
+	# 先解暂停，避免场景切换时残留 paused 状态影响下一场景
+	_paused_by_player = false
+	if is_instance_valid(get_tree()):
+		get_tree().paused = false
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager != null and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene("main", {}, "fade")
+	else:
+		# 兜底：直接走 main 的切换
+		var main_node := get_node_or_null("/root/Main")
+		if main_node != null and main_node.has_method("switch_scene"):
+			main_node.switch_scene("main", {}, "fade")
+
+# 战斗界面入场序列：TopHud 从上方滑入 + 淡入，BottomControls 从下方滑入 + 淡入
+func _maybe_play_entry() -> void:
+	if _entry_played:
+		return
+	_entry_played = true
+	_play_entry()
+
+func _play_entry() -> void:
+	# 1) TopHud：上方 30px 滑入 + 淡入
+	var top := get_node_or_null("TopHud") as Control
+	if top != null:
+		var top_rest_y := top.position.y
+		top.position.y = top_rest_y - ENTRY_TOP_SLIDE
+		top.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_TOP_DELAY)
+		tween.tween_property(top, "modulate:a", 1.0, ENTRY_TOP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(top, "position:y", top_rest_y, ENTRY_TOP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 2) BottomControls：下方 30px 滑入 + 淡入
+	var bottom := get_node_or_null("BottomControls") as Control
+	if bottom != null:
+		var bottom_rest_y := bottom.position.y
+		bottom.position.y = bottom_rest_y + ENTRY_NAV_SLIDE
+		bottom.modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_interval(ENTRY_NAV_DELAY)
+		tween.tween_property(bottom, "modulate:a", 1.0, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(bottom, "position:y", bottom_rest_y, ENTRY_NAV_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _sync_top_hud() -> void:
 	_label("TopHud/TurnBadge/Value").text = "%d/%d" % [_battle.turn_count, _battle.max_turns]
@@ -119,13 +229,34 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void
 	var hp := maxi(int(unit.get("hp", 0)), 0)
 	var max_hp := maxi(int(unit.get("maxHP", 1)), 1)
 	var portrait := slot.get_node("Portrait") as TextureRect
+	_apply_portrait_visual_scale(portrait, float(unit.get("_visualScale", 1.0)) if hp > 0 else 1.0)
 	portrait.texture = _get_monster_texture(unit) if hp > 0 else _get_texture(DEFEATED_GHOST_ASSET)
 	portrait.modulate.a = 1.0
-	(slot.get_node("Name") as Label).text = str(unit.get("name", "精灵"))
+	var is_elite := bool(unit.get("isElite", false))
+	var elite_prefix := "★精英 " if is_elite else ""
+	var name_label := slot.get_node("Name") as Label
+	name_label.text = "%s%s" % [elite_prefix, str(unit.get("name", "精灵"))]
+	name_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.16, 1.0) if is_elite else Color.WHITE)
 	var hp_bar := slot.get_node("HpBar")
 	hp_bar.set("fill_color", _hp_system_color(fill_color))
 	hp_bar.set("value", float(hp) / float(max_hp) * 100.0)
 	(slot.get_node("HpText") as Label).text = "%d/%d" % [hp, max_hp]
+
+var _portrait_base_rect_cache: Dictionary = {}
+
+func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) -> void:
+	var portrait_id := portrait.get_instance_id()
+	if not _portrait_base_rect_cache.has(portrait_id):
+		_portrait_base_rect_cache[portrait_id] = Rect2(portrait.position, portrait.size)
+	var base_rect: Rect2 = _portrait_base_rect_cache[portrait_id]
+	var scale := maxf(0.1, visual_scale)
+	var scaled_size := base_rect.size * scale
+	var scaled_pos := base_rect.position + (base_rect.size - scaled_size) * 0.5
+	portrait.position = scaled_pos
+	portrait.size = scaled_size
+	portrait.pivot_offset = scaled_size * 0.5
+	_portrait_base_pos_cache[portrait_id] = scaled_pos
+	_portrait_base_global_center_cache[portrait_id] = _portrait_current_global_center(portrait)
 
 func _hp_system_color(fill_color: String) -> Color:
 	match fill_color:
@@ -203,6 +334,59 @@ func _sync_item_confirm_popup() -> void:
 	_label("ItemConfirmLayer/Panel/Count").text = "拥有: %d" % int(item.get("count", 0))
 	_label("ItemConfirmLayer/Panel/CancelButton/Text").text = "取消"
 	_label("ItemConfirmLayer/Panel/UseButton/Text").text = "使用"
+
+func _sync_battle_end_overlay() -> void:
+	var layer := get_node_or_null(BATTLE_END_OVERLAY_PATH) as Control
+	if layer == null:
+		return
+	var active := _state == BattleState.BATTLE_END
+	layer.visible = active
+	layer.mouse_filter = Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE
+	if not active:
+		return
+	var is_win: bool = _battle != null and _battle.battle_result == "win"
+	(layer.get_node("Shade") as ColorRect).modulate.a = _overlay_fade(BATTLE_END_BG_START, BATTLE_END_BG_DURATION)
+	_sync_battle_end_texture_node("Burst", _overlay_xform(BATTLE_END_BURST_START, BATTLE_END_BURST_DURATION, BATTLE_END_BURST_SCALE_START, 1.08, BATTLE_END_BURST_OFFSET_Y), is_win)
+	_sync_battle_end_texture_node("Panel", _overlay_xform(BATTLE_END_PANEL_START, BATTLE_END_PANEL_DURATION, BATTLE_END_PANEL_SCALE_START, 1.0, 0.0), true)
+	_sync_battle_end_texture_node("Banner", _overlay_xform(BATTLE_END_BANNER_START, BATTLE_END_BANNER_DURATION, BATTLE_END_BANNER_SCALE_START, 1.05, BATTLE_END_BANNER_OFFSET_Y), true)
+	_sync_battle_end_texture_node("StatusGroup", _overlay_xform(BATTLE_END_PLAQUE_START, BATTLE_END_PLAQUE_DURATION, BATTLE_END_PLAQUE_SCALE_START, 1.05, 0.0), true)
+	_sync_battle_end_texture_node("ContinueButton", _overlay_xform(BATTLE_END_TAP_START, BATTLE_END_TAP_DURATION, BATTLE_END_TAP_SCALE_START, 1.06, BATTLE_END_TAP_OFFSET_Y), _capture_phase == "done" or _capture_phase == "")
+
+	var title := get_node_or_null(BATTLE_END_TITLE_PATH) as Label
+	if title != null:
+		title.text = "胜利" if is_win else "失败"
+		title.add_theme_color_override("font_color", C["gold"] if is_win else Color(0.78, 0.78, 0.86))
+	var state_text := "点击查看结算"
+	var state_color: Color = C["text_muted"]
+	if _capture_phase != "done" and _capture_phase != "":
+		state_text = "收服判定中..."
+		state_color = C["gold"]
+	elif not _capture_result_text.is_empty():
+		state_text = _clean_battle_end_status_text(str(_capture_result_text.get("title", state_text)))
+		state_color = C["success"] if _capture_success else Color(0.52, 0.67, 0.86)
+	var status_label := get_node_or_null(BATTLE_END_STATUS_PATH) as Label
+	if status_label != null:
+		status_label.text = state_text
+		status_label.add_theme_color_override("font_color", state_color)
+	var plaque := get_node_or_null("BattleEndOverlay/StatusGroup/Plaque") as CanvasItem
+	if plaque != null:
+		plaque.visible = not _capture_result_text.is_empty()
+	var continue_text := get_node_or_null(BATTLE_END_CONTINUE_TEXT_PATH) as Label
+	if continue_text != null:
+		continue_text.visible = _capture_phase == "done" or _capture_phase == ""
+
+func _sync_battle_end_texture_node(path: NodePath, xform: Dictionary, visible: bool) -> void:
+	var node := get_node_or_null(NodePath("BattleEndOverlay/%s" % String(path))) as Control
+	if node == null:
+		return
+	if not _battle_end_overlay_base_positions.has(node.get_instance_id()):
+		_battle_end_overlay_base_positions[node.get_instance_id()] = node.position
+		node.pivot_offset = node.size * 0.5
+	var base_pos: Vector2 = _battle_end_overlay_base_positions[node.get_instance_id()]
+	node.visible = visible and float(xform.get("alpha", 0.0)) > 0.0
+	node.modulate.a = float(xform.get("alpha", 1.0))
+	node.scale = Vector2.ONE * float(xform.get("scale", 1.0))
+	node.position = base_pos + Vector2(0.0, float(xform.get("offset_y", 0.0)))
 
 func _get_capture_toggle_rect(base_y: float) -> Rect2:
 	if is_inside_tree() and has_node("BottomControls/CaptureToggle"):

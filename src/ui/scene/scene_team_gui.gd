@@ -70,6 +70,7 @@ func _ready() -> void:
 	_connect_gui_actions()
 	_attach_gui_feedback()
 	_sync_gui()
+	# 入场动画由 team.tscn 里的 EntryAnim (AnimationPlayer) 通过 autoplay 自动播放
 
 
 func init(data: Dictionary = {}) -> void:
@@ -143,6 +144,9 @@ func _add_feedback(path: String, profile: int) -> void:
 	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 	button.add_child(feedback)
 	feedback.setup(button, profile)
+
+
+# 精灵旅馆入场动画由 team.tscn 中的 EntryAnim (AnimationPlayer) 负责，autoplay="entry" 自动播放
 
 
 func _on_slot_pressed(slot_key: String) -> void:
