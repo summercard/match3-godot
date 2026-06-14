@@ -53,6 +53,7 @@ func _run() -> void:
 	_test_rock_hammer_clears_obstacle(scene, storage)
 	_test_rock_hammer_only_clears_one_obstacle(scene, storage)
 	_test_advanced_rock_hammer_clears_all_obstacles(scene, storage)
+	_test_active_items_spawn_use_effects(scene, storage)
 	_test_missing_inventory_blocks_effect(scene, storage)
 
 	scene.queue_free()
@@ -141,29 +142,37 @@ func _test_rock_hammer_confirm_button_clears_obstacle(scene: Control, storage: F
 	_expect(not board.is_obstacle(1, 1), "rock hammer confirm button should remove a weak rock obstacle")
 	_expect(not storage.inventory.has("rock_hammer"), "rock hammer confirm button should consume the item")
 	_expect(scene.get("_selected_gem") == Vector2i(-1, -1), "rock hammer confirm click should not select the board")
+	_prepare_direct_item_use(scene)
 
 func _test_heal_consumes_item(scene: Control, storage: FakeStorage) -> void:
 	var battle = scene.get("_battle")
-	var first: Dictionary = battle.player_team[0]
+	var team: Array = battle.player_team
+	var first: Dictionary = team[0]
 	first["hp"] = maxi(1, int(int(first.get("maxHP", 100)) / 4))
+	team[0] = first
+	battle.player_team = team
 	var before_hp := int(first.get("hp", 0))
 	storage.inventory = {"hp_potion_large": 1}
-	var hotbar: Array[Dictionary] = [{"id": "hp_potion_large", "count": 1, "rarity": 2, "type": "battle"}]
-	scene.set("_hotbar_items", hotbar)
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "hp_potion_large", 1, 2)
+	_clear_item_effects(scene)
 	scene.call("_try_use_item_at_slot", 0)
-	_expect(int(first.get("hp", 0)) > before_hp, "large HP potion should heal the team")
+	_expect(int((battle.player_team[0] as Dictionary).get("hp", 0)) > before_hp, "large HP potion should heal the team")
 	_expect(not storage.inventory.has("hp_potion_large"), "large HP potion should be consumed")
+	_expect(_has_item_effect(scene, "heal"), "large HP potion should spawn a heal use effect")
 
 func _test_rock_hammer_clears_obstacle(scene: Control, storage: FakeStorage) -> void:
 	var board = scene.get("_board")
 	board.set_obstacles([{"row": 1, "col": 1, "type": "rock", "hp": 1}])
 	board.init_board()
 	storage.inventory = {"rock_hammer": 1}
-	var hotbar: Array[Dictionary] = [{"id": "rock_hammer", "count": 1, "rarity": 2, "type": "battle"}]
-	scene.set("_hotbar_items", hotbar)
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "rock_hammer", 1, 2)
+	_clear_item_effects(scene)
 	scene.call("_try_use_item_at_slot", 0)
 	_expect(not board.is_obstacle(1, 1), "rock hammer should remove a weak rock obstacle")
 	_expect(not storage.inventory.has("rock_hammer"), "rock hammer should be consumed")
+	_expect(_has_item_effect(scene, "hammer"), "rock hammer should spawn a hammer impact effect")
 
 func _test_rock_hammer_only_clears_one_obstacle(scene: Control, storage: FakeStorage) -> void:
 	var board = scene.get("_board")
@@ -173,8 +182,8 @@ func _test_rock_hammer_only_clears_one_obstacle(scene: Control, storage: FakeSto
 	])
 	board.init_board()
 	storage.inventory = {"rock_hammer": 1}
-	var hotbar: Array[Dictionary] = [{"id": "rock_hammer", "count": 1, "rarity": 2, "type": "battle"}]
-	scene.set("_hotbar_items", hotbar)
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "rock_hammer", 1, 2)
 	scene.call("_try_use_item_at_slot", 0)
 	_expect(not board.is_obstacle(1, 1), "rock hammer should remove the first weak rock obstacle")
 	_expect(board.is_obstacle(1, 2), "rock hammer should leave additional rock obstacles intact")
@@ -188,12 +197,46 @@ func _test_advanced_rock_hammer_clears_all_obstacles(scene: Control, storage: Fa
 	])
 	board.init_board()
 	storage.inventory = {"rock_hammer_plus": 1}
-	var hotbar: Array[Dictionary] = [{"id": "rock_hammer_plus", "count": 1, "rarity": 3, "type": "battle"}]
-	scene.set("_hotbar_items", hotbar)
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "rock_hammer_plus", 1, 3)
+	_clear_item_effects(scene)
 	scene.call("_try_use_item_at_slot", 0)
 	_expect(not board.is_obstacle(2, 1), "advanced rock hammer should remove the first weak rock obstacle")
 	_expect(not board.is_obstacle(2, 2), "advanced rock hammer should remove every weak rock obstacle")
 	_expect(not storage.inventory.has("rock_hammer_plus"), "advanced rock hammer should be consumed")
+	_expect(_count_item_effects(scene, "hammer") >= 2, "advanced rock hammer should spawn impact effects on every cleared rock")
+
+func _test_active_items_spawn_use_effects(scene: Control, storage: FakeStorage) -> void:
+	var battle = scene.get("_battle")
+	storage.inventory = {"guard_charm": 1}
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "guard_charm", 1, 2)
+	_clear_item_effects(scene)
+	scene.call("_try_use_item_at_slot", 0)
+	_expect(_has_item_effect(scene, "guard"), "guard charm should spawn a guard use effect")
+
+	storage.inventory = {"absorb_shield": 1}
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "absorb_shield", 1, 3)
+	_clear_item_effects(scene)
+	scene.call("_try_use_item_at_slot", 0)
+	_expect(_has_item_effect(scene, "absorb"), "absorb shield should spawn an absorb use effect")
+
+	storage.inventory = {"board_reset": 1}
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "board_reset", 1, 2)
+	_clear_item_effects(scene)
+	scene.call("_try_use_item_at_slot", 0)
+	_expect(_has_item_effect(scene, "board_reset"), "board reset should spawn a board reset use effect")
+
+	if battle != null:
+		battle.set("skill_charges", {})
+	storage.inventory = {"focus_crystal": 1}
+	_prepare_direct_item_use(scene)
+	_set_hotbar(scene, "focus_crystal", 1, 3)
+	_clear_item_effects(scene)
+	scene.call("_try_use_item_at_slot", 0)
+	_expect(_has_item_effect(scene, "charge"), "focus crystal should spawn a charge use effect")
 
 func _test_missing_inventory_blocks_effect(scene: Control, storage: FakeStorage) -> void:
 	var board = scene.get("_board")
@@ -201,9 +244,33 @@ func _test_missing_inventory_blocks_effect(scene: Control, storage: FakeStorage)
 	board.init_board()
 	storage.inventory = {}
 	var hotbar: Array[Dictionary] = [{"id": "rock_hammer", "count": 1, "rarity": 2, "type": "battle"}]
+	_prepare_direct_item_use(scene)
 	scene.set("_hotbar_items", hotbar)
 	scene.call("_try_use_item_at_slot", 0)
 	_expect(board.is_obstacle(2, 2), "missing inventory should block hotbar item effect")
+
+func _prepare_direct_item_use(scene: Control) -> void:
+	scene.set("_state", 0)
+	scene.set("_pending_hotbar_slot", -1)
+	scene.set("_selected_gem", Vector2i(-1, -1))
+
+func _set_hotbar(scene: Control, item_id: String, count: int, rarity: int) -> void:
+	var hotbar: Array[Dictionary] = [{"id": item_id, "count": count, "rarity": rarity, "type": "battle"}]
+	scene.set("_hotbar_items", hotbar)
+
+func _clear_item_effects(scene: Control) -> void:
+	var effects: Array[Dictionary] = []
+	scene.set("_item_use_effects", effects)
+
+func _has_item_effect(scene: Control, kind: String) -> bool:
+	return _count_item_effects(scene, kind) > 0
+
+func _count_item_effects(scene: Control, kind: String) -> int:
+	var count := 0
+	for fx: Dictionary in scene.get("_item_use_effects"):
+		if str(fx.get("kind", "")) == kind:
+			count += 1
+	return count
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:

@@ -50,6 +50,7 @@ var leader_skill_info: Variant = null
 var synergy_bonuses: Variant = null
 var synergy_info: Array = []
 var player_guards: Dictionary = {}      # { monsterId: { reduction, turns } }
+var player_absorb_shields: Dictionary = {}      # { monsterId: { turns: int } }
 var enemy_tempo_mods: Dictionary = {}   # { enemyIndex: { reduction, turns } }
 var capture_windows: Dictionary = {}    # { enemyIndex: current tamingWindow }
 var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reached this battle }
@@ -159,6 +160,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	synergy_bonuses = null
 	synergy_info = []
 	player_guards = {}
+	player_absorb_shields = {}
 	enemy_tempo_mods = {}
 	capture_windows = {}
 	capture_window_best = {}
@@ -578,6 +580,15 @@ func _apply_guard_to_damage(target: Dictionary, damage: int) -> Dictionary:
 	return { "damage": final_damage, "guard_absorbed": guard_absorbed }
 
 
+func _apply_absorb_shield_to_damage(target: Dictionary, damage: int) -> Dictionary:
+	# 一次性抵消下一次伤害（区别于 player_guards 的减伤 N 回合）
+	var target_id := str(target.get("id", ""))
+	if target_id.is_empty() or not player_absorb_shields.has(target_id):
+		return { "damage": damage, "absorbed": false }
+	player_absorb_shields.erase(target_id)
+	return { "damage": 0, "absorbed": true }
+
+
 func _apply_enemy_tempo_mod(enemy_idx: int, reduction: float, turns: int) -> void:
 	if enemy_idx < 0:
 		return
@@ -781,6 +792,10 @@ func enemy_action() -> Dictionary:
 		var guard_result := _apply_guard_to_damage(target, damage)
 		damage = int(guard_result.get("damage", damage))
 		var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
+		var absorb_result := _apply_absorb_shield_to_damage(target, damage)
+		var shield_absorbed := bool(absorb_result.get("absorbed", false))
+		if shield_absorbed:
+			damage = 0
 
 		target["hp"] = target.get("hp", 0) - damage
 		_refresh_capture_windows()
@@ -797,7 +812,8 @@ func enemy_action() -> Dictionary:
 			"charge_multiplier": damage_multiplier,
 			"is_weakened": tempo_mult < 1.0,
 			"weaken_reduction": tempo_mod.get("reduction", 0.0),
-			"guard_absorbed": guard_absorbed
+			"guard_absorbed": guard_absorbed,
+			"shield_absorbed": shield_absorbed
 		})
 
 	for a in actions:
@@ -920,6 +936,7 @@ func get_status() -> Dictionary:
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
 		"player_guards": player_guards.duplicate(true),
+		"player_absorb_shields": player_absorb_shields.duplicate(true),
 		"enemy_tempo_mods": enemy_tempo_mods.duplicate(true),
 		"capture_windows": capture_windows.duplicate(true),
 		"capture_window_best": capture_window_best.duplicate(true),

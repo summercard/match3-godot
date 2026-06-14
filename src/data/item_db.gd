@@ -184,6 +184,39 @@ const ITEMS_DB: Dictionary = {
 			"chargeGain": 2
 		}
 	},
+	"board_reset": {
+		"id": "board_reset",
+		"name": "棋盘重置",
+		"desc": "战斗中使用，重新生成整盘宝石，给陷入死局或元素分布极差的局面一条退路。",
+		"type": "battle",
+		"emoji": "↻",
+		"rarity": 2,
+		"effect": {
+			"resetBoard": true
+		}
+	},
+	"absorb_shield": {
+		"id": "absorb_shield",
+		"name": "强能护盾",
+		"desc": "战斗中使用，为全队抵消下一次受到的伤害。",
+		"type": "battle",
+		"emoji": "⛨",
+		"rarity": 3,
+		"effect": {
+			"absorbShield": true
+		}
+	},
+	"gem_type_shift": {
+		"id": "gem_type_shift",
+		"name": "属性易形",
+		"desc": "战斗中使用，把棋盘上一种属性的宝石全部转换为另一种属性。",
+		"type": "battle",
+		"emoji": "⇄",
+		"rarity": 3,
+		"effect": {
+			"convertType": true
+		}
+	},
 
 	# ========== 进化相关 ==========
 	"evolution_stone_fire": {
@@ -275,6 +308,9 @@ const DROP_TABLE: Array = [
 	{"id": "unlock_key", "weight": 3},
 	{"id": "mist_cleanser", "weight": 3},
 	{"id": "focus_crystal", "weight": 1},
+	{"id": "board_reset", "weight": 2},
+	{"id": "absorb_shield", "weight": 1},
+	{"id": "gem_type_shift", "weight": 1},
 	{"id": "exp_crystal", "weight": 3},
 	{"id": "gold_chest", "weight": 2},
 	{"id": "evolution_stone_fire", "weight": 2},
@@ -302,6 +338,9 @@ const SHOP_ITEMS: Array = [
 	{"id": "unlock_key", "price": 240, "currency": "gold", "label": "金币"},
 	{"id": "mist_cleanser", "price": 260, "currency": "gold", "label": "金币"},
 	{"id": "focus_crystal", "price": 22, "currency": "gems", "label": "钻石"},
+	{"id": "board_reset", "price": 280, "currency": "gold", "label": "金币"},
+	{"id": "absorb_shield", "price": 22, "currency": "gems", "label": "钻石"},
+	{"id": "gem_type_shift", "price": 28, "currency": "gems", "label": "钻石"},
 	{"id": "gold_bag", "price": 10, "currency": "gems", "label": "钻石"},
 	{"id": "gold_chest", "price": 35, "currency": "gems", "label": "钻石"},
 	{"id": "evolution_stone_fire", "price": 300, "currency": "gold", "label": "金币"},

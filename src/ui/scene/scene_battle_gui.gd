@@ -30,6 +30,7 @@ const BATTLE_END_STATUS_PATH := NodePath("BattleEndOverlay/StatusGroup/StatusLab
 const BATTLE_END_CONTINUE_TEXT_PATH := NodePath("BattleEndOverlay/ContinueButton/Text")
 const PAUSE_DIALOG_PATH := NodePath("PauseDialog")
 const PAUSE_BUTTON_PATH := NodePath("TopHud/PauseButton")
+const GEM_CONVERT_LAYER_PATH := NodePath("GemConvertLayer")
 
 # === 战斗界面入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
 const ENTRY_TOP_DELAY := 0.00
@@ -42,9 +43,17 @@ var _entry_played: bool = false
 var _battle_end_overlay_base_positions: Dictionary = {}
 var _paused_by_player: bool = false
 
+# === 属性易形 picker 状态 ===
+var _gem_convert_stage: int = 0        # 0=hidden, 1=picking source, 2=picking target
+var _gem_convert_source: String = ""
+var _gem_convert_target: String = ""
+var _gem_convert_pending_item_id: String = ""
+var _gem_convert_pending_slot: int = -1
+
 func _ready() -> void:
 	super._ready()
 	_connect_item_confirm_buttons()
+	_connect_gem_convert_buttons()
 	_connect_pause_buttons()
 	_portrait_defeat_ghost_cache.clear()
 	_portrait_base_scale_cache.clear()
@@ -81,6 +90,7 @@ func _sync_gui() -> void:
 	_sync_player_slots()
 	_sync_bottom_controls()
 	_sync_item_confirm_popup()
+	_sync_gem_convert_layer()
 	_sync_battle_end_overlay()
 
 func _connect_item_confirm_buttons() -> void:
@@ -90,6 +100,22 @@ func _connect_item_confirm_buttons() -> void:
 	var confirm := get_node_or_null("ItemConfirmLayer/Panel/UseButton") as BaseButton
 	if confirm != null and not confirm.pressed.is_connected(_confirm_hotbar_item_use):
 		confirm.pressed.connect(_confirm_hotbar_item_use)
+
+func _connect_gem_convert_buttons() -> void:
+	var elements := ["Fire", "Water", "Grass", "Thunder", "Light"]
+	for e in elements:
+		var src := get_node_or_null("GemConvertLayer/Panel/SourceRow/Src%s" % e) as BaseButton
+		if src != null and not src.pressed.is_connected(_on_gem_convert_source_picked):
+			src.pressed.connect(_on_gem_convert_source_picked.bind(str(e).to_lower()))
+		var tgt := get_node_or_null("GemConvertLayer/Panel/TargetRow/Tgt%s" % e) as BaseButton
+		if tgt != null and not tgt.pressed.is_connected(_on_gem_convert_target_picked):
+			tgt.pressed.connect(_on_gem_convert_target_picked.bind(str(e).to_lower()))
+	var confirm := get_node_or_null("GemConvertLayer/Panel/ConfirmButton") as BaseButton
+	if confirm != null and not confirm.pressed.is_connected(_on_gem_convert_confirm):
+		confirm.pressed.connect(_on_gem_convert_confirm)
+	var cancel := get_node_or_null("GemConvertLayer/Panel/CancelButton") as BaseButton
+	if cancel != null and not cancel.pressed.is_connected(_on_gem_convert_cancel):
+		cancel.pressed.connect(_on_gem_convert_cancel)
 
 func _connect_pause_buttons() -> void:
 	var pause_btn := get_node_or_null(PAUSE_BUTTON_PATH) as BaseButton
@@ -359,6 +385,118 @@ func _sync_item_confirm_popup() -> void:
 	_label("ItemConfirmLayer/Panel/Count").text = "拥有: %d" % int(item.get("count", 0))
 	_label("ItemConfirmLayer/Panel/CancelButton/Text").text = "取消"
 	_label("ItemConfirmLayer/Panel/UseButton/Text").text = "使用"
+
+# === 属性易形 picker 实现 ===
+func _open_gem_convert_picker(item_id: String, slot_idx: int) -> void:
+	_gem_convert_pending_item_id = item_id
+	_gem_convert_pending_slot = slot_idx
+	_gem_convert_source = ""
+	_gem_convert_target = ""
+	_gem_convert_stage = 1
+	var layer := get_node_or_null(GEM_CONVERT_LAYER_PATH) as Control
+	if layer != null:
+		layer.visible = true
+		layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_sync_gem_convert_layer()
+
+func _on_gem_convert_source_picked(element: String) -> void:
+	if _gem_convert_stage != 1:
+		return
+	_gem_convert_source = element
+	_gem_convert_target = ""
+	_gem_convert_stage = 2
+	_sync_gem_convert_layer()
+
+func _on_gem_convert_target_picked(element: String) -> void:
+	if _gem_convert_stage != 2:
+		return
+	_gem_convert_target = element
+	_sync_gem_convert_layer()
+
+func _on_gem_convert_confirm() -> void:
+	if _gem_convert_stage != 2:
+		return
+	if _gem_convert_source.is_empty() or _gem_convert_target.is_empty():
+		return
+	if _gem_convert_source == _gem_convert_target:
+		return
+	_execute_gem_type_shift(_gem_convert_source, _gem_convert_target)
+
+func _on_gem_convert_cancel() -> void:
+	_close_gem_convert_picker(false)
+
+func _close_gem_convert_picker(consume: bool) -> void:
+	var layer := get_node_or_null(GEM_CONVERT_LAYER_PATH) as Control
+	if layer != null:
+		layer.visible = false
+		layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if consume and _gem_convert_pending_slot >= 0 and not _gem_convert_pending_item_id.is_empty():
+		_consume_hotbar_item(_gem_convert_pending_item_id, _gem_convert_pending_slot)
+	_gem_convert_stage = 0
+	_gem_convert_source = ""
+	_gem_convert_target = ""
+	_gem_convert_pending_item_id = ""
+	_gem_convert_pending_slot = -1
+	# 重置 ItemConfirmLayer 状态
+	_pending_hotbar_slot = -1
+
+func _sync_gem_convert_layer() -> void:
+	var layer := get_node_or_null(GEM_CONVERT_LAYER_PATH) as Control
+	if layer == null:
+		return
+	var active := _gem_convert_stage == 1 or _gem_convert_stage == 2
+	layer.visible = active
+	if not active:
+		return
+	var source_row := get_node_or_null("GemConvertLayer/Panel/SourceRow") as Control
+	var target_row := get_node_or_null("GemConvertLayer/Panel/TargetRow") as Control
+	var target_title := get_node_or_null("GemConvertLayer/Panel/TargetTitle") as Control
+	var confirm_btn := get_node_or_null("GemConvertLayer/Panel/ConfirmButton") as BaseButton
+	if source_row != null:
+		source_row.visible = true
+	if target_row != null:
+		target_row.visible = _gem_convert_stage == 2
+	if target_title != null:
+		target_title.visible = _gem_convert_stage == 2
+	if confirm_btn != null:
+		confirm_btn.disabled = not (_gem_convert_stage == 2 and not _gem_convert_source.is_empty() and not _gem_convert_target.is_empty() and _gem_convert_source != _gem_convert_target)
+	# 禁用 source 已被选为 target 的按钮
+	var elements := ["Fire", "Water", "Grass", "Thunder", "Light"]
+	for e in elements:
+		var el := str(e).to_lower()
+		var src := get_node_or_null("GemConvertLayer/Panel/SourceRow/Src%s" % e) as BaseButton
+		if src != null:
+			src.disabled = _gem_convert_stage == 2 and el == _gem_convert_target
+		var tgt := get_node_or_null("GemConvertLayer/Panel/TargetRow/Tgt%s" % e) as BaseButton
+		if tgt != null:
+			tgt.disabled = _gem_convert_stage == 2 and el == _gem_convert_source
+
+func _execute_gem_type_shift(source: String, target: String) -> void:
+	if _board == null:
+		_close_gem_convert_picker(false)
+		return
+	if _state != BattleState.IDLE:
+		_show_message("当前无法使用道具")
+		_close_gem_convert_picker(false)
+		return
+	var affected := 0
+	for r in range(_board.rows):
+		for c in range(_board.cols):
+			if str(_board.grid[r][c]) == source:
+				_board.grid[r][c] = target
+				affected += 1
+	_screen_flash_timer = 0.22
+	_element_glow = {"type": target, "timer": 0.5, "color": GEM_COLORS.get(target, C["gold"])}
+	var source_emoji: String = GEM_EMOJI.get(source, source)
+	var target_emoji: String = GEM_EMOJI.get(target, target)
+	var center_x := float(_board.offset_x) + float(_board.cols) * float(_board.cell_size) * 0.5
+	var center_y := float(_board.offset_y) + float(_board.rows) * float(_board.cell_size) * 0.5
+	_spawn_item_use_effect("gem_shift", Vector2(center_x, center_y), GEM_COLORS.get(target, C["gold"]), 0.92, {"source": source, "target": target, "affected": affected})
+	_floating_texts.append({"text": "%s→%s × %d" % [source_emoji, target_emoji, affected], "x": center_x, "y": center_y, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 1.0})
+	_show_message("使用 属性易形：%s → %s（%d 个宝石）" % [source_emoji, target_emoji, affected])
+	_sfx("battle_heal_leaf_bubble")
+	queue_redraw()
+	_close_gem_convert_picker(true)
 
 func _sync_battle_end_overlay() -> void:
 	var layer := get_node_or_null(BATTLE_END_OVERLAY_PATH) as Control

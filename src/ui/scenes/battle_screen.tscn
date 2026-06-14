@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://d2u36y1wnlpla" path="res://src/ui/scenes/battle/enemy_stage_slot.tscn" id="enemy_stage"]
 [ext_resource type="Texture2D" uid="uid://4k7woutr7m5c" path="res://assets/images/ui/slots/battle_ui_item_slot_selected.png" id="item_selected"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/slots/battle_ui_item_slot.png" id="item_slot"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/slots/battle_ui_capture_slot.png" id="capture_slot"]
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/ui/buttons/battle_ui_speed_button.png" id="speed_button"]
@@ -249,7 +250,7 @@ layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
 mouse_filter = 2
-texture = ExtResource("item_slot")
+texture = ExtResource("capture_slot")
 expand_mode = 1
 stretch_mode = 5
 
@@ -298,7 +299,7 @@ layout_mode = 0
 offset_right = 39.0
 offset_bottom = 39.0
 mouse_filter = 2
-texture = ExtResource("item_slot")
+texture = ExtResource("capture_slot")
 expand_mode = 1
 stretch_mode = 5
 
@@ -794,6 +795,533 @@ theme_override_fonts/font = ExtResource("round_font")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
 text = "点击继续"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="GemConvertLayer" type="Control" parent="."]
+visible = false
+z_index = 2048
+process_mode = 3
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 0
+
+[node name="Shade" type="ColorRect" parent="GemConvertLayer"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="Control" parent="GemConvertLayer"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 184.0
+offset_right = 351.0
+offset_bottom = 481.0
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_right = 327.0
+offset_bottom = 297.0
+mouse_filter = 2
+texture = ExtResource("popup_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 309.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "选择源属性"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Hint" type="Label" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 46.0
+offset_right = 309.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(0.55, 0.31, 0.12, 1)
+theme_override_font_sizes/font_size = 12
+text = "把棋盘上哪一种宝石改成其他属性？"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+clip_text = true
+
+[node name="SourceRow" type="HBoxContainer" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 78.0
+offset_right = 313.0
+offset_bottom = 134.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="SrcFire" type="TextureButton" parent="GemConvertLayer/Panel/SourceRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="SrcFireFrame" type="TextureRect" parent="GemConvertLayer/Panel/SourceRow/SrcFire"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SrcFireColor" type="ColorRect" parent="GemConvertLayer/Panel/SourceRow/SrcFire"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(1, 0.3, 0.1, 1)
+
+[node name="SrcFireLabel" type="Label" parent="GemConvertLayer/Panel/SourceRow/SrcFire"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "火"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="SrcWater" type="TextureButton" parent="GemConvertLayer/Panel/SourceRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="SrcWaterFrame" type="TextureRect" parent="GemConvertLayer/Panel/SourceRow/SrcWater"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SrcWaterColor" type="ColorRect" parent="GemConvertLayer/Panel/SourceRow/SrcWater"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.1, 0.4, 1, 1)
+
+[node name="SrcWaterLabel" type="Label" parent="GemConvertLayer/Panel/SourceRow/SrcWater"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "水"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="SrcGrass" type="TextureButton" parent="GemConvertLayer/Panel/SourceRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="SrcGrassFrame" type="TextureRect" parent="GemConvertLayer/Panel/SourceRow/SrcGrass"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SrcGrassColor" type="ColorRect" parent="GemConvertLayer/Panel/SourceRow/SrcGrass"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.1, 0.8, 0.2, 1)
+
+[node name="SrcGrassLabel" type="Label" parent="GemConvertLayer/Panel/SourceRow/SrcGrass"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "草"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="SrcThunder" type="TextureButton" parent="GemConvertLayer/Panel/SourceRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="SrcThunderFrame" type="TextureRect" parent="GemConvertLayer/Panel/SourceRow/SrcThunder"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SrcThunderColor" type="ColorRect" parent="GemConvertLayer/Panel/SourceRow/SrcThunder"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.9, 0.8, 0.1, 1)
+
+[node name="SrcThunderLabel" type="Label" parent="GemConvertLayer/Panel/SourceRow/SrcThunder"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "雷"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="SrcLight" type="TextureButton" parent="GemConvertLayer/Panel/SourceRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="SrcLightFrame" type="TextureRect" parent="GemConvertLayer/Panel/SourceRow/SrcLight"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SrcLightColor" type="ColorRect" parent="GemConvertLayer/Panel/SourceRow/SrcLight"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(1, 0.9, 0.2, 1)
+
+[node name="SrcLightLabel" type="Label" parent="GemConvertLayer/Panel/SourceRow/SrcLight"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "光"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TargetTitle" type="Label" parent="GemConvertLayer/Panel"]
+visible = false
+layout_mode = 0
+offset_left = 18.0
+offset_top = 144.0
+offset_right = 309.0
+offset_bottom = 170.0
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "选择目标属性"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TargetRow" type="HBoxContainer" parent="GemConvertLayer/Panel"]
+visible = false
+layout_mode = 0
+offset_left = 14.0
+offset_top = 174.0
+offset_right = 313.0
+offset_bottom = 230.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="TgtFire" type="TextureButton" parent="GemConvertLayer/Panel/TargetRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="TgtFireFrame" type="TextureRect" parent="GemConvertLayer/Panel/TargetRow/TgtFire"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TgtFireColor" type="ColorRect" parent="GemConvertLayer/Panel/TargetRow/TgtFire"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(1, 0.3, 0.1, 1)
+
+[node name="TgtFireLabel" type="Label" parent="GemConvertLayer/Panel/TargetRow/TgtFire"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "火"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TgtWater" type="TextureButton" parent="GemConvertLayer/Panel/TargetRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="TgtWaterFrame" type="TextureRect" parent="GemConvertLayer/Panel/TargetRow/TgtWater"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TgtWaterColor" type="ColorRect" parent="GemConvertLayer/Panel/TargetRow/TgtWater"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.1, 0.4, 1, 1)
+
+[node name="TgtWaterLabel" type="Label" parent="GemConvertLayer/Panel/TargetRow/TgtWater"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "水"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TgtGrass" type="TextureButton" parent="GemConvertLayer/Panel/TargetRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="TgtGrassFrame" type="TextureRect" parent="GemConvertLayer/Panel/TargetRow/TgtGrass"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TgtGrassColor" type="ColorRect" parent="GemConvertLayer/Panel/TargetRow/TgtGrass"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.1, 0.8, 0.2, 1)
+
+[node name="TgtGrassLabel" type="Label" parent="GemConvertLayer/Panel/TargetRow/TgtGrass"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "草"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TgtThunder" type="TextureButton" parent="GemConvertLayer/Panel/TargetRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="TgtThunderFrame" type="TextureRect" parent="GemConvertLayer/Panel/TargetRow/TgtThunder"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TgtThunderColor" type="ColorRect" parent="GemConvertLayer/Panel/TargetRow/TgtThunder"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(0.9, 0.8, 0.1, 1)
+
+[node name="TgtThunderLabel" type="Label" parent="GemConvertLayer/Panel/TargetRow/TgtThunder"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "雷"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="TgtLight" type="TextureButton" parent="GemConvertLayer/Panel/TargetRow"]
+custom_minimum_size = Vector2(56, 56)
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="TgtLightFrame" type="TextureRect" parent="GemConvertLayer/Panel/TargetRow/TgtLight"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 56.0
+mouse_filter = 2
+texture = ExtResource("icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TgtLightColor" type="ColorRect" parent="GemConvertLayer/Panel/TargetRow/TgtLight"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 46.0
+offset_bottom = 46.0
+mouse_filter = 2
+color = Color(1, 0.9, 0.2, 1)
+
+[node name="TgtLightLabel" type="Label" parent="GemConvertLayer/Panel/TargetRow/TgtLight"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 56.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "光"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="ConfirmButton" type="TextureButton" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_left = 159.0
+offset_top = 240.0
+offset_right = 239.0
+offset_bottom = 281.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="GemConvertLayer/Panel/ConfirmButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_green")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="GemConvertLayer/Panel/ConfirmButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.36, 0.08, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "确认"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="CancelButton" type="TextureButton" parent="GemConvertLayer/Panel"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 240.0
+offset_right = 168.0
+offset_bottom = 281.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Frame" type="TextureRect" parent="GemConvertLayer/Panel/CancelButton"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 41.0
+mouse_filter = 2
+texture = ExtResource("button_blue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="GemConvertLayer/Panel/CancelButton"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 80.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0.22, 0.38, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "取消"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true

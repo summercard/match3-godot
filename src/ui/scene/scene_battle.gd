@@ -152,6 +152,11 @@ var _gem_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, co
 
 ## 障碍物破坏粒子
 var _obstacle_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size, gravity}]
+const OBSTACLE_PARTICLE_LIMIT: int = 96
+
+## 道具使用瞬态特效
+var _item_use_effects: Array[Dictionary] = []  # [{kind, x, y, timer, duration, color, ...}]
+const ITEM_USE_EFFECT_LIMIT: int = 24
 
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
@@ -364,14 +369,21 @@ const BATTLE_UI_ASSETS := {
 	"capture_toggle_on": "res://assets/images/ui/buttons/battle_ui_capture_toggle_on.png",
 	"item_slot": "res://assets/images/ui/slots/battle_ui_item_slot.png",
 	"item_slot_selected": "res://assets/images/ui/slots/battle_ui_item_slot_selected.png",
+	"capture_slot": "res://assets/images/ui/slots/battle_ui_capture_slot.png",
 	"item_capture_ball": "res://assets/images/ui/icons/battle_icon_capture_ball.png",
 	"item_capture_ball_plus": "res://assets/images/ui/icons/battle_icon_capture_ball_plus.png",
 	"item_hp_potion": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
 	"item_exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
+	"item_focus_crystal": "res://assets/images/ui/icons/battle_icon_focus_crystal.png",
 	"item_stone_earth": "res://assets/images/ui/gems/items_new_icon_evolution_stone_earth.png",
 	"item_stone_light": "res://assets/images/ui/gems/items_new_icon_evolution_stone_light.png",
 	"item_stone_thunder": "res://assets/images/ui/gems/items_new_icon_evolution_stone_thunder.png",
 	"item_stone_water": "res://assets/images/ui/gems/items_new_icon_evolution_stone_water.png",
+	"item_rock_hammer": "res://assets/images/ui/icons/battle_icon_rock_hammer.png",
+	"item_guard_charm": "res://assets/images/ui/icons/battle_icon_guard_charm.png",
+	"item_board_reset": "res://assets/images/ui/icons/battle_icon_board_reset.png",
+	"item_absorb_shield": "res://assets/images/ui/icons/battle_icon_absorb_shield.png",
+	"item_gem_type_shift": "res://assets/images/ui/icons/battle_icon_gem_type_shift.png",
 	"hp_frame": "res://assets/images/ui/bars/battle_ui_hp_frame.png",
 	"hp_frame_overlay": "res://assets/images/ui/bars/battle_ui_hp_frame_overlay.png",
 	"hp_fill_green": "res://assets/images/ui/bars/battle_ui_hp_fill_green.png",
@@ -1405,6 +1417,16 @@ func _start_enemy_turn() -> void:
 					"timer": 0.0,
 					"duration": 0.8
 				})
+			if action.get("shield_absorbed", false):
+				_floating_texts.append({
+					"text": "盾-吸收",
+					"x": popup_x,
+					"y": popup_y + 32.0,
+					"color": C["shield"],
+					"size": 14.0,
+					"timer": 0.0,
+					"duration": 0.9
+				})
 			if action.get("is_weakened", false):
 				_show_message("%s 被束缚，伤害降低" % action.get("attacker", "敌人"))
 			if enemy_idx >= 0 and target_idx >= 0:
@@ -2085,6 +2107,9 @@ func _process(delta: float) -> void:
 	
 	# 更新障碍物破坏粒子
 	_update_obstacle_particles(effective_delta)
+
+	# 更新道具使用特效
+	_update_item_use_effects(effective_delta)
 	
 	# 更新敌人倒下粒子
 	_update_defeat_particles(effective_delta)
@@ -2180,6 +2205,9 @@ func _draw() -> void:
 	
 	# 渲染障碍物破坏粒子
 	_draw_obstacle_particles()
+
+	# 渲染道具使用特效
+	_draw_item_use_effects()
 	
 	# 渲染敌人倒下粒子
 	_draw_defeat_particles()
@@ -2602,9 +2630,12 @@ func _draw_capture_item_slots(base_y: float) -> void:
 		var has_item := not item.is_empty() and int(item.get("count", 0)) > 0
 		var item_id := str(item.get("id", ""))
 		var selected := has_item and item_id == _equipped_capture_item_id
-		var slot_tex := _get_texture(BATTLE_UI_ASSETS["item_slot_selected" if selected else "item_slot"])
+		# 精灵球槽使用专属底图 (capture_slot)
+		var slot_tex := _get_texture(BATTLE_UI_ASSETS["capture_slot"])
 		if slot_tex:
 			_draw_texture_fit(slot_tex, slot_rect, 1.0 if has_item else 0.72)
+		if selected:
+			_draw_rounded_rect_outline(slot_rect.position.x + 1.0, slot_rect.position.y + 1.0, slot_rect.size.x - 2.0, slot_rect.size.y - 2.0, 9.0, C["gold"], 2.0)
 		if not has_item:
 			draw_circle(slot_rect.get_center(), 4.0, Color(1.0, 1.0, 1.0, 0.28))
 			continue
@@ -2644,15 +2675,21 @@ func _item_icon_asset_path(item_id: String) -> String:
 	if item_id == "hp_potion" or item_id == "hp_potion_large":
 		return BATTLE_UI_ASSETS["item_hp_potion"]
 	if item_id == "guard_charm":
-		return BATTLE_UI_ASSETS["item_stone_light"]
+		return BATTLE_UI_ASSETS["item_guard_charm"]
 	if item_id == "rock_hammer" or item_id == "rock_hammer_plus":
-		return BATTLE_UI_ASSETS["item_stone_earth"]
+		return BATTLE_UI_ASSETS["item_rock_hammer"]
 	if item_id == "unlock_key":
 		return BATTLE_UI_ASSETS["item_stone_thunder"]
 	if item_id == "mist_cleanser":
 		return BATTLE_UI_ASSETS["item_stone_water"]
 	if item_id == "focus_crystal":
-		return BATTLE_UI_ASSETS["item_exp_crystal"]
+		return BATTLE_UI_ASSETS["item_focus_crystal"]
+	if item_id == "board_reset":
+		return BATTLE_UI_ASSETS["item_board_reset"]
+	if item_id == "absorb_shield":
+		return BATTLE_UI_ASSETS["item_absorb_shield"]
+	if item_id == "gem_type_shift":
+		return BATTLE_UI_ASSETS["item_gem_type_shift"]
 	return ""
 
 func _is_hotbar_item_selected(slot_idx: int, item: Dictionary) -> bool:
@@ -2665,7 +2702,7 @@ func _load_hotbar_items() -> void:
 	_hotbar_items.clear()
 	if not _storage or not _storage.has_method("load_inventory"):
 		return
-	var equipped_inventory: Dictionary = _storage.load_inventory()
+	var equipped_inventory: Dictionary = _storage.call("load_inventory")
 	_load_capture_slot_items(equipped_inventory)
 	for equipped_id in _equipped_battle_item_ids:
 		var item_id := str(equipped_id)
@@ -2712,7 +2749,7 @@ func _load_hotbar_items() -> void:
 func _load_capture_preferences() -> void:
 	var settings := {"autoCapture": false, "equippedItem": "", "equippedBattleItems": []}
 	if _storage and _storage.has_method("load_capture_settings"):
-		settings = _storage.load_capture_settings()
+		settings = _storage.call("load_capture_settings")
 	_auto_capture_enabled = bool(settings.get("autoCapture", false))
 	_equipped_capture_item_id = str(settings.get("equippedItem", ""))
 	_equipped_battle_item_ids = _sanitize_equipped_battle_items(settings.get("equippedBattleItems", []))
@@ -2744,7 +2781,7 @@ func _load_capture_slot_items(inventory: Dictionary) -> void:
 
 func _save_capture_preferences() -> void:
 	if _storage and _storage.has_method("save_capture_settings"):
-		_storage.save_capture_settings({
+		_storage.call("save_capture_settings", {
 			"autoCapture": _auto_capture_enabled,
 			"equippedItem": _equipped_capture_item_id,
 			"equippedBattleItems": _equipped_battle_item_ids.duplicate()
@@ -2922,6 +2959,12 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 			used = _use_hotbar_clear_poison(def, effect)
 		elif effect.has("chargeGain"):
 			used = _use_hotbar_charge(def, effect)
+		elif effect.has("resetBoard"):
+			used = _use_hotbar_board_reset(def, effect)
+		elif effect.has("absorbShield"):
+			used = _use_hotbar_absorb_shield(def, effect)
+		elif effect.has("convertType"):
+			used = _use_hotbar_gem_type_shift(def, effect)
 		else:
 			_show_message("%s 暂时无法使用" % def.get("name", "道具"))
 			return true
@@ -2949,8 +2992,10 @@ func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
 		if actual <= 0:
 			continue
 		monster["hp"] = next_hp
+		_battle.player_team[i] = monster
 		healed += actual
 		var card := _get_player_card_rect(i)
+		_spawn_item_use_effect("heal", card.get_center(), C["heal_green"], 0.82, {"label": "+", "scale": 1.0})
 		_floating_texts.append({"text": "+%d" % actual, "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["heal_green"], "size": 15.0, "timer": 0.0, "duration": 0.8})
 	if healed <= 0:
 		_show_message("队伍生命已满")
@@ -2977,6 +3022,7 @@ func _use_hotbar_guard(def: Dictionary, effect: Dictionary) -> bool:
 		guards[monster_id] = {"reduction": reduction, "turns": turns}
 		applied += 1
 		var card := _get_player_card_rect(i)
+		_spawn_item_use_effect("guard", card.get_center(), C["shield"], 0.90, {"scale": 1.08})
 		_floating_texts.append({"text": "护-%d%%" % int(round(reduction * 100.0)), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["shield"], "size": 14.0, "timer": 0.0, "duration": 0.9})
 	if applied <= 0:
 		_show_message("没有可守护的队员")
@@ -3008,6 +3054,7 @@ func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
 					broke = true
 					break
 			var center := _board_cell_center(row, col)
+			_spawn_item_use_effect("hammer", center, Color(1.0, 0.72, 0.22, 1.0), 0.72, {"row": row, "col": col, "strong": broke})
 			_floating_texts.append({"text": "破岩", "x": center.x, "y": center.y - 12.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.75})
 			if broke:
 				destroyed += 1
@@ -3017,10 +3064,12 @@ func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
 	if touched <= 0:
 		_show_message("当前没有岩石障碍")
 		return false
-	if destroyed > 0:
-		_apply_gravity()
-	_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
-	queue_redraw()
+		if destroyed > 0:
+			_apply_gravity()
+		_board_shake_timer = maxf(_board_shake_timer, 0.22)
+		_sfx("powerup_burst_soft")
+		_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
+		queue_redraw()
 	return true
 
 func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
@@ -3042,9 +3091,10 @@ func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
 				result = _board.unlock_gem(row, col)
 				if result.get("fullyUnlocked", false):
 					break
-			var center := _board_cell_center(row, col)
-			var text := "解锁" if result.get("fullyUnlocked", false) else "破链"
-			_floating_texts.append({"text": text, "x": center.x, "y": center.y - 12.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.75})
+				var center := _board_cell_center(row, col)
+				var text := "解锁" if result.get("fullyUnlocked", false) else "破链"
+				_spawn_item_use_effect("unlock", center, C["gold"], 0.65, {"strong": result.get("fullyUnlocked", false)})
+				_floating_texts.append({"text": text, "x": center.x, "y": center.y - 12.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.75})
 			if result.get("fullyUnlocked", false):
 				unlocked += 1
 				_unlock_animations.append({"row": row, "col": col, "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
@@ -3071,6 +3121,7 @@ func _use_hotbar_clear_poison(def: Dictionary, effect: Dictionary) -> bool:
 			_board.clear_poison_fog(row, col)
 			cleared += 1
 			var center := _board_cell_center(row, col)
+			_spawn_item_use_effect("cleanse", center, C["success"], 0.72)
 			_poison_fog_clear_anims.append({"row": row, "col": col, "x": center.x, "y": center.y, "timer": 0.0})
 			_floating_texts.append({"text": "净雾", "x": center.x, "y": center.y - 12.0, "color": C["success"], "size": 13.0, "timer": 0.0, "duration": 0.75})
 		if cleared >= target_count:
@@ -3103,6 +3154,7 @@ func _use_hotbar_charge(def: Dictionary, effect: Dictionary) -> bool:
 		charges[monster_id] = after
 		total_gain += after - before
 		var card := _get_player_card_rect(i)
+		_spawn_item_use_effect("charge", card.get_center(), C["gold"], 0.88, {"scale": 1.0})
 		_floating_texts.append({"text": "+%d 能量" % (after - before), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.85})
 	if total_gain <= 0:
 		_show_message("技能能量已满")
@@ -3112,9 +3164,68 @@ func _use_hotbar_charge(def: Dictionary, effect: Dictionary) -> bool:
 	queue_redraw()
 	return true
 
+func _use_hotbar_board_reset(def: Dictionary, effect: Dictionary) -> bool:
+	if _board == null:
+		return false
+	# 重新生成整盘宝石（保留岩石/锁链/毒雾布局）
+	_board.init_board()
+	_screen_flash_timer = 0.22
+	_element_glow = {"type": "light", "timer": 0.5, "color": GEM_COLORS.get("light", C["gold"])}
+	var center_x := float(_board.offset_x) + float(_board.cols) * float(_board.cell_size) * 0.5
+	var center_y := float(_board.offset_y) + float(_board.rows) * float(_board.cell_size) * 0.5
+	_spawn_item_use_effect("board_reset", Vector2(center_x, center_y), C["gold"], 0.95, {"cols": _board.cols, "rows": _board.rows})
+	_floating_texts.append({"text": "棋盘重置！", "x": center_x, "y": center_y, "color": C["gold"], "size": 18.0, "timer": 0.0, "duration": 1.0})
+	_show_message("使用 %s，整盘宝石已重置" % def.get("name", "棋盘重置"))
+	_sfx("battle_heal_leaf_bubble")
+	queue_redraw()
+	return true
+
+func _use_hotbar_absorb_shield(def: Dictionary, effect: Dictionary) -> bool:
+	if _battle == null:
+		return false
+	var shields_var: Variant = _battle.get("player_absorb_shields")
+	var shields: Dictionary = shields_var.duplicate(true) if shields_var is Dictionary else {}
+	var applied := 0
+	for i in range(_battle.player_team.size()):
+		var monster: Dictionary = _battle.player_team[i]
+		if monster == null or monster.is_empty() or int(monster.get("hp", 0)) <= 0:
+			continue
+		var monster_id := str(monster.get("id", ""))
+		if monster_id.is_empty():
+			continue
+		shields[monster_id] = {"turns": 1}
+		applied += 1
+		var card := _get_player_card_rect(i)
+		_spawn_item_use_effect("absorb", card.get_center(), Color(0.40, 0.88, 1.0, 1.0), 1.0, {"scale": 1.14})
+		_floating_texts.append({"text": "护盾已就绪", "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["shield"], "size": 14.0, "timer": 0.0, "duration": 0.9})
+	if applied <= 0:
+		_show_message("没有可守护的队员")
+		return false
+	_battle.set("player_absorb_shields", shields)
+	_show_message("使用 %s，全队获得一次性护盾" % def.get("name", "强能护盾"))
+	_sfx("battle_shield_soft_bloom")
+	queue_redraw()
+	return true
+
+func _use_hotbar_gem_type_shift(def: Dictionary, effect: Dictionary) -> bool:
+	if _battle == null or _board == null:
+		return false
+	# 选源/目标属性的 picker 在 .tscn 的 GemConvertLayer 中实现。
+	# 仅在 GUI 版（场景里挂有该节点）下生效；legacy 版直接提示。
+	const GEM_CONVERT_LAYER_PATH := NodePath("GemConvertLayer")
+	if not is_inside_tree() or not has_node(GEM_CONVERT_LAYER_PATH):
+		_show_message("该道具需要 GUI 模式")
+		return false
+	var slot_idx := _pending_hotbar_slot
+	if slot_idx < 0 or slot_idx >= _hotbar_items.size():
+		return false
+	# 打开 picker，由 scene_battle_gui.gd 接管后续流程
+	call("_open_gem_convert_picker", _hotbar_items[slot_idx].get("id", ""), slot_idx)
+	return false  # 不立即消费，等待 picker 完成
+
 func _consume_hotbar_item(item_id: String, slot_idx: int) -> bool:
 	if _storage and _storage.has_method("use_item"):
-		if not _storage.use_item(item_id, 1):
+		if not bool(_storage.call("use_item", item_id, 1)):
 			_show_message("道具数量不足")
 			_load_hotbar_items()
 			_refresh_hotbar_ui()
@@ -3134,7 +3245,7 @@ func _consume_hotbar_item(item_id: String, slot_idx: int) -> bool:
 
 func _has_hotbar_item_available(item_id: String) -> bool:
 	if _storage and _storage.has_method("load_inventory"):
-		var inventory: Dictionary = _storage.load_inventory()
+		var inventory: Dictionary = _storage.call("load_inventory")
 		if int(inventory.get(item_id, 0)) <= 0:
 			_show_message("道具数量不足")
 			_load_hotbar_items()
@@ -3435,7 +3546,10 @@ func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
 	var cx: float = board_x + col * cell_size + cell_size / 2.0
 	var cy: float = board_y + row * cell_size + cell_size / 2.0
 	
-	var particle_count := 12
+	var room := OBSTACLE_PARTICLE_LIMIT - _obstacle_particles.size()
+	if room <= 0:
+		return
+	var particle_count: int = mini(12, room)
 	var speed_base := 100.0
 	
 	for i in range(particle_count):
@@ -3481,8 +3595,27 @@ func _update_gem_particles(delta: float) -> void:
 func _update_obstacle_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_obstacle_particles, delta, 300.0)
 
+func _update_item_use_effects(delta: float) -> void:
+	for i in range(_item_use_effects.size() - 1, -1, -1):
+		var fx: Dictionary = _item_use_effects[i]
+		fx["timer"] = float(fx.get("timer", 0.0)) + delta
+		if float(fx.get("timer", 0.0)) >= float(fx.get("duration", 0.75)):
+			_item_use_effects.remove_at(i)
+
 func _update_defeat_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_defeat_explosions, delta, 180.0)
+
+func _spawn_item_use_effect(kind: String, center: Vector2, color: Color, duration: float = 0.75, extra: Dictionary = {}) -> void:
+	var fx := extra.duplicate(true)
+	fx["kind"] = kind
+	fx["x"] = center.x
+	fx["y"] = center.y
+	fx["color"] = color
+	fx["timer"] = 0.0
+	fx["duration"] = duration
+	_item_use_effects.append(fx)
+	while _item_use_effects.size() > ITEM_USE_EFFECT_LIMIT:
+		_item_use_effects.remove_at(0)
 
 func _update_victory_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_victory_particles, delta, 80.0)
@@ -3554,6 +3687,117 @@ func _draw_obstacle_particles() -> void:
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
 		var half_size: float = size / 2.0
 		_draw_rounded_rect(p["x"] - half_size, p["y"] - half_size, size, size, 1.0, color)
+
+func _draw_item_use_effects() -> void:
+	for fx: Dictionary in _item_use_effects:
+		var duration := maxf(0.01, float(fx.get("duration", 0.75)))
+		var progress := clampf(float(fx.get("timer", 0.0)) / duration, 0.0, 1.0)
+		var alpha := clampf(1.0 - maxf(0.0, progress - 0.62) / 0.38, 0.0, 1.0)
+		var center := Vector2(float(fx.get("x", 0.0)), float(fx.get("y", 0.0)))
+		var color: Color = fx.get("color", C["gold"])
+		match str(fx.get("kind", "")):
+			"hammer":
+				_draw_item_fx_hammer(fx, center, color, progress, alpha)
+			"heal":
+				_draw_item_fx_heal(center, color, progress, alpha)
+			"guard":
+				_draw_item_fx_guard(center, color, progress, alpha, false)
+			"absorb":
+				_draw_item_fx_guard(center, color, progress, alpha, true)
+			"charge":
+				_draw_item_fx_charge(center, color, progress, alpha)
+			"board_reset":
+				_draw_item_fx_board_reset(center, color, progress, alpha)
+			"gem_shift":
+				_draw_item_fx_gem_shift(fx, center, color, progress, alpha)
+			"unlock":
+				_draw_item_fx_unlock(center, color, progress, alpha)
+			"cleanse":
+				_draw_item_fx_cleanse(center, color, progress, alpha)
+
+func _draw_item_fx_hammer(fx: Dictionary, center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var swing := clampf(progress / 0.38, 0.0, 1.0)
+	var hammer_pos := center + Vector2(lerpf(-22.0, 3.0, swing), lerpf(-34.0, -8.0, swing))
+	var hammer_size := 29.0 + sin(swing * PI) * 5.0
+	var hammer_tex := _get_texture(BATTLE_UI_ASSETS.get("item_rock_hammer", ""))
+	if hammer_tex:
+		_draw_texture_contain(hammer_tex, Rect2(hammer_pos.x - hammer_size / 2.0, hammer_pos.y - hammer_size / 2.0, hammer_size, hammer_size), clampf(alpha + 0.12, 0.0, 1.0))
+	else:
+		draw_line(hammer_pos + Vector2(-8.0, 10.0), hammer_pos + Vector2(8.0, -10.0), Color(0.80, 0.40, 0.16, alpha), 4.0)
+		_draw_rounded_rect(hammer_pos.x - 11.0, hammer_pos.y - 13.0, 20.0, 10.0, 2.0, Color(1.0, 0.32, 0.18, alpha))
+	var impact := clampf((progress - 0.16) / 0.38, 0.0, 1.0)
+	if impact <= 0.0:
+		return
+	var ring_alpha := alpha * (1.0 - impact)
+	draw_arc(center, 8.0 + impact * 28.0, 0.0, TAU, 44, Color(color.r, color.g, color.b, 0.75 * ring_alpha), 3.0, true)
+	draw_arc(center, 4.0 + impact * 16.0, 0.0, TAU, 34, Color(1.0, 1.0, 1.0, 0.45 * ring_alpha), 1.5, true)
+	for i in range(7):
+		var angle := float(i) * TAU / 7.0 + 0.22
+		var dir := Vector2(cos(angle), sin(angle))
+		var crack_len := 9.0 + impact * 18.0 + (4.0 if bool(fx.get("strong", false)) else 0.0)
+		draw_line(center + dir * 4.0, center + dir * crack_len, Color(0.42, 0.22, 0.11, 0.72 * alpha), 1.4)
+	for i in range(5):
+		var angle := float(i) * TAU / 5.0 + progress * 0.8
+		var chip_pos := center + Vector2(cos(angle), sin(angle)) * (8.0 + impact * 18.0)
+		_draw_rounded_rect(chip_pos.x - 2.0, chip_pos.y - 2.0, 4.0, 4.0, 1.0, Color(0.78, 0.54, 0.28, alpha * (1.0 - impact * 0.35)))
+
+func _draw_item_fx_heal(center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var pulse := sin(clampf(progress / 0.42, 0.0, 1.0) * PI)
+	draw_circle(center, 17.0 + progress * 18.0, Color(color.r, color.g, color.b, 0.16 * alpha))
+	draw_arc(center, 20.0 + pulse * 5.0, 0.0, TAU, 42, Color(color.r, color.g, color.b, 0.65 * alpha), 2.4, true)
+	draw_line(center + Vector2(-8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 1.0, 0.82 * alpha), 3.0)
+	draw_line(center + Vector2(0.0, -8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 1.0, 0.82 * alpha), 3.0)
+	_draw_soft_sparkles(self, center, color, alpha, true)
+
+func _draw_item_fx_guard(center: Vector2, color: Color, progress: float, alpha: float, absorb: bool) -> void:
+	var scale := 1.0 + sin(clampf(progress / 0.36, 0.0, 1.0) * PI) * 0.12
+	var radius := (26.0 if absorb else 23.0) * scale
+	draw_circle(center, radius, Color(color.r, color.g, color.b, (0.16 if absorb else 0.11) * alpha))
+	draw_arc(center, radius, -0.18 * PI, 1.18 * PI, 52, Color(color.r, color.g, color.b, 0.78 * alpha), 2.6 if absorb else 2.2, true)
+	draw_arc(center, radius - 6.0, 0.82 * PI, 1.86 * PI, 34, Color(1.0, 1.0, 1.0, 0.42 * alpha), 1.3, true)
+	if absorb:
+		draw_arc(center, radius + 5.0 + progress * 8.0, 0.0, TAU, 56, Color(0.76, 0.96, 1.0, 0.32 * alpha * (1.0 - progress * 0.35)), 1.8, true)
+
+func _draw_item_fx_charge(center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var radius := 20.0 + sin(progress * PI) * 8.0
+	for i in range(5):
+		var angle := progress * TAU * 1.4 + float(i) * TAU / 5.0
+		var pos := center + Vector2(cos(angle), sin(angle)) * radius
+		draw_circle(pos, 3.2, Color(color.r, color.g, color.b, 0.74 * alpha))
+	draw_arc(center, radius + 2.0, -0.2 * PI, 1.1 * PI, 44, Color(color.r, color.g, color.b, 0.45 * alpha), 2.0, true)
+
+func _draw_item_fx_board_reset(center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	if _board != null:
+		var board_rect := Rect2(float(_board.offset_x), float(_board.offset_y), float(_board.cols * _board.cell_size), float(_board.rows * _board.cell_size))
+		var sweep_x := lerpf(board_rect.position.x, board_rect.end.x, clampf(progress / 0.72, 0.0, 1.0))
+		draw_rect(Rect2(sweep_x - 9.0, board_rect.position.y, 18.0, board_rect.size.y), Color(color.r, color.g, color.b, 0.16 * alpha))
+		_draw_stroke_rect_on(self, board_rect.position.x - 2.0, board_rect.position.y - 2.0, board_rect.size.x + 4.0, board_rect.size.y + 4.0, 2.0, Color(color.r, color.g, color.b, 0.55 * alpha))
+	draw_arc(center, 42.0 + progress * 92.0, 0.0, TAU, 72, Color(color.r, color.g, color.b, 0.34 * alpha * (1.0 - progress * 0.45)), 3.0, true)
+
+func _draw_item_fx_gem_shift(fx: Dictionary, center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var source_color: Color = GEM_COLORS.get(str(fx.get("source", "")), C["white"])
+	var target_color: Color = GEM_COLORS.get(str(fx.get("target", "")), color)
+	draw_arc(center, 38.0 + progress * 92.0, -0.1 * PI, 1.1 * PI, 68, Color(source_color.r, source_color.g, source_color.b, 0.34 * alpha), 3.0, true)
+	draw_arc(center, 24.0 + progress * 74.0, 0.9 * PI, 1.95 * PI, 58, Color(target_color.r, target_color.g, target_color.b, 0.52 * alpha), 3.2, true)
+	for i in range(6):
+		var angle := progress * TAU + float(i) * TAU / 6.0
+		var pos := center + Vector2(cos(angle), sin(angle)) * (20.0 + progress * 45.0)
+		draw_circle(pos, 3.5, Color(target_color.r, target_color.g, target_color.b, 0.70 * alpha))
+
+func _draw_item_fx_unlock(center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var burst := sin(clampf(progress / 0.42, 0.0, 1.0) * PI)
+	draw_arc(center, 12.0 + progress * 28.0, 0.0, TAU, 38, Color(color.r, color.g, color.b, 0.46 * alpha), 2.0, true)
+	for i in range(4):
+		var angle := float(i) * TAU / 4.0 + PI / 4.0
+		var dir := Vector2(cos(angle), sin(angle))
+		draw_line(center - dir * 4.0, center + dir * (12.0 + burst * 10.0), Color(1.0, 0.92, 0.42, 0.72 * alpha), 2.0)
+
+func _draw_item_fx_cleanse(center: Vector2, color: Color, progress: float, alpha: float) -> void:
+	draw_circle(center, 18.0 + progress * 20.0, Color(color.r, color.g, color.b, 0.12 * alpha))
+	for i in range(5):
+		var angle := float(i) * TAU / 5.0 + progress * 0.8
+		var pos := center + Vector2(cos(angle), sin(angle)) * (8.0 + progress * 18.0)
+		draw_circle(pos, 2.6 + progress * 2.0, Color(0.74, 1.0, 0.88, 0.62 * alpha))
 
 func _draw_defeat_particles() -> void:
 	for p: Dictionary in _defeat_explosions:
@@ -4153,6 +4397,7 @@ func destroy() -> void:
 	_poison_fog_clear_anims.clear()
 	_gem_particles.clear()
 	_obstacle_particles.clear()
+	_item_use_effects.clear()
 	_special_elim_phases.clear()
 	_defeat_explosions.clear()
 	_victory_particles.clear()

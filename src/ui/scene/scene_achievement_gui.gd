@@ -463,7 +463,8 @@ func _filter_by_category(category: String) -> void:
 		_filtered_achievements = _all_achievements.duplicate()
 	else:
 		_filtered_achievements = _all_achievements.filter(func(ach): return ach.get("category", "") == category)
-	_scroll_offset = 0.0
+	# 保留当前滚动位置（领取奖励后会触发该函数，不要复位到顶部）
+	_scroll_offset = minf(_scroll_offset, _get_gui_max_scroll_offset())
 	queue_redraw()
 
 
