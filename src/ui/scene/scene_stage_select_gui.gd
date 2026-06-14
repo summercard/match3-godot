@@ -28,8 +28,8 @@ const DOT_PATHS := [
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.75, 0.88)
 const MAP_SCROLL_DRAG_THRESHOLD: float = 8.0
-const DEFAULT_STAR_LIT_PATH := "res://assets/images/ui/icons/stage_icon_star_lit.png"
-const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/stage_icon_star_lit.png"
+const DEFAULT_STAR_LIT_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
+const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/result_refresh_icon_star_silver.png"
 const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 
 # === 大地图入场动画时间线（对齐大厅 Header / BottomNav 节奏）===

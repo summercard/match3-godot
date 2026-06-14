@@ -5,6 +5,7 @@ extends Control
 signal tutorial_completed()
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const ROUND_FONT: Font = preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
@@ -12,29 +13,31 @@ const BOARD_COLS := 8
 const BOARD_ROWS := 6
 const BOARD_RECT := Rect2(21.0, 318.0, 333.0, 235.0)
 const CELL_SIZE := 41.0
-const HEADER_RECT := Rect2(72.0, 18.0, 232.0, 62.0)
-const PROMPT_RECT := Rect2(20.0, 510.0, 335.0, 108.0)
-const SKIP_RECT := Rect2(18.0, 616.0, 92.0, 44.0)
-const NEXT_RECT := Rect2(214.0, 607.0, 148.0, 54.0)
-const TARGET_RECT := Rect2(274.0, 389.0, 82.0, 112.0)
+const HEADER_RECT := Rect2(57.0, 14.0, 260.0, 72.0)
+const PROMPT_RECT := Rect2(20.0, 498.0, 335.0, 124.0)
+const SKIP_RECT := Rect2(18.0, 620.0, 108.0, 40.0)
+const NEXT_RECT := Rect2(206.0, 601.0, 160.0, 62.0)
+const TARGET_RECT := Rect2(252.0, 374.0, 104.0, 140.0)
 
 const TUTORIAL_ASSETS := {
 	"bg": "res://assets/images/maps/backgrounds/battle_bg_forest_ruins.png",
-	"header": "res://assets/images/ui/bars/tutorial_ui_tutorial_header.png",
-	"prompt": "res://assets/images/ui/panels/tutorial_ui_tutorial_prompt_panel.png",
-	"prompt_dark": "res://assets/images/ui/panels/tutorial_ui_tutorial_prompt_dark.png",
-	"next_button": "res://assets/images/ui/buttons/tutorial_ui_next_button.png",
-	"skip_button": "res://assets/images/ui/buttons/tutorial_ui_skip_button.png",
-	"highlight": "res://assets/images/effects/tutorial_fx_highlight_frame.png",
-	"arrow": "res://assets/images/effects/tutorial_fx_swipe_arrow.png",
-	"dotted_path": "res://assets/images/effects/tutorial_fx_dotted_path.png",
-	"hand": "res://assets/images/ui/icons/tutorial_icon_hand_pointer.png",
-	"target_card": "res://assets/images/ui/cards/tutorial_ui_target_card.png",
-	"dot_active": "res://assets/images/ui/icons/tutorial_ui_step_dot_active.png",
-	"dot_inactive": "res://assets/images/ui/icons/tutorial_ui_step_dot_inactive.png",
-	"panel_dark": "res://assets/images/ui/panels/battle_ui_panel_dark_large.png",
-	"team_card": "res://assets/images/ui/cards/battle_prepare_ui_team_card.png",
-	"enemy_card": "res://assets/images/ui/cards/battle_prepare_ui_enemy_card.png",
+	"header": "res://assets/images/ui/bars/battle_prepare_new_ui_prepare_header.png",
+	"prompt": "res://assets/images/ui/panels/result_refresh_ui_panel_large.png",
+	"prompt_dark": "res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png",
+	"next_button": "res://assets/images/ui/buttons/battle_flow_new_ui_btn_gold.png",
+	"skip_button": "res://assets/images/ui/buttons/battle_flow_new_ui_btn_blue.png",
+	"highlight": "res://assets/images/effects/battle_fx_selected_cell.png",
+	"arrow": "res://assets/images/ui/buttons/stage_icon_next_arrow.png",
+	"target_card": "res://assets/images/ui/cards/result_refresh_ui_reward_card.png",
+	"board_frame": "res://assets/images/ui/misc/battle_ui_board_frame.png",
+	"board_cell": "res://assets/images/ui/misc/battle_ui_board_cell.png",
+	"team_card_fire": "res://assets/images/ui/cards/battle_prepare_new_ui_team_card_fire.png",
+	"team_card_grass": "res://assets/images/ui/cards/battle_prepare_new_ui_team_card_grass.png",
+	"team_card_water": "res://assets/images/ui/cards/battle_prepare_new_ui_team_card_water.png",
+	"enemy_card": "res://assets/images/ui/cards/battle_prepare_new_ui_enemy_card.png",
+	"sparkles": "res://assets/images/effects/battle_flow_new_fx_sparkles.png",
+	"leaf_cluster": "res://assets/images/effects/battle_prepare_new_fx_leaf_cluster_a.png",
+	"leaf_single": "res://assets/images/effects/battle_prepare_new_fx_leaf_single_b.png",
 	"hp_green": "res://assets/images/ui/bars/battle_ui_hp_bar_green.png",
 	"gem_fire": "res://assets/images/ui/gems/battle_gem_fire.png",
 	"gem_water": "res://assets/images/ui/gems/battle_gem_water.png",
@@ -90,6 +93,8 @@ const STEPS := [
 
 var _current_step := 0
 var _opacity := 0.0
+var _anim_time := 0.0
+var _step_time := 0.0
 var _tutorial_ready := false
 var _texture_cache: Dictionary = {}
 
@@ -103,6 +108,7 @@ func _ready() -> void:
 
 func init(data: Dictionary = {}) -> void:
 	_opacity = 0.0
+	_step_time = 0.0
 	_tutorial_ready = false
 	var replay: bool = data.get("replay", false)
 	var progress := _load_tutorial_progress()
@@ -161,6 +167,7 @@ func _next_step() -> void:
 		_complete_tutorial()
 		return
 	_opacity = 0.0
+	_step_time = 0.0
 	_tutorial_ready = false
 	_save_tutorial_progress(_current_step)
 	queue_redraw()
@@ -169,6 +176,7 @@ func _next_step() -> void:
 func _complete_tutorial() -> void:
 	_save_tutorial_progress(STEPS.size())
 	_opacity = 0.0
+	_step_time = 0.0
 	_tutorial_ready = false
 	tutorial_completed.emit()
 
@@ -178,6 +186,8 @@ func _skip_tutorial() -> void:
 
 
 func _process(delta: float) -> void:
+	_anim_time += delta
+	_step_time += delta
 	if _opacity < 1.0:
 		_opacity = minf(1.0, _opacity + delta * 2.3)
 		if _opacity >= 1.0:
@@ -191,6 +201,7 @@ func _draw() -> void:
 		return
 	_draw_battle_mock(a)
 	draw_rect(Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(0.0, 0.0, 0.0, 0.46 * a), true)
+	_draw_ambient_fx(a)
 	_draw_header(a)
 	# 安全检查：确保 _current_step 在有效范围内
 	var safe_step: int = clampi(_current_step, 0, maxi(0, STEPS.size() - 1))
@@ -214,35 +225,39 @@ func _draw_enemy_row(a: float) -> void:
 		{"id": "monster_006", "hp": "1100", "element": "gem_fire", "rect": Rect2(254.0, 99.0, 78.0, 78.0)},
 	]
 	for enemy: Dictionary in enemies:
-		_draw_texture_contain(_tex(str(enemy["element"])), Rect2(enemy["rect"].position.x - 14.0, 96.0, 26.0, 26.0), 0.84 * a)
-		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(enemy["id"]))), enemy["rect"], a)
-		_draw_text(str(enemy["hp"]), enemy["rect"].get_center().x, 188.0, C["white"], 15.0, true, 70.0, a)
-		_draw_hp_bar(Rect2(enemy["rect"].position.x - 7.0, 195.0, 92.0, 9.0), Color(0.92, 0.14, 0.12, a), 0.72)
+		var rect: Rect2 = enemy["rect"]
+		var bob := sin(_anim_time * 2.1 + rect.position.x * 0.03) * 2.4
+		_draw_texture_fit(_tex("enemy_card"), Rect2(rect.position.x - 13.0, rect.position.y - 7.0, 104.0, 118.0), 0.54 * a)
+		_draw_texture_contain(_tex(str(enemy["element"])), Rect2(rect.position.x - 14.0, 96.0 + bob, 26.0, 26.0), 0.84 * a)
+		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(enemy["id"]))), _offset_rect(rect, Vector2(0.0, bob)), a)
+		_draw_text(str(enemy["hp"]), rect.get_center().x, 188.0, C["white"], 15.0, true, 70.0, a)
+		_draw_hp_bar(Rect2(rect.position.x - 7.0, 195.0, 92.0, 9.0), Color(0.92, 0.14, 0.12, a), 0.72)
 
 
 func _draw_team_row(a: float) -> void:
 	var team := [
-		{"id": "monster_003", "hp": "1200/1200", "element": "gem_grass", "rect": Rect2(39.0, 221.0, 92.0, 92.0)},
-		{"id": "monster_002", "hp": "1300/1300", "element": "gem_water", "rect": Rect2(141.0, 221.0, 92.0, 92.0)},
-		{"id": "monster_001", "hp": "1100/1100", "element": "gem_fire", "rect": Rect2(244.0, 221.0, 92.0, 92.0)},
+		{"id": "monster_003", "hp": "1200/1200", "element": "gem_grass", "card": "team_card_grass", "rect": Rect2(39.0, 221.0, 92.0, 92.0)},
+		{"id": "monster_002", "hp": "1300/1300", "element": "gem_water", "card": "team_card_water", "rect": Rect2(141.0, 221.0, 92.0, 92.0)},
+		{"id": "monster_001", "hp": "1100/1100", "element": "gem_fire", "card": "team_card_fire", "rect": Rect2(244.0, 221.0, 92.0, 92.0)},
 	]
 	for member: Dictionary in team:
 		var card: Rect2 = member["rect"]
-		_draw_texture_fit(_tex("team_card"), card, 0.9 * a)
-		_draw_texture_contain(_tex(str(member["element"])), Rect2(card.position.x + 8.0, card.position.y + 9.0, 24.0, 24.0), a)
-		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(member["id"]))), Rect2(card.position.x + 13.0, card.position.y + 18.0, 66.0, 58.0), a)
+		var bob := sin(_anim_time * 2.0 + card.position.x * 0.04) * 1.8
+		var draw_card := _offset_rect(card, Vector2(0.0, bob))
+		_draw_texture_fit(_tex(str(member["card"])), draw_card, 0.96 * a)
+		_draw_texture_contain(_tex(str(member["element"])), Rect2(card.position.x + 8.0, card.position.y + 9.0 + bob, 24.0, 24.0), a)
+		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(member["id"]))), Rect2(card.position.x + 13.0, card.position.y + 17.0 + bob, 66.0, 58.0), a)
 		_draw_hp_bar(Rect2(card.position.x + 15.0, card.position.y + 76.0, 62.0, 8.0), Color(0.26, 0.82, 0.28, a), 1.0)
 		_draw_text(str(member["hp"]), card.get_center().x, card.position.y + 84.0, C["white"], 9.0, true, 72.0, a)
 
 
 func _draw_board(a: float) -> void:
-	_draw_texture_fit(_tex("panel_dark"), Rect2(13.0, 306.0, 349.0, 257.0), 0.92 * a)
+	_draw_texture_fit(_tex("board_frame"), Rect2(12.0, 306.0, 351.0, 258.0), 0.78 * a)
 	var gems: Array[String] = ["gem_water", "gem_grass", "gem_fire", "gem_water", "gem_light", "gem_grass", "gem_water", "gem_thunder"]
 	for row in range(BOARD_ROWS):
 		for col in range(BOARD_COLS):
 			var cell := Rect2(BOARD_RECT.position.x + col * CELL_SIZE, BOARD_RECT.position.y + row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-			draw_rect(cell.grow(-1.0), Color(0.02, 0.06, 0.11, 0.62 * a), true)
-			draw_rect(cell.grow(-1.0), Color(0.12, 0.19, 0.30, 0.40 * a), false, 1.0)
+			_draw_texture_fit(_tex("board_cell"), cell.grow(-1.0), 0.88 * a)
 			var key: String = gems[(row * 3 + col) % gems.size()]
 			if row == 1 and col in [2, 3, 4]:
 				key = "gem_water"
@@ -250,56 +265,63 @@ func _draw_board(a: float) -> void:
 
 
 func _draw_focus_overlay(focus: String, a: float) -> void:
+	var pulse := 1.0 + sin(_anim_time * 5.0) * 0.045
+	var hint_alpha := a * (0.78 + sin(_anim_time * 4.8) * 0.16)
 	match focus:
 		"overview":
-			_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path("monster_002")), Rect2(18.0, 392.0, 110.0, 115.0), a)
-			_draw_texture_fit(_tex("prompt_dark"), Rect2(139.0, 332.0, 166.0, 50.0), a)
+			_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path("monster_002")), Rect2(18.0, 390.0 + sin(_anim_time * 2.7) * 4.0, 110.0, 115.0), a)
+			_draw_texture_fit(_tex("prompt_dark"), _intro_rect(Rect2(139.0, 332.0, 166.0, 50.0), Vector2(0.0, 18.0)), a)
 			_draw_text("先看战斗布局", 222.0, 363.0, C["gold"], 18.0, true, 132.0, a)
 		"match":
 			var match_rect := Rect2(101.0, 354.0, 154.0, 52.0)
-			_draw_texture_fit(_tex("highlight"), match_rect.grow(9.0), a)
-			_draw_texture_fit(_tex("arrow"), Rect2(250.0, 354.0, 100.0, 46.0), a)
-			_draw_texture_fit(_tex("dotted_path"), Rect2(118.0, 416.0, 106.0, 70.0), a)
-			_draw_texture_contain(_tex("hand"), Rect2(220.0, 383.0, 82.0, 96.0), a)
+			_draw_texture_fit(_tex("highlight"), _scale_rect(match_rect.grow(8.0), pulse), hint_alpha)
+			_draw_texture_contain(_tex("arrow"), Rect2(248.0 + sin(_anim_time * 3.7) * 8.0, 356.0, 54.0, 54.0), a)
+			_draw_texture_contain(_tex("arrow"), Rect2(151.0 + sin(_anim_time * 3.7) * 8.0, 408.0, 42.0, 42.0), 0.74 * a)
 			_draw_target_card(a, "目标", "消除 3 个", "gem_water")
 		"enemy":
-			_draw_texture_fit(_tex("highlight"), Rect2(30.0, 91.0, 312.0, 121.0), a)
-			_draw_texture_fit(_tex("arrow"), Rect2(150.0, 245.0, 86.0, 40.0), a)
-			_draw_texture_fit(_tex("prompt_dark"), Rect2(107.0, 210.0, 160.0, 48.0), a)
+			_draw_texture_fit(_tex("highlight"), _scale_rect(Rect2(30.0, 91.0, 312.0, 121.0), pulse), hint_alpha)
+			_draw_texture_fit(_tex("arrow"), Rect2(150.0, 245.0 + sin(_anim_time * 3.2) * 5.0, 86.0, 40.0), a)
+			_draw_texture_fit(_tex("prompt_dark"), _intro_rect(Rect2(107.0, 210.0, 160.0, 48.0), Vector2(0.0, 16.0)), a)
 			_draw_text("攻击敌方血条", 187.0, 240.0, C["gold"], 17.0, true, 130.0, a)
 		"capture":
-			_draw_texture_fit(_tex("highlight"), Rect2(244.0, 375.0, 117.0, 135.0), a)
-			_draw_texture_contain(_tex("capture_ball"), Rect2(281.0, 401.0, 58.0, 58.0), a)
+			_draw_texture_fit(_tex("highlight"), _scale_rect(Rect2(244.0, 375.0, 117.0, 135.0), pulse), hint_alpha)
+			_draw_texture_contain(_tex("capture_ball"), Rect2(281.0, 401.0 + sin(_anim_time * 4.2) * 3.0, 58.0, 58.0), a)
 			_draw_target_card(a, "收服", "捕获球 +1", "capture_ball")
 		"team":
-			_draw_texture_fit(_tex("highlight"), Rect2(29.0, 214.0, 318.0, 111.0), a)
-			_draw_texture_fit(_tex("prompt_dark"), Rect2(112.0, 337.0, 150.0, 48.0), a)
+			_draw_texture_fit(_tex("highlight"), _scale_rect(Rect2(29.0, 214.0, 318.0, 111.0), pulse), hint_alpha)
+			_draw_texture_fit(_tex("prompt_dark"), _intro_rect(Rect2(112.0, 337.0, 150.0, 48.0), Vector2(0.0, 16.0)), a)
 			_draw_text("这里是我方队伍", 187.0, 367.0, C["gold"], 16.0, true, 126.0, a)
 
 
 func _draw_target_card(a: float, title: String, body: String, icon_key: String) -> void:
-	_draw_texture_fit(_tex("target_card"), TARGET_RECT, a)
-	_draw_text(title, TARGET_RECT.get_center().x, TARGET_RECT.position.y + 31.0, C["gold"], 14.0, true, 60.0, a)
-	_draw_texture_contain(_tex(icon_key), Rect2(TARGET_RECT.position.x + 22.0, TARGET_RECT.position.y + 45.0, 40.0, 40.0), a)
-	_draw_text(body, TARGET_RECT.get_center().x, TARGET_RECT.position.y + 101.0, C["white"], 12.0, true, 70.0, a)
+	var rect := _intro_rect(TARGET_RECT, Vector2(22.0, 0.0))
+	_draw_texture_fit(_tex("target_card"), rect, a)
+	_draw_text(title, rect.get_center().x, rect.position.y + 31.0, C["gold"], 14.0, true, 60.0, a)
+	_draw_texture_contain(_tex(icon_key), Rect2(rect.position.x + 22.0, rect.position.y + 45.0 + sin(_anim_time * 4.0) * 2.0, 40.0, 40.0), a)
+	_draw_text(body, rect.get_center().x, rect.position.y + 101.0, C["white"], 12.0, true, 70.0, a)
 
 
 func _draw_header(a: float) -> void:
-	_draw_texture_fit(_tex("header"), HEADER_RECT, a)
-	_draw_text("教程", HEADER_RECT.get_center().x, HEADER_RECT.position.y + 40.0, C["white"], 27.0, true, 150.0, a)
+	var rect := _intro_rect(_offset_rect(HEADER_RECT, Vector2(0.0, sin(_anim_time * 2.2) * 1.6)), Vector2(0.0, -16.0))
+	_draw_texture_fit(_tex("header"), rect, a)
+	_draw_texture_fit(_tex("sparkles"), Rect2(rect.position.x + 28.0, rect.position.y - 4.0, 176.0, 19.0), 0.45 * a * (0.65 + sin(_anim_time * 3.0) * 0.25))
+	_draw_text("教程", HEADER_RECT.get_center().x + 26.0, HEADER_RECT.position.y + 40.0, C["white"], 25.0, true, 150.0, a)
 
 
 func _draw_prompt(a: float) -> void:
 	var safe_step: int = clampi(_current_step, 0, maxi(0, STEPS.size() - 1))
 	var step: Dictionary = STEPS[safe_step]
-	_draw_texture_fit(_tex("prompt"), PROMPT_RECT, a)
-	_draw_text(str(step.get("title", "")), PROMPT_RECT.get_center().x, PROMPT_RECT.position.y + 37.0, C["ink"], 17.0, true, 260.0, a)
+	var rect := _intro_rect(PROMPT_RECT, Vector2(0.0, 26.0))
+	_draw_texture_fit(_tex("prompt"), rect, a)
+	_draw_texture_contain(_tex("leaf_cluster"), Rect2(rect.position.x + 13.0, rect.position.y - 9.0, 43.0, 33.0), 0.86 * a)
+	_draw_texture_contain(_tex("leaf_single"), Rect2(rect.position.x + rect.size.x - 42.0, rect.position.y + 10.0 + sin(_anim_time * 2.5) * 2.0, 24.0, 24.0), 0.72 * a)
+	_draw_text(str(step.get("title", "")), rect.get_center().x, rect.position.y + 37.0, C["ink"], 18.0, true, 260.0, a)
 	var lines: Array = step.get("body", [])
-	var y := PROMPT_RECT.position.y + 62.0
+	var y := rect.position.y + 63.0
 	for line in lines:
-		_draw_text(str(line), PROMPT_RECT.get_center().x, y, C["ink"], 13.0, false, 282.0, a)
+		_draw_text(str(line), rect.get_center().x, y, C["ink"], 14.0, false, 286.0, a)
 		y += 20.0
-	_draw_text(str(step.get("hint", "")), PROMPT_RECT.get_center().x, PROMPT_RECT.position.y + 94.0, Color(0.10, 0.36, 0.62, a), 11.0, true, 240.0, a)
+	_draw_text(str(step.get("hint", "")), rect.get_center().x, rect.position.y + 96.0, Color(0.10, 0.36, 0.62, a), 12.0, true, 240.0, a)
 	_draw_step_dots(a)
 
 
@@ -307,16 +329,27 @@ func _draw_step_dots(a: float) -> void:
 	var total := STEPS.size()
 	var start_x := PROMPT_RECT.get_center().x - (total - 1) * 14.0
 	for i in range(total):
-		var rect := Rect2(start_x + i * 28.0 - 9.0, PROMPT_RECT.position.y + 86.0, 18.0, 18.0)
-		_draw_texture_contain(_tex("dot_active" if i == _current_step else "dot_inactive"), rect, a)
+		var center := Vector2(start_x + i * 28.0, PROMPT_RECT.position.y + 116.0)
+		var active := i == _current_step
+		draw_circle(center, 5.4 if active else 4.2, Color(1.0, 0.79, 0.23, a) if active else Color(0.42, 0.49, 0.57, 0.72 * a))
+		if active:
+			draw_arc(center, 7.4, 0.0, TAU, 20, Color(1.0, 0.98, 0.72, 0.82 * a), 1.2)
 
 
 func _draw_controls(a: float) -> void:
-	_draw_texture_fit(_tex("skip_button"), SKIP_RECT, a)
-	_draw_text("跳过", SKIP_RECT.get_center().x, SKIP_RECT.position.y + 27.0, C["white"], 17.0, true, 62.0, a)
-	_draw_texture_fit(_tex("next_button"), NEXT_RECT, a)
+	var skip_rect := _intro_rect(SKIP_RECT, Vector2(-18.0, 0.0))
+	var next_rect := _scale_rect(_intro_rect(NEXT_RECT, Vector2(24.0, 0.0)), 1.0 + sin(_anim_time * 4.0) * 0.018)
+	_draw_texture_fit(_tex("skip_button"), skip_rect, a)
+	_draw_text("跳过", SKIP_RECT.get_center().x, SKIP_RECT.position.y + 25.0, C["white"], 15.0, true, 68.0, a)
+	_draw_texture_fit(_tex("next_button"), next_rect, a)
 	var is_last := _current_step == STEPS.size() - 1
-	_draw_text("开始冒险" if is_last else "下一步", NEXT_RECT.get_center().x - (5.0 if is_last else 12.0), NEXT_RECT.position.y + 34.0, C["white"], 18.0, true, 94.0, a)
+	_draw_text("开始冒险" if is_last else "下一步", NEXT_RECT.get_center().x, NEXT_RECT.position.y + 37.0, C["white"], 18.0, true, 114.0, a)
+
+
+func _draw_ambient_fx(a: float) -> void:
+	_draw_texture_fit(_tex("sparkles"), Rect2(20.0, 82.0, 180.0, 20.0), 0.16 * a * (0.7 + sin(_anim_time * 1.8) * 0.25))
+	_draw_texture_contain(_tex("leaf_single"), Rect2(302.0 + sin(_anim_time * 1.7) * 6.0, 68.0 + sin(_anim_time * 2.1) * 4.0, 26.0, 26.0), 0.55 * a)
+	_draw_texture_contain(_tex("leaf_cluster"), Rect2(34.0, 208.0 + sin(_anim_time * 1.5) * 3.0, 40.0, 31.0), 0.42 * a)
 
 
 func _draw_hp_bar(rect: Rect2, color: Color, percent: float) -> void:
@@ -368,11 +401,36 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 
+func _scale_rect(rect: Rect2, scale: float) -> Rect2:
+	var center := rect.get_center()
+	var size := rect.size * scale
+	return Rect2(center - size * 0.5, size)
+
+
+func _intro_rect(rect: Rect2, from_offset: Vector2) -> Rect2:
+	var t := clampf(_step_time * 4.0, 0.0, 1.0)
+	var eased := 1.0 - pow(1.0 - t, 3.0)
+	return _offset_rect(rect, from_offset * (1.0 - eased))
+
+
+func _offset_rect(rect: Rect2, offset: Vector2) -> Rect2:
+	return Rect2(rect.position + offset, rect.size)
+
+
 func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, _bold: bool = false, width: float = 160.0, opacity: float = 1.0) -> void:
 	var col := Color(color.r, color.g, color.b, color.a * opacity)
-	var shadow := Color(C["shadow"].r, C["shadow"].g, C["shadow"].b, C["shadow"].a * opacity)
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0 + 1.0, y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, int(font_size), shadow)
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, int(font_size), col)
+	var outline := Color(C["shadow"].r, C["shadow"].g, C["shadow"].b, 0.58 * opacity)
+	var font := ROUND_FONT if ROUND_FONT != null else ThemeDB.fallback_font
+	var pos := Vector2(x - width / 2.0, y)
+	var size := int(font_size)
+	var needs_outline := _bold and not _is_dark_text(color)
+	if needs_outline:
+		draw_string(font, pos + Vector2(0.0, 1.4), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, outline)
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, size, col)
+
+
+func _is_dark_text(color: Color) -> bool:
+	return color.r < 0.25 and color.g < 0.25 and color.b < 0.25
 
 
 func destroy() -> void:

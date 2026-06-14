@@ -326,11 +326,13 @@ func _handle_social_tap(pos: Vector2) -> void:
 func _switch_to_social() -> void:
 	_active_page = "social"
 	_dragging_class_list = false
+	_load_data()
 	_update_class_scroll_limit()
 	queue_redraw()
 
 func _switch_to_classroom() -> void:
 	_active_page = "classroom"
+	_load_data()
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
 	_update_class_scroll_limit()
@@ -427,6 +429,7 @@ func _try_social_action() -> void:
 		if bool(result.get("ok", false)):
 			_show_status("社交开始")
 			_load_data()
+			queue_redraw()
 			return
 		_show_status("社交开始失败")
 

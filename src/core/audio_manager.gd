@@ -76,9 +76,9 @@ const SFX_LIBRARY: Dictionary = {
 	# ---- 奖励 ----
 	"reward_coin_soft":           { "path": "res://assets/audio/sfx/reward_coin_soft.wav",           "category": "reward",    "volume_db": -9.0  },
 
-	# ---- BGM（怪兽收集 RPG 圆润版，OGG 可循环）----
-	"bgm_town":                   { "path": "res://assets/audio/bgm/bgm_town_monster_rpg_round_under500k.ogg",     "category": "bgm", "volume_db": -8.0, "loop": true },
-	"bgm_battle":                 { "path": "res://assets/audio/bgm/bgm_battle_monster_rpg_round_under500k.ogg", "category": "bgm", "volume_db": -8.0, "loop": true },
+	# ---- BGM ----
+	"bgm_town":                   { "path": "res://assets/audio/bgm/elf_valley.mp3", "category": "bgm", "volume_db": -8.0, "loop": true },
+	"bgm_battle":                 { "path": "res://assets/audio/bgm/elf_cha_cha.mp3", "category": "bgm", "volume_db": -8.0, "loop": true },
 }
 
 ## ========== 元素 → 攻击 / 消除 音效别名 ==========

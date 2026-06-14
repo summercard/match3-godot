@@ -12,6 +12,8 @@ func _init() -> void:
 func _run() -> void:
 	_test_social_rules()
 	_test_ranch_social_exclusivity()
+	_test_social_state_normalizes_after_load()
+	_test_social_ui_reload_switch_and_start()
 	_test_save_manager_social_flow()
 	_test_social_birth_major_outcome()
 	_test_social_erosion_is_protected()
@@ -44,6 +46,123 @@ func _test_ranch_social_exclusivity() -> void:
 	var normalized_place: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
 	_expect(normalized_place.get("slot_b", null) == null, "legacy overlap should remove ranch monster from social slot")
 	_expect(normalized_place.get("started_at", null) == null, "legacy overlap cleanup should cancel invalid social timer")
+
+
+func _test_social_state_normalizes_after_load() -> void:
+	var save_manager := root.get_node_or_null("/root/SaveManager")
+	_expect(save_manager != null, "SaveManager should exist for social load normalization")
+	if save_manager == null:
+		return
+	save_manager.clear_all_data()
+	var owned: Array = save_manager.get_owned_monsters()
+	_expect(owned.size() >= 3, "default save should have three monsters for social load normalization")
+	if owned.size() < 3:
+		return
+	var first_instance_id := str(owned[0].get("instanceId", ""))
+	var first_monster_id := str(owned[0].get("monsterId", ""))
+	var second_instance_id := str(owned[1].get("instanceId", ""))
+	var third_instance_id := str(owned[2].get("instanceId", ""))
+	var now_ms := Time.get_unix_time_from_system() * 1000.0
+
+	save_manager.set_ranch_state({
+		"slots": [],
+		"unlockedSlots": 5,
+		"socialPlaces": [{
+			"placeId": "quiet_pond",
+			"slotA": first_monster_id,
+			"slotB": first_monster_id,
+			"startedAt": now_ms
+		}]
+	})
+	var duplicate_place: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
+	_expect(str(duplicate_place.get("place_id", "")) == "quiet_pond", "legacy social place id should normalize after load")
+	_expect(str(duplicate_place.get("slot_a", "")) == first_instance_id, "legacy monster id should resolve to instance id in social slot")
+	_expect(duplicate_place.get("slot_b", null) == null, "same monster should not occupy both social slots after load")
+	_expect(duplicate_place.get("started_at", null) == null, "duplicate social slot cleanup should cancel timer")
+
+	save_manager.set_ranch_state({
+		"slots": [],
+		"unlocked_slots": 5,
+		"social_places": [{
+			"place_id": "sunny_yard",
+			"slot_a": second_instance_id,
+			"slot_b": "missing_instance",
+			"started_at": now_ms
+		}]
+	})
+	var missing_place: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
+	_expect(str(missing_place.get("slot_a", "")) == second_instance_id, "valid social slot should survive missing partner cleanup")
+	_expect(missing_place.get("slot_b", null) == null, "missing social partner should be removed after load")
+	_expect(missing_place.get("started_at", null) == null, "missing social partner cleanup should cancel timer")
+
+	save_manager.set_ranch_state({
+		"slots": [],
+		"unlocked_slots": 5,
+		"social_places": [{
+			"place_id": "meadow_yard",
+			"slot_a": second_instance_id,
+			"slot_b": third_instance_id,
+			"started_at": now_ms
+		}]
+	})
+	_expect(save_manager.remove_monster_instance(third_instance_id), "removing a monster should succeed for social cleanup")
+	var after_remove: Dictionary = save_manager.get_ranch_state().get("social_places", [])[0]
+	_expect(str(after_remove.get("slot_a", "")) == second_instance_id, "removing social partner should keep the remaining partner")
+	_expect(after_remove.get("slot_b", null) == null, "removed monster should be cleared from social slot")
+	_expect(after_remove.get("started_at", null) == null, "removing social partner should cancel social timer")
+
+
+func _test_social_ui_reload_switch_and_start() -> void:
+	var save_manager := root.get_node_or_null("/root/SaveManager")
+	_expect(save_manager != null, "SaveManager should exist for social UI reload")
+	if save_manager == null:
+		return
+	save_manager.clear_all_data()
+	var owned: Array = save_manager.get_owned_monsters()
+	_expect(owned.size() >= 2, "default save should have two monsters for social UI reload")
+	if owned.size() < 2:
+		return
+	var a_id := str(owned[0].get("instanceId", ""))
+	var b_id := str(owned[1].get("instanceId", ""))
+	_expect(save_manager.assign_social_slot(0, "slot_a", a_id), "UI reload test should assign slot A")
+	_expect(save_manager.assign_social_slot(0, "slot_b", b_id), "UI reload test should assign slot B")
+	_expect(save_manager.cycle_social_place(0), "UI reload test should switch to sunny yard")
+
+	var ranch: Control = load("res://src/ui/controllers/ranch_logic.gd").new()
+	root.add_child(ranch)
+	ranch.call("init", {})
+	ranch.call("_switch_to_social")
+	var loaded_place: Dictionary = ranch.call("_current_social_place")
+	_expect(str(loaded_place.get("place_id", "")) == "sunny_yard", "social page should load saved place when opened")
+
+	_expect(save_manager.cycle_social_place(0), "external save change should switch to quiet pond")
+	ranch.call("_switch_to_classroom")
+	ranch.call("_switch_to_social")
+	var reloaded_place: Dictionary = ranch.call("_current_social_place")
+	_expect(str(reloaded_place.get("place_id", "")) == "quiet_pond", "reopening social page should reload saved place")
+
+	ranch.call("_cycle_social_place")
+	var switched_place: Dictionary = ranch.call("_current_social_place")
+	_expect(str(switched_place.get("place_id", "")) == "meadow_yard", "place switch button should update local state after reload")
+	_expect(str(save_manager.get_ranch_state().get("social_places", [])[0].get("place_id", "")) == "meadow_yard", "place switch button should persist after reload")
+
+	ranch.call("_try_social_action")
+	var started_place: Dictionary = ranch.call("_current_social_place")
+	_expect(started_place.get("started_at", null) != null, "start button should update local started_at after reload")
+	ranch.call("_select_or_clear_social_slot", "slot_a")
+	var locked_place: Dictionary = ranch.call("_current_social_place")
+	_expect(str(locked_place.get("slot_a", "")) == a_id, "running social should not clear slot after reload")
+
+	var unlocked_state: Dictionary = save_manager.get_ranch_state()
+	var places: Array = unlocked_state.get("social_places", [])
+	places[0]["started_at"] = null
+	unlocked_state["social_places"] = places
+	save_manager.set_ranch_state(unlocked_state)
+	ranch.call("_switch_to_social")
+	ranch.call("_select_or_clear_social_slot", "slot_a")
+	var cleared_place: Dictionary = ranch.call("_current_social_place")
+	_expect(cleared_place.get("slot_a", null) == null, "clear slot toggle should work after reloading an idle social place")
+	ranch.queue_free()
 
 
 func _test_social_rules() -> void:

@@ -226,12 +226,21 @@ func _ensure_monster_pool_migrated() -> void:
 	var unlocked_slots := int(old_ranch.get("unlocked_slots", old_ranch.get("unlockedSlots", 3)))
 	while new_slots.size() < unlocked_slots:
 		new_slots.append({"instance_id": null, "placed_at": null})
+	var new_social_places: Array = []
+	var old_social_places: Array = old_ranch.get("social_places", old_ranch.get("socialPlaces", []))
+	for raw_place in old_social_places:
+		if not raw_place is Dictionary:
+			continue
+		var place := SocialRulesScript.normalize_place(raw_place)
+		place["slot_a"] = _migrate_monster_ref_to_instance(str(place.get("slot_a", "")), pool, monster_to_instance)
+		place["slot_b"] = _migrate_monster_ref_to_instance(str(place.get("slot_b", "")), pool, monster_to_instance)
+		new_social_places.append(place)
 
 	player["monster_pool"] = MonsterPool.normalize_pool(pool)
 	player["monsterPoolVersion"] = 1
 	_set_value("player", "data", player)
 	_set_value("team", "data", new_team)
-	_set_value("ranch", "data", {"slots": new_slots, "unlocked_slots": unlocked_slots})
+	_set_value("ranch", "data", {"slots": new_slots, "unlocked_slots": unlocked_slots, "social_places": new_social_places})
 	_save_config()
 
 func _migrate_monster_ref_to_instance(ref_id: String, pool: Array, monster_to_instance: Dictionary) -> Variant:
@@ -293,6 +302,15 @@ func remove_monster_instance(instance_id: String) -> bool:
 		if slot.get("instance_id") == instance_id:
 			slot["instance_id"] = null
 			slot["placed_at"] = null
+	for place: Dictionary in ranch.get("social_places", []):
+		if place.get("slot_a") == instance_id:
+			place["slot_a"] = null
+			place["started_at"] = null
+		if place.get("slot_b") == instance_id:
+			place["slot_b"] = null
+			place["started_at"] = null
+	if ranch.get("care_focus_instance_id", null) == instance_id:
+		ranch["care_focus_instance_id"] = null
 	set_ranch_state(ranch)
 	return save_monster_pool(pool)
 
@@ -1071,15 +1089,21 @@ func _normalize_ranch_state(state: Dictionary) -> Dictionary:
 	while normalized["slots"].size() < normalized["unlocked_slots"]:
 		normalized["slots"].append({ "instance_id": null, "placed_at": null })
 	var normalized_places: Array = normalized["social_places"]
+	var pool := get_monster_pool()
 	for place_index in normalized_places.size():
 		var place: Dictionary = normalized_places[place_index]
-		var removed_ranch_monster := false
+		var removed_invalid_monster := false
+		var seen_social_ids := {}
 		for social_slot in ["slot_a", "slot_b"]:
-			var instance_id := str(place.get(social_slot, ""))
-			if _ranch_slots_contain_instance(normalized["slots"], instance_id):
+			var instance_id := _resolve_social_instance_id(str(place.get(social_slot, "")), pool)
+			if instance_id.is_empty() or seen_social_ids.has(instance_id) or _ranch_slots_contain_instance(normalized["slots"], instance_id):
 				place[social_slot] = null
-				removed_ranch_monster = true
-		if removed_ranch_monster:
+				removed_invalid_monster = true
+			else:
+				place[social_slot] = instance_id
+				seen_social_ids[instance_id] = true
+		var has_two_social_monsters := place.get("slot_a", null) != null and place.get("slot_b", null) != null
+		if removed_invalid_monster or not has_two_social_monsters:
 			place["started_at"] = null
 		normalized_places[place_index] = place
 	normalized["social_places"] = normalized_places
@@ -1105,6 +1129,14 @@ func _social_places_contain_instance(places: Array, instance_id: String) -> bool
 		if place.get("slot_a") == instance_id or place.get("slot_b") == instance_id:
 			return true
 	return false
+
+func _resolve_social_instance_id(ref_id: String, pool: Array) -> String:
+	if ref_id.is_empty():
+		return ""
+	if MonsterPool.find_index(pool, ref_id) >= 0:
+		return ref_id
+	var instance := MonsterPool.get_first_instance_by_monster_id(pool, ref_id)
+	return str(instance.get("instanceId", ""))
 
 func _normalize_ranch_slot(slot_data: Variant) -> Dictionary:
 	if not slot_data is Dictionary:

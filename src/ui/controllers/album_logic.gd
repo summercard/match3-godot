@@ -21,7 +21,7 @@ const BOTTOM_TAB_Y: float = 609.0
 const DEBUG_UNLOCK_ALL_ALBUM_FOR_QA: bool = true
 
 const ALBUM_ASSETS := {
-	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg.png",
+	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
 	"header": "res://assets/images/ui/bars/album_ui_header_plaque.png",
 	"back_button": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"filter_selected": "res://assets/images/ui/buttons/album_ui_dex_filter_selected.png",
@@ -53,14 +53,14 @@ const ALBUM_ASSETS := {
 }
 
 const ELEMENT_ICON_ASSETS := {
-	"fire": "res://assets/images/ui/gems/album_icon_element_fire.png",
-	"water": "res://assets/images/ui/gems/album_icon_element_water.png",
-	"grass": "res://assets/images/ui/gems/album_icon_element_grass.png",
-	"thunder": "res://assets/images/ui/gems/album_icon_element_thunder.png",
-	"light": "res://assets/images/ui/gems/album_icon_element_light.png",
-	"earth": "res://assets/images/ui/gems/album_icon_element_earth.png",
-	"wind": "res://assets/images/ui/gems/album_icon_element_wind.png",
-	"dark": "res://assets/images/ui/gems/album_icon_element_dark.png",
+	"fire": "res://assets/images/ui/elements/element_fire.png",
+	"water": "res://assets/images/ui/elements/element_water.png",
+	"grass": "res://assets/images/ui/elements/element_grass.png",
+	"thunder": "res://assets/images/ui/elements/element_thunder.png",
+	"light": "res://assets/images/ui/elements/element_light.png",
+	"earth": "res://assets/images/ui/elements/element_earth.png",
+	"wind": "res://assets/images/ui/elements/element_wind.png",
+	"dark": "res://assets/images/ui/elements/element_dark.png",
 }
 
 const C := {

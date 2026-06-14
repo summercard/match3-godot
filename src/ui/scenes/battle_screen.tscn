@@ -9,7 +9,6 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/slots/battle_ui_capture_slot.png" id="capture_slot"]
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://bjm4ba6rvaa4c" path="res://assets/images/ui/buttons/battle_ui_speed_button.png" id="speed_button"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png" id="popup_panel"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="button_blue"]
@@ -72,7 +71,7 @@ offset_bottom = 22.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 10
 text = "回合"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -85,31 +84,39 @@ offset_bottom = 46.0
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 15
 text = "0/20"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PauseButton" type="TextureButton" parent="TopHud" unique_id=1876612873]
 layout_mode = 0
-offset_left = 315.0
-offset_top = 5.0
-offset_right = 357.0
-offset_bottom = 53.0
+offset_left = 316.0
+offset_top = 8.0
+offset_right = 360.0
+offset_bottom = 50.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
-texture_normal = ExtResource("speed_button")
+
+[node name="Frame" type="TextureRect" parent="TopHud/PauseButton"]
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("turn_badge")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="PauseIcon" type="Label" parent="TopHud/PauseButton" unique_id=1652010195]
 layout_mode = 0
 offset_left = 0.0
-offset_top = 18.0
-offset_right = 42.0
-offset_bottom = 42.0
+offset_top = 11.0
+offset_right = 44.0
+offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 17
 text = "||"
 horizontal_alignment = 1
 vertical_alignment = 1

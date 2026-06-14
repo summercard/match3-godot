@@ -47,8 +47,9 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var elastic := _attacker_elastic_factor(state, true, 0)
 	var status_offset_y := SINGLE_BOSS_STATUS_OFFSET_Y if is_boss else 0.0
 	scene._draw_text_with_shadow(name, design_w / 2.0, 83.0 + status_offset_y, colors.get("text_primary", Color.WHITE), 13.0, true)
-	scene._draw_hp_bar(196.0, 91.0 + status_offset_y, 150.0, 14.0, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], 271.0, 102.0 + status_offset_y, colors.get("white", Color.WHITE), 8.0, true)
+	var boss_hp_rect := Rect2(196.0, 91.0 + status_offset_y, 150.0, 14.0)
+	scene._draw_hp_bar(boss_hp_rect.position.x, boss_hp_rect.position.y, boss_hp_rect.size.x, boss_hp_rect.size.y, float(hp), float(max_hp), colors.get("danger", Color.RED), str(enemy.get("element", "fire")), true)
+	scene._draw_hp_text_in_bar("%d/%d" % [hp, max_hp], boss_hp_rect, colors.get("white", Color.WHITE))
 	# ★ 主人定 2026-06-11：精英怪在血条前加 ★ 精英 标识
 	if bool(enemy.get("isElite", false)):
 		scene._draw_text_with_shadow("★精英", 178.0, 102.0 + status_offset_y, colors.get("gold", Color(1.0, 0.82, 0.18, 1.0)), 9.5, true)
@@ -111,8 +112,9 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 	else:
 		scene._draw_text_with_shadow(enemy.get("emoji", "👾"), cx, y + 43.0, colors.get("white", Color.WHITE), 34.0)
 	scene._draw_text_with_shadow(name, cx, y + 14.0, colors.get("text_primary", Color.WHITE), 10.4, true)
-	scene._draw_hp_bar(x + 7.0, y + 80.0, slot_w - 14.0, 10.0, float(hp), float(max_hp), colors.get("danger", Color.RED))
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], cx, y + 89.0, colors.get("white", Color.WHITE), 7.4, true)
+	var enemy_hp_rect := Rect2(x + 7.0, y + 80.0, slot_w - 14.0, 10.0)
+	scene._draw_hp_bar(enemy_hp_rect.position.x, enemy_hp_rect.position.y, enemy_hp_rect.size.x, enemy_hp_rect.size.y, float(hp), float(max_hp), colors.get("danger", Color.RED))
+	scene._draw_hp_text_in_bar("%d/%d" % [hp, max_hp], enemy_hp_rect, colors.get("white", Color.WHITE))
 	# ★ 主人定 2026-06-11：精英怪在血条左前加 ★ 标识
 	if bool(enemy.get("isElite", false)):
 		scene._draw_text_with_shadow("★", x + 3.0, y + 86.0, colors.get("gold", Color(1.0, 0.82, 0.18, 1.0)), 9.0, true)
@@ -541,8 +543,9 @@ static func draw_player_card(scene, battle, state: Dictionary, x: float, y: floa
 	else:
 		scene._draw_text_with_shadow(monster.get("emoji", "👾"), x + 53.0, y + 36.0 + lunge_offset_y, colors.get("white", Color.WHITE), 31.0)
 	scene._draw_text_with_shadow(name, x + card_w / 2.0, y + 8.0, colors.get("text_primary", Color.WHITE), 10.0)
-	scene._draw_hp_bar(x + 4.0, y + 52.0, card_w - 8.0, 11.0, float(hp), float(max_hp), colors.get("success", Color.GREEN))
-	scene._draw_text_with_shadow("%d/%d" % [hp, max_hp], x + card_w / 2.0, y + 61.0, colors.get("white", Color.WHITE), 7.4, true)
+	var player_hp_rect := Rect2(x + 4.0, y + 52.0, card_w - 8.0, 11.0)
+	scene._draw_hp_bar(player_hp_rect.position.x, player_hp_rect.position.y, player_hp_rect.size.x, player_hp_rect.size.y, float(hp), float(max_hp), colors.get("success", Color.GREEN))
+	scene._draw_hp_text_in_bar("%d/%d" % [hp, max_hp], player_hp_rect, colors.get("white", Color.WHITE))
 
 static func _draw_defeated_ghost(scene, center: Vector2, size: Vector2) -> void:
 	# legacy 入口（仅在 GUI 模式下保留向后兼容）

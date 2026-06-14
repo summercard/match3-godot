@@ -164,8 +164,8 @@ const REWARD_ITEMS: Array[Dictionary] = [
 ]
 
 const REWARD_ICON_PATHS := {
-	"gold_coin": "res://assets/images/ui/icons/main_icon_gold_v2.png",
-	"exp_badge": "res://assets/images/ui/icons/main_icon_exp_star.png",
+	"gold_coin": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
+	"exp_badge": "res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png",
 	"capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
 	"gem_fire": "res://assets/images/ui/gems/battle_gem_fire.png",
 	"gem_water": "res://assets/images/ui/gems/battle_gem_water.png",
@@ -983,7 +983,7 @@ func _draw_chapter_header() -> void:
 	
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
-	_draw_texture_contain(_get_texture("res://assets/images/ui/icons/stage_icon_star_lit.png"), HEADER_STAR_RECT)
+	_draw_texture_contain(_get_texture("res://assets/images/ui/icons/stage_star_gold_new.png"), HEADER_STAR_RECT)
 	_draw_text_in_rect("%d/%d" % [chapter_stars, total_stars], HEADER_STAR_TEXT_RECT, Color.WHITE, 14, true)
 	_draw_page_dots(DESIGN_W / 2.0, HEADER_BAR_RECT.position.y + HEADER_BAR_RECT.size.y + 8.0, _chapters.size(), _current_chapter_index)
 
@@ -1089,7 +1089,7 @@ func _draw_stage_lock_overlay(card: Dictionary, is_boss: bool) -> void:
 func _draw_stars(x: float, y: float, count: int) -> void:
 	for i in range(3):
 		var lit := i < count
-		var path := "res://assets/images/ui/icons/stage_icon_star_lit.png" if lit else "res://assets/images/ui/icons/stage_icon_star_dim.png"
+		var path := "res://assets/images/ui/icons/stage_star_gold_new.png" if lit else "res://assets/images/ui/icons/result_refresh_icon_star_silver.png"
 		_draw_texture_fit(_get_texture(path), Rect2(x + i * 16.0, y - 7.0, 14, 14), 1.0 if lit else 0.45)
 
 func _draw_reward_panel() -> void:
@@ -1107,7 +1107,7 @@ func _draw_reward_panel() -> void:
 		_draw_reward_icon(str(item.get("key", "")), rect)
 
 func _draw_reward_icon(key: String, rect: Rect2) -> void:
-	_draw_texture_contain(_get_texture("res://assets/images/ui/slots/battle_prepare_ui_reward_slot.png"), rect)
+	_draw_texture_contain(_get_texture("res://assets/images/ui/slots/battle_prepare_new_ui_reward_slot.png"), rect)
 	var path := str(REWARD_ICON_PATHS.get(key, "res://assets/images/ui/icons/stage_icon_%s.png" % key))
 	var inset := 5.0
 	_draw_texture_contain(_get_texture(path), rect.grow(-inset))

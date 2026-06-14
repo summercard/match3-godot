@@ -45,11 +45,11 @@ const COMMON_ASSETS := {
 	"item_exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
 	"item_gold": "res://assets/images/ui/icons/items_new_icon_gold_bag.png",
 	"item_gold_chest": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
-	"item_hp": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
+	"item_hp": "res://assets/images/ui/icons/items_new_icon_hp_potion.png",
 	"item_generic": "res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png",
-	"gem_fire": "res://assets/images/ui/gems/battle_flow_new_icon_element_fire.png",
-	"gem_grass": "res://assets/images/ui/gems/battle_flow_new_icon_element_grass.png",
-	"gem_water": "res://assets/images/ui/gems/battle_flow_new_icon_element_water.png",
+	"gem_fire": "res://assets/images/ui/elements/element_fire.png",
+	"gem_grass": "res://assets/images/ui/elements/element_grass.png",
+	"gem_water": "res://assets/images/ui/elements/element_water.png",
 }
 
 # === 颜色常量 ===

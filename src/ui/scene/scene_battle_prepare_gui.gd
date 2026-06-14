@@ -51,10 +51,10 @@ func _ready() -> void:
 	_ensure_concept_nodes()
 	_connect_gui_actions()
 	_sync_gui()
-	# 进入准备：切到 town BGM（lobby 上下文）
+	# 战斗准备页留白：不重置大厅音乐，也不提前播放战斗音乐。
 	var am := get_node_or_null("/root/AudioManager")
-	if am != null and am.has_method("play_bgm"):
-		am.call("play_bgm", "bgm_town")
+	if am != null and am.has_method("stop_bgm"):
+		am.call("stop_bgm")
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)

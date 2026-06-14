@@ -30,7 +30,7 @@ const SORT_OPTIONS := [
 ]
 
 const TEAM_ASSETS := {
-	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg.png",
+	"bg": "res://assets/images/ui/backgrounds/team_new_bg_team_hall.png",
 	"back_button": "res://assets/images/ui/buttons/team_ui_back_button.png",
 	"header": "res://assets/images/ui/bars/team_ui_header_bar.png",
 	"help_button": "res://assets/images/ui/buttons/team_ui_help_button.png",
@@ -53,11 +53,11 @@ const TEAM_ASSETS := {
 }
 
 const ELEMENT_ICON_ASSETS := {
-	"fire": "res://assets/images/ui/gems/stage_icon_gem_fire.png",
-	"water": "res://assets/images/ui/gems/stage_icon_gem_water.png",
-	"grass": "res://assets/images/ui/gems/stage_icon_gem_grass.png",
-	"thunder": "res://assets/images/ui/gems/stage_icon_gem_thunder.png",
-	"light": "res://assets/images/ui/gems/stage_icon_gem_light.png",
+	"fire": "res://assets/images/ui/elements/element_fire.png",
+	"water": "res://assets/images/ui/elements/element_water.png",
+	"grass": "res://assets/images/ui/elements/element_grass.png",
+	"thunder": "res://assets/images/ui/elements/element_thunder.png",
+	"light": "res://assets/images/ui/elements/element_light.png",
 }
 
 # 颜色

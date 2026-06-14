@@ -361,7 +361,6 @@ const BATTLE_UI_ASSETS := {
 	"combo_banner": "res://assets/images/ui/panels/battle_ui_combo_banner.png",
 	"top_scrim": "res://assets/images/ui/panels/battle_ui_top_scrim.png",
 	"turn_badge": "res://assets/images/ui/icons/battle_ui_turn_badge.png",
-	"speed_button": "res://assets/images/ui/buttons/battle_ui_speed_button.png",
 	"board_frame": "res://assets/images/ui/misc/battle_ui_board_frame.png",
 	"board_cell": "res://assets/images/ui/misc/battle_ui_board_cell.png",
 	"footer_panel": "res://assets/images/ui/panels/battle_ui_footer_panel.png",
@@ -370,9 +369,9 @@ const BATTLE_UI_ASSETS := {
 	"item_slot": "res://assets/images/ui/slots/battle_ui_item_slot.png",
 	"item_slot_selected": "res://assets/images/ui/slots/battle_ui_item_slot_selected.png",
 	"capture_slot": "res://assets/images/ui/slots/battle_ui_capture_slot.png",
-	"item_capture_ball": "res://assets/images/ui/icons/battle_icon_capture_ball.png",
-	"item_capture_ball_plus": "res://assets/images/ui/icons/battle_icon_capture_ball_plus.png",
-	"item_hp_potion": "res://assets/images/ui/icons/battle_icon_hp_potion.png",
+	"item_capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
+	"item_capture_ball_plus": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
+	"item_hp_potion": "res://assets/images/ui/icons/items_new_icon_hp_potion.png",
 	"item_exp_crystal": "res://assets/images/ui/icons/items_new_icon_exp_crystal.png",
 	"item_focus_crystal": "res://assets/images/ui/icons/battle_icon_focus_crystal.png",
 	"item_stone_earth": "res://assets/images/ui/gems/items_new_icon_evolution_stone_earth.png",
@@ -2324,18 +2323,15 @@ func _draw_title_bar() -> void:
 	var turn_count: int = _battle.turn_count if _battle != null else 0
 	var max_turns: int = _battle.max_turns if _battle != null else 20
 	var turn_tex := _get_texture(BATTLE_UI_ASSETS["turn_badge"])
-	var speed_tex := _get_texture(BATTLE_UI_ASSETS["speed_button"])
+	var pause_rect := Rect2(DESIGN_W - 59.0, 8.0, 44.0, 42.0)
 	if turn_tex:
 		_draw_texture_contain(turn_tex, Rect2(9.0, 5.0, 72.0, 48.0), 1.0)
 	else:
 		_draw_rounded_rect(12.0, 9.0, 62.0, 42.0, 5.0, Color(0.07, 0.13, 0.26, 0.92))
-	_draw_text_with_shadow("回合", 45.0, 19.0, C["white"], 9.5, true)
-	_draw_text_with_shadow("%d/%d" % [turn_count, max_turns], 45.0, 37.0, C["gold"], 14.0, true)
-	if speed_tex:
-		_draw_texture_contain(speed_tex, Rect2(285.0, 5.0, 42.0, 48.0), 1.0)
-	else:
-		_draw_rounded_rect(287.0, 9.0, 38.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
-	_draw_text_with_shadow("x2", 306.0, 40.0, C["white"], 9.5, true)
+	_draw_text_with_shadow("回合", 45.0, 18.5, C["white"], 7.4, true)
+	_draw_text_with_shadow("%d/%d" % [turn_count, max_turns], 45.0, 36.5, C["gold"], 10.8, true)
+	_draw_pause_button_backplate(pause_rect)
+	_draw_pause_mark(pause_rect, C["white"], 1.0)
 
 	# BOSS阶段指示器
 	if _battle != null:
@@ -2343,6 +2339,25 @@ func _draw_title_bar() -> void:
 		if status.get("is_boss_battle", false):
 			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
 			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
+
+func _draw_pause_button_backplate(rect: Rect2) -> void:
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(1.0, 0.93, 0.69, 0.96))
+	_draw_rounded_rect(rect.position.x + 3.0, rect.position.y + 3.0, rect.size.x - 6.0, rect.size.y - 6.0, 6.0, Color(0.11, 0.36, 0.74, 0.78))
+	draw_arc(rect.get_center(), rect.size.x * 0.43, 0.0, TAU, 24, Color(1.0, 0.73, 0.19, 0.96), 2.2, true)
+	draw_arc(rect.get_center(), rect.size.x * 0.35, 0.0, TAU, 24, Color(1.0, 1.0, 1.0, 0.35), 1.2, true)
+
+func _draw_pause_mark(rect: Rect2, color: Color, opacity: float = 1.0) -> void:
+	var center := rect.get_center() + Vector2(0.0, 2.0)
+	var bar_size := Vector2(3.4, 19.0)
+	var gap := 5.0
+	var shadow := Color(0.03, 0.07, 0.16, 0.42 * opacity)
+	var fill := Color(color.r, color.g, color.b, color.a * opacity)
+	var left_pos := Vector2(center.x - gap - bar_size.x, center.y - bar_size.y * 0.5)
+	var right_pos := Vector2(center.x + gap, center.y - bar_size.y * 0.5)
+	draw_rect(Rect2(left_pos + Vector2(1.0, 1.0), bar_size), shadow, true)
+	draw_rect(Rect2(right_pos + Vector2(1.0, 1.0), bar_size), shadow, true)
+	draw_rect(Rect2(left_pos, bar_size), fill, true)
+	draw_rect(Rect2(right_pos, bar_size), fill, true)
 	
 func _draw_enemies() -> void:
 	BattleCombatantRendererScript.draw_enemies(self, _battle, _combatant_render_state())
@@ -4022,6 +4037,21 @@ func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size
 
 func _draw_text_with_shadow_on(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, bold: bool = false) -> void:
 	BattleUIFeedbackScript.draw_text_with_shadow(canvas, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
+
+func _draw_hp_text_in_bar(text: String, rect: Rect2, color: Color) -> void:
+	var font := ThemeDB.fallback_font
+	var size: int = int(round(clampf(rect.size.y * 0.36, 3.4, 5.0)))
+	var max_width: float = maxf(12.0, rect.size.x - 12.0)
+	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)
+	var center_x := rect.get_center().x
+	var baseline_y := rect.position.y + rect.size.y * 0.64
+	var left := center_x - max_width * 0.5
+	var shadow := Color(0.06, 0.10, 0.13, 0.82)
+	draw_string(font, Vector2(left - 0.45, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	draw_string(font, Vector2(left + 0.45, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	draw_string(font, Vector2(left, baseline_y - 0.45), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	draw_string(font, Vector2(left, baseline_y + 0.55), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	draw_string(font, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, color)
 
 func _draw_battle_end_text_on(canvas: CanvasItem, text: String, center: Vector2, color: Color, size: float, max_width: float) -> void:
 	if text.is_empty():

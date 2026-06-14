@@ -68,11 +68,11 @@ const PREPARE_ASSETS := {
 }
 
 const ELEMENT_ICON_ASSETS := {
-	"fire": "res://assets/images/ui/gems/stage_icon_gem_fire.png",
-	"water": "res://assets/images/ui/gems/stage_icon_gem_water.png",
-	"grass": "res://assets/images/ui/gems/stage_icon_gem_grass.png",
-	"thunder": "res://assets/images/ui/gems/stage_icon_gem_thunder.png",
-	"light": "res://assets/images/ui/gems/stage_icon_gem_light.png",
+	"fire": "res://assets/images/ui/elements/element_fire.png",
+	"water": "res://assets/images/ui/elements/element_water.png",
+	"grass": "res://assets/images/ui/elements/element_grass.png",
+	"thunder": "res://assets/images/ui/elements/element_thunder.png",
+	"light": "res://assets/images/ui/elements/element_light.png",
 }
 
 ## 单例

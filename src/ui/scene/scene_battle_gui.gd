@@ -269,7 +269,9 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void
 	var hp_bar := slot.get_node("HpBar")
 	hp_bar.set("fill_color", _hp_system_color(fill_color))
 	hp_bar.set("value", float(hp) / float(max_hp) * 100.0)
-	(slot.get_node("HpText") as Label).text = "%d/%d" % [hp, max_hp]
+	var hp_label := slot.get_node("HpText") as Label
+	hp_label.text = "%d/%d" % [hp, max_hp]
+	_sync_hp_label_layout(slot, hp_label)
 
 var _portrait_base_rect_cache: Dictionary = {}
 var _status_base_rect_cache: Dictionary = {}
@@ -308,6 +310,23 @@ func _apply_combatant_status_offset(slot: Control, is_boss: bool) -> void:
 		var base_rect: Rect2 = _status_base_rect_cache[node_id]
 		node.position = base_rect.position + offset
 		node.size = base_rect.size
+
+func _sync_hp_label_layout(slot: Control, hp_label: Label) -> void:
+	var frame := slot.get_node_or_null("HpFrame") as Control
+	if frame != null:
+		hp_label.position = frame.position
+		hp_label.size = frame.size
+	var font_size := 11
+	var outline_size := 2
+	if slot.name == "EnemyStageSlot":
+		font_size = 14
+		if frame != null:
+			hp_label.position = frame.position + Vector2(-6.0, -2.0)
+			hp_label.size = frame.size + Vector2(12.0, 2.0)
+	hp_label.add_theme_font_size_override("font_size", font_size)
+	hp_label.add_theme_constant_override("outline_size", outline_size)
+	hp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _hp_system_color(fill_color: String) -> Color:
 	match fill_color:

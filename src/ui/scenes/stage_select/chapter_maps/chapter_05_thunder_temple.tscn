@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_thunder_temple.png" id="c05_background"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_normal.png" id="c05_stage01"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/stage_icon_star_dim.png" id="11_star_dim"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_normal.png" id="c05_stage02"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_normal.png" id="c05_stage03"]

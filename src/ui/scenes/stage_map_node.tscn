@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ccu5ubryweflj"]
 
 [ext_resource type="Texture2D" uid="uid://glsitdt0led0" path="res://assets/images/maps/nodes/stage_node_normal.png" id="1_node"]
-[ext_resource type="Texture2D" uid="uid://luc7qqfxrdj5" path="res://assets/images/ui/icons/stage_icon_star_dim.png" id="2_star"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="2_star"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="3_button"]
 
 [node name="StageSlot" type="TextureButton" unique_id=2057963764]
