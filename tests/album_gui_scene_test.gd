@@ -13,9 +13,12 @@ func _run() -> void:
 	_assert((scene.get_node("LobbyBottomNav/PetsButton/Text") as Label).text == "图鉴", "album tscn bottom dex label should not be mojibake")
 	_assert((scene.get_node("LobbyBottomNav/BattleButton/Text") as Label).text == "羁绊", "album tscn bottom bond label should not be mojibake")
 	_assert((scene.get_node("LobbyBottomNav/ShopButton/Text") as Label).text == "目标", "album tscn bottom target label should not be mojibake")
-	var tscn_card_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as TextureRect
+	var dex_board := scene.get_node("DexBoard") as NinePatchRect
+	_assert(dex_board != null, "album tscn should use the black nine-patch component as the main board")
+	_assert(dex_board.texture.resource_path.ends_with("black.png"), "album main board should use the black component texture")
+	var tscn_card_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect
 	_assert(tscn_card_frame.visible, "album tscn should own the visible card backing before runtime sync")
-	_assert(tscn_card_frame.texture.resource_path.contains("ranch_ui_roster_card_ranch.png"), "album tscn should use a bright existing card backing")
+	_assert(tscn_card_frame.texture.resource_path.ends_with("black3.png"), "album tscn should use the spirit card nine-patch backing")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "album tscn should hide the legacy lock icon before runtime sync")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture != null, "album tscn should show a concept-style portrait in the editor")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "album tscn should use normalized dex portraits instead of raw battle art")
@@ -95,11 +98,16 @@ func _run() -> void:
 	card.pressed.emit()
 	await process_frame
 	_assert((scene.get_node("DetailPanel") as Control).visible, "card press should open detail for QA-unlocked album")
+	var selected_before_blocked_press := str(scene.get("_selected_monster_id"))
+	var covered_card := scene.get_node("AlbumPage/Grid/Card2") as BaseButton
+	covered_card.pressed.emit()
+	await process_frame
+	_assert(str(scene.get("_selected_monster_id")) == selected_before_blocked_press, "detail popup should block card presses behind it")
 	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "card press should not recreate the removed right-side preview")
 	_assert(not scene.has_node("AlbumPage/PreviewEmpty"), "card press should not recreate the removed empty preview hint")
-	var roster_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as TextureRect
+	var roster_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect
 	_assert(roster_frame.visible, "unlocked roster portrait should sit on a light card backing")
-	_assert(roster_frame.texture.resource_path.contains("ranch_ui_roster_card_ranch.png"), "album roster should use a bright existing card asset instead of the old dark card frame")
+	_assert(roster_frame.texture.resource_path.ends_with("black3.png"), "album roster should use the spirit card nine-patch backing")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "runtime album grid should keep normalized dex portraits")
 
 	var close := scene.get_node("DetailPanel/CloseButton") as BaseButton
@@ -115,7 +123,7 @@ func _run() -> void:
 	var locked_portrait := scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect
 	_assert(locked_portrait.visible, "locked card should keep its monster portrait silhouette")
 	_assert(locked_portrait.material is ShaderMaterial, "locked portrait should use a solid-color silhouette shader")
-	_assert((scene.get_node("AlbumPage/Grid/Card1/Frame") as TextureRect).visible, "locked silhouette should keep the light card backing behind the monster")
+	_assert((scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect).visible, "locked silhouette should keep the light card backing behind the monster")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/ElementIcon") as TextureRect).visible, "locked silhouette should not reveal its element badge")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/Stars") as Control).visible, "locked silhouette should not keep unlocked card metadata")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "locked silhouette should not add a lock marker")

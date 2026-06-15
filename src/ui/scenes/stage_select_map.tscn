@@ -2,18 +2,21 @@
 
 [ext_resource type="Script" uid="uid://dhxxynogkgxr3" path="res://src/ui/scene/scene_stage_select_gui.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://c5cgebmxk6kau" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="3_header"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="4_back"]
+[ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="4_back"]
 [ext_resource type="Texture2D" uid="uid://b4664lgl7171o" path="res://assets/images/ui/icons/inventory_new_ui_inventory_icon_badge.png" id="9_badge"]
 [ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/ui/icons/stage_star_gold_new.png" id="10_star"]
 [ext_resource type="Texture2D" uid="uid://bet0ett8i3hmo" path="res://assets/images/ui/panels/stage_ui_reward_panel_clean.png" id="15_reward"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="17_gold"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png" id="18_exp"]
+[ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="17_gold"]
+[ext_resource type="Texture2D" uid="uid://bhy6fic33ytor" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png" id="17_rpote"]
+[ext_resource type="Texture2D" uid="uid://deed6u56bkkyf" path="res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png" id="18_exp"]
+[ext_resource type="Texture2D" uid="uid://wtwvcycmleex" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_start_button_new.png" id="19_mxrjg"]
 [ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="27_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://cxor28yddwp1v" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue.png" id="28_nav_blue"]
-[ext_resource type="Texture2D" uid="uid://bijxnq5hqgoqv" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold.png" id="29_nav_gold"]
 [ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png" id="30_nav_arrow"]
-[ext_resource type="Texture2D" uid="uid://dsaff3weo4xfy" path="res://assets/images/maps/nodes/stage_cloud_soft_01.png" id="31_cloud"]
+[ext_resource type="Texture2D" uid="uid://btn4cyfwgf21y" path="res://assets/images/maps/nodes/stage_cloud_texture_01.png" id="31_cloud_01"]
+[ext_resource type="Texture2D" uid="uid://de0t6gdbyy4ox" path="res://assets/images/maps/nodes/stage_cloud_texture_02.png" id="32_cloud_02"]
+[ext_resource type="Texture2D" uid="uid://4lth56yel8lv" path="res://assets/images/maps/nodes/stage_cloud_texture_03.png" id="33_cloud_03"]
 [ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_grassland.tscn" id="chapter_01_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
 [ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
@@ -99,26 +102,24 @@ offset_bottom = 667.0
 mouse_filter = 2
 
 [node name="Cloud01" type="TextureRect" parent="CloudLayerFar" unique_id=866065568]
-modulate = Color(1, 1, 1, 0.42)
 layout_mode = 0
-offset_left = -42.0
-offset_top = 112.0
-offset_right = 128.0
-offset_bottom = 183.0
+offset_left = -127.0
+offset_top = 76.5
+offset_right = 213.0
+offset_bottom = 218.5
 mouse_filter = 2
-texture = ExtResource("31_cloud")
+texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Cloud02" type="TextureRect" parent="CloudLayerFar" unique_id=2061116367]
-modulate = Color(1, 1, 1, 0.36)
 layout_mode = 0
-offset_left = 248.0
-offset_top = 78.0
-offset_right = 398.0
-offset_bottom = 141.0
+offset_left = 173.0
+offset_top = 46.5
+offset_right = 473.0
+offset_bottom = 172.5
 mouse_filter = 2
-texture = ExtResource("31_cloud")
+texture = ExtResource("32_cloud_02")
 expand_mode = 1
 stretch_mode = 5
 
@@ -129,26 +130,24 @@ offset_bottom = 667.0
 mouse_filter = 2
 
 [node name="Cloud03" type="TextureRect" parent="CloudLayerNear" unique_id=1701906767]
-modulate = Color(1, 1, 1, 0.3)
 layout_mode = 0
-offset_left = 214.0
-offset_top = 396.0
-offset_right = 410.0
-offset_bottom = 478.0
+offset_left = 116.0
+offset_top = 355.0
+offset_right = 508.0
+offset_bottom = 519.0
 mouse_filter = 2
-texture = ExtResource("31_cloud")
+texture = ExtResource("33_cloud_03")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Cloud04" type="TextureRect" parent="CloudLayerNear" unique_id=1935678833]
-modulate = Color(1, 1, 1, 0.26)
 layout_mode = 0
-offset_left = -74.0
-offset_top = 500.0
-offset_right = 120.0
-offset_bottom = 581.0
+offset_left = -171.0
+offset_top = 459.5
+offset_right = 217.0
+offset_bottom = 621.5
 mouse_filter = 2
-texture = ExtResource("31_cloud")
+texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
@@ -171,9 +170,9 @@ stretch_mode = 5
 [node name="PrevMapButton" type="TextureButton" parent="BottomNav" unique_id=512823073]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 22.0
+offset_top = 27.0
 offset_right = 122.0
-offset_bottom = 62.0
+offset_bottom = 67.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="BottomNav/PrevMapButton" unique_id=1341124827]
@@ -181,16 +180,16 @@ layout_mode = 0
 offset_right = 94.0
 offset_bottom = 40.0
 mouse_filter = 2
-texture = ExtResource("28_nav_blue")
+texture = ExtResource("17_rpote")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Arrow" type="TextureRect" parent="BottomNav/PrevMapButton" unique_id=1321634204]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 9.0
-offset_right = 30.0
-offset_bottom = 31.0
+offset_left = 6.0
+offset_top = 8.0
+offset_right = 28.0
+offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("30_nav_arrow")
 expand_mode = 1
@@ -212,9 +211,9 @@ vertical_alignment = 1
 [node name="ReturnButton" type="TextureButton" parent="BottomNav" unique_id=1980823847]
 layout_mode = 0
 offset_left = 129.0
-offset_top = 16.0
+offset_top = 23.0
 offset_right = 226.0
-offset_bottom = 66.0
+offset_bottom = 73.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="BottomNav/ReturnButton" unique_id=65204610]
@@ -222,7 +221,7 @@ layout_mode = 0
 offset_right = 97.0
 offset_bottom = 50.0
 mouse_filter = 2
-texture = ExtResource("29_nav_gold")
+texture = ExtResource("19_mxrjg")
 expand_mode = 1
 stretch_mode = 5
 
@@ -241,9 +240,9 @@ vertical_alignment = 1
 [node name="NextMapButton" type="TextureButton" parent="BottomNav" unique_id=702731354]
 layout_mode = 0
 offset_left = 233.0
-offset_top = 22.0
+offset_top = 27.0
 offset_right = 327.0
-offset_bottom = 62.0
+offset_bottom = 67.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="BottomNav/NextMapButton" unique_id=2046895596]
@@ -251,16 +250,16 @@ layout_mode = 0
 offset_right = 94.0
 offset_bottom = 40.0
 mouse_filter = 2
-texture = ExtResource("28_nav_blue")
+texture = ExtResource("17_rpote")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Arrow" type="TextureRect" parent="BottomNav/NextMapButton" unique_id=839634591]
 layout_mode = 0
-offset_left = 64.0
-offset_top = 9.0
-offset_right = 86.0
-offset_bottom = 31.0
+offset_left = 67.0
+offset_top = 8.0
+offset_right = 89.0
+offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("30_nav_arrow")
 expand_mode = 1

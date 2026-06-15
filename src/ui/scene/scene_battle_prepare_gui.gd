@@ -314,7 +314,7 @@ func _apply_concept_layout() -> void:
 	_set_rect("EnemyPanel/ElementPill", 18, 92, 96, 25)
 	_set_rect("EnemyPanel/ElementIcon", 25, 94, 21, 21)
 	_set_rect("EnemyPanel/ElementText", 47, 94, 58, 21)
-	_set_rect("EnemyPanel/PowerIcon", 19, 123, 25, 25)
+	_set_rect("EnemyPanel/PowerIcon", 16, 116, 34, 34)
 	_set_rect("EnemyPanel/PowerCaption", 48, 118, 72, 18)
 	_set_font("EnemyPanel/Title", 18)
 	_set_font("EnemyPanel/ElementText", 12)
@@ -387,7 +387,7 @@ func _apply_concept_layout() -> void:
 	_set_local_rect("RewardPreview/Bg", 0, 0, 319, 86)
 	_set_visible("RewardPreview/Frame", false)
 	_set_rect("RewardPreview/Title", 102, -5, 115, 24)
-	_set_rect("RewardPreview/Slots", 46, 20, 228, 60)
+	_set_rect("RewardPreview/Slots", 42.5, 20, 234, 60)
 	_set_font("RewardPreview/Title", 15)
 	_style_label("RewardPreview/Title", Color.WHITE, Color(0.35, 0.08, 0.55, 0.90), 2)
 	for i in REWARD_SLOT_PATHS.size():
@@ -395,8 +395,9 @@ func _apply_concept_layout() -> void:
 		_set_rect(slot_path, float(i) * 88.0, 0, 58, 60)
 		_set_local_rect(slot_path + "/Frame", 0, 0, 58, 60)
 		_set_visible(slot_path + "/Frame", true)
-		_set_local_rect(slot_path + "/Icon", 12, 4, 34, 31)
+		_set_local_rect(slot_path + "/Icon", 9, 10, 40, 40)
 		_set_local_rect(slot_path + "/Label", -10, 32, 78, 27)
+		_set_visible(slot_path + "/Label", false)
 		_set_font(slot_path + "/Label", 9)
 		_style_label(slot_path + "/Label", BROWN_TEXT, Color.WHITE, 1)
 
@@ -600,7 +601,9 @@ func _sync_rewards() -> void:
 		var slot := _node(REWARD_SLOT_PATHS[i])
 		var data: Dictionary = rewards[i]
 		(slot.get_node("Icon") as TextureRect).texture = _prepare_texture(str(data.get("icon", "")))
-		(slot.get_node("Label") as Label).text = str(data.get("label", ""))
+		var label := slot.get_node("Label") as Label
+		label.text = ""
+		label.visible = false
 
 func _sync_start_button() -> void:
 	var is_empty := _is_player_team_empty()

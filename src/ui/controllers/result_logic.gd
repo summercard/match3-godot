@@ -15,7 +15,7 @@ const DESIGN_H: float = 667.0
 
 const RESULT_ASSETS := {
 	"bg": "res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png",
-	"victory_banner": "res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner.png",
+	"victory_banner": "res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner_clean.png",
 	"defeat_banner": "res://assets/images/ui/panels/result_refresh_ui_victory_wood_plaque.png",
 	"reward_panel": "res://assets/images/ui/panels/result_refresh_ui_panel_large.png",
 	"team_exp_panel": "res://assets/images/ui/panels/result_refresh_ui_panel_large.png",
@@ -28,8 +28,6 @@ const RESULT_ASSETS := {
 	"info_chip": "res://assets/images/ui/panels/result_refresh_ui_pill_blue.png",
 	"star_lit": "res://assets/images/ui/icons/result_refresh_icon_star_gold.png",
 	"star_dim": "res://assets/images/ui/icons/result_refresh_icon_star_silver.png",
-	"sweep_badge": "res://assets/images/ui/icons/result_refresh_icon_star_gold.png",
-	"fx_burst": "res://assets/images/effects/result_refresh_fx_golden_burst.png",
 	"fx_confetti": "res://assets/images/effects/result_refresh_fx_confetti.png",
 	"fx_capture_ring": "res://assets/images/effects/capture_success_new_fx_magic_circle.png",
 	"fx_levelup_glow": "res://assets/images/effects/result_refresh_fx_sparkles.png",
@@ -642,8 +640,7 @@ func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0, 0, DESIGN_W, DESIGN_H))
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0.02, 0.05, 0.12, 0.34))
 	if _is_win:
-		var burst_alpha := 0.34 + sin(_time_acc * 2.0) * 0.05
-		_draw_texture_fit(_tex("fx_burst"), Rect2(70, -20 + oy * 0.25, 235, 138), burst_alpha)
+		_draw_victory_halo(Rect2(54.0, 12.0 + oy * 0.25, 267.0, 154.0))
 		_draw_texture_fit(_tex("fx_confetti"), Rect2(8, 34, 92, 84), 0.78)
 		_draw_texture_fit(_tex("fx_confetti"), Rect2(276, 36, 92, 84), 0.68)
 	
@@ -676,12 +673,6 @@ func _draw() -> void:
 	# === 升级 ===
 	if _exp_anim_progress >= 1.0:
 		_draw_levelups_section(font, 558.0 + oy)
-	
-	# === 扫荡解锁 ===
-	if _button_anim_progress >= 1.0 and _stars >= 3 and _level_ups.is_empty():
-		var pulse := sin(_time_acc * 3.0) * 0.2 + 0.8
-		_draw_texture_fit(_tex("sweep_badge"), Rect2(117.0, 532.0 + oy, 34.0, 34.0), pulse)
-		_draw_centered_text(font, "已解锁扫荡功能", DESIGN_W / 2.0 + 24.0, 555.0 + oy, Color(1.0, 0.8, 0.2, pulse), 13.0)
 	
 	# === 按钮 ===
 	if _button_anim_progress >= 1.0:
@@ -905,6 +896,33 @@ func _draw_centered_text(font: Font, text: String, x: float, y: float, color: Co
 	# 阴影
 	draw_string(font, Vector2(x - tw / 2.0 + 1, y + 1), text, HORIZONTAL_ALIGNMENT_CENTER, tw, size, Color(0, 0, 0, 0.4))
 	draw_string(font, Vector2(x - tw / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, tw, size, color)
+
+func _draw_victory_halo(rect: Rect2) -> void:
+	var center := rect.position + Vector2(rect.size.x * 0.5, rect.size.y * 0.42)
+	var pulse := 0.92 + sin(_time_acc * 2.1) * 0.05
+	var max_radius := minf(rect.size.x, rect.size.y) * 0.62 * pulse
+	for i in range(8, 0, -1):
+		var t := float(i) / 8.0
+		var radius := max_radius * t
+		var alpha := 0.03 + (1.0 - t) * 0.052
+		draw_circle(center, radius, Color(1.0, 0.86, 0.18, alpha))
+	var ray_count := 18
+	for i in range(ray_count):
+		var angle := _time_acc * 0.22 + TAU * float(i) / float(ray_count)
+		var half_width := 0.045 + 0.015 * sin(_time_acc * 1.7 + float(i))
+		var inner := max_radius * 0.16
+		var outer := max_radius * (0.82 + 0.10 * sin(_time_acc * 1.3 + float(i) * 0.9))
+		var points := PackedVector2Array([
+			center + Vector2(cos(angle - half_width), sin(angle - half_width)) * inner,
+			center + Vector2(cos(angle), sin(angle)) * outer,
+			center + Vector2(cos(angle + half_width), sin(angle + half_width)) * inner,
+		])
+		var color := Color(0.83, 0.93, 0.18, 0.13).lerp(Color(1.0, 0.86, 0.18, 0.13), 0.55 + 0.25 * sin(_time_acc + float(i)))
+		draw_colored_polygon(points, color)
+	for i in range(5):
+		var radius := max_radius * (0.10 + float(i) * 0.08)
+		var alpha := 0.16 - float(i) * 0.022
+		draw_circle(center, radius, Color(1.0, 0.96, 0.38, alpha))
 
 func _rounded_rect(x: float, y: float, w: float, h: float, r: float, color: Color) -> void:
 	# 简易圆角矩形

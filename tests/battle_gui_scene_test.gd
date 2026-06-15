@@ -49,6 +49,10 @@ func _run() -> void:
 	_expect((battle.get_node("BottomControls/Item1") as Control).visible, "first capture ball slot should remain visible")
 	_expect((battle.get_node("BottomControls/Item2") as Control).visible, "second capture ball slot should remain visible")
 	_expect((battle.get_node("BottomControls/Item5") as Control).visible, "third active item slot should remain visible")
+	await _dispatch_battle_input_click(battle, battle.get_node("TopHud/PauseButton") as Control)
+	_expect((battle.get_node("PauseDialog") as Control).visible, "pause button should open the pause dialog from real input")
+	(battle.get_node("PauseDialog/Panel/ResumeButton") as BaseButton).pressed.emit()
+	_expect(not (battle.get_node("PauseDialog") as Control).visible, "resume button should close the pause dialog while the tree is paused")
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
@@ -86,6 +90,25 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _dispatch_battle_input_click(battle: Control, control: Control) -> void:
+	var center := control.get_global_transform_with_canvas() * (control.size * 0.5)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.button_mask = MOUSE_BUTTON_MASK_LEFT
+	press.position = center
+	press.global_position = center
+	battle.call("_input", press)
+	await process_frame
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.button_mask = 0
+	release.position = center
+	release.global_position = center
+	battle.call("_input", release)
+	await process_frame
 
 func _finish() -> void:
 	if _failures.is_empty():

@@ -34,6 +34,12 @@ func _run() -> void:
 	_expect((prepare.get_node("EnemyPanel/ElementPill") as Control).visible, "normal enemy panel should show element info")
 	_expect((normal_enemy_card.get_node("Level") as Control).visible, "normal enemy card should show level")
 	_expect((normal_enemy_card.get_node("Power") as Control).visible, "normal enemy card should show power")
+	_expect((prepare.get_node("EnemyPanel/PowerIcon") as TextureRect).texture.resource_path.ends_with("battle_prepare_new_icon_power_swords.png"), "enemy power icon should use the cleaned crossed swords art")
+	for reward_slot_path in ["RewardPreview/Slots/RewardSlot1", "RewardPreview/Slots/RewardSlot2", "RewardPreview/Slots/RewardSlot3"]:
+		var reward_label := prepare.get_node(reward_slot_path + "/Label") as Label
+		var reward_icon := prepare.get_node(reward_slot_path + "/Icon") as TextureRect
+		_expect(not reward_label.visible and reward_label.text.is_empty(), "%s should hide reward text and quantity" % reward_slot_path)
+		_expect(reward_icon.position.x >= 8.0 and reward_icon.size.x >= 38.0, "%s icon should stay centered after label removal" % reward_slot_path)
 	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
 	_expect(_started_stage_id == "stage_1_1", "editable start button should preserve battle start behavior")
 	prepare.init({"stageId": "stage_2_12"})

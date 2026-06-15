@@ -81,6 +81,7 @@ var _combo_popup: Dictionary = {
 	"scale": 0.5,
 	"opacity": 0.0
 }
+var _combo_count_font: Font = null
 
 ## 消息
 var _message_text: String = ""
@@ -618,6 +619,11 @@ func _gui_input(event: InputEvent) -> void:
 	_handle_input_event(event, true)
 
 func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
+	if _try_handle_battle_gui_button_input(event, already_local):
+		get_viewport().set_input_as_handled()
+		return
+	if _should_defer_battle_input_to_gui(event, already_local):
+		return
 	if _state == BattleState.BATTLE_END:
 		# 收服特效播放中不允许点击跳转
 		if _capture_waiting_for_effect:
@@ -694,6 +700,68 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 				else:
 					drag_dir = Vector2i(0, 1 if dy > 0 else -1)
 				_drag_preview = {"active": true, "direction": drag_dir}
+
+func _try_handle_battle_gui_button_input(event: InputEvent, already_local: bool) -> bool:
+	if not _is_primary_pointer_press(event):
+		return false
+	if _event_hits_control(event, already_local, get_node_or_null("TopHud/PauseButton") as Control):
+		if has_method("_on_pause_button_pressed"):
+			call("_on_pause_button_pressed")
+			return true
+	if _event_hits_control(event, already_local, get_node_or_null("PauseDialog/Panel/ResumeButton") as Control):
+		if has_method("_on_resume_button_pressed"):
+			call("_on_resume_button_pressed")
+			return true
+	if _event_hits_control(event, already_local, get_node_or_null("PauseDialog/Panel/QuitButton") as Control):
+		if has_method("_on_quit_button_pressed"):
+			call("_on_quit_button_pressed")
+			return true
+	return false
+
+func _is_primary_pointer_press(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	if event is InputEventScreenTouch:
+		return event.pressed
+	return false
+
+func _should_defer_battle_input_to_gui(event: InputEvent, already_local: bool) -> bool:
+	if not (event is InputEventMouseButton or event is InputEventScreenTouch):
+		return false
+	if event is InputEventMouseButton and event.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	for path: String in [
+		"TopHud/PauseButton",
+		"PauseDialog/Panel/ResumeButton",
+		"PauseDialog/Panel/QuitButton",
+	]:
+		var control := get_node_or_null(path) as Control
+		if _event_hits_control(event, already_local, control):
+			return true
+	return false
+
+func _event_hits_control(event: InputEvent, already_local: bool, control: Control) -> bool:
+	if control == null or not control.is_visible_in_tree():
+		return false
+	if control is BaseButton and (control as BaseButton).disabled:
+		return false
+	var rect := _control_rect_in_scene_space(control)
+	for pos: Vector2 in BattleInputMapperScript.pointer_candidates(self, event, already_local):
+		if rect.has_point(pos):
+			return true
+	return false
+
+func _control_rect_in_scene_space(control: Control) -> Rect2:
+	var to_scene := get_global_transform_with_canvas().affine_inverse() * control.get_global_transform_with_canvas()
+	var p0 := to_scene * Vector2.ZERO
+	var p1 := to_scene * Vector2(control.size.x, 0.0)
+	var p2 := to_scene * Vector2(0.0, control.size.y)
+	var p3 := to_scene * control.size
+	var min_x := minf(minf(p0.x, p1.x), minf(p2.x, p3.x))
+	var min_y := minf(minf(p0.y, p1.y), minf(p2.y, p3.y))
+	var max_x := maxf(maxf(p0.x, p1.x), maxf(p2.x, p3.x))
+	var max_y := maxf(maxf(p0.y, p1.y), maxf(p2.y, p3.y))
+	return Rect2(Vector2(min_x, min_y), Vector2(max_x - min_x, max_y - min_y))
 
 func _get_pointer_position(event: InputEvent, already_local: bool) -> Vector2:
 	var raw_pos: Vector2 = event.position
@@ -4061,6 +4129,14 @@ func _draw_battle_end_text_on(canvas: CanvasItem, text: String, center: Vector2,
 	var baseline_y := center.y + (FX_ROUND_FONT.get_ascent(size) - FX_ROUND_FONT.get_descent(size)) * 0.5
 	canvas.draw_string(FX_ROUND_FONT, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, color)
 
+func _get_combo_count_font() -> Font:
+	if _combo_count_font == null:
+		var font := FontVariation.new()
+		font.base_font = FX_ROUND_FONT
+		font.set("variation_embolden", 1.45)
+		_combo_count_font = font
+	return _combo_count_font
+
 func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 190.0, style: String = "normal") -> void:
 	if text.is_empty():
 		return
@@ -4072,15 +4148,21 @@ func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: 
 	var rim: Color = palette["rim"]
 	var fill: Color = palette["fill"]
 	var shine: Color = palette["shine"]
-	var alpha := color.a
+	var solid_combo_count := style == "combo_number" or style == "combo_label"
+	var alpha := 1.0 if solid_combo_count and color.a > 0.0 else color.a
 	shadow.a *= alpha
 	outline.a *= alpha
 	rim.a *= alpha
 	fill.a *= alpha
 	shine.a *= alpha
+	if solid_combo_count:
+		outline.a = 1.0
+		rim.a = 1.0
+		fill.a = 1.0
 	var outline_size := maxf(2.0, size * 0.15)
 	var rim_size := maxf(1.0, size * 0.07)
-	canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.0, y + outline_size + 1.4), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	if not solid_combo_count:
+		canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.0, y + outline_size + 1.4), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
 	var outline_steps := [
 		Vector2(-outline_size, 0.0), Vector2(outline_size, 0.0),
 		Vector2(0.0, -outline_size), Vector2(0.0, outline_size),
@@ -4093,8 +4175,9 @@ func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: 
 		canvas.draw_string(FX_ROUND_FONT, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline)
 	canvas.draw_string(FX_ROUND_FONT, Vector2(left - rim_size, y - rim_size), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, rim)
 	canvas.draw_string(FX_ROUND_FONT, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
-	canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.8, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
-	canvas.draw_string(FX_ROUND_FONT, Vector2(left, y - size * 0.13), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size * 0.92, shine)
+	if not solid_combo_count:
+		canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.8, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
+		canvas.draw_string(FX_ROUND_FONT, Vector2(left, y - size * 0.13), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size * 0.92, shine)
 
 func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, scale: float, opacity: float) -> void:
 	var combo_tex := _get_texture(BATTLE_FX_ASSETS["combo_word"])
@@ -4105,11 +4188,35 @@ func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, 
 		_draw_texture_fit_on(canvas, combo_tex, Rect2(cx - 112.0 * scale, cy - 42.0 * scale, word_w, word_h), opacity)
 	else:
 		_draw_fx_text(canvas, "COMBO", cx - 24.0 * scale, cy + 1.0 * scale, Color(1.0, 0.72, 0.22, opacity), 27.0 * scale, 172.0 * scale, "combo_number")
-	_draw_digit_fx_text(canvas, "x%d" % combo, cx + 105.0 * scale, cy + 10.0 * scale, 56.0 * scale, opacity, "combo_number")
+	_draw_combo_count_text(canvas, "X%d" % combo, cx + 112.0 * scale, cy + 7.0 * scale, 58.0 * scale)
 	var accent := Color(1.0, 0.98, 0.62, 0.54 * opacity)
 	canvas.draw_line(Vector2(cx - 96.0 * scale, cy + 20.0 * scale), Vector2(cx + 158.0 * scale, cy + 10.0 * scale), accent, 2.2 * scale)
 	canvas.draw_circle(Vector2(cx - 103.0 * scale, cy - 15.0 * scale), 3.2 * scale, Color(1.0, 0.92, 0.35, 0.62 * opacity))
 	canvas.draw_circle(Vector2(cx + 178.0 * scale, cy - 18.0 * scale), 2.5 * scale, Color(1.0, 0.76, 0.34, 0.58 * opacity))
+
+func _draw_combo_count_text(canvas: CanvasItem, text: String, x: float, y: float, size: float) -> void:
+	var font := _get_combo_count_font()
+	var max_width := maxf(92.0, font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x + size * 0.28)
+	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)
+	var left := x - max_width * 0.5
+	var outline_size := maxf(4.5, size * 0.14)
+	var rim_size := maxf(2.0, size * 0.06)
+	var outline := Color(0.50, 0.16, 0.03, 1.0)
+	var rim := Color(1.0, 0.46, 0.08, 1.0)
+	var fill := Color(1.0, 0.92, 0.18, 1.0)
+	var outline_steps := [
+		Vector2(-outline_size, 0.0), Vector2(outline_size, 0.0),
+		Vector2(0.0, -outline_size), Vector2(0.0, outline_size),
+		Vector2(-outline_size * 0.72, -outline_size * 0.72),
+		Vector2(outline_size * 0.72, -outline_size * 0.72),
+		Vector2(-outline_size * 0.72, outline_size * 0.72),
+		Vector2(outline_size * 0.72, outline_size * 0.72)
+	]
+	for offset: Vector2 in outline_steps:
+		canvas.draw_string(font, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline)
+	for offset: Vector2 in [Vector2(-rim_size, 0.0), Vector2(rim_size, 0.0), Vector2(0.0, -rim_size), Vector2(0.0, rim_size)]:
+		canvas.draw_string(font, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, rim)
+	canvas.draw_string(font, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
 
 func _is_digit_fx_text(text: String) -> bool:
 	if text.is_empty():
@@ -4121,9 +4228,10 @@ func _is_digit_fx_text(text: String) -> bool:
 	return true
 
 func _draw_digit_fx_text(canvas: CanvasItem, text: String, x: float, y: float, size: float, opacity: float, style: String = "damage") -> void:
+	var draw_opacity := 1.0 if style == "combo_number" and opacity > 0.0 else opacity
 	var atlas := _get_texture(BATTLE_FX_ASSETS["damage_digits"])
 	if atlas == null:
-		_draw_fx_text(canvas, text, x, y, Color(1.0, 0.76, 0.22, opacity), size, maxf(80.0, text.length() * size), style)
+		_draw_fx_text(canvas, text, x, y, Color(1.0, 0.76, 0.22, draw_opacity), size, maxf(80.0, text.length() * size), style)
 		return
 	var cell_w := 72.0
 	var cell_h := 84.0
@@ -4138,7 +4246,7 @@ func _draw_digit_fx_text(canvas: CanvasItem, text: String, x: float, y: float, s
 		if i < text.length() - 1:
 			total_w += spacing
 	var left := x - total_w / 2.0
-	var tint := _digit_fx_tint(style, opacity)
+	var tint := _digit_fx_tint(style, draw_opacity)
 	for i in range(text.length()):
 		var ch := text.substr(i, 1)
 		var w := sign_w if ["-", "+", "x", "×"].has(ch) else digit_w
@@ -4149,17 +4257,17 @@ func _draw_digit_fx_text(canvas: CanvasItem, text: String, x: float, y: float, s
 			var dst := Rect2(left, y - target_h * 0.92, digit_w, target_h)
 			canvas.draw_texture_rect_region(atlas, dst, src, tint)
 		elif ch == "-":
-			canvas.draw_line(center - Vector2(w * 0.32, 0.0), center + Vector2(w * 0.32, 0.0), Color(0.58, 0.20, 0.10, 0.82 * opacity), maxf(3.0, target_h * 0.14))
-			canvas.draw_line(center - Vector2(w * 0.28, 0.0), center + Vector2(w * 0.28, 0.0), Color(1.0, 0.77, 0.28, opacity), maxf(2.0, target_h * 0.09))
+			canvas.draw_line(center - Vector2(w * 0.32, 0.0), center + Vector2(w * 0.32, 0.0), Color(0.58, 0.20, 0.10, 0.82 * draw_opacity), maxf(3.0, target_h * 0.14))
+			canvas.draw_line(center - Vector2(w * 0.28, 0.0), center + Vector2(w * 0.28, 0.0), Color(1.0, 0.77, 0.28, draw_opacity), maxf(2.0, target_h * 0.09))
 		elif ch == "+":
-			var dark := Color(0.58, 0.20, 0.10, 0.82 * opacity)
-			var light := Color(1.0, 0.77, 0.28, opacity)
+			var dark := Color(0.58, 0.20, 0.10, 0.82 * draw_opacity)
+			var light := Color(1.0, 0.77, 0.28, draw_opacity)
 			canvas.draw_line(center - Vector2(w * 0.32, 0.0), center + Vector2(w * 0.32, 0.0), dark, maxf(3.0, target_h * 0.14))
 			canvas.draw_line(center - Vector2(0.0, w * 0.32), center + Vector2(0.0, w * 0.32), dark, maxf(3.0, target_h * 0.14))
 			canvas.draw_line(center - Vector2(w * 0.28, 0.0), center + Vector2(w * 0.28, 0.0), light, maxf(2.0, target_h * 0.09))
 			canvas.draw_line(center - Vector2(0.0, w * 0.28), center + Vector2(0.0, w * 0.28), light, maxf(2.0, target_h * 0.09))
 		else:
-			_draw_fx_text(canvas, "x", center.x, y - target_h * 0.13, Color(1.0, 0.70, 0.22, opacity), size * 0.95, w + 8.0, "combo_label")
+			_draw_fx_text(canvas, "x", center.x, y - target_h * 0.13, Color(1.0, 0.70, 0.22, draw_opacity), size * 0.95, w + 8.0, "combo_label")
 		left += w + spacing
 
 func _is_digit_char(ch: String) -> bool:

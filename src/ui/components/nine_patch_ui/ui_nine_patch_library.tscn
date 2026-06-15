@@ -1,0 +1,213 @@
+[gd_scene format=3 uid="uid://b1bwnmo8umrai"]
+
+[ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="1_black"]
+[ext_resource type="Texture2D" uid="uid://dwkrhwuewy1ru" path="res://assets/新美术资产/ui/black2.png" id="2_black2"]
+[ext_resource type="Texture2D" uid="uid://du8qtbs0nkv7x" path="res://assets/新美术资产/ui/black3.png" id="3_black3"]
+[ext_resource type="Texture2D" uid="uid://drkjfn43fdtbl" path="res://assets/新美术资产/ui/butter01.png" id="4_butter01"]
+[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="5_butter02"]
+[ext_resource type="Texture2D" uid="uid://c8quh2ab27qup" path="res://assets/新美术资产/ui/花边01.png" id="6_ribbon"]
+[ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="7_panel_base"]
+[ext_resource type="Texture2D" uid="uid://dt3fwtommedb2" path="res://assets/images/ui/generated_panel_parts/panel_top_blue_trim.png" id="8_blue_trim"]
+[ext_resource type="Texture2D" uid="uid://cnv8q40fvtaw4" path="res://assets/images/ui/generated_panel_parts/panel_bottom_yellow_bar.png" id="9_yellow_bar"]
+
+[node name="UiNinePatchLibrary" type="Control" unique_id=813668274]
+custom_minimum_size = Vector2(1420, 1040)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1420.0
+offset_bottom = 1040.0
+mouse_filter = 2
+
+[node name="black" type="Control" parent="." unique_id=1695228943]
+custom_minimum_size = Vector2(360, 246)
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 380.0
+offset_bottom = 266.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="black" unique_id=1679314963]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1359.0
+offset_top = -420.0
+offset_right = 1984.0
+offset_bottom = 581.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_black")
+patch_margin_left = 72
+patch_margin_top = 62
+patch_margin_right = 72
+patch_margin_bottom = 62
+
+[node name="black2" type="Control" parent="." unique_id=588660390]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 410.0
+offset_top = 20.0
+offset_right = 730.0
+offset_bottom = 155.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="black2" unique_id=1393918341]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_black2")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
+
+[node name="black3" type="Control" parent="." unique_id=1862555514]
+custom_minimum_size = Vector2(320, 454)
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 548.0
+offset_right = 340.0
+offset_bottom = 1002.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="black3" unique_id=962735959]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_black3")
+patch_margin_left = 96
+patch_margin_top = 110
+patch_margin_right = 96
+patch_margin_bottom = 132
+
+[node name="butter01" type="Control" parent="." unique_id=377147014]
+custom_minimum_size = Vector2(360, 108)
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 294.0
+offset_right = 380.0
+offset_bottom = 402.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="butter01" unique_id=59218314]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_butter01")
+patch_margin_left = 112
+patch_margin_top = 72
+patch_margin_right = 112
+patch_margin_bottom = 72
+
+[node name="butter02" type="Control" parent="." unique_id=1544779525]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = 410.0
+offset_top = 146.0
+offset_right = 670.0
+offset_bottom = 231.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="butter02" unique_id=470646400]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_butter02")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
+
+[node name="花边01" type="Control" parent="." unique_id=1301744306]
+custom_minimum_size = Vector2(520, 100)
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 420.0
+offset_right = 540.0
+offset_bottom = 520.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="花边01" unique_id=357127768]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 283.0
+offset_top = 28.0
+offset_right = 269.0
+offset_bottom = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_ribbon")
+patch_margin_left = 128
+patch_margin_right = 128
+
+[node name="ui底图" type="Control" parent="." unique_id=915109211]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = 780.0
+offset_top = 20.0
+offset_right = 1286.7961
+offset_bottom = 740.38837
+scale = Vector2(0.515, 0.515)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="ui底图" unique_id=1615594271]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_panel_base")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
+
+[node name="蓝色花边" type="Control" parent="." unique_id=626812747]
+custom_minimum_size = Vector2(420, 104)
+anchors_preset = 0
+offset_left = 780.0
+offset_top = 680.0
+offset_right = 1200.0
+offset_bottom = 784.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="蓝色花边" unique_id=1704806465]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("8_blue_trim")
+patch_margin_left = 210
+patch_margin_right = 210
+
+[node name="黄色底部" type="Control" parent="." unique_id=770976128]
+custom_minimum_size = Vector2(420, 82)
+anchors_preset = 0
+offset_left = 780.0
+offset_top = 816.0
+offset_right = 1200.0
+offset_bottom = 898.0
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="黄色底部" unique_id=1780086215]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("9_yellow_bar")
+patch_margin_left = 180
+patch_margin_top = 105
+patch_margin_right = 180
+patch_margin_bottom = 105

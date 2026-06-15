@@ -96,9 +96,12 @@ offset_top = 8.0
 offset_right = 360.0
 offset_bottom = 50.0
 mouse_default_cursor_shape = 2
+texture_normal = ExtResource("turn_badge")
 ignore_texture_size = true
+stretch_mode = 5
 
 [node name="Frame" type="TextureRect" parent="TopHud/PauseButton"]
+visible = false
 layout_mode = 0
 offset_right = 44.0
 offset_bottom = 42.0
@@ -1403,9 +1406,12 @@ offset_top = 138.0
 offset_right = 118.0
 offset_bottom = 179.0
 mouse_default_cursor_shape = 2
+texture_normal = ExtResource("button_green")
 ignore_texture_size = true
+stretch_mode = 5
 
 [node name="Frame" type="TextureRect" parent="PauseDialog/Panel/ResumeButton"]
+visible = false
 layout_mode = 0
 offset_right = 80.0
 offset_bottom = 41.0
@@ -1436,9 +1442,12 @@ offset_top = 138.0
 offset_right = 230.0
 offset_bottom = 179.0
 mouse_default_cursor_shape = 2
+texture_normal = ExtResource("button_blue")
 ignore_texture_size = true
+stretch_mode = 5
 
 [node name="Frame" type="TextureRect" parent="PauseDialog/Panel/QuitButton"]
+visible = false
 layout_mode = 0
 offset_right = 80.0
 offset_bottom = 41.0

@@ -26,7 +26,6 @@ const NORMAL_RESULT_NODES := [
 	"RewardPanel",
 	"ExpPanel",
 	"LevelUpPanel",
-	"SweepUnlocked",
 	"Buttons",
 ]
 
@@ -466,7 +465,9 @@ func _sync_exp_panel() -> void:
 
 func _sync_levelups() -> void:
 	_node("LevelUpPanel").visible = false
-	_node("SweepUnlocked").visible = false
+	var sweep_unlocked := get_node_or_null("SweepUnlocked") as Control
+	if sweep_unlocked != null:
+		sweep_unlocked.visible = false
 
 func _sync_buttons() -> void:
 	_node("Buttons/BackButton").visible = _is_win or _has_next_stage

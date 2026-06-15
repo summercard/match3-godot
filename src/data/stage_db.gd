@@ -73,7 +73,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_2",
-			"name": "烈焰山谷",
+			"name": "草原区",
 			"element": "fire",
 			"stages": [
 				{
@@ -140,7 +140,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_3",
-			"name": "神秘森林",
+			"name": "森林区",
 			"element": "dark",
 			"stages": [
 				{
@@ -197,7 +197,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_4",
-			"name": "幽暗森林",
+			"name": "沙漠区",
 			"element": "dark",
 			"stages": [
 				{
@@ -283,7 +283,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_5",
-			"name": "雷电圣殿",
+			"name": "海岛区",
 			"element": "thunder",
 			"stages": [
 				{
@@ -342,7 +342,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_6",
-			"name": "冰雪王座",
+			"name": "火山区",
 			"element": "ice",
 			"stages": [
 				{
@@ -423,7 +423,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_7",
-			"name": "虚空领域",
+			"name": "地底区",
 			"element": "void",
 			"stages": [
 				{
@@ -489,7 +489,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_8",
-			"name": "时空裂隙",
+			"name": "冰原区",
 			"element": "temporal",
 			"stages": [
 				{

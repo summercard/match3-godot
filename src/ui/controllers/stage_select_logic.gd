@@ -116,12 +116,13 @@ const CHAPTER_THEME_BACKGROUNDS := {
 }
 
 const CHAPTER_BACKGROUND_OVERRIDES := {
-	"chapter_3": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_03_mystic_forest.png",
-	"chapter_4": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_eclipse_canopy.png",
-	"chapter_5": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_thunder_temple.png",
-	"chapter_6": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_frost_throne.png",
-	"chapter_7": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_void_domain.png",
-	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_temporal_rift.png",
+	"chapter_2": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_02_grassland.png",
+	"chapter_3": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_03_forest.png",
+	"chapter_4": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_desert.png",
+	"chapter_5": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_island.png",
+	"chapter_6": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_volcano.png",
+	"chapter_7": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_underground.png",
+	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_icefield.png",
 	"chapter_9": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png"
 }
 

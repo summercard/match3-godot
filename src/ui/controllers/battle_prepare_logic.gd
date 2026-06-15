@@ -61,7 +61,7 @@ const PREPARE_ASSETS := {
 	"alert_panel": "res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png",
 	"reward_slot": "res://assets/images/ui/slots/battle_prepare_new_ui_reward_slot.png",
 	"chip": "res://assets/images/ui/slots/battle_prepare_new_ui_reward_slot.png",
-	"sword": "res://assets/images/ui/icons/battle_flow_new_icon_sword_cross.png",
+	"sword": "res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png",
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"exp": "res://assets/images/ui/icons/items_new_icon_exp_potion.png",
 	"capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",

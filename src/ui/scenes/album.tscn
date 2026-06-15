@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_earth.png" id="11_b1baw"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_wind.png" id="12_084vh"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_dark.png" id="13_cw21g"]
-[ext_resource type="Texture2D" uid="uid://dk4l42xmcflof" path="res://assets/images/ui/cards/ranch_ui_roster_card_ranch.png" id="14_usnmi"]
+[ext_resource type="Texture2D" path="res://assets/新美术资产/ui/black3.png" id="14_usnmi"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/ui/icons/album_icon_lock.png" id="15_7dl6j"]
 [ext_resource type="Texture2D" uid="uid://bv7yc7bt4mon7" path="res://assets/images/ui/icons/album_icon_star_dim.png" id="16_qr0pi"]
 [ext_resource type="FontFile" uid="uid://5r4yem5wbcsp" path="res://assets/fonts/ZCOOLKuaiLe-Regular.ttf" id="17_card_font"]
@@ -51,6 +51,7 @@
 [ext_resource type="Texture2D" uid="uid://d3facgc8uk2bs" path="res://assets/images/monsters/monster/monster_008_album_thumb.png" id="58_monster_013"]
 [ext_resource type="Texture2D" uid="uid://x5biafhmen6b" path="res://assets/images/monsters/monster/monster_013_album_thumb.png" id="59_monster_014"]
 [ext_resource type="Texture2D" uid="uid://wd46tc4qqa4f" path="res://assets/images/monsters/monster/monster_015_album_thumb.png" id="60_monster_015"]
+[ext_resource type="Texture2D" path="res://assets/新美术资产/ui/black.png" id="61_black_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dex_board"]
 bg_color = Color(1, 0.95, 0.82, 0.97)
@@ -130,14 +131,18 @@ offset_bottom = 667.0
 mouse_filter = 2
 color = Color(1, 0.96, 0.82, 0.08)
 
-[node name="DexBoard" type="Panel" parent="." unique_id=864969941]
+[node name="DexBoard" type="NinePatchRect" parent="." unique_id=864969941]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 88.0
 offset_right = 367.0
 offset_bottom = 593.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dex_board")
+texture = ExtResource("61_black_panel")
+patch_margin_left = 72
+patch_margin_top = 62
+patch_margin_right = 72
+patch_margin_bottom = 62
 
 [node name="AlbumResourceBar" type="Control" parent="." unique_id=1645713353]
 anchors_preset = 0
@@ -780,14 +785,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card1" unique_id=1827138616]
 visible = false
@@ -938,14 +945,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card2" unique_id=1907863278]
 visible = false
@@ -1096,14 +1105,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card3" unique_id=1404831583]
 visible = false
@@ -1254,14 +1265,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card4" unique_id=1659122511]
 visible = false
@@ -1412,14 +1425,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card5" unique_id=131352247]
 visible = false
@@ -1570,14 +1585,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card6" unique_id=512290940]
 visible = false
@@ -1729,14 +1746,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card7" unique_id=1516134750]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card7" unique_id=1516134750]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card7" unique_id=769214643]
 visible = false
@@ -1888,14 +1907,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card8" unique_id=2116465743]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card8" unique_id=2116465743]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card8" unique_id=1304171889]
 visible = false
@@ -2047,14 +2068,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card9" unique_id=1511414470]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card9" unique_id=1511414470]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card9" unique_id=710660394]
 visible = false
@@ -2206,14 +2229,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card10" unique_id=2053015839]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card10" unique_id=2053015839]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card10" unique_id=1724053971]
 visible = false
@@ -2364,14 +2389,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card11" unique_id=850595974]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card11" unique_id=850595974]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card11" unique_id=1195617374]
 visible = false
@@ -2523,14 +2550,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card12" unique_id=1360028350]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card12" unique_id=1360028350]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card12" unique_id=2079484310]
 visible = false
@@ -2682,14 +2711,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card13" unique_id=398643517]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card13" unique_id=398643517]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card13" unique_id=1231413006]
 visible = false
@@ -2841,14 +2872,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card14" unique_id=730994600]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card14" unique_id=730994600]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card14" unique_id=1435971012]
 visible = false
@@ -3000,14 +3033,16 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Grid/Card15" unique_id=722085236]
+[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card15" unique_id=722085236]
 layout_mode = 0
 offset_right = 98.0
 offset_bottom = 158.0
 mouse_filter = 2
 texture = ExtResource("14_usnmi")
-expand_mode = 1
-stretch_mode = 5
+patch_margin_left = 18
+patch_margin_top = 22
+patch_margin_right = 18
+patch_margin_bottom = 26
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card15" unique_id=1631701756]
 visible = false
@@ -3213,7 +3248,7 @@ offset_left = 18.0
 offset_top = 100.0
 offset_right = 357.0
 offset_bottom = 529.0
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="Frame" type="Panel" parent="DetailPanel" unique_id=1747680476]
 layout_mode = 0
@@ -5273,3 +5308,4 @@ theme_override_font_sizes/font_size = 11
 text = "菜单"
 horizontal_alignment = 1
 vertical_alignment = 1
+

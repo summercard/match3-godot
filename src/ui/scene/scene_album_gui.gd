@@ -138,6 +138,8 @@ func _on_filter_pressed(element: String) -> void:
 	_apply_filter()
 
 func _on_card_pressed(visible_index: int) -> void:
+	if not _selected_monster_id.is_empty():
+		return
 	var index := _album_page * PAGE_SIZE + visible_index
 	if index < 0 or index >= _filtered_monsters.size():
 		return

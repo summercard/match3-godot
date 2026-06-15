@@ -17,7 +17,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="diamond_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/effects/ranch_fx_social_heart.png" id="heart_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_plus_v3.png" id="plus_icon"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_sword_cross.png" id="sword_icon"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png" id="sword_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_fire.png" id="element_fire"]
 
 [node name="BattlePrepareGui" type="Control" unique_id=526108190]
@@ -376,10 +376,10 @@ vertical_alignment = 1
 
 [node name="PowerIcon" type="TextureRect" parent="EnemyPanel"]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 112.0
-offset_right = 48.0
-offset_bottom = 139.0
+offset_left = 16.0
+offset_top = 116.0
+offset_right = 50.0
+offset_bottom = 150.0
 mouse_filter = 2
 texture = ExtResource("sword_icon")
 expand_mode = 1
@@ -1229,21 +1229,20 @@ vertical_alignment = 1
 
 [node name="Slots" type="Control" parent="RewardPreview" unique_id=1081920075]
 anchors_preset = 0
-offset_left = 110.0
-offset_right = 285.0
-offset_bottom = 38.0
+offset_left = 42.5
+offset_top = 20.0
+offset_right = 276.5
+offset_bottom = 80.0
 
 [node name="RewardSlot1" type="Control" parent="RewardPreview/Slots" unique_id=2007506491]
 anchors_preset = 0
-offset_left = -34.0
-offset_right = 10.0
-offset_bottom = 39.0
+offset_right = 58.0
+offset_bottom = 60.0
 
 [node name="Frame" type="TextureRect" parent="RewardPreview/Slots/RewardSlot1" unique_id=1212301587]
 layout_mode = 0
-offset_left = 5.0
-offset_right = 39.0
-offset_bottom = 39.0
+offset_right = 58.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -1251,15 +1250,16 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot1" unique_id=473233826]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 5.0
-offset_right = 33.0
-offset_bottom = 27.0
+offset_left = 9.0
+offset_top = 10.0
+offset_right = 49.0
+offset_bottom = 50.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="RewardPreview/Slots/RewardSlot1" unique_id=1908981526]
+visible = false
 layout_mode = 0
 offset_left = -6.0
 offset_top = 25.0
@@ -1274,15 +1274,14 @@ vertical_alignment = 1
 
 [node name="RewardSlot2" type="Control" parent="RewardPreview/Slots" unique_id=2020328800]
 anchors_preset = 0
-offset_left = 41.0
-offset_right = 85.0
-offset_bottom = 39.0
+offset_left = 88.0
+offset_right = 146.0
+offset_bottom = 60.0
 
 [node name="Frame" type="TextureRect" parent="RewardPreview/Slots/RewardSlot2" unique_id=1862907174]
 layout_mode = 0
-offset_left = 5.0
-offset_right = 39.0
-offset_bottom = 39.0
+offset_right = 58.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -1290,15 +1289,16 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot2" unique_id=2019123627]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 5.0
-offset_right = 33.0
-offset_bottom = 27.0
+offset_left = 9.0
+offset_top = 10.0
+offset_right = 49.0
+offset_bottom = 50.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="RewardPreview/Slots/RewardSlot2" unique_id=1209992803]
+visible = false
 layout_mode = 0
 offset_left = -6.0
 offset_top = 25.0
@@ -1313,15 +1313,14 @@ vertical_alignment = 1
 
 [node name="RewardSlot3" type="Control" parent="RewardPreview/Slots" unique_id=1715697257]
 anchors_preset = 0
-offset_left = 112.0
-offset_right = 156.0
-offset_bottom = 39.0
+offset_left = 176.0
+offset_right = 234.0
+offset_bottom = 60.0
 
 [node name="Frame" type="TextureRect" parent="RewardPreview/Slots/RewardSlot3" unique_id=1381535256]
 layout_mode = 0
-offset_left = 5.0
-offset_right = 39.0
-offset_bottom = 39.0
+offset_right = 58.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("reward_slot")
 expand_mode = 1
@@ -1329,15 +1328,16 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot3" unique_id=22077985]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 5.0
-offset_right = 33.0
-offset_bottom = 27.0
+offset_left = 9.0
+offset_top = 10.0
+offset_right = 49.0
+offset_bottom = 50.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="RewardPreview/Slots/RewardSlot3" unique_id=647524009]
+visible = false
 layout_mode = 0
 offset_left = -6.0
 offset_top = 25.0

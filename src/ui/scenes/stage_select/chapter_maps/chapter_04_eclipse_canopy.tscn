@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" uid="uid://dvl2ivc2u82df" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_eclipse_canopy.png" id="c04_background"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_desert.png" id="c04_background"]
 [ext_resource type="Texture2D" uid="uid://cf6vm4ml75m8e" path="res://assets/images/monsters/boss/monster_boss_004_dark.png" id="c04_boss_art"]
 [ext_resource type="Texture2D" uid="uid://kc5sgqdsv6xe" path="res://assets/images/maps/boss/stage_boss_badge.png" id="c04_boss_platform"]
 [ext_resource type="Texture2D" uid="uid://glsitdt0led0" path="res://assets/images/maps/nodes/stage_node_normal.png" id="c04_stage04"]

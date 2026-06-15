@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_temporal_rift.png" id="c08_background"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_icefield.png" id="c08_background"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_temporal_normal.png" id="c08_stage01"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
