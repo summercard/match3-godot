@@ -15,11 +15,11 @@
 [ext_resource type="Texture2D" uid="uid://uomxda6s6wcc" path="res://assets/images/ui/icons/ranch_icon_check_badge.png" id="13_check"]
 [ext_resource type="Texture2D" uid="uid://wmi2nklh64v6" path="res://assets/images/ui/icons/ranch_ui_pet_farm_nav_panel.png" id="14_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://c8aamojsqoxli" path="res://assets/images/ui/icons/ranch_ui_pet_farm_nav_selected.png" id="15_nav_selected"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="16_nav_home"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_pets.png" id="17_nav_pets"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_battle.png" id="18_nav_battle"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_shop.png" id="19_nav_shop"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="20_nav_menu"]
+[ext_resource type="Texture2D" uid="uid://u1nmo0dbthgh" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="16_nav_home"]
+[ext_resource type="Texture2D" uid="uid://b82kr3foenxwm" path="res://assets/images/ui/icons/common_nav_icon_nav_pets.png" id="17_nav_pets"]
+[ext_resource type="Texture2D" uid="uid://cgx02cc56ai4g" path="res://assets/images/ui/icons/common_nav_icon_nav_battle.png" id="18_nav_battle"]
+[ext_resource type="Texture2D" uid="uid://go6wm7v4jga5" path="res://assets/images/ui/icons/common_nav_icon_nav_shop.png" id="19_nav_shop"]
+[ext_resource type="Texture2D" uid="uid://65c54i6uf8si" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="20_nav_menu"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="21_page_prev"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="22_page_next"]
 [ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/ui/icons/main_icon_level_shield_v3.png" id="23_def"]
@@ -40,7 +40,6 @@ corner_radius_bottom_left = 16
 [sub_resource type="Animation" id="Animation_entry"]
 resource_name = "entry"
 length = 0.72
-loop_mode = 0
 step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -201,7 +200,7 @@ tracks/12/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_default"]
 _data = {
-"entry": SubResource("Animation_entry")
+&"entry": SubResource("Animation_entry")
 }
 
 [node name="Team" type="Control" unique_id=256271296]
@@ -241,12 +240,12 @@ mouse_filter = 2
 color = Color(0.12, 0.05, 0.01, 0.22)
 
 [node name="CurrencyBar" type="Control" parent="." unique_id=559351676]
-anchors_preset = 0
-offset_right = 375.0
-offset_bottom = 58.0
-mouse_filter = 2
 modulate = Color(1, 1, 1, 0)
-position = Vector2(0, -30)
+anchors_preset = 0
+offset_top = -30.0
+offset_right = 375.0
+offset_bottom = 28.0
+mouse_filter = 2
 
 [node name="GoldChip" type="Control" parent="CurrencyBar" unique_id=124683751]
 anchors_preset = 0
@@ -399,13 +398,13 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="TeamSlots" type="Control" parent="." unique_id=2116984264]
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 386.0
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0)
 scale = Vector2(0.85, 0.85)
 pivot_offset = Vector2(187.5, 193)
+mouse_filter = 2
 
 [node name="Member1Slot" type="TextureButton" parent="TeamSlots" unique_id=942443935]
 layout_mode = 0
@@ -660,15 +659,15 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PowerPanel" type="TextureRect" parent="." unique_id=1510107033]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_left = 14.0
 offset_top = 351.0
 offset_right = 361.0
 offset_bottom = 417.0
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0)
 scale = Vector2(0.85, 0.85)
 pivot_offset = Vector2(173.5, 33)
+mouse_filter = 2
 texture = ExtResource("11_panel")
 expand_mode = 1
 
@@ -826,15 +825,15 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RosterPanel" type="TextureRect" parent="." unique_id=1699353568]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_left = 14.0
 offset_top = 420.0
 offset_right = 361.0
 offset_bottom = 548.0
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0)
 scale = Vector2(0.85, 0.85)
 pivot_offset = Vector2(173.5, 64)
+mouse_filter = 2
 texture = ExtResource("11_panel")
 expand_mode = 1
 
@@ -1230,13 +1229,13 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="BottomNav" type="TextureRect" parent="." unique_id=625178228]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_left = 7.0
 offset_top = 602.0
 offset_right = 368.0
 offset_bottom = 663.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0)
 texture = ExtResource("14_nav_panel")
 expand_mode = 1
 
@@ -1444,8 +1443,6 @@ text = "菜单"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EntryAnim" type="AnimationPlayer" parent="."]
-autoplay = "default/entry"
-libraries = {
-"default": SubResource("AnimationLibrary_default")
-}
+[node name="EntryAnim" type="AnimationPlayer" parent="." unique_id=2048080222]
+libraries/default = SubResource("AnimationLibrary_default")
+autoplay = &"default/entry"

@@ -13,12 +13,12 @@ func _run() -> void:
 	_assert((scene.get_node("LobbyBottomNav/PetsButton/Text") as Label).text == "图鉴", "album tscn bottom dex label should not be mojibake")
 	_assert((scene.get_node("LobbyBottomNav/BattleButton/Text") as Label).text == "羁绊", "album tscn bottom bond label should not be mojibake")
 	_assert((scene.get_node("LobbyBottomNav/ShopButton/Text") as Label).text == "目标", "album tscn bottom target label should not be mojibake")
-	var dex_board := scene.get_node("DexBoard") as NinePatchRect
+	var dex_board := scene.get_node("black/NinePatch") as NinePatchRect
 	_assert(dex_board != null, "album tscn should use the black nine-patch component as the main board")
 	_assert(dex_board.texture.resource_path.ends_with("black.png"), "album main board should use the black component texture")
-	var tscn_card_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect
+	var tscn_card_frame := scene.get_node("AlbumPage/Grid/Card1/CardBack/NinePatch") as NinePatchRect
 	_assert(tscn_card_frame.visible, "album tscn should own the visible card backing before runtime sync")
-	_assert(tscn_card_frame.texture.resource_path.ends_with("black3.png"), "album tscn should use the spirit card nine-patch backing")
+	_assert(tscn_card_frame.texture.resource_path.ends_with("panel_base.png"), "album tscn should use the handmade spirit card backing component")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "album tscn should hide the legacy lock icon before runtime sync")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture != null, "album tscn should show a concept-style portrait in the editor")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "album tscn should use normalized dex portraits instead of raw battle art")
@@ -33,11 +33,18 @@ func _run() -> void:
 	_assert(scene.scene_file_path == SCENE_PATH, "album should be a PackedScene GUI")
 	_assert(scene.has_node("AlbumPage/Grid/Card1"), "card nodes should be editable")
 	_assert(scene.has_node("AlbumPage/Grid/Card15"), "concept-style roster should provide a full-width five-column pet list")
+	for i in range(1, 16):
+		var card_back := scene.get_node("AlbumPage/Grid/Card%d/CardBack/NinePatch" % i) as NinePatchRect
+		_assert(card_back != null, "album card %d should use the shared handmade backing component" % i)
+		_assert(card_back.texture.resource_path.ends_with("panel_base.png"), "album card %d backing should match Card1" % i)
 	_assert(scene.has_node("AlbumPage/PageControls/PreviousButton"), "previous page button should exist")
 	_assert(scene.has_node("AlbumPage/PageControls/NextButton"), "next page button should exist")
 	_assert(scene.has_node("DetailPanel"), "detail panel should be editable")
 	_assert(scene.has_node("LobbyBottomNav/BattleButton"), "bond tab should live in the bottom navigation")
 	_assert(scene.has_node("AlbumResourceBar/GoldCapsule/Value"), "shared resource bar should be editable")
+	for capsule_name in ["GoldCapsule", "GemCapsule", "EnergyCapsule"]:
+		_assert(not (scene.get_node("AlbumResourceBar/%s" % capsule_name) is Panel), "%s should not draw the legacy system panel behind the image asset" % capsule_name)
+		_assert((scene.get_node("AlbumResourceBar/%s/Frame" % capsule_name) as TextureRect).texture.resource_path.ends_with("main_ui_currency_capsule_v3.png"), "%s should keep the image asset capsule" % capsule_name)
 	_assert(scene.has_node("LobbyBottomNav/PetsButton/Selected"), "shared bottom navigation should identify the pet section")
 	_assert(not (scene.get_node("Header/BackButton") as TextureButton).visible, "album should not expose the lobby back button")
 	var bottom_panel := scene.get_node("LobbyBottomNav/Panel") as TextureRect
@@ -47,8 +54,11 @@ func _run() -> void:
 	_assert(scene.get_node("DetailPanel/Frame") is Panel, "detail popup should use the light dex board instead of the old dark art")
 	_assert(scene.get_node("DetailPanel/PortraitStage/Frame") is Panel, "detail portrait area should not use the old blue frame art")
 	_assert(scene.get_node("DetailPanel/Stats/Stat1/Frame") is ColorRect, "detail stat rows should not use old blue image strips")
+	_assert(scene.get_node("DetailPanel/Stats/Stat1/BarBg") is Panel, "detail stat bars should use rounded panel backgrounds")
+	_assert(scene.get_node("DetailPanel/Stats/Stat1/Fill") is Panel, "detail stat fills should use rounded panel fills")
 	_assert(scene.get_node("DetailPanel/SkillPanel/Frame") is Panel, "detail skill area should not use old blue panel art")
 	_assert(scene.get_node("DetailPanel/EvolutionStrip/Frame") is Panel, "detail evolution area should not use old blue strip art")
+	_assert(not scene.has_node("DetailPanel/EvolveButton"), "album detail should not expose the duplicate evolve action")
 	_assert(scene.get_node("BondPage/Frame") is Panel, "bond page should use the light dex board")
 	_assert(scene.get_node("CollectionPage/Frame") is Panel, "target page should use the light dex board")
 	_assert(not (scene.get_node("BottomTabs") as Control).visible, "legacy floating mode tabs should be hidden when modes live in the bottom navigation")
@@ -68,6 +78,8 @@ func _run() -> void:
 	_assert(card_name.position.y >= card_portrait.position.y + card_portrait.size.y - 8.0, "dex card name should not cover the portrait body")
 	_assert(card_name.get_theme_font_size("font_size") == 15, "dex card names should use one consistent font size")
 	_assert(card_name.get_theme_font("font").resource_path.ends_with("ZCOOLKuaiLe-Regular.ttf"), "dex card names should get their font from the tscn")
+	var detail_star := scene.get_node("DetailPanel/Stars/Star1") as TextureRect
+	_assert(detail_star.texture.resource_path.ends_with("battle_flow_new_icon_star_gold.png"), "detail stars should use battle star art")
 	_assert((scene.get_node("BottomTabs/AlbumTab/Text") as Label).text == "图鉴", "album mode tab labels should render as Chinese text")
 	_assert((scene.get_node("LobbyBottomNav/PetsButton/Text") as Label).text == "图鉴", "album bottom nav labels should render as Chinese text")
 	_assert((scene.get_node("LobbyBottomNav/BattleButton/Text") as Label).text == "羁绊", "bottom nav should expose the bond album mode")
@@ -105,9 +117,9 @@ func _run() -> void:
 	_assert(str(scene.get("_selected_monster_id")) == selected_before_blocked_press, "detail popup should block card presses behind it")
 	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "card press should not recreate the removed right-side preview")
 	_assert(not scene.has_node("AlbumPage/PreviewEmpty"), "card press should not recreate the removed empty preview hint")
-	var roster_frame := scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect
+	var roster_frame := scene.get_node("AlbumPage/Grid/Card1/CardBack/NinePatch") as NinePatchRect
 	_assert(roster_frame.visible, "unlocked roster portrait should sit on a light card backing")
-	_assert(roster_frame.texture.resource_path.ends_with("black3.png"), "album roster should use the spirit card nine-patch backing")
+	_assert(roster_frame.texture.resource_path.ends_with("panel_base.png"), "album roster should use the handmade spirit card backing component")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "runtime album grid should keep normalized dex portraits")
 
 	var close := scene.get_node("DetailPanel/CloseButton") as BaseButton
@@ -123,15 +135,18 @@ func _run() -> void:
 	var locked_portrait := scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect
 	_assert(locked_portrait.visible, "locked card should keep its monster portrait silhouette")
 	_assert(locked_portrait.material is ShaderMaterial, "locked portrait should use a solid-color silhouette shader")
-	_assert((scene.get_node("AlbumPage/Grid/Card1/Frame") as NinePatchRect).visible, "locked silhouette should keep the light card backing behind the monster")
+	_assert((scene.get_node("AlbumPage/Grid/Card1/CardBack/NinePatch") as NinePatchRect).visible, "locked silhouette should keep the light card backing behind the monster")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/ElementIcon") as TextureRect).visible, "locked silhouette should not reveal its element badge")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/Stars") as Control).visible, "locked silhouette should not keep unlocked card metadata")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "locked silhouette should not add a lock marker")
 	_assert(not (scene.get_node("DetailPanel") as Control).visible, "locked card should not reveal the complete detail panel")
 	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "locked card should not reveal the removed right-side preview")
 
-	var filter_frame := scene.get_node("AlbumPage/Filters/Fire/Frame") as TextureRect
-	_assert(filter_frame.texture.resource_path.ends_with("ui_dex_filter_normal.png") or filter_frame.texture.resource_path.ends_with("ui_dex_filter_selected.png"), "filters should use the new light dex art")
+	for filter_name in ["Water", "Fire", "Grass", "Thunder", "Light", "Earth", "Wind", "Dark"]:
+		var filter_back := scene.get_node("AlbumPage/Filters/%s/black2/NinePatch" % filter_name) as NinePatchRect
+		_assert(filter_back.texture.resource_path.ends_with("black2.png"), "%s filter should use the shared black2 nine-patch component" % filter_name)
+		_assert(not scene.has_node("AlbumPage/Filters/%s/Frame" % filter_name), "%s filter should not keep the legacy frame node" % filter_name)
+		_assert(not scene.has_node("AlbumPage/Filters/%s/Text" % filter_name), "%s filter should use icon-only styling" % filter_name)
 	var prev_frame := scene.get_node("AlbumPage/PageControls/PreviousButton/Frame") as TextureRect
 	var next_frame := scene.get_node("AlbumPage/PageControls/NextButton/Frame") as TextureRect
 	_assert(prev_frame.texture.resource_path.ends_with("ui_dex_page_prev.png"), "previous page should use the new green dex button")

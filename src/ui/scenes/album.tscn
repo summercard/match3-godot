@@ -5,18 +5,21 @@
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="3_kv2bi"]
 [ext_resource type="Texture2D" uid="uid://dfkq5q22r37w2" path="res://assets/images/ui/bars/album_ui_header_plaque.png" id="4_ynhr1"]
 [ext_resource type="Texture2D" uid="uid://l0pqtw1u4d0x" path="res://assets/images/ui/buttons/album_ui_dex_filter_normal.png" id="5_4r3yu"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_fire.png" id="6_lwaa5"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_water.png" id="7_u1fqi"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_grass.png" id="8_snesh"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_thunder.png" id="9_w0q78"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_light.png" id="10_dmuhb"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_earth.png" id="11_b1baw"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_wind.png" id="12_084vh"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_dark.png" id="13_cw21g"]
-[ext_resource type="Texture2D" path="res://assets/新美术资产/ui/black3.png" id="14_usnmi"]
+[ext_resource type="Texture2D" uid="uid://l4s3pgst6tic" path="res://assets/images/ui/elements/element_fire.png" id="6_lwaa5"]
+[ext_resource type="Texture2D" uid="uid://cjd20ccr8fuw1" path="res://assets/images/ui/elements/element_water.png" id="7_u1fqi"]
+[ext_resource type="Texture2D" uid="uid://qpsbefn0h7rh" path="res://assets/images/ui/elements/element_grass.png" id="8_snesh"]
+[ext_resource type="Texture2D" uid="uid://dgbatkboi0f0i" path="res://assets/images/ui/elements/element_thunder.png" id="9_w0q78"]
+[ext_resource type="Texture2D" uid="uid://c8quh2ab27qup" path="res://assets/新美术资产/ui/花边01.png" id="10_2ugvr"]
+[ext_resource type="Texture2D" uid="uid://3w3ruout6cnp" path="res://assets/images/ui/elements/element_light.png" id="10_dmuhb"]
+[ext_resource type="Texture2D" uid="uid://bfl1k1oc8nc5o" path="res://assets/images/ui/elements/element_earth.png" id="11_b1baw"]
+[ext_resource type="Texture2D" uid="uid://cqr4a0niglspq" path="res://assets/images/ui/elements/element_wind.png" id="12_084vh"]
+[ext_resource type="Texture2D" uid="uid://dwkrhwuewy1ru" path="res://assets/新美术资产/ui/black2.png" id="12_fxvvh"]
+[ext_resource type="Texture2D" uid="uid://c7g0266wyvygp" path="res://assets/images/ui/elements/element_dark.png" id="13_cw21g"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/ui/icons/album_icon_lock.png" id="15_7dl6j"]
-[ext_resource type="Texture2D" uid="uid://bv7yc7bt4mon7" path="res://assets/images/ui/icons/album_icon_star_dim.png" id="16_qr0pi"]
+[ext_resource type="Texture2D" uid="uid://no5qkdwpa1bp" path="res://assets/images/ui/icons/battle_flow_new_icon_star_silver.png" id="16_qr0pi"]
 [ext_resource type="FontFile" uid="uid://5r4yem5wbcsp" path="res://assets/fonts/ZCOOLKuaiLe-Regular.ttf" id="17_card_font"]
+[ext_resource type="Texture2D" uid="uid://dtrqp0fe8pxpg" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="18_star_gold"]
+[ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="19_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://b6t57fnwq57pl" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="22_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://ddagefyigajtj" path="res://assets/images/ui/icons/album_icon_evolution_arrows.png" id="26_40u1r"]
 [ext_resource type="Texture2D" uid="uid://hh60i528nnsx" path="res://assets/images/ui/buttons/album_ui_dex_mode_tab_normal.png" id="29_42nqe"]
@@ -51,7 +54,7 @@
 [ext_resource type="Texture2D" uid="uid://d3facgc8uk2bs" path="res://assets/images/monsters/monster/monster_008_album_thumb.png" id="58_monster_013"]
 [ext_resource type="Texture2D" uid="uid://x5biafhmen6b" path="res://assets/images/monsters/monster/monster_013_album_thumb.png" id="59_monster_014"]
 [ext_resource type="Texture2D" uid="uid://wd46tc4qqa4f" path="res://assets/images/monsters/monster/monster_015_album_thumb.png" id="60_monster_015"]
-[ext_resource type="Texture2D" path="res://assets/新美术资产/ui/black.png" id="61_black_panel"]
+[ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="61_black_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dex_board"]
 bg_color = Color(1, 0.95, 0.82, 0.97)
@@ -67,32 +70,6 @@ corner_radius_bottom_left = 22
 shadow_color = Color(0.31, 0.13, 0.02, 0.35)
 shadow_size = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_resource"]
-bg_color = Color(1, 0.95, 0.82, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.96, 0.69, 0.3, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
-bg_color = Color(0.96, 0.36, 0.54, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.78, 0.27, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0.38, 0.08, 0.08, 0.36)
-shadow_size = 5
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
 bg_color = Color(1, 0.98, 0.9, 0.98)
 border_width_left = 2
@@ -104,6 +81,21 @@ corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
+
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_bar_bg"]
+bg_color = Color(0.79, 0.56, 0.27, 0.28)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_bar_fill"]
+bg_color = Color(0.32, 0.95, 0.52, 0.92)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="AlbumGui" type="Control" unique_id=607476915]
 layout_mode = 3
@@ -131,13 +123,44 @@ offset_bottom = 667.0
 mouse_filter = 2
 color = Color(1, 0.96, 0.82, 0.08)
 
-[node name="DexBoard" type="NinePatchRect" parent="." unique_id=864969941]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 88.0
-offset_right = 367.0
-offset_bottom = 593.0
+[node name="black" type="Control" parent="." unique_id=1881530518]
+custom_minimum_size = Vector2(360, 246)
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 232.0
+offset_right = 500.0
+offset_bottom = 895.0
+scale = Vector2(0.28, 0.28)
 mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="black" unique_id=730679515]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -453.76346
+offset_top = -546.2366
+offset_right = 448.05383
+offset_bottom = -716.5714
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("61_black_panel")
+patch_margin_left = 72
+patch_margin_top = 62
+patch_margin_right = 72
+patch_margin_bottom = 62
+
+[node name="NinePatch" type="NinePatchRect" parent="black/NinePatch" unique_id=508338227]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.19204712
+offset_top = 481.95093
+offset_right = -0.91101074
+offset_bottom = 1246.4286
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("61_black_panel")
 patch_margin_left = 72
 patch_margin_top = 62
@@ -152,12 +175,11 @@ offset_right = 367.0
 offset_bottom = 49.0
 mouse_filter = 2
 
-[node name="GoldCapsule" type="Panel" parent="AlbumResourceBar" unique_id=1770859815]
-layout_mode = 0
+[node name="GoldCapsule" type="Control" parent="AlbumResourceBar" unique_id=1770859815]
+anchors_preset = 0
 offset_right = 113.0
 offset_bottom = 42.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_resource")
 
 [node name="Frame" type="TextureRect" parent="AlbumResourceBar/GoldCapsule" unique_id=310517718]
 layout_mode = 1
@@ -195,13 +217,12 @@ text = "金币  0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="GemCapsule" type="Panel" parent="AlbumResourceBar" unique_id=484380484]
-layout_mode = 0
+[node name="GemCapsule" type="Control" parent="AlbumResourceBar" unique_id=484380484]
+anchors_preset = 0
 offset_left = 123.0
 offset_right = 236.0
 offset_bottom = 42.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_resource")
 
 [node name="Frame" type="TextureRect" parent="AlbumResourceBar/GemCapsule" unique_id=806235871]
 layout_mode = 1
@@ -239,13 +260,12 @@ text = "钻石  0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="EnergyCapsule" type="Panel" parent="AlbumResourceBar" unique_id=1484606198]
-layout_mode = 0
+[node name="EnergyCapsule" type="Control" parent="AlbumResourceBar" unique_id=1484606198]
+anchors_preset = 0
 offset_left = 246.0
 offset_right = 359.0
 offset_bottom = 42.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_resource")
 
 [node name="Frame" type="TextureRect" parent="AlbumResourceBar/EnergyCapsule" unique_id=1257229828]
 layout_mode = 1
@@ -318,14 +338,30 @@ mouse_filter = 2
 texture = ExtResource("4_ynhr1")
 expand_mode = 1
 
-[node name="PinkPlaque" type="Panel" parent="Header" unique_id=1799543633]
-layout_mode = 0
-offset_left = 82.0
-offset_top = 61.0
-offset_right = 293.0
-offset_bottom = 116.0
+[node name="花边01" type="Control" parent="Header" unique_id=1166182551]
+custom_minimum_size = Vector2(520, 100)
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 65.0
+offset_right = 526.0
+offset_bottom = 165.0
+scale = Vector2(0.67, 0.67)
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_title")
+
+[node name="NinePatch" type="NinePatchRect" parent="Header/花边01" unique_id=1670829549]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 1.0
+offset_right = 2.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_2ugvr")
+patch_margin_left = 128
+patch_margin_right = 128
 
 [node name="Title" type="Label" parent="Header" unique_id=727782132]
 layout_mode = 0
@@ -355,10 +391,10 @@ color = Color(0.96, 0.36, 0.54, 0.92)
 
 [node name="Progress" type="Label" parent="Header" unique_id=1805115788]
 layout_mode = 0
-offset_left = 290.0
-offset_top = 97.0
-offset_right = 351.0
-offset_bottom = 121.0
+offset_left = 155.0
+offset_top = 111.0
+offset_right = 216.0
+offset_bottom = 135.0
 theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
 theme_override_constants/shadow_offset_x = 1
@@ -378,17 +414,18 @@ mouse_filter = 2
 
 [node name="Filters" type="Control" parent="AlbumPage" unique_id=704618886]
 anchors_preset = 0
-offset_left = 14.0
-offset_right = 361.0
-offset_bottom = 80.0
+offset_left = 55.0
+offset_top = 2.0
+offset_right = 402.0
+offset_bottom = 82.0
 mouse_filter = 2
 
 [node name="All" type="TextureButton" parent="AlbumPage/Filters" unique_id=1533687319]
 layout_mode = 0
-offset_left = 88.0
-offset_top = 48.0
-offset_right = 130.0
-offset_bottom = 78.0
+offset_left = 254.0
+offset_top = 33.0
+offset_right = 296.0
+offset_bottom = 63.0
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="AlbumPage/Filters/All" unique_id=496898141]
@@ -427,354 +464,373 @@ clip_text = true
 
 [node name="Fire" type="TextureButton" parent="AlbumPage/Filters" unique_id=1688582026]
 layout_mode = 0
-offset_left = 71.0
-offset_top = 2.0
-offset_right = 136.0
-offset_bottom = 46.0
+offset_left = 66.0
+offset_top = 10.0
+offset_right = 131.0
+offset_bottom = 54.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Fire" unique_id=1017254631]
-layout_mode = 0
-offset_right = 65.0
-offset_bottom = 44.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Fire" unique_id=65484400]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 8.0
+offset_right = 343.2941
+offset_bottom = 205.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Fire/black2" unique_id=1383626927]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Fire" unique_id=75089376]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 8.0
-offset_right = 29.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 50.0
 offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("6_lwaa5")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Fire" unique_id=47308825]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 8.0
-offset_right = 62.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "火"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Water" type="TextureButton" parent="AlbumPage/Filters" unique_id=1315439152]
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 67.0
-offset_bottom = 46.0
+offset_left = 6.0
+offset_top = 51.0
+offset_right = 71.0
+offset_bottom = 95.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Water" unique_id=736750045]
-layout_mode = 0
-offset_right = 65.0
-offset_bottom = 44.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Water" unique_id=1328835785]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 8.0
+offset_right = 343.2941
+offset_bottom = 205.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Water/black2" unique_id=154616138]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Water" unique_id=69845190]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 8.0
-offset_right = 29.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 50.0
 offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("7_u1fqi")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Water" unique_id=60210804]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 8.0
-offset_right = 62.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "水"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Grass" type="TextureButton" parent="AlbumPage/Filters" unique_id=982259359]
 layout_mode = 0
-offset_left = 140.0
-offset_top = 2.0
-offset_right = 205.0
-offset_bottom = 46.0
+offset_left = 127.0
+offset_top = 10.0
+offset_right = 192.0
+offset_bottom = 54.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Grass" unique_id=422365754]
-layout_mode = 0
-offset_right = 65.0
-offset_bottom = 44.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Grass" unique_id=637851307]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 8.0
+offset_right = 343.2941
+offset_bottom = 205.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Grass/black2" unique_id=1268619471]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Grass" unique_id=1076791592]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 8.0
-offset_right = 29.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 50.0
 offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("8_snesh")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Grass" unique_id=873015258]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 8.0
-offset_right = 62.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "草"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Thunder" type="TextureButton" parent="AlbumPage/Filters" unique_id=29160623]
 layout_mode = 0
-offset_left = 133.0
-offset_top = 48.0
-offset_right = 175.0
-offset_bottom = 78.0
+offset_left = 81.0
+offset_top = 52.0
+offset_right = 123.0
+offset_bottom = 82.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Thunder" unique_id=492741282]
-layout_mode = 0
-offset_right = 42.0
-offset_bottom = 30.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Thunder" unique_id=1798376488]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = -4.999998
+offset_top = -1.9999998
+offset_right = 330.2941
+offset_bottom = 203.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Thunder/black2" unique_id=852928519]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Thunder" unique_id=1908139406]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 5.0
-offset_right = 20.0
-offset_bottom = 22.0
+offset_left = 9.0
+offset_top = 2.0
+offset_right = 36.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource("9_w0q78")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Thunder" unique_id=7803677]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 5.0
-offset_right = 40.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 9
-text = "雷"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Light" type="TextureButton" parent="AlbumPage/Filters" unique_id=121458126]
 layout_mode = 0
-offset_left = 209.0
-offset_top = 2.0
-offset_right = 274.0
-offset_bottom = 46.0
+offset_left = 185.0
+offset_top = 10.0
+offset_right = 250.0
+offset_bottom = 54.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Light" unique_id=1669423933]
-layout_mode = 0
-offset_right = 65.0
-offset_bottom = 44.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Light" unique_id=226461667]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 8.0
+offset_right = 343.2941
+offset_bottom = 205.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Light/black2" unique_id=1692432647]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Light" unique_id=2035168841]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 8.0
-offset_right = 29.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 50.0
 offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("10_dmuhb")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Light" unique_id=988210563]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 8.0
-offset_right = 62.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "光"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Earth" type="TextureButton" parent="AlbumPage/Filters" unique_id=1964342615]
 layout_mode = 0
-offset_left = 178.0
-offset_top = 48.0
-offset_right = 220.0
-offset_bottom = 78.0
+offset_left = 144.0
+offset_top = 55.0
+offset_right = 186.0
+offset_bottom = 85.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Earth" unique_id=1252791946]
-layout_mode = 0
-offset_right = 42.0
-offset_bottom = 30.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Earth" unique_id=1143048702]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = -8.999998
+offset_top = -4.9999995
+offset_right = 326.2941
+offset_bottom = 200.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Earth/black2" unique_id=1065001288]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Earth" unique_id=2016950946]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 5.0
-offset_right = 20.0
-offset_bottom = 22.0
+offset_left = 6.0
+offset_top = -1.0
+offset_right = 33.0
+offset_bottom = 25.0
 mouse_filter = 2
 texture = ExtResource("11_b1baw")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Earth" unique_id=432313107]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 5.0
-offset_right = 40.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 9
-text = "土"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Wind" type="TextureButton" parent="AlbumPage/Filters" unique_id=1987390750]
 layout_mode = 0
-offset_left = 223.0
-offset_top = 48.0
-offset_right = 265.0
-offset_bottom = 78.0
+offset_left = 202.0
+offset_top = 53.0
+offset_right = 244.0
+offset_bottom = 83.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Wind" unique_id=413107712]
-layout_mode = 0
-offset_right = 42.0
-offset_bottom = 30.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Wind" unique_id=141503541]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = -6.999998
+offset_top = -1.9999998
+offset_right = 328.2941
+offset_bottom = 203.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Wind/black2" unique_id=933215431]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Wind" unique_id=1569187071]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 5.0
-offset_right = 20.0
-offset_bottom = 22.0
+offset_left = 7.0
+offset_top = 2.0
+offset_right = 34.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource("12_084vh")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Wind" unique_id=207523266]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 5.0
-offset_right = 40.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 9
-text = "风"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Dark" type="TextureButton" parent="AlbumPage/Filters" unique_id=1176225502]
 layout_mode = 0
-offset_left = 278.0
-offset_top = 2.0
-offset_right = 343.0
-offset_bottom = 46.0
+offset_left = 7.0
+offset_top = 11.0
+offset_right = 72.0
+offset_bottom = 55.0
 ignore_texture_size = true
 
-[node name="Frame" type="TextureRect" parent="AlbumPage/Filters/Dark" unique_id=1673192192]
-layout_mode = 0
-offset_right = 65.0
-offset_bottom = 44.0
+[node name="black2" type="Control" parent="AlbumPage/Filters/Dark" unique_id=126608744]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 8.0
+offset_right = 343.2941
+offset_bottom = 205.88232
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
-texture = ExtResource("5_4r3yu")
-expand_mode = 1
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Filters/Dark/black2" unique_id=897512804]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_fxvvh")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="AlbumPage/Filters/Dark" unique_id=1217843436]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 8.0
-offset_right = 29.0
+offset_left = 23.0
+offset_top = 4.0
+offset_right = 50.0
 offset_bottom = 30.0
 mouse_filter = 2
 texture = ExtResource("13_cw21g")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="AlbumPage/Filters/Dark" unique_id=1745630040]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 8.0
-offset_right = 62.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
-text = "暗"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
-
 [node name="Grid" type="Control" parent="AlbumPage" unique_id=1767716641]
 anchors_preset = 0
-offset_left = 3.0
-offset_top = 68.0
-offset_right = 342.0
-offset_bottom = 390.0
+offset_left = 4.0
+offset_top = 70.0
+offset_right = 343.0
+offset_bottom = 392.0
 mouse_filter = 2
 
 [node name="Card1" type="TextureButton" parent="AlbumPage/Grid" unique_id=4729073]
@@ -785,16 +841,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card1" unique_id=1450454597]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card1" unique_id=1113625768]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card1/CardBack" unique_id=1842580015]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card1" unique_id=1827138616]
 visible = false
@@ -945,16 +1015,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card2" unique_id=692511143]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card2" unique_id=1444135416]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card2/CardBack" unique_id=1941449746]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card2" unique_id=1907863278]
 visible = false
@@ -1105,16 +1189,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card3" unique_id=616834550]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card3" unique_id=1329566780]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card3/CardBack" unique_id=1552008006]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card3" unique_id=1404831583]
 visible = false
@@ -1265,16 +1363,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card4" unique_id=438913115]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card4" unique_id=1817223010]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card4/CardBack" unique_id=1291278775]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card4" unique_id=1659122511]
 visible = false
@@ -1425,16 +1537,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card5" unique_id=1683137963]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card5" unique_id=2145246594]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card5/CardBack" unique_id=1674105236]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card5" unique_id=131352247]
 visible = false
@@ -1585,16 +1711,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card6" unique_id=2139090943]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card6" unique_id=1140890728]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card6/CardBack" unique_id=1633067109]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card6" unique_id=512290940]
 visible = false
@@ -1746,16 +1886,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card7" unique_id=1516134750]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card7" unique_id=150041029]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card7/CardBack" unique_id=1785021725]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card7" unique_id=769214643]
 visible = false
@@ -1907,16 +2061,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card8" unique_id=2116465743]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card8" unique_id=1777915976]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card8/CardBack" unique_id=1924226721]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card8" unique_id=1304171889]
 visible = false
@@ -2068,16 +2236,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card9" unique_id=1511414470]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card9" unique_id=233404685]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card9/CardBack" unique_id=805030905]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card9" unique_id=710660394]
 visible = false
@@ -2229,16 +2411,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card10" unique_id=2053015839]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card10" unique_id=385943011]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card10/CardBack" unique_id=154720935]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card10" unique_id=1724053971]
 visible = false
@@ -2389,16 +2585,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card11" unique_id=850595974]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card11" unique_id=871172557]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card11/CardBack" unique_id=770223568]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card11" unique_id=1195617374]
 visible = false
@@ -2550,16 +2760,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card12" unique_id=1360028350]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card12" unique_id=1960222856]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card12/CardBack" unique_id=2000779190]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card12" unique_id=2079484310]
 visible = false
@@ -2711,16 +2935,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card13" unique_id=398643517]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card13" unique_id=115284481]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card13/CardBack" unique_id=670746048]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card13" unique_id=1231413006]
 visible = false
@@ -2872,16 +3110,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card14" unique_id=730994600]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card14" unique_id=1588674785]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card14/CardBack" unique_id=2078634163]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card14" unique_id=1435971012]
 visible = false
@@ -3033,16 +3285,30 @@ scale = Vector2(0.64, 0.64)
 pivot_offset = Vector2(49, 79)
 ignore_texture_size = true
 
-[node name="Frame" type="NinePatchRect" parent="AlbumPage/Grid/Card15" unique_id=722085236]
-layout_mode = 0
-offset_right = 98.0
-offset_bottom = 158.0
+[node name="CardBack" type="Control" parent="AlbumPage/Grid/Card15" unique_id=2114709500]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = -1.0000029
+offset_top = 5.5624857
+offset_right = 505.7962
+offset_bottom = 725.95087
+scale = Vector2(0.205, 0.205)
 mouse_filter = 2
-texture = ExtResource("14_usnmi")
-patch_margin_left = 18
-patch_margin_top = 22
-patch_margin_right = 18
-patch_margin_bottom = 26
+
+[node name="NinePatch" type="NinePatchRect" parent="AlbumPage/Grid/Card15/CardBack" unique_id=1357965016]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_fxvvh")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="SelectedFrame" type="ColorRect" parent="AlbumPage/Grid/Card15" unique_id=1631701756]
 visible = false
@@ -3187,9 +3453,9 @@ stretch_mode = 5
 [node name="PageControls" type="Control" parent="AlbumPage" unique_id=1141274915]
 anchors_preset = 0
 offset_left = 116.0
-offset_top = 410.0
+offset_top = 401.0
 offset_right = 325.0
-offset_bottom = 458.0
+offset_bottom = 449.0
 scale = Vector2(0.68, 0.68)
 mouse_filter = 2
 
@@ -3248,7 +3514,6 @@ offset_left = 18.0
 offset_top = 100.0
 offset_right = 357.0
 offset_bottom = 529.0
-mouse_filter = 0
 
 [node name="Frame" type="Panel" parent="DetailPanel" unique_id=1747680476]
 layout_mode = 0
@@ -3327,7 +3592,7 @@ layout_mode = 0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
-texture = ExtResource("16_qr0pi")
+texture = ExtResource("18_star_gold")
 expand_mode = 1
 stretch_mode = 5
 
@@ -3337,7 +3602,7 @@ offset_left = 15.0
 offset_right = 29.0
 offset_bottom = 14.0
 mouse_filter = 2
-texture = ExtResource("16_qr0pi")
+texture = ExtResource("18_star_gold")
 expand_mode = 1
 stretch_mode = 5
 
@@ -3347,7 +3612,7 @@ offset_left = 30.0
 offset_right = 44.0
 offset_bottom = 14.0
 mouse_filter = 2
-texture = ExtResource("16_qr0pi")
+texture = ExtResource("18_star_gold")
 expand_mode = 1
 stretch_mode = 5
 
@@ -3357,7 +3622,7 @@ offset_left = 45.0
 offset_right = 59.0
 offset_bottom = 14.0
 mouse_filter = 2
-texture = ExtResource("16_qr0pi")
+texture = ExtResource("18_star_gold")
 expand_mode = 1
 stretch_mode = 5
 
@@ -3367,7 +3632,7 @@ offset_left = 60.0
 offset_right = 74.0
 offset_bottom = 14.0
 mouse_filter = 2
-texture = ExtResource("16_qr0pi")
+texture = ExtResource("18_star_gold")
 expand_mode = 1
 stretch_mode = 5
 
@@ -3443,23 +3708,23 @@ text = "生命"
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat1" unique_id=1350298611]
+[node name="BarBg" type="Panel" parent="DetailPanel/Stats/Stat1" unique_id=1350298611]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 149.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat1" unique_id=477875968]
+[node name="Fill" type="Panel" parent="DetailPanel/Stats/Stat1" unique_id=477875968]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 97.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.32, 0.95, 0.52, 0.92)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Value" type="Label" parent="DetailPanel/Stats/Stat1" unique_id=2025192314]
 layout_mode = 0
@@ -3506,23 +3771,23 @@ text = "攻击"
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat2" unique_id=911336973]
+[node name="BarBg" type="Panel" parent="DetailPanel/Stats/Stat2" unique_id=911336973]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 149.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat2" unique_id=1841592708]
+[node name="Fill" type="Panel" parent="DetailPanel/Stats/Stat2" unique_id=1841592708]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 97.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.32, 0.95, 0.52, 0.92)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Value" type="Label" parent="DetailPanel/Stats/Stat2" unique_id=1573421675]
 layout_mode = 0
@@ -3569,23 +3834,23 @@ text = "防御"
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat3" unique_id=588335619]
+[node name="BarBg" type="Panel" parent="DetailPanel/Stats/Stat3" unique_id=588335619]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 149.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat3" unique_id=1854729795]
+[node name="Fill" type="Panel" parent="DetailPanel/Stats/Stat3" unique_id=1854729795]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 97.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.32, 0.95, 0.52, 0.92)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Value" type="Label" parent="DetailPanel/Stats/Stat3" unique_id=952832100]
 layout_mode = 0
@@ -3632,23 +3897,23 @@ text = "速度"
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="DetailPanel/Stats/Stat4" unique_id=1392539974]
+[node name="BarBg" type="Panel" parent="DetailPanel/Stats/Stat4" unique_id=1392539974]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 149.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="DetailPanel/Stats/Stat4" unique_id=537984997]
+[node name="Fill" type="Panel" parent="DetailPanel/Stats/Stat4" unique_id=537984997]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 9.0
 offset_right = 97.0
 offset_bottom = 17.0
 mouse_filter = 2
-color = Color(0.32, 0.95, 0.52, 0.92)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Value" type="Label" parent="DetailPanel/Stats/Stat4" unique_id=1597512229]
 layout_mode = 0
@@ -3740,9 +4005,9 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
 [node name="Title" type="Label" parent="DetailPanel/EvolutionStrip" unique_id=604077708]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 5.0
-offset_right = 94.0
-offset_bottom = 28.0
+offset_top = 6.0
+offset_right = 102.0
+offset_bottom = 29.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -3754,20 +4019,20 @@ clip_text = true
 
 [node name="From" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=386138863]
 layout_mode = 0
-offset_left = 117.0
-offset_top = 11.0
-offset_right = 158.0
-offset_bottom = 52.0
+offset_left = 112.0
+offset_top = 17.0
+offset_right = 146.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Arrow" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=1135579736]
 layout_mode = 0
-offset_left = 166.0
-offset_top = 21.0
-offset_right = 194.0
-offset_bottom = 39.0
+offset_left = 158.0
+offset_top = 25.0
+offset_right = 188.0
+offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("26_40u1r")
 expand_mode = 1
@@ -3776,19 +4041,19 @@ stretch_mode = 5
 [node name="To" type="TextureRect" parent="DetailPanel/EvolutionStrip" unique_id=472393607]
 layout_mode = 0
 offset_left = 202.0
-offset_top = 11.0
-offset_right = 243.0
-offset_bottom = 52.0
+offset_top = 17.0
+offset_right = 236.0
+offset_bottom = 51.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Empty" type="Label" parent="DetailPanel/EvolutionStrip" unique_id=101542087]
 layout_mode = 0
-offset_left = 108.0
-offset_top = 21.0
-offset_right = 226.0
-offset_bottom = 44.0
+offset_left = 152.0
+offset_top = 20.0
+offset_right = 282.0
+offset_bottom = 47.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -3816,9 +4081,9 @@ clip_text = true
 
 [node name="CloseButton" type="TextureButton" parent="DetailPanel" unique_id=1440138589]
 layout_mode = 0
-offset_left = 27.0
+offset_left = 111.0
 offset_top = 377.0
-offset_right = 143.0
+offset_right = 227.0
 offset_bottom = 413.0
 ignore_texture_size = true
 
@@ -3844,35 +4109,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="EvolveButton" type="TextureButton" parent="DetailPanel" unique_id=729252360]
-layout_mode = 0
-offset_left = 196.0
-offset_top = 377.0
-offset_right = 312.0
-offset_bottom = 413.0
-ignore_texture_size = true
-
-[node name="Frame" type="Panel" parent="DetailPanel/EvolveButton" unique_id=1512668888]
-layout_mode = 0
-offset_right = 116.0
-offset_bottom = 36.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
-
-[node name="Text" type="Label" parent="DetailPanel/EvolveButton" unique_id=1775202593]
-layout_mode = 0
-offset_top = 5.0
-offset_right = 116.0
-offset_bottom = 29.0
-theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
-theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 16
-text = "进化"
-horizontal_alignment = 1
-vertical_alignment = 1
-clip_text = true
 
 [node name="BondPage" type="Control" parent="." unique_id=1441497115]
 visible = false
@@ -5129,10 +5365,10 @@ flat = true
 
 [node name="Icon" type="TextureRect" parent="LobbyBottomNav/HomeButton" unique_id=310479679]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 49.0
-offset_bottom = 35.0
+offset_left = 24.0
+offset_top = 11.0
+offset_right = 55.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("39_home")
 expand_mode = 1
@@ -5140,8 +5376,9 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/HomeButton" unique_id=1029839991]
 layout_mode = 0
+offset_left = 6.0
 offset_top = 34.0
-offset_right = 67.0
+offset_right = 73.0
 offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 11
@@ -5161,9 +5398,9 @@ flat = true
 
 [node name="Selected" type="TextureRect" parent="LobbyBottomNav/PetsButton" unique_id=1066701276]
 layout_mode = 0
-offset_left = 3.0
+offset_left = 10.0
 offset_top = 1.0
-offset_right = 64.0
+offset_right = 71.0
 offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("38_nav_selected")
@@ -5171,10 +5408,10 @@ expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="LobbyBottomNav/PetsButton" unique_id=562830085]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 49.0
-offset_bottom = 35.0
+offset_left = 25.0
+offset_top = 11.0
+offset_right = 56.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("40_pets")
 expand_mode = 1
@@ -5182,8 +5419,9 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/PetsButton" unique_id=1401126836]
 layout_mode = 0
+offset_left = 7.0
 offset_top = 34.0
-offset_right = 67.0
+offset_right = 74.0
 offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 11
@@ -5204,9 +5442,9 @@ flat = true
 [node name="Selected" type="TextureRect" parent="LobbyBottomNav/BattleButton" unique_id=1302234052]
 visible = false
 layout_mode = 0
-offset_left = 3.0
+offset_left = 10.0
 offset_top = 1.0
-offset_right = 64.0
+offset_right = 71.0
 offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("38_nav_selected")
@@ -5214,10 +5452,10 @@ expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="LobbyBottomNav/BattleButton" unique_id=960828762]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 49.0
-offset_bottom = 35.0
+offset_left = 25.0
+offset_top = 11.0
+offset_right = 56.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("41_battle")
 expand_mode = 1
@@ -5225,8 +5463,9 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/BattleButton" unique_id=1687611525]
 layout_mode = 0
+offset_left = 8.0
 offset_top = 34.0
-offset_right = 67.0
+offset_right = 75.0
 offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 11
@@ -5247,9 +5486,9 @@ flat = true
 [node name="Selected" type="TextureRect" parent="LobbyBottomNav/ShopButton" unique_id=759655130]
 visible = false
 layout_mode = 0
-offset_left = 3.0
+offset_left = 8.0
 offset_top = 1.0
-offset_right = 64.0
+offset_right = 69.0
 offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("38_nav_selected")
@@ -5257,10 +5496,10 @@ expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="LobbyBottomNav/ShopButton" unique_id=816399818]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 49.0
-offset_bottom = 35.0
+offset_left = 24.0
+offset_top = 11.0
+offset_right = 55.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("42_shop")
 expand_mode = 1
@@ -5268,8 +5507,9 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/ShopButton" unique_id=79648162]
 layout_mode = 0
+offset_left = 7.0
 offset_top = 34.0
-offset_right = 67.0
+offset_right = 74.0
 offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 11
@@ -5289,10 +5529,10 @@ flat = true
 
 [node name="Icon" type="TextureRect" parent="LobbyBottomNav/MenuButton" unique_id=596704928]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 49.0
-offset_bottom = 35.0
+offset_left = 25.0
+offset_top = 10.0
+offset_right = 56.0
+offset_bottom = 41.0
 mouse_filter = 2
 texture = ExtResource("43_menu")
 expand_mode = 1
@@ -5300,12 +5540,12 @@ stretch_mode = 5
 
 [node name="Text" type="Label" parent="LobbyBottomNav/MenuButton" unique_id=744559604]
 layout_mode = 0
+offset_left = 8.0
 offset_top = 34.0
-offset_right = 67.0
+offset_right = 75.0
 offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 11
 text = "菜单"
 horizontal_alignment = 1
 vertical_alignment = 1
-

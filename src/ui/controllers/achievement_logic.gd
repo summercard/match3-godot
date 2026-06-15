@@ -41,7 +41,7 @@ const ACHIEVEMENT_ASSETS := {
 	"disabled": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_normal.png",
 	"stamp": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
 	"lock": "res://assets/images/ui/icons/album_icon_lock.png",
-	"badge_star": "res://assets/images/ui/icons/album_icon_star_lit.png",
+	"badge_star": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
 	"badge_battle": "res://assets/images/ui/icons/common_nav_icon_nav_battle.png",
 	"badge_collect": "res://assets/images/ui/icons/common_nav_icon_nav_album.png",
 	"badge_growth": "res://assets/images/ui/icons/common_nav_icon_nav_pets.png",

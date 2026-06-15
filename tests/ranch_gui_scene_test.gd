@@ -30,6 +30,24 @@ func _run() -> void:
 			if not path.ends_with("PageText"):
 				_expect(ranch.get_node(path) is TextureButton, "interactive node should be TextureButton: %s" % path)
 		_expect(ranch.get_node("Pages/RanchPage/RosterPanel/Frame") is TextureRect, "farm roster backing should match classroom and social TextureRect panels")
+		for panel_path in [
+			"Pages/RanchPage/RosterPanel",
+			"Pages/ClassroomPage/RosterPanel",
+			"Pages/SocialPage/RosterPanel",
+		]:
+			var roster_back := ranch.get_node("%s/Frame/black/NinePatch" % panel_path) as NinePatchRect
+			_expect(roster_back.texture.resource_path.ends_with("black.png"), "%s roster backing should use the shared black nine-patch art" % panel_path)
+			var card_back := ranch.get_node("%s/Card1/CardBack/NinePatch" % panel_path) as NinePatchRect
+			_expect(card_back.texture.resource_path.ends_with("panel_base.png"), "%s card should use the album-style backing" % panel_path)
+			_expect(ranch.get_node("%s/Card1/Level" % panel_path) is Label, "%s card should show a level label" % panel_path)
+			_expect(not ranch.has_node("%s/Card1/Frame" % panel_path), "%s card should not keep the old roster frame" % panel_path)
+			_expect((ranch.get_node("%s/Card1" % panel_path) as Control).position == Vector2(12.0, 12.0), "%s first roster card should follow the farm card layout" % panel_path)
+			_expect((ranch.get_node("%s/Card6" % panel_path) as Control).position == Vector2(297.0, 12.0), "%s roster cards should be evenly spaced" % panel_path)
+			_expect((ranch.get_node("%s/Card1/Level" % panel_path) as Control).position == Vector2(6.0, 71.0), "%s level label should follow the farm card layout" % panel_path)
+			_expect((ranch.get_node("%s/PreviousButton" % panel_path) as Control).position == Vector2(106.0, 109.0), "%s previous button should align with the shared roster pagination" % panel_path)
+			_expect((ranch.get_node("%s/NextButton" % panel_path) as Control).position == Vector2(214.0, 108.0), "%s next button should align with the shared roster pagination" % panel_path)
+			_expect((ranch.get_node("%s/PreviousButton/Frame" % panel_path) as TextureRect).texture.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "%s previous button should use the shared ranch round art" % panel_path)
+			_expect((ranch.get_node("%s/NextButton/Frame" % panel_path) as TextureRect).texture.resource_path.ends_with("ranch_ui_btn_next_round.png"), "%s next button should use the shared ranch round art" % panel_path)
 		(ranch.get_node("Pages/RanchPage/BottomButtons/ClassroomButton") as TextureButton).pressed.emit()
 		_expect((ranch.get_node("Pages/ClassroomPage") as Control).visible, "classroom button should reveal classroom GUI page")
 		(ranch.get_node("Pages/ClassroomPage/BottomButtons/SocialButton") as TextureButton).pressed.emit()

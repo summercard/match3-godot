@@ -41,8 +41,8 @@ const ALBUM_ASSETS := {
 	"btn_secondary": "res://assets/images/ui/buttons/album_ui_btn_secondary_blue.png",
 	"bottom_tab_selected": "res://assets/images/ui/buttons/album_ui_dex_mode_tab_selected.png",
 	"bottom_tab_normal": "res://assets/images/ui/buttons/album_ui_dex_mode_tab_normal.png",
-	"icon_star_lit": "res://assets/images/ui/icons/album_icon_star_lit.png",
-	"icon_star_dim": "res://assets/images/ui/icons/album_icon_star_dim.png",
+	"icon_star_lit": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
+	"icon_star_dim": "res://assets/images/ui/icons/battle_flow_new_icon_star_silver.png",
 	"icon_lock": "res://assets/images/ui/icons/album_icon_lock.png",
 	"icon_album": "res://assets/images/ui/icons/album_icon_album_book.png",
 	"icon_paw": "res://assets/images/ui/icons/album_icon_paw.png",
@@ -110,7 +110,6 @@ var _time: float = 0.0
 
 var _back_rect := Rect2(12.0, 12.0, 52.0, 52.0)
 var _detail_close_rect := Rect2(286.0, DETAIL_Y + 194.0, 72.0, 36.0)
-var _detail_evolve_rect := Rect2(126.0, DETAIL_Y + 194.0, 124.0, 36.0)
 var _pokedex_cache: Dictionary = {}  # 缓存pokedex数据
 
 func _ready() -> void:
@@ -637,11 +636,6 @@ func _go_back() -> void:
 	var manager := _root_node("SceneManager")
 	if manager and manager.has_method("switch_scene"):
 		manager.switch_scene("main")
-
-func _go_evolve() -> void:
-	var manager := _root_node("SceneManager")
-	if manager and manager.has_method("switch_scene"):
-		manager.switch_scene("evolve", {"monsterId": _selected_monster_id})
 
 func _pick_representative_instance(instances: Array) -> Dictionary:
 	var best: Dictionary = {}

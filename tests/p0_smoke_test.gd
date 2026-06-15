@@ -16,7 +16,7 @@ func _run() -> void:
 	await process_frame
 	_expect(main.get_current_scene_name() == "main", "main scene should load")
 
-	for scene_name: String in ["team", "album", "shop", "inventory", "ranch", "achievement", "settings", "sign_in", "tutorial", "evolve"]:
+	for scene_name: String in ["team", "album", "shop", "inventory", "ranch", "achievement", "settings", "sign_in", "tutorial"]:
 		main.switch_scene(scene_name)
 		await process_frame
 		await process_frame

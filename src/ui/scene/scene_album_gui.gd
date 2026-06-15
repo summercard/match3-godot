@@ -95,7 +95,6 @@ func _connect_gui_actions() -> void:
 	_connect_button("AlbumPage/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("AlbumPage/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("DetailPanel/CloseButton", _on_detail_close_pressed)
-	_connect_button("DetailPanel/EvolveButton", _go_evolve)
 	for i in TAB_PATHS.size():
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(TAB_IDS[i]))
 	_connect_button("LobbyBottomNav/HomeButton", _go_to_scene.bind("main"))
@@ -105,7 +104,7 @@ func _connect_gui_actions() -> void:
 	_connect_button("LobbyBottomNav/MenuButton", _go_to_scene.bind("settings"))
 
 func _attach_gui_feedback() -> void:
-	var primary_paths := ["DetailPanel/EvolveButton"]
+	var primary_paths := []
 	for path in FILTER_PATHS + CARD_PATHS + TAB_PATHS + [
 		"Header/BackButton",
 		"AlbumPage/PageControls/PreviousButton",
@@ -235,21 +234,23 @@ func _sync_pages() -> void:
 func _sync_filters() -> void:
 	for i in FILTER_PATHS.size():
 		var button := get_node(FILTER_PATHS[i]) as TextureButton
-		var frame := button.get_node("Frame") as TextureRect
 		var element: String = ELEMENT_ORDER[i]
 		var selected: bool = element == _selected_element
 		var compact := element in ["all", "thunder", "earth", "wind"]
 		var texture_key := "filter_selected" if selected else "filter_normal"
 		if compact:
 			texture_key = "filter_compact_selected" if selected else "filter_compact_normal"
-		frame.texture = _album_texture(texture_key)
+		var frame := button.get_node_or_null("Frame") as TextureRect
+		if frame != null:
+			frame.texture = _album_texture(texture_key)
 		var icon := button.get_node("Icon") as TextureRect
 		icon.visible = element != "all"
 		icon.texture = _element_texture(element)
-		var text := button.get_node("Text") as Label
-		text.text = str(ELEMENT_NAMES.get(element, element))
-		text.add_theme_color_override("font_color", Color(0.12, 0.43, 0.72) if selected else Color(0.43, 0.24, 0.07))
-		text.add_theme_color_override("font_shadow_color", Color(1.0, 0.96, 0.82, 0.72))
+		var text := button.get_node_or_null("Text") as Label
+		if text != null:
+			text.text = str(ELEMENT_NAMES.get(element, element))
+			text.add_theme_color_override("font_color", Color(0.12, 0.43, 0.72) if selected else Color(0.43, 0.24, 0.07))
+			text.add_theme_color_override("font_shadow_color", Color(1.0, 0.96, 0.82, 0.72))
 
 func _sync_grid() -> void:
 	var start := _album_page * PAGE_SIZE
@@ -361,7 +362,7 @@ func _sync_detail_stats(monster: Dictionary) -> void:
 		var row := get_node("DetailPanel/Stats/Stat%d" % (i + 1)) as Control
 		(row.get_node("Name") as Label).text = STAT_LABELS[i]
 		(row.get_node("Value") as Label).text = str(stats[i])
-		(row.get_node("Fill") as ColorRect).size.x = 92.0 * clampf(float(stats[i]) / 230.0, 0.08, 1.0)
+		(row.get_node("Fill") as Control).size.x = 92.0 * clampf(float(stats[i]) / 230.0, 0.08, 1.0)
 
 func _sync_detail_skill(monster: Dictionary) -> void:
 	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
@@ -373,7 +374,9 @@ func _sync_detail_skill(monster: Dictionary) -> void:
 
 func _sync_detail_evolution(monster: Dictionary) -> void:
 	var id := str(monster.get("id", ""))
-	(get_node("DetailPanel/EvolutionStrip/From") as TextureRect).texture = _monster_texture(id, "album")
+	var from := get_node("DetailPanel/EvolutionStrip/From") as TextureRect
+	from.visible = true
+	from.texture = _monster_texture(id, "album")
 	var has_evolution := _selected_has_evolution()
 	(get_node("DetailPanel/EvolutionStrip/Arrow") as TextureRect).visible = has_evolution
 	(get_node("DetailPanel/EvolutionStrip/To") as TextureRect).visible = has_evolution

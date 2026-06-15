@@ -23,7 +23,6 @@ const PACKED_SCENE_MAP: Dictionary = {
 	"settings": "res://src/ui/scenes/settings.tscn",
 	"sign_in": "res://src/ui/scenes/sign_in.tscn",
 	"tutorial": "res://src/ui/scenes/tutorial.tscn",
-	"evolve": "res://src/ui/scenes/evolve.tscn",
 }
 
 var _current_scene: Control = null

@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://b1bwnmo8umrai"]
 
+[ext_resource type="Texture2D" uid="uid://cxu21xl1tnpxm" path="res://assets/images/ui/generated_panel_parts/panel_base2.png" id="1_5qj8m"]
 [ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="1_black"]
 [ext_resource type="Texture2D" uid="uid://dwkrhwuewy1ru" path="res://assets/新美术资产/ui/black2.png" id="2_black2"]
 [ext_resource type="Texture2D" uid="uid://du8qtbs0nkv7x" path="res://assets/新美术资产/ui/black3.png" id="3_black3"]
@@ -17,6 +18,31 @@ anchors_preset = 0
 offset_right = 1420.0
 offset_bottom = 1040.0
 mouse_filter = 2
+
+[node name="ui底图2" type="Control" parent="." unique_id=1318634278]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = 461.00012
+offset_top = 951.0
+offset_right = 967.79626
+offset_bottom = 1671.3884
+scale = Vector2(0.515, 0.515)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="ui底图2" unique_id=1687705722]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_5qj8m")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="black" type="Control" parent="." unique_id=1695228943]
 custom_minimum_size = Vector2(360, 246)
@@ -47,16 +73,21 @@ patch_margin_bottom = 62
 [node name="black2" type="Control" parent="." unique_id=588660390]
 custom_minimum_size = Vector2(320, 94)
 anchors_preset = 0
-offset_left = 410.0
-offset_top = 20.0
-offset_right = 730.0
-offset_bottom = 155.0
+offset_left = -670.0
+offset_top = 51.0
+offset_right = -334.0
+offset_bottom = 315.0
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="black2" unique_id=1393918341]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_black2")
@@ -75,9 +106,14 @@ offset_bottom = 1002.0
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="black3" unique_id=962735959]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -229.0
+offset_top = 117.0
+offset_right = 137.0
+offset_bottom = -95.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_black3")
@@ -89,10 +125,10 @@ patch_margin_bottom = 132
 [node name="butter01" type="Control" parent="." unique_id=377147014]
 custom_minimum_size = Vector2(360, 108)
 anchors_preset = 0
-offset_left = 20.0
-offset_top = 294.0
-offset_right = 380.0
-offset_bottom = 402.0
+offset_left = -1043.0
+offset_top = 763.0
+offset_right = -385.0
+offset_bottom = 1023.0
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="butter01" unique_id=59218314]
@@ -110,18 +146,17 @@ patch_margin_bottom = 72
 [node name="butter02" type="Control" parent="." unique_id=1544779525]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
-offset_left = 410.0
-offset_top = 146.0
-offset_right = 670.0
-offset_bottom = 231.0
+offset_left = -953.0
+offset_top = 465.0
+offset_right = -562.0
+offset_bottom = 670.0
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="butter02" unique_id=470646400]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 texture = ExtResource("5_butter02")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -142,10 +177,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 283.0
-offset_top = 28.0
-offset_right = 269.0
-offset_bottom = 28.0
+offset_left = 16.0
+offset_top = 1.0
+offset_right = 2.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("6_ribbon")
@@ -163,9 +198,12 @@ scale = Vector2(0.515, 0.515)
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="ui底图" unique_id=1615594271]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("7_panel_base")
@@ -188,6 +226,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("8_blue_trim")
 patch_margin_left = 210
 patch_margin_right = 210
@@ -206,6 +246,12 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 81.0
+offset_top = 163.0
+offset_right = 166.0
+offset_bottom = 734.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("9_yellow_bar")
 patch_margin_left = 180
 patch_margin_top = 105

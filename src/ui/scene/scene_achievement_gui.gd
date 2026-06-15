@@ -26,7 +26,7 @@ const GUI_ASSETS := {
 	"collect": "res://assets/images/ui/icons/common_nav_icon_nav_album.png",
 	"numeric": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"continuous": "res://assets/images/ui/icons/common_nav_icon_nav_signin.png",
-	"star": "res://assets/images/ui/icons/album_icon_star_lit.png",
+	"star": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
 	"check": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
 	"nav_panel": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_panel.png",
 	"nav_selected": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_selected.png",

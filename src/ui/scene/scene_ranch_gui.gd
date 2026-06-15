@@ -963,14 +963,9 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String) -> void:
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var instance := _get_instance(instance_id)
-	_set_texture(card.get_node("Frame") as TextureRect, _tex(RANCH_ASSETS["roster_card_selected" if selected else "roster_card"]))
 	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
 	_set_text(card.get_node("Name") as Label, "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))])
-	var detail := "Lv.%d" % _get_monster_level(instance_id)
-	if context != "ranch":
-		var element: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
-		detail += " · " + element
-	_set_text(card.get_node("Level") as Label, detail)
+	_set_text(card.get_node("Level") as Label, "Lv.%d" % _get_monster_level(instance_id))
 	var detail_label := card.get_node("Detail") as Label
 	_set_visible(detail_label, false)
 	_set_text(detail_label, _get_nature_name(str(instance.get("nature", ""))).substr(0, 3))
