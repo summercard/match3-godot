@@ -146,10 +146,10 @@ patch_margin_bottom = 72
 [node name="butter02" type="Control" parent="." unique_id=1544779525]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
-offset_left = -953.0
-offset_top = 465.0
-offset_right = -562.0
-offset_bottom = 670.0
+offset_left = -192.0
+offset_top = -103.0
+offset_right = 199.0
+offset_bottom = 102.0
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="butter02" unique_id=470646400]
@@ -157,6 +157,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("5_butter02")
 patch_margin_left = 72
 patch_margin_top = 44

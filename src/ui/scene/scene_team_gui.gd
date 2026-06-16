@@ -1,7 +1,12 @@
 class_name SceneTeamGui
-extends "res://src/ui/controllers/team_logic.gd"
+extends Control
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterArtDBScript := preload("res://src/data/monster_art_db.gd")
+const MonsterDBScript := preload("res://src/data/monster_db.gd")
+
+signal team_changed(team: Dictionary)
+signal scene_exit()
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/team_new_bg_team_hall.png",
@@ -17,7 +22,7 @@ const GUI_ASSETS := {
 	"roster_panel": "res://assets/images/ui/panels/ranch_ui_care_roster_panel.png",
 	"roster_card": "res://assets/images/ui/cards/ranch_ui_roster_card_ranch.png",
 	"roster_card_selected": "res://assets/images/ui/cards/ranch_ui_roster_card_ranch_selected.png",
-	"check": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
+	"check": "res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png",
 	"nav_panel": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_panel.png",
 	"nav_selected": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_selected.png",
 	"nav_home": "res://assets/images/ui/icons/common_nav_icon_nav_home.png",
@@ -34,6 +39,11 @@ const GUI_ASSETS := {
 }
 
 const GUI_ROSTER_PAGE_SIZE := 6
+const SORT_OPTIONS := [
+	{"id": "level", "label": "等级"},
+	{"id": "power", "label": "战力"},
+	{"id": "rarity", "label": "稀有度"},
+]
 const SLOT_PATHS := {
 	"member1": "TeamSlots/Member1Slot",
 	"leader": "TeamSlots/LeaderSlot",
@@ -62,19 +72,36 @@ const NAV_ITEMS := [
 	{"id": "menu", "label": "菜单", "icon": "nav_menu", "scene": "settings"},
 ]
 
+var _storage: Node = null
+var _team: Dictionary = {"leader": null, "member1": null, "member2": null}
+var _selected_slot: String = ""
+var _roster_page: int = 0
+var _captured_monsters: Array = []
+var _active_filter: String = "all"
+var _sort_option: int = 0
+var _time_acc: float = 0.0
+var _texture_cache: Dictionary = {}
+var _slots: Array = []
+
 
 func _ready() -> void:
+	_refresh_services()
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(false)
 	_update_slots_layout()
 	_connect_gui_actions()
 	_attach_gui_feedback()
 	_sync_gui()
-	# 入场动画由 team.tscn 里的 EntryAnim (AnimationPlayer) 通过 autoplay 自动播放
+	_play_entry_animation()
 
 
-func init(data: Dictionary = {}) -> void:
-	super.init(data)
+func init(_data: Dictionary = {}) -> void:
+	_refresh_services()
+	_roster_page = 0
+	_selected_slot = ""
+	_active_filter = "all"
+	_sort_option = 0
+	_update_slots_layout()
 	_sync_gui()
 
 
@@ -85,12 +112,243 @@ func _process(delta: float) -> void:
 		set_process(false)
 
 
-func _draw() -> void:
-	pass
+func _play_entry_animation() -> void:
+	var anim := get_node_or_null("EntryAnim") as AnimationPlayer
+	if anim == null:
+		return
+	_set_entry_animation_start_state()
+	anim.stop()
+	anim.play("default/entry")
 
 
-func _gui_input(_event: InputEvent) -> void:
-	pass
+func _set_entry_animation_start_state() -> void:
+	var currency_bar := get_node_or_null("CurrencyBar") as Control
+	if currency_bar != null:
+		currency_bar.position.y = -30.0
+		currency_bar.modulate.a = 0.0
+	var team_slots := get_node_or_null("TeamSlots") as Control
+	if team_slots != null:
+		team_slots.scale = Vector2(0.85, 0.85)
+		team_slots.modulate.a = 0.0
+	var power_panel := get_node_or_null("PowerPanel") as Control
+	if power_panel != null:
+		power_panel.scale = Vector2(0.96, 0.96)
+		power_panel.modulate.a = 0.0
+	var roster_panel := get_node_or_null("RosterPanel") as Control
+	if roster_panel != null:
+		roster_panel.scale = Vector2(0.96, 0.96)
+		roster_panel.modulate.a = 0.0
+	var bottom_nav := get_node_or_null("BottomNav") as Control
+	if bottom_nav != null:
+		bottom_nav.position.y = 632.0
+		bottom_nav.modulate.a = 0.0
+
+
+static func warm_assets() -> void:
+	for path in GUI_ASSETS.values():
+		ResourceLoader.load(str(path), "", ResourceLoader.CACHE_MODE_REUSE)
+	for monster_id in ["monster_001", "monster_002", "monster_003"]:
+		var art_path := MonsterArtDBScript.get_art_path(monster_id, "team")
+		if not art_path.is_empty():
+			ResourceLoader.load(art_path, "", ResourceLoader.CACHE_MODE_REUSE)
+
+
+func _refresh_services() -> void:
+	_storage = get_node_or_null("/root/SaveManager")
+	_load_team_state()
+	_captured_monsters = _get_captured_monsters()
+
+
+func _load_team_state() -> void:
+	if _storage != null and _storage.has_method("load_team"):
+		var saved: Dictionary = _storage.load_team()
+		_team = {
+			"leader": saved.get("leader", null),
+			"member1": saved.get("member1", null),
+			"member2": saved.get("member2", null),
+		}
+	else:
+		_team = {"leader": null, "member1": null, "member2": null}
+
+
+func _get_captured_monsters() -> Array:
+	if _storage == null:
+		return []
+	if _storage.has_method("get_owned_monsters"):
+		return _storage.get_owned_monsters()
+	if _storage.has_method("load_player"):
+		var player: Dictionary = _storage.load_player()
+		var result: Array = []
+		for monster_id in player.get("captured", []):
+			result.append({"instanceId": str(monster_id), "monsterId": str(monster_id), "level": 1, "nature": ""})
+		return result
+	return []
+
+
+func _get_instance_id(value: Variant) -> String:
+	if value is Dictionary:
+		return str((value as Dictionary).get("instanceId", ""))
+	return str(value)
+
+
+func _get_monster_id(value: Variant) -> String:
+	if value is Dictionary:
+		return str((value as Dictionary).get("monsterId", (value as Dictionary).get("id", "")))
+	var ref_id := str(value)
+	var instance := _get_monster_instance(ref_id)
+	if not instance.is_empty():
+		return str(instance.get("monsterId", ""))
+	return ref_id
+
+
+func _get_monster_instance(ref_id: String) -> Dictionary:
+	if _storage != null and _storage.has_method("get_monster_instance"):
+		var instance: Variant = _storage.get_monster_instance(ref_id)
+		if instance is Dictionary:
+			return instance
+	return {}
+
+
+func _get_monster_data(monster_id: String) -> Dictionary:
+	if monster_id.is_empty():
+		return {}
+	return MonsterDBScript.get_monster(_get_monster_id(monster_id))
+
+
+func _get_real_level(ref_id: String) -> int:
+	if _storage == null:
+		return 1
+	var instance := _get_monster_instance(ref_id)
+	if _storage.has_method("get_instance_level") and not instance.is_empty():
+		return int(_storage.get_instance_level(ref_id))
+	if _storage.has_method("get_monster_level"):
+		return int(_storage.get_monster_level(ref_id))
+	if not instance.is_empty():
+		return int(instance.get("level", 1))
+	return 1
+
+
+func _get_nature(ref_id: String) -> String:
+	if _storage == null:
+		return ""
+	var instance := _get_monster_instance(ref_id)
+	if _storage.has_method("get_instance_nature") and not instance.is_empty():
+		return str(_storage.get_instance_nature(ref_id))
+	if _storage.has_method("get_monster_nature"):
+		return str(_storage.get_monster_nature(ref_id))
+	if not instance.is_empty():
+		return str(instance.get("nature", ""))
+	return ""
+
+
+func _calc_team_power() -> int:
+	var total := 0
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		var ref_id := "" if value == null else str(value)
+		if ref_id.is_empty():
+			continue
+		var stats := _calc_stats(ref_id, _get_real_level(ref_id))
+		total += int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	return total
+
+
+func _calc_stats(monster_id: String, level: int) -> Dictionary:
+	if _storage != null and _storage.has_method("get_instance_stats") and not _get_monster_instance(monster_id).is_empty():
+		return _storage.get_instance_stats(monster_id)
+	return MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
+
+
+func _clamp_roster_page() -> void:
+	_roster_page = clampi(_roster_page, 0, _get_roster_page_count() - 1)
+
+
+func _get_display_monsters() -> Array:
+	var result: Array = []
+	for instance in _captured_monsters:
+		if not (instance is Dictionary):
+			continue
+		var monster_id := _get_monster_id(instance)
+		var md := _get_monster_data(monster_id)
+		if md.is_empty():
+			continue
+		var element := str(md.get("boardAffinity", md.get("element", "")))
+		if _active_filter != "all" and element != _active_filter:
+			continue
+		result.append(instance)
+	var sort_id := str(SORT_OPTIONS[_sort_option]["id"])
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var score_a := _get_sort_score(a, sort_id)
+		var score_b := _get_sort_score(b, sort_id)
+		if score_a == score_b:
+			return _get_instance_id(a) < _get_instance_id(b)
+		return score_a > score_b
+	)
+	return result
+
+
+func _get_sort_score(instance: Dictionary, sort_id: String) -> int:
+	var instance_id := _get_instance_id(instance)
+	var md := _get_monster_data(_get_monster_id(instance))
+	if sort_id == "rarity":
+		return int(md.get("rarity", 1))
+	if sort_id == "power":
+		var stats := _calc_stats(instance_id, _get_real_level(instance_id))
+		return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	return _get_real_level(instance_id)
+
+
+func _handle_slot_tap(slot_key: String) -> void:
+	if _team.get(slot_key) != null:
+		_team[slot_key] = null
+		if _selected_slot == slot_key:
+			_selected_slot = ""
+	else:
+		_selected_slot = "" if _selected_slot == slot_key else slot_key
+
+
+func _turn_roster_page(direction: int) -> void:
+	if direction == 0:
+		return
+	var page_count := _get_roster_page_count()
+	if page_count <= 1:
+		_roster_page = 0
+		return
+	_roster_page = clampi(_roster_page + direction, 0, page_count - 1)
+
+
+func _assign_to_slot(monster_id: String) -> void:
+	if monster_id.is_empty():
+		return
+	if _selected_slot.is_empty():
+		for key in ["leader", "member1", "member2"]:
+			if _team.get(key) == null:
+				_team[key] = monster_id
+				return
+		_team["leader"] = monster_id
+		return
+	var existing: Variant = _team[_selected_slot]
+	_team[_selected_slot] = monster_id
+	for key in ["leader", "member1", "member2"]:
+		if key != _selected_slot and _team.get(key) == monster_id:
+			_team[key] = existing
+			break
+	_selected_slot = ""
+
+
+func _save_team() -> void:
+	if _storage != null and _storage.has_method("save_team"):
+		_storage.save_team(_team)
+		emit_signal("team_changed", _team)
+
+
+func _change_to_scene(scene_name: String) -> void:
+	if has_node("/root/SceneManager"):
+		get_node("/root/SceneManager").switch_scene(scene_name, {}, "quick")
+	elif has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm != null and gm.has_node("scene_manager"):
+			gm.scene_manager.switch_scene(scene_name, {}, "quick")
 
 
 func _update_slots_layout() -> void:
@@ -99,8 +357,6 @@ func _update_slots_layout() -> void:
 		{"key": "leader", "rect": Rect2(128.0, 145.0, 119.0, 210.0), "label": "队长"},
 		{"key": "member2", "rect": Rect2(254.0, 188.0, 78.0, 160.0), "label": "右位"},
 	]
-	_roster_prev_btn = Rect2(70.0, 585.0, 38.0, 38.0)
-	_roster_next_btn = Rect2(267.0, 585.0, 38.0, 38.0)
 
 
 func _get_roster_page_count() -> int:
@@ -284,15 +540,17 @@ func _sync_roster_card(card: TextureButton, instance: Dictionary) -> void:
 	var instance_id := _get_instance_id(instance)
 	var monster_id := _get_monster_id(instance)
 	var in_team := _team.values().has(instance_id)
+	card.visible = true
 	card.disabled = false
 	card.modulate.a = 1.0
-	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card_selected" if in_team else "roster_card")
+	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
 	(card.get_node("Portrait") as TextureRect).texture = _get_monster_texture(monster_id)
 	(card.get_node("Check") as TextureRect).visible = in_team
 	(card.get_node("Level") as Label).text = "Lv.%d" % _get_real_level(instance_id)
 
 
 func _sync_empty_roster_card(card: TextureButton) -> void:
+	card.visible = false
 	card.disabled = true
 	card.modulate.a = 0.42
 	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
@@ -303,13 +561,12 @@ func _sync_empty_roster_card(card: TextureButton) -> void:
 
 func _sync_roster_page_controls() -> void:
 	var page_count := _get_roster_page_count()
-	var show_controls := page_count > 1
-	_node("RosterPanel/PageControls").visible = show_controls
-	if not show_controls:
-		return
+	_node("RosterPanel/PageControls").visible = true
 	_label("RosterPanel/PageControls/PageLabel").text = "%d / %d" % [_roster_page + 1, page_count]
 	var prev := get_node("RosterPanel/PageControls/PreviousButton") as TextureButton
 	var next := get_node("RosterPanel/PageControls/NextButton") as TextureButton
+	prev.visible = page_count > 1
+	next.visible = page_count > 1
 	prev.disabled = _roster_page <= 0
 	next.disabled = _roster_page >= page_count - 1
 	prev.modulate.a = 0.42 if prev.disabled else 1.0
@@ -358,6 +615,16 @@ func _get_monster_texture(monster_id: String) -> Texture2D:
 
 func _gui_tex(key: String) -> Texture2D:
 	return _get_texture(str(GUI_ASSETS.get(key, "")))
+
+
+func _get_texture(path: String) -> Texture2D:
+	if path.is_empty():
+		return null
+	if _texture_cache.has(path):
+		return _texture_cache[path]
+	var tex := load(path) as Texture2D
+	_texture_cache[path] = tex
+	return tex
 
 
 func _node(path: NodePath) -> Control:

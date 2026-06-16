@@ -66,6 +66,22 @@ const RANCH_SLOT_LEVEL_FONT_SIZE := 8
 const RANCH_SLOT_EXP_FONT_SIZE := 8
 const RANCH_SLOT_TIMER_FONT_SIZE := 7
 const RANCH_SLOT_EXP_OUTLINE_SIZE := 1
+const RANCH_SLOT_EMPTY_PLUS_FONT_SIZE := 34
+const RANCH_SLOT_EMPTY_PLUS_SELECTED_FONT_SIZE := 44
+const RANCH_SLOT_EMPTY_TEXT_FONT_SIZE := 13
+const RANCH_SLOT_EMPTY_TEXT_SELECTED_FONT_SIZE := 17
+const RANCH_SLOT_EMPTY_OUTLINE_SIZE := 4
+const RANCH_SLOT_EMPTY_SELECTED_OUTLINE_SIZE := 6
+const RANCH_SLOT_EMPTY_SELECTED_TEXT_COLOR := Color(1.0, 0.42, 0.04)
+const CLASSROOM_INFO_FONT_SIZE := 11
+const CLASSROOM_STATS_FONT_SIZE := 8
+const CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE := 11
+const CLASSROOM_REQUIREMENT_FONT_SIZE := 9
+const CLASSROOM_EVOLVE_BUTTON_FONT_SIZE := 13
+const SOCIAL_EMPTY_SLOT_TEXTURE := "res://assets/images/ui/panels/team_new_ui_empty_pedestal_plus.png"
+const SOCIAL_BOND_TITLE_FONT_SIZE := 10
+const SOCIAL_BOND_TEXT_FONT_SIZE := 8
+const SOCIAL_BOND_SUMMARY_FONT_SIZE := 7
 
 # 子页面入场动画（参考胜利界面：奖励槽从下方弹入 + 淡入）
 const SUBPAGE_ENTRY_DURATION := 0.20
@@ -410,8 +426,9 @@ func _sync_ranch_slots() -> void:
 			timer.modulate = TEXT_GOLD if not str(care.get("label", "")).is_empty() else TEXT_WHITE
 		else:
 			empty_text.text = "放入这里" if i == _selected_slot else "空位"
-			empty_text.modulate = TEXT_GOLD if i == _selected_slot else TEXT_WHITE
+			empty_text.modulate = RANCH_SLOT_EMPTY_SELECTED_TEXT_COLOR if i == _selected_slot else TEXT_WHITE
 			plus.modulate = TEXT_GOLD if i == _selected_slot else Color(0.98, 0.90, 0.67)
+			_apply_ranch_slot_empty_text_style(plus, empty_text, i == _selected_slot)
 
 func _apply_ranch_slot_level_text_style(level: Label) -> void:
 	if level != null:
@@ -426,6 +443,16 @@ func _apply_ranch_slot_idle_text_style(status: Label, timer: Label) -> void:
 	if timer != null:
 		timer.add_theme_font_size_override("font_size", RANCH_SLOT_TIMER_FONT_SIZE)
 		timer.clip_text = true
+
+func _apply_ranch_slot_empty_text_style(plus: Label, empty_text: Label, selected: bool) -> void:
+	if plus != null:
+		plus.add_theme_font_size_override("font_size", RANCH_SLOT_EMPTY_PLUS_SELECTED_FONT_SIZE if selected else RANCH_SLOT_EMPTY_PLUS_FONT_SIZE)
+		plus.add_theme_constant_override("outline_size", RANCH_SLOT_EMPTY_SELECTED_OUTLINE_SIZE if selected else RANCH_SLOT_EMPTY_OUTLINE_SIZE)
+		plus.clip_text = false
+	if empty_text != null:
+		empty_text.add_theme_font_size_override("font_size", RANCH_SLOT_EMPTY_TEXT_SELECTED_FONT_SIZE if selected else RANCH_SLOT_EMPTY_TEXT_FONT_SIZE)
+		empty_text.add_theme_constant_override("outline_size", RANCH_SLOT_EMPTY_SELECTED_OUTLINE_SIZE if selected else RANCH_SLOT_EMPTY_OUTLINE_SIZE)
+		empty_text.clip_text = false
 
 func _sync_collect_row() -> void:
 	var total_exp := _total_idle_exp()
@@ -809,6 +836,7 @@ func _sync_classroom_page() -> void:
 	var empty := panel.get_node("Empty") as Label
 	var evolve := panel.get_node("EvolveButton") as TextureButton
 	var stone_icon := panel.get_node("StoneIcon") as TextureRect
+	_apply_classroom_detail_text_style(panel)
 	if instance_id.is_empty():
 		portrait.visible = false
 		target_portrait.visible = false
@@ -841,7 +869,7 @@ func _sync_classroom_page() -> void:
 		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [level, _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
 		(panel.get_node("TargetName") as Label).text = target_name
 		(panel.get_node("TargetLevel") as Label).text = "进化后 · Lv.%d" % level if not target.is_empty() else "已是最终形态"
-		(panel.get_node("Stats") as Label).text = "属性预览  HP %d→%d   ATK %d→%d   DEF %d→%d" % [int(stats.get("hp", 0)), int(target_stats.get("hp", stats.get("hp", 0))), int(stats.get("atk", 0)), int(target_stats.get("atk", stats.get("atk", 0))), int(stats.get("def", 0)), int(target_stats.get("def", stats.get("def", 0)))]
+		(panel.get_node("Stats") as Label).text = "属性预览  HP %d→%d\nATK %d→%d    DEF %d→%d" % [int(stats.get("hp", 0)), int(target_stats.get("hp", stats.get("hp", 0))), int(stats.get("atk", 0)), int(target_stats.get("atk", stats.get("atk", 0))), int(stats.get("def", 0)), int(target_stats.get("def", stats.get("def", 0)))]
 		(panel.get_node("LevelRequirement") as Label).text = "等级 %d/%d" % [level, required_level]
 		(panel.get_node("StoneRequirement") as Label).text = "%s  %d/1" % [str(info.get("item_name", "进化石")), item_count]
 		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
@@ -853,6 +881,33 @@ func _sync_classroom_page() -> void:
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
 	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
 
+func _apply_classroom_detail_text_style(panel: Control) -> void:
+	for path in ["Info", "TargetLevel"]:
+		var label := panel.get_node_or_null(path) as Label
+		if label != null:
+			label.add_theme_font_size_override("font_size", CLASSROOM_INFO_FONT_SIZE)
+			label.add_theme_constant_override("outline_size", 0)
+			label.remove_theme_color_override("font_outline_color")
+			label.clip_text = true
+	var stats := panel.get_node_or_null("Stats") as Label
+	if stats != null:
+		stats.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
+		stats.clip_text = false
+		stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var title := panel.get_node_or_null("RequirementsTitle") as Label
+	if title != null:
+		title.add_theme_font_size_override("font_size", CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE)
+		title.clip_text = true
+	for path in ["LevelRequirement", "StoneRequirement"]:
+		var label := panel.get_node_or_null(path) as Label
+		if label != null:
+			label.add_theme_font_size_override("font_size", CLASSROOM_REQUIREMENT_FONT_SIZE)
+			label.add_theme_constant_override("outline_size", 0)
+			label.clip_text = true
+	var evolve_text := panel.get_node_or_null("EvolveButton/Text") as Label
+	if evolve_text != null:
+		evolve_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
+
 func _sync_social_page() -> void:
 	_sync_social_place()
 	_sync_card_strip(SOCIAL_CARD_PATHS, _social_page * SOCIAL_CARD_PATHS.size(), "social")
@@ -862,6 +917,10 @@ func _sync_social_place() -> void:
 	var place := _current_social_place()
 	var config := SocialRulesScript.place_config_for(place)
 	var panel := _node("Pages/SocialPage/PlacePanel")
+	_apply_social_observation_text_style()
+	var heart_bubble := panel.get_node_or_null("HeartBubble") as TextureRect
+	if heart_bubble != null:
+		heart_bubble.visible = false
 	(panel.get_node("Title") as Label).text = str(config.get("name", "社交场所"))
 	(panel.get_node("Duration") as Label).text = "用时%s" % SocialRulesScript.duration_label_for_place(place)
 	var switch_button := panel.get_node("SwitchButton") as TextureButton
@@ -908,19 +967,20 @@ func _sync_social_heart_fx(place: Dictionary) -> void:
 	for i in SOCIAL_HEART_FX_PATHS.size():
 		var heart := get_node(SOCIAL_HEART_FX_PATHS[i]) as TextureRect
 		var start_position := heart.position
-		var start_scale := Vector2.ONE * (0.70 + float(i % 3) * 0.08)
-		var drift := -9.0 + float(i) * 6.0
+		var start_scale := Vector2.ONE * (1.30 + float(i % 3) * 0.12)
+		var drift := -15.0 + float(i) * 10.0
 		heart.visible = true
 		heart.pivot_offset = heart.size * 0.5
 		var tween := create_tween().set_loops()
-		tween.tween_interval(float(i) * 0.52)
+		tween.tween_interval(float(i) * 0.38)
 		tween.tween_callback(_reset_social_heart_fx.bind(heart, start_position, start_scale))
-		tween.tween_property(heart, "modulate:a", 0.84, 0.45)
-		tween.parallel().tween_property(heart, "position", start_position + Vector2(drift, -23.0), 1.65)
-		tween.parallel().tween_property(heart, "scale", start_scale * 1.08, 1.65)
-		tween.tween_property(heart, "position", start_position + Vector2(drift * 1.35, -45.0), 1.25)
-		tween.parallel().tween_property(heart, "modulate:a", 0.0, 1.25)
-		tween.tween_interval(0.35)
+		tween.tween_property(heart, "modulate:a", 0.95, 0.28)
+		tween.parallel().tween_property(heart, "scale", start_scale * 1.18, 0.28)
+		tween.tween_property(heart, "position", start_position + Vector2(drift, -34.0), 1.30)
+		tween.parallel().tween_property(heart, "scale", start_scale * 1.45, 1.30)
+		tween.tween_property(heart, "position", start_position + Vector2(drift * 1.45, -66.0), 0.95)
+		tween.parallel().tween_property(heart, "modulate:a", 0.0, 0.95)
+		tween.tween_interval(0.22)
 		_social_heart_tweens.append(tween)
 
 func _reset_social_heart_fx(heart: TextureRect, start_position: Vector2, start_scale: Vector2) -> void:
@@ -939,24 +999,60 @@ func _stop_social_heart_fx() -> void:
 			heart.visible = false
 
 func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary) -> void:
-	var instance_id := str(place.get(slot_key, ""))
+	var raw_instance_id = place.get(slot_key, "")
+	var instance_id := "" if raw_instance_id == null else str(raw_instance_id)
+	if instance_id == "<null>" or instance_id == "null":
+		instance_id = ""
 	var selected := _social_selected_slot == slot_key
+	var frame := node.get_node("Frame") as TextureRect
 	var portrait := node.get_node("Portrait") as TextureRect
 	var check := node.get_node("Check") as TextureRect
 	var name_label := node.get_node("Name") as Label
 	var detail_label := node.get_node("Detail") as Label
-	check.visible = selected
+	check.visible = false
+	frame.texture = _tex(SOCIAL_EMPTY_SLOT_TEXTURE)
+	frame.visible = instance_id.is_empty()
+	frame.z_index = 2
+	frame.modulate = Color(1, 1, 1, 1)
+	frame.position = Vector2(16.0, 12.0) if selected and instance_id.is_empty() else Vector2(24.0, 21.0)
+	frame.size = Vector2(88.0, 94.0) if selected and instance_id.is_empty() else Vector2(72.0, 78.0)
 	if instance_id.is_empty():
 		portrait.visible = false
-		name_label.text = "选择精灵"
-		detail_label.text = slot_key.replace("slot_", "").to_upper()
+		name_label.visible = false
+		detail_label.visible = false
 		return
 	var instance := _get_instance(instance_id)
 	var monster := MonsterDb.get_monster(str(instance.get("monsterId", "")))
+	if instance.is_empty() or monster.is_empty():
+		frame.visible = true
+		portrait.visible = false
+		name_label.visible = false
+		detail_label.visible = false
+		return
 	portrait.visible = true
+	portrait.z_index = 3
+	name_label.visible = true
+	detail_label.visible = true
 	portrait.texture = _portrait_texture(instance_id)
 	name_label.text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))]
 	detail_label.text = "%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))]
+
+func _apply_social_observation_text_style() -> void:
+	var bond_panel := get_node_or_null("Pages/SocialPage/BondPanel") as Control
+	if bond_panel == null:
+		return
+	var title := bond_panel.get_node_or_null("BondTitle") as Label
+	if title != null:
+		title.add_theme_font_size_override("font_size", SOCIAL_BOND_TITLE_FONT_SIZE)
+		title.clip_text = true
+	var progress := bond_panel.get_node_or_null("ProgressText") as Label
+	if progress != null:
+		progress.add_theme_font_size_override("font_size", SOCIAL_BOND_TEXT_FONT_SIZE)
+		progress.clip_text = true
+	var summary := bond_panel.get_node_or_null("Summary") as Label
+	if summary != null:
+		summary.add_theme_font_size_override("font_size", SOCIAL_BOND_SUMMARY_FONT_SIZE)
+		summary.clip_text = true
 
 func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 	var used := _used_monsters()

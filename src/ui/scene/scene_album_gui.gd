@@ -403,8 +403,8 @@ func _sync_bond_page() -> void:
 		(row.get_node("Name") as Label).text = str(group.get("name", ""))
 		(row.get_node("Theme") as Label).text = str(group.get("theme", ""))
 		(row.get_node("Progress") as Label).text = "%d/%d" % [owned, total]
-		var bar_bg := row.get_node("BarBg") as ColorRect
-		(row.get_node("Fill") as ColorRect).size.x = bar_bg.size.x * clampf(float(owned) / float(total), 0.0, 1.0)
+		var bar_bg := row.get_node("BarBg") as Control
+		(row.get_node("Fill") as Control).size.x = bar_bg.size.x * clampf(float(owned) / float(total), 0.0, 1.0)
 
 func _sync_collection_page() -> void:
 	var role_target: Dictionary = EcologyBondRulesScript.get_role_collection_target(_all_monsters, _captured_ids)
@@ -422,8 +422,8 @@ func _sync_collection_page() -> void:
 		(row.get_node("Status") as Label).text = str(target.get("statusLabel", ""))
 		(row.get_node("Theme") as Label).text = str(target.get("theme", ""))
 		(row.get_node("Suggestion") as Label).text = str(target.get("suggestion", ""))
-		var bar_bg := row.get_node("BarBg") as ColorRect
-		(row.get_node("Fill") as ColorRect).size.x = bar_bg.size.x * clampf(float(target.get("ratio", 0.0)), 0.0, 1.0)
+		var bar_bg := row.get_node("BarBg") as Control
+		(row.get_node("Fill") as Control).size.x = bar_bg.size.x * clampf(float(target.get("ratio", 0.0)), 0.0, 1.0)
 
 func _sync_tabs() -> void:
 	for i in TAB_PATHS.size():

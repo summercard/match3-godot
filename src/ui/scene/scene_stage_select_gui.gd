@@ -259,7 +259,9 @@ func _update_header() -> void:
 	_chapter_title.add_theme_color_override("font_color", theme_color)
 	_chapter_name_label.text = str(chapter.get("name", ""))
 	_star_label.text = "%d/%d" % [chapter_stars, total_stars]
-	(get_node("Header/Badge/Number") as Label).text = str(_current_chapter_index + 1)
+	var badge_number := get_node_or_null("Header/Badge/Number") as Label
+	if badge_number != null:
+		badge_number.text = str(_current_chapter_index + 1)
 	_sync_map_nodes()
 
 func _update_chapter_buttons() -> void:

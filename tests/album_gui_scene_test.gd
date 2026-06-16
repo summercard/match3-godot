@@ -149,8 +149,8 @@ func _run() -> void:
 		_assert(not scene.has_node("AlbumPage/Filters/%s/Text" % filter_name), "%s filter should use icon-only styling" % filter_name)
 	var prev_frame := scene.get_node("AlbumPage/PageControls/PreviousButton/Frame") as TextureRect
 	var next_frame := scene.get_node("AlbumPage/PageControls/NextButton/Frame") as TextureRect
-	_assert(prev_frame.texture.resource_path.ends_with("ui_dex_page_prev.png"), "previous page should use the new green dex button")
-	_assert(next_frame.texture.resource_path.ends_with("ui_dex_page_next.png"), "next page should use the new green dex button")
+	_assert(prev_frame.texture.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "previous page should use the shared yellow ranch button")
+	_assert(next_frame.texture.resource_path.ends_with("ranch_ui_btn_next_round.png"), "next page should use the shared yellow ranch button")
 	var bond := scene.get_node("LobbyBottomNav/BattleButton") as BaseButton
 	bond.pressed.emit()
 	await process_frame

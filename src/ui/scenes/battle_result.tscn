@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
+[ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="18_440ek"]
 [ext_resource type="Texture2D" uid="uid://chysk2aqocnr5" path="res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="btn_next"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="btn_retry"]
-[ext_resource type="Script" path="res://src/ui/components/result_victory_halo.gd" id="halo_script"]
+[ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="btn_next"]
+[ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="btn_retry"]
 [ext_resource type="Texture2D" uid="uid://c0h344kt4d710" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="capture_btn_blue"]
 [ext_resource type="Texture2D" uid="uid://cdecxss8dii2d" path="res://assets/images/ui/buttons/capture_success_new_ui_button_green.png" id="capture_btn_green"]
 [ext_resource type="Texture2D" uid="uid://dsys4c4hrwoep" path="res://assets/images/effects/capture_success_new_fx_magic_circle.png" id="capture_circle"]
@@ -14,13 +14,13 @@
 [ext_resource type="Texture2D" uid="uid://k1ck07tlob7q" path="res://assets/images/ui/panels/capture_success_new_ui_title_pink_plaque.png" id="capture_title"]
 [ext_resource type="Texture2D" uid="uid://df3a2ib6ds7aj" path="res://assets/images/effects/result_refresh_fx_confetti.png" id="confetti"]
 [ext_resource type="Texture2D" uid="uid://c5t3y8kr00lw5" path="res://assets/images/ui/cards/result_refresh_ui_monster_card.png" id="exp_card"]
+[ext_resource type="Script" uid="uid://bubnwe6bkxed0" path="res://src/ui/components/result_victory_halo.gd" id="halo_script"]
 [ext_resource type="Texture2D" uid="uid://ukl225soelee" path="res://assets/images/ui/panels/result_refresh_ui_pill_blue.png" id="info_chip"]
 [ext_resource type="Texture2D" uid="uid://cxwjj7iyiuq0s" path="res://assets/images/effects/result_refresh_fx_sparkles.png" id="level_glow"]
-[ext_resource type="Texture2D" uid="uid://dy1tf0p04oyi3" path="res://assets/images/ui/panels/result_refresh_ui_panel_large.png" id="reward_panel"]
 [ext_resource type="Texture2D" uid="uid://bjngmri0c8ln2" path="res://assets/images/ui/cards/result_refresh_ui_reward_card.png" id="reward_slot"]
 [ext_resource type="Script" uid="uid://bgmehtlw34xli" path="res://src/ui/scene/scene_result_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="star_dim"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner_clean.png" id="victory"]
+[ext_resource type="Texture2D" uid="uid://bx41aeb4uukk8" path="res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner_clean.png" id="victory"]
 
 [node name="BattleResultGui" type="Control" unique_id=2092080466]
 clip_contents = true
@@ -52,12 +52,11 @@ color = Color(0.02, 0.05, 0.12, 0.18)
 
 [node name="WinFx" type="Control" parent="." unique_id=1739148844]
 anchors_preset = 0
-offset_top = 0.0
 offset_right = 375.0
 offset_bottom = 170.0
 
 [node name="Burst" type="Control" parent="WinFx" unique_id=1503307524]
-layout_mode = 0
+anchors_preset = 0
 offset_left = 54.0
 offset_top = 12.0
 offset_right = 321.0
@@ -110,7 +109,7 @@ offset_top = 48.0
 offset_right = 317.0
 offset_bottom = 108.0
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
-theme_override_colors/font_outline_color = Color(0.30, 0.13, 0.04, 0.82)
+theme_override_colors/font_outline_color = Color(0.3, 0.13, 0.04, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 36
 text = "战斗胜利"
@@ -436,6 +435,33 @@ offset_top = 236.0
 offset_right = 347.0
 offset_bottom = 270.0
 
+[node name="black" type="Control" parent="BattleInfo" unique_id=1084611146]
+custom_minimum_size = Vector2(360, 246)
+anchors_preset = 0
+offset_left = 108.0
+offset_top = 116.0
+offset_right = 468.0
+offset_bottom = 362.0
+scale = Vector2(0.22, 0.22)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="BattleInfo/black" unique_id=1838678759]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -122.72717
+offset_right = 526.3635
+offset_bottom = 199.45459
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("18_440ek")
+patch_margin_left = 72
+patch_margin_top = 62
+patch_margin_right = 72
+patch_margin_bottom = 62
+
 [node name="Frame" type="TextureRect" parent="BattleInfo" unique_id=993747995]
 layout_mode = 0
 offset_left = 24.0
@@ -483,15 +509,6 @@ offset_left = 16.0
 offset_top = 318.0
 offset_right = 359.0
 offset_bottom = 450.0
-
-[node name="Frame" type="TextureRect" parent="RewardPanel" unique_id=2125386871]
-layout_mode = 0
-offset_right = 343.0
-offset_bottom = 132.0
-mouse_filter = 2
-texture = ExtResource("reward_panel")
-expand_mode = 1
-stretch_mode = 5
 
 [node name="Title" type="Label" parent="RewardPanel" unique_id=1209168286]
 layout_mode = 0
@@ -636,14 +653,32 @@ offset_top = 456.0
 offset_right = 359.0
 offset_bottom = 596.0
 
-[node name="Frame" type="TextureRect" parent="ExpPanel" unique_id=310957884]
-layout_mode = 0
-offset_right = 343.0
-offset_bottom = 140.0
+[node name="black" type="Control" parent="ExpPanel" unique_id=213042672]
+custom_minimum_size = Vector2(360, 246)
+anchors_preset = 0
+offset_left = 120.0
+offset_top = 34.0
+offset_right = 480.0
+offset_bottom = 280.0
+scale = Vector2(0.22, 0.22)
 mouse_filter = 2
-texture = ExtResource("reward_panel")
-expand_mode = 1
-stretch_mode = 5
+
+[node name="NinePatch" type="NinePatchRect" parent="ExpPanel/black" unique_id=1519147254]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -286.36368
+offset_top = -168.18176
+offset_right = 408.1819
+offset_bottom = 226.72742
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("18_440ek")
+patch_margin_left = 72
+patch_margin_top = 62
+patch_margin_right = 72
+patch_margin_bottom = 62
 
 [node name="Title" type="Label" parent="ExpPanel" unique_id=1654325864]
 layout_mode = 0

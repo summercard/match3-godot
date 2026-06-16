@@ -37,8 +37,8 @@
 [ext_resource type="Texture2D" uid="uid://dd2jpaw5qefp7" path="res://assets/images/ui/icons/common_nav_icon_nav_bond.png" id="41_battle"]
 [ext_resource type="Texture2D" uid="uid://bpo8jem45ohj8" path="res://assets/images/ui/icons/common_nav_icon_nav_goal.png" id="42_shop"]
 [ext_resource type="Texture2D" uid="uid://65c54i6uf8si" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="43_menu"]
-[ext_resource type="Texture2D" uid="uid://wmq7knkq0xkj" path="res://assets/images/ui/buttons/album_ui_dex_page_prev.png" id="44_dex_prev"]
-[ext_resource type="Texture2D" uid="uid://b7b6342surasa" path="res://assets/images/ui/buttons/album_ui_dex_page_next.png" id="45_dex_next"]
+[ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="44_dex_prev"]
+[ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="45_dex_next"]
 [ext_resource type="Texture2D" uid="uid://b102vvut68pah" path="res://assets/images/monsters/monster/monster_001_album_thumb.png" id="46_monster_001"]
 [ext_resource type="Texture2D" uid="uid://ctd58sy8qnll6" path="res://assets/images/monsters/monster/monster_006_album_thumb.png" id="47_monster_002"]
 [ext_resource type="Texture2D" uid="uid://fsp5ly7qw313" path="res://assets/images/monsters/enemy/enemy_001_album_thumb.png" id="48_monster_003"]
@@ -96,6 +96,13 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_album_goal_row"]
+bg_color = Color(1, 0.92, 0.72, 0.34)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
 
 [node name="AlbumGui" type="Control" unique_id=607476915]
 layout_mode = 3
@@ -4167,22 +4174,22 @@ mouse_filter = 2
 [node name="Row1" type="Control" parent="BondPage/Rows" unique_id=9065069]
 anchors_preset = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=304471067]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row1" unique_id=304471067]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row1" unique_id=973481649]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4194,10 +4201,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row1" unique_id=258695305]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4210,10 +4217,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row1" unique_id=1128733105]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4222,44 +4229,44 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=222335698]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row1" unique_id=222335698]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row1" unique_id=1806888909]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row1" unique_id=1806888909]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row2" type="Control" parent="BondPage/Rows" unique_id=1070995018]
 anchors_preset = 0
-offset_top = 49.0
+offset_top = 50.0
 offset_right = 285.0
-offset_bottom = 89.0
+offset_bottom = 96.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=2061535469]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row2" unique_id=2061535469]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row2" unique_id=2019749434]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4271,10 +4278,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row2" unique_id=1181026247]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4287,10 +4294,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row2" unique_id=1991241964]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4299,44 +4306,44 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=35275940]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row2" unique_id=35275940]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row2" unique_id=1055345271]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row2" unique_id=1055345271]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row3" type="Control" parent="BondPage/Rows" unique_id=848186748]
 anchors_preset = 0
-offset_top = 98.0
+offset_top = 100.0
 offset_right = 285.0
-offset_bottom = 138.0
+offset_bottom = 146.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=449153637]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row3" unique_id=449153637]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row3" unique_id=2054551111]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4348,10 +4355,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row3" unique_id=673052040]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4364,10 +4371,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row3" unique_id=1984077648]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4376,44 +4383,44 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=285123493]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row3" unique_id=285123493]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row3" unique_id=1382924563]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row3" unique_id=1382924563]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row4" type="Control" parent="BondPage/Rows" unique_id=1426946462]
 anchors_preset = 0
-offset_top = 147.0
+offset_top = 150.0
 offset_right = 285.0
-offset_bottom = 187.0
+offset_bottom = 196.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=1699623303]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row4" unique_id=1699623303]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row4" unique_id=1424506739]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4425,10 +4432,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row4" unique_id=110314011]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4441,10 +4448,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row4" unique_id=91245235]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4453,44 +4460,44 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=1283348850]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row4" unique_id=1283348850]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row4" unique_id=780049538]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row4" unique_id=780049538]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row5" type="Control" parent="BondPage/Rows" unique_id=987791573]
 anchors_preset = 0
-offset_top = 196.0
+offset_top = 200.0
 offset_right = 285.0
-offset_bottom = 236.0
+offset_bottom = 246.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=484746163]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row5" unique_id=484746163]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row5" unique_id=939197030]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4502,10 +4509,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row5" unique_id=893256513]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4518,10 +4525,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row5" unique_id=119606444]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4530,44 +4537,44 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=1453645370]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row5" unique_id=1453645370]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row5" unique_id=803093279]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row5" unique_id=803093279]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row6" type="Control" parent="BondPage/Rows" unique_id=1007987928]
 anchors_preset = 0
-offset_top = 245.0
+offset_top = 250.0
 offset_right = 285.0
-offset_bottom = 285.0
+offset_bottom = 296.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=1826884054]
+[node name="Frame" type="Panel" parent="BondPage/Rows/Row6" unique_id=1826884054]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 40.0
+offset_bottom = 46.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="BondPage/Rows/Row6" unique_id=993065987]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 4.0
-offset_right = 99.0
-offset_bottom = 27.0
+offset_left = 12.0
+offset_top = 3.0
+offset_right = 168.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4579,10 +4586,10 @@ clip_text = true
 
 [node name="Progress" type="Label" parent="BondPage/Rows/Row6" unique_id=539955681]
 layout_mode = 0
-offset_left = 225.0
-offset_top = 4.0
+offset_left = 210.0
+offset_top = 3.0
 offset_right = 272.0
-offset_bottom = 27.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4595,10 +4602,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="BondPage/Rows/Row6" unique_id=1862952587]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 12.0
 offset_top = 22.0
-offset_right = 121.0
-offset_bottom = 45.0
+offset_right = 188.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4607,23 +4614,23 @@ theme_override_font_sizes/font_size = 9
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=120627589]
+[node name="BarBg" type="Panel" parent="BondPage/Rows/Row6" unique_id=120627589]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
+offset_left = 12.0
+offset_top = 37.0
 offset_right = 273.0
-offset_bottom = 31.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="BondPage/Rows/Row6" unique_id=89381881]
+[node name="Fill" type="Panel" parent="BondPage/Rows/Row6" unique_id=89381881]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 25.0
-offset_right = 67.0
-offset_bottom = 31.0
+offset_left = 12.0
+offset_top = 37.0
+offset_right = 12.0
+offset_bottom = 43.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="CollectionPage" type="Control" parent="." unique_id=1322174343]
 visible = false
@@ -4676,15 +4683,15 @@ anchors_preset = 0
 offset_left = 24.0
 offset_top = 78.0
 offset_right = 309.0
-offset_bottom = 147.0
+offset_bottom = 142.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/RoleTarget" unique_id=1197801783]
+[node name="Frame" type="Panel" parent="CollectionPage/RoleTarget" unique_id=1197801783]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 69.0
+offset_bottom = 64.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.42)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/RoleTarget" unique_id=2023073350]
 layout_mode = 0
@@ -4720,9 +4727,9 @@ clip_text = true
 [node name="Suggestion" type="Label" parent="CollectionPage/RoleTarget" unique_id=1281637786]
 layout_mode = 0
 offset_left = 13.0
-offset_top = 36.0
-offset_right = 265.0
-offset_bottom = 59.0
+offset_top = 35.0
+offset_right = 267.0
+offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4734,30 +4741,30 @@ clip_text = true
 [node name="Rows" type="Control" parent="CollectionPage" unique_id=2042298768]
 anchors_preset = 0
 offset_left = 24.0
-offset_top = 164.0
+offset_top = 156.0
 offset_right = 309.0
-offset_bottom = 381.0
+offset_bottom = 400.0
 mouse_filter = 2
 
 [node name="Row1" type="Control" parent="CollectionPage/Rows" unique_id=195144055]
 anchors_preset = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=1154318486]
+[node name="Frame" type="Panel" parent="CollectionPage/Rows/Row1" unique_id=1154318486]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/Rows/Row1" unique_id=1049969229]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 12.0
 offset_top = 3.0
-offset_right = 102.0
-offset_bottom = 26.0
+offset_right = 168.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4771,8 +4778,8 @@ clip_text = true
 layout_mode = 0
 offset_left = 205.0
 offset_top = 3.0
-offset_right = 271.0
-offset_bottom = 26.0
+offset_right = 272.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4784,10 +4791,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="CollectionPage/Rows/Row1" unique_id=52180420]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 19.0
-offset_right = 82.0
-offset_bottom = 42.0
+offset_left = 12.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4797,12 +4804,11 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row1" unique_id=998135022]
-visible = false
 layout_mode = 0
-offset_left = 87.0
-offset_top = 18.0
-offset_right = 271.0
-offset_bottom = 41.0
+offset_left = 105.0
+offset_top = 20.0
+offset_right = 272.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4812,44 +4818,44 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=1868292508]
+[node name="BarBg" type="Panel" parent="CollectionPage/Rows/Row1" unique_id=1868292508]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 273.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row1" unique_id=423826968]
+[node name="Fill" type="Panel" parent="CollectionPage/Rows/Row1" unique_id=423826968]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 12.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row2" type="Control" parent="CollectionPage/Rows" unique_id=938650292]
 anchors_preset = 0
-offset_top = 43.0
+offset_top = 46.0
 offset_right = 285.0
-offset_bottom = 80.0
+offset_bottom = 90.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=767236987]
+[node name="Frame" type="Panel" parent="CollectionPage/Rows/Row2" unique_id=767236987]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1221580103]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 12.0
 offset_top = 3.0
-offset_right = 102.0
-offset_bottom = 26.0
+offset_right = 168.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4863,8 +4869,8 @@ clip_text = true
 layout_mode = 0
 offset_left = 205.0
 offset_top = 3.0
-offset_right = 271.0
-offset_bottom = 26.0
+offset_right = 272.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4876,10 +4882,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1276039548]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 19.0
-offset_right = 82.0
-offset_bottom = 42.0
+offset_left = 12.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4889,12 +4895,11 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row2" unique_id=1688730412]
-visible = false
 layout_mode = 0
-offset_left = 87.0
-offset_top = 18.0
-offset_right = 271.0
-offset_bottom = 41.0
+offset_left = 105.0
+offset_top = 20.0
+offset_right = 272.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4904,44 +4909,44 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=232330734]
+[node name="BarBg" type="Panel" parent="CollectionPage/Rows/Row2" unique_id=232330734]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 273.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row2" unique_id=460549650]
+[node name="Fill" type="Panel" parent="CollectionPage/Rows/Row2" unique_id=460549650]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 12.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row3" type="Control" parent="CollectionPage/Rows" unique_id=1744384923]
 anchors_preset = 0
-offset_top = 86.0
+offset_top = 92.0
 offset_right = 285.0
-offset_bottom = 123.0
+offset_bottom = 136.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=1890465171]
+[node name="Frame" type="Panel" parent="CollectionPage/Rows/Row3" unique_id=1890465171]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/Rows/Row3" unique_id=1780065344]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 12.0
 offset_top = 3.0
-offset_right = 102.0
-offset_bottom = 26.0
+offset_right = 168.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4955,8 +4960,8 @@ clip_text = true
 layout_mode = 0
 offset_left = 205.0
 offset_top = 3.0
-offset_right = 271.0
-offset_bottom = 26.0
+offset_right = 272.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4968,10 +4973,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="CollectionPage/Rows/Row3" unique_id=954354160]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 19.0
-offset_right = 82.0
-offset_bottom = 42.0
+offset_left = 12.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4981,12 +4986,11 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row3" unique_id=1831540810]
-visible = false
 layout_mode = 0
-offset_left = 87.0
-offset_top = 18.0
-offset_right = 271.0
-offset_bottom = 41.0
+offset_left = 105.0
+offset_top = 20.0
+offset_right = 272.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -4996,44 +5000,44 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=556992829]
+[node name="BarBg" type="Panel" parent="CollectionPage/Rows/Row3" unique_id=556992829]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 273.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row3" unique_id=492504849]
+[node name="Fill" type="Panel" parent="CollectionPage/Rows/Row3" unique_id=492504849]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 12.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row4" type="Control" parent="CollectionPage/Rows" unique_id=1603493559]
 anchors_preset = 0
-offset_top = 129.0
+offset_top = 138.0
 offset_right = 285.0
-offset_bottom = 166.0
+offset_bottom = 182.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=1482866860]
+[node name="Frame" type="Panel" parent="CollectionPage/Rows/Row4" unique_id=1482866860]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/Rows/Row4" unique_id=42889243]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 12.0
 offset_top = 3.0
-offset_right = 102.0
-offset_bottom = 26.0
+offset_right = 168.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5047,8 +5051,8 @@ clip_text = true
 layout_mode = 0
 offset_left = 205.0
 offset_top = 3.0
-offset_right = 271.0
-offset_bottom = 26.0
+offset_right = 272.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5060,10 +5064,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="CollectionPage/Rows/Row4" unique_id=31721746]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 19.0
-offset_right = 82.0
-offset_bottom = 42.0
+offset_left = 12.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5073,12 +5077,11 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row4" unique_id=226444150]
-visible = false
 layout_mode = 0
-offset_left = 87.0
-offset_top = 18.0
-offset_right = 271.0
-offset_bottom = 41.0
+offset_left = 105.0
+offset_top = 20.0
+offset_right = 272.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5088,44 +5091,44 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=362357579]
+[node name="BarBg" type="Panel" parent="CollectionPage/Rows/Row4" unique_id=362357579]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 273.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row4" unique_id=1409802967]
+[node name="Fill" type="Panel" parent="CollectionPage/Rows/Row4" unique_id=1409802967]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 12.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="Row5" type="Control" parent="CollectionPage/Rows" unique_id=963143024]
 anchors_preset = 0
-offset_top = 172.0
+offset_top = 184.0
 offset_right = 285.0
-offset_bottom = 209.0
+offset_bottom = 228.0
 mouse_filter = 2
 
-[node name="Frame" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=392520719]
+[node name="Frame" type="Panel" parent="CollectionPage/Rows/Row5" unique_id=392520719]
 layout_mode = 0
 offset_right = 285.0
-offset_bottom = 37.0
+offset_bottom = 44.0
 mouse_filter = 2
-color = Color(1, 0.92, 0.72, 0.36)
+theme_override_styles/panel = SubResource("StyleBoxFlat_album_goal_row")
 
 [node name="Name" type="Label" parent="CollectionPage/Rows/Row5" unique_id=1195715570]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 12.0
 offset_top = 3.0
-offset_right = 102.0
-offset_bottom = 26.0
+offset_right = 168.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5139,8 +5142,8 @@ clip_text = true
 layout_mode = 0
 offset_left = 205.0
 offset_top = 3.0
-offset_right = 271.0
-offset_bottom = 26.0
+offset_right = 272.0
+offset_bottom = 23.0
 theme_override_colors/font_color = Color(0.75, 0.38, 0.08, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5152,10 +5155,10 @@ clip_text = true
 
 [node name="Theme" type="Label" parent="CollectionPage/Rows/Row5" unique_id=355077350]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 19.0
-offset_right = 82.0
-offset_bottom = 42.0
+offset_left = 12.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5165,12 +5168,11 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Suggestion" type="Label" parent="CollectionPage/Rows/Row5" unique_id=694511932]
-visible = false
 layout_mode = 0
-offset_left = 87.0
-offset_top = 18.0
-offset_right = 271.0
-offset_bottom = 41.0
+offset_left = 105.0
+offset_top = 20.0
+offset_right = 272.0
+offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
@@ -5180,23 +5182,23 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
-[node name="BarBg" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=899209361]
+[node name="BarBg" type="Panel" parent="CollectionPage/Rows/Row5" unique_id=899209361]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 273.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.79, 0.56, 0.27, 0.28)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_bg")
 
-[node name="Fill" type="ColorRect" parent="CollectionPage/Rows/Row5" unique_id=1586325905]
+[node name="Fill" type="Panel" parent="CollectionPage/Rows/Row5" unique_id=1586325905]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 32.0
-offset_right = 271.0
-offset_bottom = 36.0
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 12.0
+offset_bottom = 42.0
 mouse_filter = 2
-color = Color(0.29, 0.86, 0.47, 0.96)
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_bar_fill")
 
 [node name="BottomTabs" type="Control" parent="." unique_id=1699004637]
 visible = false

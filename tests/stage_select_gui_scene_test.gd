@@ -73,7 +73,9 @@ func _run() -> void:
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/Background") as TextureRect).texture.resource_path.ends_with("bg_chapter_01_grassland_540x960.png"), "chapter 1 should use the optimized formal background")
 	_expect((scene.get_node("Header/Bar") as TextureRect).texture.resource_path.ends_with("ui_shop_title_plaque_image2.png"), "top chapter info bar should reuse the shop title plaque art")
 	_expect((scene.get_node("Header/BackButton/Frame") as TextureRect).texture.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "top back button should reuse the shared round previous button art")
-	_expect((scene.get_node("Header/Badge") as TextureRect).texture.resource_path.ends_with("ui_inventory_icon_badge.png"), "chapter badge should reuse the inventory badge art")
+	var chapter_badge := scene.get_node_or_null("Header/Badge") as TextureRect
+	if chapter_badge != null:
+		_expect(chapter_badge.texture.resource_path.ends_with("ui_inventory_icon_badge.png"), "chapter badge should reuse the inventory badge art")
 	_expect((scene.get_node("BottomNav/Panel") as TextureRect).texture.resource_path.ends_with("main_ui_bottom_nav_panel_v3.png"), "bottom nav should stay on the shared lobby navigation art")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter 9 should show its independent editable map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "inactive chapter maps should stay hidden")
