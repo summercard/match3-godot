@@ -970,10 +970,10 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 	_set_visible(detail_label, false)
 	_set_text(detail_label, _get_nature_name(str(instance.get("nature", ""))).substr(0, 3))
 	var check := card.get_node("Check") as TextureRect
-	_set_visible(check, selected and context == "ranch")
+	_set_visible(check, selected)
 	var selection_mark := card.get_node_or_null("SelectionMark") as Label
 	if selection_mark != null:
-		_set_visible(selection_mark, selected and context != "ranch")
+		_set_visible(selection_mark, false)
 
 func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	var previous := get_node(panel_path + "/PreviousButton") as TextureButton

@@ -44,6 +44,10 @@ func _run() -> void:
 			_expect((ranch.get_node("%s/Card1" % panel_path) as Control).position == Vector2(12.0, 12.0), "%s first roster card should follow the farm card layout" % panel_path)
 			_expect((ranch.get_node("%s/Card6" % panel_path) as Control).position == Vector2(297.0, 12.0), "%s roster cards should be evenly spaced" % panel_path)
 			_expect((ranch.get_node("%s/Card1/Level" % panel_path) as Control).position == Vector2(6.0, 71.0), "%s level label should follow the farm card layout" % panel_path)
+			_expect((ranch.get_node("%s/Card1/Level" % panel_path) as Label).get_theme_font_size("font_size") == 12, "%s level label should use the compact farm text size" % panel_path)
+			_expect((ranch.get_node("%s/Card1/Check" % panel_path) as Control).position == Vector2(-3.0, 1.0), "%s selection check should follow the farm card layout" % panel_path)
+			_expect((ranch.get_node("%s/Card1/Check" % panel_path) as Control).size == Vector2(21.0, 21.0), "%s selection check should use the farm card size" % panel_path)
+			_expect((ranch.get_node("%s/Card1/Check" % panel_path) as TextureRect).texture.resource_path.ends_with("ranch_icon_check_badge.png"), "%s selection check should use the shared check art" % panel_path)
 			_expect((ranch.get_node("%s/PreviousButton" % panel_path) as Control).position == Vector2(106.0, 109.0), "%s previous button should align with the shared roster pagination" % panel_path)
 			_expect((ranch.get_node("%s/NextButton" % panel_path) as Control).position == Vector2(214.0, 108.0), "%s next button should align with the shared roster pagination" % panel_path)
 			_expect((ranch.get_node("%s/PreviousButton/Frame" % panel_path) as TextureRect).texture.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "%s previous button should use the shared ranch round art" % panel_path)
@@ -66,6 +70,13 @@ func _run() -> void:
 			{"instance_id": null, "placed_at": null},
 		])
 		ranch.call("_calc_idle_exp")
+		ranch.call("_sync_gui")
+		ranch.call("_switch_to_classroom")
+		ranch.set("_class_selected_instance_id", "monster_001")
+		ranch.call("_sync_gui")
+		_expect((ranch.get_node("Pages/ClassroomPage/RosterPanel/Card1/Check") as TextureRect).visible, "classroom selection should use the shared check art")
+		_expect(not (ranch.get_node("Pages/ClassroomPage/RosterPanel/Card1/SelectionMark") as Label).visible, "classroom selection should not use the old text mark")
+		ranch.call("_switch_to_ranch")
 		ranch.call("_sync_gui")
 		var timer := ranch.get_node("Pages/RanchPage/Slots/Slot1/Timer") as Label
 		var timer_before := timer.text
