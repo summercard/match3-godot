@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://dw1ag3xhmm4ds" path="res://assets/images/ui/generated_panel_parts/panel_base3.png" id="10_e8rgr"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="12_uqcji"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="13_72f50"]
-[ext_resource type="Texture2D" uid="uid://uomxda6s6wcc" path="res://assets/images/ui/icons/ranch_icon_check_badge.png" id="15_5g78r"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png" id="15_5g78r"]
 [ext_resource type="Texture2D" uid="uid://bkt5606dedikh" path="res://assets/images/ui/panels/ranch_ui_classroom_detail_panel.png" id="16_yskjy"]
 [ext_resource type="Texture2D" uid="uid://ccwdydo1rjp7g" path="res://assets/images/ui/buttons/album_ui_btn_secondary_blue.png" id="17_qrgjm"]
 [ext_resource type="Texture2D" uid="uid://bwkgtfdik0aq7" path="res://assets/images/ui/panels/ranch_ui_relationship_ribbon.png" id="20_tn4tg"]
@@ -128,6 +128,8 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_resource_capsule_clear"]
+
 [node name="SceneRanch" type="Control" unique_id=995115595]
 clip_contents = true
 layout_mode = 3
@@ -174,9 +176,9 @@ offset_bottom = 438.0
 [node name="Slot1" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=1706141859]
 layout_mode = 0
 offset_left = 20.0
-offset_top = 171.0
+offset_top = 194.0
 offset_right = 126.0
-offset_bottom = 283.0
+offset_bottom = 306.0
 pivot_offset = Vector2(53, 56)
 ignore_texture_size = true
 
@@ -192,26 +194,25 @@ stretch_mode = 5
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1366583310]
 visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 84.0
-offset_bottom = 75.0
+offset_left = 14.0
+offset_top = 0.0
+offset_right = 92.0
+offset_bottom = 76.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1341602261]
-visible = false
 layout_mode = 0
-offset_left = 17.0
+offset_left = 33.0
 offset_top = -17.0
-offset_right = 89.0
+offset_right = 73.0
 offset_bottom = 7.0
 mouse_filter = 2
 texture = ExtResource("4_reeqw")
 expand_mode = 1
 
-[node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=817687865]
+[node name="Sparkle" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1"]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -224,7 +225,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=327730678]
-visible = false
 layout_mode = 0
 offset_left = 17.0
 offset_top = -16.0
@@ -233,33 +233,31 @@ offset_bottom = 7.0
 theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Lv.3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1114502829]
-visible = false
 layout_mode = 0
-offset_left = 11.0
-offset_top = 93.0
-offset_right = 95.0
-offset_bottom = 111.0
+offset_left = 18.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 96.0
 mouse_filter = 2
 texture = ExtResource("6_evj83")
 expand_mode = 1
 
 [node name="Status" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=1952174850]
-visible = false
 layout_mode = 0
 offset_left = 11.0
-offset_top = 93.0
+offset_top = 73.0
 offset_right = 95.0
-offset_bottom = 114.0
+offset_bottom = 94.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
 text = "专注 00:32"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -268,9 +266,9 @@ vertical_alignment = 1
 modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 32.0
-offset_top = 34.0
+offset_top = 28.0
 offset_right = 74.0
-offset_bottom = 70.0
+offset_bottom = 64.0
 theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
@@ -293,25 +291,23 @@ text = "放入这里"
 horizontal_alignment = 1
 
 [node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1072251594]
-visible = false
 layout_mode = 0
-offset_left = 15.0
-offset_top = 113.0
-offset_right = 91.0
-offset_bottom = 135.0
+offset_left = 22.0
+offset_top = 92.0
+offset_right = 84.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("7_1yngj")
 expand_mode = 1
 
 [node name="Timer" type="Label" parent="Pages/RanchPage/Slots/Slot1" unique_id=2045224827]
-visible = false
 layout_mode = 0
 offset_left = 15.0
-offset_top = 113.0
+offset_top = 92.0
 offset_right = 91.0
-offset_bottom = 136.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -336,10 +332,10 @@ stretch_mode = 5
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1157801372]
 visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 84.0
-offset_bottom = 75.0
+offset_left = 14.0
+offset_top = 0.0
+offset_right = 92.0
+offset_bottom = 76.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -347,9 +343,9 @@ stretch_mode = 5
 [node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=909115565]
 visible = false
 layout_mode = 0
-offset_left = 17.0
+offset_left = 33.0
 offset_top = -17.0
-offset_right = 89.0
+offset_right = 73.0
 offset_bottom = 7.0
 mouse_filter = 2
 texture = ExtResource("4_reeqw")
@@ -377,7 +373,7 @@ offset_bottom = 7.0
 theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Lv.4"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -385,10 +381,10 @@ vertical_alignment = 1
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1636993171]
 visible = false
 layout_mode = 0
-offset_left = 11.0
-offset_top = 93.0
-offset_right = 95.0
-offset_bottom = 111.0
+offset_left = 18.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 96.0
 mouse_filter = 2
 texture = ExtResource("6_evj83")
 expand_mode = 1
@@ -397,36 +393,41 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 11.0
-offset_top = 93.0
+offset_top = 73.0
 offset_right = 95.0
-offset_bottom = 114.0
+offset_bottom = 94.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
 text = "放置 01:04"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=495169321]
-modulate = Color(0.98, 0.9, 0.67, 1)
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 32.0
-offset_top = 34.0
+offset_top = 28.0
 offset_right = 74.0
-offset_bottom = 70.0
+offset_bottom = 64.0
 theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 26
 text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot2" unique_id=1857928552]
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
 offset_right = 96.0
 offset_bottom = 110.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
@@ -434,10 +435,10 @@ horizontal_alignment = 1
 [node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1764226313]
 visible = false
 layout_mode = 0
-offset_left = 15.0
-offset_top = 113.0
-offset_right = 91.0
-offset_bottom = 135.0
+offset_left = 22.0
+offset_top = 92.0
+offset_right = 84.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("7_1yngj")
 expand_mode = 1
@@ -446,20 +447,20 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 15.0
-offset_top = 113.0
+offset_top = 92.0
 offset_right = 91.0
-offset_bottom = 136.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Slot3" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=406071953]
 layout_mode = 0
 offset_left = 248.0
-offset_top = 171.0
+offset_top = 199.0
 offset_right = 354.0
-offset_bottom = 283.0
+offset_bottom = 311.0
 pivot_offset = Vector2(53, 56)
 ignore_texture_size = true
 
@@ -475,10 +476,10 @@ stretch_mode = 5
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1025689886]
 visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 84.0
-offset_bottom = 75.0
+offset_left = 14.0
+offset_top = 0.0
+offset_right = 92.0
+offset_bottom = 76.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -486,9 +487,9 @@ stretch_mode = 5
 [node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=235685397]
 visible = false
 layout_mode = 0
-offset_left = 17.0
+offset_left = 33.0
 offset_top = -17.0
-offset_right = 89.0
+offset_right = 73.0
 offset_bottom = 7.0
 mouse_filter = 2
 texture = ExtResource("4_reeqw")
@@ -516,7 +517,7 @@ offset_bottom = 7.0
 theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Lv.5"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -524,10 +525,10 @@ vertical_alignment = 1
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1469056223]
 visible = false
 layout_mode = 0
-offset_left = 11.0
-offset_top = 93.0
-offset_right = 95.0
-offset_bottom = 111.0
+offset_left = 18.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 96.0
 mouse_filter = 2
 texture = ExtResource("6_evj83")
 expand_mode = 1
@@ -536,36 +537,41 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 11.0
-offset_top = 93.0
+offset_top = 73.0
 offset_right = 95.0
-offset_bottom = 114.0
+offset_bottom = 94.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
 text = "放置 01:36"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=1357323496]
-modulate = Color(0.98, 0.9, 0.67, 1)
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 32.0
-offset_top = 34.0
+offset_top = 28.0
 offset_right = 74.0
-offset_bottom = 70.0
+offset_bottom = 64.0
 theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 26
 text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot3" unique_id=887957630]
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
 offset_right = 96.0
 offset_bottom = 110.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 11
 text = "空位"
 horizontal_alignment = 1
@@ -573,10 +579,10 @@ horizontal_alignment = 1
 [node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=717384118]
 visible = false
 layout_mode = 0
-offset_left = 15.0
-offset_top = 113.0
-offset_right = 91.0
-offset_bottom = 135.0
+offset_left = 22.0
+offset_top = 92.0
+offset_right = 84.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("7_1yngj")
 expand_mode = 1
@@ -585,11 +591,11 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 15.0
-offset_top = 113.0
+offset_top = 92.0
 offset_right = 91.0
-offset_bottom = 136.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -603,7 +609,8 @@ pivot_offset = Vector2(54, 56)
 ignore_texture_size = true
 
 [node name="FarmFrame" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1655470061]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -614,10 +621,10 @@ stretch_mode = 5
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1530923397]
 visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 86.0
-offset_bottom = 75.0
+offset_left = 14.0
+offset_top = 0.0
+offset_right = 92.0
+offset_bottom = 76.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -625,9 +632,9 @@ stretch_mode = 5
 [node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=274217230]
 visible = false
 layout_mode = 0
-offset_left = 17.0
+offset_left = 33.0
 offset_top = -17.0
-offset_right = 89.0
+offset_right = 73.0
 offset_bottom = 7.0
 mouse_filter = 2
 texture = ExtResource("4_reeqw")
@@ -655,17 +662,18 @@ offset_bottom = 7.0
 theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Lv.1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=977962167]
 visible = false
 layout_mode = 0
-offset_left = 11.0
-offset_top = 106.0
-offset_right = 97.0
-offset_bottom = 124.0
+offset_left = 18.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 96.0
 mouse_filter = 2
 texture = ExtResource("6_evj83")
 expand_mode = 1
@@ -674,21 +682,25 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 11.0
-offset_top = 108.0
-offset_right = 97.0
-offset_bottom = 129.0
-theme_override_font_sizes/font_size = 10
+offset_top = 73.0
+offset_right = 95.0
+offset_bottom = 94.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
 text = "放置 00:00"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=288537903]
-modulate = Color(0.98, 0.9, 0.67, 1)
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
-offset_left = 33.0
-offset_top = 35.0
-offset_right = 75.0
-offset_bottom = 71.0
-theme_override_colors/font_color = Color(1, 0.9, 0.67, 1)
+offset_left = 32.0
+offset_top = 28.0
+offset_right = 74.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 26
@@ -696,12 +708,13 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot4" unique_id=406802384]
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
-offset_right = 98.0
+offset_right = 96.0
 offset_bottom = 110.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 11
@@ -711,10 +724,10 @@ horizontal_alignment = 1
 [node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=648470816]
 visible = false
 layout_mode = 0
-offset_left = 15.0
-offset_top = 113.0
-offset_right = 91.0
-offset_bottom = 135.0
+offset_left = 22.0
+offset_top = 92.0
+offset_right = 84.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("7_1yngj")
 expand_mode = 1
@@ -723,11 +736,11 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 15.0
-offset_top = 113.0
+offset_top = 92.0
 offset_right = 91.0
-offset_bottom = 136.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -752,10 +765,10 @@ stretch_mode = 5
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=899441358]
 visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 86.0
-offset_bottom = 75.0
+offset_left = 14.0
+offset_top = 0.0
+offset_right = 92.0
+offset_bottom = 76.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -763,9 +776,9 @@ stretch_mode = 5
 [node name="LevelBadge" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=1919811389]
 visible = false
 layout_mode = 0
-offset_left = 17.0
+offset_left = 33.0
 offset_top = -17.0
-offset_right = 89.0
+offset_right = 73.0
 offset_bottom = 7.0
 mouse_filter = 2
 texture = ExtResource("4_reeqw")
@@ -793,17 +806,18 @@ offset_bottom = 7.0
 theme_override_colors/font_color = Color(0.32, 0.17, 0.04, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Lv.1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Ribbon" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=1757642050]
 visible = false
 layout_mode = 0
-offset_left = 11.0
-offset_top = 102.0
-offset_right = 97.0
-offset_bottom = 120.0
+offset_left = 18.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 96.0
 mouse_filter = 2
 texture = ExtResource("6_evj83")
 expand_mode = 1
@@ -812,21 +826,25 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 11.0
-offset_top = 104.0
-offset_right = 97.0
-offset_bottom = 125.0
-theme_override_font_sizes/font_size = 10
+offset_top = 73.0
+offset_right = 95.0
+offset_bottom = 94.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
 text = "放置 00:00"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="EmptyPlus" type="Label" parent="Pages/RanchPage/Slots/Slot5" unique_id=888991365]
-modulate = Color(0.98, 0.9, 0.67, 1)
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
-offset_left = 33.0
-offset_top = 33.0
-offset_right = 75.0
-offset_bottom = 69.0
-theme_override_colors/font_color = Color(1, 0.9, 0.67, 1)
+offset_left = 32.0
+offset_top = 28.0
+offset_right = 74.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 26
@@ -834,12 +852,13 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="EmptyText" type="Label" parent="Pages/RanchPage/Slots/Slot5" unique_id=1638924933]
+modulate = Color(1, 0.84, 0.25, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 84.0
-offset_right = 98.0
+offset_right = 96.0
 offset_bottom = 110.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 11
@@ -849,10 +868,10 @@ horizontal_alignment = 1
 [node name="TimerPlate" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=601422701]
 visible = false
 layout_mode = 0
-offset_left = 15.0
-offset_top = 113.0
-offset_right = 91.0
-offset_bottom = 135.0
+offset_left = 22.0
+offset_top = 92.0
+offset_right = 84.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("7_1yngj")
 expand_mode = 1
@@ -861,11 +880,11 @@ expand_mode = 1
 visible = false
 layout_mode = 0
 offset_left = 15.0
-offset_top = 113.0
+offset_top = 92.0
 offset_right = 91.0
-offset_bottom = 136.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.36, 0.19, 0.05, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1040,11 +1059,12 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Card1" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1896302962]
+z_index = 1
 layout_mode = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 66.0
-offset_bottom = 104.0
+offset_left = 15.0
+offset_top = 14.0
+offset_right = 69.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1120,8 +1140,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1143,11 +1163,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card2" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1625096792]
+z_index = 2
 layout_mode = 0
-offset_left = 69.0
-offset_top = 12.0
-offset_right = 123.0
-offset_bottom = 104.0
+offset_left = 68.0
+offset_top = 14.0
+offset_right = 122.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1221,8 +1242,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1244,11 +1265,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card3" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1434607902]
+z_index = 3
 layout_mode = 0
-offset_left = 126.0
-offset_top = 12.0
-offset_right = 180.0
-offset_bottom = 104.0
+offset_left = 120.0
+offset_top = 14.0
+offset_right = 174.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1322,8 +1344,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1345,11 +1367,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card4" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1460872550]
+z_index = 4
 layout_mode = 0
-offset_left = 183.0
-offset_top = 12.0
-offset_right = 237.0
-offset_bottom = 104.0
+offset_left = 172.0
+offset_top = 14.0
+offset_right = 226.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1423,8 +1446,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1446,11 +1469,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card5" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1696030260]
+z_index = 5
 layout_mode = 0
-offset_left = 240.0
-offset_top = 12.0
-offset_right = 294.0
-offset_bottom = 104.0
+offset_left = 226.0
+offset_top = 14.0
+offset_right = 280.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1524,8 +1548,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1547,11 +1571,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card6" type="TextureButton" parent="Pages/RanchPage/RosterPanel" unique_id=1412682747]
+z_index = 6
 layout_mode = 0
-offset_left = 297.0
-offset_top = 12.0
-offset_right = 351.0
-offset_bottom = 104.0
+offset_left = 280.0
+offset_top = 14.0
+offset_right = 334.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -1625,8 +1650,8 @@ offset_bottom = 10.0
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -1650,9 +1675,9 @@ vertical_alignment = 1
 [node name="PageText" type="Label" parent="Pages/RanchPage/RosterPanel" unique_id=209950076]
 layout_mode = 0
 offset_left = 116.0
-offset_top = 124.0
+offset_top = 116.0
 offset_right = 239.0
-offset_bottom = 147.0
+offset_bottom = 139.0
 theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
 theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
@@ -2065,11 +2090,12 @@ patch_margin_right = 72
 patch_margin_bottom = 62
 
 [node name="Card1" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=434160890]
+z_index = 1
 layout_mode = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 66.0
-offset_bottom = 104.0
+offset_left = 15.0
+offset_top = 14.0
+offset_right = 69.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2149,8 +2175,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2172,11 +2198,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card2" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=2088133441]
+z_index = 2
 layout_mode = 0
-offset_left = 69.0
-offset_top = 12.0
-offset_right = 123.0
-offset_bottom = 104.0
+offset_left = 68.0
+offset_top = 14.0
+offset_right = 122.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2255,8 +2282,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2278,11 +2305,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card3" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1122132987]
+z_index = 3
 layout_mode = 0
-offset_left = 126.0
-offset_top = 12.0
-offset_right = 180.0
-offset_bottom = 104.0
+offset_left = 120.0
+offset_top = 14.0
+offset_right = 174.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2361,8 +2389,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2420,11 +2448,12 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Card4" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=1423853574]
+z_index = 4
 layout_mode = 0
-offset_left = 183.0
-offset_top = 12.0
-offset_right = 237.0
-offset_bottom = 104.0
+offset_left = 172.0
+offset_top = 14.0
+offset_right = 226.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2503,8 +2532,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2526,11 +2555,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card5" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=477669672]
+z_index = 5
 layout_mode = 0
-offset_left = 240.0
-offset_top = 12.0
-offset_right = 294.0
-offset_bottom = 104.0
+offset_left = 226.0
+offset_top = 14.0
+offset_right = 280.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2609,8 +2639,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2632,11 +2662,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card6" type="TextureButton" parent="Pages/ClassroomPage/RosterPanel" unique_id=29507558]
+z_index = 6
 layout_mode = 0
-offset_left = 297.0
-offset_top = 12.0
-offset_right = 351.0
-offset_bottom = 104.0
+offset_left = 280.0
+offset_top = 14.0
+offset_right = 334.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 stretch_mode = 0
@@ -2715,8 +2746,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -2740,9 +2771,9 @@ vertical_alignment = 1
 [node name="PageText" type="Label" parent="Pages/ClassroomPage/RosterPanel" unique_id=1459398062]
 layout_mode = 0
 offset_left = 116.0
-offset_top = 124.0
+offset_top = 116.0
 offset_right = 239.0
-offset_bottom = 147.0
+offset_bottom = 139.0
 theme_override_colors/font_color = Color(0.48, 0.29, 0.11, 1)
 theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
@@ -2826,6 +2857,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SocialPage" type="Control" parent="Pages" unique_id=174540711]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -2930,6 +2962,7 @@ offset_bottom = 112.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+flip_h = true
 
 [node name="Check" type="TextureRect" parent="Pages/SocialPage/PlacePanel/SlotA" unique_id=1744040305]
 layout_mode = 0
@@ -3167,11 +3200,12 @@ patch_margin_right = 72
 patch_margin_bottom = 62
 
 [node name="Card1" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1059752229]
+z_index = 1
 layout_mode = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 66.0
-offset_bottom = 104.0
+offset_left = 15.0
+offset_top = 14.0
+offset_right = 69.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3249,8 +3283,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -3272,11 +3306,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card2" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=616383467]
+z_index = 2
 layout_mode = 0
-offset_left = 69.0
-offset_top = 12.0
-offset_right = 123.0
-offset_bottom = 104.0
+offset_left = 68.0
+offset_top = 14.0
+offset_right = 122.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3354,8 +3389,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -3377,11 +3412,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card3" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=813255996]
+z_index = 3
 layout_mode = 0
-offset_left = 126.0
-offset_top = 12.0
-offset_right = 180.0
-offset_bottom = 104.0
+offset_left = 120.0
+offset_top = 14.0
+offset_right = 174.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3459,8 +3495,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -3518,11 +3554,12 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Card4" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1439713269]
+z_index = 4
 layout_mode = 0
-offset_left = 183.0
-offset_top = 12.0
-offset_right = 237.0
-offset_bottom = 104.0
+offset_left = 172.0
+offset_top = 14.0
+offset_right = 226.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3600,8 +3637,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -3623,11 +3660,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card5" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=457280577]
+z_index = 5
 layout_mode = 0
-offset_left = 240.0
-offset_top = 12.0
-offset_right = 294.0
-offset_bottom = 104.0
+offset_left = 226.0
+offset_top = 14.0
+offset_right = 280.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3705,8 +3743,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -3728,11 +3766,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card6" type="TextureButton" parent="Pages/SocialPage/RosterPanel" unique_id=1641076313]
+z_index = 6
 layout_mode = 0
-offset_left = 297.0
-offset_top = 12.0
-offset_right = 351.0
-offset_bottom = 104.0
+offset_left = 280.0
+offset_top = 14.0
+offset_right = 334.0
+offset_bottom = 106.0
 pivot_offset = Vector2(27, 46)
 ignore_texture_size = true
 
@@ -3810,8 +3849,8 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_left = -3.0
 offset_top = 1.0
-offset_right = 18.0
-offset_bottom = 22.0
+offset_right = 23.0
+offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("15_5g78r")
 expand_mode = 1
@@ -4190,7 +4229,7 @@ offset_top = 14.0
 offset_right = 121.0
 offset_bottom = 48.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_gcd6x")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_resource_capsule_clear")
 
 [node name="Frame" type="TextureRect" parent="PetFarmResourceBar/GoldCapsule" unique_id=451354424]
 layout_mode = 0
@@ -4229,7 +4268,7 @@ offset_top = 14.0
 offset_right = 232.0
 offset_bottom = 48.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ca4fg")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_resource_capsule_clear")
 
 [node name="Frame" type="TextureRect" parent="PetFarmResourceBar/GemCapsule" unique_id=1643549940]
 layout_mode = 0
@@ -4268,7 +4307,7 @@ offset_top = 14.0
 offset_right = 359.0
 offset_bottom = 48.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_h4son")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_resource_capsule_clear")
 
 [node name="Frame" type="TextureRect" parent="PetFarmResourceBar/EnergyCapsule" unique_id=1902604643]
 layout_mode = 0
@@ -4389,9 +4428,9 @@ flat = true
 [node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav2" unique_id=362631236]
 layout_mode = 0
 offset_left = -2.0
-offset_top = -5.0
+offset_top = -1.0
 offset_right = 59.0
-offset_bottom = 54.0
+offset_bottom = 58.0
 mouse_filter = 2
 texture = ExtResource("29_ceena")
 expand_mode = 1
@@ -4431,12 +4470,11 @@ mouse_default_cursor_shape = 2
 flat = true
 
 [node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav3" unique_id=1485065725]
-visible = false
 layout_mode = 0
 offset_left = -3.0
-offset_top = -5.0
+offset_top = -1.0
 offset_right = 58.0
-offset_bottom = 54.0
+offset_bottom = 58.0
 mouse_filter = 2
 texture = ExtResource("29_ceena")
 expand_mode = 1
@@ -4476,12 +4514,11 @@ mouse_default_cursor_shape = 2
 flat = true
 
 [node name="Selected" type="TextureRect" parent="PetFarmBottomNav/Nav4" unique_id=1978902525]
-visible = false
 layout_mode = 0
 offset_left = -4.0
-offset_top = -5.0
+offset_top = -1.0
 offset_right = 57.0
-offset_bottom = 54.0
+offset_bottom = 58.0
 mouse_filter = 2
 texture = ExtResource("29_ceena")
 expand_mode = 1

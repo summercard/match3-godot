@@ -984,6 +984,24 @@ const MONSTER_DB: Dictionary = {
 		"baseHP": 89, "baseATK": 13, "baseDEF": 62, "baseSPD": 28,
 		"skill": { "name": "光弹", "cost": 5, "multiplier": 2.2 }
 	},
+	"enemy_047": {
+		"id": "enemy_047", "name": "熔火幼蜥", "element": "fire",
+		"rarity": 1, "emoji": "🦎",
+		"baseHP": 36, "baseATK": 10, "baseDEF": 8, "baseSPD": 10,
+		"skill": { "name": "火苗扑击", "cost": 5, "multiplier": 1.6 }
+	},
+	"enemy_048": {
+		"id": "enemy_048", "name": "岩浆泡泡", "element": "fire",
+		"rarity": 1, "emoji": "🔥",
+		"baseHP": 40, "baseATK": 10, "baseDEF": 9, "baseSPD": 8,
+		"skill": { "name": "熔泡", "cost": 5, "multiplier": 1.5 }
+	},
+	"enemy_049": {
+		"id": "enemy_049", "name": "火绒精", "element": "fire",
+		"rarity": 1, "emoji": "✨", "isElite": true,
+		"baseHP": 34, "baseATK": 11, "baseDEF": 8, "baseSPD": 12,
+		"skill": { "name": "火绒爆", "cost": 5, "multiplier": 1.7 }
+	},
 	"monster_boss_011": {
 		"id": "monster_boss_011", "name": "光耀天使长", "element": "light",
 		"rarity": 5, "emoji": "👼",

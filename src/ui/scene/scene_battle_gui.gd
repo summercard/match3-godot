@@ -235,10 +235,24 @@ func _sync_player_slots() -> void:
 		slot.visible = i < player_count
 		if slot.visible:
 			_set_combatant(slot, _battle.player_team[i], "green")
+			_sync_leader_charge_point(slot, _battle.player_team[i])
 			# ★ 主人定 2026-06-11：玩家受击 portrait 柔和闪白
 			_apply_hit_feedback(slot, false, i)
 			_apply_defeat_feedback(slot, false, i)
 			_apply_elastic_feedback(slot, false, i)
+
+func _sync_leader_charge_point(slot: Control, unit: Dictionary) -> void:
+	var point := slot.get_node_or_null("LeaderChargePoint") as Control
+	if point == null or _battle == null or unit == null:
+		return
+	var status: Dictionary = _battle.get_status()
+	var charges: Dictionary = status.get("leader_charge_points", {})
+	var max_charge := maxi(1, int(status.get("leader_charge_max", 1)))
+	var monster_id := str(unit.get("id", ""))
+	var value := int(charges.get(monster_id, 0))
+	point.visible = int(unit.get("hp", 0)) > 0
+	point.set("progress", clampf(float(value) / float(max_charge), 0.0, 1.0))
+	point.set("element", str(unit.get("boardAffinity", unit.get("element", "fire"))))
 
 func _set_stage_enemy(slot: Control, unit: Dictionary) -> void:
 	_set_combatant(slot, unit, "red")

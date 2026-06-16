@@ -62,6 +62,10 @@ const TEXT_MUTED := Color(0.66, 0.72, 0.82)
 const TEXT_GOLD := Color(1.0, 0.84, 0.25)
 const DYNAMIC_GUI_INTERVAL := 1.0
 const STATUS_GUI_INTERVAL := 1.0 / 15.0
+const RANCH_SLOT_LEVEL_FONT_SIZE := 8
+const RANCH_SLOT_EXP_FONT_SIZE := 8
+const RANCH_SLOT_TIMER_FONT_SIZE := 7
+const RANCH_SLOT_EXP_OUTLINE_SIZE := 1
 
 # 子页面入场动画（参考胜利界面：奖励槽从下方弹入 + 淡入）
 const SUBPAGE_ENTRY_DURATION := 0.20
@@ -395,6 +399,8 @@ func _sync_ranch_slots() -> void:
 		_set_visible(sparkle, occupied)
 		_set_visible(plus, not occupied)
 		_set_visible(empty_text, not occupied)
+		_apply_ranch_slot_level_text_style(level)
+		_apply_ranch_slot_idle_text_style(status, timer)
 		if occupied:
 			_set_texture(portrait, _portrait_texture(instance_id))
 			_set_text(level, "Lv.%d" % _get_monster_level(instance_id))
@@ -406,6 +412,20 @@ func _sync_ranch_slots() -> void:
 			empty_text.text = "放入这里" if i == _selected_slot else "空位"
 			empty_text.modulate = TEXT_GOLD if i == _selected_slot else TEXT_WHITE
 			plus.modulate = TEXT_GOLD if i == _selected_slot else Color(0.98, 0.90, 0.67)
+
+func _apply_ranch_slot_level_text_style(level: Label) -> void:
+	if level != null:
+		level.add_theme_font_size_override("font_size", RANCH_SLOT_LEVEL_FONT_SIZE)
+		level.clip_text = true
+
+func _apply_ranch_slot_idle_text_style(status: Label, timer: Label) -> void:
+	if status != null:
+		status.add_theme_font_size_override("font_size", RANCH_SLOT_EXP_FONT_SIZE)
+		status.add_theme_constant_override("outline_size", RANCH_SLOT_EXP_OUTLINE_SIZE)
+		status.clip_text = true
+	if timer != null:
+		timer.add_theme_font_size_override("font_size", RANCH_SLOT_TIMER_FONT_SIZE)
+		timer.clip_text = true
 
 func _sync_collect_row() -> void:
 	var total_exp := _total_idle_exp()

@@ -26,6 +26,7 @@ var turn: int = 0
 var combo: int = 0                # 当前连锁数
 var total_damage_dealt: Dictionary = {}  # 按属性统计伤害
 var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: charge }
+var leader_charge_points: Dictionary = {}
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
 var turn_count: int = 0
@@ -70,6 +71,7 @@ var enemy_level: int = 1
 
 const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
 const ELITE_VISUAL_SCALE: float = 1.2
+const LEADER_CHARGE_MAX: int = 5
 
 # ========== 单例模式 ==========
 static var instance: BattleManager
@@ -125,6 +127,8 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	battle_result = ""
 	turn_count = 0
 	max_turns = _stage_max_turns(s_data)
+	skill_charges = {}
+	leader_charge_points = {}
 
 	player_level = p_level
 	enemy_level = e_level
@@ -132,6 +136,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	for m in player_team:
 		if m != null:
 			skill_charges[m.get("id", "")] = 0
+			leader_charge_points[m.get("id", "")] = 0
 
 	# 敌人技能系统（委托给 EnemySkillSystem，不再手动管理）
 
@@ -287,6 +292,7 @@ func get_synergy_def_mult(element: String) -> float:
 func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionary:
 	self.combo = combo_count
 	var damage_log: Array = []
+	var leader_charge_events: Array = []
 
 	for monster in player_team:
 		if monster == null or monster.get("hp", 0) <= 0:
@@ -297,6 +303,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		var gem_count = gem_counts.get(board_affinity, 0)
 		if gem_count == 0:
 			continue
+		_add_leader_charge(monster, 1, leader_charge_events)
 
 		var element_mult = 1.0
 		var target = _get_weakest_enemy()
@@ -356,13 +363,40 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 	# 阶段转换检查
 	var phase_to_trigger = _phase_handler.check_phase_transition()
 	if not phase_to_trigger.is_empty():
-		return { "damage_log": damage_log, "phase_transition": phase_to_trigger }
+		return {
+			"damage_log": damage_log,
+			"leader_charge_events": leader_charge_events,
+			"leader_skill_pending": _all_leader_charges_ready() and _get_weakest_enemy() != null,
+			"phase_transition": phase_to_trigger
+		}
 
 	# 状态效果（委托给 BattleStatusEffect）
 	_status_effect.try_apply_status_effects(gem_counts, player_team, enemies)
 	_refresh_capture_windows()
 
-	return { "damage_log": damage_log, "status_effect_log": _status_effect.get_effect_log() }
+	return {
+		"damage_log": damage_log,
+		"leader_charge_events": leader_charge_events,
+		"leader_skill_pending": _all_leader_charges_ready() and _get_weakest_enemy() != null,
+		"status_effect_log": _status_effect.get_effect_log()
+	}
+
+
+func consume_ready_leader_burst() -> Dictionary:
+	if not _all_leader_charges_ready() or _get_weakest_enemy() == null:
+		return {}
+	var leader_skill_log := _execute_leader_burst()
+	if leader_skill_log.is_empty():
+		return {}
+	_reset_leader_charges()
+	var result := {
+		"leader_skill_log": leader_skill_log
+	}
+	var phase_to_trigger = _phase_handler.check_phase_transition()
+	if not phase_to_trigger.is_empty():
+		result["phase_transition"] = phase_to_trigger
+	_refresh_capture_windows()
+	return result
 
 
 func use_active_skill(monster_id: String) -> Dictionary:
@@ -538,6 +572,256 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		result["battleEnded"] = true
 
 	return result
+
+
+func _add_leader_charge(monster: Dictionary, amount: int, events: Array) -> void:
+	var monster_id := str(monster.get("id", ""))
+	if monster_id.is_empty() or amount <= 0:
+		return
+	var prev := int(leader_charge_points.get(monster_id, 0))
+	var next := clampi(prev + amount, 0, LEADER_CHARGE_MAX)
+	leader_charge_points[monster_id] = next
+	if next == prev:
+		return
+	events.append({
+		"monster_id": monster_id,
+		"monster_name": str(monster.get("name", "")),
+		"index": _player_index_by_id(monster_id),
+		"amount": amount,
+		"value": next,
+		"max": LEADER_CHARGE_MAX,
+		"filled": next >= LEADER_CHARGE_MAX
+	})
+
+
+func _all_leader_charges_ready() -> bool:
+	if player_team.size() < 3:
+		return false
+	for i in range(3):
+		var monster = player_team[i]
+		if monster == null or int(monster.get("hp", 0)) <= 0:
+			return false
+		var monster_id := str(monster.get("id", ""))
+		if int(leader_charge_points.get(monster_id, 0)) < LEADER_CHARGE_MAX:
+			return false
+	return true
+
+
+func _reset_leader_charges() -> void:
+	for monster in player_team:
+		if monster == null:
+			continue
+		var monster_id := str(monster.get("id", ""))
+		if not monster_id.is_empty():
+			leader_charge_points[monster_id] = 0
+
+
+func _execute_leader_burst() -> Dictionary:
+	var leader: Dictionary = player_team[0] if player_team.size() > 0 and player_team[0] != null else {}
+	if leader.is_empty() or int(leader.get("hp", 0)) <= 0:
+		return {}
+	var element := _fantasy_element(leader)
+	var log := {
+		"type": "leader_burst",
+		"element": element,
+		"leader": str(leader.get("name", "")),
+		"leader_id": str(leader.get("id", "")),
+		"effects": [],
+		"battle_ended": false
+	}
+
+	match element:
+		"grass":
+			_leader_heal_lowest(log, 0.42, int(round(float(leader.get("atk", 10)) * 1.4)), "Verdant Mend")
+		"water":
+			_leader_guard_lowest(log, 0.50, 2, "Tide Shell")
+		"earth":
+			_leader_guard_lowest(log, 0.62, 2, "Stone Bulwark")
+		"light":
+			_leader_convert_gems(log, 2, "light", "Star Calling")
+		"dark":
+			_leader_damage_weakest(log, leader, 1.65, false, "Night Siphon")
+			_leader_lifesteal_lowest(log, 0.55, "Siphon Heal")
+		"thunder":
+			_leader_damage_weakest(log, leader, 1.75, false, "Thunder Pin")
+			_leader_status_weakest(log, "stun", leader)
+		"ice":
+			_leader_damage_weakest(log, leader, 1.35, false, "Frost Needle")
+			_leader_status_weakest(log, "freeze", leader)
+		"wind":
+			_leader_weaken_weakest(log, 0.40, 2, "Gale Break")
+		"void":
+			_leader_damage_weakest(log, leader, 1.95, true, "Void Pierce")
+		"temporal":
+			_leader_damage_weakest(log, leader, 1.25, false, "Time Nick")
+			_leader_weaken_weakest(log, 0.45, 1, "Time Slow")
+		"star":
+			_leader_damage_weakest(log, leader, 1.55, false, "Starfall")
+			_leader_heal_lowest(log, 0.16, int(round(float(leader.get("atk", 10)) * 1.1)), "Star Gleam")
+		"chaos":
+			_leader_damage_weakest(log, leader, 1.85, false, "Chaos Spike")
+			_leader_status_weakest(log, "burn", leader)
+		_:
+			_leader_damage_weakest(log, leader, 1.55, false, "Leader Strike")
+
+	if check_battle_end():
+		log["battle_ended"] = true
+	return log
+
+
+func _leader_damage_weakest(log: Dictionary, leader: Dictionary, mult: float, pierce: bool, label: String) -> void:
+	var target = _get_weakest_enemy()
+	if target == null:
+		return
+	var target_idx := enemies.find(target)
+	var element := str(log.get("element", _fantasy_element(leader)))
+	var element_mult := MonsterDb.get_element_multiplier(element, target.get("element", ""))
+	var target_def := 0 if pierce else int(target.get("def", 0))
+	var damage := _damage_calc.calc_player_damage(
+		float(leader.get("atk", 10)),
+		element,
+		float(target_def),
+		3,
+		1,
+		element_mult,
+		1.0,
+		get_synergy_atk_mult(_board_affinity(leader))
+	)
+	damage = maxi(1, int(round(float(damage) * mult)))
+	var remaining := damage
+	var absorbed := 0
+	if _enemy_skill_system != null and target_idx >= 0 and not pierce:
+		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, damage)
+		absorbed = int(shield_result.get("absorbed", 0))
+		remaining = int(shield_result.get("remaining", damage))
+	target["hp"] = int(target.get("hp", 0)) - remaining
+	_update_capture_window(target_idx)
+	log["damage"] = int(log.get("damage", 0)) + damage
+	log["remaining_damage"] = int(log.get("remaining_damage", 0)) + remaining
+	log["target"] = str(target.get("name", ""))
+	log["target_index"] = target_idx
+	log["is_effective"] = element_mult > 1.0
+	log["is_weak"] = element_mult < 1.0
+	log["target_died"] = int(target.get("hp", 0)) <= 0
+	log["effects"].append({
+		"kind": "damage",
+		"label": label,
+		"target": str(target.get("name", "")),
+		"target_index": target_idx,
+		"amount": damage,
+		"remaining": remaining,
+		"shield_absorbed": absorbed,
+		"pierce": pierce
+	})
+
+
+func _leader_heal_lowest(log: Dictionary, ratio: float, minimum: int, label: String) -> void:
+	var ally := _get_lowest_hp_ally()
+	if ally.is_empty():
+		return
+	var max_hp := maxi(1, int(ally.get("maxHP", 1)))
+	var prev_hp := int(ally.get("hp", 0))
+	var amount := maxi(minimum, int(round(float(max_hp) * ratio)))
+	ally["hp"] = mini(max_hp, prev_hp + amount)
+	var actual := int(ally.get("hp", 0)) - prev_hp
+	log["effects"].append({
+		"kind": "heal",
+		"label": label,
+		"target": str(ally.get("name", "")),
+		"target_id": str(ally.get("id", "")),
+		"target_index": _player_index_by_id(str(ally.get("id", ""))),
+		"amount": actual
+	})
+
+
+func _leader_lifesteal_lowest(log: Dictionary, ratio: float, label: String) -> void:
+	var ally := _get_lowest_hp_ally()
+	if ally.is_empty():
+		return
+	var damage_done := int(log.get("remaining_damage", log.get("damage", 0)))
+	if damage_done <= 0:
+		return
+	var max_hp := maxi(1, int(ally.get("maxHP", 1)))
+	var prev_hp := int(ally.get("hp", 0))
+	var amount := maxi(1, int(round(float(damage_done) * clampf(ratio, 0.0, 2.0))))
+	ally["hp"] = mini(max_hp, prev_hp + amount)
+	var actual := int(ally.get("hp", 0)) - prev_hp
+	log["effects"].append({
+		"kind": "lifesteal",
+		"label": label,
+		"target": str(ally.get("name", "")),
+		"target_id": str(ally.get("id", "")),
+		"target_index": _player_index_by_id(str(ally.get("id", ""))),
+		"amount": actual,
+		"source_damage": damage_done
+	})
+
+
+func _leader_convert_gems(log: Dictionary, count: int, target_element: String, label: String) -> void:
+	log["effects"].append({
+		"kind": "convert_gems",
+		"label": label,
+		"count": maxi(1, count),
+		"target_element": target_element
+	})
+
+
+func _leader_guard_lowest(log: Dictionary, reduction: float, turns: int, label: String) -> void:
+	var ally := _get_lowest_hp_ally()
+	if ally.is_empty():
+		return
+	_apply_player_guard(ally, reduction, turns)
+	log["effects"].append({
+		"kind": "guard",
+		"label": label,
+		"target": str(ally.get("name", "")),
+		"target_id": str(ally.get("id", "")),
+		"target_index": _player_index_by_id(str(ally.get("id", ""))),
+		"reduction": clampf(reduction, 0.0, 0.8),
+		"turns": maxi(1, turns)
+	})
+
+
+func _leader_status_weakest(log: Dictionary, status_type: String, leader: Dictionary) -> void:
+	var target = _get_weakest_enemy()
+	if target == null:
+		return
+	var target_idx := enemies.find(target)
+	var status_log := _status_effect.apply_status(target_idx, status_type, int(leader.get("atk", 10)), str(target.get("name", "")))
+	if status_log.is_empty():
+		return
+	_refresh_capture_windows()
+	log["effects"].append({
+		"kind": "status",
+		"status": status_type,
+		"target": str(target.get("name", "")),
+		"target_index": target_idx
+	})
+
+
+func _leader_weaken_weakest(log: Dictionary, reduction: float, turns: int, label: String) -> void:
+	var target = _get_weakest_enemy()
+	if target == null:
+		return
+	var target_idx := enemies.find(target)
+	_apply_enemy_tempo_mod(target_idx, reduction, turns)
+	_refresh_capture_windows()
+	log["effects"].append({
+		"kind": "weaken",
+		"label": label,
+		"target": str(target.get("name", "")),
+		"target_index": target_idx,
+		"reduction": clampf(reduction, 0.0, 0.8),
+		"turns": maxi(1, turns)
+	})
+
+
+func _player_index_by_id(monster_id: String) -> int:
+	for i in range(player_team.size()):
+		var monster = player_team[i]
+		if monster != null and str(monster.get("id", "")) == monster_id:
+			return i
+	return -1
 
 
 func _get_lowest_hp_ally() -> Dictionary:
@@ -925,6 +1209,8 @@ func get_status() -> Dictionary:
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"skill_charges": skill_charges.duplicate(),
+		"leader_charge_points": leader_charge_points.duplicate(),
+		"leader_charge_max": LEADER_CHARGE_MAX,
 		"battle_over": battle_over,
 		"battle_result": battle_result,
 		"current_phase": current_phase,

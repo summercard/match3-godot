@@ -78,31 +78,31 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_2_1", "name": "火山口", "type": "normal",
-					"enemies": ["enemy_001", "enemy_001"],
+					"enemies": ["enemy_047", "enemy_047"],
 					"enemyLevel": 4,
 					"rewards": {"gold": 60, "exp": 35}
 				},
 				{
 					"id": "stage_2_2", "name": "岩浆洞窟", "type": "normal",
-					"enemies": ["enemy_001", "enemy_003"],
+					"enemies": ["enemy_047", "enemy_048"],
 					"enemyLevel": 5,
 					"rewards": {"gold": 80, "exp": 48}
 				},
 				{
 					"id": "stage_2_3", "name": "烈焰荒原", "type": "normal",
-					"enemies": ["enemy_002", "enemy_001"],
+					"enemies": ["enemy_048", "enemy_047"],
 					"enemyLevel": 5,
 					"rewards": {"gold": 95, "exp": 58}
 				},
 				{
 					"id": "stage_2_4", "name": "火焰池", "type": "normal",
-					"enemies": ["enemy_003", "enemy_002"],
+					"enemies": ["enemy_049", "enemy_048"],
 					"enemyLevel": 6,
 					"rewards": {"gold": 110, "exp": 65}
 				},
 				{
 					"id": "stage_2_4e", "name": "精英·烈焰守卫", "type": "elite",
-					"enemies": ["enemy_003"],
+					"enemies": ["enemy_049"],
 					"enemyLevel": 8,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 165, "exp": 98},

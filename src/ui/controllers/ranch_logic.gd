@@ -34,7 +34,7 @@ const RANCH_ASSETS := {
 	"reward_strip": "res://assets/images/ui/panels/ranch_ui_reward_strip_dark.png",
 	"exp": "res://assets/images/ui/icons/ranch_icon_exp_badge.png",
 	"coin": "res://assets/images/ui/icons/ranch_icon_gold_coin.png",
-	"check": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
+	"check": "res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png",
 	"banner": "res://assets/images/ui/panels/ranch_ui_banner_small.png",
 	"banner_fringe": "res://assets/images/ui/panels/ranch_ui_banner_fringe.png",
 	"sparkle": "res://assets/images/effects/ranch_fx_leaf_sparkle_cluster.png",

@@ -96,6 +96,31 @@ func get_freeze_atk_multiplier(enemy_index: int) -> float:
 	return 1.0 - reduction
 
 
+func apply_status(enemy_index: int, status_type: String, source_atk: int, enemy_name: String = "") -> Dictionary:
+	if enemy_index < 0 or enemy_index >= _effects.size():
+		return {}
+	if not STATUS_DEFS.has(status_type):
+		return {}
+	var def: Dictionary = STATUS_DEFS[status_type]
+	var duration: int = int(def.get("duration", 1))
+	var element: String = str(def.get("element", ""))
+	_effects[enemy_index] = {
+		"type": status_type,
+		"source_atk": source_atk,
+		"turns_left": duration,
+		"element": element
+	}
+	var label: String = str(def.get("label", status_type))
+	var log := {
+		"type": status_type,
+		"enemy_index": enemy_index,
+		"enemy_name": enemy_name,
+		"message": "%s -> %s" % [label, enemy_name]
+	}
+	_effect_log.append(log)
+	return log
+
+
 ## 尝试根据消除宝石数量附加状态效果
 func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemies: Array) -> void:
 	_effect_log = []

@@ -158,6 +158,8 @@ const OBSTACLE_PARTICLE_LIMIT: int = 96
 ## 道具使用瞬态特效
 var _item_use_effects: Array[Dictionary] = []  # [{kind, x, y, timer, duration, color, ...}]
 const ITEM_USE_EFFECT_LIMIT: int = 24
+var _leader_skill_fx: Array[Dictionary] = []
+const LEADER_SKILL_FX_LIMIT: int = 12
 
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
@@ -502,6 +504,7 @@ func init(data: Dictionary = {}) -> void:
 	_poison_fog_clear_anims = []
 	_gem_particles = []
 	_obstacle_particles = []
+	_leader_skill_fx = []
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
@@ -1063,9 +1066,8 @@ func _process_matches() -> void:
 	var matches: Array = match_context.get("matches", [])
 	
 	if not match_context.get("has_matches", false):
-		if _check_battle_end():
-			return
 		await _wait_for_player_resolution_tail()
+		await _play_ready_leader_burst_after_combo()
 		if _check_battle_end():
 			return
 		_start_enemy_turn()
@@ -1185,6 +1187,8 @@ func _process_matches() -> void:
 			_trigger_attack_shake()
 		if attacker_idx >= 0 and target_idx >= 0:
 			await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
+
+	_handle_leader_charge_events(result.get("leader_charge_events", []))
 	
 	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
 	var all_special_gems: Array = removal_result.get("special_gems", explosion_gems + bomb_gems + rainbow_gems)
@@ -1255,6 +1259,43 @@ func _wait_for_player_resolution_tail() -> void:
 	while _has_pending_player_resolution_fx() and waited < MATCH_CHAIN_TAIL_WAIT_MAX:
 		await get_tree().create_timer(0.03).timeout
 		waited += 0.03
+
+func _play_ready_leader_burst_after_combo() -> void:
+	if _battle == null or not _battle.has_method("consume_ready_leader_burst"):
+		return
+	var result: Dictionary = _battle.consume_ready_leader_burst()
+	var leader_skill_log: Dictionary = result.get("leader_skill_log", {})
+	if leader_skill_log.is_empty():
+		return
+	_state = BattleState.MATCHING
+	await get_tree().create_timer(0.18).timeout
+	await _play_leader_skill_log(leader_skill_log)
+	await _handle_phase_transition_result(result.get("phase_transition", {}))
+
+func _handle_phase_transition_result(phase_transition: Dictionary) -> void:
+	if phase_transition.is_empty() or _battle == null:
+		return
+	var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
+	if new_enemies.is_empty():
+		return
+	var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
+	_show_message("%s 杩涘叆婵€鎴樼姸鎬侊紒" % boss_name)
+	_phase_transition_state = {
+		"phase": phase_transition.get("phase", 1),
+		"enemies": new_enemies,
+		"timer": 1.5,
+		"boss_name": boss_name
+	}
+	_screen_flash_timer = 0.3
+	_shake_timer = 0.3
+	_enemy_display_hp.clear()
+	_boss_skill_visuals.clear()
+	await get_tree().create_timer(0.1).timeout
+	for r in range(_board.rows):
+		for c in range(_board.cols):
+			_board.grid[r][c] = ""
+	await get_tree().create_timer(1.0).timeout
+	_board.init_board()
 
 func _has_pending_player_resolution_fx() -> bool:
 	return (
@@ -1844,6 +1885,192 @@ func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
 # 伤害数字信号处理
 ## ============================================
 
+func _handle_leader_charge_events(events: Array) -> void:
+	for event: Dictionary in events:
+		if not bool(event.get("filled", false)):
+			continue
+		var idx := int(event.get("index", -1))
+		if idx < 0:
+			continue
+		var center := _combatant_effect_center(false, idx)
+		var element := _player_element_at(idx)
+		_leader_skill_fx.append({
+			"kind": "charge_full",
+			"element": element,
+			"center": center,
+			"timer": 0.45,
+			"maxTimer": 0.45
+		})
+		_floating_texts.append({
+			"text": "MAX",
+			"x": center.x,
+			"y": center.y + 30.0,
+			"color": _leader_fx_color(element),
+			"size": 12.0,
+			"timer": 0.0,
+			"duration": 0.55,
+			"critical": true
+		})
+	while _leader_skill_fx.size() > LEADER_SKILL_FX_LIMIT:
+		_leader_skill_fx.remove_at(0)
+
+func _play_leader_skill_log(log: Dictionary) -> void:
+	var element := str(log.get("element", "fire"))
+	var color := _leader_fx_color(element)
+	var board_center := _board_center()
+	_trigger_element_glow(element, Color(color.r, color.g, color.b, 0.18))
+	_trigger_element_ripple(element, color)
+	_show_message("LEADER BURST")
+	_sfx("powerup_burst_soft")
+	for i in range(mini(3, _battle.player_team.size() if _battle != null else 0)):
+		_leader_skill_fx.append({
+			"kind": "gather",
+			"element": element,
+			"from": _combatant_effect_center(false, i),
+			"to": board_center,
+			"timer": 0.42,
+			"maxTimer": 0.42
+		})
+	await get_tree().create_timer(0.20).timeout
+
+	var target_idx := int(log.get("target_index", -1))
+	var effects: Array = log.get("effects", [])
+	var has_damage := int(log.get("remaining_damage", log.get("damage", 0))) > 0
+	if has_damage and target_idx >= 0:
+		var target_center := _combatant_effect_center(true, target_idx)
+		_leader_skill_fx.append({
+			"kind": "beam",
+			"element": element,
+			"from": board_center,
+			"to": target_center,
+			"timer": 0.56,
+			"maxTimer": 0.56
+		})
+		_sfx_attack_by_element(element)
+		await get_tree().create_timer(0.18).timeout
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.48, "maxTimer": 0.48})
+		_trigger_attack_shake()
+		_floating_texts.append({
+			"text": "-%d" % int(log.get("remaining_damage", log.get("damage", 0))),
+			"x": target_center.x,
+			"y": target_center.y - 14.0,
+			"color": color,
+			"size": 26.0 if bool(log.get("is_effective", false)) else 21.0,
+			"timer": 0.0,
+			"duration": 0.9,
+			"critical": true
+		})
+
+	for effect: Dictionary in effects:
+		var kind := str(effect.get("kind", ""))
+		if kind == "heal" or kind == "guard" or kind == "lifesteal":
+			var p_idx := int(effect.get("target_index", -1))
+			if p_idx < 0:
+				continue
+			var ally_center := _combatant_effect_center(false, p_idx)
+			_leader_skill_fx.append({
+				"kind": "ally_burst",
+				"element": element,
+				"center": ally_center,
+				"timer": 0.66,
+				"maxTimer": 0.66
+			})
+			if kind == "heal" or kind == "lifesteal":
+				_sfx("battle_heal_leaf_bubble")
+				_floating_texts.append({"text": "+%d" % int(effect.get("amount", 0)), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"], "size": 20.0, "timer": 0.0, "duration": 0.85, "critical": true})
+			else:
+				_sfx("battle_shield_soft_bloom")
+				_floating_texts.append({"text": "GUARD", "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
+		elif kind == "convert_gems":
+			var converted := _convert_random_gems_to(str(effect.get("target_element", "light")), int(effect.get("count", 2)))
+			if not converted.is_empty():
+				_sfx("powerup_created_star")
+				_spawn_item_use_effect("gem_shift", board_center, color, 0.72, {"source": "mixed", "target": str(effect.get("target_element", "light")), "affected": converted.size()})
+				for cell: Dictionary in converted:
+					var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
+					_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", "light")), "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
+				_floating_texts.append({"text": "星星 x%d" % converted.size(), "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
+		elif kind == "status" or kind == "weaken":
+			var e_idx := int(effect.get("target_index", target_idx))
+			if e_idx < 0:
+				continue
+			var e_center := _combatant_effect_center(true, e_idx)
+			_leader_skill_fx.append({"kind": "mark", "element": element, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
+			var label := str(effect.get("status", "DOWN")).to_upper() if kind == "status" else "DOWN"
+			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": 0.75, "critical": true})
+	await get_tree().create_timer(0.28).timeout
+
+func _board_center() -> Vector2:
+	if _board == null:
+		return Vector2(DESIGN_W * 0.5, BATTLE_BOARD_Y + 156.0)
+	return Vector2(
+		float(_board.offset_x) + float(_board.cols * _board.cell_size) * 0.5,
+		float(_board.offset_y) + float(_board.rows * _board.cell_size) * 0.5
+	)
+
+func _convert_random_gems_to(target_element: String, count: int) -> Array:
+	var converted: Array = []
+	if _board == null:
+		return converted
+	var candidates: Array = []
+	for row in range(_board.rows):
+		for col in range(_board.cols):
+			if _board.is_obstacle(row, col) or _board.is_locked(row, col):
+				continue
+			var gem := str(_board.grid[row][col])
+			if gem.is_empty() or gem == target_element:
+				continue
+			candidates.append({"row": row, "col": col, "from": gem})
+	candidates.shuffle()
+	var limit := mini(maxi(0, count), candidates.size())
+	for i in range(limit):
+		var cell: Dictionary = candidates[i]
+		var row := int(cell.get("row", 0))
+		var col := int(cell.get("col", 0))
+		_board.grid[row][col] = target_element
+		cell["to"] = target_element
+		converted.append(cell)
+	return converted
+
+func _combatant_effect_center(is_enemy: bool, index: int) -> Vector2:
+	var state := _combatant_render_state()
+	var key := "gui_enemy_centers" if is_enemy else "gui_player_centers"
+	var centers: Array = state.get(key, [])
+	if index >= 0 and index < centers.size():
+		return centers[index]
+	if is_enemy:
+		return Vector2(25.0 + float(index) * 120.0 + 55.0, 88.0)
+	return Vector2(15.0 + float(index) * 120.0 + 55.0, 230.0)
+
+func _player_element_at(index: int) -> String:
+	if _battle == null or index < 0 or index >= _battle.player_team.size():
+		return "fire"
+	var unit: Dictionary = _battle.player_team[index]
+	return str(unit.get("boardAffinity", unit.get("element", "fire")))
+
+func _leader_fx_color(element: String) -> Color:
+	if GEM_COLORS.has(element):
+		return GEM_COLORS[element]
+	match element:
+		"earth":
+			return Color(0.72, 0.50, 0.25, 1.0)
+		"wind":
+			return Color(0.58, 0.92, 0.82, 1.0)
+		"dark":
+			return Color(0.42, 0.25, 0.72, 1.0)
+		"ice":
+			return Color(0.62, 0.92, 1.0, 1.0)
+		"void":
+			return Color(0.55, 0.36, 0.95, 1.0)
+		"temporal":
+			return Color(0.54, 0.78, 1.0, 1.0)
+		"star":
+			return Color(1.0, 0.86, 0.34, 1.0)
+		"chaos":
+			return Color(0.95, 0.22, 0.70, 1.0)
+		_:
+			return C["gold"]
+
 func _on_damage_dealt(damage_info: Dictionary) -> void:
 	"""处理 BattleManager.damage_dealt 信号，显示浮动伤害数字"""
 	var damage: int = damage_info.get("damage", 0)
@@ -2177,6 +2404,7 @@ func _process(delta: float) -> void:
 
 	# 更新道具使用特效
 	_update_item_use_effects(effective_delta)
+	BattleAnimationControllerScript.tick_timed_entries(_leader_skill_fx, effective_delta)
 	
 	# 更新敌人倒下粒子
 	_update_defeat_particles(effective_delta)
@@ -2275,6 +2503,7 @@ func _draw() -> void:
 
 	# 渲染道具使用特效
 	_draw_item_use_effects()
+	_draw_leader_skill_fx()
 	
 	# 渲染敌人倒下粒子
 	_draw_defeat_particles()
@@ -3797,6 +4026,61 @@ func _draw_item_use_effects() -> void:
 				_draw_item_fx_unlock(center, color, progress, alpha)
 			"cleanse":
 				_draw_item_fx_cleanse(center, color, progress, alpha)
+
+func _draw_leader_skill_fx() -> void:
+	for fx: Dictionary in _leader_skill_fx:
+		var duration := maxf(0.01, float(fx.get("maxTimer", fx.get("duration", 0.6))))
+		var remaining := clampf(float(fx.get("timer", 0.0)), 0.0, duration)
+		var progress := clampf(1.0 - remaining / duration, 0.0, 1.0)
+		var alpha := clampf(1.0 - maxf(0.0, progress - 0.72) / 0.28, 0.0, 1.0)
+		var element := str(fx.get("element", "fire"))
+		var color := _leader_fx_color(element)
+		match str(fx.get("kind", "")):
+			"charge_full":
+				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				var pulse := sin(progress * PI)
+				draw_circle(center, 12.0 + progress * 25.0, Color(color.r, color.g, color.b, 0.22 * alpha))
+				draw_arc(center, 14.0 + pulse * 7.0, 0.0, TAU, 42, Color(color.r, color.g, color.b, 0.82 * alpha), 2.4, true)
+				_draw_soft_sparkles(self, center, color, alpha, true)
+			"gather":
+				var start: Vector2 = fx.get("from", Vector2.ZERO)
+				var finish: Vector2 = fx.get("to", Vector2.ZERO)
+				var p := 1.0 - pow(1.0 - progress, 3.0)
+				var pos := start.lerp(finish, p)
+				draw_line(start, pos, Color(color.r, color.g, color.b, 0.34 * alpha), 2.0)
+				draw_circle(pos, 5.5 + 3.0 * sin(progress * PI), Color(color.r, color.g, color.b, 0.86 * alpha))
+				draw_circle(pos, 2.5, Color(1.0, 1.0, 0.88, 0.88 * alpha))
+			"beam":
+				var start: Vector2 = fx.get("from", Vector2.ZERO)
+				var finish: Vector2 = fx.get("to", Vector2.ZERO)
+				var reach := clampf(progress / 0.42, 0.0, 1.0)
+				var tip := start.lerp(finish, 1.0 - pow(1.0 - reach, 3.0))
+				draw_line(start, tip, Color(color.r, color.g, color.b, 0.80 * alpha), 5.0)
+				draw_line(start, tip, Color(1.0, 1.0, 0.92, 0.72 * alpha), 2.2)
+				draw_circle(start, 18.0 + sin(progress * PI) * 8.0, Color(color.r, color.g, color.b, 0.18 * alpha))
+				if reach >= 0.98:
+					draw_circle(finish, 16.0 + progress * 20.0, Color(color.r, color.g, color.b, 0.18 * alpha))
+					_draw_soft_sparkles(self, finish, color, alpha, true)
+			"ally_burst":
+				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				var pulse := sin(clampf(progress / 0.55, 0.0, 1.0) * PI)
+				draw_circle(center, 20.0 + progress * 26.0, Color(color.r, color.g, color.b, 0.13 * alpha))
+				draw_arc(center, 22.0 + pulse * 8.0, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.78 * alpha), 2.4, true)
+				draw_line(center + Vector2(-8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
+				draw_line(center + Vector2(0.0, -8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
+				_draw_soft_sparkles(self, center, color, alpha, true)
+			"mark":
+				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				draw_arc(center, 18.0 + progress * 18.0, -PI * 0.4, PI * 1.4, 46, Color(color.r, color.g, color.b, 0.78 * alpha), 2.4, true)
+				draw_arc(center, 10.0 + progress * 10.0, PI * 0.6, PI * 1.9, 32, Color(1.0, 1.0, 0.92, 0.50 * alpha), 1.3, true)
+			"convert_cell":
+				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				var burst := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
+				draw_circle(center, 10.0 + progress * 22.0, Color(color.r, color.g, color.b, 0.18 * alpha))
+				draw_arc(center, 14.0 + burst * 8.0, 0.0, TAU, 42, Color(color.r, color.g, color.b, 0.82 * alpha), 2.0, true)
+				draw_line(center - Vector2(8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 0.88, 0.88 * alpha), 1.6)
+				draw_line(center - Vector2(0.0, 8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 0.88, 0.88 * alpha), 1.6)
+				_draw_soft_sparkles(self, center, color, alpha, true)
 
 func _draw_item_fx_hammer(fx: Dictionary, center: Vector2, color: Color, progress: float, alpha: float) -> void:
 	var swing := clampf(progress / 0.38, 0.0, 1.0)
