@@ -86,8 +86,8 @@ func initialize(game: Node, data: Dictionary = {}) -> void:
 
 func _create_ui() -> void:
 	_back_btn = get_node("Header/BackButton") as TextureButton
-	_prev_chapter_btn = get_node("Header/PreviousButton") as TextureButton
-	_next_chapter_btn = get_node("Header/NextButton") as TextureButton
+	_prev_chapter_btn = get_node_or_null("Header/PreviousButton") as TextureButton
+	_next_chapter_btn = get_node_or_null("Header/NextButton") as TextureButton
 	_chapter_title = get_node("Header/ChapterTitle") as Label
 	_chapter_name_label = get_node("Header/ChapterName") as Label
 	_star_label = get_node("Header/StarValue") as Label
@@ -137,6 +137,8 @@ func _connect_shell_actions() -> void:
 	_attach_button_feedback(_sweep_cancel_btn, CartoonButtonFeedback.Profile.NAV, false)
 
 func _connect_button(button: BaseButton, action: Callable) -> void:
+	if button == null:
+		return
 	if not button.pressed.is_connected(action):
 		button.pressed.connect(action)
 
@@ -265,10 +267,12 @@ func _update_header() -> void:
 	_sync_map_nodes()
 
 func _update_chapter_buttons() -> void:
-	_prev_chapter_btn.visible = false
-	_prev_chapter_btn.disabled = _current_chapter_index <= 0
-	_next_chapter_btn.visible = false
-	_next_chapter_btn.disabled = _current_chapter_index >= _chapters.size() - 1
+	if _prev_chapter_btn != null:
+		_prev_chapter_btn.visible = false
+		_prev_chapter_btn.disabled = _current_chapter_index <= 0
+	if _next_chapter_btn != null:
+		_next_chapter_btn.visible = false
+		_next_chapter_btn.disabled = _current_chapter_index >= _chapters.size() - 1
 	if _bottom_prev_map_btn != null:
 		_bottom_prev_map_btn.disabled = _current_chapter_index <= 0
 		_bottom_prev_map_btn.modulate.a = 0.48 if _bottom_prev_map_btn.disabled else 1.0
@@ -279,7 +283,9 @@ func _update_chapter_buttons() -> void:
 func _update_page_dots() -> void:
 	var anim := _get_anim()
 	for i in DOT_PATHS.size():
-		var dot := get_node(DOT_PATHS[i]) as ColorRect
+		var dot := get_node_or_null(DOT_PATHS[i]) as ColorRect
+		if dot == null:
+			continue
 		dot.visible = i < _chapters.size()
 		var target_color: Color = Color(1.0, 0.82, 0.18, 1.0) if i == _current_chapter_index else Color(1.0, 1.0, 1.0, 0.34)
 		var target_size: Vector2 = Vector2(10.0, 6.0) if i == _current_chapter_index else Vector2(5.0, 5.0)

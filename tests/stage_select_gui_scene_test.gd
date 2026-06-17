@@ -84,7 +84,7 @@ func _run() -> void:
 	var star_frame := scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage/Platform") as TextureRect
 	_expect(star_frame.size.x >= 200.0 and star_frame.size.y >= 260.0, "chapter 9 boss platform should remain large and editable")
 
-	(scene.get_node("Header/PreviousButton") as TextureButton).pressed.emit()
+	(scene.get_node("BottomNav/PrevMapButton") as TextureButton).pressed.emit()
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent temporal map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter switch should hide the previous map group")
 	(scene.get_node("BottomNav/NextMapButton") as TextureButton).pressed.emit()
