@@ -18,7 +18,7 @@ const LOBBY_ASSETS := {
 	"currency": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"gems": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
-	"plus": "res://assets/images/ui/icons/main_icon_plus_v3.png",
+	"plus": "res://assets/images/ui/icons/main_icon_currency_plus_green.png",
 }
 const RANCH_CARD_PATHS := [
 	"Pages/RanchPage/RosterPanel/Card1",

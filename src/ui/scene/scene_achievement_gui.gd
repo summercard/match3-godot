@@ -11,7 +11,7 @@ const GUI_ASSETS := {
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 	"heart": "res://assets/images/effects/ranch_fx_social_heart.png",
-	"plus": "res://assets/images/ui/icons/main_icon_plus_v3.png",
+	"plus": "res://assets/images/ui/icons/main_icon_currency_plus_green.png",
 	"back": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"title": "res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png",
 	"panel": "res://assets/images/ui/panels/inventory_new_ui_inventory_panel.png",
@@ -27,7 +27,7 @@ const GUI_ASSETS := {
 	"numeric": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"continuous": "res://assets/images/ui/icons/common_nav_icon_nav_signin.png",
 	"star": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
-	"check": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
+	"check": "res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png",
 	"nav_panel": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_panel.png",
 	"nav_selected": "res://assets/images/ui/icons/ranch_ui_pet_farm_nav_selected.png",
 	"nav_home": "res://assets/images/ui/icons/common_nav_icon_nav_home.png",
@@ -77,7 +77,6 @@ const TOP_CHIPS := [
 	{"icon": "heart", "key": "stamina", "rect": Rect2(244.0, 8.0, 116.0, 36.0)},
 ]
 const TITLE_RECT := Rect2(83.0, 52.0, 210.0, 58.0)
-const BACK_BUTTON_RECT := Rect2(15.0, 59.0, 45.0, 45.0)
 const SUMMARY_PANEL := Rect2(15.0, 111.0, 345.0, 93.0)
 const TAB_RECTS := [
 	Rect2(16.0, 211.0, 64.0, 39.0),
@@ -143,7 +142,6 @@ func _process(delta: float) -> void:
 
 func _rebuild_button_rects() -> void:
 	_button_rects.clear()
-	_button_rects.append({"id": "back", "rect": BACK_BUTTON_RECT, "profile": "icon"})
 	for i in TAB_RECTS.size():
 		_button_rects.append({"id": "tab_%s" % str(CATEGORY_LABELS[i]["id"]), "rect": TAB_RECTS[i], "profile": "nav"})
 	for i in NAV_ITEMS.size():
@@ -181,10 +179,6 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _on_gui_tap(point: Vector2) -> void:
-	if BACK_BUTTON_RECT.has_point(point):
-		_play_feedback(BACK_BUTTON_RECT)
-		_go_scene_after_feedback("main")
-		return
 	for i in CATEGORY_LABELS.size():
 		if TAB_RECTS[i].has_point(point):
 			_play_feedback(TAB_RECTS[i])
@@ -294,9 +288,8 @@ func _draw_top_currency(font: Font) -> void:
 
 
 func _draw_gui_header(font: Font) -> void:
-	_draw_texture_fit(_gui_tex("back"), BACK_BUTTON_RECT)
 	_draw_texture_fit(_gui_tex("title"), TITLE_RECT)
-	_draw_center_text(font, "成就殿堂", TITLE_RECT.get_center() + Vector2(0.0, 14.0), Color.WHITE, 25.0, 150.0)
+	_draw_center_text(font, "成就殿堂", TITLE_RECT.get_center() + Vector2(0.0, 7.0), Color.WHITE, 25.0, 150.0)
 
 
 func _draw_summary_panel(font: Font) -> void:
@@ -352,7 +345,6 @@ func _draw_achievement_card_gui(font: Font, ach: Dictionary, rect: Rect2) -> voi
 	_draw_reward_gui(font, ach, Rect2(draw_rect.position.x + 232.0, draw_rect.position.y + 16.0, 37.0, 37.0), unlocked)
 	if claimed:
 		_draw_texture_contain(_gui_tex("check"), Rect2(draw_rect.end.x - 56.0, draw_rect.position.y + 45.0, 28.0, 28.0))
-		_draw_center_text(font, "已领取", Vector2(draw_rect.end.x - 42.0, draw_rect.position.y + 72.0), Color(0.38, 0.64, 0.12), 10.0, 54.0)
 	elif unlocked:
 		var claim_rect := _feedback_rect(_get_gui_claim_rect(rect))
 		_draw_texture_fit(_gui_tex("claim"), claim_rect)

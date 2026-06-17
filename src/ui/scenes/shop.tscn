@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="3_currency"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="4_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="5_diamond"]
-[ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/ui/icons/main_icon_plus_v3.png" id="6_plus"]
+[ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="6_plus"]
 [ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="7_heart"]
 [ext_resource type="Texture2D" uid="uid://q7o0wp1k2j6e" path="res://assets/images/ui/icons/shop_icon_shop_category_gems.png" id="9_cat_gems"]
 [ext_resource type="Texture2D" uid="uid://c35o42p0oriw7" path="res://assets/images/ui/icons/shop_icon_shop_category_coins.png" id="10_cat_coins"]

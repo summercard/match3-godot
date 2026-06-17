@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://uomxda6s6wcc"
-path="res://.godot/imported/ranch_icon_check_badge.png-815dc12e282e20956c01e266f00f49f9.ctex"
+uid="uid://cfak3eptbdmnn"
+path="res://.godot/imported/stage_node_ch03_mystic_normal.png-9ec0309c994041ec9f544ed25c193a05.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/ui/icons/ranch_icon_check_badge.png"
-dest_files=["res://.godot/imported/ranch_icon_check_badge.png-815dc12e282e20956c01e266f00f49f9.ctex"]
+source_file="res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png"
+dest_files=["res://.godot/imported/stage_node_ch03_mystic_normal.png-9ec0309c994041ec9f544ed25c193a05.ctex"]
 
 [params]
 

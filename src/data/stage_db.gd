@@ -342,7 +342,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_6",
-			"name": "火山区",
+			"name": "冰霜王座",
 			"element": "ice",
 			"stages": [
 				{
@@ -423,7 +423,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_7",
-			"name": "地底区",
+			"name": "虚空领域",
 			"element": "void",
 			"stages": [
 				{
@@ -489,7 +489,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_8",
-			"name": "冰原区",
+			"name": "时空裂隙",
 			"element": "temporal",
 			"stages": [
 				{

@@ -31,6 +31,8 @@ const MAP_SCROLL_DRAG_THRESHOLD: float = 8.0
 const DEFAULT_STAR_LIT_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/result_refresh_icon_star_silver.png"
 const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
+const STAGE_LOCK_ICON_PATH := "res://assets/images/ui/icons/stage_lock_icon.png"
+const STAGE_LOCK_ICON_SIZE := Vector2(28.0, 28.0)
 
 # === 大地图入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
 const ENTRY_HEADER_DELAY := 0.00
@@ -441,12 +443,14 @@ func _connect_chapter_map_actions() -> void:
 		_ensure_portrait_node(boss, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
 
 # 普通关卡台子的画像尺寸（位置由 _apply_stage_portrait 动态按台子中心计算）
-const _STAGE_PORTRAIT_SIZE := Vector2(64.0, 56.0)
+const _STAGE_PORTRAIT_SIZE := Vector2(74.0, 66.0)
 # Boss 台子的画像尺寸
-const _BOSS_PORTRAIT_SIZE := Vector2(106.0, 96.0)
+const _BOSS_PORTRAIT_SIZE := Vector2(118.0, 108.0)
 # 首帧 fallback 位置（_apply_*_portrait 会在 _sync 时按台子尺寸重设为"底部对准中心"）
-const _STAGE_PORTRAIT_FALLBACK_POS := Vector2(8.0, -2.0)
-const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(36.0, 32.0)
+const _STAGE_PORTRAIT_FALLBACK_POS := Vector2(9.0, -17.0)
+const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(30.0, 10.0)
+const _STAGE_PORTRAIT_LIFT := 12.0
+const _BOSS_PORTRAIT_LIFT := 16.0
 
 ## 动态为关卡台子添加怪物画像 TextureRect；只创建一次，避免重复堆叠。
 ## 位置由 _apply_stage_portrait / _apply_boss_portrait 按台子尺寸动态计算（底部对准台子中心）。
@@ -503,19 +507,13 @@ func _apply_stage_portrait(button: TextureButton, card: Dictionary) -> void:
 	portrait.texture = load(path)
 	# 保留原色（白 modulate = 无修改）
 	portrait.modulate = Color(1, 1, 1, 1)
-	# 动态定位：图片底部对准台子中心，水平居中
-	_center_portrait_on_pedestal(button, portrait)
+	# 动态定位：图片底部对准台子中心并略向上抬，水平居中。
+	_center_portrait_on_pedestal(button, portrait, _STAGE_PORTRAIT_LIFT)
 	portrait.visible = true
 
 func _apply_boss_portrait(button: TextureButton, card: Dictionary) -> void:
 	var portrait := _ensure_portrait_node(button, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
 	if portrait == null:
-		return
-	var enabled := bool(card.get("enabled", true))
-	var stars := int(card.get("stars", 0))
-	if not enabled or stars > 0:
-		portrait.visible = false
-		portrait.texture = null
 		return
 	var monster_id := _feature_enemy_id(card)
 	var path := MonsterArtDB.get_battle_portrait_path(monster_id) if not monster_id.is_empty() else ""
@@ -525,18 +523,18 @@ func _apply_boss_portrait(button: TextureButton, card: Dictionary) -> void:
 		return
 	portrait.texture = load(path)
 	portrait.modulate = Color(1, 1, 1, 1)
-	_center_portrait_on_pedestal(button, portrait)
+	_center_portrait_on_pedestal(button, portrait, _BOSS_PORTRAIT_LIFT)
 	portrait.visible = true
 
 ## 把 portrait 放在台子中心：图片底部贴着 button 垂直中线，水平居中。
 ## 这样怪物画像看起来像坐在台子上（露出台子上半部分）。
-func _center_portrait_on_pedestal(button: TextureButton, portrait: TextureRect) -> void:
+func _center_portrait_on_pedestal(button: TextureButton, portrait: TextureRect, lift: float) -> void:
 	var btn_size: Vector2 = button.size
 	var port_size: Vector2 = portrait.size
-	# bottom-of-portrait at vertical-midline of button: position.y = mid - height
+	# Bottom-of-portrait sits slightly above the pedestal midline.
 	portrait.position = Vector2(
 		(btn_size.x - port_size.x) * 0.5,
-		btn_size.y * 0.5 - port_size.y
+		btn_size.y * 0.5 - lift - port_size.y
 	)
 
 func _stage_buttons() -> Array[TextureButton]:
@@ -579,8 +577,7 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	(button.get_node("StageNumber") as Label).text = str(card.get("stage_no", ""))
 	(button.get_node("StageNumber") as Label).modulate = TEXT_WHITE if enabled else TEXT_MUTED
 	(button.get_node("StageNumber") as Label).visible = enabled
-	var lock_state := button.get_node("LockState") as Label
-	lock_state.visible = not enabled
+	_sync_lock_state(button, not enabled)
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	(button.get_node("SweepButton") as Button).visible = enabled and bool(card.get("can_sweep", false))
@@ -592,8 +589,22 @@ func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	button.modulate.a = 1.0 if enabled else 0.82
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
-	(button.get_node("LockState") as Label).visible = not enabled
+	_sync_lock_state(button, not enabled)
 	_apply_boss_portrait(button, card)
+
+func _sync_lock_state(button: TextureButton, visible: bool) -> void:
+	var lock_node := button.get_node_or_null("LockState") as CanvasItem
+	if lock_node == null:
+		return
+	if lock_node is TextureRect:
+		var icon := lock_node as TextureRect
+		if icon.texture == null or icon.texture.resource_path != STAGE_LOCK_ICON_PATH:
+			icon.texture = _get_texture(STAGE_LOCK_ICON_PATH)
+		icon.size = STAGE_LOCK_ICON_SIZE
+		icon.position = (button.size - STAGE_LOCK_ICON_SIZE) * 0.5
+	elif lock_node is Label:
+		(lock_node as Label).text = ""
+	lock_node.visible = visible
 
 func _sync_selection_ring(button: TextureButton, enabled: bool) -> void:
 	if not button.has_node("SelectionRing"):

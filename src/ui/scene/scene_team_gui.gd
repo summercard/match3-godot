@@ -14,7 +14,7 @@ const GUI_ASSETS := {
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 	"heart": "res://assets/images/effects/ranch_fx_social_heart.png",
-	"plus": "res://assets/images/ui/icons/main_icon_plus_v3.png",
+	"plus": "res://assets/images/ui/icons/main_icon_currency_plus_green.png",
 	"empty_plus": "res://assets/images/ui/panels/team_new_ui_empty_pedestal_plus.png",
 	"leader_badge": "res://assets/images/ui/icons/team_new_ui_leader_badge.png",
 	"pedestal_label": "res://assets/images/ui/panels/team_new_ui_pedestal_label.png",

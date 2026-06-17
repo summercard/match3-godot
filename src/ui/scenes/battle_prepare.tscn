@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="gold_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="diamond_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/effects/ranch_fx_social_heart.png" id="heart_icon"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_plus_v3.png" id="plus_icon"]
+[ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="plus_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png" id="sword_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/elements/element_fire.png" id="element_fire"]
 

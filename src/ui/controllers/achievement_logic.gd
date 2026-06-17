@@ -39,7 +39,7 @@ const ACHIEVEMENT_ASSETS := {
 	"progress_fill": "res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png",
 	"claim": "res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png",
 	"disabled": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_normal.png",
-	"stamp": "res://assets/images/ui/icons/ranch_icon_check_badge.png",
+	"stamp": "res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png",
 	"lock": "res://assets/images/ui/icons/album_icon_lock.png",
 	"badge_star": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
 	"badge_battle": "res://assets/images/ui/icons/common_nav_icon_nav_battle.png",
@@ -343,7 +343,7 @@ func _draw_achievement_card(ach: Dictionary, rect: Rect2) -> void:
 	_draw_progress_bar(Rect2(rect.position.x + 98.0, rect.position.y + 72.0, 148.0, 14.0), progress, "%d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
 	_draw_reward(ach, Rect2(rect.position.x + 250.0, rect.position.y + 14.0, 38.0, 38.0), unlocked)
 	if claimed:
-		_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 256.0, rect.position.y + 56.0, 88.0, 31.0))
+		_draw_texture_contain(_tex("stamp"), Rect2(rect.position.x + 292.0, rect.position.y + 56.0, 32.0, 32.0))
 	elif unlocked:
 		var claim_rect := _get_claim_rect(rect)
 		_draw_texture_fit(_tex("claim"), claim_rect)

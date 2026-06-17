@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="4_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="5_diamond"]
 [ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="6_heart"]
-[ext_resource type="Texture2D" uid="uid://cegj4fnu5c0bj" path="res://assets/images/ui/icons/main_icon_plus_v3.png" id="7_plus"]
+[ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="7_plus"]
 [ext_resource type="Texture2D" uid="uid://d0vsl4s2lgjbr" path="res://assets/images/ui/panels/team_new_ui_empty_pedestal_plus.png" id="8_empty_plus"]
 [ext_resource type="Texture2D" uid="uid://ivv7n7jnlj1d" path="res://assets/images/ui/icons/team_new_ui_leader_badge.png" id="9_leader_badge"]
 [ext_resource type="Texture2D" uid="uid://bescenerehs6r" path="res://assets/images/ui/panels/team_new_ui_pedestal_label.png" id="10_pedestal_label"]

@@ -48,7 +48,7 @@ const PREPARE_ASSETS := {
 	"currency_chip": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 	"heart": "res://assets/images/effects/ranch_fx_social_heart.png",
-	"plus": "res://assets/images/ui/icons/main_icon_plus_v3.png",
+	"plus": "res://assets/images/ui/icons/main_icon_currency_plus_green.png",
 	"header": "res://assets/images/ui/bars/battle_prepare_new_ui_prepare_header.png",
 	"team_card": "res://assets/images/ui/cards/battle_prepare_new_ui_monster_card.png",
 	"enemy_card": "res://assets/images/ui/cards/battle_prepare_new_ui_monster_card.png",

@@ -8,6 +8,7 @@ extends Control
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
+const LOCK_ICON_PATH := "res://assets/images/ui/icons/stage_lock_icon.png"
 
 const MAP_NODE_POSITIONS: Array[Vector2] = [
 	Vector2(62, 500), Vector2(96, 420), Vector2(144, 358), Vector2(202, 386),
@@ -46,32 +47,77 @@ const CHAPTER_BOSS_LAYOUT_OVERRIDES := {
 	}
 }
 const STAGE_NODE_ASSETS_DEFAULT := {
-	"node_normal": "res://assets/images/maps/nodes/stage_node_normal.png",
-	"node_selected": "res://assets/images/maps/nodes/stage_node_selected.png",
-	"node_crystal": "res://assets/images/maps/nodes/stage_node_crystal.png",
+	"node_normal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
+	"node_selected": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
+	"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_elite.png",
 	"node_chest": "res://assets/images/maps/nodes/stage_node_chest.png",
 	"node_locked": "res://assets/images/maps/nodes/stage_node_locked.png"
 }
 const CHAPTER_STAGE_NODE_ASSET_OVERRIDES := {
+	"chapter_1": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_elite.png"
+	},
+	"chapter_2": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch02_castle_elite.png"
+	},
+	"chapter_3": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch03_mystic_elite.png"
+	},
+	"chapter_4": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch04_desert_elite.png"
+	},
+	"chapter_5": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch05_island_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch05_island_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch05_island_elite.png"
+	},
+	"chapter_6": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png"
+	},
+	"chapter_7": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch07_void_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch07_void_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch07_void_elite.png"
+	},
 	"chapter_8": {
-		"node_normal": "res://assets/images/maps/nodes/stage_node_temporal_normal.png",
-		"node_selected": "res://assets/images/maps/nodes/stage_node_temporal_selected.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_temporal_elite.png"
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch08_temporal_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch08_temporal_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch08_temporal_elite.png"
 	},
 	"chapter_9": {
-		"node_normal": "res://assets/images/maps/nodes/stage_node_star_normal.png",
-		"node_selected": "res://assets/images/maps/nodes/stage_node_star_selected.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_star_elite.png"
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch09_star_elite.png"
+	},
+	"chapter_10": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch10_chaos_elite.png"
+	},
+	"chapter_11": {
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch11_light_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch11_light_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch11_light_elite.png"
 	}
 }
 const CHAPTER_STAGE_NODE_SIZE_OVERRIDES := {
 	"chapter_8": {
-		"normal": Vector2(78.0, 62.0),
-		"elite": Vector2(80.0, 98.0)
+		"normal": Vector2(94.0, 72.0),
+		"elite": Vector2(94.0, 72.0)
 	},
 	"chapter_9": {
-		"normal": Vector2(80.0, 64.0),
-		"elite": Vector2(82.0, 100.0)
+		"normal": Vector2(94.0, 72.0),
+		"elite": Vector2(94.0, 72.0)
 	}
 }
 const MAP_CONTENT_TOP: float = 78.0
@@ -116,13 +162,14 @@ const CHAPTER_THEME_BACKGROUNDS := {
 }
 
 const CHAPTER_BACKGROUND_OVERRIDES := {
-	"chapter_2": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_02_grassland.png",
+	"chapter_1": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_02_grassland.png",
+	"chapter_2": "res://assets/images/maps/backgrounds/stage_bg_chapter_01_grassland_540x960.png",
 	"chapter_3": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_03_forest.png",
 	"chapter_4": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_desert.png",
 	"chapter_5": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_island.png",
-	"chapter_6": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_volcano.png",
-	"chapter_7": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_underground.png",
-	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_icefield.png",
+	"chapter_6": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_frost_throne.png",
+	"chapter_7": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_void_domain.png",
+	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_temporal_rift.png",
 	"chapter_9": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png"
 }
 
@@ -589,7 +636,7 @@ func _boss_layout_for_chapter(chapter_id: String) -> Dictionary:
 
 func _stage_node_size_for_chapter(chapter_id: String, is_elite: bool) -> Vector2:
 	var kind := "elite" if is_elite else "normal"
-	var default_size := Vector2(66.0, 76.0) if is_elite else Vector2(64.0, 54.0)
+	var default_size := Vector2(94.0, 72.0)
 	if not CHAPTER_STAGE_NODE_SIZE_OVERRIDES.has(chapter_id):
 		return default_size
 	return CHAPTER_STAGE_NODE_SIZE_OVERRIDES[chapter_id].get(kind, default_size)
@@ -1084,7 +1131,9 @@ func _draw_stage_lock_overlay(card: Dictionary, is_boss: bool) -> void:
 	var required_name := str(required.get("requiredStageName", "前置关卡"))
 	var label := "通关%s解锁" % required_name if not required_name.is_empty() else "未解锁"
 	var label_y := cy + (64.0 if is_boss else 36.0)
-	_draw_text_center("锁", cx, cy + (-3.0 if is_boss else 0.0), Color(0.78, 0.84, 0.92), 14, true, 38)
+	var icon_size := Vector2(28.0, 28.0)
+	var icon_y := cy + (-22.0 if is_boss else -14.0)
+	_draw_texture_contain(_get_texture(LOCK_ICON_PATH), Rect2(cx - icon_size.x * 0.5, icon_y, icon_size.x, icon_size.y), 0.92)
 	_draw_text_center(label, cx, label_y, Color(0.68, 0.76, 0.88), 8, false, 92)
 
 func _draw_stars(x: float, y: float, count: int) -> void:
@@ -1205,15 +1254,14 @@ func _create_stage_node(card: Dictionary) -> void:
 	node.custom_minimum_size = Vector2(card["w"], card["h"])
 	
 	# 节点背景图片
-	var node_image_path: String = ""
+	var node_key := "node_crystal" if is_elite else "node_normal"
 	if is_boss:
-		node_image_path = "res://assets/images/maps/nodes/stage_node_crystal.png"
+		node_key = "node_normal"
 	else:
 		var can_sweep: bool = card.get("can_sweep", false)
 		if can_sweep:
-			node_image_path = "res://assets/images/maps/nodes/stage_node_selected.png"
-		else:
-			node_image_path = "res://assets/images/maps/nodes/stage_node_normal.png"
+			node_key = "node_selected"
+	var node_image_path := _stage_node_asset_path(str(card.get("chapter_id", "")), node_key)
 	
 	if ResourceLoader.exists(node_image_path):
 		var bg_tex := TextureRect.new()
