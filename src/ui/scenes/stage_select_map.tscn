@@ -478,6 +478,158 @@ offset_right = 150.0
 offset_bottom = 5.0
 color = Color(1, 1, 1, 0.34)
 
+[node name="TransitionCloudLayer" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 0
+
+[node name="Mist" type="ColorRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="LeftCloud01" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = -840.0
+offset_top = -110.0
+offset_right = -40.0
+offset_bottom = 300.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud02" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = -930.0
+offset_top = 75.0
+offset_right = -40.0
+offset_bottom = 535.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud03" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = -900.0
+offset_top = 335.0
+offset_right = -50.0
+offset_bottom = 760.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud04" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.92)
+layout_mode = 0
+offset_left = -720.0
+offset_top = 210.0
+offset_right = -40.0
+offset_bottom = 610.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud05" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = -700.0
+offset_top = 500.0
+offset_right = -50.0
+offset_bottom = 815.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud06" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.9)
+layout_mode = 0
+offset_left = -740.0
+offset_top = -250.0
+offset_right = -60.0
+offset_bottom = 70.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud01" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = -130.0
+offset_right = 1225.0
+offset_bottom = 270.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud02" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = 405.0
+offset_top = 70.0
+offset_right = 1295.0
+offset_bottom = 550.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud03" type="TextureRect" parent="TransitionCloudLayer"]
+layout_mode = 0
+offset_left = 410.0
+offset_top = 315.0
+offset_right = 1220.0
+offset_bottom = 760.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud04" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = 405.0
+offset_top = 200.0
+offset_right = 1085.0
+offset_bottom = 610.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud05" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.95)
+layout_mode = 0
+offset_left = 415.0
+offset_top = 500.0
+offset_right = 1125.0
+offset_bottom = 815.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud06" type="TextureRect" parent="TransitionCloudLayer"]
+modulate = Color(1, 1, 1, 0.9)
+layout_mode = 0
+offset_left = 410.0
+offset_top = -260.0
+offset_right = 1125.0
+offset_bottom = 70.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="PopupLayer" type="Control" parent="." unique_id=978015749]
 visible = false
 anchors_preset = 0

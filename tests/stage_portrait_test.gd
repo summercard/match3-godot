@@ -77,7 +77,7 @@ func _run() -> void:
 	var port_pos: Vector2 = (portrait1 as TextureRect).position
 	# bottom-of-portrait at vertical-midline: pos.y + size.y == btn.y * 0.5
 	var portrait_bottom: float = port_pos.y + port_size.y
-	var expected_bottom: float = btn_size.y * 0.5 - 12.0
+	var expected_bottom: float = btn_size.y * 0.5 - 4.0
 	_check(absf(portrait_bottom - expected_bottom) < 0.5, "Stage 1 portrait bottom should be lifted above button center (got %f, expected %f)" % [portrait_bottom, expected_bottom])
 	# 水平居中（容差 0.5）
 	var expected_x: float = (btn_size.x - port_size.x) * 0.5
@@ -134,7 +134,7 @@ func _run() -> void:
 	var port2_pos: Vector2 = (portrait2 as TextureRect).position
 	var port2_size: Vector2 = (portrait2 as TextureRect).size
 	var port2_bottom: float = port2_pos.y + port2_size.y
-	var expected_bottom2: float = btn2_size.y * 0.5 - 12.0
+	var expected_bottom2: float = btn2_size.y * 0.5 - 4.0
 	_check(absf(port2_bottom - expected_bottom2) < 0.5, "Stage 2 portrait bottom should be lifted above button center (got %f, expected %f)" % [port2_bottom, expected_bottom2])
 
 	# === 规则 7：locked + 没 stars → 不显示（验证明确规则）===

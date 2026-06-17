@@ -105,9 +105,9 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Banner" unique_id=1683066956]
 layout_mode = 0
 offset_left = 62.0
-offset_top = 48.0
+offset_top = 56.0
 offset_right = 317.0
-offset_bottom = 108.0
+offset_bottom = 116.0
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
 theme_override_colors/font_outline_color = Color(0.3, 0.13, 0.04, 0.82)
 theme_override_constants/outline_size = 3

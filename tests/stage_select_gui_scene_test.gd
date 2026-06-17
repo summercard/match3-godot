@@ -65,6 +65,8 @@ func _run() -> void:
 		"BottomNav/NextMapButton",
 		"CloudLayerFar/Cloud01",
 		"CloudLayerNear/Cloud03",
+		"TransitionCloudLayer/LeftCloud01",
+		"TransitionCloudLayer/RightCloud01",
 		"PopupLayer/SweepDialog/ConfirmBtn",
 	]:
 		_expect(scene.has_node(path), "editable map node should exist: %s" % path)
@@ -80,15 +82,20 @@ func _run() -> void:
 	_expect(return_patch.texture != null and return_patch.texture.resource_path.ends_with("butter01.png"), "bottom return button should stay on shared navigation button art")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter 9 should show its independent editable map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "inactive chapter maps should stay hidden")
+	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/PathDecorations") as Control).visible, "stage path dot decorations should be hidden")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_09_starlit_temple.png"), "chapter 9 group should carry its own formal background")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.contains("stage_node_ch09_star"), "chapter 9 group should carry its own themed platform asset")
 	var star_frame := scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage/Platform") as TextureRect
 	_expect(star_frame.size.x >= 200.0 and star_frame.size.y >= 260.0, "chapter 9 boss platform should remain large and editable")
+	_expect(not (scene.get_node("TransitionCloudLayer") as Control).visible, "chapter transition clouds should start offscreen and hidden")
 
 	(scene.get_node("BottomNav/PrevMapButton") as TextureButton).pressed.emit()
+	await _wait_frames(120)
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent temporal map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter switch should hide the previous map group")
+	_expect(not (scene.get_node("TransitionCloudLayer") as Control).visible, "chapter transition clouds should hide after switching")
 	(scene.get_node("BottomNav/NextMapButton") as TextureButton).pressed.emit()
+	await _wait_frames(120)
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "bottom next map button should switch to the next background")
 
 	scene.init({"chapterIndex": 0})
@@ -99,7 +106,7 @@ func _run() -> void:
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11/StageNumber") as Label).text == "11", "chapter 1 should render the eleventh normal stage node")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch01_grass_normal.png"), "chapter 1 boss should use the compact ordinary grass pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/BossArt"), "chapter 1 boss should not keep the old boss art overlay")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SelectionRing") as TextureRect).texture.resource_path.ends_with("selection_ring_pink.png"), "chapter 1 stages should carry the new selection ring asset")
+	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SelectionRing") as TextureRect).visible, "chapter 1 stage selection ring should be hidden")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/Stars/Star01") as TextureRect).texture.resource_path.ends_with("star_gold_new.png"), "chapter 1 stars should use the new formal star asset")
 	(scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01") as TextureButton).pressed.emit()
 	_expect(_selected_stage_id == "stage_1_1", "editable stage button should preserve enter-stage behavior")
@@ -209,6 +216,10 @@ func _on_stage_selected(stage_id: String, _stage_data: Dictionary, _chapter_inde
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _wait_frames(count: int) -> void:
+	for _i in range(count):
+		await process_frame
 
 func _finish() -> void:
 	if _failures.is_empty():

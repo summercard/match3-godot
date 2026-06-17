@@ -33,6 +33,19 @@ const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/result_refresh_icon
 const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 const STAGE_LOCK_ICON_PATH := "res://assets/images/ui/icons/stage_lock_icon.png"
 const STAGE_LOCK_ICON_SIZE := Vector2(28.0, 28.0)
+const STAGE_NUMBER_SIZE := Vector2(44.0, 25.0)
+const STAGE_LOCK_REFERENCE_Y: float = 11.0
+const BOSS_COMPACT_PLATFORM_SCALE: float = 1.5
+const BOSS_COMPACT_BUTTON_MAX_SIZE := Vector2(130.0, 150.0)
+const CLOUD_TRANSITION_CLOSE_DURATION: float = 0.50
+const CLOUD_TRANSITION_HOLD_DURATION: float = 0.22
+const CLOUD_TRANSITION_OPEN_DURATION: float = 0.66
+const CLOUD_TRANSITION_MAP_OUT_SCALE: Vector2 = Vector2(1.105, 1.105)
+const CLOUD_TRANSITION_MAP_IN_SCALE: Vector2 = Vector2(1.12, 1.12)
+const TRANSITION_LEFT_CLOSED_X := [-285.0, -365.0, -310.0, -255.0, -315.0, -260.0]
+const TRANSITION_RIGHT_CLOSED_X := [-110.0, -145.0, -95.0, -20.0, -75.0, -55.0]
+const TRANSITION_LEFT_DELAY := [0.0, 0.04, 0.02, 0.07, 0.11, 0.03]
+const TRANSITION_RIGHT_DELAY := [0.03, 0.0, 0.05, 0.09, 0.12, 0.02]
 
 # === 大地图入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
 const ENTRY_HEADER_DELAY := 0.00
@@ -49,6 +62,11 @@ var _chapter_maps_content: Control = null
 var _map_scroll: ScrollContainer = null
 var _cloud_layer_far: Control = null
 var _cloud_layer_near: Control = null
+var _transition_cloud_layer: Control = null
+var _transition_mist: ColorRect = null
+var _transition_left_clouds: Array[Control] = []
+var _transition_right_clouds: Array[Control] = []
+var _map_transition_active: bool = false
 var _bottom_prev_map_btn: TextureButton = null
 var _bottom_return_btn: TextureButton = null
 var _bottom_next_map_btn: TextureButton = null
@@ -99,6 +117,9 @@ func _create_ui() -> void:
 	_map_scroll = get_node("MapScroll") as ScrollContainer
 	_cloud_layer_far = get_node_or_null("CloudLayerFar") as Control
 	_cloud_layer_near = get_node_or_null("CloudLayerNear") as Control
+	_transition_cloud_layer = get_node_or_null("TransitionCloudLayer") as Control
+	_transition_mist = get_node_or_null("TransitionCloudLayer/Mist") as ColorRect
+	_cache_transition_clouds()
 	_reward_panel = get_node("Bindings/RewardPanel") as PanelContainer
 	_bottom_prev_map_btn = get_node("BottomNav/PrevMapButton") as TextureButton
 	_bottom_return_btn = get_node("BottomNav/ReturnButton") as TextureButton
@@ -152,6 +173,37 @@ func _attach_button_feedback(button: BaseButton, profile: int, burst_enabled: bo
 	feedback.setup(button, profile)
 	feedback.set_burst_enabled(burst_enabled)
 
+func _cache_transition_clouds() -> void:
+	_transition_left_clouds.clear()
+	_transition_right_clouds.clear()
+	if _transition_cloud_layer == null:
+		return
+	for child: Node in _transition_cloud_layer.get_children():
+		if child is Control:
+			var control := child as Control
+			if str(control.name).begins_with("LeftCloud"):
+				_transition_left_clouds.append(control)
+			elif str(control.name).begins_with("RightCloud"):
+				_transition_right_clouds.append(control)
+	_transition_left_clouds.sort_custom(func(a: Control, b: Control): return str(a.name) < str(b.name))
+	_transition_right_clouds.sort_custom(func(a: Control, b: Control): return str(a.name) < str(b.name))
+	_reset_transition_clouds()
+
+func _reset_transition_clouds() -> void:
+	if _transition_cloud_layer == null:
+		return
+	for cloud in _transition_left_clouds:
+		if not cloud.has_meta("open_position"):
+			cloud.set_meta("open_position", cloud.position)
+		cloud.position = cloud.get_meta("open_position")
+	for cloud in _transition_right_clouds:
+		if not cloud.has_meta("open_position"):
+			cloud.set_meta("open_position", cloud.position)
+		cloud.position = cloud.get_meta("open_position")
+	if _transition_mist != null:
+		_transition_mist.color = Color(1, 1, 1, 0.0)
+	_transition_cloud_layer.visible = false
+
 # 大地图入场序列：Header 从上方滑入 + 淡入，BottomNav 从下方滑入 + 淡入
 func _maybe_play_entry() -> void:
 	if _entry_played:
@@ -187,7 +239,7 @@ func _gui_input(_event: InputEvent) -> void:
 	pass
 
 func _input(event: InputEvent) -> void:
-	if _map_scroll == null or _sweep_dialog_active or _sweep_anim_active:
+	if _map_scroll == null or _sweep_dialog_active or _sweep_anim_active or _map_transition_active:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
@@ -378,6 +430,7 @@ func _ensure_chapter_map() -> void:
 	_prepare_chapter_map_scroll_extent()
 	_scroll_map_to_start()
 	_connect_chapter_map_actions()
+	_normalize_chapter_map_visuals()
 
 func _prepare_chapter_map_scroll_extent() -> void:
 	if _chapter_map == null:
@@ -437,10 +490,12 @@ func _connect_chapter_map_actions() -> void:
 		_attach_button_feedback(stage_button, CartoonButtonFeedback.Profile.NAV, false)
 		_attach_button_feedback(stage_button.get_node_or_null("SweepButton") as BaseButton, CartoonButtonFeedback.Profile.ICON, false)
 		_ensure_portrait_node(stage_button, _STAGE_PORTRAIT_FALLBACK_POS, _STAGE_PORTRAIT_SIZE)
+		_normalize_stage_button_layout(stage_button)
 	var boss := _boss_button()
 	if boss != null:
 		_attach_button_feedback(boss, CartoonButtonFeedback.Profile.ENTRY, false)
 		_ensure_portrait_node(boss, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
+		_normalize_boss_button_layout(boss)
 
 # 普通关卡台子的画像尺寸（位置由 _apply_stage_portrait 动态按台子中心计算）
 const _STAGE_PORTRAIT_SIZE := Vector2(74.0, 66.0)
@@ -449,8 +504,8 @@ const _BOSS_PORTRAIT_SIZE := Vector2(118.0, 108.0)
 # 首帧 fallback 位置（_apply_*_portrait 会在 _sync 时按台子尺寸重设为"底部对准中心"）
 const _STAGE_PORTRAIT_FALLBACK_POS := Vector2(9.0, -17.0)
 const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(30.0, 10.0)
-const _STAGE_PORTRAIT_LIFT := 12.0
-const _BOSS_PORTRAIT_LIFT := 16.0
+const _STAGE_PORTRAIT_LIFT := 4.0
+const _BOSS_PORTRAIT_LIFT := -5.0
 
 ## 动态为关卡台子添加怪物画像 TextureRect；只创建一次，避免重复堆叠。
 ## 位置由 _apply_stage_portrait / _apply_boss_portrait 按台子尺寸动态计算（底部对准台子中心）。
@@ -537,6 +592,64 @@ func _center_portrait_on_pedestal(button: TextureButton, portrait: TextureRect, 
 		btn_size.y * 0.5 - lift - port_size.y
 	)
 
+func _normalize_chapter_map_visuals() -> void:
+	if _chapter_map == null:
+		return
+	var path_decorations := _chapter_map.get_node_or_null("PathDecorations") as CanvasItem
+	if path_decorations != null:
+		path_decorations.visible = false
+	for stage_button in _stage_buttons():
+		_normalize_stage_button_layout(stage_button)
+	var boss := _boss_button()
+	if boss != null:
+		_normalize_boss_button_layout(boss)
+
+func _normalize_stage_button_layout(button: TextureButton) -> void:
+	if button == null:
+		return
+	var number := button.get_node_or_null("StageNumber") as Label
+	if number == null:
+		return
+	var platform := button.get_node_or_null("Platform") as Control
+	var center_x := button.size.x * 0.5
+	var top_y := 14.0
+	if platform != null:
+		center_x = platform.position.x + platform.size.x * 0.5
+		top_y = platform.position.y + 4.0
+	number.position = Vector2(center_x - STAGE_NUMBER_SIZE.x * 0.5, top_y)
+	number.size = STAGE_NUMBER_SIZE
+	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	number.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+func _normalize_boss_button_layout(button: TextureButton) -> void:
+	if button == null:
+		return
+	var platform := button.get_node_or_null("Platform") as TextureRect
+	if platform == null:
+		return
+	var is_compact := button.size.x <= BOSS_COMPACT_BUTTON_MAX_SIZE.x and button.size.y <= BOSS_COMPACT_BUTTON_MAX_SIZE.y
+	if not is_compact:
+		return
+	if not platform.has_meta("base_position"):
+		platform.set_meta("base_position", platform.position)
+		platform.set_meta("base_size", platform.size)
+	var base_position: Vector2 = platform.get_meta("base_position")
+	var base_size: Vector2 = platform.get_meta("base_size")
+	var center := base_position + base_size * 0.5
+	var target_size := base_size * BOSS_COMPACT_PLATFORM_SCALE
+	platform.size = target_size
+	platform.position = center - target_size * 0.5
+	var label := button.get_node_or_null("StageLabel") as Label
+	if label != null:
+		label.size = Vector2(84.0, 24.0)
+		label.position = Vector2((button.size.x - label.size.x) * 0.5, platform.position.y + platform.size.y * 0.56)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var stars := button.get_node_or_null("Stars") as Control
+	if stars != null:
+		stars.size = Vector2(48.0, 14.0)
+		stars.position = Vector2((button.size.x - stars.size.x) * 0.5, platform.position.y + platform.size.y * 0.82)
+
 func _stage_buttons() -> Array[TextureButton]:
 	var result: Array[TextureButton] = []
 	if _chapter_map == null:
@@ -558,6 +671,7 @@ func _boss_button() -> TextureButton:
 func _sync_map_nodes() -> void:
 	if _chapter_map == null or _cards.is_empty():
 		return
+	_normalize_chapter_map_visuals()
 	var stage_cards: Array = _cards.filter(func(card): return not bool(card.get("is_boss", false)))
 	var buttons := _stage_buttons()
 	for i in buttons.size():
@@ -577,6 +691,7 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	(button.get_node("StageNumber") as Label).text = str(card.get("stage_no", ""))
 	(button.get_node("StageNumber") as Label).modulate = TEXT_WHITE if enabled else TEXT_MUTED
 	(button.get_node("StageNumber") as Label).visible = enabled
+	_normalize_stage_button_layout(button)
 	_sync_lock_state(button, not enabled)
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
@@ -587,6 +702,7 @@ func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
 	button.disabled = not enabled
 	button.modulate.a = 1.0 if enabled else 0.82
+	_normalize_boss_button_layout(button)
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
 	_sync_lock_state(button, not enabled)
@@ -601,17 +717,21 @@ func _sync_lock_state(button: TextureButton, visible: bool) -> void:
 		if icon.texture == null or icon.texture.resource_path != STAGE_LOCK_ICON_PATH:
 			icon.texture = _get_texture(STAGE_LOCK_ICON_PATH)
 		icon.size = STAGE_LOCK_ICON_SIZE
-		icon.position = (button.size - STAGE_LOCK_ICON_SIZE) * 0.5
+		if button.name == "BossStage" and button.has_node("Platform"):
+			var platform := button.get_node("Platform") as Control
+			icon.position = platform.position + (platform.size - STAGE_LOCK_ICON_SIZE) * 0.5
+		else:
+			icon.position = Vector2((button.size.x - STAGE_LOCK_ICON_SIZE.x) * 0.5, STAGE_LOCK_REFERENCE_Y)
 	elif lock_node is Label:
 		(lock_node as Label).text = ""
 	lock_node.visible = visible
 
-func _sync_selection_ring(button: TextureButton, enabled: bool) -> void:
+func _sync_selection_ring(button: TextureButton, _enabled: bool) -> void:
 	if not button.has_node("SelectionRing"):
 		return
 	var ring := button.get_node("SelectionRing") as TextureRect
-	ring.visible = enabled
-	ring.modulate.a = 0.72 if enabled else 0.0
+	ring.visible = false
+	ring.modulate.a = 0.0
 
 func _sync_stars(container: Control, count: int, enabled: bool) -> void:
 	for i in 3:
@@ -662,8 +782,110 @@ func _on_popup_shade_input(event: InputEvent) -> void:
 		_on_sweep_cancel_pressed()
 
 func _switch_chapter(direction: int) -> void:
+	if _map_transition_active:
+		return
+	var new_index: int = _current_chapter_index + direction
+	if new_index < 0 or new_index >= _chapters.size():
+		return
+	_play_cloud_chapter_transition(direction)
+
+func _play_cloud_chapter_transition(direction: int) -> void:
+	_map_transition_active = true
+	_set_transition_buttons_disabled(true)
+	_prepare_transition_layer()
+	var outgoing_map := _chapter_map
+	_prepare_map_for_transition(outgoing_map)
+
+	var close_tween := create_tween()
+	close_tween.set_parallel(true)
+	if outgoing_map != null:
+		close_tween.tween_property(outgoing_map, "scale", CLOUD_TRANSITION_MAP_OUT_SCALE, 0.48).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+		close_tween.tween_property(outgoing_map, "modulate:a", 0.84, 0.44).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	if _transition_mist != null:
+		close_tween.tween_property(_transition_mist, "color", Color(1, 1, 1, 0.86), 0.46).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_tween_transition_clouds(close_tween, true)
+	await close_tween.finished
+
 	super._switch_chapter(direction)
 	_sync_gui()
+	await get_tree().process_frame
+	var incoming_map := _chapter_map
+	_prepare_map_for_transition(incoming_map)
+	if incoming_map != null:
+		incoming_map.scale = CLOUD_TRANSITION_MAP_IN_SCALE
+		incoming_map.modulate.a = 1.0
+	if CLOUD_TRANSITION_HOLD_DURATION > 0.0:
+		await get_tree().create_timer(CLOUD_TRANSITION_HOLD_DURATION).timeout
+
+	var open_tween := create_tween()
+	open_tween.set_parallel(true)
+	if incoming_map != null:
+		open_tween.tween_property(incoming_map, "scale", Vector2.ONE, 0.58).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if _transition_mist != null:
+		open_tween.tween_property(_transition_mist, "color", Color(1, 1, 1, 0.0), 0.62).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_tween_transition_clouds(open_tween, false)
+	await open_tween.finished
+
+	if outgoing_map != null:
+		outgoing_map.scale = Vector2.ONE
+		outgoing_map.modulate.a = 1.0
+	if incoming_map != null:
+		incoming_map.scale = Vector2.ONE
+		incoming_map.modulate.a = 1.0
+	_reset_transition_clouds()
+	_map_transition_active = false
+	_set_transition_buttons_disabled(false)
+	_update_chapter_buttons()
+
+func _prepare_transition_layer() -> void:
+	if _transition_cloud_layer == null:
+		return
+	_transition_cloud_layer.visible = true
+	_transition_cloud_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	if _transition_mist != null:
+		_transition_mist.color = Color(1, 1, 1, 0.0)
+	for cloud in _transition_left_clouds:
+		if not cloud.has_meta("open_position"):
+			cloud.set_meta("open_position", cloud.position)
+		cloud.position = cloud.get_meta("open_position")
+	for cloud in _transition_right_clouds:
+		if not cloud.has_meta("open_position"):
+			cloud.set_meta("open_position", cloud.position)
+		cloud.position = cloud.get_meta("open_position")
+
+func _prepare_map_for_transition(map: Control) -> void:
+	if map == null or _map_scroll == null:
+		return
+	map.pivot_offset = Vector2(DESIGN_W * 0.5, float(_map_scroll.scroll_vertical) + DESIGN_H * 0.5)
+	map.scale = Vector2.ONE
+	map.modulate.a = 1.0
+
+func _tween_transition_clouds(tween: Tween, closing: bool) -> void:
+	for i in _transition_left_clouds.size():
+		var cloud := _transition_left_clouds[i]
+		var target: Vector2 = cloud.get_meta("open_position")
+		if closing:
+			target.x = float(TRANSITION_LEFT_CLOSED_X[mini(i, TRANSITION_LEFT_CLOSED_X.size() - 1)])
+		var duration := CLOUD_TRANSITION_CLOSE_DURATION if closing else CLOUD_TRANSITION_OPEN_DURATION
+		var delay := float(TRANSITION_LEFT_DELAY[mini(i, TRANSITION_LEFT_DELAY.size() - 1)])
+		if not closing:
+			delay = maxf(0.0, 0.14 - delay)
+		tween.tween_property(cloud, "position", target, duration + float(i) * 0.012).set_delay(delay).set_trans(Tween.TRANS_BACK if closing else Tween.TRANS_QUART).set_ease(Tween.EASE_OUT if closing else Tween.EASE_IN_OUT)
+	for i in _transition_right_clouds.size():
+		var cloud := _transition_right_clouds[i]
+		var target: Vector2 = cloud.get_meta("open_position")
+		if closing:
+			target.x = float(TRANSITION_RIGHT_CLOSED_X[mini(i, TRANSITION_RIGHT_CLOSED_X.size() - 1)])
+		var duration := CLOUD_TRANSITION_CLOSE_DURATION if closing else CLOUD_TRANSITION_OPEN_DURATION
+		var delay := float(TRANSITION_RIGHT_DELAY[mini(i, TRANSITION_RIGHT_DELAY.size() - 1)])
+		if not closing:
+			delay = maxf(0.0, 0.14 - delay)
+		tween.tween_property(cloud, "position", target, duration + float(i) * 0.012).set_delay(delay).set_trans(Tween.TRANS_BACK if closing else Tween.TRANS_QUART).set_ease(Tween.EASE_OUT if closing else Tween.EASE_IN_OUT)
+
+func _set_transition_buttons_disabled(disabled: bool) -> void:
+	for button in [_bottom_prev_map_btn, _bottom_next_map_btn, _bottom_return_btn, _back_btn]:
+		if button != null:
+			button.disabled = disabled
 
 func _show_sweep_dialog(stage_id: String, stage_name: String) -> void:
 	super._show_sweep_dialog(stage_id, stage_name)

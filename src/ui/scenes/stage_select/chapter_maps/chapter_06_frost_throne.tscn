@@ -1,38 +1,37 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d28esueilvnne"]
 
-[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_frost_throne.png" id="c06_background"]
+[ext_resource type="Texture2D" uid="uid://bqag4ri3f01n7" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_icefield.png" id="1_owd5d"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage01"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage02"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage03"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage04"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png" id="c06_stage05"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
+[ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
+[ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
+[ext_resource type="Texture2D" uid="uid://cu6qyvlswj3ct" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage04"]
+[ext_resource type="Texture2D" uid="uid://b8xsquivli7td" path="res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png" id="c06_stage05"]
+[ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
-[node name="Chapter06FrostThrone" type="Control"]
+[node name="Chapter06FrostThrone" type="Control" unique_id=1903609080]
 custom_minimum_size = Vector2(375, 1280)
-layout_mode = 0
+layout_mode = 3
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 1280.0
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1891402174]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 1280.0
 mouse_filter = 2
-texture = ExtResource("c06_background")
+texture = ExtResource("1_owd5d")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="PathDecorations" type="Control" parent="."]
+[node name="PathDecorations" type="Control" parent="." unique_id=1997329914]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 1280.0
 mouse_filter = 2
 
-[node name="PathDot01" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot01" type="TextureRect" parent="PathDecorations" unique_id=603847620]
 layout_mode = 0
 offset_left = 178.0
 offset_top = 1098.7
@@ -42,7 +41,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot02" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot02" type="TextureRect" parent="PathDecorations" unique_id=1843991376]
 layout_mode = 0
 offset_left = 170.0
 offset_top = 1067.3
@@ -52,7 +51,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot03" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot03" type="TextureRect" parent="PathDecorations" unique_id=1242175724]
 layout_mode = 0
 offset_left = 172.0
 offset_top = 1005.3
@@ -62,7 +61,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot04" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot04" type="TextureRect" parent="PathDecorations" unique_id=723571543]
 layout_mode = 0
 offset_left = 182.0
 offset_top = 974.7
@@ -72,7 +71,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot05" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot05" type="TextureRect" parent="PathDecorations" unique_id=331099458]
 layout_mode = 0
 offset_left = 181.7
 offset_top = 913.3
@@ -82,7 +81,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot06" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot06" type="TextureRect" parent="PathDecorations" unique_id=1180684417]
 layout_mode = 0
 offset_left = 171.3
 offset_top = 882.7
@@ -92,7 +91,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot07" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot07" type="TextureRect" parent="PathDecorations" unique_id=1821253263]
 layout_mode = 0
 offset_left = 177.3
 offset_top = 821.3
@@ -102,7 +101,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot08" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot08" type="TextureRect" parent="PathDecorations" unique_id=377555115]
 layout_mode = 0
 offset_left = 193.7
 offset_top = 790.7
@@ -112,7 +111,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot09" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot09" type="TextureRect" parent="PathDecorations" unique_id=907638691]
 layout_mode = 0
 offset_left = 197.3
 offset_top = 729.3
@@ -122,7 +121,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot10" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot10" type="TextureRect" parent="PathDecorations" unique_id=1372613540]
 layout_mode = 0
 offset_left = 184.7
 offset_top = 698.7
@@ -132,7 +131,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot11" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot11" type="TextureRect" parent="PathDecorations" unique_id=1062576339]
 layout_mode = 0
 offset_left = 188.0
 offset_top = 638.0
@@ -142,7 +141,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot12" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot12" type="TextureRect" parent="PathDecorations" unique_id=1565790156]
 layout_mode = 0
 offset_left = 204.0
 offset_top = 608.0
@@ -152,7 +151,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot13" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot13" type="TextureRect" parent="PathDecorations" unique_id=1089852281]
 layout_mode = 0
 offset_left = 206.7
 offset_top = 548.0
@@ -162,7 +161,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot14" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot14" type="TextureRect" parent="PathDecorations" unique_id=371281531]
 layout_mode = 0
 offset_left = 193.3
 offset_top = 518.0
@@ -172,7 +171,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot15" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot15" type="TextureRect" parent="PathDecorations" unique_id=394318212]
 layout_mode = 0
 offset_left = 193.3
 offset_top = 458.7
@@ -182,7 +181,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot16" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot16" type="TextureRect" parent="PathDecorations" unique_id=386114791]
 layout_mode = 0
 offset_left = 206.7
 offset_top = 429.3
@@ -192,7 +191,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot17" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot17" type="TextureRect" parent="PathDecorations" unique_id=1762531159]
 layout_mode = 0
 offset_left = 210.7
 offset_top = 370.7
@@ -202,7 +201,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot18" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot18" type="TextureRect" parent="PathDecorations" unique_id=1638904868]
 layout_mode = 0
 offset_left = 201.3
 offset_top = 341.3
@@ -212,7 +211,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot19" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot19" type="TextureRect" parent="PathDecorations" unique_id=1898226759]
 layout_mode = 0
 offset_left = 207.3
 offset_top = 289.3
@@ -222,7 +221,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot20" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot20" type="TextureRect" parent="PathDecorations" unique_id=140465243]
 layout_mode = 0
 offset_left = 222.7
 offset_top = 266.7
@@ -232,7 +231,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot21" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot21" type="TextureRect" parent="PathDecorations" unique_id=2031970527]
 layout_mode = 0
 offset_left = 240.7
 offset_top = 239.7
@@ -242,7 +241,7 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="PathDot22" type="TextureRect" parent="PathDecorations"]
+[node name="PathDot22" type="TextureRect" parent="PathDecorations" unique_id=1848490995]
 layout_mode = 0
 offset_left = 243.3
 offset_top = 235.3
@@ -252,13 +251,13 @@ mouse_filter = 2
 texture = ExtResource("11_path")
 expand_mode = 1
 
-[node name="StageNodes" type="Control" parent="."]
-layout_mode = 0
+[node name="StageNodes" type="Control" parent="." unique_id=551263405]
+anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 1280.0
 mouse_filter = 2
 
-[node name="Stage01" type="TextureButton" parent="StageNodes"]
+[node name="Stage01" type="TextureButton" parent="StageNodes" unique_id=930270062]
 layout_mode = 0
 offset_left = 144.0
 offset_top = 1085.0
@@ -266,340 +265,7 @@ offset_right = 236.0
 offset_bottom = 1183.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage01"]
-layout_mode = 0
-offset_left = -1.0
-offset_top = 10.0
-offset_right = 93.0
-offset_bottom = 82.0
-mouse_filter = 2
-texture = ExtResource("c06_stage01")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StageNumber" type="Label" parent="StageNodes/Stage01"]
-layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-text = "1"
-horizontal_alignment = 1
-
-[node name="Stars" type="Control" parent="StageNodes/Stage01"]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 77.0
-offset_right = 70.0
-offset_bottom = 91.0
-mouse_filter = 2
-
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage01/Stars"]
-layout_mode = 0
-offset_left = 0.0
-offset_right = 14.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage01/Stars"]
-layout_mode = 0
-offset_left = 16.0
-offset_right = 30.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage01/Stars"]
-layout_mode = 0
-offset_left = 32.0
-offset_right = 46.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage01"]
-visible = false
-layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
-mouse_filter = 2
-texture = ExtResource("lock_icon")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SweepButton" type="Button" parent="StageNodes/Stage01"]
-visible = false
-layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
-flat = true
-
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
-
-[node name="Text" type="Label" parent="StageNodes/Stage01/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "扫荡"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Stage02" type="TextureButton" parent="StageNodes"]
-layout_mode = 0
-offset_left = 120.0
-offset_top = 991.0
-offset_right = 212.0
-offset_bottom = 1089.0
-ignore_texture_size = true
-
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage02"]
-layout_mode = 0
-offset_left = -1.0
-offset_top = 10.0
-offset_right = 93.0
-offset_bottom = 82.0
-mouse_filter = 2
-texture = ExtResource("c06_stage02")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StageNumber" type="Label" parent="StageNodes/Stage02"]
-layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-text = "2"
-horizontal_alignment = 1
-
-[node name="Stars" type="Control" parent="StageNodes/Stage02"]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 77.0
-offset_right = 70.0
-offset_bottom = 91.0
-mouse_filter = 2
-
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage02/Stars"]
-layout_mode = 0
-offset_left = 0.0
-offset_right = 14.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage02/Stars"]
-layout_mode = 0
-offset_left = 16.0
-offset_right = 30.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage02/Stars"]
-layout_mode = 0
-offset_left = 32.0
-offset_right = 46.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage02"]
-visible = false
-layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
-mouse_filter = 2
-texture = ExtResource("lock_icon")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SweepButton" type="Button" parent="StageNodes/Stage02"]
-visible = false
-layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
-flat = true
-
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
-
-[node name="Text" type="Label" parent="StageNodes/Stage02/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "扫荡"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Stage03" type="TextureButton" parent="StageNodes"]
-layout_mode = 0
-offset_left = 150.0
-offset_top = 899.0
-offset_right = 242.0
-offset_bottom = 997.0
-ignore_texture_size = true
-
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage03"]
-layout_mode = 0
-offset_left = -1.0
-offset_top = 10.0
-offset_right = 93.0
-offset_bottom = 82.0
-mouse_filter = 2
-texture = ExtResource("c06_stage03")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StageNumber" type="Label" parent="StageNodes/Stage03"]
-layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 15
-text = "3"
-horizontal_alignment = 1
-
-[node name="Stars" type="Control" parent="StageNodes/Stage03"]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 77.0
-offset_right = 70.0
-offset_bottom = 91.0
-mouse_filter = 2
-
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage03/Stars"]
-layout_mode = 0
-offset_left = 0.0
-offset_right = 14.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage03/Stars"]
-layout_mode = 0
-offset_left = 16.0
-offset_right = 30.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage03/Stars"]
-layout_mode = 0
-offset_left = 32.0
-offset_right = 46.0
-offset_bottom = 14.0
-mouse_filter = 2
-texture = ExtResource("11_star_dim")
-expand_mode = 1
-
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage03"]
-visible = false
-layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
-mouse_filter = 2
-texture = ExtResource("lock_icon")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SweepButton" type="Button" parent="StageNodes/Stage03"]
-visible = false
-layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
-flat = true
-
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
-
-[node name="Text" type="Label" parent="StageNodes/Stage03/SweepButton"]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "扫荡"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Stage04" type="TextureButton" parent="StageNodes"]
-layout_mode = 0
-offset_left = 119.0
-offset_top = 807.0
-offset_right = 211.0
-offset_bottom = 905.0
-ignore_texture_size = true
-
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage04"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage01" unique_id=1327403005]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
@@ -610,38 +276,37 @@ texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage04"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage01" unique_id=1800608434]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
-text = "4"
+text = "1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage04"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage01" unique_id=1499245618]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage04/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage01/Stars" unique_id=1691979510]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage04/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage01/Stars" unique_id=695236186]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -650,7 +315,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage04/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage01/Stars" unique_id=226871314]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -659,19 +324,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage04"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage01" unique_id=1850137446]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage04"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage01" unique_id=1392475590]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -680,29 +345,351 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton" unique_id=1370138532]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage04/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage01/SweepButton" unique_id=1934172206]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Stage05" type="TextureButton" parent="StageNodes"]
+[node name="Stage02" type="TextureButton" parent="StageNodes" unique_id=1804054920]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 991.0
+offset_right = 212.0
+offset_bottom = 1089.0
+ignore_texture_size = true
+
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage02" unique_id=121118186]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 10.0
+offset_right = 93.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("c06_stage04")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StageNumber" type="Label" parent="StageNodes/Stage02" unique_id=400844291]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stars" type="Control" parent="StageNodes/Stage02" unique_id=1501087295]
+anchors_preset = 0
+offset_left = 22.0
+offset_top = 77.0
+offset_right = 70.0
+offset_bottom = 91.0
+mouse_filter = 2
+
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage02/Stars" unique_id=1698612270]
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage02/Stars" unique_id=1399200238]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 30.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage02/Stars" unique_id=1804796030]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 46.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage02" unique_id=1039416370]
+visible = false
+layout_mode = 0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("lock_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SweepButton" type="Button" parent="StageNodes/Stage02" unique_id=1769394443]
+visible = false
+layout_mode = 0
+offset_left = 42.0
+offset_top = -7.0
+offset_right = 106.0
+offset_bottom = 23.0
+flat = true
+
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton" unique_id=1856901201]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+texture = ExtResource("26_blue_btn")
+patch_margin_left = 18
+patch_margin_top = 10
+patch_margin_right = 18
+patch_margin_bottom = 10
+
+[node name="Text" type="Label" parent="StageNodes/Stage02/SweepButton" unique_id=1777629740]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "扫荡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stage03" type="TextureButton" parent="StageNodes" unique_id=1271365829]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 899.0
+offset_right = 242.0
+offset_bottom = 997.0
+ignore_texture_size = true
+
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage03" unique_id=1431319945]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 10.0
+offset_right = 93.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("c06_stage04")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StageNumber" type="Label" parent="StageNodes/Stage03" unique_id=442392150]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stars" type="Control" parent="StageNodes/Stage03" unique_id=2077949157]
+anchors_preset = 0
+offset_left = 22.0
+offset_top = 77.0
+offset_right = 70.0
+offset_bottom = 91.0
+mouse_filter = 2
+
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage03/Stars" unique_id=631408802]
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage03/Stars" unique_id=1874321895]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 30.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage03/Stars" unique_id=1151625688]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 46.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage03" unique_id=2142239539]
+visible = false
+layout_mode = 0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("lock_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SweepButton" type="Button" parent="StageNodes/Stage03" unique_id=779964178]
+visible = false
+layout_mode = 0
+offset_left = 42.0
+offset_top = -7.0
+offset_right = 106.0
+offset_bottom = 23.0
+flat = true
+
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton" unique_id=1266101864]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+texture = ExtResource("26_blue_btn")
+patch_margin_left = 18
+patch_margin_top = 10
+patch_margin_right = 18
+patch_margin_bottom = 10
+
+[node name="Text" type="Label" parent="StageNodes/Stage03/SweepButton" unique_id=1609370768]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "扫荡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stage04" type="TextureButton" parent="StageNodes" unique_id=8138381]
+layout_mode = 0
+offset_left = 119.0
+offset_top = 807.0
+offset_right = 211.0
+offset_bottom = 905.0
+ignore_texture_size = true
+
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage04" unique_id=1160616634]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 10.0
+offset_right = 93.0
+offset_bottom = 82.0
+mouse_filter = 2
+texture = ExtResource("c06_stage04")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StageNumber" type="Label" parent="StageNodes/Stage04" unique_id=1042402252]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+text = "4"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stars" type="Control" parent="StageNodes/Stage04" unique_id=803503537]
+anchors_preset = 0
+offset_left = 22.0
+offset_top = 77.0
+offset_right = 70.0
+offset_bottom = 91.0
+mouse_filter = 2
+
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage04/Stars" unique_id=539457539]
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage04/Stars" unique_id=1573184859]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 30.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage04/Stars" unique_id=1410735973]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 46.0
+offset_bottom = 14.0
+mouse_filter = 2
+texture = ExtResource("11_star_dim")
+expand_mode = 1
+
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage04" unique_id=488805128]
+visible = false
+layout_mode = 0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
+mouse_filter = 2
+texture = ExtResource("lock_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SweepButton" type="Button" parent="StageNodes/Stage04" unique_id=1687747293]
+visible = false
+layout_mode = 0
+offset_left = 42.0
+offset_top = -7.0
+offset_right = 106.0
+offset_bottom = 23.0
+flat = true
+
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton" unique_id=1226701218]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+texture = ExtResource("26_blue_btn")
+patch_margin_left = 18
+patch_margin_top = 10
+patch_margin_right = 18
+patch_margin_bottom = 10
+
+[node name="Text" type="Label" parent="StageNodes/Stage04/SweepButton" unique_id=1517182554]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "扫荡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stage05" type="TextureButton" parent="StageNodes" unique_id=55415843]
 layout_mode = 0
 offset_left = 168.0
 offset_top = 715.0
@@ -710,7 +697,7 @@ offset_right = 260.0
 offset_bottom = 813.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage05"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage05" unique_id=732393241]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
@@ -721,38 +708,37 @@ texture = ExtResource("c06_stage05")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage05"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage05" unique_id=1137527399]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "5"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage05"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage05" unique_id=1950849316]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage05/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage05/Stars" unique_id=388590691]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage05/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage05/Stars" unique_id=1221694424]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -761,7 +747,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage05/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage05/Stars" unique_id=1978385147]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -770,19 +756,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage05"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage05" unique_id=507920513]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage05"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage05" unique_id=2011277982]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -791,30 +777,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton" unique_id=856134695]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage05/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage05/SweepButton" unique_id=1855566508]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage06" type="TextureButton" parent="StageNodes"]
+[node name="Stage06" type="TextureButton" parent="StageNodes" unique_id=1282841910]
 layout_mode = 0
 offset_left = 130.0
 offset_top = 623.0
@@ -822,49 +805,48 @@ offset_right = 222.0
 offset_bottom = 721.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage06"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage06" unique_id=103116916]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage06"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage06" unique_id=982177346]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "6"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage06"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage06" unique_id=1506378321]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage06/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage06/Stars" unique_id=1358173826]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage06/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage06/Stars" unique_id=317205900]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -873,7 +855,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage06/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage06/Stars" unique_id=358359630]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -882,19 +864,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage06"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage06" unique_id=899652487]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage06"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage06" unique_id=122670330]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -903,30 +885,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton" unique_id=530079164]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage06/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage06/SweepButton" unique_id=139807192]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage07" type="TextureButton" parent="StageNodes"]
+[node name="Stage07" type="TextureButton" parent="StageNodes" unique_id=1879603544]
 layout_mode = 0
 offset_left = 178.0
 offset_top = 533.0
@@ -934,49 +913,48 @@ offset_right = 270.0
 offset_bottom = 631.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage07"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage07" unique_id=463807559]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage07"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage07" unique_id=362349831]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "7"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage07"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage07" unique_id=1303697123]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage07/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage07/Stars" unique_id=360863068]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage07/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage07/Stars" unique_id=1337568133]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -985,7 +963,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage07/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage07/Stars" unique_id=101344073]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -994,19 +972,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage07"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage07" unique_id=738607060]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage07"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage07" unique_id=2078492089]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -1015,30 +993,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton" unique_id=1158004811]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage07/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage07/SweepButton" unique_id=2068096705]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage08" type="TextureButton" parent="StageNodes"]
+[node name="Stage08" type="TextureButton" parent="StageNodes" unique_id=1275174256]
 layout_mode = 0
 offset_left = 138.0
 offset_top = 443.0
@@ -1046,49 +1021,48 @@ offset_right = 230.0
 offset_bottom = 541.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage08"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage08" unique_id=43945186]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage08"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage08" unique_id=1810619578]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "8"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage08"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage08" unique_id=53501087]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage08/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage08/Stars" unique_id=1955786708]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage08/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage08/Stars" unique_id=655580225]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -1097,7 +1071,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage08/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage08/Stars" unique_id=1422441818]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -1106,19 +1080,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage08"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage08" unique_id=721209841]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage08"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage08" unique_id=1083369503]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -1127,30 +1101,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton" unique_id=675546633]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage08/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage08/SweepButton" unique_id=125233115]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage09" type="TextureButton" parent="StageNodes"]
+[node name="Stage09" type="TextureButton" parent="StageNodes" unique_id=2089573339]
 layout_mode = 0
 offset_left = 178.0
 offset_top = 355.0
@@ -1158,49 +1129,48 @@ offset_right = 270.0
 offset_bottom = 453.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage09"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage09" unique_id=2105202441]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage09"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage09" unique_id=679415537]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "9"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage09"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage09" unique_id=1049017107]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage09/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage09/Stars" unique_id=367969866]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage09/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage09/Stars" unique_id=2046193756]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -1209,7 +1179,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage09/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage09/Stars" unique_id=1154146436]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -1218,19 +1188,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage09"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage09" unique_id=1881292659]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage09"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage09" unique_id=2062129493]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -1239,30 +1209,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton" unique_id=286332763]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage09/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage09/SweepButton" unique_id=1498907258]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage10" type="TextureButton" parent="StageNodes"]
+[node name="Stage10" type="TextureButton" parent="StageNodes" unique_id=662224089]
 layout_mode = 0
 offset_left = 150.0
 offset_top = 267.0
@@ -1270,49 +1237,48 @@ offset_right = 242.0
 offset_bottom = 365.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage10"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage10" unique_id=221769610]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage10"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage10" unique_id=604406033]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "10"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage10"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage10" unique_id=1313264692]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage10/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage10/Stars" unique_id=1213123308]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage10/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage10/Stars" unique_id=37102486]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -1321,7 +1287,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage10/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage10/Stars" unique_id=9686848]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -1330,19 +1296,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage10"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage10" unique_id=2076703009]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage10"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage10" unique_id=1227193662]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -1351,30 +1317,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton" unique_id=1338402896]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage10/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage10/SweepButton" unique_id=429126397]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-
-[node name="Stage11" type="TextureButton" parent="StageNodes"]
+[node name="Stage11" type="TextureButton" parent="StageNodes" unique_id=1506814251]
 layout_mode = 0
 offset_left = 196.0
 offset_top = 199.0
@@ -1382,49 +1345,48 @@ offset_right = 288.0
 offset_bottom = 297.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="StageNodes/Stage11"]
+[node name="Platform" type="TextureRect" parent="StageNodes/Stage11" unique_id=1574815077]
 layout_mode = 0
 offset_left = -1.0
 offset_top = 10.0
 offset_right = 93.0
 offset_bottom = 82.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageNumber" type="Label" parent="StageNodes/Stage11"]
+[node name="StageNumber" type="Label" parent="StageNodes/Stage11" unique_id=2017983681]
 layout_mode = 0
-offset_left = 21.0
-offset_top = 15.0
-offset_right = 59.0
-offset_bottom = 40.0
-mouse_filter = 2
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 68.0
+offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.82)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "11"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="StageNodes/Stage11"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="StageNodes/Stage11" unique_id=662774069]
+anchors_preset = 0
 offset_left = 22.0
 offset_top = 77.0
 offset_right = 70.0
 offset_bottom = 91.0
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="StageNodes/Stage11/Stars"]
+[node name="Star01" type="TextureRect" parent="StageNodes/Stage11/Stars" unique_id=808046602]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="StageNodes/Stage11/Stars"]
+[node name="Star02" type="TextureRect" parent="StageNodes/Stage11/Stars" unique_id=1742230161]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -1433,7 +1395,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="StageNodes/Stage11/Stars"]
+[node name="Star03" type="TextureRect" parent="StageNodes/Stage11/Stars" unique_id=1221956760]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -1442,19 +1404,19 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="StageNodes/Stage11"]
+[node name="LockState" type="TextureRect" parent="StageNodes/Stage11" unique_id=1376805099]
 visible = false
 layout_mode = 0
-offset_left = 32.0
-offset_top = 30.0
-offset_right = 60.0
-offset_bottom = 58.0
+offset_left = 31.0
+offset_top = 11.0
+offset_right = 59.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SweepButton" type="Button" parent="StageNodes/Stage11"]
+[node name="SweepButton" type="Button" parent="StageNodes/Stage11" unique_id=936451334]
 visible = false
 layout_mode = 0
 offset_left = 42.0
@@ -1463,29 +1425,27 @@ offset_right = 106.0
 offset_bottom = 23.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton"]
+[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton" unique_id=1650495827]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 texture = ExtResource("26_blue_btn")
 patch_margin_left = 18
 patch_margin_top = 10
 patch_margin_right = 18
 patch_margin_bottom = 10
 
-[node name="Text" type="Label" parent="StageNodes/Stage11/SweepButton"]
+[node name="Text" type="Label" parent="StageNodes/Stage11/SweepButton" unique_id=2048517895]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BossStage" type="TextureButton" parent="."]
+[node name="BossStage" type="TextureButton" parent="." unique_id=1231652551]
 layout_mode = 0
 offset_left = 194.0
 offset_top = 170.0
@@ -1493,48 +1453,48 @@ offset_right = 306.0
 offset_bottom = 300.0
 ignore_texture_size = true
 
-[node name="Platform" type="TextureRect" parent="BossStage"]
+[node name="Platform" type="TextureRect" parent="BossStage" unique_id=803181241]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 54.0
-offset_right = 103.0
-offset_bottom = 126.0
+offset_left = -14.5
+offset_top = 36.0
+offset_right = 126.5
+offset_bottom = 144.0
 mouse_filter = 2
-texture = ExtResource("c06_stage01")
+texture = ExtResource("c06_stage04")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StageLabel" type="Label" parent="BossStage"]
+[node name="StageLabel" type="Label" parent="BossStage" unique_id=1146916044]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 86.0
+offset_top = 96.48
 offset_right = 98.0
-offset_bottom = 110.0
+offset_bottom = 120.48
 theme_override_colors/font_color = Color(1, 0.82, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.84)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 14
 text = "BOSS"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Stars" type="Control" parent="BossStage"]
-layout_mode = 0
+[node name="Stars" type="Control" parent="BossStage" unique_id=1123456009]
+anchors_preset = 0
 offset_left = 32.0
-offset_top = 108.0
+offset_top = 124.56
 offset_right = 80.0
-offset_bottom = 122.0
+offset_bottom = 138.56
 mouse_filter = 2
 
-[node name="Star01" type="TextureRect" parent="BossStage/Stars"]
+[node name="Star01" type="TextureRect" parent="BossStage/Stars" unique_id=995877385]
 layout_mode = 0
-offset_left = 0.0
 offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star02" type="TextureRect" parent="BossStage/Stars"]
+[node name="Star02" type="TextureRect" parent="BossStage/Stars" unique_id=1876249324]
 layout_mode = 0
 offset_left = 16.0
 offset_right = 30.0
@@ -1543,7 +1503,7 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="Star03" type="TextureRect" parent="BossStage/Stars"]
+[node name="Star03" type="TextureRect" parent="BossStage/Stars" unique_id=298606367]
 layout_mode = 0
 offset_left = 32.0
 offset_right = 46.0
@@ -1552,13 +1512,13 @@ mouse_filter = 2
 texture = ExtResource("11_star_dim")
 expand_mode = 1
 
-[node name="LockState" type="TextureRect" parent="BossStage"]
+[node name="LockState" type="TextureRect" parent="BossStage" unique_id=832026874]
 visible = false
 layout_mode = 0
 offset_left = 42.0
-offset_top = 66.0
+offset_top = 76.0
 offset_right = 70.0
-offset_bottom = 94.0
+offset_bottom = 104.0
 mouse_filter = 2
 texture = ExtResource("lock_icon")
 expand_mode = 1
