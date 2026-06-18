@@ -233,7 +233,7 @@ func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Header"):
 		return
 	_ensure_concept_nodes()
-	_apply_concept_layout()
+	_sync_background()
 	_sync_top_resource_bar()
 	_label("Header/Title").text = "战斗准备"
 	_label("Header/StageName").text = str(_stage_data.get("name", _stage_id))
@@ -246,6 +246,13 @@ func _sync_gui() -> void:
 	_sync_start_button()
 	_sync_alert()
 	_maybe_play_entry()
+
+func _sync_background() -> void:
+	var background := get_node_or_null("Background") as TextureRect
+	if background == null:
+		return
+	var path := StageWarBackgroundsScript.path_for(_stage_id, _stage_data)
+	background.texture = _get_texture(path)
 
 func _sync_enemy_cards() -> void:
 	_set_visible("EnemyPanel/Frame", false)

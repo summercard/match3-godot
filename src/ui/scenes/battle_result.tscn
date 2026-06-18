@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
 [ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="18_440ek"]
-[ext_resource type="Texture2D" uid="uid://chysk2aqocnr5" path="res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png" id="bg"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/warbackgrouds/map1.png" id="bg"]
 [ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="btn_next"]
 [ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="btn_retry"]
 [ext_resource type="Texture2D" uid="uid://c0h344kt4d710" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="capture_btn_blue"]
@@ -546,10 +546,10 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=1770531726]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 9.0
-offset_right = 54.0
-offset_bottom = 45.0
+offset_left = 12.0
+offset_top = 5.0
+offset_right = 60.0
+offset_bottom = 53.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -567,6 +567,7 @@ theme_override_font_sizes/font_size = 11
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="RewardSlot2" type="Control" parent="RewardPanel/Slots" unique_id=795980711]
 anchors_preset = 0
@@ -585,10 +586,10 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=833072020]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 9.0
-offset_right = 54.0
-offset_bottom = 45.0
+offset_left = 12.0
+offset_top = 5.0
+offset_right = 60.0
+offset_bottom = 53.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -606,6 +607,7 @@ theme_override_font_sizes/font_size = 11
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="RewardSlot3" type="Control" parent="RewardPanel/Slots" unique_id=1481737944]
 anchors_preset = 0
@@ -624,10 +626,10 @@ stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1002186608]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 9.0
-offset_right = 54.0
-offset_bottom = 45.0
+offset_left = 12.0
+offset_top = 5.0
+offset_right = 60.0
+offset_bottom = 53.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -645,6 +647,7 @@ theme_override_font_sizes/font_size = 11
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="ExpPanel" type="Control" parent="." unique_id=823335105]
 anchors_preset = 0
@@ -740,9 +743,9 @@ stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=588148548]
 layout_mode = 0
-offset_top = 58.0
+offset_top = 57.0
 offset_right = 68.0
-offset_bottom = 73.0
+offset_bottom = 70.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -750,13 +753,13 @@ theme_override_font_sizes/font_size = 8
 text = "Lv.1"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=1359102942]
 layout_mode = 0
-offset_left = -8.0
-offset_top = 73.0
-offset_right = 76.0
-offset_bottom = 90.0
+offset_top = 70.0
+offset_right = 68.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -764,6 +767,7 @@ theme_override_font_sizes/font_size = 7
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="ExpCard2" type="Control" parent="ExpPanel/Cards" unique_id=2098007429]
 anchors_preset = 0
@@ -793,9 +797,9 @@ stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=1930564297]
 layout_mode = 0
-offset_top = 58.0
+offset_top = 57.0
 offset_right = 68.0
-offset_bottom = 73.0
+offset_bottom = 70.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -803,13 +807,13 @@ theme_override_font_sizes/font_size = 8
 text = "Lv.1"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=742288577]
 layout_mode = 0
-offset_left = -8.0
-offset_top = 73.0
-offset_right = 76.0
-offset_bottom = 90.0
+offset_top = 70.0
+offset_right = 68.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -817,6 +821,7 @@ theme_override_font_sizes/font_size = 7
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="ExpCard3" type="Control" parent="ExpPanel/Cards" unique_id=1579014413]
 anchors_preset = 0
@@ -846,9 +851,9 @@ stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1125240006]
 layout_mode = 0
-offset_top = 58.0
+offset_top = 57.0
 offset_right = 68.0
-offset_bottom = 73.0
+offset_bottom = 70.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -856,13 +861,13 @@ theme_override_font_sizes/font_size = 8
 text = "Lv.1"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1622793231]
 layout_mode = 0
-offset_left = -8.0
-offset_top = 73.0
-offset_right = 76.0
-offset_bottom = 90.0
+offset_top = 70.0
+offset_right = 68.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
@@ -870,6 +875,7 @@ theme_override_font_sizes/font_size = 7
 text = "+0"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 
 [node name="LevelUpPanel" type="Control" parent="." unique_id=1286156204]
 visible = false

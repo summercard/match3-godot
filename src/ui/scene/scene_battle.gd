@@ -21,6 +21,7 @@ const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
 const BattleFeedbackOverlayScript = preload("res://src/ui/components/battle_feedback_overlay.gd")
+const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const FX_ROUND_FONT: Font = preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
@@ -348,6 +349,11 @@ func _add_background(image_path: String) -> void:
 	_bg_texture.z_index = -10
 	add_child(_bg_texture)
 
+func _set_runtime_background(image_path: String) -> void:
+	_battle_background_path = image_path if ResourceLoader.exists(image_path) else BATTLE_BG_PATH
+	if _bg_texture != null and is_instance_valid(_bg_texture):
+		_bg_texture.texture = load(_battle_background_path)
+
 ## 宝石图片路径映射
 const GEM_IMAGE_PATHS := {
 	"fire": "res://assets/images/ui/gems/battle_gem_fire.png",
@@ -357,7 +363,7 @@ const GEM_IMAGE_PATHS := {
 	"light": "res://assets/images/ui/gems/battle_gem_light.png"
 }
 
-const BATTLE_BG_PATH := "res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png"
+const BATTLE_BG_PATH := StageWarBackgroundsScript.DEFAULT_PATH
 
 const BATTLE_UI_ASSETS := {
 	"toast_panel": "res://assets/images/ui/panels/battle_ui_battle_toast_panel.png",
@@ -417,8 +423,7 @@ const BATTLE_RESULT_OVERLAY_ASSETS := {
 	"panel": "res://assets/images/ui/panels/battle_flow_new_ui_panel_large.png",
 	"button_continue": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
 	"capture_plaque": "res://assets/images/ui/panels/battle_flow_new_ui_capture_status_plaque.png",
-	"tap_strip": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png",
-	"victory_burst": "res://assets/images/effects/battle_flow_new_fx_golden_burst.png"
+	"tap_strip": "res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png"
 }
 
 # === 战局结束弹窗（胜利/失败）入场动画（参考胜利界面奖励槽节奏）===
@@ -451,6 +456,7 @@ const BATTLE_END_TOTAL_DURATION := 0.70
 
 ## 宝石 TextureRect 缓存
 var _gem_icon_pool: Array[TextureRect] = []
+var _battle_background_path: String = BATTLE_BG_PATH
 
 func _ready() -> void:
 	instance = self
@@ -522,6 +528,7 @@ func init(data: Dictionary = {}) -> void:
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
+	_set_runtime_background(StageWarBackgroundsScript.path_for(_stage_id, _stage_data, data))
 	
 	_init_battle()
 	_state = BattleState.IDLE
@@ -1546,6 +1553,7 @@ func _start_enemy_turn() -> void:
 	if next_state.get("state", "") == "battle_end":
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
+		_begin_battle_end_capture_flow()
 		_show_message(next_state.get("message", "战斗结束"))
 		return
 	_state = BattleState.IDLE
@@ -1555,15 +1563,20 @@ func _check_battle_end() -> bool:
 	if BattleFlowControllerScript.should_end_battle(_battle):
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
-		if _battle.battle_result == "win":
-			if _auto_capture_enabled:
-				_trigger_inline_capture()
-			else:
-				_skip_inline_capture()
-		else:
-			_trigger_inline_capture_miss()
+		_begin_battle_end_capture_flow()
 		return true
 	return false
+
+func _begin_battle_end_capture_flow() -> void:
+	if _battle == null or _capture_phase != "":
+		return
+	if _battle.battle_result == "win":
+		if _auto_capture_enabled:
+			_trigger_inline_capture()
+		else:
+			_skip_inline_capture()
+	else:
+		_trigger_inline_capture_miss()
 
 func _begin_battle_end_overlay() -> void:
 	if _battle_end_overlay_started:
@@ -1734,9 +1747,10 @@ func _consume_selected_capture_item() -> Dictionary:
 	"""消耗玩家预选的捕获道具，返回本次捕捉道具结果"""
 	if not _storage or not _storage.has_method("load_inventory") or not _storage.has_method("use_item"):
 		return {"ok": false, "reason": "storage_unavailable"}
+	var inventory: Dictionary = _storage.load_inventory()
+	_ensure_equipped_capture_item(inventory, true)
 	if _equipped_capture_item_id.is_empty():
 		return {"ok": false, "reason": "no_item"}
-	var inventory: Dictionary = _storage.load_inventory()
 	if int(inventory.get(_equipped_capture_item_id, 0)) <= 0:
 		var empty_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
 		return {"ok": false, "reason": "item_empty", "item_name": str(empty_def.get("name", "捕捉球"))}
@@ -2612,7 +2626,7 @@ func _board_render_state() -> Dictionary:
 	}
 
 func _draw_background() -> void:
-	var bg_tex := _get_texture(BATTLE_BG_PATH)
+	var bg_tex := _get_texture(_battle_background_path)
 	if bg_tex:
 		_draw_texture_cover(bg_tex, Rect2(0, 0, DESIGN_W, DESIGN_H))
 
@@ -3069,6 +3083,8 @@ func _load_capture_preferences() -> void:
 func _load_capture_slot_items(inventory: Dictionary) -> void:
 	_capture_slot_items.clear()
 	var ordered_ids: Array = ["capture_ball", "capture_ball_plus", "capture_ball_elite"]
+	if _auto_capture_enabled:
+		_ensure_equipped_capture_item(inventory, true)
 	if not _equipped_capture_item_id.is_empty() and int(inventory.get(_equipped_capture_item_id, 0)) > 0:
 		var equipped_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
 		if str(equipped_def.get("type", "")) == "capture":
@@ -3090,6 +3106,27 @@ func _load_capture_slot_items(inventory: Dictionary) -> void:
 		if str(def.get("type", "")) != "capture":
 			continue
 		_capture_slot_items.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1), "type": "capture"})
+
+func _ensure_equipped_capture_item(inventory: Dictionary, persist: bool = false) -> bool:
+	if not _equipped_capture_item_id.is_empty():
+		var current_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
+		if str(current_def.get("type", "")) == "capture" and int(inventory.get(_equipped_capture_item_id, 0)) > 0:
+			return true
+	var ordered_ids: Array = ["capture_ball", "capture_ball_plus", "capture_ball_elite"]
+	for item_id in ordered_ids:
+		if int(inventory.get(item_id, 0)) <= 0:
+			continue
+		var item_def: Dictionary = ItemDB.get_item(item_id)
+		if str(item_def.get("type", "")) != "capture":
+			continue
+		_equipped_capture_item_id = item_id
+		if persist:
+			_save_capture_preferences()
+		return true
+	_equipped_capture_item_id = ""
+	if persist:
+		_save_capture_preferences()
+	return false
 
 func _save_capture_preferences() -> void:
 	if _storage and _storage.has_method("save_capture_settings"):
@@ -3117,6 +3154,9 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 619.0
 	if _get_capture_toggle_rect(bottom_y).has_point(Vector2(x, y)):
 		_auto_capture_enabled = not _auto_capture_enabled
+		var inventory: Dictionary = _storage.call("load_inventory") if _storage and _storage.has_method("load_inventory") else {}
+		if _auto_capture_enabled:
+			_ensure_equipped_capture_item(inventory, false)
 		_save_capture_preferences()
 		if _auto_capture_enabled and _equipped_capture_item_id.is_empty():
 			_show_message("自动捕捉已开启，请选择捕捉球")
@@ -3689,6 +3729,40 @@ func _make_centered_scale_offset_xform(center: Vector2, scale: float, offset_y: 
 	x = x.translated(Vector2(center.x, center.y + offset_y))
 	return x
 
+func _draw_programmatic_victory_halo(canvas: CanvasItem, center: Vector2, size: Vector2, opacity: float = 1.0) -> void:
+	var alpha_scale := clampf(opacity, 0.0, 1.0)
+	if alpha_scale <= 0.0:
+		return
+	var halo_time := _battle_end_overlay_timer + 0.35
+	var pulse := 0.96 + sin(halo_time * 2.0) * 0.035
+	var max_radius := maxf(size.x, size.y) * 0.48 * pulse
+	for i in range(10, 0, -1):
+		var t := float(i) / 10.0
+		var radius := max_radius * t
+		var layer_alpha := (0.018 + (1.0 - t) * 0.058) * alpha_scale
+		canvas.draw_circle(center, radius, Color(1.0, 0.86, 0.16, layer_alpha))
+
+	var ray_count := 22
+	for i in range(ray_count):
+		var angle := halo_time * 0.18 + TAU * float(i) / float(ray_count)
+		var wave := sin(halo_time * 1.4 + float(i) * 0.83)
+		var half_width := 0.035 + 0.014 * wave
+		var inner := max_radius * 0.12
+		var outer := max_radius * (0.82 + 0.12 * sin(halo_time * 1.15 + float(i)))
+		var points := PackedVector2Array([
+			center + Vector2(cos(angle - half_width), sin(angle - half_width)) * inner,
+			center + Vector2(cos(angle), sin(angle)) * outer,
+			center + Vector2(cos(angle + half_width), sin(angle + half_width)) * inner,
+		])
+		var mix := 0.45 + 0.25 * wave
+		var color := Color(1.0, 0.96, 0.34, 0.14 * alpha_scale).lerp(Color(1.0, 0.86, 0.16, 0.14 * alpha_scale), mix)
+		canvas.draw_colored_polygon(points, color)
+
+	for i in range(5):
+		var radius := max_radius * (0.10 + float(i) * 0.07)
+		var layer_alpha := (0.15 - float(i) * 0.02) * alpha_scale
+		canvas.draw_circle(center, radius, Color(1.0, 0.96, 0.40, layer_alpha))
+
 func _draw_battle_end_overlay(canvas: CanvasItem = self) -> void:
 	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 	var is_win: bool = _battle != null and _battle.battle_result == "win"
@@ -3708,9 +3782,8 @@ func _draw_battle_end_overlay(canvas: CanvasItem = self) -> void:
 	# 2) Victory burst：scale bounce + 上滑 + fade（仅胜利显示）
 	if is_win:
 		var burst_xform: Dictionary = _overlay_xform(BATTLE_END_BURST_START, BATTLE_END_BURST_DURATION, BATTLE_END_BURST_SCALE_START, 1.08, BATTLE_END_BURST_OFFSET_Y)
-		var burst_tex := _get_texture(BATTLE_RESULT_OVERLAY_ASSETS["victory_burst"])
 		canvas.draw_set_transform_matrix(_make_centered_scale_offset_xform(burst_center, burst_xform["scale"], burst_xform["offset_y"]))
-		_draw_texture_centered_on(canvas, burst_tex, burst_center, Vector2(218.0, 136.0), 0.58 * burst_xform["alpha"])
+		_draw_programmatic_victory_halo(canvas, burst_center, Vector2(218.0, 136.0), 0.58 * burst_xform["alpha"])
 		canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 		_draw_victory_particles(bg_alpha, true, canvas)
 	# 失败界面去掉 "defeat_smoke" 星星条带（原本贴图路径错配到 sparkles，已删除）
@@ -4775,6 +4848,8 @@ func _clean_battle_fx_text(text: String) -> String:
 ## ============================================
 
 func _go_to_result() -> void:
+	if _battle != null and _capture_phase == "":
+		_begin_battle_end_capture_flow()
 	# 如果收服特效还在播放，等待完成
 	if _capture_waiting_for_effect:
 		return

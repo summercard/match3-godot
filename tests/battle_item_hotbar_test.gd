@@ -45,6 +45,7 @@ func _run() -> void:
 	scene.set("_storage", storage)
 
 	_test_equipped_items_drive_hotbar(scene, storage)
+	_test_auto_capture_selects_available_ball(scene, storage)
 	_test_capture_slots_are_passive(scene, storage)
 	_test_tap_opens_confirm_before_use(scene, storage)
 	_test_confirm_popup_blocks_board_selection(scene, storage)
@@ -79,6 +80,19 @@ func _test_equipped_items_drive_hotbar(scene: Control, storage: FakeStorage) -> 
 	_expect(str(hotbar[2].get("id", "")) == "rock_hammer", "third equipped battle item should keep slot order")
 	var capture_slots: Array = scene.get("_capture_slot_items")
 	_expect(capture_slots.size() == 1 and str(capture_slots[0].get("id", "")) == "capture_ball_plus", "capture ball slots should stay separate from active item hotbar")
+
+func _test_auto_capture_selects_available_ball(scene: Control, storage: FakeStorage) -> void:
+	storage.inventory = {"capture_ball": 2}
+	storage.settings = {"autoCapture": true, "equippedItem": "", "equippedBattleItems": []}
+	scene.call("_load_capture_preferences")
+	scene.call("_load_hotbar_items")
+	var capture_slots: Array = scene.get("_capture_slot_items")
+	_expect(str(scene.get("_equipped_capture_item_id")) == "capture_ball", "auto capture should select an available ball when no ball was manually selected")
+	_expect(str(storage.settings.get("equippedItem", "")) == "capture_ball", "auto-selected capture ball should persist to capture settings")
+	_expect(not capture_slots.is_empty() and str(capture_slots[0].get("id", "")) == "capture_ball", "auto-selected ball should appear as the selected capture slot")
+	var item_use: Dictionary = scene.call("_consume_selected_capture_item")
+	_expect(bool(item_use.get("ok", false)), "auto-selected ball should be usable for inline battle capture")
+	_expect(int(storage.inventory.get("capture_ball", 0)) == 1, "inline battle capture should consume the auto-selected ball")
 
 func _test_capture_slots_are_passive(scene: Control, storage: FakeStorage) -> void:
 	storage.inventory = {"capture_ball": 2, "capture_ball_plus": 1, "hp_potion_large": 1}

@@ -157,7 +157,6 @@ func _connect_gui_actions() -> void:
 	_connect_button("PetFarmBottomNav/Nav4", _on_pet_farm_social)
 	_connect_button("PetFarmBottomNav/Nav5", _on_pet_farm_menu)
 	_connect_button("Header/BackButton", _on_back_button_pressed)
-	_connect_button("Pages/RanchPage/CollectRow/CollectButton", _on_collect_button_pressed)
 	_connect_button("Pages/RanchPage/BottomButtons/FocusButton", _on_focus_button_pressed)
 	_connect_button("Pages/RanchPage/BottomButtons/ClassroomButton", _switch_to_classroom)
 	_connect_button("Pages/RanchPage/BottomButtons/SocialButton", _switch_to_social)
@@ -200,10 +199,6 @@ func _on_back_button_pressed() -> void:
 		_go_to_scene("main")
 	else:
 		_switch_to_ranch()
-
-func _on_collect_button_pressed() -> void:
-	_on_collect_pressed()
-	_sync_gui()
 
 func _on_focus_button_pressed() -> void:
 	_toggle_care_focus_selected()
@@ -777,7 +772,6 @@ func _subpage_card_paths_for(page_name: String) -> PackedStringArray:
 func _attach_interaction_feedback() -> void:
 	var paths := [
 		"Header/BackButton",
-		"Pages/RanchPage/CollectRow/CollectButton",
 		"Pages/RanchPage/BottomButtons/FocusButton",
 		"Pages/ClassroomPage/DetailPanel/EvolveButton",
 		"Pages/SocialPage/PlacePanel/SwitchButton",

@@ -66,7 +66,9 @@ func _run() -> void:
 		"CloudLayerFar/Cloud01",
 		"CloudLayerNear/Cloud03",
 		"TransitionCloudLayer/LeftCloud01",
+		"TransitionCloudLayer/LeftCloud10",
 		"TransitionCloudLayer/RightCloud01",
+		"TransitionCloudLayer/RightCloud10",
 		"PopupLayer/SweepDialog/ConfirmBtn",
 	]:
 		_expect(scene.has_node(path), "editable map node should exist: %s" % path)
@@ -88,10 +90,17 @@ func _run() -> void:
 	var star_frame := scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage/Platform") as TextureRect
 	_expect(star_frame.size.x >= 200.0 and star_frame.size.y >= 260.0, "chapter 9 boss platform should remain large and editable")
 	_expect(not (scene.get_node("TransitionCloudLayer") as Control).visible, "chapter transition clouds should start offscreen and hidden")
+	_expect((scene.get_node("TransitionCloudLayer") as Control).z_index >= 4096, "chapter transition clouds should render above map bosses and UI")
 
 	(scene.get_node("BottomNav/PrevMapButton") as TextureButton).pressed.emit()
+	await _wait_frames(35)
+	var transition_layer := scene.get_node("TransitionCloudLayer") as Control
+	var transition_mist := scene.get_node("TransitionCloudLayer/Mist") as ColorRect
+	_expect(transition_layer.visible, "chapter transition clouds should be visible during map switching")
+	_expect(transition_layer.z_index >= 4096, "chapter transition clouds should stay above boss portraits during switching")
+	_expect(transition_mist.color.a >= 0.95, "chapter transition white mist should fully cover the outgoing map")
 	await _wait_frames(120)
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent temporal map group")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift") as Control).visible, "previous chapter should display its independent chapter 8 map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter switch should hide the previous map group")
 	_expect(not (scene.get_node("TransitionCloudLayer") as Control).visible, "chapter transition clouds should hide after switching")
 	(scene.get_node("BottomNav/NextMapButton") as TextureButton).pressed.emit()
@@ -103,7 +112,7 @@ func _run() -> void:
 	_expect((scene.get_node("BottomNav/PrevMapButton") as TextureButton).disabled, "bottom previous map button should be disabled on the first chapter")
 	_expect(scene.has_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11"), "chapter 1 should dynamically render eleven normal stage nodes")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch01_grass_normal.png"), "chapter 1 normal stages should use the redesigned grass pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11/StageNumber") as Label).text == "11", "chapter 1 should render the eleventh normal stage node")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage11/StageNumber") as Label).text == "1-11", "chapter 1 should render the eleventh normal stage node with chapter-stage numbering")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch01_grass_normal.png"), "chapter 1 boss should use the compact ordinary grass pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter01Grassland/BossStage/BossArt"), "chapter 1 boss should not keep the old boss art overlay")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes/Stage01/SelectionRing") as TextureRect).visible, "chapter 1 stage selection ring should be hidden")
@@ -117,8 +126,12 @@ func _run() -> void:
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter02FireValley/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch02_castle_normal.png"), "chapter 2 stages should use the castle hill pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter02FireValley/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch02_castle_normal.png"), "chapter 2 boss should use the compact ordinary castle hill pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter02FireValley/BossStage/BossArt"), "chapter 2 boss should not keep the old boss art overlay")
+	var chapter_2_boss_platform := scene.get_node("MapScroll/ChapterMaps/Chapter02FireValley/BossStage/Platform") as TextureRect
 	var chapter_2_boss_portrait := scene.get_node("MapScroll/ChapterMaps/Chapter02FireValley/BossStage/MonsterPortrait") as TextureRect
 	_expect(chapter_2_boss_portrait.visible and chapter_2_boss_portrait.texture != null, "chapter 2 boss portrait should show by default")
+	_expect(absf((chapter_2_boss_portrait.position.x + chapter_2_boss_portrait.size.x * 0.5) - (chapter_2_boss_platform.position.x + chapter_2_boss_platform.size.x * 0.5)) <= 1.0, "chapter 2 boss portrait should be centered on its platform")
+	_expect(absf((chapter_2_boss_portrait.position.y + chapter_2_boss_portrait.size.y) - (chapter_2_boss_platform.position.y + chapter_2_boss_platform.size.y * 0.58)) <= 1.0, "chapter 2 boss portrait should sit on the platform anchor")
+	_expect(chapter_2_boss_portrait.texture is AtlasTexture, "chapter 2 boss portrait should crop source label padding in stage select")
 
 	scene.init({"chapterIndex": 2})
 	await process_frame
@@ -171,6 +184,8 @@ func _run() -> void:
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_07_void_domain.png"), "chapter 7 should use the void domain formal background")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_normal.png"), "chapter 7 normal stages should use the void pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_elite.png"), "chapter 7 elite stages should use the void elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/StageNodes/Stage01/StageNumber") as Label).text == "7-1", "chapter 7 stage numbers should use chapter-stage format")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/StageNodes/Stage02/StageNumber") as Label).visible, "locked chapter 7 stages should still show their chapter-stage number")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_normal.png"), "chapter 7 boss should use the compact ordinary void pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter07VoidDomain/BossStage/BossArt"), "chapter 7 boss should not keep the old boss art overlay")
 	var chapter_7_boss_portrait := scene.get_node("MapScroll/ChapterMaps/Chapter07VoidDomain/BossStage/MonsterPortrait") as TextureRect
@@ -178,11 +193,13 @@ func _run() -> void:
 
 	scene.init({"chapterIndex": 7})
 	await process_frame
-	_expect((scene.get_node("Header/ChapterName") as Label).text == "时空裂隙", "chapter 8 title should match the temporal rift theme")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_08_temporal_rift.png"), "chapter 8 should use the temporal rift formal background")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_temporal_normal.png"), "chapter 8 normal stages should use the temporal pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_temporal_elite.png"), "chapter 8 elite stages should use the temporal elite pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_temporal_normal.png"), "chapter 8 boss should use the compact ordinary temporal pedestal asset")
+	_expect((scene.get_node("Header/ChapterName") as Label).text == "时空裂隙", "chapter 8 title should keep the configured chapter data")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_06_volcano.png"), "chapter 8 should use the lava volcano formal background")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_normal.png"), "chapter 8 normal stages should use the lava pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_elite.png"), "chapter 8 elite stages should use the lava elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage01/StageNumber") as Label).text == "8-1", "chapter 8 stage numbers should use chapter-stage format")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/StageNodes/Stage02/StageNumber") as Label).visible, "locked chapter 8 stages should still show their chapter-stage number")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_normal.png"), "chapter 8 boss should use the compact ordinary lava pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter08TemporalRift/BossStage/BossArt"), "chapter 8 boss should not keep the old boss art overlay")
 	var chapter_8_boss_portrait := scene.get_node("MapScroll/ChapterMaps/Chapter08TemporalRift/BossStage/MonsterPortrait") as TextureRect
 	_expect(chapter_8_boss_portrait.visible and chapter_8_boss_portrait.texture != null, "chapter 8 boss portrait should show by default")

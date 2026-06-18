@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://bkufctihbwdc6"]
+[gd_scene format=3 uid="uid://byfd44du2vong"]
 
 [ext_resource type="Texture2D" uid="uid://dj0u1jobqsedo" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_volcano.png" id="1_3adt3"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" uid="uid://cis0v8xqh1n4u" path="res://assets/images/maps/nodes/stage_node_ch08_temporal_elite.png" id="c08_stage04"]
-[ext_resource type="Texture2D" uid="uid://bos1jrsmv3r8c" path="res://assets/images/maps/nodes/stage_node_ch08_temporal_normal.png" id="c08_stage05"]
+[ext_resource type="Texture2D" uid="uid://brsnk3giql00t" path="res://assets/images/maps/nodes/stage_node_ch08_lava_elite.png" id="c08_stage04"]
+[ext_resource type="Texture2D" uid="uid://7luvua8bmbpp" path="res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png" id="c08_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter08TemporalRift" type="Control" unique_id=1325133689]
@@ -259,10 +259,10 @@ mouse_filter = 2
 
 [node name="Stage01" type="TextureButton" parent="StageNodes" unique_id=281141288]
 layout_mode = 0
-offset_left = 138.0
-offset_top = 1091.0
-offset_right = 230.0
-offset_bottom = 1189.0
+offset_left = 139.0
+offset_top = 1126.0
+offset_right = 231.0
+offset_bottom = 1224.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage01" unique_id=442080013]
@@ -367,10 +367,10 @@ vertical_alignment = 1
 
 [node name="Stage02" type="TextureButton" parent="StageNodes" unique_id=745761033]
 layout_mode = 0
-offset_left = 166.0
-offset_top = 1003.0
-offset_right = 258.0
-offset_bottom = 1101.0
+offset_left = 160.0
+offset_top = 1020.0
+offset_right = 252.0
+offset_bottom = 1118.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage02" unique_id=1965838727]
@@ -475,10 +475,10 @@ vertical_alignment = 1
 
 [node name="Stage03" type="TextureButton" parent="StageNodes" unique_id=1592151893]
 layout_mode = 0
-offset_left = 136.0
-offset_top = 915.0
-offset_right = 228.0
-offset_bottom = 1013.0
+offset_left = 83.0
+offset_top = 943.0
+offset_right = 175.0
+offset_bottom = 1041.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage03" unique_id=778174934]
@@ -583,10 +583,10 @@ vertical_alignment = 1
 
 [node name="Stage04" type="TextureButton" parent="StageNodes" unique_id=1211077633]
 layout_mode = 0
-offset_left = 178.0
-offset_top = 827.0
-offset_right = 270.0
-offset_bottom = 925.0
+offset_left = 162.0
+offset_top = 860.0
+offset_right = 254.0
+offset_bottom = 958.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage04" unique_id=298858531]
@@ -691,10 +691,10 @@ vertical_alignment = 1
 
 [node name="Stage05" type="TextureButton" parent="StageNodes" unique_id=1038719960]
 layout_mode = 0
-offset_left = 144.0
-offset_top = 739.0
-offset_right = 236.0
-offset_bottom = 837.0
+offset_left = 107.0
+offset_top = 762.0
+offset_right = 199.0
+offset_bottom = 860.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage05" unique_id=1339543073]
@@ -799,10 +799,10 @@ vertical_alignment = 1
 
 [node name="Stage06" type="TextureButton" parent="StageNodes" unique_id=2056518761]
 layout_mode = 0
-offset_left = 190.0
-offset_top = 651.0
-offset_right = 282.0
-offset_bottom = 749.0
+offset_left = 186.0
+offset_top = 682.0
+offset_right = 278.0
+offset_bottom = 780.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage06" unique_id=1219981183]
@@ -907,10 +907,10 @@ vertical_alignment = 1
 
 [node name="Stage07" type="TextureButton" parent="StageNodes" unique_id=862223241]
 layout_mode = 0
-offset_left = 152.0
-offset_top = 563.0
-offset_right = 244.0
-offset_bottom = 661.0
+offset_left = 128.0
+offset_top = 577.0
+offset_right = 220.0
+offset_bottom = 675.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage07" unique_id=1808380889]
@@ -1015,10 +1015,10 @@ vertical_alignment = 1
 
 [node name="Stage08" type="TextureButton" parent="StageNodes" unique_id=1956008027]
 layout_mode = 0
-offset_left = 194.0
-offset_top = 475.0
-offset_right = 286.0
-offset_bottom = 573.0
+offset_left = 205.0
+offset_top = 499.0
+offset_right = 297.0
+offset_bottom = 597.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage08" unique_id=399926715]
@@ -1123,10 +1123,10 @@ vertical_alignment = 1
 
 [node name="Stage09" type="TextureButton" parent="StageNodes" unique_id=711985325]
 layout_mode = 0
-offset_left = 156.0
-offset_top = 387.0
-offset_right = 248.0
-offset_bottom = 485.0
+offset_left = 115.0
+offset_top = 419.0
+offset_right = 207.0
+offset_bottom = 517.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage09" unique_id=5442795]
@@ -1231,10 +1231,10 @@ vertical_alignment = 1
 
 [node name="Stage10" type="TextureButton" parent="StageNodes" unique_id=1782840769]
 layout_mode = 0
-offset_left = 198.0
-offset_top = 297.0
-offset_right = 290.0
-offset_bottom = 395.0
+offset_left = 196.0
+offset_top = 362.0
+offset_right = 288.0
+offset_bottom = 460.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage10" unique_id=1298890096]
@@ -1339,10 +1339,10 @@ vertical_alignment = 1
 
 [node name="Stage11" type="TextureButton" parent="StageNodes" unique_id=458499458]
 layout_mode = 0
-offset_left = 170.0
-offset_top = 219.0
-offset_right = 262.0
-offset_bottom = 317.0
+offset_left = 191.0
+offset_top = 274.0
+offset_right = 283.0
+offset_bottom = 372.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="StageNodes/Stage11" unique_id=20172022]
@@ -1447,10 +1447,10 @@ vertical_alignment = 1
 
 [node name="BossStage" type="TextureButton" parent="." unique_id=1044930909]
 layout_mode = 0
-offset_left = 194.0
-offset_top = 170.0
-offset_right = 306.0
-offset_bottom = 300.0
+offset_left = 232.0
+offset_top = 159.0
+offset_right = 344.0
+offset_bottom = 289.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="BossStage" unique_id=1461067503]

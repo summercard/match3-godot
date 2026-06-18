@@ -55,6 +55,7 @@ func _ready() -> void:
 	set_process(true)
 	_setup_win_confetti_fx()
 	CartoonTypographyScript.apply(self, "lobby")
+	_apply_result_compact_text()
 	_connect_gui_actions()
 	_sync_gui()
 
@@ -353,6 +354,7 @@ func _set_fx_node(root: Node, path: NodePath, scale_value: float, rotation_value
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Banner"):
 		return
+	_sync_background()
 	_sync_capture_success_layer()
 	_sync_banner()
 	_sync_stars()
@@ -364,6 +366,13 @@ func _sync_gui() -> void:
 	_sync_buttons()
 	_sync_capture_success_layer()
 	_maybe_play_normal_entry()
+
+func _sync_background() -> void:
+	var background := get_node_or_null("Background") as TextureRect
+	if background == null:
+		return
+	var stage_id := str(_battle_result.get("stageId", _battle_result.get("stage_id", "")))
+	background.texture = _get_texture(StageWarBackgroundsScript.path_for(stage_id, {}, _battle_result))
 
 func _sync_banner() -> void:
 	var banner_key := "victory_banner" if _is_win else "defeat_banner"
@@ -437,6 +446,7 @@ func _sync_rewards() -> void:
 		var item := reward_items[i]
 		(slot.get_node("Icon") as TextureRect).texture = _result_texture(str(item.get("icon", "")))
 		(slot.get_node("Amount") as Label).text = str(item.get("amount", ""))
+		_style_compact_label(slot.get_node("Amount") as Label, 11, 2)
 
 func _sync_exp_panel() -> void:
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
@@ -462,6 +472,28 @@ func _sync_exp_panel() -> void:
 		if bool(catchup.get("enabled", false)):
 			exp_text = "+%d %s" % [award_exp, str(catchup.get("label", ""))]
 		(card.get_node("Exp") as Label).text = exp_text
+		_style_compact_label(card.get_node("Level") as Label, 8, 1)
+		_style_compact_label(card.get_node("Exp") as Label, 8, 1)
+
+func _apply_result_compact_text() -> void:
+	for path in REWARD_SLOT_PATHS:
+		var slot := get_node_or_null(path) as Control
+		if slot == null:
+			continue
+		_style_compact_label(slot.get_node_or_null("Amount") as Label, 11, 2)
+	for path in EXP_CARD_PATHS:
+		var card := get_node_or_null(path) as Control
+		if card == null:
+			continue
+		_style_compact_label(card.get_node_or_null("Level") as Label, 8, 1)
+		_style_compact_label(card.get_node_or_null("Exp") as Label, 8, 1)
+
+func _style_compact_label(label: Label, font_size: int, outline_size: int) -> void:
+	if label == null:
+		return
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_constant_override("outline_size", outline_size)
+	label.clip_text = true
 
 func _sync_levelups() -> void:
 	_node("LevelUpPanel").visible = false

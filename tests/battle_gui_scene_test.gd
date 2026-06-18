@@ -21,6 +21,11 @@ func _run() -> void:
 	var battle: Control = main.get_current_scene()
 	_expect(battle.scene_file_path == "res://src/ui/scenes/battle_screen.tscn", "battle should load editable PackedScene")
 	_expect(bool(battle.call("_uses_editable_gui")), "battle should enable editable GUI mode")
+	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle should use map1 war background")
+	var victory_halo := battle.get_node("BattleEndOverlay/Burst")
+	_expect(victory_halo is Control and not (victory_halo is TextureRect), "battle victory halo should be drawn by a Control, not a texture node")
+	var victory_halo_script = (victory_halo as Control).get_script()
+	_expect(victory_halo_script != null and str(victory_halo_script.resource_path).ends_with("battle_victory_halo.gd"), "battle victory halo should use the programmatic halo script")
 	for path in [
 		"Background",
 		"TopHud/TurnBadge/Value",
@@ -67,6 +72,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	battle = main.get_current_scene()
+	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle should use map2 war background")
 	var boss_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
 	var boss_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
 	_expect(boss_portrait_size.x >= normal_enemy_portrait_size.x * 2.0 and boss_portrait_size.y >= normal_enemy_portrait_size.y * 2.0, "boss battle portrait should be at least twice the normal single enemy size")
@@ -79,6 +85,7 @@ func _run() -> void:
 	})
 	await process_frame
 	battle = main.get_current_scene()
+	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map3.png"), "chapter 3 battle should use map3 war background")
 	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should show for three enemies")
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
 	_expect(battle.has_node("Combatants/MultiEnemies/Enemy3/HpFrameBase"), "multi-enemy hp bars should keep the base frame layer")

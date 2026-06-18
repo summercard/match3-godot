@@ -19,9 +19,9 @@
 [ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
 [ext_resource type="PackedScene" uid="uid://nd1ukitcfaxr" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_04_eclipse_canopy.tscn" id="chapter_04_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_05_thunder_temple.tscn" id="chapter_05_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_06_frost_throne.tscn" id="chapter_06_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_07_void_domain.tscn" id="chapter_07_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn" id="chapter_08_scene"]
+[ext_resource type="PackedScene" uid="uid://bwau7dx7n5eyl" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_06_frost_throne.tscn" id="chapter_06_scene"]
+[ext_resource type="PackedScene" uid="uid://bkkg62te4x88x" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_07_void_domain.tscn" id="chapter_07_scene"]
+[ext_resource type="PackedScene" uid="uid://byfd44du2vong" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn" id="chapter_08_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn" id="chapter_09_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn" id="chapter_10_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn" id="chapter_11_scene"]
@@ -54,7 +54,7 @@ layout_mode = 0
 
 [node name="Chapter02FireValley" parent="MapScroll/ChapterMaps" unique_id=315406483 instance=ExtResource("chapter_02_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter03MysticForest" parent="MapScroll/ChapterMaps" unique_id=976449952 instance=ExtResource("chapter_03_scene")]
 visible = false
@@ -66,23 +66,23 @@ layout_mode = 0
 
 [node name="Chapter05ThunderTemple" parent="MapScroll/ChapterMaps" unique_id=191119368 instance=ExtResource("chapter_05_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter06FrostThrone" parent="MapScroll/ChapterMaps" unique_id=952459069 instance=ExtResource("chapter_06_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter07VoidDomain" parent="MapScroll/ChapterMaps" unique_id=295859020 instance=ExtResource("chapter_07_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter08TemporalRift" parent="MapScroll/ChapterMaps" unique_id=280571989 instance=ExtResource("chapter_08_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter09StarlitTemple" parent="MapScroll/ChapterMaps" unique_id=1831753647 instance=ExtResource("chapter_09_scene")]
 visible = false
-anchors_preset = 0
+layout_mode = 0
 
 [node name="Chapter10ChaosDomain" parent="MapScroll/ChapterMaps" unique_id=1386337963 instance=ExtResource("chapter_10_scene")]
 visible = false
@@ -282,9 +282,9 @@ vertical_alignment = 1
 
 [node name="Header" type="Control" parent="." unique_id=2083169124]
 anchors_preset = 0
-offset_left = -27.0
+offset_left = 1.0
 offset_top = 1.0
-offset_right = 348.0
+offset_right = 376.0
 offset_bottom = 99.0
 
 [node name="TopScrim" type="ColorRect" parent="Header" unique_id=367042694]
@@ -478,21 +478,21 @@ offset_right = 150.0
 offset_bottom = 5.0
 color = Color(1, 1, 1, 0.34)
 
-[node name="TransitionCloudLayer" type="Control" parent="."]
+[node name="TransitionCloudLayer" type="Control" parent="." unique_id=745520593]
 visible = false
+z_index = 4096
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
-mouse_filter = 0
 
-[node name="Mist" type="ColorRect" parent="TransitionCloudLayer"]
+[node name="Mist" type="ColorRect" parent="TransitionCloudLayer" unique_id=2099995664]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
-[node name="LeftCloud01" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud01" type="TextureRect" parent="TransitionCloudLayer" unique_id=2124815297]
 layout_mode = 0
 offset_left = -840.0
 offset_top = -110.0
@@ -503,7 +503,7 @@ texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeftCloud02" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud02" type="TextureRect" parent="TransitionCloudLayer" unique_id=724053349]
 layout_mode = 0
 offset_left = -930.0
 offset_top = 75.0
@@ -514,7 +514,7 @@ texture = ExtResource("33_cloud_03")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeftCloud03" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud03" type="TextureRect" parent="TransitionCloudLayer" unique_id=2065792726]
 layout_mode = 0
 offset_left = -900.0
 offset_top = 335.0
@@ -525,7 +525,7 @@ texture = ExtResource("32_cloud_02")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeftCloud04" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud04" type="TextureRect" parent="TransitionCloudLayer" unique_id=454434667]
 modulate = Color(1, 1, 1, 0.92)
 layout_mode = 0
 offset_left = -720.0
@@ -537,7 +537,7 @@ texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeftCloud05" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud05" type="TextureRect" parent="TransitionCloudLayer" unique_id=1055883663]
 modulate = Color(1, 1, 1, 0.94)
 layout_mode = 0
 offset_left = -700.0
@@ -549,7 +549,7 @@ texture = ExtResource("33_cloud_03")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeftCloud06" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="LeftCloud06" type="TextureRect" parent="TransitionCloudLayer" unique_id=1249020826]
 modulate = Color(1, 1, 1, 0.9)
 layout_mode = 0
 offset_left = -740.0
@@ -561,7 +561,7 @@ texture = ExtResource("32_cloud_02")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud01" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud01" type="TextureRect" parent="TransitionCloudLayer" unique_id=567579099]
 layout_mode = 0
 offset_left = 415.0
 offset_top = -130.0
@@ -572,7 +572,7 @@ texture = ExtResource("32_cloud_02")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud02" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud02" type="TextureRect" parent="TransitionCloudLayer" unique_id=1693995965]
 layout_mode = 0
 offset_left = 405.0
 offset_top = 70.0
@@ -583,7 +583,7 @@ texture = ExtResource("33_cloud_03")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud03" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud03" type="TextureRect" parent="TransitionCloudLayer" unique_id=1819140082]
 layout_mode = 0
 offset_left = 410.0
 offset_top = 315.0
@@ -594,7 +594,7 @@ texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud04" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud04" type="TextureRect" parent="TransitionCloudLayer" unique_id=1463028225]
 modulate = Color(1, 1, 1, 0.94)
 layout_mode = 0
 offset_left = 405.0
@@ -606,7 +606,7 @@ texture = ExtResource("32_cloud_02")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud05" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud05" type="TextureRect" parent="TransitionCloudLayer" unique_id=2144545667]
 modulate = Color(1, 1, 1, 0.95)
 layout_mode = 0
 offset_left = 415.0
@@ -618,7 +618,7 @@ texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RightCloud06" type="TextureRect" parent="TransitionCloudLayer"]
+[node name="RightCloud06" type="TextureRect" parent="TransitionCloudLayer" unique_id=153156267]
 modulate = Color(1, 1, 1, 0.9)
 layout_mode = 0
 offset_left = 410.0
@@ -627,6 +627,102 @@ offset_right = 1125.0
 offset_bottom = 70.0
 mouse_filter = 2
 texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud07" type="TextureRect" parent="TransitionCloudLayer" unique_id=1320813402]
+modulate = Color(1, 1, 1, 0.96)
+layout_mode = 0
+offset_left = -650.0
+offset_top = 30.0
+offset_right = -30.0
+offset_bottom = 240.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud07" type="TextureRect" parent="TransitionCloudLayer" unique_id=368126455]
+modulate = Color(1, 1, 1, 0.96)
+layout_mode = 0
+offset_left = 385.0
+offset_top = 110.0
+offset_right = 985.0
+offset_bottom = 305.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud08" type="TextureRect" parent="TransitionCloudLayer" unique_id=1728915002]
+modulate = Color(1, 1, 1, 0.95)
+layout_mode = 0
+offset_left = -710.0
+offset_top = 210.0
+offset_right = -60.0
+offset_bottom = 430.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud08" type="TextureRect" parent="TransitionCloudLayer" unique_id=1782083896]
+modulate = Color(1, 1, 1, 0.95)
+layout_mode = 0
+offset_left = 390.0
+offset_top = 270.0
+offset_right = 1000.0
+offset_bottom = 495.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud09" type="TextureRect" parent="TransitionCloudLayer" unique_id=1633322880]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = -660.0
+offset_top = 415.0
+offset_right = -70.0
+offset_bottom = 600.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud09" type="TextureRect" parent="TransitionCloudLayer" unique_id=806893997]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = 400.0
+offset_top = 410.0
+offset_right = 1000.0
+offset_bottom = 615.0
+mouse_filter = 2
+texture = ExtResource("32_cloud_02")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftCloud10" type="TextureRect" parent="TransitionCloudLayer" unique_id=300379001]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = -670.0
+offset_top = 535.0
+offset_right = -70.0
+offset_bottom = 720.0
+mouse_filter = 2
+texture = ExtResource("33_cloud_03")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightCloud10" type="TextureRect" parent="TransitionCloudLayer" unique_id=559561377]
+modulate = Color(1, 1, 1, 0.94)
+layout_mode = 0
+offset_left = 385.0
+offset_top = 560.0
+offset_right = 985.0
+offset_bottom = 755.0
+mouse_filter = 2
+texture = ExtResource("31_cloud_01")
 expand_mode = 1
 stretch_mode = 5
 

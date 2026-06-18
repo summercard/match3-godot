@@ -8,13 +8,14 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
+const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
 
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
 
 const RESULT_ASSETS := {
-	"bg": "res://assets/images/maps/backgrounds/battle_garden_ruins_bg.png",
+	"bg": StageWarBackgroundsScript.DEFAULT_PATH,
 	"victory_banner": "res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner_clean.png",
 	"defeat_banner": "res://assets/images/ui/panels/result_refresh_ui_victory_wood_plaque.png",
 	"reward_panel": "res://assets/images/ui/panels/result_refresh_ui_panel_large.png",
@@ -34,8 +35,8 @@ const RESULT_ASSETS := {
 }
 
 const COMMON_ASSETS := {
-	"gold": "res://assets/images/ui/icons/battle_flow_new_icon_gold_coin.png",
-	"exp": "res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png",
+	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
+	"exp": "res://assets/images/ui/icons/ranch_icon_exp_badge.png",
 	"capture_ball": "res://assets/images/ui/icons/battle_flow_new_icon_capture_ball.png",
 	"item_capture": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
 	"item_capture_plus": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
@@ -311,9 +312,10 @@ func _load_capture_preferences() -> Dictionary:
 func _consume_selected_capture_item(item_id: String) -> Dictionary:
 	if not _storage or not _storage.has_method("load_inventory") or not _storage.has_method("use_item"):
 		return {"ok": false, "reason": "storage_unavailable"}
+	var inventory: Dictionary = _storage.load_inventory()
+	item_id = _resolve_capture_item_id(item_id, inventory)
 	if item_id.is_empty():
 		return {"ok": false, "reason": "no_item"}
-	var inventory: Dictionary = _storage.load_inventory()
 	var item_def: Dictionary = ItemDBScript.get_item(item_id)
 	if str(item_def.get("type", "")) != "capture":
 		return {"ok": false, "reason": "invalid_item", "item_name": str(item_def.get("name", "道具"))}
@@ -328,6 +330,28 @@ func _consume_selected_capture_item(item_id: String) -> Dictionary:
 		}
 		return {"ok": true, "bonus": bonus, "item": _capture_item_used.duplicate(true)}
 	return {"ok": false, "reason": "item_empty", "item_name": str(item_def.get("name", "捕捉球"))}
+
+func _resolve_capture_item_id(preferred_id: String, inventory: Dictionary) -> String:
+	if not preferred_id.is_empty():
+		var preferred_def: Dictionary = ItemDBScript.get_item(preferred_id)
+		if str(preferred_def.get("type", "")) == "capture" and int(inventory.get(preferred_id, 0)) > 0:
+			return preferred_id
+	for item_id in ["capture_ball", "capture_ball_plus", "capture_ball_elite"]:
+		if int(inventory.get(item_id, 0)) <= 0:
+			continue
+		var item_def: Dictionary = ItemDBScript.get_item(item_id)
+		if str(item_def.get("type", "")) != "capture":
+			continue
+		_save_resolved_capture_item(item_id)
+		return item_id
+	return ""
+
+func _save_resolved_capture_item(item_id: String) -> void:
+	if not _storage or not _storage.has_method("save_capture_settings"):
+		return
+	var settings := _load_capture_preferences()
+	settings["equippedItem"] = item_id
+	_storage.call("save_capture_settings", settings)
 
 func _get_capture_result_text(prob: float, captured: bool) -> Dictionary:
 	return CaptureSystemScript.get_capture_result_text(prob, captured, _capture_window, {
@@ -577,7 +601,11 @@ func _on_next_btn_pressed() -> void:
 					if stage.get("id") == next_stage_id:
 						stage_data = stage
 						break
-			_go_to_scene("battle_prepare", {"stageId": next_stage_id, "stageData": stage_data})
+			_go_to_scene("battle_prepare", {
+				"stageId": next_stage_id,
+				"stageData": stage_data,
+				"chapterIndex": _infer_chapter_index(next_stage_id)
+			})
 
 func _on_back_btn_pressed() -> void:
 	var chapter_index: int = _infer_chapter_index(_battle_result.get("stageId", ""))
@@ -597,7 +625,11 @@ func _on_retry_btn_pressed() -> void:
 			if stage.get("id") == stage_id:
 				stage_data = stage
 				break
-	_go_to_scene("battle_prepare", {"stageId": stage_id, "stageData": stage_data})
+	_go_to_scene("battle_prepare", {
+		"stageId": stage_id,
+		"stageData": stage_data,
+		"chapterIndex": _infer_chapter_index(stage_id)
+	})
 
 func _go_to_scene(scene_name: String, params: Dictionary = {}) -> void:
 	if has_node("/root/SceneManager"):
@@ -773,7 +805,7 @@ func _draw_rewards_section(font: Font, y: float) -> void:
 		var bounce := sin(progress * PI * 2.0 + i * 0.5) * 4.0 * (1.0 - progress)
 		var x := start_x + i * (slot_w + gap)
 		_draw_texture_fit(_tex("reward_slot"), Rect2(x, y + 34.0 + bounce, slot_w, 56.0))
-		_draw_texture_fit(_tex(item["icon"]), Rect2(x + 13.0, y + 43.0 + bounce, 28.0, 28.0))
+		_draw_texture_fit(_tex(item["icon"]), Rect2(x + 8.0, y + 38.0 + bounce, 38.0, 38.0))
 		_draw_centered_text(font, item["amount"], x + slot_w / 2.0, y + 91.0, item["color"], 11.0)
 
 func _get_reward_item_icon_key(item_id: String) -> String:
@@ -828,7 +860,7 @@ func _draw_exp_section(font: Font, y: float) -> void:
 		var exp_text := "+%d" % award_exp
 		if bool(catchup.get("enabled", false)):
 			exp_text = "+%d %s" % [award_exp, str(catchup.get("label", ""))]
-		_draw_centered_text(font, exp_text, x + card_w / 2.0, y + 101.0, Color(0.78, 1.0, 0.45), 7.2)
+		_draw_centered_text(font, exp_text, x + card_w / 2.0, y + 98.0, Color(0.78, 1.0, 0.45), 6.8)
 
 func _draw_levelups_section(font: Font, y: float) -> void:
 	if _level_ups.is_empty():

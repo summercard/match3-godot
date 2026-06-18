@@ -16,6 +16,7 @@ const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rule
 const MonsterDBScript = preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const ItemDB = preload("res://src/data/item_db.gd")
+const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
 
 ## 信号定义
 signal battle_started(stage_id: String, stage_data: Dictionary)
@@ -42,7 +43,7 @@ const BTN_Y := 593.0
 
 ## 战斗准备美术资产
 const PREPARE_ASSETS := {
-	"bg": "res://assets/images/ui/backgrounds/battle_prepare_new_bg_battle_prepare_garden.png",
+	"bg": StageWarBackgroundsScript.DEFAULT_PATH,
 	"back_button": "res://assets/images/ui/buttons/battle_prepare_new_ui_back_button.png",
 	"back_arrow": "res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png",
 	"currency_chip": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
@@ -173,11 +174,15 @@ func init(data: Dictionary = {}) -> void:
 	
 	# 优先使用传入的 stageData；否则从关卡数据查找
 	if data.get("stageData") is Dictionary and not (data.get("stageData") as Dictionary).is_empty():
-		_stage_data = data["stageData"]
+		_stage_data = (data["stageData"] as Dictionary).duplicate(true)
 	else:
 		_stage_data = _lookup_stage_data(_stage_id)
 		if _stage_data.is_empty():
 			_stage_data = _get_default_stage_data()
+		else:
+			_stage_data = _stage_data.duplicate(true)
+	if data.has("chapterIndex") and not _stage_data.has("chapterIndex"):
+		_stage_data["chapterIndex"] = data.get("chapterIndex")
 	
 	# 加载玩家队伍
 	_load_player_team()

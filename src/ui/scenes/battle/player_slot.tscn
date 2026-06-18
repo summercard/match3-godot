@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bewmx8fg4phvd"]
 
+[ext_resource type="Script" uid="uid://c54domcnrvfux" path="res://src/ui/components/battle_leader_charge_point.gd" id="charge_point"]
 [ext_resource type="Script" uid="uid://e8d055pley2n" path="res://src/ui/components/battle_hp_bar.gd" id="hp_bar"]
-[ext_resource type="Script" path="res://src/ui/components/battle_leader_charge_point.gd" id="charge_point"]
 [ext_resource type="Texture2D" uid="uid://ckj73sky5lin" path="res://assets/images/ui/bars/battle_ui_hp_frame.png" id="hp_frame_base"]
 [ext_resource type="Texture2D" uid="uid://d28scdfx8ucde" path="res://assets/images/ui/bars/battle_ui_hp_frame_overlay.png" id="hp_frame_overlay"]
 
@@ -91,9 +91,9 @@ text = "100/100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LeaderChargePoint" type="Control" parent="."]
+[node name="LeaderChargePoint" type="Control" parent="." unique_id=1919228401]
 z_index = 4
-layout_mode = 0
+anchors_preset = 0
 offset_left = 19.0
 offset_top = 40.0
 offset_right = 58.0

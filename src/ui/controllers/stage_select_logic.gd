@@ -90,9 +90,9 @@ const CHAPTER_STAGE_NODE_ASSET_OVERRIDES := {
 		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch07_void_elite.png"
 	},
 	"chapter_8": {
-		"node_normal": "res://assets/images/maps/nodes/stage_node_ch08_temporal_normal.png",
-		"node_selected": "res://assets/images/maps/nodes/stage_node_ch08_temporal_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch08_temporal_elite.png"
+		"node_normal": "res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png",
+		"node_selected": "res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png",
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch08_lava_elite.png"
 	},
 	"chapter_9": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png",
@@ -169,7 +169,7 @@ const CHAPTER_BACKGROUND_OVERRIDES := {
 	"chapter_5": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_island.png",
 	"chapter_6": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_frost_throne.png",
 	"chapter_7": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_void_domain.png",
-	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_08_temporal_rift.png",
+	"chapter_8": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_volcano.png",
 	"chapter_9": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png"
 }
 
@@ -284,6 +284,7 @@ var _art_assets: Dictionary = {}
 var _art_ready: bool = false
 var _art_loading_started: bool = false
 var _texture_cache: Dictionary = {}
+var _stage_number_font_cache: Font
 
 var _bg_texture: TextureRect
 
@@ -646,6 +647,26 @@ func _stage_node_asset_path(chapter_id: String, node_key: String) -> String:
 	if CHAPTER_STAGE_NODE_ASSET_OVERRIDES.has(chapter_id):
 		paths.merge(CHAPTER_STAGE_NODE_ASSET_OVERRIDES[chapter_id], true)
 	return str(paths.get(node_key, STAGE_NODE_ASSETS_DEFAULT["node_normal"]))
+
+func _chapter_number_from_id(chapter_id: String) -> int:
+	var parts := chapter_id.split("_")
+	if parts.size() < 2:
+		return _current_chapter_index + 1
+	var suffix := str(parts[parts.size() - 1])
+	if not suffix.is_valid_int():
+		return _current_chapter_index + 1
+	return int(suffix)
+
+func _stage_display_label(card: Dictionary) -> String:
+	var chapter_no := _chapter_number_from_id(str(card.get("chapter_id", "")))
+	return "%d-%d" % [chapter_no, int(card.get("stage_no", 1))]
+
+func _stage_number_font() -> Font:
+	if _stage_number_font_cache == null:
+		var font := SystemFont.new()
+		font.font_names = PackedStringArray(["Microsoft YaHei UI", "Microsoft YaHei", "Arial Rounded MT Bold"])
+		_stage_number_font_cache = font
+	return _stage_number_font_cache
 
 func _sample_stage_positions(count: int) -> Array[Vector2]:
 	var result: Array[Vector2] = []
@@ -1095,7 +1116,7 @@ func _draw_stage_card(card: Dictionary) -> void:
 		_draw_texture_contain(_get_texture(str(boss_layout["badge_path"])), Rect2(badge_rect.position + boss_origin, badge_rect.size), boss_alpha)
 		var boss_path := str(boss_layout.get("art_path", CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/monsters/boss/boss_flower.png")))
 		_draw_texture_contain(_get_texture(boss_path), Rect2(art_rect.position + boss_origin, art_rect.size), boss_alpha)
-		_draw_text_center("BOSS", draw_cx, card.get("cy", 0.0) + float(boss_layout["label_y"]), Color(1.0, 0.82, 0.0), 13, true, 70)
+		_draw_text_center(_stage_display_label(card), draw_cx, card.get("cy", 0.0) + float(boss_layout["label_y"]), Color(1.0, 0.82, 0.0), 13, true, 70)
 		_draw_stars(draw_cx - 22, card.get("cy", 0.0) + float(boss_layout["stars_y"]), card.get("stars", 0))
 		if not is_unlocked:
 			_draw_stage_lock_overlay(card, true)
@@ -1118,7 +1139,7 @@ func _draw_stage_card(card: Dictionary) -> void:
 		_draw_texture_contain(_get_texture(node_path), Rect2(node_x, node_y, node_w, node_h), 0.55 if not is_unlocked else 1.0)
 	else:
 		draw_circle(Vector2(draw_cx, card.get("cy", 0.0)), 26, Color(0.08, 0.10, 0.14, 0.72) if not is_unlocked else Color(0.1, 0.5, 1.0, 0.95))
-	_draw_text_center(str(card.get("stage_no", 1)), draw_cx, card.get("cy", 0.0) + (-1.0 if is_elite else -4.0), Color(0.62, 0.68, 0.76) if not is_unlocked else Color.WHITE, 15, true, 42)
+	_draw_text_center(_stage_display_label(card), draw_cx, card.get("cy", 0.0) + (-1.0 if is_elite else -4.0), Color(0.62, 0.68, 0.76) if not is_unlocked else Color.WHITE, 13, true, 54)
 	if is_unlocked:
 		_draw_stars(draw_cx - 21, card.get("cy", 0.0) + 28, card.get("stars", 0))
 	else:
@@ -1282,11 +1303,15 @@ func _create_stage_node(card: Dictionary) -> void:
 	
 	# 关卡编号标签
 	var no_label: Label = Label.new()
-	no_label.text = str(stage_no)
+	no_label.text = _stage_display_label(card)
 	no_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	no_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	no_label.position = Vector2(card["w"] / 2.0 - 10, card["h"] / 2.0 - 8)
-	no_label.add_theme_font_size_override("font_size", 16)
+	no_label.position = Vector2(card["w"] / 2.0 - 32.0, card["h"] / 2.0 - 10.0)
+	no_label.size = Vector2(64.0, 22.0)
+	no_label.add_theme_font_override("font", _stage_number_font())
+	no_label.add_theme_font_size_override("font_size", 13)
+	no_label.add_theme_color_override("font_outline_color", Color(0.12, 0.06, 0.18, 0.92))
+	no_label.add_theme_constant_override("outline_size", 3)
 	node.add_child(no_label)
 	
 	# 星级显示
@@ -1297,16 +1322,6 @@ func _create_stage_node(card: Dictionary) -> void:
 	stars_label.add_theme_font_size_override("font_size", 10)
 	stars_label.add_theme_color_override("font_color", Color(1, 0.84, 0))
 	node.add_child(stars_label)
-	
-	# BOSS 标签
-	if is_boss:
-		var boss_label: Label = Label.new()
-		boss_label.text = "BOSS"
-		boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		boss_label.position = Vector2(card["w"] / 2.0 - 20, card["h"] - 24)
-		boss_label.add_theme_font_size_override("font_size", 10)
-		boss_label.add_theme_color_override("font_color", Color.YELLOW)
-		node.add_child(boss_label)
 	
 	# 扫荡按钮（如果有）
 	if card.get("can_sweep", false):

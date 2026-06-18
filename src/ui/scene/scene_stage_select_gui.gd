@@ -33,19 +33,21 @@ const DEFAULT_STAR_DIM_PATH := "res://assets/images/ui/icons/result_refresh_icon
 const CHAPTER_01_STAR_PATH := "res://assets/images/ui/icons/stage_star_gold_new.png"
 const STAGE_LOCK_ICON_PATH := "res://assets/images/ui/icons/stage_lock_icon.png"
 const STAGE_LOCK_ICON_SIZE := Vector2(28.0, 28.0)
-const STAGE_NUMBER_SIZE := Vector2(44.0, 25.0)
-const STAGE_LOCK_REFERENCE_Y: float = 11.0
-const BOSS_COMPACT_PLATFORM_SCALE: float = 1.5
+const STAGE_NUMBER_SIZE := Vector2(64.0, 22.0)
+const STAGE_LOCK_REFERENCE_Y: float = 36.0
+const BOSS_COMPACT_PLATFORM_SCALE: float = 1.0
 const BOSS_COMPACT_BUTTON_MAX_SIZE := Vector2(130.0, 150.0)
 const CLOUD_TRANSITION_CLOSE_DURATION: float = 0.50
 const CLOUD_TRANSITION_HOLD_DURATION: float = 0.22
 const CLOUD_TRANSITION_OPEN_DURATION: float = 0.66
 const CLOUD_TRANSITION_MAP_OUT_SCALE: Vector2 = Vector2(1.105, 1.105)
 const CLOUD_TRANSITION_MAP_IN_SCALE: Vector2 = Vector2(1.12, 1.12)
-const TRANSITION_LEFT_CLOSED_X := [-285.0, -365.0, -310.0, -255.0, -315.0, -260.0]
-const TRANSITION_RIGHT_CLOSED_X := [-110.0, -145.0, -95.0, -20.0, -75.0, -55.0]
-const TRANSITION_LEFT_DELAY := [0.0, 0.04, 0.02, 0.07, 0.11, 0.03]
-const TRANSITION_RIGHT_DELAY := [0.03, 0.0, 0.05, 0.09, 0.12, 0.02]
+const CLOUD_TRANSITION_LAYER_Z_INDEX: int = 4096
+const CLOUD_TRANSITION_MIST_CLOSED_ALPHA: float = 1.0
+const TRANSITION_LEFT_CLOSED_X := [-285.0, -365.0, -310.0, -255.0, -315.0, -260.0, -155.0, -245.0, -170.0, -145.0]
+const TRANSITION_RIGHT_CLOSED_X := [-110.0, -145.0, -95.0, -20.0, -75.0, -55.0, -10.0, 45.0, 65.0, 30.0]
+const TRANSITION_LEFT_DELAY := [0.0, 0.04, 0.02, 0.07, 0.11, 0.03, 0.015, 0.055, 0.085, 0.11]
+const TRANSITION_RIGHT_DELAY := [0.03, 0.0, 0.05, 0.09, 0.12, 0.02, 0.025, 0.065, 0.095, 0.115]
 
 # === 大地图入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
 const ENTRY_HEADER_DELAY := 0.00
@@ -506,6 +508,10 @@ const _STAGE_PORTRAIT_FALLBACK_POS := Vector2(9.0, -17.0)
 const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(30.0, 10.0)
 const _STAGE_PORTRAIT_LIFT := 4.0
 const _BOSS_PORTRAIT_LIFT := -5.0
+const _BOSS_PORTRAIT_PEDESTAL_ANCHOR_Y := 0.58
+const _BOSS_PORTRAIT_CROP_BOTTOM_RATIO := 0.79
+
+var _boss_stage_portrait_texture_cache: Dictionary = {}
 
 ## 动态为关卡台子添加怪物画像 TextureRect；只创建一次，避免重复堆叠。
 ## 位置由 _apply_stage_portrait / _apply_boss_portrait 按台子尺寸动态计算（底部对准台子中心）。
@@ -576,10 +582,27 @@ func _apply_boss_portrait(button: TextureButton, card: Dictionary) -> void:
 		portrait.visible = false
 		portrait.texture = null
 		return
-	portrait.texture = load(path)
+	portrait.texture = _stage_select_boss_portrait_texture(path)
 	portrait.modulate = Color(1, 1, 1, 1)
-	_center_portrait_on_pedestal(button, portrait, _BOSS_PORTRAIT_LIFT)
+	portrait.z_index = 1
+	_center_boss_portrait_on_pedestal(button, portrait)
 	portrait.visible = true
+
+func _stage_select_boss_portrait_texture(path: String) -> Texture2D:
+	if _boss_stage_portrait_texture_cache.has(path):
+		return _boss_stage_portrait_texture_cache[path]
+	var source := load(path) as Texture2D
+	if source == null:
+		return null
+	if path.contains("/boss/monster_boss_") and not path.ends_with("monster_boss_001_grass_flower_512.png"):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = source
+		var source_size := source.get_size()
+		atlas.region = Rect2(Vector2.ZERO, Vector2(source_size.x, source_size.y * _BOSS_PORTRAIT_CROP_BOTTOM_RATIO))
+		_boss_stage_portrait_texture_cache[path] = atlas
+	else:
+		_boss_stage_portrait_texture_cache[path] = source
+	return _boss_stage_portrait_texture_cache[path]
 
 ## 把 portrait 放在台子中心：图片底部贴着 button 垂直中线，水平居中。
 ## 这样怪物画像看起来像坐在台子上（露出台子上半部分）。
@@ -591,6 +614,16 @@ func _center_portrait_on_pedestal(button: TextureButton, portrait: TextureRect, 
 		(btn_size.x - port_size.x) * 0.5,
 		btn_size.y * 0.5 - lift - port_size.y
 	)
+
+func _center_boss_portrait_on_pedestal(button: TextureButton, portrait: TextureRect) -> void:
+	var platform := button.get_node_or_null("Platform") as Control
+	if platform == null:
+		_center_portrait_on_pedestal(button, portrait, _BOSS_PORTRAIT_LIFT)
+		return
+	var port_size: Vector2 = portrait.size
+	var platform_center_x := platform.position.x + platform.size.x * 0.5
+	var anchor_y := platform.position.y + platform.size.y * _BOSS_PORTRAIT_PEDESTAL_ANCHOR_Y
+	portrait.position = Vector2(platform_center_x - port_size.x * 0.5, anchor_y - port_size.y)
 
 func _normalize_chapter_map_visuals() -> void:
 	if _chapter_map == null:
@@ -615,11 +648,15 @@ func _normalize_stage_button_layout(button: TextureButton) -> void:
 	var top_y := 14.0
 	if platform != null:
 		center_x = platform.position.x + platform.size.x * 0.5
-		top_y = platform.position.y + 4.0
+		top_y = platform.position.y + 1.0
 	number.position = Vector2(center_x - STAGE_NUMBER_SIZE.x * 0.5, top_y)
 	number.size = STAGE_NUMBER_SIZE
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	number.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	number.add_theme_font_override("font", _stage_number_font())
+	number.add_theme_font_size_override("font_size", 12)
+	number.add_theme_color_override("font_outline_color", Color(0.12, 0.06, 0.18, 0.92))
+	number.add_theme_constant_override("outline_size", 3)
 
 func _normalize_boss_button_layout(button: TextureButton) -> void:
 	if button == null:
@@ -639,14 +676,21 @@ func _normalize_boss_button_layout(button: TextureButton) -> void:
 	var target_size := base_size * BOSS_COMPACT_PLATFORM_SCALE
 	platform.size = target_size
 	platform.position = center - target_size * 0.5
+	platform.z_index = 0
 	var label := button.get_node_or_null("StageLabel") as Label
 	if label != null:
+		label.z_index = 3
 		label.size = Vector2(84.0, 24.0)
 		label.position = Vector2((button.size.x - label.size.x) * 0.5, platform.position.y + platform.size.y * 0.56)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_override("font", _stage_number_font())
+		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_color_override("font_outline_color", Color(0.12, 0.06, 0.18, 0.94))
+		label.add_theme_constant_override("outline_size", 3)
 	var stars := button.get_node_or_null("Stars") as Control
 	if stars != null:
+		stars.z_index = 3
 		stars.size = Vector2(48.0, 14.0)
 		stars.position = Vector2((button.size.x - stars.size.x) * 0.5, platform.position.y + platform.size.y * 0.82)
 
@@ -688,9 +732,10 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
 	button.disabled = not enabled
 	button.modulate.a = 1.0 if enabled else 0.80
-	(button.get_node("StageNumber") as Label).text = str(card.get("stage_no", ""))
-	(button.get_node("StageNumber") as Label).modulate = TEXT_WHITE if enabled else TEXT_MUTED
-	(button.get_node("StageNumber") as Label).visible = enabled
+	var number := button.get_node("StageNumber") as Label
+	number.text = _stage_display_label(card)
+	number.modulate = TEXT_WHITE if enabled else TEXT_MUTED
+	number.visible = true
 	_normalize_stage_button_layout(button)
 	_sync_lock_state(button, not enabled)
 	_sync_selection_ring(button, enabled)
@@ -702,6 +747,10 @@ func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
 	button.disabled = not enabled
 	button.modulate.a = 1.0 if enabled else 0.82
+	var label := button.get_node_or_null("StageLabel") as Label
+	if label != null:
+		label.text = _stage_display_label(card)
+		label.modulate = TEXT_WHITE if enabled else TEXT_MUTED
 	_normalize_boss_button_layout(button)
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
@@ -720,6 +769,7 @@ func _sync_lock_state(button: TextureButton, visible: bool) -> void:
 		if button.name == "BossStage" and button.has_node("Platform"):
 			var platform := button.get_node("Platform") as Control
 			icon.position = platform.position + (platform.size - STAGE_LOCK_ICON_SIZE) * 0.5
+			icon.z_index = 4
 		else:
 			icon.position = Vector2((button.size.x - STAGE_LOCK_ICON_SIZE.x) * 0.5, STAGE_LOCK_REFERENCE_Y)
 	elif lock_node is Label:
@@ -802,7 +852,7 @@ func _play_cloud_chapter_transition(direction: int) -> void:
 		close_tween.tween_property(outgoing_map, "scale", CLOUD_TRANSITION_MAP_OUT_SCALE, 0.48).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 		close_tween.tween_property(outgoing_map, "modulate:a", 0.84, 0.44).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	if _transition_mist != null:
-		close_tween.tween_property(_transition_mist, "color", Color(1, 1, 1, 0.86), 0.46).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		close_tween.tween_property(_transition_mist, "color", Color(1, 1, 1, CLOUD_TRANSITION_MIST_CLOSED_ALPHA), 0.46).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_tween_transition_clouds(close_tween, true)
 	await close_tween.finished
 
@@ -840,6 +890,7 @@ func _play_cloud_chapter_transition(direction: int) -> void:
 func _prepare_transition_layer() -> void:
 	if _transition_cloud_layer == null:
 		return
+	_transition_cloud_layer.z_index = CLOUD_TRANSITION_LAYER_Z_INDEX
 	_transition_cloud_layer.visible = true
 	_transition_cloud_layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	if _transition_mist != null:

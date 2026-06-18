@@ -40,7 +40,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_auto_off_skips_without_consuming()
-	_test_auto_on_requires_selected_ball()
+	_test_auto_on_uses_available_ball_without_manual_selection()
 	_test_selected_ball_is_consumed_exactly()
 	_finish()
 
@@ -57,14 +57,16 @@ func _test_auto_off_skips_without_consuming() -> void:
 	storage.queue_free()
 
 
-func _test_auto_on_requires_selected_ball() -> void:
+func _test_auto_on_uses_available_ball_without_manual_selection() -> void:
 	var storage := MockStorage.new()
 	storage.inventory = {"capture_ball": 3}
 	storage.settings = {"autoCapture": true, "equippedItem": ""}
 	var scene: Control = _make_result_scene(storage)
 	scene.call("_process_capture")
-	_expect(int(storage.inventory.get("capture_ball", 0)) == 3, "auto capture without selected ball should not consume anything")
-	_expect(str(scene.get("_capture_result").get("skip_reason", "")) == "no_item", "auto capture should require a selected capture ball")
+	var item_used: Dictionary = scene.get("_capture_item_used")
+	_expect(str(item_used.get("id", "")) == "capture_ball", "auto capture should choose an available capture ball when none is selected")
+	_expect(int(storage.inventory.get("capture_ball", 0)) == 2, "auto-selected capture ball should be consumed for the capture judgment")
+	_expect(str(scene.get("_capture_result").get("skip_reason", "")) != "no_item", "auto capture with an available ball should enter the capture judgment")
 	scene.queue_free()
 	storage.queue_free()
 

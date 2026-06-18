@@ -91,8 +91,7 @@ func _run() -> void:
 		_expect(timer.text.count(":") == 2, "farm slot timer should expose seconds so idle time visibly advances")
 		_expect(timer.text != timer_before, "farm slot timer should refresh while the page remains open")
 		_expect(int((ranch.get("_idle_exp_map") as Dictionary).get("monster_001", 0)) > exp_before, "farm dynamic refresh should recalculate idle rewards")
-		(ranch.get_node("Pages/RanchPage/CollectRow/CollectButton") as TextureButton).pressed.emit()
-		_expect(str(ranch.get("_status_text")).begins_with("收获 +"), "GUI collect button should preserve ranch reward feedback")
+		_expect(not ranch.has_node("Pages/RanchPage/CollectRow/CollectButton"), "GUI ranch page should not show the collect-all button")
 		ranch.call("_switch_to_social")
 		ranch.set("_social_places", [{
 			"place_id": "meadow_yard",

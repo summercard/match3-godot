@@ -85,6 +85,7 @@ func _uses_editable_battle_end_overlay() -> bool:
 func _sync_gui() -> void:
 	if not is_inside_tree() or _battle == null:
 		return
+	_sync_background()
 	_sync_top_hud()
 	_sync_enemy_slots()
 	_sync_player_slots()
@@ -92,6 +93,14 @@ func _sync_gui() -> void:
 	_sync_item_confirm_popup()
 	_sync_gem_convert_layer()
 	_sync_battle_end_overlay()
+
+func _sync_background() -> void:
+	var background := get_node_or_null("Background") as TextureRect
+	if background == null:
+		return
+	var texture := _get_texture(_battle_background_path)
+	if background.texture != texture:
+		background.texture = texture
 
 func _connect_item_confirm_buttons() -> void:
 	var cancel := get_node_or_null("ItemConfirmLayer/Panel/CancelButton") as BaseButton

@@ -17,6 +17,7 @@ func _run() -> void:
 	prepare.battle_started.connect(func(stage_id: String, _stage_data: Dictionary): _started_stage_id = stage_id)
 	prepare.init({"stageId": "stage_1_1"})
 	_expect(prepare.scene_file_path == "res://src/ui/scenes/battle_prepare.tscn", "battle prepare should be an editable PackedScene")
+	_expect((prepare.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle prepare should use map1 war background")
 	for path in [
 		"Header/BackButton",
 		"EnemyPanel/Cards/EnemyCard1/Portrait",
@@ -43,6 +44,7 @@ func _run() -> void:
 	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
 	_expect(_started_stage_id == "stage_1_1", "editable start button should preserve battle start behavior")
 	prepare.init({"stageId": "stage_2_12"})
+	_expect((prepare.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle prepare should use map2 war background")
 	var enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
 	var enemy_name := enemy_card.get_node("Name") as Control
 	var enemy_level := enemy_card.get_node("Level") as Control
@@ -84,6 +86,7 @@ func _run() -> void:
 		"capture_window": {"label": "稳定", "stability": 0.82},
 	})
 	_expect(result.scene_file_path == "res://src/ui/scenes/battle_result.tscn", "battle result should be an editable PackedScene")
+	_expect((result.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle result should use map1 war background")
 	_expect((result.get_node("CaptureResultPanel") as Control).scene_file_path == "res://src/ui/scenes/capture_result_panel.tscn", "capture pet result should be an independent editable GUI panel")
 	for path in [
 		"Banner/Frame",
@@ -105,6 +108,12 @@ func _run() -> void:
 	_expect((result.get_node("CaptureSuccessLayer") as Control).visible, "capture success layer should show captured result")
 	_expect(not (result.get_node("CaptureResultPanel") as Control).visible, "old capture pet panel should be hidden behind success layer")
 	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Amount") as Label).text == "超级捕获球 x2", "result reward slot should name the same item it grants")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot1/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_gold_coin_v3.png"), "result gold reward should use the formal art icon")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot2/Icon") as TextureRect).texture.resource_path.ends_with("ranch_icon_exp_badge.png"), "result exp reward should use the formal art icon")
+	var exp_card := result.get_node("ExpPanel/Cards/ExpCard1") as Control
+	var exp_label := exp_card.get_node("Exp") as Label
+	_expect(exp_label.get_theme_font_size("font_size") <= 8 and exp_label.clip_text, "result monster exp text should stay compact and clipped inside the card")
+	_expect(exp_label.position.x >= 0.0 and exp_label.position.x + exp_label.size.x <= exp_card.size.x + 0.5, "result monster exp text box should stay inside the card width")
 	var inventory_after_result: Dictionary = save_manager.load_inventory() if save_manager != null else {}
 	_expect(int(inventory_after_result.get("capture_ball_plus", 0)) == 2, "result should grant the same guaranteed item count shown in the reward slot")
 	var captured_instances: Array = save_manager.get_instances_by_monster_id("enemy_001") if save_manager != null and save_manager.has_method("get_instances_by_monster_id") else []
