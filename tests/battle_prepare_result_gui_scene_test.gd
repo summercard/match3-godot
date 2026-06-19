@@ -36,6 +36,15 @@ func _run() -> void:
 	_expect((normal_enemy_card.get_node("Level") as Control).visible, "normal enemy card should show level")
 	_expect((normal_enemy_card.get_node("Power") as Control).visible, "normal enemy card should show power")
 	_expect((prepare.get_node("EnemyPanel/PowerIcon") as TextureRect).texture.resource_path.ends_with("battle_prepare_new_icon_power_swords.png"), "enemy power icon should use the cleaned crossed swords art")
+	for team_card_path in ["TeamPanel/Cards/TeamCard1", "TeamPanel/Cards/TeamCard2", "TeamPanel/Cards/TeamCard3"]:
+		var team_card := prepare.get_node(team_card_path) as Control
+		var element_badge := team_card.get_node("ElementBadge") as TextureRect
+		var power_stars := team_card.get_node("Stars") as Label
+		var card_panel := team_card.get_node("ui底图2/NinePatch") as NinePatchRect
+		_expect(not power_stars.visible and power_stars.text.is_empty(), "%s should hide power stars" % team_card_path)
+		_expect(is_equal_approx(element_badge.position.y, -2.0), "%s should align its element badge near the top edge" % team_card_path)
+		_expect(card_panel.texture.resource_path.ends_with("panel_base2.png"), "%s should reuse the first team card panel" % team_card_path)
+		_expect(not team_card.has_node("Frame"), "%s should not keep the old team card frame" % team_card_path)
 	for reward_slot_path in ["RewardPreview/Slots/RewardSlot1", "RewardPreview/Slots/RewardSlot2", "RewardPreview/Slots/RewardSlot3"]:
 		var reward_label := prepare.get_node(reward_slot_path + "/Label") as Label
 		var reward_icon := prepare.get_node(reward_slot_path + "/Icon") as TextureRect

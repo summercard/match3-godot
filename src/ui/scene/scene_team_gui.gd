@@ -49,6 +49,12 @@ const SLOT_PATHS := {
 	"leader": "TeamSlots/LeaderSlot",
 	"member2": "TeamSlots/Member2Slot",
 }
+const SLOT_KEYS := ["member1", "leader", "member2"]
+const SLOT_LABELS := {
+	"member1": "左位",
+	"leader": "队长",
+	"member2": "右位",
+}
 const ROSTER_PATHS := [
 	"RosterPanel/Cards/Card1",
 	"RosterPanel/Cards/Card2",
@@ -81,14 +87,12 @@ var _active_filter: String = "all"
 var _sort_option: int = 0
 var _time_acc: float = 0.0
 var _texture_cache: Dictionary = {}
-var _slots: Array = []
 
 
 func _ready() -> void:
 	_refresh_services()
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(false)
-	_update_slots_layout()
 	_connect_gui_actions()
 	_attach_gui_feedback()
 	_sync_gui()
@@ -101,7 +105,6 @@ func init(_data: Dictionary = {}) -> void:
 	_selected_slot = ""
 	_active_filter = "all"
 	_sort_option = 0
-	_update_slots_layout()
 	_sync_gui()
 
 
@@ -351,14 +354,6 @@ func _change_to_scene(scene_name: String) -> void:
 			gm.scene_manager.switch_scene(scene_name, {}, "quick")
 
 
-func _update_slots_layout() -> void:
-	_slots = [
-		{"key": "member1", "rect": Rect2(43.0, 188.0, 78.0, 160.0), "label": "左位"},
-		{"key": "leader", "rect": Rect2(128.0, 145.0, 119.0, 210.0), "label": "队长"},
-		{"key": "member2", "rect": Rect2(254.0, 188.0, 78.0, 160.0), "label": "右位"},
-	]
-
-
 func _get_roster_page_count() -> int:
 	return maxi(1, ceili(float(_get_display_monsters().size()) / float(GUI_ROSTER_PAGE_SIZE)))
 
@@ -466,22 +461,26 @@ func _sync_currency_bar() -> void:
 
 
 func _sync_team_slots() -> void:
-	for slot: Dictionary in _slots:
-		var key := str(slot["key"])
+	for key: String in SLOT_KEYS:
 		var slot_node := get_node(str(SLOT_PATHS[key])) as TextureButton
 		var value: Variant = _team.get(key, null)
 		var instance_id := "" if value == null else str(value)
 		var occupied := not instance_id.is_empty()
 		(slot_node.get_node("EmptyPlus") as TextureRect).visible = not occupied
-		(slot_node.get_node("Portrait") as TextureRect).visible = occupied
+		var portrait := slot_node.find_child("Portrait", true, false) as TextureRect
+		if portrait != null:
+			portrait.visible = occupied
 		(slot_node.get_node("Fallback") as Label).visible = false
 		(slot_node.get_node("Selection") as Panel).visible = _selected_slot == key
-		(slot_node.get_node("LeaderBadge") as TextureRect).visible = key == "leader" and occupied
-		(slot_node.get_node("LeaderText") as Label).visible = key == "leader" and occupied
-		(slot_node.get_node("Label/Text") as Label).text = str(slot["label"])
-		if not occupied:
+		var leader_badge := slot_node.find_child("LeaderBadge", true, false) as CanvasItem
+		if leader_badge != null:
+			leader_badge.visible = key == "leader" and occupied
+		var leader_text := slot_node.find_child("LeaderText", true, false) as CanvasItem
+		if leader_text != null:
+			leader_text.visible = key == "leader" and occupied
+		(slot_node.get_node("Label/Text") as Label).text = str(SLOT_LABELS[key])
+		if not occupied or portrait == null:
 			continue
-		var portrait := slot_node.get_node("Portrait") as TextureRect
 		var monster_id := _get_monster_id(instance_id)
 		portrait.texture = _get_monster_texture(monster_id)
 		if portrait.texture == null:

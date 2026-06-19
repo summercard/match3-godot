@@ -25,6 +25,9 @@
 [ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/ui/icons/main_icon_level_shield_v3.png" id="23_def"]
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="24_spd"]
 [ext_resource type="Texture2D" uid="uid://dw1ag3xhmm4ds" path="res://assets/images/ui/generated_panel_parts/panel_base3.png" id="25_roster_bg"]
+[ext_resource type="Texture2D" uid="uid://dmascmt2urjay" path="res://assets/images/monsters/monster/monster_001_fire_lizard.png" id="26_preview_member1"]
+[ext_resource type="Texture2D" uid="uid://dlewxgo3udhbp" path="res://assets/images/monsters/monster/monster_002_water_cub.png" id="27_preview_leader"]
+[ext_resource type="Texture2D" uid="uid://3mpnbnr2angk" path="res://assets/images/monsters/monster/monster_003_grass_leaf.png" id="28_preview_member2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selection"]
 bg_color = Color(1, 0.82, 0.26, 0.08)
@@ -423,10 +426,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
 
 [node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2011852903]
 layout_mode = 0
-offset_left = -7.000001
-offset_top = -5.999998
-offset_right = 71.0
-offset_bottom = 72.0
+offset_left = -11.000002
+offset_top = -0.9999976
+offset_right = 67.0
+offset_bottom = 77.0
 scale = Vector2(0.8520866, 0.8520866)
 pivot_offset = Vector2(39, 39)
 mouse_filter = 2
@@ -434,14 +437,23 @@ texture = ExtResource("8_empty_plus")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Portrait" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=1355864503]
-visible = false
-layout_mode = 0
-offset_left = -4.0
-offset_top = 4.0
-offset_right = 82.0
-offset_bottom = 90.0
+[node name="MonsterPosition" type="Control" parent="TeamSlots/Member1Slot" unique_id=533519079]
+anchors_preset = 0
+offset_left = -12.0
+offset_top = 14.0
+offset_right = 74.0
+offset_bottom = 100.0
 mouse_filter = 2
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/Member1Slot/MonsterPosition" unique_id=1355864503]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("26_preview_member1")
 expand_mode = 1
 stretch_mode = 5
 
@@ -506,13 +518,23 @@ texture = ExtResource("8_empty_plus")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Portrait" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=1552465044]
-visible = false
-layout_mode = 0
-offset_top = 21.0
-offset_right = 119.0
-offset_bottom = 140.0
+[node name="MonsterPosition" type="Control" parent="TeamSlots/LeaderSlot" unique_id=1954364003]
+anchors_preset = 0
+offset_left = -7.0
+offset_top = 30.0
+offset_right = 112.0
+offset_bottom = 149.0
 mouse_filter = 2
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/LeaderSlot/MonsterPosition" unique_id=1552465044]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("27_preview_leader")
 expand_mode = 1
 stretch_mode = 5
 
@@ -523,31 +545,6 @@ offset_top = 25.0
 offset_right = 117.0
 offset_bottom = 132.0
 theme_override_font_sizes/font_size = 34
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="LeaderBadge" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=1966864138]
-visible = false
-layout_mode = 0
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 112.0
-offset_bottom = 55.0
-mouse_filter = 2
-texture = ExtResource("9_leader_badge")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="LeaderText" type="Label" parent="TeamSlots/LeaderSlot" unique_id=749417123]
-visible = false
-layout_mode = 0
-offset_left = 6.0
-offset_top = 25.0
-offset_right = 112.0
-offset_bottom = 51.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "Leader"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -580,6 +577,29 @@ text = "队长"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="LeaderBadge" type="TextureRect" parent="TeamSlots/LeaderSlot/Label" unique_id=1966864138]
+layout_mode = 0
+offset_left = 25.0
+offset_top = -14.0
+offset_right = 50.0
+offset_bottom = 9.0
+mouse_filter = 2
+texture = ExtResource("9_leader_badge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeaderText" type="Label" parent="TeamSlots/LeaderSlot/Label" unique_id=749417123]
+layout_mode = 0
+offset_left = 11.0
+offset_top = -13.0
+offset_right = 65.0
+offset_bottom = 10.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 5
+text = "Leader"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Member2Slot" type="TextureButton" parent="TeamSlots" unique_id=714256556]
 layout_mode = 0
 offset_left = 254.0
@@ -590,10 +610,10 @@ pivot_offset = Vector2(39, 80)
 
 [node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=102303894]
 layout_mode = 0
-offset_left = -1.0
-offset_top = -8.0
-offset_right = 77.0
-offset_bottom = 70.0
+offset_left = -7.0
+offset_top = -2.0
+offset_right = 71.0
+offset_bottom = 76.0
 scale = Vector2(0.9594732, 0.9594732)
 pivot_offset = Vector2(39, 39)
 mouse_filter = 2
@@ -601,14 +621,23 @@ texture = ExtResource("8_empty_plus")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Portrait" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=680454598]
-visible = false
-layout_mode = 0
-offset_left = -4.0
-offset_top = 4.0
-offset_right = 82.0
-offset_bottom = 90.0
+[node name="MonsterPosition" type="Control" parent="TeamSlots/Member2Slot" unique_id=2035806805]
+anchors_preset = 0
+offset_left = -11.0
+offset_top = 14.0
+offset_right = 75.0
+offset_bottom = 100.0
 mouse_filter = 2
+
+[node name="Portrait" type="TextureRect" parent="TeamSlots/Member2Slot/MonsterPosition" unique_id=680454598]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("28_preview_member2")
 expand_mode = 1
 stretch_mode = 5
 

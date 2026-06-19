@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bkkg62te4x88x"]
 
+[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="sweep_button_new"]
 [ext_resource type="Texture2D" uid="uid://c4tklxp8dg7d" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_underground.png" id="1_0tcrg"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
-[ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
 [ext_resource type="Texture2D" uid="uid://dstria83kyfjg" path="res://assets/images/maps/nodes/stage_node_ch07_void_elite.png" id="c07_stage04"]
 [ext_resource type="Texture2D" uid="uid://d4cb4rbn067q2" path="res://assets/images/maps/nodes/stage_node_ch07_void_normal.png" id="c07_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
@@ -339,26 +339,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage01" unique_id=440770537]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton" unique_id=1327583500]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage01/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage01/SweepButton" unique_id=71422968]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -447,26 +464,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage02" unique_id=1784766527]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton" unique_id=876138568]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage02/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage02/SweepButton" unique_id=1172019165]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -555,26 +589,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage03" unique_id=1280500299]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton" unique_id=167175006]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage03/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage03/SweepButton" unique_id=680004945]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -663,26 +714,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage04" unique_id=1900398671]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton" unique_id=1110360169]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage04/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage04/SweepButton" unique_id=1889532680]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -771,26 +839,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage05" unique_id=1856430176]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton" unique_id=389532037]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage05/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage05/SweepButton" unique_id=896618364]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -879,26 +964,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage06" unique_id=1965384511]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton" unique_id=456960854]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage06/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage06/SweepButton" unique_id=1484488274]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -987,26 +1089,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage07" unique_id=1801548380]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton" unique_id=1147407029]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage07/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage07/SweepButton" unique_id=857904677]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1095,26 +1214,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage08" unique_id=214710871]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton" unique_id=1728463103]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage08/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage08/SweepButton" unique_id=432786780]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1203,26 +1339,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage09" unique_id=1942457384]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton" unique_id=1648477000]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage09/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage09/SweepButton" unique_id=914643387]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1311,26 +1464,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage10" unique_id=1282525587]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton" unique_id=1218064957]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage10/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage10/SweepButton" unique_id=1086238364]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1419,26 +1589,43 @@ stretch_mode = 5
 [node name="SweepButton" type="Button" parent="StageNodes/Stage11" unique_id=988314179]
 visible = false
 layout_mode = 0
-offset_left = 42.0
-offset_top = -7.0
-offset_right = 106.0
-offset_bottom = 23.0
+offset_left = 14.0
+offset_top = 47.0
+offset_right = 333.0
+offset_bottom = 204.0
 flat = true
+mouse_filter = 2
+focus_mode = 0
 
-[node name="Frame" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton" unique_id=884320188]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 30.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 18
-patch_margin_top = 10
-patch_margin_right = 18
-patch_margin_bottom = 10
+[node name="butter02" type="Control" parent="StageNodes/Stage11/SweepButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -0.99999905
+offset_top = 4.0000005
+offset_right = 390.0
+offset_bottom = 142.46191
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("sweep_button_new")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="StageNodes/Stage11/SweepButton" unique_id=2074061270]
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"

@@ -915,9 +915,9 @@ stretch_mode = 5
 [node name="ElementBadge" type="TextureRect" parent="TeamPanel/Cards/TeamCard1" unique_id=703315462]
 layout_mode = 0
 offset_left = 8.0
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 30.0
-offset_bottom = 27.0
+offset_bottom = 20.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -968,11 +968,10 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Stars" type="Label" parent="TeamPanel/Cards/TeamCard1" unique_id=1662611001]
+visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 104.0
-offset_right = 91.0
-offset_bottom = 127.0
+offset_right = 1.0
+offset_bottom = 1.0
 theme_override_colors/font_color = Color(1, 0.73, 0.16, 1)
 theme_override_colors/font_outline_color = Color(0.46, 0.22, 0.04, 0.65)
 theme_override_constants/outline_size = 1
@@ -987,14 +986,30 @@ offset_left = 107.0
 offset_right = 206.0
 offset_bottom = 113.0
 
-[node name="Frame" type="TextureRect" parent="TeamPanel/Cards/TeamCard2" unique_id=1381841569]
-layout_mode = 0
-offset_right = 99.0
-offset_bottom = 113.0
+[node name="ui底图2" type="Control" parent="TeamPanel/Cards/TeamCard2"]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = 7.0000005
+offset_top = -8.999999
+offset_right = 574.7419
+offset_bottom = 797.45166
+scale = Vector2(0.155, 0.155)
 mouse_filter = 2
-texture = ExtResource("team_card")
-expand_mode = 1
-stretch_mode = 5
+
+[node name="NinePatch" type="NinePatchRect" parent="TeamPanel/Cards/TeamCard2/ui底图2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("18_nkwmc")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="Portrait" type="TextureRect" parent="TeamPanel/Cards/TeamCard2" unique_id=1454698942]
 layout_mode = 0
@@ -1009,9 +1024,9 @@ stretch_mode = 5
 [node name="ElementBadge" type="TextureRect" parent="TeamPanel/Cards/TeamCard2" unique_id=664806817]
 layout_mode = 0
 offset_left = 8.0
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 30.0
-offset_bottom = 27.0
+offset_bottom = 20.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1062,11 +1077,10 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Stars" type="Label" parent="TeamPanel/Cards/TeamCard2" unique_id=1304214000]
+visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 104.0
-offset_right = 91.0
-offset_bottom = 127.0
+offset_right = 1.0
+offset_bottom = 1.0
 theme_override_colors/font_color = Color(1, 0.73, 0.16, 1)
 theme_override_colors/font_outline_color = Color(0.46, 0.22, 0.04, 0.65)
 theme_override_constants/outline_size = 1
@@ -1081,14 +1095,30 @@ offset_left = 210.0
 offset_right = 309.0
 offset_bottom = 113.0
 
-[node name="Frame" type="TextureRect" parent="TeamPanel/Cards/TeamCard3" unique_id=979113694]
-layout_mode = 0
-offset_right = 99.0
-offset_bottom = 113.0
+[node name="ui底图2" type="Control" parent="TeamPanel/Cards/TeamCard3"]
+custom_minimum_size = Vector2(360, 620)
+anchors_preset = 0
+offset_left = 7.0000005
+offset_top = -8.999999
+offset_right = 574.7419
+offset_bottom = 797.45166
+scale = Vector2(0.155, 0.155)
 mouse_filter = 2
-texture = ExtResource("team_card")
-expand_mode = 1
-stretch_mode = 5
+
+[node name="NinePatch" type="NinePatchRect" parent="TeamPanel/Cards/TeamCard3/ui底图2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.825241
+offset_right = -5.8252563
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("18_nkwmc")
+patch_margin_left = 100
+patch_margin_top = 120
+patch_margin_right = 100
+patch_margin_bottom = 120
 
 [node name="Portrait" type="TextureRect" parent="TeamPanel/Cards/TeamCard3" unique_id=458266112]
 layout_mode = 0
@@ -1103,9 +1133,9 @@ stretch_mode = 5
 [node name="ElementBadge" type="TextureRect" parent="TeamPanel/Cards/TeamCard3" unique_id=1604141494]
 layout_mode = 0
 offset_left = 8.0
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 30.0
-offset_bottom = 27.0
+offset_bottom = 20.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1156,11 +1186,10 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Stars" type="Label" parent="TeamPanel/Cards/TeamCard3" unique_id=1797804513]
+visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 104.0
-offset_right = 91.0
-offset_bottom = 127.0
+offset_right = 1.0
+offset_bottom = 1.0
 theme_override_colors/font_color = Color(1, 0.73, 0.16, 1)
 theme_override_colors/font_outline_color = Color(0.46, 0.22, 0.04, 0.65)
 theme_override_constants/outline_size = 1

@@ -80,6 +80,7 @@ var _scroll_ignore_tap_once: bool = false
 var _shade_visible_state := false
 var _sweep_dialog_anim_state := false
 var _sweep_result_anim_state := false
+var _sweep_choice_card: Dictionary = {}
 var _anim: AnimationHelper = null
 var _focus_stage_id: String = ""
 var _focus_scroll_applied: bool = false
@@ -150,7 +151,7 @@ func _connect_shell_actions() -> void:
 	_connect_button(_bottom_return_btn, _on_back_btn_pressed)
 	_connect_button(_bottom_next_map_btn, _on_next_chapter_btn_pressed)
 	_connect_button(_sweep_confirm_btn, _do_sweep_confirm)
-	_connect_button(_sweep_cancel_btn, _on_sweep_cancel_pressed)
+	_connect_button(_sweep_cancel_btn, _on_sweep_enter_pressed)
 	var shade := get_node("PopupLayer/Shade") as ColorRect
 	if not shade.gui_input.is_connected(_on_popup_shade_input):
 		shade.gui_input.connect(_on_popup_shade_input)
@@ -484,13 +485,12 @@ func _connect_chapter_map_actions() -> void:
 	for index in _stage_buttons().size():
 		var stage_button := _stage_buttons()[index]
 		_connect_button(stage_button, _on_stage_pressed.bind(index))
-		_connect_button(stage_button.get_node("SweepButton") as BaseButton, _on_sweep_pressed.bind(index))
+		_configure_sweep_indicator(stage_button)
 	var boss_button := _boss_button()
 	if boss_button != null:
 		_connect_button(boss_button, _on_boss_pressed)
 	for stage_button in _stage_buttons():
 		_attach_button_feedback(stage_button, CartoonButtonFeedback.Profile.NAV, false)
-		_attach_button_feedback(stage_button.get_node_or_null("SweepButton") as BaseButton, CartoonButtonFeedback.Profile.ICON, false)
 		_ensure_portrait_node(stage_button, _STAGE_PORTRAIT_FALLBACK_POS, _STAGE_PORTRAIT_SIZE)
 		_normalize_stage_button_layout(stage_button)
 	var boss := _boss_button()
@@ -498,6 +498,15 @@ func _connect_chapter_map_actions() -> void:
 		_attach_button_feedback(boss, CartoonButtonFeedback.Profile.ENTRY, false)
 		_ensure_portrait_node(boss, _BOSS_PORTRAIT_FALLBACK_POS, _BOSS_PORTRAIT_SIZE)
 		_normalize_boss_button_layout(boss)
+
+func _configure_sweep_indicator(stage_button: TextureButton) -> void:
+	var sweep_indicator := stage_button.get_node_or_null("SweepButton") as Button
+	if sweep_indicator == null:
+		return
+	sweep_indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sweep_indicator.focus_mode = Control.FOCUS_NONE
+	for child in sweep_indicator.find_children("*", "Control", true, false):
+		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 # 普通关卡台子的画像尺寸（位置由 _apply_stage_portrait 动态按台子中心计算）
 const _STAGE_PORTRAIT_SIZE := Vector2(74.0, 66.0)
@@ -740,7 +749,9 @@ func _sync_stage_button(button: TextureButton, card: Dictionary) -> void:
 	_sync_lock_state(button, not enabled)
 	_sync_selection_ring(button, enabled)
 	_sync_stars(button.get_node("Stars") as Control, int(card.get("stars", 0)), enabled)
-	(button.get_node("SweepButton") as Button).visible = enabled and bool(card.get("can_sweep", false))
+	var sweep_indicator := button.get_node("SweepButton") as Button
+	sweep_indicator.visible = enabled and bool(card.get("can_sweep", false))
+	_configure_sweep_indicator(button)
 	_apply_stage_portrait(button, card)
 
 func _sync_boss_button(button: TextureButton, card: Dictionary) -> void:
@@ -806,15 +817,27 @@ func _on_stage_pressed(index: int) -> void:
 	if _should_ignore_pressed_after_scroll():
 		return
 	var cards := _active_stage_cards()
-	if index < cards.size() and bool(cards[index].get("enabled", false)):
-		stage_selected.emit(str(cards[index].get("id", "")), cards[index].get("stage_data", {}), _current_chapter_index)
-
-func _on_sweep_pressed(index: int) -> void:
-	if _should_ignore_pressed_after_scroll():
+	if index >= cards.size():
 		return
-	var cards := _active_stage_cards()
-	if index < cards.size() and bool(cards[index].get("enabled", false)) and bool(cards[index].get("can_sweep", false)):
-		_show_sweep_dialog(str(cards[index].get("id", "")), str(cards[index].get("text", "")))
+	var card: Dictionary = cards[index]
+	if not bool(card.get("enabled", false)):
+		return
+	if bool(card.get("can_sweep", false)):
+		_sweep_choice_card = card.duplicate(true)
+		_show_sweep_dialog(str(card.get("id", "")), str(card.get("text", "")))
+		return
+	_emit_stage_selection(card)
+
+func _on_sweep_enter_pressed() -> void:
+	if _sweep_choice_card.is_empty():
+		_on_sweep_cancel_pressed()
+		return
+	var card := _sweep_choice_card.duplicate(true)
+	_on_sweep_cancel_pressed()
+	_emit_stage_selection(card)
+
+func _emit_stage_selection(card: Dictionary) -> void:
+	stage_selected.emit(str(card.get("id", "")), card.get("stage_data", {}), _current_chapter_index)
 
 func _on_boss_pressed() -> void:
 	if _should_ignore_pressed_after_scroll():
@@ -940,10 +963,14 @@ func _set_transition_buttons_disabled(disabled: bool) -> void:
 
 func _show_sweep_dialog(stage_id: String, stage_name: String) -> void:
 	super._show_sweep_dialog(stage_id, stage_name)
+	_sweep_title_label.text = "选择操作：%s" % stage_name
+	(_sweep_confirm_btn.get_node("Text") as Label).text = "扫荡"
+	(_sweep_cancel_btn.get_node("Text") as Label).text = "进入关卡"
 	_sync_popup_visibility()
 
 func _on_sweep_cancel_pressed() -> void:
 	super._on_sweep_cancel_pressed()
+	_sweep_choice_card.clear()
 	_sync_popup_visibility()
 
 func _do_sweep_confirm() -> void:
@@ -955,11 +982,13 @@ func _update_sweep_animation(delta: float) -> void:
 	_sync_popup_visibility()
 
 func _sync_popup_visibility() -> void:
+	var popup_layer := get_node("PopupLayer") as Control
 	var shade := get_node("PopupLayer/Shade") as ColorRect
 	var want_shade := _sweep_dialog_active or _sweep_anim_active
 	var want_dialog := _sweep_dialog_active
 	var want_result := _sweep_anim_active
 	var anim := _get_anim()
+	popup_layer.visible = want_shade or want_dialog or want_result
 
 	if want_shade and not _shade_visible_state:
 		_shade_visible_state = true

@@ -9,22 +9,23 @@
 [ext_resource type="Texture2D" uid="uid://bhy6fic33ytor" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png" id="17_rpote"]
 [ext_resource type="Texture2D" uid="uid://deed6u56bkkyf" path="res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png" id="18_exp"]
 [ext_resource type="Texture2D" uid="uid://drkjfn43fdtbl" path="res://assets/新美术资产/ui/butter01.png" id="18_uh67w"]
-[ext_resource type="Texture2D" uid="uid://cjtwvptpxcdc2" path="res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png" id="26_blue_btn"]
-[ext_resource type="Texture2D" uid="uid://b50qyvmfu7emd" path="res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png" id="30_nav_arrow"]
+[ext_resource type="Texture2D" uid="uid://dwkrhwuewy1ru" path="res://assets/新美术资产/ui/black2.png" id="21_uh67w"]
+[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="25_i4diq"]
 [ext_resource type="Texture2D" uid="uid://btn4cyfwgf21y" path="res://assets/images/maps/nodes/stage_cloud_texture_01.png" id="31_cloud_01"]
 [ext_resource type="Texture2D" uid="uid://de0t6gdbyy4ox" path="res://assets/images/maps/nodes/stage_cloud_texture_02.png" id="32_cloud_02"]
 [ext_resource type="Texture2D" uid="uid://4lth56yel8lv" path="res://assets/images/maps/nodes/stage_cloud_texture_03.png" id="33_cloud_03"]
 [ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_grassland.tscn" id="chapter_01_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
+[ext_resource type="PackedScene" uid="uid://u74n5h65r50f" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
 [ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
 [ext_resource type="PackedScene" uid="uid://nd1ukitcfaxr" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_04_eclipse_canopy.tscn" id="chapter_04_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_05_thunder_temple.tscn" id="chapter_05_scene"]
+[ext_resource type="PackedScene" uid="uid://bnjhqlo1dhbmo" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_05_thunder_temple.tscn" id="chapter_05_scene"]
 [ext_resource type="PackedScene" uid="uid://bwau7dx7n5eyl" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_06_frost_throne.tscn" id="chapter_06_scene"]
 [ext_resource type="PackedScene" uid="uid://bkkg62te4x88x" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_07_void_domain.tscn" id="chapter_07_scene"]
 [ext_resource type="PackedScene" uid="uid://byfd44du2vong" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn" id="chapter_08_scene"]
-[ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn" id="chapter_09_scene"]
+[ext_resource type="PackedScene" uid="uid://c41bmyr66vhsw" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn" id="chapter_09_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn" id="chapter_10_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn" id="chapter_11_scene"]
+[ext_resource type="PackedScene" path="res://src/ui/components/nine_patch_ui/ribbon_side_stretch.tscn" id="sweep_ribbon_component"]
 
 [node name="StageSelectMap" type="Control" unique_id=1913807013]
 clip_contents = true
@@ -179,14 +180,13 @@ offset_top = 8.0
 offset_right = 28.0
 offset_bottom = 30.0
 mouse_filter = 2
-texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Text" type="Label" parent="BottomNav/PrevMapButton" unique_id=2059397413]
 layout_mode = 0
-offset_left = 24.0
-offset_right = 88.0
+offset_left = 14.0
+offset_right = 78.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
@@ -228,8 +228,9 @@ patch_margin_bottom = 72
 
 [node name="Text" type="Label" parent="BottomNav/ReturnButton" unique_id=1201495619]
 layout_mode = 0
+offset_top = -2.0
 offset_right = 97.0
-offset_bottom = 50.0
+offset_bottom = 48.0
 theme_override_colors/font_color = Color(0.23, 0.11, 0.03, 1)
 theme_override_colors/font_outline_color = Color(1, 0.92, 0.45, 0.35)
 theme_override_constants/outline_size = 2
@@ -262,15 +263,14 @@ offset_top = 8.0
 offset_right = 89.0
 offset_bottom = 30.0
 mouse_filter = 2
-texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
 [node name="Text" type="Label" parent="BottomNav/NextMapButton" unique_id=1580534066]
 layout_mode = 0
-offset_left = 6.0
-offset_right = 70.0
+offset_left = 14.0
+offset_right = 78.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
@@ -321,7 +321,6 @@ offset_top = 12.0
 offset_right = 43.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("30_nav_arrow")
 expand_mode = 1
 stretch_mode = 5
 
@@ -741,41 +740,94 @@ offset_bottom = 667.0
 color = Color(0, 0, 0, 0.48)
 
 [node name="SweepDialog" type="Control" parent="PopupLayer" unique_id=652117799]
-visible = false
 anchors_preset = 0
-offset_left = 52.0
-offset_top = 238.0
-offset_right = 322.0
-offset_bottom = 428.0
+offset_left = 30.0
+offset_top = 215.0
+offset_right = 345.0
+offset_bottom = 453.0
 
-[node name="Frame" type="NinePatchRect" parent="PopupLayer/SweepDialog" unique_id=2133313040]
-layout_mode = 0
-offset_right = 270.0
-offset_bottom = 190.0
-texture = ExtResource("15_reward")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+[node name="black3" type="Control" parent="PopupLayer/SweepDialog" unique_id=1201252149]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 103.0
+offset_top = 71.0
+offset_right = 439.0
+offset_bottom = 335.0
+scale = Vector2(0.325, 0.325)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepDialog/black3" unique_id=970269112]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -298.46155
+offset_top = -86.15381
+offset_right = 304.00006
+offset_bottom = 132.92316
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("21_uh67w")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
+
+[node name="TitleRibbon" parent="PopupLayer/SweepDialog" unique_id=1196997192 instance=ExtResource("sweep_ribbon_component")]
+custom_minimum_size = Vector2(0, 0)
+anchors_preset = 0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 310.0
+offset_bottom = 65.0
+
+[node name="black2" type="Control" parent="PopupLayer/SweepDialog" unique_id=1330273767]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 103.0
+offset_top = 71.0
+offset_right = 439.0
+offset_bottom = 335.0
+scale = Vector2(0.325, 0.325)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepDialog/black2" unique_id=1097266272]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -230.76926
+offset_top = -8.0
+offset_right = 211.69238
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("21_uh67w")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="TitleLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=286068673]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 23.0
-offset_right = 240.0
-offset_bottom = 48.0
+offset_left = 22.0
+offset_top = 18.0
+offset_right = 293.0
+offset_bottom = 52.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.42, 0.08, 0.12, 1)
 theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 17
+text = "选择关卡操作"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GoldIcon" type="TextureRect" parent="PopupLayer/SweepDialog" unique_id=918039620]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 62.0
-offset_right = 68.0
-offset_bottom = 88.0
+offset_left = 34.0
+offset_top = 88.0
+offset_right = 60.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("17_gold")
 expand_mode = 1
@@ -783,21 +835,20 @@ stretch_mode = 5
 
 [node name="GoldLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=1010015902]
 layout_mode = 0
-offset_left = 70.0
-offset_top = 67.0
-offset_right = 138.0
-offset_bottom = 91.0
-theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
-theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
+offset_left = 62.0
+offset_top = 89.0
+offset_right = 148.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(0.42, 0.23, 0.04, 1)
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
 
 [node name="ExpIcon" type="TextureRect" parent="PopupLayer/SweepDialog" unique_id=1866972403]
 layout_mode = 0
-offset_left = 148.0
-offset_top = 62.0
-offset_right = 174.0
-offset_bottom = 88.0
+offset_left = 169.0
+offset_top = 88.0
+offset_right = 195.0
+offset_bottom = 114.0
 mouse_filter = 2
 texture = ExtResource("18_exp")
 expand_mode = 1
@@ -805,131 +856,248 @@ stretch_mode = 5
 
 [node name="ExpLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=2132634597]
 layout_mode = 0
-offset_left = 176.0
-offset_top = 67.0
-offset_right = 244.0
-offset_bottom = 91.0
-theme_override_colors/font_color = Color(0.74, 0.9, 1, 1)
-theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
+offset_left = 197.0
+offset_top = 89.0
+offset_right = 286.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(0.12, 0.38, 0.46, 1)
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
 
 [node name="RuleLabel" type="Label" parent="PopupLayer/SweepDialog" unique_id=822395860]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 96.0
-offset_right = 252.0
-offset_bottom = 113.0
-theme_override_colors/font_color = Color(0.66, 0.78, 1, 1)
-theme_override_font_sizes/font_size = 10
+offset_left = 32.0
+offset_top = 124.0
+offset_right = 283.0
+offset_bottom = 146.0
+theme_override_colors/font_color = Color(0.46, 0.32, 0.18, 1)
+theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ConfirmBtn" type="Button" parent="PopupLayer/SweepDialog" unique_id=1642853623]
 layout_mode = 0
-offset_left = 25.0
-offset_top = 128.0
-offset_right = 125.0
-offset_bottom = 168.0
+offset_left = 12.0
+offset_top = 170.0
+offset_right = 152.0
+offset_bottom = 222.0
 flat = true
 
-[node name="Frame" type="TextureRect" parent="PopupLayer/SweepDialog/ConfirmBtn" unique_id=43487503]
-layout_mode = 0
-offset_right = 100.0
-offset_bottom = 40.0
+[node name="butter02" type="Control" parent="PopupLayer/SweepDialog/ConfirmBtn" unique_id=121727622]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = 7.0
+offset_top = -1.0
+offset_right = 464.14282
+offset_bottom = 204.0
+scale = Vector2(0.28, 0.28)
 mouse_filter = 2
-texture = ExtResource("26_blue_btn")
-expand_mode = 1
-stretch_mode = 5
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepDialog/ConfirmBtn/butter02" unique_id=1522526657]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("25_i4diq")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="PopupLayer/SweepDialog/ConfirmBtn" unique_id=42870000]
 layout_mode = 0
-offset_right = 100.0
-offset_bottom = 40.0
-theme_override_colors/font_color = Color(0.25, 0.14, 0.03, 1)
-theme_override_colors/font_outline_color = Color(1, 0.92, 0.45, 0.45)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
+offset_right = 140.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.36, 0.17, 0.02, 1)
+theme_override_colors/font_outline_color = Color(1, 0.93, 0.5, 0.7)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 text = "扫荡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CancelBtn" type="Button" parent="PopupLayer/SweepDialog" unique_id=1576008267]
 layout_mode = 0
-offset_left = 145.0
-offset_top = 128.0
-offset_right = 245.0
-offset_bottom = 168.0
+offset_left = 163.0
+offset_top = 170.0
+offset_right = 303.0
+offset_bottom = 222.0
 flat = true
 
-[node name="Frame" type="NinePatchRect" parent="PopupLayer/SweepDialog/CancelBtn" unique_id=2087862874]
-layout_mode = 0
-offset_right = 100.0
-offset_bottom = 40.0
-texture = ExtResource("26_blue_btn")
-patch_margin_left = 20
-patch_margin_top = 16
-patch_margin_right = 20
-patch_margin_bottom = 16
+[node name="butter02" type="Control" parent="PopupLayer/SweepDialog/CancelBtn" unique_id=1564517050]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = 3.0
+offset_top = -3.0
+offset_right = 460.14282
+offset_bottom = 202.0
+scale = Vector2(0.28, 0.28)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepDialog/CancelBtn/butter02" unique_id=588993570]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("25_i4diq")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
 
 [node name="Text" type="Label" parent="PopupLayer/SweepDialog/CancelBtn" unique_id=756564389]
 layout_mode = 0
-offset_right = 100.0
-offset_bottom = 40.0
+offset_right = 140.0
+offset_bottom = 52.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.95)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 14
-text = "取消"
+theme_override_colors/font_outline_color = Color(0.04, 0.22, 0.42, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "进入关卡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SweepResult" type="Control" parent="PopupLayer" unique_id=1108739272]
 visible = false
 anchors_preset = 0
-offset_left = 52.0
-offset_top = 238.0
-offset_right = 322.0
-offset_bottom = 428.0
+offset_left = 30.0
+offset_top = 215.0
+offset_right = 345.0
+offset_bottom = 453.0
 
-[node name="Frame" type="NinePatchRect" parent="PopupLayer/SweepResult" unique_id=2078092648]
-layout_mode = 0
-offset_right = 270.0
-offset_bottom = 190.0
-texture = ExtResource("15_reward")
-patch_margin_left = 24
-patch_margin_top = 24
-patch_margin_right = 24
-patch_margin_bottom = 24
+[node name="black3" type="Control" parent="PopupLayer/SweepResult"]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 103.0
+offset_top = 71.0
+offset_right = 439.0
+offset_bottom = 335.0
+scale = Vector2(0.325, 0.325)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepResult/black3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -298.46155
+offset_top = -86.15381
+offset_right = 304.00006
+offset_bottom = 132.92316
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("21_uh67w")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
+
+[node name="TitleRibbon" parent="PopupLayer/SweepResult" instance=ExtResource("sweep_ribbon_component")]
+custom_minimum_size = Vector2(0, 0)
+anchors_preset = 0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 310.0
+offset_bottom = 65.0
+
+[node name="black2" type="Control" parent="PopupLayer/SweepResult"]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = 103.0
+offset_top = 71.0
+offset_right = 439.0
+offset_bottom = 335.0
+scale = Vector2(0.325, 0.325)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="PopupLayer/SweepResult/black2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -230.76926
+offset_top = -8.0
+offset_right = 211.69238
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("21_uh67w")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
 
 [node name="TitleLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=1909515833]
 layout_mode = 0
-offset_left = 25.0
-offset_top = 50.0
-offset_right = 245.0
-offset_bottom = 80.0
-theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
-theme_override_font_sizes/font_size = 22
+offset_left = 22.0
+offset_top = 18.0
+offset_right = 293.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.42, 0.08, 0.12, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 17
+text = "扫荡完成！"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldIcon" type="TextureRect" parent="PopupLayer/SweepResult"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 88.0
+offset_right = 60.0
+offset_bottom = 114.0
+mouse_filter = 2
+texture = ExtResource("17_gold")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="GoldLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=689188983]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 92.0
-offset_right = 238.0
-offset_bottom = 117.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
+offset_left = 62.0
+offset_top = 89.0
+offset_right = 148.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(0.42, 0.23, 0.04, 1)
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
+
+[node name="ExpIcon" type="TextureRect" parent="PopupLayer/SweepResult"]
+layout_mode = 0
+offset_left = 169.0
+offset_top = 88.0
+offset_right = 195.0
+offset_bottom = 114.0
+mouse_filter = 2
+texture = ExtResource("18_exp")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ExpLabel" type="Label" parent="PopupLayer/SweepResult" unique_id=996239423]
 layout_mode = 0
+offset_left = 197.0
+offset_top = 89.0
+offset_right = 286.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(0.12, 0.38, 0.46, 1)
+theme_override_font_sizes/font_size = 13
+vertical_alignment = 1
+
+[node name="RuleLabel" type="Label" parent="PopupLayer/SweepResult"]
+layout_mode = 0
 offset_left = 32.0
-offset_top = 121.0
-offset_right = 238.0
+offset_top = 124.0
+offset_right = 283.0
 offset_bottom = 146.0
-theme_override_colors/font_color = Color(0.74, 0.87, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.46, 0.32, 0.18, 1)
+theme_override_font_sizes/font_size = 11
+text = "奖励已发放"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Bindings" type="Control" parent="." unique_id=591238947]
 visible = false

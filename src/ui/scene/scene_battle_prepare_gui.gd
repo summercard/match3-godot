@@ -282,8 +282,9 @@ func _sync_team_cards() -> void:
 			continue
 		var monster: Dictionary = _player_team[i]
 		_set_monster_card(card, monster, true)
-		var rarity := int(monster.get("rarity", 1))
-		(card.get_node("Stars") as Label).text = "★".repeat(clampi(rarity, 1, 5))
+		var stars := card.get_node("Stars") as Label
+		stars.text = ""
+		stars.visible = false
 
 func _layout_cards(paths: Array, count: int, card_w: float, gap: float, total_w: float) -> void:
 	var visible_count := mini(count, paths.size())
@@ -418,11 +419,12 @@ func _layout_monster_card(path: String, x: float, y: float, w: float, h: float, 
 	_set_rect(path, x, y, w, h)
 	_set_local_rect(path + "/Frame", 0, 0, w, h)
 	_set_local_rect(path + "/Portrait", 18, 21, w - 36, 48)
-	_set_local_rect(path + "/ElementBadge", 8, 5, 22, 22)
+	_set_local_rect(path + "/ElementBadge", 8, -2, 22, 22)
 	_set_local_rect(path + "/Name", 31, 4, w - 38, 22)
 	_set_local_rect(path + "/Level", 24, 72, w - 48, 17)
 	_set_local_rect(path + "/Power", 16, 91, w - 24, 17)
-	_set_local_rect(path + "/Stars", 8, h - 9, w - 16, 12)
+	_set_local_rect(path + "/Stars", 0, 0, 1, 1)
+	_set_visible(path + "/Stars", false)
 	_set_font(path + "/Name", 13)
 	_set_font(path + "/Level", 11)
 	_set_font(path + "/Power", 10)

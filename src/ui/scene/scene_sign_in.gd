@@ -86,6 +86,7 @@ var _animation_complete := false
 var _particles: Array = []
 var _floating_rewards: Array = []
 var _texture_cache: Dictionary = {}
+var _style_box_cache: Dictionary = {}
 var _round_font_normal: Font = null
 var _round_font_bold: Font = null
 
@@ -334,7 +335,7 @@ func _draw_hero() -> void:
 		_draw_hero_inner()
 
 func _draw_hero_inner() -> void:
-	_draw_texture_fit(_tex("month_panel"), HERO_RECT)
+	_draw_nine_patch("month_panel", HERO_RECT)
 	_draw_texture_contain(_tex("calendar"), Rect2(28.0, 88.0, 88.0, 82.0))
 	_draw_texture_contain(_tex("mascot"), Rect2(255.0, 76.0, 88.0, 100.0))
 	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
@@ -367,23 +368,23 @@ func _draw_week_rewards() -> void:
 		var card_key := "day_card_today" if today else ("day_card" if i % 2 == 0 else "day_card_alt")
 		if day > signed_limit + 1 and not today:
 			card_key = "day_card_locked"
-		_draw_texture_fit(_tex(card_key), rect)
+		_draw_nine_patch(card_key, rect)
 		_draw_text("第%d天" % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else Color(0.43, 0.24, 0.07), 15.0, true, rect.size.x - 8.0)
 		if today:
-			_draw_texture_fit(_tex("today_tag"), Rect2(rect.position.x + 5.0, rect.position.y + 28.0, 42.0, 23.0))
+			_draw_nine_patch("today_tag", Rect2(rect.position.x + 5.0, rect.position.y + 28.0, 42.0, 23.0))
 			_draw_text("今日", rect.position.x + 26.0, rect.position.y + 45.0, C["white"], 11.0, true, 34.0)
 		_draw_texture_contain(_tex(str(item["icon"])), Rect2(rect.position.x + 16.0, rect.position.y + 42.0, rect.size.x - 32.0, 45.0))
-		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 20.0, Color(0.43, 0.24, 0.07), 17.0, true, rect.size.x - 12.0)
+		_draw_text(str(item["amount"]), rect.get_center().x, rect.position.y + rect.size.y - 14.0, Color(0.43, 0.24, 0.07), 15.0, true, rect.size.x - 18.0)
 		if signed:
-			_draw_texture_fit(_tex("stamp"), Rect2(rect.position.x + 10.0, rect.position.y + rect.size.y - 47.0, rect.size.x - 20.0, 34.0), 0.92)
+			_draw_texture_contain(_tex("stamp"), Rect2(rect.end.x - 31.0, rect.position.y + 31.0, 25.0, 25.0), 0.92)
 		if scale != 1.0:
 			draw_set_transform_matrix(Transform2D.IDENTITY)
 
 func _draw_month_rewards() -> void:
 	var panel_offset_y := _month_panel_offset_y()
 	# 月度面板 + 内容（不包括里程碑宝箱，宝箱有自己的 bounce）：整体从下方滑入
-	_draw_texture_fit(_tex("month_panel"), Rect2(MONTH_RECT.position + Vector2(0, panel_offset_y), MONTH_RECT.size))
-	_draw_texture_fit(_tex("month_ribbon"), Rect2(74.0, 448.0 + panel_offset_y, 228.0, 40.0))
+	_draw_nine_patch("month_panel", Rect2(MONTH_RECT.position + Vector2(0, panel_offset_y), MONTH_RECT.size))
+	_draw_nine_patch("month_ribbon", Rect2(74.0, 448.0 + panel_offset_y, 228.0, 40.0))
 	_draw_text("本月累计签到奖励", 188.0, 474.0 + panel_offset_y, C["white"], 15.0, true, 180.0)
 	var total := int(_sign_in_data.get("totalDays", 0))
 	var month_count := clampi(total % 29, 0, 28)
@@ -391,7 +392,11 @@ func _draw_month_rewards() -> void:
 		month_count = 28
 	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0 + panel_offset_y, 76.0, 70.0))
 	_draw_text("本月已签到 %d/28 天" % month_count, 205.0, 505.0 + panel_offset_y, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
-	_draw_texture_fit(_tex("progress"), Rect2(108.0, 548.0 + panel_offset_y, 230.0, 26.0))
+	var progress_track := Rect2(108.0, 547.0 + panel_offset_y, 230.0, 20.0)
+	_draw_nine_patch("claim_disabled", progress_track)
+	var progress_width := (progress_track.size.x - 6.0) * float(month_count) / 28.0
+	if progress_width > 0.0:
+		_draw_nine_patch("progress", Rect2(progress_track.position + Vector2(3.0, 3.0), Vector2(maxf(progress_width, 10.0), progress_track.size.y - 6.0)))
 	# 里程碑宝箱：每个有自己的 bounce scale（缩放中心随面板上移）
 	for i in range(MILESTONES.size()):
 		var m: Dictionary = MILESTONES[i]
@@ -410,11 +415,11 @@ func _draw_month_rewards() -> void:
 		_draw_texture_contain(_tex(str(m["icon"])), orig_chest, 1.0 if reached else 0.55)
 		if scale != 1.0:
 			draw_set_transform_matrix(Transform2D.IDENTITY)
-		_draw_text("%d天" % int(m["day"]), x, 583.0 + panel_offset_y, C["green"] if reached else C["muted"], 12.0, true, 42.0)
+		_draw_text("%d天" % int(m["day"]), x, 579.0 + panel_offset_y, C["green"] if reached else C["muted"], 11.0, true, 42.0)
 
 func _draw_claim_area() -> void:
 	var key := "claim_button" if _can_sign_in else "claim_disabled"
-	_draw_texture_fit(_tex(key), CLAIM_RECT)
+	_draw_nine_patch(key, CLAIM_RECT)
 	var label := "领取奖励" if _can_sign_in else "今日已签到"
 	_draw_text(label, CLAIM_RECT.get_center().x, CLAIM_RECT.position.y + 35.0, C["white"], 24.0 if _can_sign_in else 19.0, true, 170.0)
 
@@ -474,6 +479,32 @@ func _draw_texture_fit(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> voi
 	draw_texture_rect(tex, rect, false, Color(1.0, 1.0, 1.0, opacity))
 
 
+func _draw_nine_patch(key: String, rect: Rect2) -> void:
+	var tex := _tex(key)
+	if tex == null:
+		return
+	if not _style_box_cache.has(key):
+		var style := StyleBoxTexture.new()
+		style.texture = tex
+		var margins := _nine_patch_margins(key)
+		style.set_texture_margin(SIDE_LEFT, margins.x)
+		style.set_texture_margin(SIDE_TOP, margins.y)
+		style.set_texture_margin(SIDE_RIGHT, margins.z)
+		style.set_texture_margin(SIDE_BOTTOM, margins.w)
+		_style_box_cache[key] = style
+	draw_style_box(_style_box_cache[key], rect)
+
+
+func _nine_patch_margins(key: String) -> Vector4:
+	if key.begins_with("day_card"):
+		return Vector4(30.0, 30.0, 30.0, 30.0)
+	if key == "month_panel":
+		return Vector4(54.0, 54.0, 54.0, 54.0)
+	if key == "month_ribbon" or key == "today_tag" or key == "claim_disabled":
+		return Vector4(46.0, 28.0, 46.0, 28.0)
+	return Vector4(58.0, 30.0, 58.0, 30.0)
+
+
 func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
 		return
@@ -499,7 +530,10 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 180.0) -> void:
 	var font := _get_round_font(bold)
-	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)
+	var fitted_size := size
+	while fitted_size > 9.0 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted_size).x > width:
+		fitted_size -= 1.0
+	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, fitted_size, color)
 
 
 func _get_round_font(bold: bool) -> Font:

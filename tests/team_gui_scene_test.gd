@@ -23,7 +23,11 @@ func _run() -> void:
 	for path in [
 		"CurrencyBar/GoldChip/Amount",
 		"TeamSlots/Member1Slot/EmptyPlus",
-		"TeamSlots/LeaderSlot/Portrait",
+		"TeamSlots/Member1Slot/MonsterPosition/Portrait",
+		"TeamSlots/LeaderSlot/MonsterPosition/Portrait",
+		"TeamSlots/Member2Slot/MonsterPosition/Portrait",
+		"TeamSlots/LeaderSlot/Label/LeaderBadge",
+		"TeamSlots/LeaderSlot/Label/LeaderText",
 		"TeamSlots/Member2Slot/Label/Text",
 		"PowerPanel/Power",
 		"PowerPanel/Stats/Hp/Value",
@@ -47,6 +51,15 @@ func _run() -> void:
 	_assert(scene.scene_file_path == SCENE_PATH, "runtime init should not replace the editable PackedScene")
 	_assert(scene.has_node("RosterPanel/Cards/Card6/Level"), "runtime sync should keep roster card nodes editable")
 	_assert(not str(scene.get_script().resource_path).contains("team_logic.gd"), "team GUI should not inherit the old draw controller")
+	for slot_path in ["TeamSlots/Member1Slot", "TeamSlots/LeaderSlot", "TeamSlots/Member2Slot"]:
+		var position_component := scene.get_node(slot_path + "/MonsterPosition") as Control
+		var portrait := position_component.get_node("Portrait") as TextureRect
+		_assert(position_component.size.x > 0.0 and position_component.size.y > 0.0, "%s should expose an editable monster position component" % slot_path)
+		_assert(portrait.texture != null, "%s should show a preview monster in team.tscn" % slot_path)
+	scene.set("_team", {"leader": "monster_001", "member1": null, "member2": null})
+	scene.call("_sync_team_slots")
+	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderBadge") as CanvasItem).visible, "nested leader badge should show for an occupied leader slot")
+	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderText") as CanvasItem).visible, "nested leader text should show for an occupied leader slot")
 
 	print("[TeamGuiSceneTest] passed")
 	quit(0)
