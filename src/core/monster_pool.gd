@@ -1,6 +1,7 @@
 class_name MonsterPool
 extends RefCounted
 
+const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
 const DEFAULT_STARTERS: Array[String] = ["monster_001", "monster_002", "monster_003"]
 
 static func generate_instance_id() -> String:
@@ -296,7 +297,7 @@ static func add_instance_exp(instance: Dictionary, exp_gained: int) -> Dictionar
 	instance["exp"] = old_exp + maxi(0, exp_gained)
 	while true:
 		var level := int(instance.get("level", 1))
-		var needed := 80 + level * 10
+		var needed := GrowthRulesScript.get_exp_for_level(level)
 		if int(instance["exp"]) < needed:
 			break
 		instance["exp"] = int(instance["exp"]) - needed

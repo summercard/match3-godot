@@ -6,9 +6,9 @@ extends RefCounted
 ## 输出: 完整属性字典 {hp, atk, def, spd, level, rarity, nature}
 ##
 ## 公式：
-##   growth = 1 + (level - 1) × growth_rate
-##   growth_rate = MonsterDb.RARITY_GROWTH_RATE[rarity]   # ★1=8% ~ ★5=16%
-##   stat = base × growth × nature_mult
+##   growth = (1 + growth_rate) ^ (level - 1)
+##   growth_rate = MonsterDb.RARITY_GROWTH_RATE[rarity]   # HP/ATK/SPD 使用
+##   DEF = baseDEF + (level - 1) × flat_def_growth
 ##
 ## 与旧 MonsterDb.get_monster_stats 兼容：保留其函数，新代码优先调 calc()
 
@@ -22,15 +22,18 @@ const MAX_LEVEL: int = 100  # 等级封顶：宠物/敌人共用上限（主人�
 const NORMAL_ENEMY_HP_MULT: float = 2.0
 const ELITE_ENEMY_HP_MULT: float = 5.0
 const ELITE_ENEMY_ATK_BONUS: float = 0.20
+const NORMAL_ENEMY_LEVEL_BONUS: int = 5
+const GLOBAL_ENEMY_HP_MULT: float = 2.0
+const GLOBAL_ENEMY_ATK_MULT: float = 2.0
 
 enum EnemyTier { NORMAL, ELITE }
 
-## 等级成长系数（线性，与原公式完全一致）
+## 等级成长系数（复利：每级基于当前属性按百分比继续成长）
 static func growth_mult(level: int, rarity: int) -> float:
 	if level <= 1:
 		return 1.0
-	var rate: float = MonsterDb.RARITY_GROWTH_RATE.get(rarity, 0.10)
-	return 1.0 + float(level - 1) * rate
+	var rate: float = MonsterDb.RARITY_GROWTH_RATE.get(rarity, 0.08)
+	return pow(1.0 + rate, float(level - 1))
 
 ## 等级封顶（主人定 MAX_LEVEL=50，敌人都受同一封顶限制）
 static func clamp_level(level: int) -> int:
@@ -58,7 +61,9 @@ static func calc(monster_id: String, level: int, nature_id: String = "", rarity_
 
 	var hp  := int(float(data.get("baseHP",  0)) * g * nature_mult(nature_id, "hp"))
 	var atk := int(float(data.get("baseATK", 0)) * g * nature_mult(nature_id, "atk"))
-	var df  := int(float(data.get("baseDEF", 0)) * g * nature_mult(nature_id, "def"))
+	var def_per_level: float = MonsterDb.RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)
+	var flat_def: float = float(data.get("baseDEF", 0)) + float(lv - 1) * def_per_level
+	var df  := int(flat_def * nature_mult(nature_id, "def"))
 	var spd := int(float(data.get("baseSPD", 0)) * g * nature_mult(nature_id, "spd"))
 
 	return {
@@ -82,8 +87,23 @@ static func calc(monster_id: String, level: int, nature_id: String = "", rarity_
 ##       EnemyTier.ELITE        → HP × 5，ATK + 20%
 static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NORMAL) -> Dictionary:
 	var nature := NatureDB.random_nature()  # ★ 主人定的：每次 random
-	var stats := calc(monster_id, level, nature)
-	return _apply_tier_modifier(stats, tier)
+	var stats := calc(monster_id, enemy_combat_level(monster_id, level), nature)
+	return apply_enemy_difficulty(_apply_tier_modifier(stats, tier))
+
+## 普通敌人比关卡标注等级高 5 级；Boss 保持原关卡等级。
+static func enemy_combat_level(monster_id: String, base_level: int) -> int:
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
+	var bonus := 0 if bool(data.get("isBoss", false)) else NORMAL_ENEMY_LEVEL_BONUS
+	return clamp_level(base_level + bonus)
+
+## 在普通/精英 tier 和等级成长之后，统一叠加全局敌方难度。
+static func apply_enemy_difficulty(stats: Dictionary) -> Dictionary:
+	if stats.is_empty():
+		return stats
+	stats["hp"] = roundi(float(stats.get("hp", 0)) * GLOBAL_ENEMY_HP_MULT)
+	stats["maxHP"] = stats["hp"]
+	stats["atk"] = roundi(float(stats.get("atk", 0)) * GLOBAL_ENEMY_ATK_MULT)
+	return stats
 
 ## 精英怪便捷：HP × 5，ATK + 20%
 static func calc_elite_enemy(monster_id: String, level: int) -> Dictionary:

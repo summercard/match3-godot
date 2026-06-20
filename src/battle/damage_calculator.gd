@@ -5,6 +5,9 @@
 class_name DamageCalculator
 extends RefCounted
 
+const DEFENSE_SCALE: float = 200.0
+const MAX_DEFENSE_REDUCTION: float = 0.25
+
 # 属性克制表 (与 monster_db.gd 保持一致)
 const ELEMENT_CHART: Dictionary = {
 	"fire":    { "fire": 1.0, "water": 0.5, "grass": 2.0, "thunder": 1.0, "light": 1.0 },
@@ -20,12 +23,16 @@ static func get_element_multiplier(attacker_elem: String, defender_elem: String)
 		return ELEMENT_CHART[attacker_elem][defender_elem]
 	return 1.0
 
+
+static func get_defense_reduction(defense: float) -> float:
+	return minf(MAX_DEFENSE_REDUCTION, maxf(0.0, defense) / (maxf(0.0, defense) + DEFENSE_SCALE))
+
 # ============================================
 # 玩家伤害计算
 # ============================================
 # 基础伤害 = ATK × (消除数 / 3) × combo加成(1 + (combo-1)×0.3)
 # 总伤害 = 基础伤害 × 属性克制 × 队长ATK加成 × 属性协同ATK加成
-# 最终伤害 = 总伤害 × (1 - def/(def+100)) × 随机波动(0.9~1.1)
+# 最终伤害 = 总伤害 × (1 - 防御减伤，最高25%) × 随机波动(0.9~1.1)
 static func calc_player_damage(
 	attacker_atk: float,
 	attacker_element: String,
@@ -57,8 +64,8 @@ static func calc_player_damage(
 	# 属性协同ATK加成 (2同属性+15%, 3同属性+30%)
 	total_damage *= synergy_atk_mult
 	
-	# 防御减免 (上限50%, def越高减免越多)
-	var def_reduction := target_def / (target_def + 100.0)
+	# 防御减免：统一缓增长，并硬限制为最高 25%
+	var def_reduction := get_defense_reduction(target_def)
 	total_damage *= (1.0 - def_reduction)
 	
 	# ±10% 随机波动 (增加战斗变数)
@@ -73,7 +80,7 @@ static func calc_player_damage(
 # 敌方伤害计算
 # ============================================
 # 基础伤害 = ATK × (0.6 + random×0.3)
-# 总伤害 = 基础伤害 × 属性克制 × 冰冻降低 × (1 - def/(def+80))
+# 总伤害 = 基础伤害 × 属性克制 × 冰冻降低 × (1 - 防御减伤，最高25%)
 # 最终伤害 = 总伤害 × 队长DEF加成 × 属性协同DEF降低
 static func calc_enemy_damage(
 	enemy_atk: float,
@@ -94,8 +101,8 @@ static func calc_enemy_damage(
 	# 冰冻 ATK 降低 (冰冻时 freeze_mult=0.7)
 	base_damage *= freeze_mult
 	
-	# 防御减免 (敌人视角用 def+80, 比玩家的 def+100 更有效)
-	var def_reduction := target_def / (target_def + 80.0)
+	# 防御减免：玩家和敌人使用同一尺度与上限
+	var def_reduction := get_defense_reduction(target_def)
 	base_damage *= (1.0 - def_reduction)
 	
 	# ±10% 随机波动

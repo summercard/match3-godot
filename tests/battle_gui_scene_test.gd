@@ -63,6 +63,17 @@ func _run() -> void:
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
 	var normal_enemy_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
 	var normal_enemy_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
+	var player_slot := battle.get_node("Combatants/Players/Player1") as Control
+	var player_hp_y := (player_slot.get_node("HpFrameBase") as TextureRect).position.y
+	battle.call("_set_combatant", player_slot, {
+		"id": "monster_boss_001",
+		"name": "抓获 Boss",
+		"isBoss": true,
+		"hp": 100,
+		"maxHP": 100,
+		"element": "grass",
+	}, "green", false)
+	_expect(is_equal_approx((player_slot.get_node("HpFrameBase") as TextureRect).position.y, player_hp_y), "captured boss player hp frame should stay at the same bottom position as ordinary player monsters")
 
 	main.switch_scene("battle", {
 		"stageId": "stage_2_12",

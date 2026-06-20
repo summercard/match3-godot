@@ -231,7 +231,7 @@ func _sync_enemy_slots() -> void:
 		var slot := _control(MULTI_ENEMY_PATHS[i])
 		slot.visible = enemy_count > 1 and i < enemy_count
 		if slot.visible:
-			_set_combatant(slot, _battle.enemies[i], "red")
+			_set_combatant(slot, _battle.enemies[i], "red", true)
 			# ★ 主人定 2026-06-11：多怪受击 portrait 柔和闪白
 			_apply_hit_feedback(slot, true, i)
 			_apply_defeat_feedback(slot, true, i)
@@ -243,7 +243,7 @@ func _sync_player_slots() -> void:
 		var slot := _control(PLAYER_PATHS[i])
 		slot.visible = i < player_count
 		if slot.visible:
-			_set_combatant(slot, _battle.player_team[i], "green")
+			_set_combatant(slot, _battle.player_team[i], "green", false)
 			_sync_leader_charge_point(slot, _battle.player_team[i])
 			# ★ 主人定 2026-06-11：玩家受击 portrait 柔和闪白
 			_apply_hit_feedback(slot, false, i)
@@ -264,7 +264,7 @@ func _sync_leader_charge_point(slot: Control, unit: Dictionary) -> void:
 	point.set("element", str(unit.get("boardAffinity", unit.get("element", "fire"))))
 
 func _set_stage_enemy(slot: Control, unit: Dictionary) -> void:
-	_set_combatant(slot, unit, "red")
+	_set_combatant(slot, unit, "red", true)
 	var element := str(unit.get("element", "fire"))
 	var orb := slot.get_node("Orb") as TextureRect
 	orb.texture = _get_texture(str(GEM_IMAGE_PATHS.get(element, GEM_IMAGE_PATHS["fire"])))
@@ -273,13 +273,13 @@ func _set_stage_enemy(slot: Control, unit: Dictionary) -> void:
 	var active_beads := clampi(int(ceil(float(hp) / float(max_hp) * 5.0)), 0, 5)
 	(slot.get_node("Beads") as Label).text = "●".repeat(active_beads) + "○".repeat(5 - active_beads)
 
-func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void:
+func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_boss_status_offset: bool = false) -> void:
 	if unit == null:
 		slot.visible = false
 		return
 	var hp := maxi(int(unit.get("hp", 0)), 0)
 	var max_hp := maxi(int(unit.get("maxHP", 1)), 1)
-	_apply_combatant_status_offset(slot, bool(unit.get("isBoss", false)) and hp > 0)
+	_apply_combatant_status_offset(slot, allow_boss_status_offset and bool(unit.get("isBoss", false)) and hp > 0)
 	var portrait := slot.get_node("Portrait") as TextureRect
 	_apply_portrait_visual_scale(portrait, _combatant_portrait_scale(unit, hp))
 	portrait.texture = _get_monster_texture(unit) if hp > 0 else _get_texture(DEFEATED_GHOST_ASSET)

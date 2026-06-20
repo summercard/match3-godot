@@ -465,13 +465,13 @@ func _ensure_pet_farm_layout() -> void:
 		"Pages/RanchPage/RosterPanel/Card6",
 		"Pages/RanchPage/RosterPanel/PageText",
 		"Pages/ClassroomPage/DetailPanel/CreamFrame",
-		"Pages/ClassroomPage/DetailPanel/EvolveButton/ModernFrame",
+		"Pages/ClassroomPage/DetailPanel/EvolveButton/butter02",
 		"Pages/ClassroomPage/RosterPanel/Card6",
 		"Pages/SocialPage/PlacePanel/HeartBubble",
 		"Pages/SocialPage/PlacePanel/FxLayer/HeartFx4",
-		"Pages/SocialPage/PlacePanel/SwitchButton/SocialFrame",
+		"Pages/SocialPage/PlacePanel/SwitchButton/butter01",
 		"Pages/SocialPage/BondPanel",
-		"Pages/SocialPage/BottomButtons/ActionButton/SocialFrame",
+		"Pages/SocialPage/BottomButtons/ActionButton/butter01",
 		"Pages/SocialPage/RosterPanel/Card6",
 	]
 	for path in required_paths:
@@ -1164,54 +1164,14 @@ func _set_visible(node: CanvasItem, value: bool) -> void:
 		node.visible = value
 
 func _set_action_frame(button: TextureButton, enabled: bool) -> void:
-	if button.has_node("SocialFrame"):
-		_set_social_action_style(button, enabled)
-		return
-	if button.has_node("ModernFrame"):
-		_set_classroom_evolve_style(button, enabled)
-		return
-	var frame := button.get_node_or_null("Frame") as TextureRect
-	if frame != null:
-		frame.texture = _tex(RANCH_ASSETS["collect_button" if enabled else "secondary_button"])
-	var text_node := button.get_node_or_null("Text") as Label
-	if text_node != null:
-		text_node.add_theme_color_override("font_color", Color(0.22, 0.12, 0.02) if enabled else TEXT_WHITE)
-
-func _set_classroom_evolve_style(button: TextureButton, enabled: bool) -> void:
-	if button.has_meta("_ranch_action_style_enabled") and bool(button.get_meta("_ranch_action_style_enabled")) == enabled:
-		return
-	button.set_meta("_ranch_action_style_enabled", enabled)
-	var modern_frame := button.get_node("ModernFrame") as Panel
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.52, 0.80, 0.12, 1.0) if enabled else Color(0.39, 0.57, 0.16, 1.0)
-	style.border_color = Color(0.98, 0.76, 0.20, 1.0)
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(14)
-	style.shadow_color = Color(0.19, 0.12, 0.02, 0.38)
-	style.shadow_size = 4
-	modern_frame.add_theme_stylebox_override("panel", style)
-	var text_node := button.get_node("Text") as Label
-	text_node.add_theme_color_override("font_color", Color.WHITE)
-	text_node.add_theme_color_override("font_outline_color", Color(0.20, 0.34, 0.05))
-	text_node.add_theme_constant_override("outline_size", 2)
-
-func _set_social_action_style(button: TextureButton, enabled: bool) -> void:
-	if button.has_meta("_ranch_action_style_enabled") and bool(button.get_meta("_ranch_action_style_enabled")) == enabled:
-		return
-	button.set_meta("_ranch_action_style_enabled", enabled)
-	var social_frame := button.get_node("SocialFrame") as Panel
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(1.0, 0.52, 0.10, 1.0) if enabled else Color(0.71, 0.56, 0.32, 1.0)
-	style.border_color = Color(1.0, 0.76, 0.22, 1.0)
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(14)
-	style.shadow_color = Color(0.35, 0.16, 0.02, 0.35)
-	style.shadow_size = 4
-	social_frame.add_theme_stylebox_override("panel", style)
-	var text_node := button.get_node("Text") as Label
-	text_node.add_theme_color_override("font_color", Color.WHITE)
-	text_node.add_theme_color_override("font_outline_color", Color(0.49, 0.20, 0.02))
-	text_node.add_theme_constant_override("outline_size", 2)
+	# The visual is authored in ranch_hub.tscn (butter01/butter02). Runtime
+	# only communicates disabled state by tinting that art; it never overlays
+	# a generated Panel or replacement texture.
+	var art := button.get_node_or_null("butter02") as CanvasItem
+	if art == null:
+		art = button.get_node_or_null("butter01") as CanvasItem
+	if art != null:
+		art.modulate = Color.WHITE if enabled else Color(0.68, 0.68, 0.68, 0.88)
 
 func _label(path: String) -> Label:
 	return get_node(path) as Label
