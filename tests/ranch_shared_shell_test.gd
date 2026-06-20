@@ -11,12 +11,12 @@ func _run() -> void:
 	for path in [
 		"PetFarmResourceBar",
 		"PetFarmBottomNav/Nav5",
-		"Pages/ClassroomPage/DetailPanel/EvolveButton/ModernFrame",
+		"Pages/ClassroomPage/DetailPanel/EvolveButton/butter02",
 		"Pages/SocialPage/BondPanel",
 		"Pages/SocialPage/BondPanel/Heart",
 		"Pages/SocialPage/PlacePanel/FxLayer/HeartFx4",
-		"Pages/SocialPage/PlacePanel/SwitchButton/SocialFrame",
-		"Pages/SocialPage/BottomButtons/ActionButton/SocialFrame",
+		"Pages/SocialPage/PlacePanel/SwitchButton/butter01",
+		"Pages/SocialPage/BottomButtons/ActionButton/butter01",
 	]:
 		_expect(static_ranch.has_node(path), "ranch_hub.tscn should own formal UI node before _ready: %s" % path)
 	static_ranch.free()
@@ -58,7 +58,8 @@ func _run() -> void:
 	ranch.set("_captured_monsters", roster)
 	ranch.call("_switch_to_classroom")
 	_expect(not (ranch.get_node("Header/BackButton") as TextureButton).visible, "classroom should hide the legacy back arrow")
-	_expect(ranch.has_node("Pages/ClassroomPage/DetailPanel/EvolveButton/ModernFrame"), "classroom evolve action should use the modern green frame")
+	_expect(ranch.has_node("Pages/ClassroomPage/DetailPanel/EvolveButton/butter02"), "classroom evolve action should preserve authored butter02 art")
+	_expect(not ranch.has_node("Pages/ClassroomPage/DetailPanel/EvolveButton/ModernFrame"), "classroom evolve action should not overlay generated code UI")
 	_expect(not (ranch.get_node("Pages/ClassroomPage/DetailPanel/EvolveButton/Frame") as TextureRect).visible, "classroom evolve action should hide the legacy frame")
 	ranch.call("_on_class_next_pressed")
 	_expect(int(ranch.get("_class_page")) == 1, "classroom pagination should advance independently")
@@ -80,8 +81,10 @@ func _run() -> void:
 	_expect(ranch.get_node("Pages/SocialPage/PlacePanel/HeartBubble") is TextureRect, "social center heart should use extracted art asset")
 	_expect(ranch.get_node("Pages/SocialPage/BondPanel/Heart") is TextureRect, "social bond heart should use extracted art asset")
 	_expect(not (ranch.get_node("Pages/SocialPage/PlacePanel/SwitchButton/Frame") as TextureRect).visible, "social place switch should hide the legacy texture button")
-	_expect(ranch.has_node("Pages/SocialPage/PlacePanel/SwitchButton/SocialFrame"), "social place switch should use the modern orange frame")
-	_expect(ranch.has_node("Pages/SocialPage/BottomButtons/ActionButton/SocialFrame"), "social action should use the card-level orange frame")
+	_expect(ranch.has_node("Pages/SocialPage/PlacePanel/SwitchButton/butter01"), "social place switch should preserve authored butter01 art")
+	_expect(ranch.has_node("Pages/SocialPage/BottomButtons/ActionButton/butter01"), "social action should preserve authored butter01 art")
+	_expect(not ranch.has_node("Pages/SocialPage/PlacePanel/SwitchButton/SocialFrame"), "social place switch should not overlay generated code UI")
+	_expect(not ranch.has_node("Pages/SocialPage/BottomButtons/ActionButton/SocialFrame"), "social action should not overlay generated code UI")
 	ranch.call("_on_place_switch_pressed")
 	_expect((ranch.get_node("Background") as TextureRect).texture.resource_path.ends_with("bg_social_sunny_yard_750.png"), "social place cycling should replace the scene background")
 	(ranch.get_node("PetFarmBottomNav/Nav2") as Button).pressed.emit()

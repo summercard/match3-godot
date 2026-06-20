@@ -29,7 +29,7 @@ const RANCH_ASSETS := {
 	"slot_locked": "res://assets/images/ui/slots/ranch_ui_slot_locked.png",
 	"level_badge": "res://assets/images/ui/icons/ranch_ui_level_badge.png",
 	"timer_plate": "res://assets/images/ui/panels/ranch_ui_timer_plate.png",
-	"collect_button": "res://assets/images/ui/buttons/ranch_ui_btn_collect_gold.png",
+	"collect_button": "res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png",
 	"status_ribbon": "res://assets/images/ui/panels/ranch_ui_status_ribbon_green.png",
 	"reward_strip": "res://assets/images/ui/panels/ranch_ui_reward_strip_dark.png",
 	"exp": "res://assets/images/ui/icons/ranch_icon_exp_badge.png",
@@ -39,7 +39,7 @@ const RANCH_ASSETS := {
 	"banner_fringe": "res://assets/images/ui/panels/ranch_ui_banner_fringe.png",
 	"sparkle": "res://assets/images/effects/ranch_fx_leaf_sparkle_cluster.png",
 	"nav_button": "res://assets/images/ui/buttons/team_ui_btn_cancel.png",
-	"secondary_button": "res://assets/images/ui/buttons/album_ui_btn_secondary_blue.png",
+	"secondary_button": "res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png",
 	"roster_card": "res://assets/images/ui/cards/ranch_ui_roster_card_ranch.png",
 	"roster_card_selected": "res://assets/images/ui/cards/ranch_ui_roster_card_ranch_selected.png",
 	"previous_round": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
@@ -125,6 +125,10 @@ var _social_selected_slot: String = "slot_a"
 var _care_focus_instance_id: String = ""
 var _care_state_map: Dictionary = {}
 var _captured_monsters: Array = []
+var _instance_by_id: Dictionary = {}
+var _monster_id_by_instance: Dictionary = {}
+var _level_by_instance: Dictionary = {}
+var _stats_by_instance: Dictionary = {}
 var _idle_exp_map: Dictionary = {}
 var _bubbles: Array = []
 var _bubble_timer: float = 0.0
@@ -460,13 +464,49 @@ func _get_monster_id(value: Variant) -> String:
 	if value is Dictionary:
 		return str((value as Dictionary).get("monsterId", (value as Dictionary).get("id", "")))
 	var ref_id := str(value)
+	if _monster_id_by_instance.has(ref_id):
+		return str(_monster_id_by_instance[ref_id])
 	if _storage != null and _storage.has_method("get_monster_instance"):
 		var instance: Dictionary = _storage.get_monster_instance(ref_id)
 		if not instance.is_empty():
-			return str(instance.get("monsterId", ""))
+			_cache_instance(instance)
+			return str(_monster_id_by_instance.get(ref_id, instance.get("monsterId", "")))
 	return ref_id
 
+func _cache_instance(instance: Dictionary) -> void:
+	var instance_id := str(instance.get("instanceId", ""))
+	if instance_id.is_empty():
+		return
+	_instance_by_id[instance_id] = instance
+	_monster_id_by_instance[instance_id] = str(instance.get("monsterId", instance.get("id", "")))
+	_level_by_instance[instance_id] = int(instance.get("level", 1))
+
+func _rebuild_instance_index() -> void:
+	_instance_by_id.clear()
+	_monster_id_by_instance.clear()
+	_level_by_instance.clear()
+	_stats_by_instance.clear()
+	for candidate: Variant in _captured_monsters:
+		if candidate is Dictionary:
+			_cache_instance(candidate as Dictionary)
+
+func _refresh_captured_snapshot() -> void:
+	if _storage != null:
+		if _storage.has_method("get_owned_monsters"):
+			_captured_monsters = _storage.get_owned_monsters()
+		elif _storage.has_method("get_captured_monsters"):
+			_captured_monsters = _storage.get_captured_monsters()
+	_captured_monsters = _captured_monsters.filter(func(item): return MonsterDb.has_monster(_get_monster_id(item)))
+	if _captured_monsters.is_empty():
+		_captured_monsters = [
+			{"instanceId": "monster_001", "monsterId": "monster_001"},
+			{"instanceId": "monster_002", "monsterId": "monster_002"},
+			{"instanceId": "monster_003", "monsterId": "monster_003"}
+		]
+	_rebuild_instance_index()
+
 func _load_data() -> void:
+	_care_state_map.clear()
 	_slots_data = []
 	for _i in range(SLOT_COUNT):
 		_slots_data.append({"instance_id": null, "placed_at": null})
@@ -479,9 +519,7 @@ func _load_data() -> void:
 		_social_places = SocialRulesScript.normalize_places(ranch_state.get("social_places", []), 1)
 		_care_focus_instance_id = str(ranch_state.get("care_focus_instance_id", ""))
 
-		if _storage.has_method("get_captured_monsters"):
-			_captured_monsters = _storage.get_owned_monsters() if _storage.has_method("get_owned_monsters") else _storage.get_captured_monsters()
-		else:
+		if not _storage.has_method("get_owned_monsters") and not _storage.has_method("get_captured_monsters"):
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
 			_captured_monsters = player.get("captured", [])
 	else:
@@ -493,13 +531,7 @@ func _load_data() -> void:
 			{"instanceId": "monster_003", "monsterId": "monster_003"}
 		]
 
-	_captured_monsters = _captured_monsters.filter(func(item): return MonsterDb.has_monster(_get_monster_id(item)))
-	if _captured_monsters.is_empty():
-		_captured_monsters = [
-			{"instanceId": "monster_001", "monsterId": "monster_001"},
-			{"instanceId": "monster_002", "monsterId": "monster_002"},
-			{"instanceId": "monster_003", "monsterId": "monster_003"}
-		]
+	_refresh_captured_snapshot()
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
 	if _social_places.is_empty():
@@ -528,20 +560,25 @@ func _save_ranch_state() -> void:
 
 func _calc_idle_exp() -> void:
 	_idle_exp_map = {}
-	_care_state_map = {}
 	var now := Time.get_unix_time_from_system() * 1000.0
 	for slot: Dictionary in _slots_data:
 		var monster_id = slot.get("instance_id", null)
 		var placed_at = slot.get("placed_at", null)
-		if monster_id == null or placed_at == null:
+		if monster_id == null:
+			continue
+		var instance_id := str(monster_id)
+		var care: Dictionary = _care_state_map.get(instance_id, {})
+		if care.is_empty():
+			care = _get_care_state(instance_id)
+			_care_state_map[instance_id] = care
+		if placed_at == null:
 			continue
 		var elapsed := minf(maxf(0.0, now - float(placed_at)), IDLE_MAX_MS)
 		var intervals := int(elapsed / IDLE_INTERVAL_MS)
 		if intervals <= 0:
 			continue
-		var rate := _get_idle_exp_rate(str(monster_id))
-		_care_state_map[str(monster_id)] = _get_care_state(str(monster_id))
-		_idle_exp_map[str(monster_id)] = intervals * rate
+		var rate := float(care["rate"]) if care.has("rate") else _get_idle_exp_rate(instance_id)
+		_idle_exp_map[instance_id] = intervals * rate
 
 func _init_bubbles() -> void:
 	_bubbles = []
@@ -684,6 +721,10 @@ func _on_evolve_pressed() -> void:
 	_refresh_ranch_view()
 
 func _refresh_ranch_view() -> void:
+	# Player actions may level up or evolve a monster. Refresh the snapshot once
+	# for that action; per-frame/per-second UI updates use the in-memory index.
+	_refresh_captured_snapshot()
+	_care_state_map.clear()
 	_calc_idle_exp()
 	_init_bubbles()
 	_update_list_scroll_limit()
@@ -1124,16 +1165,21 @@ func _selected_monster_id() -> String:
 func _get_instance(instance_id: String) -> Dictionary:
 	if instance_id.is_empty():
 		return {}
+	if _instance_by_id.has(instance_id):
+		return _instance_by_id[instance_id] as Dictionary
 	if _storage != null and _storage.has_method("get_monster_instance"):
-		return _storage.get_monster_instance(instance_id)
+		var instance: Dictionary = _storage.get_monster_instance(instance_id)
+		if not instance.is_empty():
+			_cache_instance(instance)
+		return instance
 	for candidate: Variant in _captured_monsters:
 		if candidate is Dictionary and _get_instance_id(candidate) == instance_id:
 			return (candidate as Dictionary).duplicate(true)
 	return {"instanceId": instance_id, "monsterId": _get_monster_id(instance_id), "level": 1, "nature": ""}
 
 func _get_instance_stats(instance_id: String) -> Dictionary:
-	if _storage != null and _storage.has_method("get_instance_stats"):
-		return _storage.get_instance_stats(instance_id)
+	if _stats_by_instance.has(instance_id):
+		return _stats_by_instance[instance_id] as Dictionary
 	# 统一公式：牧场预览也走 StatCalculator（保持 nature 兼容）
 	var instance := _get_instance(instance_id)
 	var monster_id := _get_monster_id(instance_id)
@@ -1142,7 +1188,9 @@ func _get_instance_stats(instance_id: String) -> Dictionary:
 	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier
 	var is_elite: bool = bool(instance.get("isElite", MonsterDb.MONSTER_DB.get(monster_id, {}).get("isElite", false)))
 	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
-	return StatCalculator.calc_with_tier(monster_id, level, nature, tier)
+	var stats := StatCalculator.calc_with_tier(monster_id, level, nature, tier)
+	_stats_by_instance[instance_id] = stats
+	return stats
 
 func _get_selected_evolution_info() -> Dictionary:
 	var instance_id := _class_selected_instance_id if _active_page == "classroom" else _selected_monster_id()
@@ -1379,8 +1427,12 @@ func _total_idle_exp() -> float:
 	return total
 
 func _get_monster_level(monster_id: String) -> int:
+	if _level_by_instance.has(monster_id):
+		return int(_level_by_instance[monster_id])
 	if _storage != null and _storage.has_method("get_instance_level"):
-		return _storage.get_instance_level(monster_id)
+		var level := int(_storage.get_instance_level(monster_id))
+		_level_by_instance[monster_id] = level
+		return level
 	if _storage != null and _storage.has_method("get_monster_level"):
 		return _storage.get_monster_level(_get_monster_id(monster_id))
 	for candidate: Variant in _captured_monsters:
@@ -1389,6 +1441,10 @@ func _get_monster_level(monster_id: String) -> int:
 	return 1
 
 func _get_idle_exp_rate(monster_id: String) -> float:
+	if _care_state_map.has(monster_id):
+		var care: Dictionary = _care_state_map[monster_id]
+		if care.has("rate"):
+			return float(care["rate"])
 	if _storage != null and _storage.has_method("get_idle_exp_rate_for_instance"):
 		return _storage.get_idle_exp_rate_for_instance(monster_id)
 	if _storage != null and _storage.has_method("get_idle_exp_rate"):
@@ -1396,6 +1452,8 @@ func _get_idle_exp_rate(monster_id: String) -> float:
 	return 5.0 + float(_get_monster_level(monster_id))
 
 func _get_care_state(instance_id: String) -> Dictionary:
+	if _care_state_map.has(instance_id):
+		return _care_state_map[instance_id] as Dictionary
 	if _storage != null and _storage.has_method("get_ranch_care_state"):
 		return _storage.get_ranch_care_state(instance_id)
 	return {

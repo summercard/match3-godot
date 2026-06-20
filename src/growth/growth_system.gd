@@ -5,6 +5,8 @@
 class_name GrowthSystem
 extends Node
 
+const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
+
 # 单例访问
 static var instance: GrowthSystem
 
@@ -14,16 +16,13 @@ func _init() -> void:
 # ============================================
 # 经验需求计算
 # ============================================
-# 每级基础80 + 等级×10
+# Lv30 前为 80 + 等级×10；Lv31 起追加 (等级-30)²
 static func get_exp_for_level(level: int) -> int:
-	return 80 + level * 10
+	return GrowthRulesScript.get_exp_for_level(level)
 
 # 获取升到指定等级所需总经验
 static func get_total_exp_for_level(level: int) -> int:
-	var total := 0
-	for l in range(1, level):
-		total += get_exp_for_level(l)
-	return total
+	return GrowthRulesScript.get_total_exp_for_level(level)
 
 # 获取当前等级到下一级所需经验
 static func get_exp_to_next_level(current_level: int, current_exp: int) -> int:

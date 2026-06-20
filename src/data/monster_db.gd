@@ -1070,11 +1070,20 @@ const SKILL_TYPE_LABELS: Dictionary = {
 
 # ========== 稀有度成长率 ==========
 const RARITY_GROWTH_RATE: Dictionary = {
-	1: 0.08,  # ★1 普通
-	2: 0.10,  # ★2 常见
-	3: 0.12,  # ★3 稀有
-	4: 0.14,  # ★4 史诗
-	5: 0.16   # ★5 传说
+	1: 0.05,  # ★1 普通：每级 +5%
+	2: 0.07,  # ★2 常见：每级 +7%
+	3: 0.08,  # ★3 稀有：每级 +8%
+	4: 0.12,  # ★4 史诗：每级 +12%
+	5: 0.15   # ★5 传说：每级 +15%
+}
+
+# DEF 不参与百分比复利，只按等级增加固定数值。
+const RARITY_DEF_GROWTH_PER_LEVEL: Dictionary = {
+	1: 0.10,
+	2: 0.15,
+	3: 0.20,
+	4: 0.25,
+	5: 0.30
 }
 
 # ========== 静态工具函数 ==========
@@ -1142,13 +1151,16 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 	var data: Dictionary = MONSTER_DB.get(monster_id, {})
 	if data.is_empty():
 		return {}
-	var growth_rate: float = RARITY_GROWTH_RATE.get(data.get("rarity", 2), 0.10)
-	var mult: float = 1.0 + (level - 1) * growth_rate
+	var safe_level := clampi(level, 1, 100)
+	var rarity := int(data.get("rarity", 2))
+	var growth_rate: float = RARITY_GROWTH_RATE.get(data.get("rarity", 2), 0.08)
+	var mult: float = pow(1.0 + growth_rate, float(safe_level - 1))
+	var def_per_level: float = RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)
 
 	# 计算基础属性
 	var hp: int = int(data.get("baseHP", 0) * mult)
 	var atk: int = int(data.get("baseATK", 0) * mult)
-	var def: int = int(data.get("baseDEF", 0) * mult)
+	var def: int = int(float(data.get("baseDEF", 0)) + float(safe_level - 1) * def_per_level)
 	var spd: int = int(data.get("baseSPD", 0) * mult)
 
 	# 性格修正

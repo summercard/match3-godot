@@ -87,31 +87,44 @@ var _active_filter: String = "all"
 var _sort_option: int = 0
 var _time_acc: float = 0.0
 var _texture_cache: Dictionary = {}
+var _team_portrait_cache: Dictionary = {}
+var _roster_texture_cache: Dictionary = {}
+var _loaded_roster_page: int = -1
+var _roster_load_generation: int = 0
+var _pending_portrait_loads: Dictionary = {}
+var _player_snapshot: Dictionary = {}
+var _instance_by_id: Dictionary = {}
+var _monster_id_by_instance_id: Dictionary = {}
+var _stats_cache: Dictionary = {}
+var _display_monsters_cache: Array = []
+var _initialized: bool = false
 
 
 func _ready() -> void:
-	_refresh_services()
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(false)
 	_connect_gui_actions()
 	_attach_gui_feedback()
-	_sync_gui()
-	_play_entry_animation()
 
 
 func init(_data: Dictionary = {}) -> void:
-	_refresh_services()
+	if not _initialized:
+		_refresh_services()
+		_initialized = true
 	_roster_page = 0
 	_selected_slot = ""
 	_active_filter = "all"
 	_sort_option = 0
+	_rebuild_display_monsters_cache()
 	_sync_gui()
+	_play_entry_animation()
 
 
 func _process(delta: float) -> void:
 	_time_acc += delta
 	_sync_empty_slot_pulses()
-	if not _has_empty_slot():
+	_poll_portrait_loads()
+	if not _has_empty_slot() and _pending_portrait_loads.is_empty():
 		set_process(false)
 
 
@@ -150,16 +163,33 @@ func _set_entry_animation_start_state() -> void:
 static func warm_assets() -> void:
 	for path in GUI_ASSETS.values():
 		ResourceLoader.load(str(path), "", ResourceLoader.CACHE_MODE_REUSE)
-	for monster_id in ["monster_001", "monster_002", "monster_003"]:
-		var art_path := MonsterArtDBScript.get_art_path(monster_id, "team")
-		if not art_path.is_empty():
-			ResourceLoader.load(art_path, "", ResourceLoader.CACHE_MODE_REUSE)
 
 
 func _refresh_services() -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_load_team_state()
+	_player_snapshot = _storage.load_player() if _storage != null and _storage.has_method("load_player") else {}
 	_captured_monsters = _get_captured_monsters()
+	_rebuild_instance_index()
+	_stats_cache.clear()
+	_team_portrait_cache.clear()
+	_roster_texture_cache.clear()
+	_pending_portrait_loads.clear()
+	_loaded_roster_page = -1
+
+
+func _rebuild_instance_index() -> void:
+	_instance_by_id.clear()
+	_monster_id_by_instance_id.clear()
+	for value: Variant in _captured_monsters:
+		if not value is Dictionary:
+			continue
+		var instance: Dictionary = value
+		var instance_id := _get_instance_id(instance)
+		if instance_id.is_empty():
+			continue
+		_instance_by_id[instance_id] = instance
+		_monster_id_by_instance_id[instance_id] = str(instance.get("monsterId", instance.get("id", "")))
 
 
 func _load_team_state() -> void:
@@ -198,6 +228,10 @@ func _get_monster_id(value: Variant) -> String:
 	if value is Dictionary:
 		return str((value as Dictionary).get("monsterId", (value as Dictionary).get("id", "")))
 	var ref_id := str(value)
+	if _monster_id_by_instance_id.has(ref_id):
+		return str(_monster_id_by_instance_id[ref_id])
+	if MonsterDBScript.has_monster(ref_id):
+		return ref_id
 	var instance := _get_monster_instance(ref_id)
 	if not instance.is_empty():
 		return str(instance.get("monsterId", ""))
@@ -205,6 +239,8 @@ func _get_monster_id(value: Variant) -> String:
 
 
 func _get_monster_instance(ref_id: String) -> Dictionary:
+	if _instance_by_id.has(ref_id):
+		return _instance_by_id[ref_id]
 	if _storage != null and _storage.has_method("get_monster_instance"):
 		var instance: Variant = _storage.get_monster_instance(ref_id)
 		if instance is Dictionary:
@@ -219,26 +255,14 @@ func _get_monster_data(monster_id: String) -> Dictionary:
 
 
 func _get_real_level(ref_id: String) -> int:
-	if _storage == null:
-		return 1
 	var instance := _get_monster_instance(ref_id)
-	if _storage.has_method("get_instance_level") and not instance.is_empty():
-		return int(_storage.get_instance_level(ref_id))
-	if _storage.has_method("get_monster_level"):
-		return int(_storage.get_monster_level(ref_id))
 	if not instance.is_empty():
 		return int(instance.get("level", 1))
 	return 1
 
 
 func _get_nature(ref_id: String) -> String:
-	if _storage == null:
-		return ""
 	var instance := _get_monster_instance(ref_id)
-	if _storage.has_method("get_instance_nature") and not instance.is_empty():
-		return str(_storage.get_instance_nature(ref_id))
-	if _storage.has_method("get_monster_nature"):
-		return str(_storage.get_monster_nature(ref_id))
 	if not instance.is_empty():
 		return str(instance.get("nature", ""))
 	return ""
@@ -257,9 +281,12 @@ func _calc_team_power() -> int:
 
 
 func _calc_stats(monster_id: String, level: int) -> Dictionary:
-	if _storage != null and _storage.has_method("get_instance_stats") and not _get_monster_instance(monster_id).is_empty():
-		return _storage.get_instance_stats(monster_id)
-	return MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
+	var cache_key := "%s:%d" % [monster_id, level]
+	if _stats_cache.has(cache_key):
+		return _stats_cache[cache_key]
+	var stats := MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
+	_stats_cache[cache_key] = stats
+	return stats
 
 
 func _clamp_roster_page() -> void:
@@ -267,6 +294,10 @@ func _clamp_roster_page() -> void:
 
 
 func _get_display_monsters() -> Array:
+	return _display_monsters_cache
+
+
+func _rebuild_display_monsters_cache() -> void:
 	var result: Array = []
 	for instance in _captured_monsters:
 		if not (instance is Dictionary):
@@ -287,7 +318,7 @@ func _get_display_monsters() -> Array:
 			return _get_instance_id(a) < _get_instance_id(b)
 		return score_a > score_b
 	)
-	return result
+	_display_monsters_cache = result
 
 
 func _get_sort_score(instance: Dictionary, sort_id: String) -> int:
@@ -418,12 +449,12 @@ func _on_roster_card_pressed(visible_index: int) -> void:
 
 func _on_previous_page_pressed() -> void:
 	_turn_roster_page(-1)
-	_sync_gui()
+	_sync_pet_roster()
 
 
 func _on_next_page_pressed() -> void:
 	_turn_roster_page(1)
-	_sync_gui()
+	_sync_pet_roster()
 
 
 func _on_nav_pressed(scene_name: String) -> void:
@@ -446,7 +477,7 @@ func _sync_gui() -> void:
 	_sync_pet_roster()
 	_sync_bottom_nav()
 	_sync_empty_slot_pulses()
-	set_process(_has_empty_slot())
+	set_process(_has_empty_slot() or not _pending_portrait_loads.is_empty())
 
 
 func _sync_currency_bar() -> void:
@@ -482,8 +513,8 @@ func _sync_team_slots() -> void:
 		if not occupied or portrait == null:
 			continue
 		var monster_id := _get_monster_id(instance_id)
-		portrait.texture = _get_monster_texture(monster_id)
-		if portrait.texture == null:
+		_request_portrait_texture(monster_id, portrait, "team")
+		if MonsterArtDBScript.get_art_path(monster_id, "team").is_empty():
 			var md := _get_monster_data(monster_id)
 			(slot_node.get_node("Fallback") as Label).text = str(md.get("emoji", "?"))
 			(slot_node.get_node("Fallback") as Label).visible = true
@@ -524,6 +555,7 @@ func _sync_pet_roster() -> void:
 	_label("RosterPanel/Subtitle").text = "选择精灵加入队伍"
 	var visible := _get_display_monsters()
 	var start := _roster_page * GUI_ROSTER_PAGE_SIZE
+	_prepare_roster_texture_page(_roster_page)
 	for i in ROSTER_PATHS.size():
 		var card := get_node(ROSTER_PATHS[i]) as TextureButton
 		var index := start + i
@@ -543,7 +575,7 @@ func _sync_roster_card(card: TextureButton, instance: Dictionary) -> void:
 	card.disabled = false
 	card.modulate.a = 1.0
 	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
-	(card.get_node("Portrait") as TextureRect).texture = _get_monster_texture(monster_id)
+	_request_portrait_texture(monster_id, card.get_node("Portrait") as TextureRect, "roster")
 	(card.get_node("Check") as TextureRect).visible = in_team
 	(card.get_node("Level") as Label).text = "Lv.%d" % _get_real_level(instance_id)
 
@@ -594,9 +626,7 @@ func _calc_team_totals() -> Dictionary:
 
 
 func _load_player_data() -> Dictionary:
-	if _storage != null and _storage.has_method("load_player"):
-		return _storage.load_player()
-	return {"gold": 0, "diamond": 0, "stamina": 5}
+	return _player_snapshot
 
 
 func _format_number(value: int) -> String:
@@ -610,6 +640,68 @@ func _format_number(value: int) -> String:
 
 func _get_monster_texture(monster_id: String) -> Texture2D:
 	return _get_texture(MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team"))
+
+
+func _prepare_roster_texture_page(page: int) -> void:
+	if page == _loaded_roster_page:
+		return
+	_roster_load_generation += 1
+	for path: String in ROSTER_PATHS:
+		var portrait := get_node_or_null(path + "/Portrait") as TextureRect
+		if portrait != null:
+			portrait.texture = null
+	_roster_texture_cache.clear()
+	_loaded_roster_page = page
+
+
+func _request_portrait_texture(monster_id: String, target: TextureRect, scope: String) -> void:
+	var path := MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team")
+	if path.is_empty():
+		target.texture = null
+		return
+	var cache := _team_portrait_cache if scope == "team" else _roster_texture_cache
+	if cache.has(path):
+		target.texture = cache[path]
+		return
+	target.texture = null
+	var targets: Array = _pending_portrait_loads.get(path, [])
+	targets.append({
+		"node": target,
+		"scope": scope,
+		"generation": _roster_load_generation if scope == "roster" else -1,
+	})
+	_pending_portrait_loads[path] = targets
+	if targets.size() == 1:
+		ResourceLoader.load_threaded_request(path, "Texture2D", true, ResourceLoader.CACHE_MODE_REUSE)
+	set_process(true)
+
+
+func _poll_portrait_loads() -> void:
+	if _pending_portrait_loads.is_empty():
+		return
+	for path: String in _pending_portrait_loads.keys():
+		var status := ResourceLoader.load_threaded_get_status(path)
+		if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			continue
+		var targets: Array = _pending_portrait_loads[path]
+		_pending_portrait_loads.erase(path)
+		if status != ResourceLoader.THREAD_LOAD_LOADED:
+			continue
+		var texture := ResourceLoader.load_threaded_get(path) as Texture2D
+		if texture == null:
+			continue
+		for target_data: Dictionary in targets:
+			var scope := str(target_data.get("scope", ""))
+			if scope == "roster" and int(target_data.get("generation", -1)) != _roster_load_generation:
+				continue
+			var node := target_data.get("node") as TextureRect
+			if node == null or not is_instance_valid(node):
+				continue
+			if scope == "team":
+				_team_portrait_cache[path] = texture
+			else:
+				_roster_texture_cache[path] = texture
+			node.texture = texture
 
 
 func _gui_tex(key: String) -> Texture2D:

@@ -475,17 +475,14 @@ func get_captured_monsters() -> Array:
 
 ## 计算升级所需经验（每级所需经验递增）
 ## JS: _getExpForLevel(level)
-## 公式: 80 + level * 10
+## 公式由 GrowthRules 统一维护：Lv30 前线性，Lv31 起追加二次增长
 static func get_exp_for_level(level: int) -> int:
-	return 80 + level * 10
+	return GrowthRulesScript.get_exp_for_level(level)
 
 ## 获取当前等级总经验要求（用于经验条显示）
 ## JS: _getTotalExpForLevel(level)
 static func get_total_exp_for_level(level: int) -> int:
-	var total: int = 0
-	for l: int in range(1, level):
-		total += get_exp_for_level(l)
-	return total
+	return GrowthRulesScript.get_total_exp_for_level(level)
 
 ## 增加精灵经验，可触发升级
 ## JS: addMonsterExp(monsterId, expGained)
