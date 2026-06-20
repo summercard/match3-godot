@@ -1,0 +1,9 @@
+desert_cactus_basic.png | 西部仙人掌 初级 | emotion=胆小好奇 | size=(768, 768) | bbox=(137, 93, 630, 674) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+desert_cactus_middle.png | 西部仙人掌 中级 | emotion=自信警觉 | size=(768, 768) | bbox=(68, 53, 700, 715) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+desert_mummy_basic.png | 可爱木乃伊 初级 | emotion=困倦胆小 | size=(768, 768) | bbox=(59, 133, 607, 635) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+desert_mummy_middle.png | 可爱木乃伊 中级 | emotion=可靠保护 | size=(768, 768) | bbox=(54, 94, 714, 673) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+red_wine_scorpion_basic.png | 红酒蝎子 初级 | emotion=兴奋玩闹 | size=(768, 768) | bbox=(54, 156, 579, 611) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+red_wine_scorpion_middle.png | 红酒蝎子 中级 | emotion=警觉自信 | size=(768, 768) | bbox=(40, 92, 728, 675) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+pink_desert_fox_basic.png | 粉色沙漠狐狸 初级 | emotion=害羞好奇 | size=(768, 768) | bbox=(89, 64, 679, 703) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+pink_desert_fox_middle.png | 粉色沙漠狐狸 中级 | emotion=平静勇敢 | size=(768, 768) | bbox=(54, 78, 714, 690) | touch_edge=False | silhouette_truncation=False | transparent_corners=True | magenta_visible_px=0 | PASS=True
+ALL_PASS=True
