@@ -211,7 +211,7 @@ func _sync_resource_bar() -> void:
 	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}
 	_label("AlbumResourceBar/GoldCapsule/Value").text = "金币  %s" % _format_resource_number(int(player.get("gold", 0)))
 	_label("AlbumResourceBar/GemCapsule/Value").text = "钻石  %s" % _format_resource_number(int(player.get("gems", 0)))
-	_label("AlbumResourceBar/EnergyCapsule/Value").text = "体力  Full"
+	_label("AlbumResourceBar/EnergyCapsule/Value").text = "体力  %d/5" % int(player.get("stamina", 5))
 
 func _sync_header() -> void:
 	_label("Header/Title").text = "精灵图鉴"

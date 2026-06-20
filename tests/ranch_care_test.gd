@@ -44,10 +44,12 @@ func _run() -> void:
 	ranch["slots"] = slots
 	save_manager.set_ranch_state(ranch)
 	var before_exp: int = save_manager.get_instance_exp(low_id)
+	var pool_before: int = save_manager.get_shared_monster_exp()
 	var collected: float = save_manager.collect_idle_exp_for_instance(low_id)
 	var after_exp: int = save_manager.get_instance_exp(low_id)
 	_expect(collected > 0.0, "focused ranch collect should return exp")
-	_expect(after_exp > before_exp, "focused ranch collect should add exp")
+	_expect(after_exp == before_exp, "focused ranch collect should not directly add monster exp")
+	_expect(save_manager.get_shared_monster_exp() > pool_before, "focused ranch collect should add exp to the shared pool")
 
 	ranch = save_manager.get_ranch_state()
 	slots = ranch.get("slots", [])

@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://b8xsquivli7td" path="res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png" id="c06_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
-[node name="Chapter06FrostThrone" type="Control" unique_id=1903609080]
+[node name="Chapter06IceKingdom" type="Control" unique_id=1903609080]
 custom_minimum_size = Vector2(375, 1280)
 layout_mode = 3
 anchors_preset = 0

@@ -37,6 +37,7 @@
 [ext_resource type="Texture2D" uid="uid://u1nmo0dbthgh" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="36_home_nav"]
 [ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="37_card_back"]
 [ext_resource type="Texture2D" uid="uid://d0vsl4s2lgjbr" path="res://assets/images/ui/panels/team_new_ui_empty_pedestal_plus.png" id="38_empty_plus"]
+[ext_resource type="Texture2D" uid="uid://cxwjj7iyiuq0s" path="res://assets/images/effects/result_refresh_fx_sparkles.png" id="39_upgrade_sparkles"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r8pwf"]
 bg_color = Color(1, 0.96, 0.84, 0.99)
@@ -1741,9 +1742,9 @@ expand_mode = 1
 [node name="Portrait" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1629723582]
 layout_mode = 0
 offset_left = 18.0
-offset_top = 74.0
-offset_right = 153.0
-offset_bottom = 192.0
+offset_top = 46.0
+offset_right = 151.0
+offset_bottom = 154.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1762,9 +1763,9 @@ text = "暂无精灵"
 [node name="Name" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=384115174]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 47.0
+offset_top = 28.0
 offset_right = 157.0
-offset_bottom = 71.0
+offset_bottom = 50.0
 theme_override_colors/font_color = Color(0.21, 0.42, 0.76, 1)
 theme_override_font_sizes/font_size = 15
 text = "小火龙"
@@ -1773,9 +1774,9 @@ horizontal_alignment = 1
 [node name="Info" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=620100325]
 layout_mode = 0
 offset_left = 20.0
-offset_top = 190.0
+offset_top = 151.0
 offset_right = 150.0
-offset_bottom = 211.0
+offset_bottom = 172.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 11
@@ -1784,13 +1785,33 @@ horizontal_alignment = 1
 
 [node name="Stats" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1094460168]
 layout_mode = 0
-offset_left = 34.0
-offset_top = 211.0
-offset_right = 317.0
-offset_bottom = 237.0
+offset_left = 176.0
+offset_top = 46.0
+offset_right = 337.0
+offset_bottom = 207.0
 theme_override_colors/font_color = Color(0.49, 0.31, 0.13, 1)
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 9
 text = "HP 100   ATK 32   DEF 25"
+vertical_alignment = 0
+
+[node name="MonsterExpBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 176.0
+offset_right = 151.0
+offset_bottom = 188.0
+mouse_filter = 2
+show_percentage = false
+
+[node name="MonsterExpText" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 188.0
+offset_right = 157.0
+offset_bottom = 207.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 8
+text = "当前经验 0 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1833,7 +1854,7 @@ horizontal_alignment = 1
 [node name="RequirementsPanel" type="Panel" parent="Pages/ClassroomPage/DetailPanel" unique_id=1456940473]
 layout_mode = 0
 offset_left = 10.0
-offset_top = 239.0
+offset_top = 212.0
 offset_right = 341.0
 offset_bottom = 316.0
 mouse_filter = 2
@@ -1842,9 +1863,9 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_xhaif")
 [node name="Divider" type="ColorRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=497084759]
 layout_mode = 0
 offset_left = 175.0
-offset_top = 56.0
-offset_right = 177.0
-offset_bottom = 211.0
+offset_top = 31.0
+offset_right = 176.0
+offset_bottom = 207.0
 mouse_filter = 2
 color = Color(1, 0.76, 0.24, 0.5)
 
@@ -1855,11 +1876,12 @@ offset_right = 351.0
 offset_bottom = 38.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
 theme_override_font_sizes/font_size = 18
-text = "进化预览"
+text = "精灵详情"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TargetName" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1969326537]
+visible = false
 layout_mode = 0
 offset_left = 196.0
 offset_top = 47.0
@@ -1872,6 +1894,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TargetLevel" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=869140085]
+visible = false
 layout_mode = 0
 offset_left = 213.0
 offset_top = 190.0
@@ -1884,6 +1907,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Arrow" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=2124748050]
+visible = false
 layout_mode = 0
 offset_left = 140.0
 offset_top = 103.0
@@ -1898,21 +1922,21 @@ vertical_alignment = 1
 [node name="RequirementsTitle" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1539644153]
 layout_mode = 0
 offset_left = 23.0
-offset_top = 245.0
-offset_right = 184.0
-offset_bottom = 263.0
+offset_top = 216.0
+offset_right = 174.0
+offset_bottom = 234.0
 theme_override_colors/font_color = Color(0.5, 0.27, 0.08, 1)
 theme_override_font_sizes/font_size = 11
-text = "进化条件"
+text = "共享经验槽"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LevelRequirement" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=32927874]
 layout_mode = 0
 offset_left = 18.0
-offset_top = 270.0
-offset_right = 88.0
-offset_bottom = 294.0
+offset_top = 282.0
+offset_right = 92.0
+offset_bottom = 306.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 9
@@ -1922,9 +1946,9 @@ vertical_alignment = 1
 [node name="StoneRequirement" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=207402901]
 layout_mode = 0
 offset_left = 119.0
-offset_top = 270.0
-offset_right = 215.0
-offset_bottom = 294.0
+offset_top = 282.0
+offset_right = 177.0
+offset_bottom = 306.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 9
@@ -1932,6 +1956,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TargetPortrait" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1587896114]
+visible = false
 layout_mode = 0
 offset_left = 202.0
 offset_top = 74.0
@@ -1944,20 +1969,20 @@ stretch_mode = 5
 [node name="StoneIcon" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel" unique_id=1707619719]
 layout_mode = 0
 offset_left = 88.0
-offset_top = 269.0
+offset_top = 282.0
 offset_right = 112.0
-offset_bottom = 293.0
+offset_bottom = 306.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="EvolveButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel" unique_id=1962767549]
 layout_mode = 0
-offset_left = 229.0
-offset_top = 257.0
-offset_right = 325.0
-offset_bottom = 298.0
-pivot_offset = Vector2(48, 20.5)
+offset_left = 259.0
+offset_top = 248.0
+offset_right = 329.0
+offset_bottom = 284.0
+pivot_offset = Vector2(35, 18)
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -1968,7 +1993,7 @@ offset_left = -1.0
 offset_top = -4.0
 offset_right = 390.0
 offset_bottom = 201.0
-scale = Vector2(0.25, 0.25)
+scale = Vector2(0.18, 0.18)
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="Pages/ClassroomPage/DetailPanel/EvolveButton/butter02" unique_id=1426498676]
@@ -1995,11 +2020,133 @@ expand_mode = 1
 
 [node name="Text" type="Label" parent="Pages/ClassroomPage/DetailPanel/EvolveButton" unique_id=1296996258]
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 41.0
+offset_right = 70.0
+offset_bottom = 36.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "进化"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PoolBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 238.0
+offset_right = 171.0
+offset_bottom = 251.0
+mouse_filter = 2
+show_percentage = false
+
+[node name="PoolText" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 251.0
+offset_right = 177.0
+offset_bottom = 273.0
+theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
+theme_override_font_sizes/font_size = 9
+text = "总经验槽 0 / 1,500"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UpgradeButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel"]
+layout_mode = 0
+offset_left = 181.0
+offset_top = 248.0
+offset_right = 251.0
+offset_bottom = 284.0
+pivot_offset = Vector2(35, 18)
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="butter02" type="Control" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+custom_minimum_size = Vector2(260, 85)
+anchors_preset = 0
+offset_left = -1.0
+offset_top = -4.0
+offset_right = 390.0
+offset_bottom = 201.0
+scale = Vector2(0.18, 0.18)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton/butter02"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("17_7sekf")
+patch_margin_left = 72
+patch_margin_top = 44
+patch_margin_right = 72
+patch_margin_bottom = 44
+
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+visible = false
+layout_mode = 0
+offset_right = 70.0
+offset_bottom = 36.0
+mouse_filter = 2
+texture = ExtResource("17_qrgjm")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+layout_mode = 0
+offset_right = 70.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "升级"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UpgradeFeedback" type="Control" parent="Pages/ClassroomPage/DetailPanel"]
+visible = false
+z_index = 30
+layout_mode = 0
+offset_right = 351.0
+offset_bottom = 316.0
+mouse_filter = 2
+
+[node name="Glow" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 18.0
+offset_right = 169.0
+offset_bottom = 165.0
+mouse_filter = 2
+texture = ExtResource("39_upgrade_sparkles")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Message" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+z_index = 2
+layout_mode = 0
+offset_left = 67.0
+offset_top = 88.0
+offset_right = 286.0
+offset_bottom = 126.0
+theme_override_colors/font_color = Color(1, 0.82, 0.16, 1)
+theme_override_colors/font_outline_color = Color(0.36, 0.14, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "升级成功！"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Transfer" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+z_index = 2
+layout_mode = 0
+offset_left = 81.0
+offset_top = 218.0
+offset_right = 270.0
+offset_bottom = 247.0
+theme_override_colors/font_color = Color(0.24, 0.68, 0.12, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.76, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "经验槽 -100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -4286,7 +4433,7 @@ offset_top = 7.0
 offset_right = 27.0
 offset_bottom = 27.0
 mouse_filter = 2
-texture = ExtResource("8_5svvp")
+texture = ExtResource("34_social_heart")
 expand_mode = 1
 stretch_mode = 5
 
@@ -4297,7 +4444,7 @@ anchor_bottom = 1.0
 offset_left = 20.0
 theme_override_colors/font_color = Color(0.34, 0.17, 0.04, 1)
 theme_override_font_sizes/font_size = 12
-text = "体力  Full"
+text = "体力  5/5"
 horizontal_alignment = 1
 vertical_alignment = 1
 

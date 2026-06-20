@@ -280,7 +280,7 @@ func _draw_top_currency(font: Font) -> void:
 		_draw_texture_contain(_gui_tex(str(chip["icon"])), Rect2(rect.position.x + 7.0, rect.position.y + 5.0, 26.0, 26.0))
 		var value := str(player.get(str(chip["key"]), 0))
 		if str(chip["key"]) == "stamina":
-			value = "%s Full" % str(player.get("stamina", player.get("energy", 5)))
+			value = "%d/5" % int(player.get("stamina", player.get("energy", 5)))
 		else:
 			value = _format_number(int(value))
 		_draw_center_text(font, value, Vector2(rect.position.x + rect.size.x * 0.56, rect.position.y + 24.0), Color(0.32, 0.18, 0.06), 13.0, rect.size.x * 0.58)

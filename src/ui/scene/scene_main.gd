@@ -51,6 +51,8 @@ var _player: Dictionary = {
 	"level": 1,
 	"gold": 0,
 	"gems": 0,
+	"stamina": 5,
+	"achievement_score": 0,
 	"exp": 0,
 	"exp_to_level": 100
 }
@@ -61,6 +63,8 @@ var _player: Dictionary = {
 @onready var _exp_value: Label = %ExpValue
 @onready var _gold_value: Label = %GoldValue
 @onready var _diamond_value: Label = %DiamondValue
+@onready var _stamina_value: Label = %StaminaValue
+@onready var _rank_score: Label = %RankScore
 
 func _ready() -> void:
 	instance = self
@@ -75,7 +79,7 @@ func _ready() -> void:
 		_attach_button_feedback(button, _feedback_profile(button_id))
 		button.pressed.connect(_queue_button_pressed.bind(button_id))
 		button.tooltip_text = BUTTON_DESCRIPTIONS[button_id]
-	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus"]:
+	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus", "Header/StaminaPlus"]:
 		var plus_button := get_node_or_null(plus_path) as TextureButton
 		if plus_button != null:
 			_attach_button_feedback(plus_button, CartoonButtonFeedback.Profile.ICON)
@@ -101,6 +105,8 @@ func _load_player_data() -> void:
 			"level": level,
 			"gold": player.get("gold", 0),
 			"gems": player.get("gems", 0),
+			"stamina": player.get("stamina", player.get("energy", 5)),
+			"achievement_score": _calc_achievement_score(),
 			"exp": player.get("exp", 0),
 			"exp_to_level": _storage.get_exp_for_level(level) if _storage.has_method("get_exp_for_level") else 100
 		}
@@ -114,6 +120,16 @@ func _update_player_display() -> void:
 	_exp_value.text = "%s/%s" % [_format_number(int(exp_value)), _format_number(int(exp_target))]
 	_gold_value.text = _format_number(int(_player.get("gold", 0)))
 	_diamond_value.text = _format_number(int(_player.get("gems", 0)))
+	_stamina_value.text = "%d/5" % int(_player.get("stamina", 5))
+	_rank_score.text = _format_number(int(_player.get("achievement_score", 0)))
+
+func _calc_achievement_score() -> int:
+	if _storage == null or not _storage.has_method("load_achievements"):
+		return 0
+	var data: Dictionary = _storage.load_achievements()
+	var unlocked: Array = data.get("unlockedIds", [])
+	var claimed: Array = data.get("claimedIds", [])
+	return unlocked.size() * 100 + claimed.size() * 50
 
 func _on_button_pressed(button_id: String) -> void:
 	button_pressed.emit(button_id)

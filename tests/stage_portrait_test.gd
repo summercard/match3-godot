@@ -36,9 +36,9 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	var stage_nodes: Node = scene.get_node_or_null("MapScroll/ChapterMaps/Chapter01Grassland/StageNodes")
+	var stage_nodes: Node = scene.get_node_or_null("MapScroll/ChapterMaps/Chapter01BreezePlain/StageNodes")
 	if stage_nodes == null:
-		_failures.append("Chapter01Grassland/StageNodes not found")
+		_failures.append("Chapter01BreezePlain/StageNodes not found")
 		_report_and_quit()
 		return
 
@@ -160,7 +160,7 @@ func _run() -> void:
 	_check(not (portrait2 as TextureRect).visible, "Unlocked stage with missing portrait should hide portrait (no crash)")
 
 	# === BossStage 也应支持新规则 ===
-	var boss_button: TextureButton = scene.get_node_or_null("MapScroll/ChapterMaps/Chapter01Grassland/BossStage") as TextureButton
+	var boss_button: TextureButton = scene.get_node_or_null("MapScroll/ChapterMaps/Chapter01BreezePlain/BossStage") as TextureButton
 	if boss_button != null:
 		var boss_portrait: TextureRect = boss_button.get_node_or_null("MonsterPortrait") as TextureRect
 		_check(boss_portrait != null, "BossStage should also have MonsterPortrait node")

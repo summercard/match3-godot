@@ -25,7 +25,7 @@ const BTN_H := 27.0
 const BOTTOM_NAV_RECT := Rect2(0.0, 596.0, 375.0, 71.0)
 
 const SHOP_ASSETS := {
-	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"bg": "res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png",
 	"top_bar": "res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png",
 	"back_button": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"currency_chip": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
@@ -73,11 +73,10 @@ const ITEM_ICON_ASSETS := {
 }
 
 const TABS := [
-	{"id": "gems", "label": "宝石", "icon": "◆"},
-	{"id": "coins", "label": "金币", "icon": "●"},
-	{"id": "hearts", "label": "爱心", "icon": "♥"},
-	{"id": "boosters", "label": "增强", "icon": "★"},
-	{"id": "chest", "label": "宝箱", "icon": "▣"},
+	{"id": "all", "label": "所有", "icon": "▣"},
+	{"id": "capture", "label": "捕获道具", "icon": "●"},
+	{"id": "battle", "label": "战场道具", "icon": "★"},
+	{"id": "other", "label": "其他道具", "icon": "◆"},
 ]
 
 const C := {
@@ -102,7 +101,7 @@ var swipe_handler: Callable
 var _storage: Node = null
 var _bg_texture: ColorRect
 var _texture_cache: Dictionary = {}
-var _active_tab := "gems"
+var _active_tab := "all"
 var _popup_quantity := 1
 
 
@@ -131,7 +130,7 @@ func init(data: Dictionary = {}) -> void:
 	popup = {}
 	scroll_offset = 0.0
 	_popup_quantity = 1
-	_active_tab = data.get("tab", "gems")
+	_active_tab = data.get("tab", "all")
 	_build_shop_list()
 	_set_input_handlers()
 	set_process(false)
@@ -177,6 +176,7 @@ func _build_shop_list() -> void:
 			"id": item_id,
 			"price": entry.get("price", 0),
 			"currency": entry.get("currency", "gold"),
+			"daily_limit": entry.get("daily_limit", _default_daily_limit(item_data)),
 			"label": entry.get("label", ""),
 			"data": item_data
 		})
@@ -313,6 +313,13 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 		return
 
 	quantity = maxi(1, quantity)
+	var remaining := _get_daily_remaining(item_id)
+	if remaining <= 0:
+		_show_toast("今日购买次数已用完", "warning")
+		return
+	if quantity > remaining:
+		_show_toast("今日最多还能购买 %d 个" % remaining, "warning")
+		return
 	var player: Dictionary = _load_player_data()
 	var total_price: float = _get_item_price(item_id) * quantity
 	var currency: String = _get_item_currency(item_id)
@@ -324,15 +331,19 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 		player["gold"] = (player.get("gold", 0) as float) - total_price
 	elif currency == "gems":
 		if (player.get("gems", 0) as float) < total_price:
-			_show_toast("钻石不足", "warning")
+			_show_toast("宝石不足", "warning")
 			return
 		player["gems"] = (player.get("gems", 0) as float) - total_price
+	else:
+		_show_toast("商品货币配置错误", "warning")
+		return
 
 	_save_player_data(player)
 	player_data["gold"] = player.get("gold", 0)
 	player_data["gems"] = player.get("gems", 0)
 
 	_add_item(item_id, quantity)
+	_record_daily_purchase(item_id, quantity)
 	emit_signal("purchase_completed", item_id, quantity)
 	_show_toast("获得 %s x%d" % [str(item_data.get("name", "")), quantity], "success")
 	# print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])
@@ -370,6 +381,8 @@ func _get_item_currency(item_id: String) -> String:
 
 
 func _can_afford(item_id: String, quantity: int = 1) -> bool:
+	if quantity > _get_daily_remaining(item_id):
+		return false
 	var price := _get_item_price(item_id) * quantity
 	var currency := _get_item_currency(item_id)
 	if currency == "gold":
@@ -574,13 +587,43 @@ func _popup_confirm_rect() -> Rect2:
 
 
 func _get_limit_text(shop_item: Dictionary) -> String:
-	var item: Dictionary = shop_item.get("data", {})
-	var item_type: String = item.get("type", "")
-	if item_type == "evolution":
-		return "限购 3/3"
-	if item_type == "capture":
-		return "限购 10/10"
-	return "限购 5/5"
+	var item_id := str(shop_item.get("id", ""))
+	var limit := _get_daily_limit(item_id)
+	return "每日限购 %d/%d" % [_get_daily_remaining(item_id), limit]
+
+
+func _default_daily_limit(item: Dictionary) -> int:
+	match str(item.get("type", "")):
+		"capture":
+			return 10
+		"evolution":
+			return 3
+		_:
+			return 5
+
+
+func _get_daily_limit(item_id: String) -> int:
+	for entry in shop_list:
+		if str(entry.get("id", "")) == item_id:
+			return maxi(1, int(entry.get("daily_limit", 1)))
+	return 1
+
+
+func _get_daily_purchased(item_id: String) -> int:
+	var storage := _get_storage()
+	if storage and storage.has_method("get_shop_daily_purchase_count"):
+		return int(storage.get_shop_daily_purchase_count(item_id))
+	return 0
+
+
+func _get_daily_remaining(item_id: String) -> int:
+	return maxi(0, _get_daily_limit(item_id) - _get_daily_purchased(item_id))
+
+
+func _record_daily_purchase(item_id: String, quantity: int) -> void:
+	var storage := _get_storage()
+	if storage and storage.has_method("record_shop_daily_purchase"):
+		storage.record_shop_daily_purchase(item_id, quantity)
 
 
 func _get_item_count(item_id: String) -> int:

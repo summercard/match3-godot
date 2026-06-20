@@ -9,6 +9,7 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
+const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
 const ELEMENT_LABELS := {
 	"fire": "火", "water": "水", "grass": "草",
 	"thunder": "雷", "light": "光", "dark": "暗"
@@ -162,10 +163,11 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(true)
 
-func init(_data: Dictionary = {}) -> void:
+func init(data: Dictionary = {}) -> void:
 	_game = _root_node("GameManager")
 	_storage = _resolve_storage()
-	_active_page = "ranch"
+	var requested_page := str(data.get("page", data.get("tab", "ranch")))
+	_active_page = requested_page if requested_page in ["ranch", "classroom", "social"] else "ranch"
 	_load_data()
 	_calc_idle_exp()
 	_init_bubbles()
@@ -415,7 +417,7 @@ func _try_social_action() -> void:
 			var collect_result: Dictionary = _storage.collect_social(0)
 			if bool(collect_result.get("ok", false)):
 				var result: Dictionary = collect_result.get("result", {})
-				_show_status("%s +%dEXP +%d金币" % [result.get("label", "社交完成"), int(result.get("exp_each", 0)), int(result.get("gold", 0))])
+				_show_status("%s 经验槽+%d +%d金币" % [result.get("label", "社交完成"), int(result.get("shared_exp_added", int(result.get("exp_each", 0)) * 2)), int(result.get("gold", 0))])
 				_social_result_popup = result.duplicate(true)
 				_load_data()
 				queue_redraw()
@@ -628,8 +630,8 @@ func _on_picker_item_pressed(instance_id: String) -> void:
 	var old_id = _slots_data[_selected_slot].get("instance_id", null)
 	if old_id != null:
 		var old_exp := int(_idle_exp_map.get(str(old_id), 0))
-		if old_exp > 0 and _storage != null and _storage.has_method("add_instance_exp"):
-			_storage.add_instance_exp(str(old_id), old_exp)
+		if old_exp > 0 and _storage != null and _storage.has_method("add_shared_monster_exp"):
+			_storage.add_shared_monster_exp(old_exp)
 		if _care_focus_instance_id == str(old_id):
 			_care_focus_instance_id = ""
 	_slots_data[_selected_slot] = {
@@ -651,13 +653,17 @@ func _collect_slot(slot_index: int) -> void:
 	if exp <= 0:
 		_show_status("暂无可收获收益")
 		return
-	if _storage != null and _storage.has_method("add_instance_exp"):
-		_storage.add_instance_exp(str(instance_id), exp)
+	var added := exp
+	var overflow := 0
+	if _storage != null and _storage.has_method("add_shared_monster_exp"):
+		var add_result: Dictionary = _storage.add_shared_monster_exp(exp)
+		added = int(add_result.get("added", exp))
+		overflow = int(add_result.get("overflow", 0))
 	slot["placed_at"] = Time.get_unix_time_from_system() * 1000.0
 	_save_ranch_state()
 	_refresh_ranch_view()
-	exp_collected.emit(exp)
-	_show_status("收获 +%d EXP" % exp)
+	exp_collected.emit(added)
+	_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
 
 func _on_collect_pressed() -> void:
 	var total_collected := 0
@@ -668,15 +674,19 @@ func _on_collect_pressed() -> void:
 		var exp := int(_idle_exp_map.get(str(monster_id), 0))
 		if exp <= 0:
 			continue
-		if _storage != null and _storage.has_method("add_instance_exp"):
-			_storage.add_instance_exp(str(monster_id), exp)
 		total_collected += exp
 		slot["placed_at"] = Time.get_unix_time_from_system() * 1000.0
+	var added := total_collected
+	var overflow := 0
+	if total_collected > 0 and _storage != null and _storage.has_method("add_shared_monster_exp"):
+		var add_result: Dictionary = _storage.add_shared_monster_exp(total_collected)
+		added = int(add_result.get("added", total_collected))
+		overflow = int(add_result.get("overflow", 0))
 	_save_ranch_state()
 	_refresh_ranch_view()
 	if total_collected > 0:
-		exp_collected.emit(total_collected)
-		_show_status("收获 +%d EXP" % total_collected)
+		exp_collected.emit(added)
+		_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
 	else:
 		_show_status("暂无可收获收益")
 
@@ -719,6 +729,28 @@ func _on_evolve_pressed() -> void:
 	_show_status("进化成功：%s %s" % [str(new_data.get("name", new_id)), play_text])
 	_load_data()
 	_refresh_ranch_view()
+
+func _on_upgrade_pressed() -> Dictionary:
+	var instance_id := _class_selected_instance_id
+	if instance_id.is_empty():
+		_show_status("请选择精灵")
+		return {"ok": false, "reason": "not_selected"}
+	if _storage == null or not _storage.has_method("feed_instance_from_shared_exp"):
+		_show_status("经验槽暂不可用")
+		return {"ok": false, "reason": "unavailable"}
+	var result: Dictionary = _storage.feed_instance_from_shared_exp(instance_id)
+	if not bool(result.get("ok", false)):
+		match str(result.get("reason", "")):
+			"empty": _show_status("共享经验槽为空")
+			"max_level": _show_status("精灵已达到最高等级")
+			_: _show_status("升级失败")
+		return result
+	if bool(result.get("leveledUp", false)):
+		_show_status("升级成功：Lv.%d" % int(result.get("newLevel", 1)))
+	else:
+		_show_status("投入 %d 经验" % int(result.get("consumed", 0)))
+	_refresh_ranch_view()
+	return result
 
 func _refresh_ranch_view() -> void:
 	# Player actions may level up or evolve a monster. Refresh the snapshot once
@@ -1187,8 +1219,7 @@ func _get_instance_stats(instance_id: String) -> Dictionary:
 	var nature := str(instance.get("nature", ""))
 	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier
 	var is_elite: bool = bool(instance.get("isElite", MonsterDb.MONSTER_DB.get(monster_id, {}).get("isElite", false)))
-	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
-	var stats := StatCalculator.calc_with_tier(monster_id, level, nature, tier)
+	var stats := MonsterService.get_owned_stats(monster_id, level, nature, is_elite)
 	_stats_by_instance[instance_id] = stats
 	return stats
 
@@ -1456,8 +1487,11 @@ func _get_care_state(instance_id: String) -> Dictionary:
 		return _care_state_map[instance_id] as Dictionary
 	if _storage != null and _storage.has_method("get_ranch_care_state"):
 		return _storage.get_ranch_care_state(instance_id)
+	var instance := _get_instance(instance_id)
+	var nature_mult := RanchCareRulesScript.calc_nature_multiplier(str(instance.get("nature", "")))
 	return {
-		"rate": 5.0 + float(_get_monster_level(instance_id)),
+		"rate": RanchCareRulesScript.calc_base_rate(_get_monster_level(instance_id)) * nature_mult,
+		"natureMultiplier": nature_mult,
 		"label": "专注" if _care_focus_instance_id == instance_id else ""
 	}
 

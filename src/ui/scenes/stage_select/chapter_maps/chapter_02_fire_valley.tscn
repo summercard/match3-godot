@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://u74n5h65r50f"]
+[gd_scene format=3 uid="uid://biwvyrw8pvgb1"]
 
 [ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="6_ydqli"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
@@ -342,9 +342,9 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
 [node name="butter02" type="Control" parent="StageNodes/Stage01/SweepButton" unique_id=647857532]
 custom_minimum_size = Vector2(260, 85)
@@ -363,7 +363,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -374,7 +373,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -467,11 +465,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage02/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage02/SweepButton" unique_id=737494131]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -481,14 +479,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton/butter02" unique_id=1972663041]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -499,7 +496,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -592,11 +588,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage03/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage03/SweepButton" unique_id=285902709]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -606,14 +602,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton/butter02" unique_id=1203645404]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -624,7 +619,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -717,11 +711,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage04/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage04/SweepButton" unique_id=1944346059]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -731,14 +725,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton/butter02" unique_id=2101085713]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -749,7 +742,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -842,11 +834,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage05/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage05/SweepButton" unique_id=624552686]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -856,14 +848,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton/butter02" unique_id=1423895714]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -874,7 +865,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -967,11 +957,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage06/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage06/SweepButton" unique_id=643272547]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -981,14 +971,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton/butter02" unique_id=1704961283]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -999,7 +988,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1092,11 +1080,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage07/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage07/SweepButton" unique_id=379442666]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1106,14 +1094,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton/butter02" unique_id=2042325764]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1124,7 +1111,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1217,11 +1203,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage08/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage08/SweepButton" unique_id=1182433758]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1231,14 +1217,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton/butter02" unique_id=697997160]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1249,7 +1234,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1342,11 +1326,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage09/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage09/SweepButton" unique_id=1668017982]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1356,14 +1340,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton/butter02" unique_id=1233453517]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1374,7 +1357,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1467,11 +1449,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage10/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage10/SweepButton" unique_id=732687522]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1481,14 +1463,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton/butter02" unique_id=1468205451]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1499,7 +1480,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1592,11 +1572,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage11/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage11/SweepButton" unique_id=1693814814]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1606,14 +1586,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton/butter02" unique_id=195010323]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("6_ydqli")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1624,7 +1603,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"

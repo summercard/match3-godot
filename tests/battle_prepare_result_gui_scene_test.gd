@@ -49,9 +49,19 @@ func _run() -> void:
 		var reward_label := prepare.get_node(reward_slot_path + "/Label") as Label
 		var reward_icon := prepare.get_node(reward_slot_path + "/Icon") as TextureRect
 		_expect(not reward_label.visible and reward_label.text.is_empty(), "%s should hide reward text and quantity" % reward_slot_path)
-		_expect(reward_icon.position.x >= 8.0 and reward_icon.size.x >= 38.0, "%s icon should stay centered after label removal" % reward_slot_path)
+		_expect(reward_icon.position.x >= 8.0 and reward_icon.size.x >= 30.0, "%s icon should stay centered without reward text" % reward_slot_path)
+	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "first-clear diamond preview should use the diamond icon")
+	prepare.init({"stageId": "stage_1_2"})
+	_expect(prepare.has_node("RewardPreview/Slots/RewardSlot4"), "battle prepare should support a fourth reward preview slot")
+	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "stage with guaranteed item should still preview first-clear diamonds by icon")
+	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot4/Icon") as TextureRect).texture.resource_path.ends_with("items_new_icon_capture_ball.png"), "stage guaranteed item should show its real item icon")
+	_expect(not (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).visible and (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).text.is_empty(), "stage guaranteed item should not show reward text")
+	save_manager.save_stage_stars("stage_1_2", 3)
+	prepare.init({"stageId": "stage_1_2"})
+	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("items_new_icon_capture_ball.png"), "cleared stage should replace first-clear diamonds with the guaranteed item icon")
+	_expect(not (prepare.get_node("RewardPreview/Slots/RewardSlot4") as Control).visible, "cleared stage with three reward types should hide unused fourth preview slot")
 	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
-	_expect(_started_stage_id == "stage_1_1", "editable start button should preserve battle start behavior")
+	_expect(_started_stage_id == "stage_1_2", "editable start button should preserve battle start behavior")
 	prepare.init({"stageId": "stage_2_12"})
 	_expect((prepare.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle prepare should use map2 war background")
 	var enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
@@ -94,6 +104,12 @@ func _run() -> void:
 		"capture_item_used": {"name": "捕捉球"},
 		"capture_window": {"label": "稳定", "stability": 0.82},
 	})
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot1/Amount") as Label).text == "+0", "gold reward should begin its count-up at zero")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot2/Amount") as Label).text.contains("获得 +0"), "shared experience gain should begin its count-up at zero")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Amount") as Label).text == "+0", "diamond reward should begin its count-up at zero")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot4/Amount") as Label).text.ends_with("x0"), "item count should begin its count-up at zero")
+	result.set("_reward_anim_progress", 1.0)
+	result.call("_sync_gui")
 	_expect(result.scene_file_path == "res://src/ui/scenes/battle_result.tscn", "battle result should be an editable PackedScene")
 	_expect((result.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle result should use map1 war background")
 	_expect((result.get_node("CaptureResultPanel") as Control).scene_file_path == "res://src/ui/scenes/capture_result_panel.tscn", "capture pet result should be an independent editable GUI panel")
@@ -116,13 +132,16 @@ func _run() -> void:
 		_expect(result.has_node(path), "battle result GUI node should exist: %s" % path)
 	_expect((result.get_node("CaptureSuccessLayer") as Control).visible, "capture success layer should show captured result")
 	_expect(not (result.get_node("CaptureResultPanel") as Control).visible, "old capture pet panel should be hidden behind success layer")
-	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Amount") as Label).text == "超级捕获球 x2", "result reward slot should name the same item it grants")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Amount") as Label).text == "+3", "first clear should show the normal-stage diamond reward")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "first-clear diamonds should use the formal diamond icon")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot4/Amount") as Label).text == "超级捕获球 x2", "result reward slot should name the same item it grants")
 	_expect((result.get_node("RewardPanel/Slots/RewardSlot1/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_gold_coin_v3.png"), "result gold reward should use the formal art icon")
 	_expect((result.get_node("RewardPanel/Slots/RewardSlot2/Icon") as TextureRect).texture.resource_path.ends_with("ranch_icon_exp_badge.png"), "result exp reward should use the formal art icon")
 	var exp_card := result.get_node("ExpPanel/Cards/ExpCard1") as Control
 	var exp_label := exp_card.get_node("Exp") as Label
-	_expect(exp_label.get_theme_font_size("font_size") <= 8 and exp_label.clip_text, "result monster exp text should stay compact and clipped inside the card")
-	_expect(exp_label.position.x >= 0.0 and exp_label.position.x + exp_label.size.x <= exp_card.size.x + 0.5, "result monster exp text box should stay inside the card width")
+	_expect(not (exp_card.get_node("Level") as Label).visible and not exp_label.visible, "result monster cards should hide level and allocation text")
+	_expect((result.get_node("RewardPanel/Slots/RewardSlot2/Amount") as Label).text.contains("总槽") and (result.get_node("RewardPanel/Slots/RewardSlot2/Amount") as Label).text.contains("获得 +"), "experience reward should show total pool and gained experience")
+	_expect((result.get_node("Buttons/RetryButton/Text") as Label).text == "课堂升级精灵", "victory result should offer classroom upgrading")
 	var inventory_after_result: Dictionary = save_manager.load_inventory() if save_manager != null else {}
 	_expect(int(inventory_after_result.get("capture_ball_plus", 0)) == 2, "result should grant the same guaranteed item count shown in the reward slot")
 	var captured_instances: Array = save_manager.get_instances_by_monster_id("enemy_001") if save_manager != null and save_manager.has_method("get_instances_by_monster_id") else []

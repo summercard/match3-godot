@@ -61,6 +61,8 @@ func _run() -> void:
 		_expect((ranch.get_node("Pages/SocialPage") as Control).visible, "social button should reveal social GUI page")
 		(ranch.get_node("Header/BackButton") as TextureButton).pressed.emit()
 		_expect((ranch.get_node("Pages/RanchPage") as Control).visible, "back from subpage should reveal ranch GUI page")
+		ranch.init({"page": "classroom"})
+		_expect((ranch.get_node("Pages/ClassroomPage") as Control).visible, "ranch route should support opening the classroom directly")
 		ranch.set("_storage", null)
 		ranch.set("_captured_monsters", [
 			{"instanceId": "monster_001", "monsterId": "monster_001", "level": 3, "nature": "brave"},

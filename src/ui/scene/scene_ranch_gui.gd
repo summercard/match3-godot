@@ -4,6 +4,7 @@ class_name SceneRanchGui
 extends "res://src/ui/controllers/ranch_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const GrowthRulesScript := preload("res://src/core/growth_rules.gd")
 const PAGE_BACKGROUNDS := {
 	"ranch": "res://assets/images/ui/backgrounds/ranch_optimized_bg_ranch_pasture_750.png",
 	"classroom": "res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png",
@@ -109,6 +110,8 @@ var _subpage_entry_tweens: Array[Tween] = []
 var _hub_entry_tweens: Array[Tween] = []
 var _hub_entry_played: bool = false
 var _portrait_path_cache: Dictionary = {}
+var _upgrade_animating: bool = false
+var _upgrade_feedback_tween: Tween = null
 
 func _ready() -> void:
 	super._ready()
@@ -168,6 +171,7 @@ func _connect_gui_actions() -> void:
 		_connect_button(RANCH_CARD_PATHS[i], _on_ranch_card_pressed.bind(i))
 
 	_connect_button("Pages/ClassroomPage/DetailPanel/EvolveButton", _on_evolve_button_pressed)
+	_connect_button("Pages/ClassroomPage/DetailPanel/UpgradeButton", _on_upgrade_button_pressed)
 	_connect_button("Pages/ClassroomPage/BottomButtons/RanchButton", _switch_to_ranch)
 	_connect_button("Pages/ClassroomPage/BottomButtons/SocialButton", _switch_to_social)
 	_connect_button("Pages/ClassroomPage/RosterPanel/PreviousButton", _on_class_previous_pressed)
@@ -248,6 +252,22 @@ func _on_class_card_pressed(visible_index: int) -> void:
 func _on_evolve_button_pressed() -> void:
 	_on_evolve_pressed()
 	_sync_gui()
+
+func _on_upgrade_button_pressed() -> void:
+	if _upgrade_animating:
+		return
+	var instance_id := _class_selected_instance_id
+	var before := _fresh_instance(instance_id).duplicate(true)
+	var pool_before := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else 0
+	var result: Dictionary = _on_upgrade_pressed()
+	var after := _fresh_instance(instance_id).duplicate(true)
+	var pool_after := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else pool_before
+	_sync_gui()
+	if bool(result.get("ok", false)):
+		_status_text = ""
+		_status_timer = 0.0
+		_sync_status()
+		_play_upgrade_feedback(before, after, result, pool_before, pool_after)
 
 func _on_place_switch_pressed() -> void:
 	_cycle_social_place()
@@ -410,30 +430,36 @@ func _sync_ranch_slots() -> void:
 		_set_visible(sparkle, occupied)
 		_set_visible(plus, not occupied)
 		_set_visible(empty_text, not occupied)
-		_apply_ranch_slot_level_text_style(level)
-		_apply_ranch_slot_idle_text_style(status, timer)
+		var selected := i == _selected_slot
+		_apply_ranch_slot_level_text_style(level, selected and occupied)
+		_apply_ranch_slot_idle_text_style(status, timer, selected and occupied)
 		if occupied:
 			_set_texture(portrait, _portrait_texture(instance_id))
 			_set_text(level, "Lv.%d" % _get_monster_level(instance_id))
 			var care: Dictionary = _care_state_map.get(instance_id, _get_care_state(instance_id))
-			_set_text(status, "EXP +%d/h" % (60 + _get_monster_level(instance_id) * 10))
+			_set_text(status, "EXP +%d/h" % roundi(float(care.get("rate", _get_idle_exp_rate(instance_id))) * 12.0))
 			_set_text(timer, _format_elapsed(slot.get("placed_at", null)))
 			timer.modulate = TEXT_GOLD if not str(care.get("label", "")).is_empty() else TEXT_WHITE
+			level_badge.modulate = Color(1.18, 1.06, 0.48) if selected else Color.WHITE
+			ribbon.modulate = Color(1.18, 1.08, 0.52) if selected else Color.WHITE
 		else:
 			empty_text.text = "放入这里" if i == _selected_slot else "空位"
 			empty_text.modulate = RANCH_SLOT_EMPTY_SELECTED_TEXT_COLOR if i == _selected_slot else TEXT_WHITE
 			plus.modulate = TEXT_GOLD if i == _selected_slot else Color(0.98, 0.90, 0.67)
 			_apply_ranch_slot_empty_text_style(plus, empty_text, i == _selected_slot)
 
-func _apply_ranch_slot_level_text_style(level: Label) -> void:
+func _apply_ranch_slot_level_text_style(level: Label, selected: bool = false) -> void:
 	if level != null:
 		level.add_theme_font_size_override("font_size", RANCH_SLOT_LEVEL_FONT_SIZE)
+		level.add_theme_constant_override("outline_size", 4 if selected else 1)
+		level.add_theme_color_override("font_outline_color", Color(1.0, 0.58, 0.05, 1.0) if selected else Color(1.0, 0.95, 0.78, 1.0))
 		level.clip_text = true
 
-func _apply_ranch_slot_idle_text_style(status: Label, timer: Label) -> void:
+func _apply_ranch_slot_idle_text_style(status: Label, timer: Label, selected: bool = false) -> void:
 	if status != null:
 		status.add_theme_font_size_override("font_size", RANCH_SLOT_EXP_FONT_SIZE)
-		status.add_theme_constant_override("outline_size", RANCH_SLOT_EXP_OUTLINE_SIZE)
+		status.add_theme_constant_override("outline_size", 4 if selected else RANCH_SLOT_EXP_OUTLINE_SIZE)
+		status.add_theme_color_override("font_outline_color", Color(0.95, 0.45, 0.02, 1.0) if selected else Color(0.0, 0.0, 0.0, 0.7))
 		status.clip_text = true
 	if timer != null:
 		timer.add_theme_font_size_override("font_size", RANCH_SLOT_TIMER_FONT_SIZE)
@@ -504,7 +530,7 @@ func _sync_top_resource_bar() -> void:
 	var values := [
 		"金币  %s" % _format_resource_number(int(player.get("gold", 0))),
 		"钻石  %s" % _format_resource_number(int(player.get("gems", 0))),
-		"体力  Full",
+		"体力  %d/5" % int(player.get("stamina", 5)),
 	]
 	for i in 3:
 		var panel := bar.get_child(i) as Panel
@@ -773,7 +799,6 @@ func _attach_interaction_feedback() -> void:
 	var paths := [
 		"Header/BackButton",
 		"Pages/RanchPage/BottomButtons/FocusButton",
-		"Pages/ClassroomPage/DetailPanel/EvolveButton",
 		"Pages/SocialPage/PlacePanel/SwitchButton",
 		"Pages/SocialPage/BottomButtons/ActionButton",
 		"Pages/SocialPage/ResultPopup/ConfirmButton",
@@ -785,6 +810,8 @@ func _attach_interaction_feedback() -> void:
 	for path in paths:
 		var button := get_node_or_null(path) as BaseButton
 		_attach_button_feedback(button, CartoonButtonFeedback.Profile.NAV, false)
+	_attach_button_feedback(get_node_or_null("Pages/ClassroomPage/DetailPanel/UpgradeButton") as BaseButton, CartoonButtonFeedback.Profile.PRIMARY, true)
+	_attach_button_feedback(get_node_or_null("Pages/ClassroomPage/DetailPanel/EvolveButton") as BaseButton, CartoonButtonFeedback.Profile.ENTRY, true)
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
 	if nav != null:
 		for i in 5:
@@ -829,6 +856,7 @@ func _sync_classroom_page() -> void:
 	var target_portrait := panel.get_node("TargetPortrait") as TextureRect
 	var empty := panel.get_node("Empty") as Label
 	var evolve := panel.get_node("EvolveButton") as TextureButton
+	var upgrade := panel.get_node("UpgradeButton") as TextureButton
 	var stone_icon := panel.get_node("StoneIcon") as TextureRect
 	_apply_classroom_detail_text_style(panel)
 	if instance_id.is_empty():
@@ -837,9 +865,10 @@ func _sync_classroom_page() -> void:
 		stone_icon.visible = false
 		empty.visible = true
 		evolve.disabled = true
+		upgrade.disabled = true
 		_set_action_frame(evolve, false)
 	else:
-		var instance := _get_instance(instance_id)
+		var instance := _fresh_instance(instance_id)
 		var monster_id := str(instance.get("monsterId", _get_monster_id(instance_id)))
 		var monster := MonsterDb.get_monster(monster_id)
 		var stats := _get_instance_stats(instance_id)
@@ -848,22 +877,30 @@ func _sync_classroom_page() -> void:
 		var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
 		var target_name := str(target.get("name", "最终形态")) if not target.is_empty() else "最终形态"
 		var level := int(instance.get("level", 1))
-		var target_stats := StatCalculator.calc_with_tier(target_id, level, str(instance.get("nature", "")), StatCalculator.EnemyTier.ELITE if bool(instance.get("isElite", MonsterDb.MONSTER_DB.get(target_id, {}).get("isElite", false))) else StatCalculator.EnemyTier.NORMAL) if not target_id.is_empty() else {}
 		var required_level := int(info.get("required_level", 1))
 		var item_count := int(info.get("item_count", 0))
 		var required_item := str(info.get("required_item", ""))
 		portrait.visible = true
-		target_portrait.visible = not target.is_empty()
+		target_portrait.visible = false
 		stone_icon.visible = not required_item.is_empty()
 		empty.visible = false
 		portrait.texture = _portrait_texture(instance_id)
 		target_portrait.texture = _monster_portrait_texture(target_id)
 		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
 		(panel.get_node("Name") as Label).text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", monster_id))]
-		(panel.get_node("Info") as Label).text = "Lv.%d · %s · %s" % [level, _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
-		(panel.get_node("TargetName") as Label).text = target_name
-		(panel.get_node("TargetLevel") as Label).text = "进化后 · Lv.%d" % level if not target.is_empty() else "已是最终形态"
-		(panel.get_node("Stats") as Label).text = "属性预览  HP %d→%d\nATK %d→%d    DEF %d→%d" % [int(stats.get("hp", 0)), int(target_stats.get("hp", stats.get("hp", 0))), int(stats.get("atk", 0)), int(target_stats.get("atk", stats.get("atk", 0))), int(stats.get("def", 0)), int(target_stats.get("def", stats.get("def", 0)))]
+		(panel.get_node("Info") as Label).text = _classroom_info_text(instance, monster)
+		(panel.get_node("TargetName") as Label).visible = false
+		(panel.get_node("TargetLevel") as Label).visible = false
+		(panel.get_node("Arrow") as Label).visible = false
+		(panel.get_node("Stats") as Label).text = _classroom_stats_text(instance, monster, stats)
+		var current_exp := int(instance.get("exp", 0))
+		var needed_exp := GrowthRulesScript.get_exp_for_level(level)
+		_sync_exp_progress(panel.get_node("MonsterExpBar") as ProgressBar, current_exp, needed_exp)
+		(panel.get_node("MonsterExpText") as Label).text = "当前经验 %d / %d" % [current_exp, needed_exp]
+		var pool_exp := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else 0
+		var pool_capacity := int(_storage.get_shared_monster_exp_capacity()) if _storage != null and _storage.has_method("get_shared_monster_exp_capacity") else 1
+		_sync_exp_progress(panel.get_node("PoolBar") as ProgressBar, pool_exp, pool_capacity)
+		(panel.get_node("PoolText") as Label).text = "总经验槽 %s / %s" % [_format_resource_number(pool_exp), _format_resource_number(pool_capacity)]
 		(panel.get_node("LevelRequirement") as Label).text = "等级 %d/%d" % [level, required_level]
 		(panel.get_node("StoneRequirement") as Label).text = "%s  %d/1" % [str(info.get("item_name", "进化石")), item_count]
 		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
@@ -872,6 +909,8 @@ func _sync_classroom_page() -> void:
 		# exact missing-level or missing-item feedback.
 		evolve.disabled = false
 		_set_action_frame(evolve, bool(info.get("can_evolve", false)))
+		upgrade.disabled = false
+		_set_action_frame(upgrade, pool_exp > 0 and level < StatCalculator.MAX_LEVEL)
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
 	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
 
@@ -901,6 +940,168 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 	var evolve_text := panel.get_node_or_null("EvolveButton/Text") as Label
 	if evolve_text != null:
 		evolve_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
+	var upgrade_text := panel.get_node_or_null("UpgradeButton/Text") as Label
+	if upgrade_text != null:
+		upgrade_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
+
+func _sync_exp_progress(bar: ProgressBar, value: int, maximum: int) -> void:
+	bar.max_value = max(1, maximum)
+	bar.value = clampi(value, 0, maximum)
+	bar.show_percentage = false
+	var background := StyleBoxFlat.new()
+	background.bg_color = Color(0.45, 0.25, 0.08, 0.28)
+	background.corner_radius_top_left = 6
+	background.corner_radius_top_right = 6
+	background.corner_radius_bottom_left = 6
+	background.corner_radius_bottom_right = 6
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.38, 0.78, 0.24, 1.0)
+	fill.corner_radius_top_left = 6
+	fill.corner_radius_top_right = 6
+	fill.corner_radius_bottom_left = 6
+	fill.corner_radius_bottom_right = 6
+	bar.add_theme_stylebox_override("background", background)
+	bar.add_theme_stylebox_override("fill", fill)
+
+func _fresh_instance(instance_id: String) -> Dictionary:
+	if instance_id.is_empty():
+		return {}
+	if _storage != null and _storage.has_method("get_monster_instance"):
+		var current: Dictionary = _storage.get_monster_instance(instance_id)
+		if not current.is_empty():
+			_instance_by_id[instance_id] = current
+			_monster_id_by_instance[instance_id] = str(current.get("monsterId", ""))
+			_level_by_instance[instance_id] = int(current.get("level", 1))
+			_stats_by_instance.erase(instance_id)
+			return current
+	return _get_instance(instance_id)
+
+func _classroom_info_text(instance: Dictionary, monster: Dictionary) -> String:
+	return "Lv.%d · %s · %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
+
+func _classroom_stats_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
+	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
+	var power := int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	return "等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d" % [int(instance.get("level", 1)), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))), _get_nature_name(str(instance.get("nature", ""))), _gender_label(instance), "★".repeat(rarity), "是" if bool(instance.get("isElite", false)) else "否", int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
+
+func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dictionary, pool_before: int, pool_after: int) -> void:
+	var panel := _node("Pages/ClassroomPage/DetailPanel")
+	var feedback := panel.get_node("UpgradeFeedback") as Control
+	var glow := feedback.get_node("Glow") as TextureRect
+	var message := feedback.get_node("Message") as Label
+	var transfer := feedback.get_node("Transfer") as Label
+	var portrait := panel.get_node("Portrait") as TextureRect
+	var info := panel.get_node("Info") as Label
+	var stats := panel.get_node("Stats") as Label
+	var monster_bar := panel.get_node("MonsterExpBar") as ProgressBar
+	var monster_text := panel.get_node("MonsterExpText") as Label
+	var pool_bar := panel.get_node("PoolBar") as ProgressBar
+	var pool_text := panel.get_node("PoolText") as Label
+	var pool_title := panel.get_node("RequirementsTitle") as Label
+	var upgrade := panel.get_node("UpgradeButton") as TextureButton
+	var old_level := int(before.get("level", 1))
+	var new_level := int(after.get("level", old_level))
+	var old_exp := int(before.get("exp", 0))
+	var new_exp := int(after.get("exp", old_exp))
+	var old_needed := GrowthRulesScript.get_exp_for_level(old_level)
+	var new_needed := GrowthRulesScript.get_exp_for_level(new_level)
+	var consumed := int(result.get("consumed", 0))
+	var leveled_up := new_level > old_level
+	var after_monster := MonsterDb.get_monster(str(after.get("monsterId", "")))
+	var after_stats := MonsterService.get_owned_stats(str(after.get("monsterId", "")), new_level, str(after.get("nature", "")), bool(after.get("isElite", false)))
+
+	_upgrade_animating = true
+	upgrade.disabled = true
+	feedback.visible = true
+	feedback.modulate = Color.WHITE
+	glow.pivot_offset = glow.size * 0.5
+	glow.scale = Vector2(0.62, 0.62)
+	glow.modulate.a = 0.0
+	message.pivot_offset = message.size * 0.5
+	message.scale = Vector2(0.60, 0.60)
+	message.modulate.a = 0.0
+	message.text = "升级成功  Lv.%d!" % new_level if leveled_up else "经验注入 +%d" % consumed
+	transfer.position.y = 226.0
+	transfer.modulate.a = 0.0
+	transfer.text = "经验槽 -%d  →  精灵 +%d" % [consumed, consumed]
+	pool_title.visible = false
+	portrait.pivot_offset = portrait.size * 0.5
+	info.pivot_offset = info.size * 0.5
+	stats.pivot_offset = stats.size * 0.5
+	if leveled_up:
+		var before_monster := MonsterDb.get_monster(str(before.get("monsterId", "")))
+		var before_stats := MonsterService.get_owned_stats(str(before.get("monsterId", "")), old_level, str(before.get("nature", "")), bool(before.get("isElite", false)))
+		info.text = _classroom_info_text(before, before_monster)
+		stats.text = _classroom_stats_text(before, before_monster, before_stats)
+
+	monster_bar.max_value = old_needed
+	monster_bar.value = old_exp
+	monster_text.text = "当前经验 %d / %d" % [old_exp, old_needed]
+	pool_bar.value = pool_before
+	pool_text.text = "总经验槽 %s / %s" % [_format_resource_number(pool_before), _format_resource_number(int(pool_bar.max_value))]
+
+	var pool_tween := create_tween()
+	pool_tween.tween_method(_set_pool_feedback_value.bind(pool_bar, pool_text), float(pool_before), float(pool_after), 0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	var exp_tween := create_tween()
+	if leveled_up:
+		exp_tween.tween_method(_set_monster_feedback_value.bind(monster_bar, monster_text, old_needed), float(old_exp), float(old_needed), 0.42).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		exp_tween.tween_callback(_reset_level_exp_bar.bind(monster_bar, monster_text, new_exp, new_needed, info, stats, after, after_monster, after_stats))
+	else:
+		exp_tween.tween_method(_set_monster_feedback_value.bind(monster_bar, monster_text, old_needed), float(old_exp), float(new_exp), 0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	if _upgrade_feedback_tween != null and _upgrade_feedback_tween.is_valid():
+		_upgrade_feedback_tween.kill()
+	_upgrade_feedback_tween = create_tween()
+	_upgrade_feedback_tween.set_parallel(true)
+	_upgrade_feedback_tween.tween_property(glow, "modulate:a", 0.95 if leveled_up else 0.55, 0.18)
+	_upgrade_feedback_tween.tween_property(glow, "scale", Vector2(1.08, 1.08), 0.32).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(message, "modulate:a", 1.0, 0.12)
+	_upgrade_feedback_tween.tween_property(message, "scale", Vector2(1.08, 1.08), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(transfer, "modulate:a", 1.0, 0.12)
+	_upgrade_feedback_tween.tween_property(transfer, "position:y", 208.0, 0.46).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(portrait, "scale", Vector2(1.08, 1.08), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(info, "scale", Vector2(1.14, 1.14), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(stats, "modulate", Color(1.18, 0.96, 0.48, 1.0), 0.22)
+	_upgrade_feedback_tween.chain().tween_interval(0.34)
+	_upgrade_feedback_tween.chain().set_parallel(true)
+	_upgrade_feedback_tween.tween_property(glow, "modulate:a", 0.0, 0.30)
+	_upgrade_feedback_tween.tween_property(message, "modulate:a", 0.0, 0.26)
+	_upgrade_feedback_tween.tween_property(transfer, "modulate:a", 0.0, 0.24)
+	_upgrade_feedback_tween.tween_property(portrait, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(info, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_upgrade_feedback_tween.tween_property(stats, "modulate", Color.WHITE, 0.24)
+	_upgrade_feedback_tween.chain().tween_callback(_finish_upgrade_feedback)
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("play_sfx"):
+		am.play_sfx("powerup_burst_soft")
+
+func _set_pool_feedback_value(value: float, bar: ProgressBar, label: Label) -> void:
+	bar.value = value
+	label.text = "总经验槽 %s / %s" % [_format_resource_number(roundi(value)), _format_resource_number(roundi(bar.max_value))]
+
+func _set_monster_feedback_value(value: float, bar: ProgressBar, label: Label, maximum: int) -> void:
+	bar.value = value
+	label.text = "当前经验 %d / %d" % [roundi(value), maximum]
+
+func _reset_level_exp_bar(bar: ProgressBar, label: Label, value: int, maximum: int, info: Label, stats: Label, instance: Dictionary, monster: Dictionary, current_stats: Dictionary) -> void:
+	bar.max_value = maximum
+	bar.value = value
+	bar.self_modulate = Color(1.28, 1.10, 0.42, 1.0)
+	label.text = "当前经验 %d / %d" % [value, maximum]
+	info.text = _classroom_info_text(instance, monster)
+	stats.text = _classroom_stats_text(instance, monster, current_stats)
+	var flash := create_tween()
+	flash.tween_property(bar, "self_modulate", Color.WHITE, 0.30).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _finish_upgrade_feedback() -> void:
+	_upgrade_animating = false
+	var feedback := get_node_or_null("Pages/ClassroomPage/DetailPanel/UpgradeFeedback") as Control
+	if feedback != null:
+		feedback.visible = false
+	var pool_title := get_node_or_null("Pages/ClassroomPage/DetailPanel/RequirementsTitle") as Label
+	if pool_title != null:
+		pool_title.visible = true
+	_sync_gui()
 
 func _sync_social_page() -> void:
 	_sync_social_place()
@@ -1114,7 +1315,7 @@ func _sync_result_popup() -> void:
 	var title := popup.get_node("Panel/Title") as Label
 	title.text = _social_result_title(result)
 	title.modulate = accent
-	(popup.get_node("Panel/Score") as Label).text = "相性 %d · %s · +%dEXP · +%d金币" % [int(result.get("score", 0)), str(result.get("relation_label", "初识")), int(result.get("exp_each", 0)), int(result.get("gold", 0))]
+	(popup.get_node("Panel/Score") as Label).text = "相性 %d · %s · 经验槽+%d · +%d金币" % [int(result.get("score", 0)), str(result.get("relation_label", "初识")), int(result.get("shared_exp_added", int(result.get("exp_each", 0)) * 2)), int(result.get("gold", 0))]
 	var event: Dictionary = result.get("event", {})
 	(popup.get_node("Panel/Event") as Label).text = str(event.get("name", "社交事件"))
 	(popup.get_node("Panel/Flavor") as Label).text = str(event.get("flavor", "关系发生了变化。"))

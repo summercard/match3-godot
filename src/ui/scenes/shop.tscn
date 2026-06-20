@@ -1,20 +1,20 @@
 [gd_scene format=3 uid="uid://c72yn1k0rw21q"]
 
 [ext_resource type="Script" uid="uid://b1mwnf6oxkocj" path="res://src/ui/scene/scene_shop_gui.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://287wgurvcwv4" path="res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="3_currency"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="4_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="5_diamond"]
 [ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="6_plus"]
 [ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="7_heart"]
-[ext_resource type="Texture2D" uid="uid://q7o0wp1k2j6e" path="res://assets/images/ui/icons/shop_icon_shop_category_gems.png" id="9_cat_gems"]
-[ext_resource type="Texture2D" uid="uid://c35o42p0oriw7" path="res://assets/images/ui/icons/shop_icon_shop_category_coins.png" id="10_cat_coins"]
-[ext_resource type="Texture2D" uid="uid://cp0em14cj5t77" path="res://assets/images/ui/icons/shop_icon_shop_category_hearts.png" id="11_cat_hearts"]
-[ext_resource type="Texture2D" uid="uid://cpykyipk5xtxy" path="res://assets/images/ui/icons/shop_icon_shop_category_boosters.png" id="12_cat_boosters"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_inventory.png" id="9_cat_gems"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/items_new_icon_capture_ball.png" id="10_cat_coins"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_icon_guard_charm.png" id="11_cat_hearts"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/items_new_icon_exp_potion.png" id="12_cat_boosters"]
 [ext_resource type="Texture2D" uid="uid://tei6gljtmp15" path="res://assets/images/ui/icons/shop_icon_shop_category_chest.png" id="13_cat_chest"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/items_new_icon_capture_ball.png" id="14_item_placeholder"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="15_bottom_nav"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_pets.png" id="17_nav_pets"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_inventory.png" id="17_nav_pets"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_battle.png" id="18_nav_battle"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_shop.png" id="19_nav_shop"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="20_nav_menu"]
@@ -254,7 +254,7 @@ offset_right = 80.0
 offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 12
-text = "5 Full"
+text = "5/5"
 horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
@@ -313,14 +313,14 @@ mouse_filter = 2
 
 [node name="Gems" type="TextureButton" parent="Tabs" unique_id=1478352059]
 layout_mode = 0
-offset_right = 70.0
+offset_right = 86.0
 offset_bottom = 43.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Tabs/Gems" unique_id=2134560525]
 layout_mode = 0
-offset_right = 70.0
+offset_right = 86.0
 offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("29_tab_active_image2")
@@ -342,29 +342,29 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 28.0
 offset_top = 8.0
-offset_right = 68.0
+offset_right = 84.0
 offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 13
-text = "精灵"
+theme_override_font_sizes/font_size = 12
+text = "所有"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Coins" type="TextureButton" parent="Tabs" unique_id=1265028706]
 layout_mode = 0
-offset_left = 72.0
-offset_right = 142.0
+offset_left = 89.0
+offset_right = 175.0
 offset_bottom = 43.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Tabs/Coins" unique_id=2047593755]
 layout_mode = 0
-offset_right = 70.0
+offset_right = 86.0
 offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("30_tab_normal_image2")
@@ -386,29 +386,29 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 28.0
 offset_top = 8.0
-offset_right = 68.0
+offset_right = 84.0
 offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 13
-text = "冒险"
+theme_override_font_sizes/font_size = 12
+text = "捕获道具"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Hearts" type="TextureButton" parent="Tabs" unique_id=866290962]
 layout_mode = 0
-offset_left = 144.0
-offset_right = 214.0
+offset_left = 178.0
+offset_right = 264.0
 offset_bottom = 43.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Tabs/Hearts" unique_id=1167530567]
 layout_mode = 0
-offset_right = 70.0
+offset_right = 86.0
 offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("30_tab_normal_image2")
@@ -430,29 +430,29 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 28.0
 offset_top = 8.0
-offset_right = 68.0
+offset_right = 84.0
 offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 13
-text = "商店"
+theme_override_font_sizes/font_size = 12
+text = "战场道具"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Boosters" type="TextureButton" parent="Tabs" unique_id=299797774]
 layout_mode = 0
-offset_left = 216.0
-offset_right = 288.0
+offset_left = 267.0
+offset_right = 357.0
 offset_bottom = 43.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
 [node name="Frame" type="TextureRect" parent="Tabs/Boosters" unique_id=2100310209]
 layout_mode = 0
-offset_right = 72.0
+offset_right = 90.0
 offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("30_tab_normal_image2")
@@ -474,19 +474,20 @@ stretch_mode = 5
 layout_mode = 0
 offset_left = 28.0
 offset_top = 8.0
-offset_right = 70.0
+offset_right = 88.0
 offset_bottom = 33.0
 theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 13
-text = "菜单"
+theme_override_font_sizes/font_size = 12
+text = "其他道具"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Chest" type="TextureButton" parent="Tabs" unique_id=1797099436]
+visible = false
 layout_mode = 0
 offset_left = 290.0
 offset_right = 357.0
@@ -1892,8 +1893,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
-[node name="PetsButton" type="TextureButton" parent="BottomNav" unique_id=904052759]
-visible = false
+[node name="InventoryButton" type="TextureButton" parent="BottomNav" unique_id=904052759]
 layout_mode = 0
 offset_left = 86.0
 offset_top = 3.0
@@ -1902,7 +1902,7 @@ offset_bottom = 69.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
-[node name="Selected" type="Panel" parent="BottomNav/PetsButton" unique_id=1068224636]
+[node name="Selected" type="Panel" parent="BottomNav/InventoryButton" unique_id=1068224636]
 visible = false
 layout_mode = 0
 offset_left = 3.0
@@ -1912,24 +1912,25 @@ offset_bottom = 63.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_selected_nav")
 
-[node name="Icon" type="TextureRect" parent="BottomNav/PetsButton" unique_id=1281848579]
+[node name="Icon" type="TextureRect" parent="BottomNav/InventoryButton" unique_id=1281848579]
 layout_mode = 0
-offset_left = 17.0
-offset_right = 50.0
-offset_bottom = 33.0
+offset_left = 20.0
+offset_top = 3.0
+offset_right = 52.0
+offset_bottom = 48.0
 mouse_filter = 2
 texture = ExtResource("17_nav_pets")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text" type="Label" parent="BottomNav/PetsButton" unique_id=96088591]
+[node name="Text" type="Label" parent="BottomNav/InventoryButton" unique_id=96088591]
 layout_mode = 0
-offset_top = 33.0
+offset_top = 39.0
 offset_right = 68.0
-offset_bottom = 59.0
+offset_bottom = 65.0
 theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
 theme_override_font_sizes/font_size = 12
-text = "??"
+text = "背包"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true

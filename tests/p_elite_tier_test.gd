@@ -52,12 +52,11 @@ func _init() -> void:
 	var view_normal = MonsterService.build_instance_view(inst_normal)
 	var view_elite = MonsterService.build_instance_view(inst_elite)
 	print("\n[Service] view_normal.stats.hp=%d" % view_normal.stats.hp)
-	print("[Service] view_elite.stats.hp=%d (期望 = normal × 2.5 = %d)" %
-		[view_elite.stats.hp, view_normal.stats.hp * 5 / 2])
-	# normal (HP×2) vs elite (HP×5) → 比例 = 5/2 = 2.5x
-	# 注意 int 截断可能导致 ±1 误差
-	var expected_elite_hp: int = view_normal.stats.hp * 5 / 2
-	assert(abs(view_elite.stats.hp - expected_elite_hp) <= 2, "ELITE pet HP 应该约等于 normal × 2.5")
+	print("[Service] view_elite.stats.hp=%d (期望 = normal × 5 = %d)" %
+		[view_elite.stats.hp, view_normal.stats.hp * 5])
+	assert(view_normal.stats.hp == StatCalculator.calc("monster_001", 1, "brave").hp, "普通我方精灵应使用基础 HP")
+	var expected_elite_hp: int = view_normal.stats.hp * 5
+	assert(abs(view_elite.stats.hp - expected_elite_hp) <= 2, "ELITE pet HP 应该约等于 normal × 5")
 	assert(view_elite.get("isElite", false) == true, "view.isElite 应为 true")
 	assert(view_normal.get("isElite", true) == false, "view.isElite 应为 false")
 	print("  ✓ Service build_instance_view 应用 tier OK")

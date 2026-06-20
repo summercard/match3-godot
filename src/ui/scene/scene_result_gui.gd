@@ -11,6 +11,7 @@ const REWARD_SLOT_PATHS := [
 	"RewardPanel/Slots/RewardSlot1",
 	"RewardPanel/Slots/RewardSlot2",
 	"RewardPanel/Slots/RewardSlot3",
+	"RewardPanel/Slots/RewardSlot4",
 ]
 const EXP_CARD_PATHS := [
 	"ExpPanel/Cards/ExpCard1",
@@ -427,32 +428,53 @@ func _capture_lines() -> Array[String]:
 	return lines.slice(0, 3)
 
 func _sync_rewards() -> void:
+	var progress := clampf(_reward_anim_progress, 0.0, 1.0)
+	var number_progress := 1.0 - pow(1.0 - progress, 3.0)
+	var animated_gold := roundi(int(_rewards.get("gold", 0)) * number_progress)
+	var animated_gems := roundi(int(_rewards.get("gems", 0)) * number_progress)
+	var shared: Dictionary = _monster_exp_awards.get("shared", {})
+	var gained_exp := int(shared.get("added", _rewards.get("exp", 0)))
+	var total_exp := int(shared.get("current", gained_exp))
+	var old_total_exp := maxi(0, total_exp - gained_exp)
+	var animated_gained_exp := roundi(gained_exp * number_progress)
+	var animated_total_exp := roundi(lerpf(float(old_total_exp), float(total_exp), number_progress))
 	var reward_items: Array[Dictionary] = [
-		{"icon": "gold", "amount": "+%d" % int(_rewards.get("gold", 0))},
-		{"icon": "exp", "amount": "+%d" % int(_rewards.get("exp", 0))},
+		{"icon": "gold", "amount": "+%d" % animated_gold},
+		{"icon": "exp", "amount": "总槽 %d\n获得 +%d" % [animated_total_exp, animated_gained_exp], "compact": true},
 	]
+	if int(_rewards.get("gems", 0)) > 0:
+		reward_items.append({"icon": "diamond", "amount": "+%d" % animated_gems})
 	if _rewards.get("item", null):
+		var animated_item_count := roundi(maxi(1, int(_rewards.get("item_count", 1))) * number_progress)
 		reward_items.append({
 			"icon": _get_reward_item_icon_key(str(_rewards.get("item", ""))),
-			"amount": "%s x%d" % [str(_rewards.get("item_name", _rewards.get("item", "道具"))), maxi(1, int(_rewards.get("item_count", 1)))]
+			"amount": "%s x%d" % [str(_rewards.get("item_name", _rewards.get("item", "道具"))), animated_item_count]
 		})
-	elif _is_win:
-		reward_items.append({"icon": "gem_grass", "amount": "x2"})
+	var visible_count := mini(reward_items.size(), REWARD_SLOT_PATHS.size())
+	var slot_width := 72.0
+	var slot_gap := 10.0
+	var slots_width := visible_count * slot_width + maxi(0, visible_count - 1) * slot_gap
+	var start_x := (343.0 - slots_width) * 0.5
 	for i in REWARD_SLOT_PATHS.size():
 		var slot := _node(REWARD_SLOT_PATHS[i])
 		slot.visible = i < reward_items.size()
 		if i >= reward_items.size():
 			continue
+		slot.position.x = start_x + i * (slot_width + slot_gap)
 		var item := reward_items[i]
 		(slot.get_node("Icon") as TextureRect).texture = _result_texture(str(item.get("icon", "")))
 		(slot.get_node("Amount") as Label).text = str(item.get("amount", ""))
-		_style_compact_label(slot.get_node("Amount") as Label, 11, 2)
+		_style_compact_label(slot.get_node("Amount") as Label, 8 if bool(item.get("compact", false)) else 11, 2)
 
 func _sync_exp_panel() -> void:
-	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
-	var desc := "统一默认奖励"
-	if stage_rewards.has("exp"):
-		desc = "基础 %d × %.1fx 星级系数" % [int(stage_rewards.get("exp", 0)), RewardRulesScript.get_star_multiplier(_stars)]
+	_label("ExpPanel/Title").text = "共享经验槽"
+	var shared: Dictionary = _monster_exp_awards.get("shared", {})
+	var added := int(shared.get("added", _rewards.get("exp", 0)))
+	var current := int(shared.get("current", 0))
+	var capacity := int(shared.get("capacity", 0))
+	var desc := "本次 +%d · 经验槽 %d/%d" % [added, current, capacity]
+	if int(shared.get("overflow", 0)) > 0:
+		desc += "（已满）"
 	_label("ExpPanel/Desc").text = desc
 	var team: Array = _battle_result.get("playerTeam", [])
 	var display_team := team.filter(func(m): return m != null).slice(0, EXP_CARD_PATHS.size())
@@ -462,18 +484,9 @@ func _sync_exp_panel() -> void:
 		if i >= display_team.size():
 			continue
 		var monster: Dictionary = display_team[i]
-		var member_id := str(monster.get("id", ""))
-		var award: Dictionary = _monster_exp_awards.get(member_id, {})
-		var award_exp := int(award.get("exp", 0))
-		var catchup: Dictionary = award.get("catchup", {})
 		(card.get_node("Portrait") as TextureRect).texture = _monster_texture(monster, "result")
-		(card.get_node("Level") as Label).text = "Lv.%d" % int(monster.get("level", 1))
-		var exp_text := "+%d" % award_exp
-		if bool(catchup.get("enabled", false)):
-			exp_text = "+%d %s" % [award_exp, str(catchup.get("label", ""))]
-		(card.get_node("Exp") as Label).text = exp_text
-		_style_compact_label(card.get_node("Level") as Label, 8, 1)
-		_style_compact_label(card.get_node("Exp") as Label, 8, 1)
+		(card.get_node("Level") as Label).visible = false
+		(card.get_node("Exp") as Label).visible = false
 
 func _apply_result_compact_text() -> void:
 	for path in REWARD_SLOT_PATHS:
@@ -504,10 +517,11 @@ func _sync_levelups() -> void:
 func _sync_buttons() -> void:
 	_node("Buttons/BackButton").visible = _is_win or _has_next_stage
 	_node("Buttons/NextButton").visible = _is_win and _has_next_stage
-	_node("Buttons/RetryButton").visible = _has_next_stage or not _is_win
+	_node("Buttons/RetryButton").visible = true
 	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else ("返回关卡" if _is_win else "重试")
 	_label("Buttons/NextButton/Text").text = "下一关"
-	_label("Buttons/RetryButton/Text").text = "再来一次" if _is_win else "重试"
+	_label("Buttons/RetryButton/Text").text = "课堂升级精灵" if _is_win else "重试"
+	_style_compact_label(_label("Buttons/RetryButton/Text"), 10 if _is_win else 13, 2)
 
 func _on_result_back_pressed() -> void:
 	_run_after_result_button_feedback(func(): _on_back_btn_pressed())
@@ -516,7 +530,12 @@ func _on_result_next_pressed() -> void:
 	_run_after_result_button_feedback(func(): _on_next_btn_pressed())
 
 func _on_result_retry_pressed() -> void:
-	_run_after_result_button_feedback(func(): _on_retry_btn_pressed())
+	_run_after_result_button_feedback(func():
+		if _is_win:
+			_on_classroom_btn_pressed()
+		else:
+			_on_retry_btn_pressed()
+	)
 
 func _on_capture_confirm_pressed() -> void:
 	_run_after_capture_button_feedback(func():

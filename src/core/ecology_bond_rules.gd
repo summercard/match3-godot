@@ -12,17 +12,17 @@ const ROLE_LABELS := {
 }
 
 const ECOLOGY_BY_ELEMENT := {
-	"fire": {"id": "volcanic", "name": "熔火生态", "theme": "爆发与破障", "chapter": "烈焰山谷"},
-	"water": {"id": "shore", "name": "潮岸生态", "theme": "续航与缓冲", "chapter": "冰雪王座"},
-	"grass": {"id": "meadow", "name": "林地生态", "theme": "控场与捕捉窗口", "chapter": "草原之旅"},
-	"thunder": {"id": "storm", "name": "雷暴生态", "theme": "连锁与节奏", "chapter": "雷霆神殿"},
+	"fire": {"id": "volcanic", "name": "熔火生态", "theme": "爆发与破障", "chapter": "热情沙漠"},
+	"water": {"id": "shore", "name": "潮岸生态", "theme": "续航与缓冲", "chapter": "瀑布国"},
+	"grass": {"id": "meadow", "name": "林地生态", "theme": "控场与捕捉窗口", "chapter": "微风平原"},
+	"thunder": {"id": "storm", "name": "雷暴生态", "theme": "连锁与节奏", "chapter": "南国海"},
 	"light": {"id": "radiant", "name": "辉光生态", "theme": "保护与捕捉辅助", "chapter": "光耀圣殿"},
-	"earth": {"id": "mountain", "name": "岩山生态", "theme": "防守与破障", "chapter": "烈焰山谷"},
-	"wind": {"id": "sky", "name": "苍空生态", "theme": "速度与先手", "chapter": "神秘森林"},
-	"dark": {"id": "shadow", "name": "暗影生态", "theme": "集火与压制", "chapter": "神秘森林"},
-	"ice": {"id": "shore", "name": "潮岸生态", "theme": "续航与缓冲", "chapter": "冰雪王座"},
-	"void": {"id": "void", "name": "虚空生态", "theme": "分割与重连", "chapter": "虚空领域"},
-	"temporal": {"id": "time", "name": "时序生态", "theme": "延迟与爆发窗口", "chapter": "时空裂隙"},
+	"earth": {"id": "mountain", "name": "岩山生态", "theme": "防守与破障", "chapter": "热情沙漠"},
+	"wind": {"id": "sky", "name": "苍空生态", "theme": "速度与先手", "chapter": "幻羽森林"},
+	"dark": {"id": "shadow", "name": "暗影生态", "theme": "集火与压制", "chapter": "幻羽森林"},
+	"ice": {"id": "shore", "name": "潮岸生态", "theme": "续航与缓冲", "chapter": "冰之国"},
+	"void": {"id": "void", "name": "虚空生态", "theme": "分割与重连", "chapter": "精灵虚空"},
+	"temporal": {"id": "time", "name": "时序生态", "theme": "延迟与爆发窗口", "chapter": "烧烤岩"},
 	"star": {"id": "star", "name": "星轨生态", "theme": "阵型与跨区连锁", "chapter": "星耀圣殿"},
 	"chaos": {"id": "chaos", "name": "混沌生态", "theme": "复合压力", "chapter": "混沌领域"}
 }

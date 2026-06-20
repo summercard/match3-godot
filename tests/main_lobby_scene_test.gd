@@ -54,7 +54,7 @@ func _run() -> void:
 		button.pressed.emit()
 		await create_timer(0.23 if button_name == "StartButton" else 0.17).timeout
 	_expect(emitted_ids == expected_buttons.values(), "all lobby buttons should preserve their navigation ids")
-	lobby.set("_player", {"name": "test", "level": 4, "gold": 0, "gems": 0, "exp": 50, "exp_to_level": 100})
+	lobby.set("_player", {"name": "test", "level": 4, "gold": 0, "gems": 0, "stamina": 3, "achievement_score": 250, "exp": 50, "exp_to_level": 100})
 	lobby.call("_update_player_display")
 	_expect(is_equal_approx(float(lobby.get_node("%ExperienceFill").get("value")), 50.0), "owner level experience bar should use a real percentage value")
 	var exp_profile: Dictionary = lobby.get_node("%ExperienceFill").call("get_visual_profile")
@@ -65,6 +65,11 @@ func _run() -> void:
 	_expect(level_badge.visible, "owner level badge should be visible beside the experience bar")
 	_expect(exp_bar.size.y >= 15.0, "owner level experience bar should be tall enough to read")
 	_expect(absf((level_badge.position.y + level_badge.size.y * 0.5) - (exp_bar.position.y + exp_bar.size.y * 0.5)) <= 2.0, "owner level badge and experience bar should align on the same center line")
+	_expect((lobby.get_node("%StaminaValue") as Label).text == "3/5", "top resource row should show stamina as current over max")
+	_expect((lobby.get_node("%RankScore") as Label).text == "250", "third header row should show achievement score")
+	_expect((lobby.get_node("Header/GoldCapsule") as Control).position.y == (lobby.get_node("Header/DiamondCapsule") as Control).position.y and (lobby.get_node("Header/DiamondCapsule") as Control).position.y == (lobby.get_node("Header/StaminaCapsule") as Control).position.y, "gold, diamond and stamina should share the first row")
+	_expect((lobby.get_node("Header/PlayerStatus") as Control).position.y > (lobby.get_node("Header/GoldCapsule") as Control).position.y, "owner level should sit on the second row")
+	_expect((lobby.get_node("Header/RankPanel") as Control).position.y > (lobby.get_node("Header/PlayerStatus") as Control).position.y, "achievement score should sit on the third row")
 	var start_label := lobby.get_node("PrimaryButtons/StartButton/Text") as Label
 	var nav_label := lobby.get_node("BottomNav/AlbumButton/Text") as Label
 	_expect(start_label.get_theme_font("font") != null, "start text should use the shared cartoon font")
@@ -72,7 +77,7 @@ func _run() -> void:
 	_expect(nav_label.get_theme_font("font") != null, "bottom navigation text should use the shared cartoon font")
 	_expect(nav_label.get_theme_font_size("font_size") >= 15, "bottom navigation text should be larger than the old compact labels")
 	_expect(not lobby.has_node("Header/SettingsTopButton"), "top settings shortcut should be removed")
-	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus"]:
+	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus", "Header/StaminaPlus"]:
 		var plus_button := lobby.get_node(plus_path) as TextureButton
 		_expect(plus_button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % plus_path)
 		plus_button.pressed.emit()

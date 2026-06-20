@@ -14,14 +14,14 @@
 [ext_resource type="Texture2D" uid="uid://btn4cyfwgf21y" path="res://assets/images/maps/nodes/stage_cloud_texture_01.png" id="31_cloud_01"]
 [ext_resource type="Texture2D" uid="uid://de0t6gdbyy4ox" path="res://assets/images/maps/nodes/stage_cloud_texture_02.png" id="32_cloud_02"]
 [ext_resource type="Texture2D" uid="uid://4lth56yel8lv" path="res://assets/images/maps/nodes/stage_cloud_texture_03.png" id="33_cloud_03"]
-[ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_grassland.tscn" id="chapter_01_scene"]
-[ext_resource type="PackedScene" uid="uid://u74n5h65r50f" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_fire_valley.tscn" id="chapter_02_scene"]
-[ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_mystic_forest.tscn" id="chapter_03_scene"]
-[ext_resource type="PackedScene" uid="uid://nd1ukitcfaxr" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_04_eclipse_canopy.tscn" id="chapter_04_scene"]
-[ext_resource type="PackedScene" uid="uid://bnjhqlo1dhbmo" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_05_thunder_temple.tscn" id="chapter_05_scene"]
-[ext_resource type="PackedScene" uid="uid://bwau7dx7n5eyl" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_06_frost_throne.tscn" id="chapter_06_scene"]
-[ext_resource type="PackedScene" uid="uid://bkkg62te4x88x" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_07_void_domain.tscn" id="chapter_07_scene"]
-[ext_resource type="PackedScene" uid="uid://byfd44du2vong" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn" id="chapter_08_scene"]
+[ext_resource type="PackedScene" uid="uid://bgbquhjn6flga" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn" id="chapter_01_scene"]
+[ext_resource type="PackedScene" uid="uid://u74n5h65r50f" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn" id="chapter_02_scene"]
+[ext_resource type="PackedScene" uid="uid://dpatys4nklud1" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn" id="chapter_03_scene"]
+[ext_resource type="PackedScene" uid="uid://nd1ukitcfaxr" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn" id="chapter_04_scene"]
+[ext_resource type="PackedScene" uid="uid://bnjhqlo1dhbmo" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn" id="chapter_05_scene"]
+[ext_resource type="PackedScene" uid="uid://bwau7dx7n5eyl" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn" id="chapter_06_scene"]
+[ext_resource type="PackedScene" uid="uid://bkkg62te4x88x" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn" id="chapter_07_scene"]
+[ext_resource type="PackedScene" uid="uid://byfd44du2vong" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn" id="chapter_08_scene"]
 [ext_resource type="PackedScene" uid="uid://c41bmyr66vhsw" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn" id="chapter_09_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn" id="chapter_10_scene"]
 [ext_resource type="PackedScene" path="res://src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn" id="chapter_11_scene"]
@@ -49,35 +49,35 @@ custom_minimum_size = Vector2(375, 1280)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Chapter01Grassland" parent="MapScroll/ChapterMaps" unique_id=2044910982 instance=ExtResource("chapter_01_scene")]
+[node name="Chapter01BreezePlain" parent="MapScroll/ChapterMaps" unique_id=2044910982 instance=ExtResource("chapter_01_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter02FireValley" parent="MapScroll/ChapterMaps" unique_id=315406483 instance=ExtResource("chapter_02_scene")]
+[node name="Chapter02WaterfallKingdom" parent="MapScroll/ChapterMaps" unique_id=315406483 instance=ExtResource("chapter_02_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter03MysticForest" parent="MapScroll/ChapterMaps" unique_id=976449952 instance=ExtResource("chapter_03_scene")]
+[node name="Chapter03FeatherForest" parent="MapScroll/ChapterMaps" unique_id=976449952 instance=ExtResource("chapter_03_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter04EclipseCanopy" parent="MapScroll/ChapterMaps" unique_id=924509359 instance=ExtResource("chapter_04_scene")]
+[node name="Chapter04PassionDesert" parent="MapScroll/ChapterMaps" unique_id=924509359 instance=ExtResource("chapter_04_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter05ThunderTemple" parent="MapScroll/ChapterMaps" unique_id=191119368 instance=ExtResource("chapter_05_scene")]
+[node name="Chapter05SouthernSea" parent="MapScroll/ChapterMaps" unique_id=191119368 instance=ExtResource("chapter_05_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter06FrostThrone" parent="MapScroll/ChapterMaps" unique_id=952459069 instance=ExtResource("chapter_06_scene")]
+[node name="Chapter06IceKingdom" parent="MapScroll/ChapterMaps" unique_id=952459069 instance=ExtResource("chapter_06_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter07VoidDomain" parent="MapScroll/ChapterMaps" unique_id=295859020 instance=ExtResource("chapter_07_scene")]
+[node name="Chapter07SpiritVoid" parent="MapScroll/ChapterMaps" unique_id=295859020 instance=ExtResource("chapter_07_scene")]
 visible = false
 layout_mode = 0
 
-[node name="Chapter08TemporalRift" parent="MapScroll/ChapterMaps" unique_id=280571989 instance=ExtResource("chapter_08_scene")]
+[node name="Chapter08BarbecueRock" parent="MapScroll/ChapterMaps" unique_id=280571989 instance=ExtResource("chapter_08_scene")]
 visible = false
 layout_mode = 0
 

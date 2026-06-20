@@ -36,6 +36,7 @@ const RESULT_ASSETS := {
 
 const COMMON_ASSETS := {
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
+	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 	"exp": "res://assets/images/ui/icons/ranch_icon_exp_badge.png",
 	"capture_ball": "res://assets/images/ui/icons/battle_flow_new_icon_capture_ball.png",
 	"item_capture": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
@@ -85,7 +86,7 @@ var _capture_item_used: Dictionary = {}
 var _capture_window: Dictionary = {}
 
 # 奖励
-var _rewards: Dictionary = {"gold": 0, "exp": 0, "item": null, "item_name": "", "item_count": 0}
+var _rewards: Dictionary = {"gold": 0, "gems": 0, "first_clear": false, "exp": 0, "item": null, "item_name": "", "item_count": 0}
 var _level_ups: Array[Dictionary] = []
 var _monster_exp_awards: Dictionary = {}
 
@@ -378,6 +379,17 @@ func _calc_rewards() -> void:
 	var reward_result := RewardRulesScript.calc_battle_rewards(stage_rewards, _stars, _is_win)
 	_rewards["gold"] = int(reward_result.get("gold", 0))
 	_rewards["exp"] = int(reward_result.get("exp", 0))
+	_rewards["gems"] = 0
+	_rewards["first_clear"] = false
+	var stage_id := str(_battle_result.get("stageId", ""))
+	if _is_win and not stage_id.is_empty() and _storage and _storage.has_method("is_stage_cleared"):
+		if not _storage.is_stage_cleared(stage_id):
+			var stage_data: Dictionary = _battle_result.get("stageData", {})
+			if stage_data.is_empty() and _storage.has_method("get_stage"):
+				stage_data = _storage.get_stage(stage_id)
+			var is_boss := str(stage_data.get("type", "")) == "boss"
+			_rewards["gems"] = 10 if is_boss else 3
+			_rewards["first_clear"] = true
 	_rewards["item"] = null
 	_rewards["item_name"] = ""
 	_rewards["item_count"] = 0
@@ -408,6 +420,8 @@ func _save_rewards() -> void:
 		return
 	if _rewards["gold"] > 0 and _storage.has_method("add_gold"):
 		_storage.add_gold(_rewards["gold"])
+	if int(_rewards.get("gems", 0)) > 0 and _storage.has_method("add_gems"):
+		_storage.add_gems(int(_rewards["gems"]))
 	if _rewards["exp"] > 0 and _storage.has_method("add_player_exp"):
 		_storage.add_player_exp(_rewards["exp"])
 	_add_monster_exp_from_battle()
@@ -468,51 +482,12 @@ func _record_achievement_progress() -> void:
 func _add_monster_exp_from_battle() -> void:
 	if not _is_win or not _storage:
 		return
-	var team: Dictionary = _storage.load_team() if _storage.has_method("load_team") else {}
-	var team_members: Array = [team.get("leader"), team.get("member1"), team.get("member2")].filter(func(x): return x)
-	if team_members.is_empty():
-		return
 	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
 	var exp_to_add := RewardRulesScript.calc_monster_exp(stage_rewards, _stars, _is_win)
 	if exp_to_add <= 0:
 		return
-	var player_team: Array = _battle_result.get("playerTeam", [])
-	var reference_level: int = _storage.get_team_reference_level() if _storage.has_method("get_team_reference_level") else 1
-	for monster_id in team_members:
-		var member_id := str(monster_id)
-		var battle_monster: Dictionary = {}
-		for m: Dictionary in player_team:
-			if m and str(m.get("id", "")) == member_id:
-				battle_monster = m
-				break
-		if not battle_monster.is_empty() and battle_monster.get("hp", 0) > 0:
-			var actual_exp: int = exp_to_add
-			var catchup_state: Dictionary = {}
-			if _storage.has_method("calc_instance_battle_exp"):
-				actual_exp = _storage.calc_instance_battle_exp(member_id, exp_to_add, reference_level)
-			if _storage.has_method("get_instance_catchup_state"):
-				catchup_state = _storage.get_instance_catchup_state(member_id, reference_level)
-			_monster_exp_awards[member_id] = {
-				"exp": actual_exp,
-				"catchup": catchup_state
-			}
-			var result: Dictionary = {}
-			if _storage.has_method("add_instance_exp") and not _storage.get_monster_instance(member_id).is_empty():
-				result = _storage.add_instance_exp(member_id, actual_exp)
-			else:
-				if _storage.has_method("init_monster_pokedex"):
-					_storage.init_monster_pokedex(member_id)
-				if _storage.has_method("add_monster_exp"):
-					result = _storage.add_monster_exp(member_id, actual_exp)
-			if not result.is_empty():
-				if result.get("leveledUp", false):
-					_level_ups.append({
-						"monsterId": battle_monster.get("monsterId", member_id),
-						"instanceId": member_id,
-						"oldLevel": result.get("oldLevel", 0),
-						"newLevel": result.get("newLevel", 0),
-						"expGained": result.get("expGained", 0)
-					})
+	if _storage.has_method("add_shared_monster_exp"):
+		_monster_exp_awards["shared"] = _storage.add_shared_monster_exp(exp_to_add)
 
 func _trigger_achievements() -> void:
 	if not _achievement_manager:
@@ -583,7 +558,10 @@ func _on_tap(x: float, y: float) -> void:
 		return
 
 	if _retry_btn_rect.has_point(Vector2(x, y)):
-		_on_retry_btn_pressed()
+		if _is_win:
+			_on_classroom_btn_pressed()
+		else:
+			_on_retry_btn_pressed()
 		return
 
 # ==================== 按钮回调 ====================
@@ -630,6 +608,9 @@ func _on_retry_btn_pressed() -> void:
 		"stageData": stage_data,
 		"chapterIndex": _infer_chapter_index(stage_id)
 	})
+
+func _on_classroom_btn_pressed() -> void:
+	_go_to_scene("ranch", {"page": "classroom"})
 
 func _go_to_scene(scene_name: String, params: Dictionary = {}) -> void:
 	if has_node("/root/SceneManager"):
@@ -787,14 +768,14 @@ func _draw_rewards_section(font: Font, y: float) -> void:
 		{"icon": "gold", "amount": "+%d" % _rewards["gold"], "color": C["gold"]},
 		{"icon": "exp", "amount": "+%d" % _rewards["exp"], "color": C["thunder"]},
 	]
+	if int(_rewards.get("gems", 0)) > 0:
+		reward_items.append({"icon": "diamond", "amount": "+%d" % int(_rewards["gems"]), "color": Color(1.0, 0.45, 0.8)})
 	if _rewards["item"]:
 		reward_items.append({
 			"icon": _get_reward_item_icon_key(str(_rewards.get("item", ""))),
 			"amount": "%s x%d" % [str(_rewards.get("item_name", _rewards.get("item", "道具"))), maxi(1, int(_rewards.get("item_count", 1)))],
 			"color": C["text_primary"]
 		})
-	elif _is_win:
-		reward_items.append({"icon": "gem_grass", "amount": "x2", "color": Color(0.65, 1.0, 0.45)})
 	
 	var slot_w := 54.0
 	var gap := 13.0
@@ -829,16 +810,10 @@ func _get_reward_item_icon_key(item_id: String) -> String:
 
 func _draw_exp_section(font: Font, y: float) -> void:
 	_draw_texture_fit(_tex("team_exp_panel"), Rect2(16.0, y, DESIGN_W - 32.0, 116.0), 0.95)
-	_draw_centered_text(font, "队伍经验", DESIGN_W / 2.0, y + 18.0, C["text_primary"], 14.0)
+	_draw_centered_text(font, "共享经验槽", DESIGN_W / 2.0, y + 18.0, C["text_primary"], 14.0)
 
-	var stage_rewards: Dictionary = _battle_result.get("stageRewards", {})
-	var desc := ""
-	if stage_rewards.has("exp"):
-		var mult := RewardRulesScript.get_star_multiplier(_stars)
-		desc = "基础 %d × %.1fx 星级系数" % [stage_rewards["exp"], mult]
-	else:
-		var fallback_rewards := RewardRulesScript.calc_battle_rewards(stage_rewards, _stars, _is_win)
-		desc = "统一默认奖励 %d" % int(fallback_rewards.get("exp", 0))
+	var shared: Dictionary = _monster_exp_awards.get("shared", {})
+	var desc := "本次 +%d · 经验槽 %d/%d" % [int(shared.get("added", _rewards.get("exp", 0))), int(shared.get("current", 0)), int(shared.get("capacity", 0))]
 	_draw_centered_text(font, desc, DESIGN_W / 2.0, y + 106.0, C["text_muted"], 9.5)
 
 	var team: Array = _battle_result.get("playerTeam", [])
@@ -849,18 +824,9 @@ func _draw_exp_section(font: Font, y: float) -> void:
 	var start_x: float = (DESIGN_W - total_w) / 2.0
 	for i in range(display_team.size()):
 		var monster: Dictionary = display_team[i]
-		var member_id := str(monster.get("id", ""))
-		var award: Dictionary = _monster_exp_awards.get(member_id, {})
-		var award_exp := int(award.get("exp", 0))
-		var catchup: Dictionary = award.get("catchup", {})
 		var x: float = start_x + float(i) * (card_w + gap)
 		_draw_texture_fit(_tex("monster_exp_card"), Rect2(x, y + 30.0, card_w, 68.0))
 		_draw_monster_portrait(monster, Rect2(x + 6.0, y + 35.0, 42.0, 42.0))
-		_draw_centered_text(font, "Lv.%d" % monster.get("level", 1), x + card_w / 2.0, y + 84.0, C["white"], 8.0)
-		var exp_text := "+%d" % award_exp
-		if bool(catchup.get("enabled", false)):
-			exp_text = "+%d %s" % [award_exp, str(catchup.get("label", ""))]
-		_draw_centered_text(font, exp_text, x + card_w / 2.0, y + 98.0, Color(0.78, 1.0, 0.45), 6.8)
 
 func _draw_levelups_section(font: Font, y: float) -> void:
 	if _level_ups.is_empty():
@@ -902,7 +868,7 @@ func _draw_buttons(font: Font, y: float) -> void:
 		_next_btn_rect = Rect2(next_x, y, btn_w, btn_h)
 
 		_draw_texture_fit(_tex("btn_secondary"), Rect2(retry_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h))
-		_draw_centered_text(font, "再来一次", retry_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["text_primary"], 12.0)
+		_draw_centered_text(font, "课堂升级精灵", retry_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["text_primary"], 9.0)
 		_retry_btn_rect = Rect2(retry_x, y, btn_w, btn_h)
 	else:
 		var btn_x := (DESIGN_W - btn_w) / 2.0
@@ -912,14 +878,20 @@ func _draw_buttons(font: Font, y: float) -> void:
 		var draw_y := y + (btn_h - scaled_h) / 2.0
 		
 		if _is_win:
-			_draw_texture_fit(_tex("btn_secondary"), Rect2(draw_x, draw_y, scaled_w, scaled_h))
-			_draw_centered_text(font, "返回关卡", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 15.0)
+			var back_x := 62.0
+			var classroom_x := DESIGN_W - btn_w - 62.0
+			_draw_texture_fit(_tex("btn_secondary"), Rect2(back_x, draw_y, scaled_w, scaled_h))
+			_draw_centered_text(font, "返回关卡", back_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 13.0)
+			_draw_texture_fit(_tex("btn_secondary"), Rect2(classroom_x, draw_y, scaled_w, scaled_h))
+			_draw_centered_text(font, "课堂升级精灵", classroom_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 9.0)
+			_back_btn_rect = Rect2(back_x, y, btn_w, btn_h)
+			_retry_btn_rect = Rect2(classroom_x, y, btn_w, btn_h)
 		else:
 			_draw_texture_fit(_tex("btn_retry"), Rect2(draw_x, draw_y, scaled_w, scaled_h))
 			_draw_centered_text(font, "重试", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
-		_back_btn_rect = Rect2(btn_x, y, btn_w, btn_h)
+			_back_btn_rect = Rect2(btn_x, y, btn_w, btn_h)
+			_retry_btn_rect = Rect2()
 		_next_btn_rect = Rect2()
-		_retry_btn_rect = Rect2()
 
 # ==================== 绘制辅助 ====================
 

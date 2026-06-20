@@ -149,7 +149,6 @@ func _seed_ranch_demo(main: Control) -> void:
 			"nature": natures[i % natures.size()],
 			"gender": genders[i % genders.size()],
 		})
-	ranch_scene.set("_storage", null)
 	ranch_scene.set("_captured_monsters", visual_roster)
 	ranch_scene.set("_class_selected_instance_id", str(visual_roster[0].get("instanceId", "")))
 	ranch_scene.set("_care_focus_instance_id", str(visual_roster[0].get("instanceId", "")))
@@ -200,6 +199,18 @@ func _seed_ranch_demo(main: Control) -> void:
 		ranch_scene.call("_sync_gui")
 	else:
 		ranch_scene.queue_redraw()
+	if page == "classroom" and _read_arg("--ranch-upgrade-demo=", "0") == "1":
+		var storage := ranch_scene.get("_storage") as Node
+		if storage != null and storage.has_method("add_shared_monster_exp"):
+			if storage.has_method("get_owned_monsters"):
+				var owned: Array = storage.get_owned_monsters()
+				if not owned.is_empty():
+					ranch_scene.set("_captured_monsters", owned)
+					ranch_scene.set("_class_selected_instance_id", str((owned[0] as Dictionary).get("instanceId", "")))
+					ranch_scene.call("_rebuild_instance_index")
+			storage.add_shared_monster_exp(999)
+			ranch_scene.call("_sync_gui")
+			(ranch_scene.get_node("Pages/ClassroomPage/DetailPanel/UpgradeButton") as BaseButton).pressed.emit()
 
 func _seed_inventory_demo(main: Control) -> void:
 	var inventory_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("InventoryGui")
@@ -265,8 +276,8 @@ func _seed_shop_demo(main: Control) -> void:
 	var shop_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("ShopGui")
 	if shop_scene == null:
 		return
-	shop_scene.set("player_data", {"gold": 5000, "gems": 120})
-	shop_scene.set("_active_tab", _read_arg("--shop-tab=", "gems"))
+	shop_scene.set("player_data", {"gold": 5000, "gems": 120, "stamina": 5})
+	shop_scene.set("_active_tab", _read_arg("--shop-tab=", "all"))
 	if shop_scene.has_method("_sync_gui"):
 		shop_scene.call("_sync_gui")
 	if _read_arg("--shop-popup=", "0") == "1":

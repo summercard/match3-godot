@@ -226,7 +226,7 @@ func _test_save_manager_social_flow() -> void:
 	var collect: Dictionary = save_manager.collect_social(0)
 	_expect(bool(collect.get("ok", false)), "ready social should collect")
 	var result: Dictionary = collect.get("result", {})
-	_expect(int(result.get("exp_each", 0)) > 0, "social should grant monster exp")
+	_expect(int(result.get("shared_exp_added", 0)) > 0, "social should add its training exp to the shared pool")
 	_expect(not result.get("event", {}).is_empty(), "social should resolve an event")
 	_expect(str(result.get("place_id", "")) == str(selected_place.get("place_id", "")), "social result should use selected place")
 	var a_after: Dictionary = save_manager.get_monster_instance(a_id)

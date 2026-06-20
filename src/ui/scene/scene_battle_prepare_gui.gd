@@ -18,6 +18,7 @@ const REWARD_SLOT_PATHS := [
 	"RewardPreview/Slots/RewardSlot1",
 	"RewardPreview/Slots/RewardSlot2",
 	"RewardPreview/Slots/RewardSlot3",
+	"RewardPreview/Slots/RewardSlot4",
 ]
 
 # === 入场动画时间线 ===
@@ -147,6 +148,17 @@ func _ensure_concept_nodes() -> void:
 	_create_panel_bg("PowerPanel", "Bg", _rounded_style(Color(1.0, 0.93, 0.74, 0.92), Color(0.94, 0.60, 0.22, 1.0), 2, 12))
 	_create_panel_bg("TeamPanel", "Bg", _rounded_style(Color(1.0, 0.94, 0.76, 0.62), Color(0.94, 0.62, 0.22, 1.0), 2, 12))
 	_create_panel_bg("RewardPreview", "Bg", _rounded_style(Color(1.0, 0.94, 0.76, 0.90), Color(0.94, 0.62, 0.22, 1.0), 2, 12))
+	_ensure_reward_slots()
+
+func _ensure_reward_slots() -> void:
+	var slots := get_node_or_null("RewardPreview/Slots") as Control
+	if slots == null or slots.has_node("RewardSlot4") or not slots.has_node("RewardSlot1"):
+		return
+	var source := slots.get_node("RewardSlot1") as Control
+	var slot := source.duplicate(Node.DUPLICATE_USE_INSTANTIATION) as Control
+	slot.name = "RewardSlot4"
+	slot.unique_name_in_owner = false
+	slots.add_child(slot)
 
 func _create_panel_bg(parent_path: NodePath, node_name: String, style: StyleBoxFlat) -> void:
 	var parent := get_node_or_null(parent_path) as Control
@@ -219,7 +231,7 @@ func _sync_top_resource_bar() -> void:
 	var player: Dictionary = storage.get_player() if storage != null and storage.has_method("get_player") else {}
 	_label("TopResourceBar/GoldChip/Value").text = _compact_number(int(player.get("gold", 12350)))
 	_label("TopResourceBar/DiamondChip/Value").text = _compact_number(int(player.get("gems", 2548)))
-	_label("TopResourceBar/HeartChip/Value").text = "%s  满" % str(player.get("stamina", 5))
+	_label("TopResourceBar/HeartChip/Value").text = "%d/5" % int(player.get("stamina", 5))
 
 func _compact_number(value: int) -> String:
 	var text := str(value)
@@ -395,18 +407,22 @@ func _apply_concept_layout() -> void:
 	_set_local_rect("RewardPreview/Bg", 0, 0, 319, 86)
 	_set_visible("RewardPreview/Frame", false)
 	_set_rect("RewardPreview/Title", 102, -5, 115, 24)
-	_set_rect("RewardPreview/Slots", 42.5, 20, 234, 60)
+	_set_rect("RewardPreview/Slots", 0, 20, 319, 60)
 	_set_font("RewardPreview/Title", 15)
 	_style_label("RewardPreview/Title", Color.WHITE, Color(0.35, 0.08, 0.55, 0.90), 2)
 	for i in REWARD_SLOT_PATHS.size():
 		var slot_path: String = REWARD_SLOT_PATHS[i]
-		_set_rect(slot_path, float(i) * 88.0, 0, 58, 60)
+		_set_rect(slot_path, 0, 0, 58, 60)
 		_set_local_rect(slot_path + "/Frame", 0, 0, 58, 60)
+		_set_local_rect(slot_path + "/black2", -5.5, 2, 336, 264)
+		var patch := get_node_or_null(slot_path + "/black2/NinePatch") as NinePatchRect
+		if patch != null:
+			patch.texture = _prepare_texture("reward_slot")
 		_set_visible(slot_path + "/Frame", true)
-		_set_local_rect(slot_path + "/Icon", 9, 10, 40, 40)
-		_set_local_rect(slot_path + "/Label", -10, 32, 78, 27)
+		_set_local_rect(slot_path + "/Icon", 13, 6, 32, 32)
+		_set_local_rect(slot_path + "/Label", -13, 35, 84, 24)
 		_set_visible(slot_path + "/Label", false)
-		_set_font(slot_path + "/Label", 9)
+		_set_font(slot_path + "/Label", 8)
 		_style_label(slot_path + "/Label", BROWN_TEXT, Color.WHITE, 1)
 
 	_set_rect("StartButton", 47, 613, 281, 48)
@@ -594,25 +610,95 @@ func _sync_synergy() -> void:
 		_label("SynergyPanel/Line2").text = str((synergies[1] as Dictionary).get("label", "")) if synergies.size() > 1 else ""
 
 func _sync_rewards() -> void:
-	var stage_rewards: Dictionary = _stage_data.get("rewards", {})
-	var rewards := [
-		{"icon": "gold", "label": "金币\n%s" % _compact_number(int(stage_rewards.get("gold", 2400)))},
-		{"icon": "exp", "label": "经验药水\n%s" % _compact_number(int(stage_rewards.get("exp", 120)))},
-	]
-	var guaranteed_items: Array = stage_rewards.get("guaranteedItems", [])
-	if guaranteed_items.is_empty():
-		rewards.append({"icon": "capture_ball", "label": "捕捉球\n5"})
-	else:
-		var item: Dictionary = guaranteed_items[0]
-		var item_def := ItemDB.get_item(str(item.get("id", "")))
-		rewards.append({"icon": "capture_ball", "label": "%s\n%s" % [str(item_def.get("name", "道具")), str(item.get("count", 1))]})
+	var rewards := _build_reward_preview_items()
+	var visible_count := mini(rewards.size(), REWARD_SLOT_PATHS.size())
+	var slot_w := 58.0
+	var gap := 16.0 if visible_count >= 4 else 28.0
+	var total_w := float(visible_count) * slot_w + float(maxi(0, visible_count - 1)) * gap
+	var start_x := (319.0 - total_w) * 0.5
 	for i in REWARD_SLOT_PATHS.size():
 		var slot := _node(REWARD_SLOT_PATHS[i])
+		slot.visible = i < visible_count
+		if i >= visible_count:
+			continue
+		slot.position.x = start_x + float(i) * (slot_w + gap)
 		var data: Dictionary = rewards[i]
-		(slot.get_node("Icon") as TextureRect).texture = _prepare_texture(str(data.get("icon", "")))
+		(slot.get_node("Icon") as TextureRect).texture = _reward_preview_texture(data)
 		var label := slot.get_node("Label") as Label
 		label.text = ""
 		label.visible = false
+
+func _build_reward_preview_items() -> Array[Dictionary]:
+	var stage_rewards: Dictionary = _stage_data.get("rewards", {})
+	var rewards: Array[Dictionary] = []
+	var gold := int(stage_rewards.get("gold", 0))
+	if gold > 0:
+		rewards.append({"icon": "gold", "label": "金币\n%s" % _compact_number(gold)})
+	var exp := int(stage_rewards.get("exp", 0))
+	if exp > 0:
+		rewards.append({"icon": "exp", "label": "经验\n%s" % _compact_number(exp)})
+	var first_clear_gems := _preview_first_clear_gems()
+	if first_clear_gems > 0:
+		rewards.append({"icon": "diamond", "label": "首通钻石\n+%d" % first_clear_gems})
+	var guaranteed_items: Array = stage_rewards.get("guaranteedItems", [])
+	for item: Dictionary in guaranteed_items:
+		if rewards.size() >= REWARD_SLOT_PATHS.size():
+			break
+		var item_id := str(item.get("id", ""))
+		if item_id.is_empty():
+			continue
+		var item_def := ItemDB.get_item(item_id)
+		var item_name := str(item_def.get("name", item_id))
+		var count := maxi(1, int(item.get("count", 1)))
+		rewards.append({
+			"icon": "item",
+			"item_id": item_id,
+			"label": "%s\nx%d" % [_short_reward_name(item_name), count],
+		})
+	if rewards.is_empty():
+		rewards.append({"icon": "gold", "label": "通关后\n结算"})
+	return rewards
+
+func _preview_first_clear_gems() -> int:
+	if _stage_id.is_empty():
+		return 0
+	var storage := get_node_or_null("/root/SaveManager")
+	if storage != null and storage.has_method("is_stage_cleared") and storage.is_stage_cleared(_stage_id):
+		return 0
+	var is_boss := str(_stage_data.get("type", "")) == "boss"
+	return 10 if is_boss else 3
+
+func _short_reward_name(name: String) -> String:
+	if name.length() <= 5:
+		return name
+	return name.substr(0, 5)
+
+func _reward_preview_texture(data: Dictionary) -> Texture2D:
+	var icon := str(data.get("icon", ""))
+	if icon == "item":
+		return _get_texture(_reward_item_icon_path(str(data.get("item_id", ""))))
+	return _prepare_texture(icon)
+
+func _reward_item_icon_path(item_id: String) -> String:
+	if item_id in ["capture_ball_plus", "capture_ball_elite"]:
+		return "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png"
+	if item_id == "capture_ball":
+		return "res://assets/images/ui/icons/items_new_icon_capture_ball.png"
+	if item_id == "exp_crystal":
+		return "res://assets/images/ui/icons/items_new_icon_exp_crystal.png"
+	if item_id == "exp_potion":
+		return "res://assets/images/ui/icons/items_new_icon_exp_potion.png"
+	if item_id in ["gold_bag", "gold_chest"]:
+		return "res://assets/images/ui/icons/items_new_icon_%s.png" % item_id
+	if item_id in ["hp_potion", "hp_potion_large"]:
+		return "res://assets/images/ui/icons/items_new_icon_hp_potion.png"
+	if item_id in ["guard_charm", "absorb_shield"]:
+		return "res://assets/images/ui/icons/battle_icon_guard_charm.png"
+	if item_id in ["rock_hammer", "rock_hammer_plus"]:
+		return "res://assets/images/ui/icons/battle_icon_rock_hammer.png"
+	if item_id.begins_with("evolution_stone_"):
+		return "res://assets/images/ui/gems/items_new_icon_%s.png" % item_id
+	return "res://assets/images/ui/icons/items_new_icon_capture_ball.png"
 
 func _sync_start_button() -> void:
 	var is_empty := _is_player_team_empty()

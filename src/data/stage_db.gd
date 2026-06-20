@@ -13,7 +13,7 @@ const STAGES_DATA: Dictionary = {
 	"chapters": [
 		{
 			"id": "chapter_1",
-			"name": "草原之旅",
+			"name": "微风平原",
 			"element": "grass",
 			"stages": [
 				{
@@ -73,7 +73,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_2",
-			"name": "草原区",
+			"name": "瀑布国",
 			"element": "fire",
 			"stages": [
 				{
@@ -140,7 +140,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_3",
-			"name": "森林区",
+			"name": "幻羽森林",
 			"element": "dark",
 			"stages": [
 				{
@@ -197,7 +197,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_4",
-			"name": "沙漠区",
+			"name": "热情沙漠",
 			"element": "dark",
 			"stages": [
 				{
@@ -283,7 +283,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_5",
-			"name": "海岛区",
+			"name": "南国海",
 			"element": "thunder",
 			"stages": [
 				{
@@ -342,7 +342,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_6",
-			"name": "冰霜王座",
+			"name": "冰之国",
 			"element": "ice",
 			"stages": [
 				{
@@ -423,7 +423,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_7",
-			"name": "虚空领域",
+			"name": "精灵虚空",
 			"element": "void",
 			"stages": [
 				{
@@ -489,7 +489,7 @@ const STAGES_DATA: Dictionary = {
 		},
 		{
 			"id": "chapter_8",
-			"name": "时空裂隙",
+			"name": "烧烤岩",
 			"element": "temporal",
 			"stages": [
 				{

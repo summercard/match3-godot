@@ -29,7 +29,7 @@
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="33_currency"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="34_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="35_gem"]
-[ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="36_energy"]
+[ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="36_energy"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="37_nav_panel"]
 [ext_resource type="Texture2D" uid="uid://bgqu7cmyj23b6" path="res://assets/images/ui/icons/album_ui_dex_bottom_nav_selected.png" id="38_nav_selected"]
 [ext_resource type="Texture2D" uid="uid://u1nmo0dbthgh" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="39_home"]
@@ -306,7 +306,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.34, 0.17, 0.04, 1)
 theme_override_font_sizes/font_size = 11
-text = "体力  Full"
+text = "体力  5/5"
 horizontal_alignment = 1
 vertical_alignment = 1
 

@@ -45,6 +45,7 @@ func _run() -> void:
 	ranch.set("_class_selected_instance_id", instance_id)
 	ranch.call("_sync_gui")
 	var evolve := ranch.get_node("Pages/ClassroomPage/DetailPanel/EvolveButton") as TextureButton
+	var upgrade := ranch.get_node("Pages/ClassroomPage/DetailPanel/UpgradeButton") as TextureButton
 	var frame := evolve.get_node("Frame") as TextureRect
 	var authored_art := evolve.get_node("butter02") as CanvasItem
 
@@ -52,6 +53,24 @@ func _run() -> void:
 	_expect(not frame.visible, "classroom evolution should hide the legacy texture frame")
 	_expect(not evolve.has_node("ModernFrame"), "evolution should not overlay generated code UI")
 	_expect(authored_art.modulate.a < 1.0, "unavailable evolution should tint the authored art")
+	_expect(not (ranch.get_node("Pages/ClassroomPage/DetailPanel/TargetPortrait") as TextureRect).visible, "classroom should remove the evolution preview portrait")
+	_expect(ranch.has_node("Pages/ClassroomPage/DetailPanel/MonsterExpBar"), "classroom should show the selected monster exp bar")
+	_expect(ranch.has_node("Pages/ClassroomPage/DetailPanel/PoolBar"), "classroom should show the shared exp pool")
+	_expect(not upgrade.disabled, "upgrade action should remain tappable for empty-pool feedback")
+	upgrade.pressed.emit()
+	_expect(str(ranch.get("_status_text")) == "共享经验槽为空", "empty upgrade should explain the shared pool state")
+	save_manager.add_shared_monster_exp(110)
+	ranch.call("_sync_gui")
+	upgrade.pressed.emit()
+	_expect(int(save_manager.get_monster_instance(instance_id).get("level", 1)) == 4, "upgrade should consume shared exp and raise one level")
+	_expect(save_manager.get_shared_monster_exp() == 0, "upgrade should consume only the exp needed for the next level")
+	_expect((ranch.get_node("Pages/ClassroomPage/DetailPanel/UpgradeFeedback") as Control).visible, "upgrade should immediately show authored success feedback")
+	for _frame in 90:
+		await process_frame
+	_expect(not (ranch.get_node("Pages/ClassroomPage/DetailPanel/UpgradeFeedback") as Control).visible, "upgrade feedback should finish cleanly")
+	_expect((ranch.get_node("Pages/ClassroomPage/DetailPanel/Info") as Label).text.begins_with("Lv.4"), "classroom detail should refresh to the new level")
+	_expect((ranch.get_node("Pages/ClassroomPage/DetailPanel/MonsterExpText") as Label).text == "当前经验 0 / 120", "monster exp text should settle on the latest post-level values")
+	_expect(is_zero_approx((ranch.get_node("Pages/ClassroomPage/DetailPanel/MonsterExpBar") as ProgressBar).value), "monster exp bar should settle on the latest post-level value")
 	evolve.pressed.emit()
 	_expect(str(ranch.get("_status_text")) == "需要 Lv.16", "low level tap should state the required level")
 	_expect(not (ranch.get_node("Header/Status") as Label).visible, "classroom feedback should not overlap the detail-panel header")

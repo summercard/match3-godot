@@ -25,7 +25,7 @@ const DETAIL_RECT := Rect2(9.0, 515.0, 357.0, 136.0)
 const USE_BTN_RECT := Rect2(275.0, 603.0, 78.0, 38.0)
 
 const INVENTORY_ASSETS := {
-	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"bg": "res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png",
 	"back": "res://assets/images/ui/buttons/album_ui_back_button.png",
 	"backpack": "res://assets/images/ui/icons/common_nav_icon_nav_inventory.png",
 	"currency_chip": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
@@ -240,8 +240,10 @@ func _use_item(item_id: String) -> void:
 		"exp":
 			var exp_gain: int = effect.get("expGain", 0)
 			if exp_gain > 0 and _storage.use_item(item_id, 1):
-				_storage.add_player_exp(exp_gain)
-				_show_toast("获得 %d 经验" % exp_gain)
+				var result: Dictionary = _storage.add_shared_monster_exp(exp_gain) if _storage.has_method("add_shared_monster_exp") else {}
+				var added := int(result.get("added", exp_gain))
+				var overflow := int(result.get("overflow", 0))
+				_show_toast("经验槽 +%d%s" % [added, "（已满）" if overflow > 0 else ""])
 		"gold":
 			var gold_gain: int = effect.get("goldGain", 0)
 			if gold_gain > 0 and _storage.use_item(item_id, 1):

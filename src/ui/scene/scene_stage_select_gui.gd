@@ -7,14 +7,14 @@ const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_bu
 const AnimationHelperScript := preload("res://src/engine/animation_player.gd")
 
 const CHAPTER_MAP_NODES := {
-	"chapter_1": "MapScroll/ChapterMaps/Chapter01Grassland",
-	"chapter_2": "MapScroll/ChapterMaps/Chapter02FireValley",
-	"chapter_3": "MapScroll/ChapterMaps/Chapter03MysticForest",
-	"chapter_4": "MapScroll/ChapterMaps/Chapter04EclipseCanopy",
-	"chapter_5": "MapScroll/ChapterMaps/Chapter05ThunderTemple",
-	"chapter_6": "MapScroll/ChapterMaps/Chapter06FrostThrone",
-	"chapter_7": "MapScroll/ChapterMaps/Chapter07VoidDomain",
-	"chapter_8": "MapScroll/ChapterMaps/Chapter08TemporalRift",
+	"chapter_1": "MapScroll/ChapterMaps/Chapter01BreezePlain",
+	"chapter_2": "MapScroll/ChapterMaps/Chapter02WaterfallKingdom",
+	"chapter_3": "MapScroll/ChapterMaps/Chapter03FeatherForest",
+	"chapter_4": "MapScroll/ChapterMaps/Chapter04PassionDesert",
+	"chapter_5": "MapScroll/ChapterMaps/Chapter05SouthernSea",
+	"chapter_6": "MapScroll/ChapterMaps/Chapter06IceKingdom",
+	"chapter_7": "MapScroll/ChapterMaps/Chapter07SpiritVoid",
+	"chapter_8": "MapScroll/ChapterMaps/Chapter08BarbecueRock",
 	"chapter_9": "MapScroll/ChapterMaps/Chapter09StarlitTemple",
 	"chapter_10": "MapScroll/ChapterMaps/Chapter10ChaosDomain",
 	"chapter_11": "MapScroll/ChapterMaps/Chapter11RadiantTemple",

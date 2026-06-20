@@ -833,6 +833,11 @@ func _do_sweep_confirm() -> void:
 	if not _storage:
 		_on_sweep_cancel_pressed()
 		return
+	var player: Dictionary = _storage.get_player() if _storage.has_method("get_player") else {}
+	if int(player.get("stamina", 0)) < 1:
+		if _sweep_rule_label:
+			_sweep_rule_label.text = "体力不足：每次扫荡消耗 1 点，6 小时恢复 1 点"
+		return
 	
 	var reward: Dictionary = _storage.do_sweep(_sweep_dialog_stage_id) if _storage.has_method("do_sweep") else {}
 	_on_sweep_cancel_pressed()
@@ -848,6 +853,7 @@ func _do_sweep_confirm() -> void:
 
 func _refresh_sweep_dialog_content() -> void:
 	var reward: Dictionary = {}
+	var stamina_player: Dictionary = _storage.get_player() if _storage and _storage.has_method("get_player") else {}
 	if _storage and _storage.has_method("get_sweep_reward"):
 		reward = _storage.get_sweep_reward(_sweep_dialog_stage_id)
 	_sweep_dialog_reward = reward
@@ -863,7 +869,9 @@ func _refresh_sweep_dialog_content() -> void:
 		_sweep_exp_label.text = "+%d 经验" % reward.get("exp", 0)
 
 	if _sweep_rule_label:
-		_sweep_rule_label.text = "%d 星扫荡收益 80%%" % clampi(_sweep_dialog_stars, 1, 3)
+		_sweep_rule_label.text = "%d 星收益 80%% · 消耗体力 1（%d/5）" % [clampi(_sweep_dialog_stars, 1, 3), int(stamina_player.get("stamina", 0))]
+	if _sweep_confirm_btn:
+		_sweep_confirm_btn.disabled = int(stamina_player.get("stamina", 0)) < 1
 
 # ==================== 动画更新 ====================
 

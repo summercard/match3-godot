@@ -485,7 +485,7 @@ func _sync_currency_bar() -> void:
 	var values := {
 		"GoldChip": _format_number(int(player.get("gold", 0))),
 		"DiamondChip": _format_number(int(player.get("diamond", player.get("gems", 0)))),
-		"HeartChip": "%s Full" % str(player.get("stamina", player.get("energy", 5))),
+		"HeartChip": "%d/5" % int(player.get("stamina", player.get("energy", 5))),
 	}
 	for chip_name in values.keys():
 		_label("CurrencyBar/%s/Amount" % chip_name).text = str(values[chip_name])

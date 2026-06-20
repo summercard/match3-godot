@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="11_plus"]
 [ext_resource type="Texture2D" uid="uid://vdants1nwxss" path="res://assets/images/ui/panels/main_ui_trophy_capsule_v3.png" id="12_trophy_capsule"]
 [ext_resource type="Texture2D" uid="uid://juqei62ypmlc" path="res://assets/images/ui/icons/main_icon_trophy_score_v3.png" id="13_trophy"]
+[ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="14_stamina"]
 [ext_resource type="Texture2D" uid="uid://bdc3tphg7nwn5" path="res://assets/images/ui/buttons/main_ui_entry_shop_v3.png" id="15_shop_entry"]
 [ext_resource type="Texture2D" uid="uid://cchkq1ji5vvc3" path="res://assets/images/ui/buttons/main_ui_entry_inn_v3.png" id="16_inn_entry"]
 [ext_resource type="Texture2D" uid="uid://dfkl83jl7tvt0" path="res://assets/images/ui/buttons/main_ui_entry_ranch_v3.png" id="17_ranch_entry"]
@@ -59,15 +60,15 @@ script = ExtResource("2_particles")
 [node name="Header" type="Control" parent="." unique_id=236415546]
 anchors_preset = 0
 offset_right = 375.0
-offset_bottom = 64.0
+offset_bottom = 158.0
 mouse_filter = 2
 
 [node name="PlayerStatus" type="TextureRect" parent="Header" unique_id=1230815732]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 3.0
-offset_right = 130.0
-offset_bottom = 62.0
+offset_left = 16.0
+offset_top = 54.0
+offset_right = 143.0
+offset_bottom = 113.0
 mouse_filter = 2
 texture = ExtResource("4_player_card")
 expand_mode = 1
@@ -75,10 +76,10 @@ stretch_mode = 5
 
 [node name="Avatar" type="TextureRect" parent="Header" unique_id=331730849]
 layout_mode = 0
-offset_left = 11.0
-offset_top = 10.0
-offset_right = 52.0
-offset_bottom = 51.0
+offset_left = 24.0
+offset_top = 61.0
+offset_right = 65.0
+offset_bottom = 102.0
 mouse_filter = 2
 texture = ExtResource("5_avatar")
 expand_mode = 1
@@ -86,10 +87,10 @@ stretch_mode = 5
 
 [node name="OwnerLevelTitle" type="Label" parent="Header" unique_id=2090889518]
 layout_mode = 0
-offset_left = 60.0
-offset_top = 9.0
-offset_right = 119.0
-offset_bottom = 25.0
+offset_left = 73.0
+offset_top = 60.0
+offset_right = 132.0
+offset_bottom = 76.0
 theme_override_colors/font_color = Color(0.28, 0.14, 0.05, 1)
 theme_override_font_sizes/font_size = 10
 text = "主人等级"
@@ -100,18 +101,18 @@ vertical_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 45.0
-offset_top = 8.0
-offset_right = 111.0
-offset_bottom = 24.0
+offset_left = 58.0
+offset_top = 59.0
+offset_right = 124.0
+offset_bottom = 75.0
 text = "冒险者"
 
 [node name="LevelBadge" type="TextureRect" parent="Header" unique_id=939879965]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 35.0
-offset_right = 71.0
-offset_bottom = 57.0
+offset_left = 63.0
+offset_top = 86.0
+offset_right = 84.0
+offset_bottom = 108.0
 mouse_filter = 2
 texture = ExtResource("6_level")
 expand_mode = 1
@@ -120,10 +121,10 @@ stretch_mode = 5
 [node name="LevelValue" type="Label" parent="Header" unique_id=852806575]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 51.0
-offset_top = 38.0
-offset_right = 70.0
-offset_bottom = 55.0
+offset_left = 64.0
+offset_top = 89.0
+offset_right = 83.0
+offset_bottom = 106.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.16, 0.03, 1)
 theme_override_constants/outline_size = 2
@@ -134,29 +135,29 @@ vertical_alignment = 1
 
 [node name="ExperienceTrack" type="Control" parent="Header" unique_id=911767861]
 anchors_preset = 0
-offset_left = 66.0
-offset_top = 38.0
-offset_right = 122.0
-offset_bottom = 55.0
+offset_left = 79.0
+offset_top = 89.0
+offset_right = 135.0
+offset_bottom = 106.0
 mouse_filter = 2
 
 [node name="ExperienceFill" type="Control" parent="Header" unique_id=878699461]
 unique_name_in_owner = true
 anchors_preset = 0
-offset_left = 66.0
-offset_top = 38.0
-offset_right = 122.0
-offset_bottom = 55.0
+offset_left = 79.0
+offset_top = 89.0
+offset_right = 135.0
+offset_bottom = 106.0
 mouse_filter = 2
 script = ExtResource("7_exp_bar")
 
 [node name="ExpValue" type="Label" parent="Header" unique_id=623275096]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 68.0
-offset_top = 38.0
-offset_right = 120.0
-offset_bottom = 54.0
+offset_left = 81.0
+offset_top = 89.0
+offset_right = 133.0
+offset_bottom = 105.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.12, 0.28, 0.04, 1)
 theme_override_constants/outline_size = 2
@@ -167,10 +168,10 @@ vertical_alignment = 1
 
 [node name="GoldCapsule" type="TextureRect" parent="Header" unique_id=194318496]
 layout_mode = 0
-offset_left = 127.0
-offset_top = 15.0
-offset_right = 203.0
-offset_bottom = 43.0
+offset_left = 15.0
+offset_top = 8.0
+offset_right = 125.0
+offset_bottom = 48.0
 mouse_filter = 2
 texture = ExtResource("8_currency")
 expand_mode = 1
@@ -178,10 +179,10 @@ stretch_mode = 5
 
 [node name="GoldIcon" type="TextureRect" parent="Header" unique_id=780420617]
 layout_mode = 0
-offset_left = 130.0
-offset_top = 18.0
-offset_right = 151.0
-offset_bottom = 40.0
+offset_left = 20.0
+offset_top = 14.0
+offset_right = 48.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("9_gold")
 expand_mode = 1
@@ -190,10 +191,10 @@ stretch_mode = 5
 [node name="GoldValue" type="Label" parent="Header" unique_id=342748516]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 150.0
-offset_top = 17.0
-offset_right = 187.0
-offset_bottom = 41.0
+offset_left = 49.0
+offset_top = 14.0
+offset_right = 95.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 11
 text = "12,350"
@@ -202,10 +203,10 @@ vertical_alignment = 1
 
 [node name="GoldPlus" type="TextureButton" parent="Header" unique_id=152312080]
 layout_mode = 0
-offset_left = 184.0
-offset_top = 20.0
-offset_right = 202.0
-offset_bottom = 38.0
+offset_left = 98.0
+offset_top = 17.0
+offset_right = 120.0
+offset_bottom = 39.0
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("11_plus")
 texture_pressed = ExtResource("11_plus")
@@ -214,10 +215,10 @@ stretch_mode = 5
 
 [node name="DiamondCapsule" type="TextureRect" parent="Header" unique_id=432962208]
 layout_mode = 0
-offset_left = 203.0
-offset_top = 15.0
-offset_right = 279.0
-offset_bottom = 43.0
+offset_left = 132.0
+offset_top = 8.0
+offset_right = 242.0
+offset_bottom = 48.0
 mouse_filter = 2
 texture = ExtResource("8_currency")
 expand_mode = 1
@@ -225,10 +226,10 @@ stretch_mode = 5
 
 [node name="DiamondIcon" type="TextureRect" parent="Header" unique_id=759331152]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 18.0
-offset_right = 229.0
-offset_bottom = 40.0
+offset_left = 137.0
+offset_top = 14.0
+offset_right = 165.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = ExtResource("10_diamond")
 expand_mode = 1
@@ -237,10 +238,10 @@ stretch_mode = 5
 [node name="DiamondValue" type="Label" parent="Header" unique_id=1472582720]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 227.0
-offset_top = 17.0
-offset_right = 264.0
-offset_bottom = 41.0
+offset_left = 166.0
+offset_top = 14.0
+offset_right = 212.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 11
 text = "2,548"
@@ -249,10 +250,57 @@ vertical_alignment = 1
 
 [node name="DiamondPlus" type="TextureButton" parent="Header" unique_id=1552543318]
 layout_mode = 0
-offset_left = 260.0
-offset_top = 20.0
-offset_right = 278.0
-offset_bottom = 38.0
+offset_left = 215.0
+offset_top = 17.0
+offset_right = 237.0
+offset_bottom = 39.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_plus")
+texture_pressed = ExtResource("11_plus")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="StaminaCapsule" type="TextureRect" parent="Header"]
+layout_mode = 0
+offset_left = 249.0
+offset_top = 8.0
+offset_right = 359.0
+offset_bottom = 48.0
+mouse_filter = 2
+texture = ExtResource("8_currency")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StaminaIcon" type="TextureRect" parent="Header"]
+layout_mode = 0
+offset_left = 254.0
+offset_top = 14.0
+offset_right = 282.0
+offset_bottom = 42.0
+mouse_filter = 2
+texture = ExtResource("14_stamina")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StaminaValue" type="Label" parent="Header"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 283.0
+offset_top = 14.0
+offset_right = 329.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
+theme_override_font_sizes/font_size = 11
+text = "5/5"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="StaminaPlus" type="TextureButton" parent="Header"]
+layout_mode = 0
+offset_left = 332.0
+offset_top = 17.0
+offset_right = 354.0
+offset_bottom = 39.0
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("11_plus")
 texture_pressed = ExtResource("11_plus")
@@ -261,10 +309,10 @@ stretch_mode = 5
 
 [node name="RankPanel" type="TextureRect" parent="Header" unique_id=1402777171]
 layout_mode = 0
-offset_left = 277.0
-offset_top = 15.0
-offset_right = 344.0
-offset_bottom = 43.0
+offset_left = 16.0
+offset_top = 118.0
+offset_right = 146.0
+offset_bottom = 154.0
 mouse_filter = 2
 texture = ExtResource("12_trophy_capsule")
 expand_mode = 1
@@ -272,10 +320,10 @@ stretch_mode = 5
 
 [node name="RankIcon" type="TextureRect" parent="Header" unique_id=734181460]
 layout_mode = 0
-offset_left = 280.0
-offset_top = 18.0
-offset_right = 302.0
-offset_bottom = 40.0
+offset_left = 21.0
+offset_top = 123.0
+offset_right = 49.0
+offset_bottom = 151.0
 mouse_filter = 2
 texture = ExtResource("13_trophy")
 expand_mode = 1
@@ -283,10 +331,10 @@ stretch_mode = 5
 
 [node name="RankTitle" type="Label" parent="Header" unique_id=1520743959]
 layout_mode = 0
-offset_left = 300.0
-offset_top = 17.0
-offset_right = 342.0
-offset_bottom = 29.0
+offset_left = 49.0
+offset_top = 121.0
+offset_right = 143.0
+offset_bottom = 135.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 7
 text = "成就分数"
@@ -294,11 +342,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RankScore" type="Label" parent="Header" unique_id=1466909314]
+unique_name_in_owner = true
 layout_mode = 0
-offset_left = 300.0
-offset_top = 27.0
-offset_right = 342.0
-offset_bottom = 41.0
+offset_left = 49.0
+offset_top = 134.0
+offset_right = 143.0
+offset_bottom = 152.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 8
 text = "15,680"

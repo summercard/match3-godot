@@ -22,6 +22,10 @@ func _run() -> void:
 	_assert(scene.has_node("DetailPanel/BattleSlots/Slot1"), "battle equip slot 1 should be editable")
 	_assert(scene.has_node("DetailPanel/BattleSlots/Slot2"), "battle equip slot 2 should be editable")
 	_assert(scene.has_node("DetailPanel/BattleSlots/Slot3"), "battle equip slot 3 should be editable")
+	_assert(scene.has_node("BottomNav/HomeButton"), "inventory should reuse the shop home navigation button")
+	_assert(scene.has_node("BottomNav/InventoryButton"), "inventory should show the selected backpack navigation button")
+	_assert((scene.get_node("BottomNav/InventoryButton/Selected") as Control).visible, "backpack navigation should show its selected state")
+	_assert((scene.get_node("DetailPanel") as Control).position.y + (scene.get_node("DetailPanel") as Control).size.y <= (scene.get_node("BottomNav") as Control).position.y, "compact detail panel should leave room for bottom navigation")
 
 	scene.set("_inventory", {
 		"capture_ball": 3,

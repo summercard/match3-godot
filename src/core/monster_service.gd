@@ -9,6 +9,12 @@ static func get_template(monster_id: String) -> Dictionary:
 static func get_template_stats(monster_id: String, level: int = 1, nature_id: String = "") -> Dictionary:
 	return StatCalculator.calc(monster_id, level, nature_id)
 
+## 我方普通精灵使用基础成长数值；只有明确标记为精英的实例才叠加精英倍率。
+static func get_owned_stats(monster_id: String, level: int = 1, nature_id: String = "", is_elite: bool = false) -> Dictionary:
+	if is_elite:
+		return StatCalculator.calc_with_tier(monster_id, level, nature_id, StatCalculator.EnemyTier.ELITE)
+	return StatCalculator.calc(monster_id, level, nature_id)
+
 static func get_instance_view(instance_id: String, storage: Node = null) -> Dictionary:
 	var sm := _storage(storage)
 	if sm == null or not sm.has_method("get_monster_instance"):
@@ -48,8 +54,7 @@ static func get_species_album_view(monster_id: String, storage: Node = null) -> 
 	var nature := str(representative.get("nature", "")) if not representative.is_empty() else ""
 	# ★ 主人定 2026-06-11：图鉴显示也尊重 instance.isElite
 	var is_elite: bool = bool(representative.get("isElite", template.get("isElite", false))) if not representative.is_empty() else bool(template.get("isElite", false))
-	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
-	var stats: Dictionary = StatCalculator.calc_with_tier(monster_id, level, nature, tier)
+	var stats: Dictionary = get_owned_stats(monster_id, level, nature, is_elite)
 	return {
 		"monsterId": monster_id,
 		"template": template,
@@ -94,8 +99,7 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(template)
 	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier（HP×5, ATK+20%）
 	var is_elite: bool = bool(instance.get("isElite", template.get("isElite", false)))
-	var tier: int = StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
-	var stats: Dictionary = StatCalculator.calc_with_tier(monster_id, level, nature_id, tier)
+	var stats: Dictionary = get_owned_stats(monster_id, level, nature_id, is_elite)
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,

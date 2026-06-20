@@ -80,9 +80,9 @@ func _test_result_awards(save_manager: Node, high_id: String, low_id: String, th
 		]
 	})
 	var awards: Dictionary = scene.get("_monster_exp_awards")
-	_expect(int(awards.get(high_id, {}).get("exp", 0)) == 100, "high-level monster should get base exp")
-	_expect(int(awards.get(low_id, {}).get("exp", 0)) == 150, "low-level monster should get catchup exp")
-	_expect(bool(awards.get(low_id, {}).get("catchup", {}).get("enabled", false)), "result awards should preserve catchup state for UI")
+	_expect(int(awards.get("shared", {}).get("added", 0)) == 100, "battle monster exp should enter the shared pool once")
+	_expect(save_manager.get_instance_exp(high_id) == 0, "battle should not directly add exp to the active monster")
+	_expect(save_manager.get_instance_exp(low_id) == 0, "battle should not directly add catchup exp to a team member")
 	scene.queue_free()
 
 

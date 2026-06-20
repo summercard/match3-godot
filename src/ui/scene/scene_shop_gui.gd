@@ -18,7 +18,7 @@ const CARD_PATHS := [
 	"ProductGrid/Cards/Card8",
 	"ProductGrid/Cards/Card9",
 ]
-const TAB_PATHS := ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters", "Tabs/Chest"]
+const TAB_PATHS := ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters"]
 
 var _shop_page := 0
 var _toast_timer := 0.0
@@ -61,17 +61,14 @@ func _get_visible_shop_items() -> Array:
 	for entry in shop_list:
 		var item: Dictionary = entry.get("data", {})
 		var item_type: String = item.get("type", "")
-		var item_id := str(entry.get("id", ""))
-		if _active_tab == "gems":
+		if _active_tab == "all":
 			result.append(entry)
 			continue
-		if _active_tab == "coins" and item_type != "gold":
+		if _active_tab == "capture" and item_type != "capture":
 			continue
-		if _active_tab == "hearts" and not item.get("effect", {}).has("healRatio"):
+		if _active_tab == "battle" and item_type != "battle":
 			continue
-		if _active_tab == "boosters" and not (item_type in ["capture", "exp", "battle"]):
-			continue
-		if _active_tab == "chest" and item_type != "evolution":
+		if _active_tab == "other" and item_type in ["capture", "battle"]:
 			continue
 		result.append(entry)
 	return result
@@ -91,6 +88,7 @@ func _connect_gui_actions() -> void:
 	_connect_button("PopupOverlay/Panel/CancelButton", _on_popup_cancel_pressed)
 	_connect_button("PopupOverlay/Panel/ConfirmButton", _on_popup_confirm_pressed)
 	_connect_button("BottomNav/HomeButton", _go_main)
+	_connect_button("BottomNav/InventoryButton", _go_inventory)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -128,11 +126,11 @@ func _on_popup_minus_pressed() -> void:
 	_sync_popup()
 
 func _on_popup_plus_pressed() -> void:
-	_popup_quantity = mini(99, _popup_quantity + 1)
+	_popup_quantity = mini(_popup_max_quantity(), _popup_quantity + 1)
 	_sync_popup()
 
 func _on_popup_plus_ten_pressed() -> void:
-	_popup_quantity = mini(99, _popup_quantity + 10)
+	_popup_quantity = mini(_popup_max_quantity(), _popup_quantity + 10)
 	_sync_popup()
 
 func _on_popup_cancel_pressed() -> void:
@@ -235,6 +233,7 @@ func _sync_gui() -> void:
 func _sync_static_labels() -> void:
 	var labels := {
 		"BottomNav/HomeButton/Text": "主页",
+		"BottomNav/InventoryButton/Text": "背包",
 		"PopupOverlay/Panel/Title": "购买确认",
 		"PopupOverlay/Panel/CloseButton/Text": "×",
 		"PopupOverlay/Panel/CancelButton/Text": "取消",
@@ -252,7 +251,7 @@ func _sync_header() -> void:
 	_label("Header/GoldChip/Amount").text = _format_number(int(player_data.get("gold", 0)))
 	_label("Header/DiamondChip/Amount").text = _format_number(int(player_data.get("gems", 0)))
 	if has_node("Header/EnergyChip/Amount"):
-		_label("Header/EnergyChip/Amount").text = "5 Full"
+		_label("Header/EnergyChip/Amount").text = "%d/5" % int(player_data.get("stamina", player_data.get("energy", 5)))
 
 func _sync_tabs() -> void:
 	for i in TAB_PATHS.size():
@@ -265,6 +264,8 @@ func _sync_tabs() -> void:
 		var text := tab.get_node("Text") as Label
 		text.add_theme_color_override("font_color", Color.WHITE if active else Color(0.43, 0.24, 0.07))
 		text.add_theme_color_override("font_shadow_color", Color(0.42, 0.10, 0.13, 0.72) if active else Color(1.0, 0.95, 0.78, 0.72))
+	if has_node("Tabs/Chest"):
+		_node("Tabs/Chest").visible = false
 
 func _sync_feature() -> void:
 	_label("FeatureBanner/Title").text = "新手超值礼包"
@@ -286,6 +287,7 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 	var item_id := str(shop_item.get("id", ""))
 	var currency_key := "diamond" if str(shop_item.get("currency", "gold")) == "gems" else "gold"
 	var can_afford := _can_afford(item_id)
+	var sold_out := _get_daily_remaining(item_id) <= 0
 	(card.get_node("Icon") as TextureRect).texture = _get_item_texture(item_id)
 	(card.get_node("Name") as Label).text = str(item.get("name", ""))
 	(card.get_node("Limit") as Label).text = _get_limit_text(shop_item)
@@ -295,8 +297,8 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 		(card.get_node("BestRibbon") as Control).visible = item_id in ["gold_chest", "capture_ball_elite", "focus_crystal", "evolution_stone_light", "evolution_stone_dark"]
 		if card.has_node("BestRibbon/Text"):
 			(card.get_node("BestRibbon/Text") as Label).text = "超值"
-	card.disabled = false
-	card.modulate.a = 1.0
+	card.disabled = sold_out
+	card.modulate.a = 0.58 if sold_out else 1.0
 	if card.has_node("Price"):
 		(card.get_node("Price") as Control).modulate.a = 1.0
 	if card.has_node("BuyButton"):
@@ -332,6 +334,8 @@ func _sync_popup() -> void:
 	var confirm := get_node("PopupOverlay/Panel/ConfirmButton") as TextureButton
 	confirm.disabled = not can_afford
 	confirm.modulate.a = 1.0 if can_afford else 0.62
+	(get_node("PopupOverlay/Panel/PlusButton") as BaseButton).disabled = _popup_quantity >= _popup_max_quantity()
+	(get_node("PopupOverlay/Panel/PlusTenButton") as BaseButton).disabled = _popup_quantity >= _popup_max_quantity()
 
 func _attach_shop_feedback() -> void:
 	var primary_paths := {
@@ -345,7 +349,6 @@ func _attach_shop_feedback() -> void:
 		"Tabs/Coins",
 		"Tabs/Hearts",
 		"Tabs/Boosters",
-		"Tabs/Chest",
 		"ProductGrid/PageControls/PreviousButton",
 		"ProductGrid/PageControls/NextButton",
 		"PopupOverlay/Panel/CloseButton",
@@ -355,6 +358,7 @@ func _attach_shop_feedback() -> void:
 		"PopupOverlay/Panel/CancelButton",
 		"PopupOverlay/Panel/ConfirmButton",
 		"BottomNav/HomeButton",
+		"BottomNav/InventoryButton",
 	]
 	for path in CARD_PATHS:
 		feedback_paths.append(path)
@@ -478,6 +482,14 @@ func _go_to_scene(scene_name: String) -> void:
 		game.scene_manager.switch_scene(scene_name, {}, "slide")
 	elif has_node("/root/SceneManager"):
 		get_node("/root/SceneManager").switch_scene(scene_name, {}, "slide")
+
+func _go_inventory() -> void:
+	_go_to_scene("inventory")
+
+func _popup_max_quantity() -> int:
+	if popup.is_empty():
+		return 1
+	return maxi(1, mini(99, _get_daily_remaining(str(popup.get("id", "")))))
 
 func _make_tab_style(active: bool) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()

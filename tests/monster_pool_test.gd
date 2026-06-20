@@ -18,6 +18,10 @@ func _run() -> void:
 	var starter_instance: Dictionary = pool[0]
 	var starter_id := str(starter_instance.get("instanceId", ""))
 	_expect(not starter_id.is_empty(), "starter should have instanceId")
+	for starter: Dictionary in pool.slice(0, 3):
+		var starter_view := MonsterService.build_instance_view(starter)
+		var expected_stats := StatCalculator.calc(str(starter.get("monsterId", "")), int(starter.get("level", 1)), str(starter.get("nature", "")))
+		_expect(starter_view.get("stats", {}) == expected_stats, "starter %s should use normal player stats without enemy HP scaling" % str(starter.get("monsterId", "")))
 
 	var first: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "brave", "source": "test"})
 	var second: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "cautious", "source": "test"})

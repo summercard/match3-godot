@@ -531,8 +531,8 @@ offset_bottom = 128.0
 
 [node name="RewardSlot1" type="Control" parent="RewardPanel/Slots" unique_id=657978786]
 anchors_preset = 0
-offset_left = 51.0
-offset_right = 123.0
+offset_left = 13.0
+offset_right = 85.0
 offset_bottom = 84.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot1" unique_id=118173143]
@@ -571,8 +571,8 @@ clip_text = true
 
 [node name="RewardSlot2" type="Control" parent="RewardPanel/Slots" unique_id=795980711]
 anchors_preset = 0
-offset_left = 135.0
-offset_right = 207.0
+offset_left = 95.0
+offset_right = 167.0
 offset_bottom = 84.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot2" unique_id=1519586129]
@@ -611,8 +611,8 @@ clip_text = true
 
 [node name="RewardSlot3" type="Control" parent="RewardPanel/Slots" unique_id=1481737944]
 anchors_preset = 0
-offset_left = 219.0
-offset_right = 291.0
+offset_left = 177.0
+offset_right = 249.0
 offset_bottom = 84.0
 
 [node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot3" unique_id=1858066800]
@@ -635,6 +635,46 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot3" unique_id=801588685]
+layout_mode = 0
+offset_left = -7.0
+offset_top = 58.0
+offset_right = 79.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="RewardSlot4" type="Control" parent="RewardPanel/Slots"]
+anchors_preset = 0
+offset_left = 259.0
+offset_right = 331.0
+offset_bottom = 84.0
+
+[node name="Frame" type="TextureRect" parent="RewardPanel/Slots/RewardSlot4"]
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 84.0
+mouse_filter = 2
+texture = ExtResource("reward_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="RewardPanel/Slots/RewardSlot4"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 5.0
+offset_right = 60.0
+offset_bottom = 53.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Amount" type="Label" parent="RewardPanel/Slots/RewardSlot4"]
 layout_mode = 0
 offset_left = -7.0
 offset_top = 58.0
@@ -692,7 +732,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = "队伍经验"
+text = "共享经验槽"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -742,6 +782,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=588148548]
+visible = false
 layout_mode = 0
 offset_top = 57.0
 offset_right = 68.0
@@ -750,12 +791,13 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 8
-text = "Lv.1"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard1" unique_id=1359102942]
+visible = false
 layout_mode = 0
 offset_top = 70.0
 offset_right = 68.0
@@ -764,7 +806,7 @@ theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 7
-text = "+0"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -796,6 +838,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=1930564297]
+visible = false
 layout_mode = 0
 offset_top = 57.0
 offset_right = 68.0
@@ -804,12 +847,13 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 8
-text = "Lv.1"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard2" unique_id=742288577]
+visible = false
 layout_mode = 0
 offset_top = 70.0
 offset_right = 68.0
@@ -818,7 +862,7 @@ theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 7
-text = "+0"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -850,6 +894,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Level" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1125240006]
+visible = false
 layout_mode = 0
 offset_top = 57.0
 offset_right = 68.0
@@ -858,12 +903,13 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 8
-text = "Lv.1"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 
 [node name="Exp" type="Label" parent="ExpPanel/Cards/ExpCard3" unique_id=1622793231]
+visible = false
 layout_mode = 0
 offset_top = 70.0
 offset_right = 68.0
@@ -872,7 +918,7 @@ theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 7
-text = "+0"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -996,6 +1042,6 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 13
-text = "再来一次"
+text = "课堂升级精灵"
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -4,10 +4,24 @@ extends RefCounted
 const BASE_IDLE_EXP: float = 5.0
 const COMPANION_BONUS_PER_PARTNER: float = 0.15
 const COMPANION_BONUS_MAX: float = 0.45
+const NATURE_IDLE_MULTIPLIERS := {
+	"brave": 1.06,
+	"cautious": 1.08,
+	"agile": 1.10,
+	"wise": 1.15,
+	"gentle": 1.12,
+	"fierce": 1.05,
+	"calm": 1.09,
+	"chaos": 1.13,
+}
 
 
 static func calc_base_rate(level: int) -> float:
 	return BASE_IDLE_EXP + float(maxi(1, level))
+
+
+static func calc_nature_multiplier(nature_id: String) -> float:
+	return float(NATURE_IDLE_MULTIPLIERS.get(nature_id, 1.0))
 
 
 static func calc_companion_multiplier(occupied_count: int) -> float:
@@ -16,18 +30,21 @@ static func calc_companion_multiplier(occupied_count: int) -> float:
 	return 1.0 + bonus
 
 
-static func calc_state(monster_level: int, reference_level: int, occupied_count: int, is_focus: bool) -> Dictionary:
+static func calc_state(monster_level: int, reference_level: int, occupied_count: int, is_focus: bool, nature_id: String = "") -> Dictionary:
 	var base_rate := calc_base_rate(monster_level)
+	var nature_mult := calc_nature_multiplier(nature_id)
 	var companion_mult := calc_companion_multiplier(occupied_count)
 	var catchup_state := GrowthRules.get_catchup_state(monster_level, reference_level)
 	var catchup_mult := float(catchup_state.get("multiplier", 1.0)) if is_focus else 1.0
-	var total_mult := companion_mult * catchup_mult
+	var total_mult := nature_mult * companion_mult * catchup_mult
 	var rate := base_rate * total_mult
 	return {
 		"baseRate": base_rate,
 		"rate": rate,
 		"occupiedCount": occupied_count,
 		"isFocus": is_focus,
+		"nature": nature_id,
+		"natureMultiplier": nature_mult,
 		"companionMultiplier": companion_mult,
 		"companionLabel": companion_label(occupied_count),
 		"catchup": catchup_state if is_focus else GrowthRules.get_catchup_state(monster_level, monster_level),

@@ -85,6 +85,7 @@ func _connect_gui_actions() -> void:
 	_connect_button("GridPanel/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("GridPanel/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("DetailPanel/UseButton", _on_use_pressed)
+	_connect_button("BottomNav/HomeButton", _on_back_pressed)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -169,6 +170,8 @@ func _sync_static_labels() -> void:
 		"GridPanel/EmptyHint": "去战斗或商店获取吧",
 		"DetailPanel/EmptyText": "选择一个道具查看详情",
 		"DetailPanel/UseButton/Text": "使用",
+		"BottomNav/HomeButton/Text": "主页",
+		"BottomNav/InventoryButton/Text": "背包",
 	}
 	for path in labels.keys():
 		if has_node(path):
@@ -322,6 +325,8 @@ func _attach_inventory_feedback() -> void:
 		"GridPanel/PageControls/PreviousButton",
 		"GridPanel/PageControls/NextButton",
 		"DetailPanel/UseButton",
+		"BottomNav/HomeButton",
+		"BottomNav/InventoryButton",
 	]
 	for path in SLOT_PATHS:
 		paths.append(path)
@@ -343,7 +348,7 @@ func _attach_inventory_feedback() -> void:
 		feedback.setup(button, profile)
 
 func _play_enter_animation() -> void:
-	for path in ["Header", "Tabs", "GridPanel", "DetailPanel"]:
+	for path in ["Header", "Tabs", "GridPanel", "DetailPanel", "BottomNav"]:
 		var node := get_node_or_null(path) as Control
 		if node == null:
 			continue

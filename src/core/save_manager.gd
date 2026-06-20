@@ -16,6 +16,7 @@ const StageDBScript = preload("res://src/data/stage_db.gd")
 const AchievementDBScript = preload("res://src/data/achievement_db.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
 const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
+const StatCalculator = preload("res://src/core/stat_calculator.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
 const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
@@ -34,6 +35,9 @@ func _exit_tree() -> void:
 const SAVE_PATH: String = "user://save_game.cfg"
 const RANCH_IDLE_INTERVAL_MS: float = 5.0 * 60.0 * 1000.0
 const RANCH_IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
+const STAMINA_MAX: int = 5
+const STAMINA_RECOVERY_MS: float = 6.0 * 60.0 * 60.0 * 1000.0
+const SWEEP_STAMINA_COST: int = 1
 
 var _config: ConfigFile = null
 var _dirty: bool = false
@@ -102,10 +106,12 @@ func clear_all_data() -> bool:
 ## 获取玩家数据（带默认值）
 ## JS: loadPlayer()
 func get_player() -> Dictionary:
-	return _get_value("player", "data", {
+	var player: Dictionary = _get_value("player", "data", {
 		"level": 1,
 		"gold": 0,
 		"gems": 0,
+		"stamina": 5,
+		"staminaUpdatedAt": Time.get_unix_time_from_system() * 1000.0,
 		"exp": 0,
 		"team": ["monster_001", "monster_002", "monster_003"],
 		"captured": ["monster_001", "monster_002", "monster_003"],
@@ -114,6 +120,52 @@ func get_player() -> Dictionary:
 		"stageProgress": { "chapter": 1, "stage": 1 },
 		"pokedex": {}
 	})
+	# 兼容旧存档中的 energy 字段，并保证三种资源都有统一入口。
+	if not player.has("stamina"):
+		player["stamina"] = int(player.get("energy", 5))
+	if _apply_stamina_recovery(player):
+		_set_value("player", "data", player)
+		_save_config()
+	return player
+
+func _apply_stamina_recovery(player: Dictionary) -> bool:
+	var now_ms := Time.get_unix_time_from_system() * 1000.0
+	var changed := false
+	var stamina := clampi(int(player.get("stamina", player.get("energy", STAMINA_MAX))), 0, STAMINA_MAX)
+	if stamina != int(player.get("stamina", stamina)):
+		changed = true
+	player["stamina"] = stamina
+	var updated_at := float(player.get("staminaUpdatedAt", now_ms))
+	if not player.has("staminaUpdatedAt") or updated_at <= 0.0 or updated_at > now_ms:
+		updated_at = now_ms
+		changed = true
+	if stamina < STAMINA_MAX:
+		var recovered := int((now_ms - updated_at) / STAMINA_RECOVERY_MS)
+		if recovered > 0:
+			stamina = mini(STAMINA_MAX, stamina + recovered)
+			player["stamina"] = stamina
+			updated_at = now_ms if stamina >= STAMINA_MAX else updated_at + recovered * STAMINA_RECOVERY_MS
+			changed = true
+	player["staminaUpdatedAt"] = updated_at
+	return changed
+
+func spend_stamina(amount: int = 1) -> bool:
+	amount = maxi(0, amount)
+	var player := get_player()
+	var current := int(player.get("stamina", 0))
+	if current < amount:
+		return false
+	if current >= STAMINA_MAX and amount > 0:
+		player["staminaUpdatedAt"] = Time.get_unix_time_from_system() * 1000.0
+	player["stamina"] = current - amount
+	return save_player(player)
+
+func add_stamina(amount: int) -> bool:
+	var player := get_player()
+	player["stamina"] = clampi(int(player.get("stamina", 0)) + amount, 0, STAMINA_MAX)
+	if int(player["stamina"]) >= STAMINA_MAX:
+		player["staminaUpdatedAt"] = Time.get_unix_time_from_system() * 1000.0
+	return save_player(player)
 
 func load_player() -> Dictionary:
 	return get_player()
@@ -354,6 +406,56 @@ func add_instance_exp(instance_id: String, exp_gained: int) -> Dictionary:
 	var result := MonsterPool.add_instance_exp(instance, exp_gained)
 	pool[idx] = instance
 	save_monster_pool(pool)
+	return result
+
+# ========== 精灵共享经验槽（section: sharedMonsterExp） ==========
+
+func get_shared_monster_exp_capacity(player_level: int = -1) -> int:
+	var level := int(get_player().get("level", 1)) if player_level < 0 else player_level
+	return 1000 + maxi(1, level) * 500
+
+func get_shared_monster_exp() -> int:
+	return maxi(0, int(_get_value("sharedMonsterExp", "amount", 0)))
+
+func add_shared_monster_exp(amount: int) -> Dictionary:
+	var before := get_shared_monster_exp()
+	var capacity := get_shared_monster_exp_capacity()
+	var accepted := mini(maxi(0, amount), maxi(0, capacity - before))
+	var current := before + accepted
+	_set_value("sharedMonsterExp", "amount", current)
+	_save_config()
+	return {
+		"before": before,
+		"added": accepted,
+		"overflow": maxi(0, amount - accepted),
+		"current": current,
+		"capacity": capacity,
+	}
+
+func consume_shared_monster_exp(amount: int) -> int:
+	var current := get_shared_monster_exp()
+	var consumed := mini(current, maxi(0, amount))
+	_set_value("sharedMonsterExp", "amount", current - consumed)
+	_save_config()
+	return consumed
+
+func feed_instance_from_shared_exp(instance_id: String) -> Dictionary:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return {"ok": false, "reason": "not_found"}
+	var level := int(instance.get("level", 1))
+	if level >= StatCalculator.MAX_LEVEL:
+		return {"ok": false, "reason": "max_level", "level": level}
+	var current_exp := int(instance.get("exp", 0))
+	var needed := maxi(1, GrowthRulesScript.get_exp_for_level(level) - current_exp)
+	var consumed := consume_shared_monster_exp(needed)
+	if consumed <= 0:
+		return {"ok": false, "reason": "empty", "needed": needed, "level": level}
+	var result := add_instance_exp(instance_id, consumed)
+	result["ok"] = true
+	result["consumed"] = consumed
+	result["needed"] = needed
+	result["poolRemaining"] = get_shared_monster_exp()
 	return result
 
 func get_team_reference_level() -> int:
@@ -620,6 +722,35 @@ func get_item_count(item_id: String) -> int:
 	var inv: Dictionary = load_inventory()
 	return inv.get(item_id, 0)
 
+# ========== 商店每日限购（section: shopDaily） ==========
+
+func _shop_today_key() -> String:
+	return Time.get_date_string_from_system(false)
+
+func load_shop_daily_purchases() -> Dictionary:
+	var today := _shop_today_key()
+	var data: Dictionary = _get_value("shopDaily", "data", {})
+	if str(data.get("date", "")) != today:
+		data = {"date": today, "purchases": {}}
+		_set_value("shopDaily", "data", data)
+		_save_config()
+	return (data.get("purchases", {}) as Dictionary).duplicate(true)
+
+func get_shop_daily_purchase_count(item_id: String) -> int:
+	return int(load_shop_daily_purchases().get(item_id, 0))
+
+func record_shop_daily_purchase(item_id: String, count: int = 1) -> bool:
+	if item_id.is_empty() or count <= 0:
+		return false
+	var purchases := load_shop_daily_purchases()
+	purchases[item_id] = int(purchases.get(item_id, 0)) + count
+	_set_value("shopDaily", "data", {
+		"date": _shop_today_key(),
+		"purchases": purchases
+	})
+	_save_config()
+	return true
+
 # ========== 关卡进度与扫荡（section: stageProgress） ==========
 ## 关卡进度数据结构: { 'stage_1_1': { stars: 2, cleared: true }, ... }
 
@@ -716,10 +847,14 @@ func get_sweep_reward(stage_id: String) -> Dictionary:
 func do_sweep(stage_id: String) -> Dictionary:
 	if not can_sweep(stage_id):
 		return {}
+	if not spend_stamina(SWEEP_STAMINA_COST):
+		return {}
 
 	var reward: Dictionary = get_sweep_reward(stage_id)
+	reward["staminaCost"] = SWEEP_STAMINA_COST
 	add_gold(reward["gold"])
 	add_player_exp(reward["exp"])
+	add_shared_monster_exp(int(reward["exp"]))
 
 	# 更新奖励统计
 	var rewards: Dictionary = load_rewards()
@@ -1200,7 +1335,8 @@ func get_ranch_care_state(instance_id: String) -> Dictionary:
 		int(instance.get("level", 1)),
 		get_team_reference_level(),
 		occupied_count,
-		focus_id == instance_id
+		focus_id == instance_id,
+		str(instance.get("nature", ""))
 	)
 
 ## 收取单只精灵的挂机经验
@@ -1232,14 +1368,14 @@ func collect_idle_exp_for_instance(instance_id: String) -> float:
 	var rate: float = get_idle_exp_rate_for_instance(instance_id)
 	var exp: float = intervals * rate
 
-	# 增加经验
-	add_instance_exp(instance_id, int(exp))
+	# 挂机产出的培养经验统一进入共享经验槽。
+	var add_result := add_shared_monster_exp(int(exp))
 
 	# 重置放置时间（毫秒时间戳）
 	slot["placed_at"] = now_ms
 	set_ranch_state(ranch)
 
-	return exp
+	return float(add_result.get("added", 0))
 
 func place_instance_in_ranch(instance_id: String, slot_index: int) -> bool:
 	var ranch := get_ranch_state()
@@ -1362,8 +1498,9 @@ func collect_social(place_index: int) -> Dictionary:
 	var result := SocialRulesScript.resolve(a, b, place)
 	var exp_each := int(result.get("exp_each", 0))
 	if exp_each > 0:
-		add_instance_exp(a_id, exp_each)
-		add_instance_exp(b_id, exp_each)
+		var shared_result := add_shared_monster_exp(exp_each * 2)
+		result["shared_exp_added"] = int(shared_result.get("added", 0))
+		result["shared_exp_overflow"] = int(shared_result.get("overflow", 0))
 	_apply_social_memory(a_id, b_id, result)
 	_apply_social_evolution_insight(a_id, result)
 	_apply_social_memory(b_id, a_id, result)

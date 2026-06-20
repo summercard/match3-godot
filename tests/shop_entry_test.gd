@@ -53,7 +53,7 @@ func _run() -> void:
 		_expect(chip.modulate.a < 0.5, "%s modulate.a should be ~0 at entry start, got %f" % [chip_path, chip.modulate.a])
 
 	# === 测试 3: Tabs 5 个标签初始 scale 应小于 1（入场态） ===
-	for tab_path in ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters", "Tabs/Chest"]:
+	for tab_path in ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters"]:
 		var tab := shop.get_node_or_null(tab_path) as Control
 		_expect(tab != null, "%s should exist" % tab_path)
 		if tab == null or not tab.visible:
@@ -99,7 +99,7 @@ func _run() -> void:
 		_expect(absf(chip.modulate.a - 1.0) < 0.01, "%s modulate.a should be 1.0 after entry, got %f" % [chip_path, chip.modulate.a])
 
 	# Tabs 归位
-	for tab_path in ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters", "Tabs/Chest"]:
+	for tab_path in ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters"]:
 		var tab := shop.get_node_or_null(tab_path) as Control
 		if tab == null or not tab.visible:
 			continue
