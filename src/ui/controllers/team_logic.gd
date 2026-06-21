@@ -4,6 +4,7 @@
 class_name SceneTeam
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")
@@ -577,7 +578,7 @@ func _get_monster_index_at_pos(pos: Vector2) -> int:
 # ==================== 绘制 ====================
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	var t := _time_acc
 	
 	_clamp_roster_page()
@@ -647,7 +648,7 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 
 func _draw_button(rect: Rect2, text: String, asset_key: String) -> void:
 	_draw_texture_fit(_tex(asset_key), rect)
-	_draw_text(ThemeDB.fallback_font, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 7.0, C["white"], 18.0)
+	_draw_text(PROJECT_ROUND_FONT, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 7.0, C["white"], 18.0)
 
 func _draw_team_summary(font: Font) -> void:
 	var power := _calc_team_power()
@@ -932,7 +933,7 @@ func _draw_monster_portrait(monster_id: String, rect: Rect2) -> void:
 		return
 	var md := _get_monster_data(monster_id)
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.04, 0.07, 0.15, 0.82))
-	_draw_text(ThemeDB.fallback_font, md.get("emoji", "?"), rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y * 0.60, C["white"], minf(rect.size.x * 0.45, 22.0))
+	_draw_text(PROJECT_ROUND_FONT, md.get("emoji", "?"), rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y * 0.60, C["white"], minf(rect.size.x * 0.45, 22.0))
 
 func _tex(key: String) -> Texture2D:
 	var path: String = TEAM_ASSETS.get(key, "")

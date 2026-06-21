@@ -3,6 +3,7 @@
 class_name SceneAlbum
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
@@ -320,11 +321,10 @@ func _draw_detail_panel() -> void:
 	var element := str(monster.get("element", "grass"))
 	var instances := _get_instances_for_species(id)
 	var owned_count := instances.size()
-	var representative := _pick_representative_instance(instances)
 	_draw_texture_fit(_tex(ELEMENT_ICON_ASSETS.get(element, "")), Rect2(25.0, DETAIL_Y + 16.0, 26.0, 26.0))
 	_draw_text("%s  %s" % [id.replace("monster_", ""), monster.get("name", "???")], 108.0, DETAIL_Y + 36.0, C["text"], 17.0, 140.0)
 	_draw_stars(int(monster.get("rarity", 1)), 28.0, DETAIL_Y + 48.0, 16.0, true)
-	var own_text := "未拥有" if owned_count <= 0 else "已拥有 %d 只  代表 Lv.%d" % [owned_count, int(representative.get("level", 1))]
+	var own_text := "未收录" if owned_count <= 0 else "已收录"
 	_draw_text(own_text, 259.0, DETAIL_Y + 37.0, C["gold"] if owned_count > 0 else C["text_muted"], 10.0, 128.0)
 	_draw_texture_fit(_tex(ALBUM_ASSETS["portrait_stage"]), Rect2(24.0, DETAIL_Y + 70.0, 122.0, 118.0))
 	_draw_monster_portrait(id, Rect2(50.0, DETAIL_Y + 80.0, 74.0, 72.0))
@@ -343,69 +343,17 @@ func _draw_detail_ecology(monster: Dictionary) -> void:
 	_draw_text("%s · %s" % [identity.get("roleLabel", "角色"), ecology.get("name", "生态")], 248.0, DETAIL_Y + 161.0, C["gold"], 8.8, 176.0)
 
 func _draw_detail_nature(monster_id: String) -> void:
-	# 从SaveManager获取性格数据
-	var nature_id: String = ""
-	var instances := _get_instances_for_species(monster_id)
-	if not instances.is_empty():
-		nature_id = str(_pick_representative_instance(instances).get("nature", ""))
-	elif _storage and _storage.has_method("get_monster_pokedex"):
-		var pokedex: Dictionary = _storage.get_monster_pokedex(monster_id)
-		nature_id = pokedex.get("nature", "")
-
-	# 如果没有性格（未收服），显示"未收服"
-	if nature_id.is_empty():
-		_draw_text("未收服", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
-		return
-
-	# 获取性格信息
-	var NatureDB = load("res://src/data/nature_db.gd")
-	var nature: Dictionary = {}
-	if NatureDB and NatureDB.has_method("get_nature"):
-		nature = NatureDB.get_nature(nature_id)
-
-	if not nature.is_empty():
-		# 显示性格emoji和名称
-		var emoji: String = nature.get("emoji", "🌀")
-		var name: String = nature.get("name", "混沌")
-		_draw_text("%s %s" % [emoji, name], 108.0, DETAIL_Y + 52.0, C["text"], 11.0, 120.0)
-	else:
-		_draw_text("??", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
-
-func _gender_label_for_detail(monster_id: String) -> String:
-	# 取代表实例的性别
-	var instances := _get_instances_for_species(monster_id)
-	if instances.is_empty():
-		return ""
-	var instance := _pick_representative_instance(instances)
-	var gender := SocialRulesScript.gender_for_instance(instance)
-	return str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
+	_draw_text("个体性格随机", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
 
 func _draw_detail_stats(monster: Dictionary) -> void:
 	var x := 154.0
 	var y := DETAIL_Y + 58.0
 	var id := str(monster.get("id", ""))
 	
-	# 获取性格修正后的实际数值（如果已收服）
-	var is_captured := _is_captured(id)
-	var level: int = 1
-	var nature_id: String = ""
-	if is_captured and _storage:
-		var instances := _get_instances_for_species(id)
-		if not instances.is_empty():
-			var representative: Dictionary = _pick_representative_instance(instances)
-			level = int(representative.get("level", 1))
-			nature_id = str(representative.get("nature", ""))
-		else:
-			if _storage.has_method("get_monster_level"):
-				level = _storage.get_monster_level(id)
-			if _storage.has_method("get_monster_nature"):
-				nature_id = _storage.get_monster_nature(id)
-	
-	# 计算带有性格修正的数值
 	var MonsterDB = load("res://src/data/monster_db.gd")
 	var stats_data: Dictionary = {}
 	if MonsterDB and MonsterDB.has_method("get_monster_stats"):
-		stats_data = MonsterDB.get_monster_stats(id, level, nature_id)
+		stats_data = MonsterDB.get_monster_stats(id, 1, "")
 	
 	var base_hp: int = int(monster.get("baseHP", 0))
 	var base_atk: int = int(monster.get("baseATK", 0))
@@ -591,7 +539,7 @@ func _draw_stars(rarity: int, x: float, y: float, size: float, lit: bool) -> voi
 		_draw_texture_fit(tex, Rect2(x + float(i) * (size + 1.0), y, size, size))
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, max_w: float = 200.0) -> void:
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	var left := x - max_w / 2.0
 	draw_string(font, Vector2(left + 1.0, y + 1.5), text, HORIZONTAL_ALIGNMENT_CENTER, max_w, size, Color(0, 0, 0, 0.58))
 	draw_string(font, Vector2(left, y), text, HORIZONTAL_ALIGNMENT_CENTER, max_w, size, color)
@@ -636,13 +584,6 @@ func _go_back() -> void:
 	var manager := _root_node("SceneManager")
 	if manager and manager.has_method("switch_scene"):
 		manager.switch_scene("main")
-
-func _pick_representative_instance(instances: Array) -> Dictionary:
-	var best: Dictionary = {}
-	for instance: Dictionary in instances:
-		if best.is_empty() or int(instance.get("level", 1)) > int(best.get("level", 1)):
-			best = instance
-	return best
 
 func _get_instances_for_species(monster_id: String) -> Array:
 	if _storage and _storage.has_method("get_instances_by_monster_id"):

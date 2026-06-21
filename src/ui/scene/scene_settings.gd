@@ -5,7 +5,7 @@ extends Control
 
 signal back_pressed()
 
-const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0

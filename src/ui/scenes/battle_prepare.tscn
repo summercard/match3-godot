@@ -15,10 +15,10 @@
 [ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="plus_icon"]
 [ext_resource type="Texture2D" uid="uid://vevgwefd4xem" path="res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png" id="power_panel"]
 [ext_resource type="Texture2D" uid="uid://dnsjcm4cpmwcl" path="res://assets/images/ui/panels/battle_prepare_new_ui_reward_panel.png" id="reward_panel"]
-[ext_resource type="Script" uid="uid://4sa0f7ilpgt3" path="res://src/ui/scene/scene_battle_prepare_gui.gd" id="script"]
+[ext_resource type="Script" path="res://src/ui/controllers/battle_prepare_scene.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://bj70nl7t663xv" path="res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png" id="sword_icon"]
 [ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png" id="synergy_panel"]
-[ext_resource type="Texture2D" uid="uid://cbuoorml6pq8o" path="res://assets/images/ui/cards/battle_prepare_new_ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/cards/battle_flow_new_ui_monster_card.png" id="team_card"]
 [ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="dark_overlay"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_v6go8"]
@@ -1517,6 +1517,66 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="RewardPreview/Slots/RewardSlot3" unique_id=647524009]
+visible = false
+layout_mode = 0
+offset_left = -10.0
+offset_top = 32.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.34, 0.16, 0.05, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="RewardSlot4" type="Control" parent="RewardPreview/Slots"]
+visible = false
+anchors_preset = 0
+offset_left = 259.5
+offset_top = 1.0
+offset_right = 307.5
+offset_bottom = 51.0
+
+[node name="black2" type="Control" parent="RewardPreview/Slots/RewardSlot4"]
+custom_minimum_size = Vector2(320, 94)
+anchors_preset = 0
+offset_left = -5.5
+offset_top = 2.0
+offset_right = 330.5
+offset_bottom = 266.0
+scale = Vector2(0.17, 0.17)
+mouse_filter = 2
+
+[node name="NinePatch" type="NinePatchRect" parent="RewardPreview/Slots/RewardSlot4/black2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -8.0
+offset_right = -13.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("20_rlwyf")
+patch_margin_left = 86
+patch_margin_top = 54
+patch_margin_right = 86
+patch_margin_bottom = 54
+
+[node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot4"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 9.0
+offset_right = 37.0
+offset_bottom = 35.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="RewardPreview/Slots/RewardSlot4"]
 visible = false
 layout_mode = 0
 offset_left = -10.0

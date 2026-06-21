@@ -404,8 +404,10 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		return { "success": false, "reason": "battle_over" }
 
 	var monster: Dictionary = _get_player_monster(monster_id)
-	if monster.is_empty() or monster.get("hp", 0) <= 0:
+	if monster.is_empty():
 		return { "success": false, "reason": "monster_unavailable" }
+	if monster.get("hp", 0) <= 0:
+		return { "success": false, "reason": "dead" }
 
 	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
 	if skill.is_empty():
@@ -1048,6 +1050,9 @@ func enemy_action() -> Dictionary:
 
 		# 普通攻击
 		var target = alive_team[randi() % alive_team.size()]
+		var target_idx := _player_index_by_id(str(target.get("id", "")))
+		if target_idx < 0:
+			target_idx = player_team.find(target)
 
 		# 冰冻ATK降低（委托给 BattleStatusEffect）
 		var freeze_mult = _status_effect.get_freeze_atk_multiplier(i)
@@ -1088,6 +1093,10 @@ func enemy_action() -> Dictionary:
 			"attacker": enemy.get("name", ""),
 			"attacker_emoji": enemy.get("emoji", ""),
 			"target": target.get("name", ""),
+			"target_id": target.get("id", ""),
+			"target_index": target_idx,
+			"targetId": target.get("id", ""),
+			"targetIndex": target_idx,
 			"target_emoji": target.get("emoji", ""),
 			"damage": damage,
 			"element": enemy.get("element", ""),

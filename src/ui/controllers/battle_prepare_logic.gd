@@ -11,6 +11,8 @@
 class_name SceneBattlePrepare
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")
 const MonsterDBScript = preload("res://src/data/monster_db.gd")
@@ -760,8 +762,8 @@ func _draw_line(x1: float, y1: float, x2: float, y2: float, color: Color) -> voi
 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 200.0) -> void:
 	var shadow_color := Color(0.0, 0.0, 0.0, 0.55)
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow_color)
-	draw_string(ThemeDB.fallback_font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)
+	draw_string(PROJECT_ROUND_FONT, Vector2(x - width / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow_color)
+	draw_string(PROJECT_ROUND_FONT, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)
 
 func _tex(key: String) -> Texture2D:
 	var path: String = PREPARE_ASSETS.get(key, "")

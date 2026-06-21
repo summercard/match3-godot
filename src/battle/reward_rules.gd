@@ -14,22 +14,23 @@ const DEFAULT_STAGE_REWARDS := {
 }
 
 
-static func calc_hp_ratio(player_team: Array) -> float:
-	var alive_hp: float = 0.0
-	var max_hp: float = 0.0
-	for monster: Dictionary in player_team:
-		if monster:
-			alive_hp += float(monster.get("hp", 0))
-			max_hp += float(monster.get("maxHP", monster.get("max_hp", 0)))
-	return clampf(alive_hp / max_hp, 0.0, 1.0) if max_hp > 0.0 else 0.0
+static func calc_dead_count(player_team: Array) -> int:
+	var dead_count := 0
+	for monster in player_team:
+		if monster == null:
+			continue
+		if monster is Dictionary and int(monster.get("hp", 0)) <= 0:
+			dead_count += 1
+	return dead_count
 
 
-static func calc_battle_stars(turn_count: int, max_turns: int, player_hp_ratio: float) -> int:
-	var turn_score := 1.0 - (float(maxi(turn_count, 0)) / float(maxi(max_turns, 1)))
-	var total := clampf(player_hp_ratio, 0.0, 1.0) * 0.6 + clampf(turn_score, 0.0, 1.0) * 0.4
-	if total >= 0.8:
+static func calc_battle_stars_for_team(player_team: Array) -> int:
+	if player_team.is_empty():
+		return 1
+	var dead_count := calc_dead_count(player_team)
+	if dead_count <= 0:
 		return 3
-	if total >= 0.5:
+	if dead_count == 1:
 		return 2
 	return 1
 

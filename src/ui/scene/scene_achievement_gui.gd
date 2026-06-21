@@ -3,7 +3,7 @@ class_name SceneAchievementGui
 extends "res://src/ui/controllers/achievement_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
-const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",

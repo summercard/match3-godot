@@ -10,9 +10,7 @@ static func get_template_stats(monster_id: String, level: int = 1, nature_id: St
 	return StatCalculator.calc(monster_id, level, nature_id)
 
 ## 我方普通精灵使用基础成长数值；只有明确标记为精英的实例才叠加精英倍率。
-static func get_owned_stats(monster_id: String, level: int = 1, nature_id: String = "", is_elite: bool = false) -> Dictionary:
-	if is_elite:
-		return StatCalculator.calc_with_tier(monster_id, level, nature_id, StatCalculator.EnemyTier.ELITE)
+static func get_owned_stats(monster_id: String, level: int = 1, nature_id: String = "", _is_elite: bool = false) -> Dictionary:
 	return StatCalculator.calc(monster_id, level, nature_id)
 
 static func get_instance_view(instance_id: String, storage: Node = null) -> Dictionary:
@@ -49,19 +47,14 @@ static func get_species_album_view(monster_id: String, storage: Node = null) -> 
 	var sm := _storage(storage)
 	if sm != null and sm.has_method("get_instances_by_monster_id"):
 		instances = sm.get_instances_by_monster_id(monster_id)
-	var representative := _pick_representative(instances)
-	var level := int(representative.get("level", 1)) if not representative.is_empty() else 1
-	var nature := str(representative.get("nature", "")) if not representative.is_empty() else ""
-	# ★ 主人定 2026-06-11：图鉴显示也尊重 instance.isElite
-	var is_elite: bool = bool(representative.get("isElite", template.get("isElite", false))) if not representative.is_empty() else bool(template.get("isElite", false))
-	var stats: Dictionary = get_owned_stats(monster_id, level, nature, is_elite)
+	var stats: Dictionary = get_template_stats(monster_id, 1, "")
 	return {
 		"monsterId": monster_id,
 		"template": template,
 		"owned": not instances.is_empty(),
 		"ownedCount": instances.size(),
-		"representative": representative,
-		"isElite": is_elite,
+		"representative": {},
+		"isElite": bool(template.get("isElite", false)),
 		"stats": stats,
 		"art": MonsterArtDB.get_art_bundle(monster_id),
 	}
@@ -97,9 +90,8 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var nature := NatureDB.get_nature(nature_id)
 	var level := int(instance.get("level", 1))
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(template)
-	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier（HP×5, ATK+20%）
 	var is_elite: bool = bool(instance.get("isElite", template.get("isElite", false)))
-	var stats: Dictionary = get_owned_stats(monster_id, level, nature_id, is_elite)
+	var stats: Dictionary = MonsterPool.get_instance_stats(instance)
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,
@@ -189,10 +181,3 @@ static func _storage(storage: Node = null) -> Node:
 	if tree == null or tree.root == null:
 		return null
 	return tree.root.get_node_or_null("SaveManager")
-
-static func _pick_representative(instances: Array) -> Dictionary:
-	var best: Dictionary = {}
-	for instance: Dictionary in instances:
-		if best.is_empty() or int(instance.get("level", 1)) > int(best.get("level", 1)):
-			best = instance
-	return best.duplicate(true)

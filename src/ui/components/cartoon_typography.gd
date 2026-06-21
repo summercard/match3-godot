@@ -1,13 +1,14 @@
 class_name CartoonTypography
 extends RefCounted
 
-const ROUND_FONT := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const ROUND_FONT := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 
 static func apply(root: Node, profile: String = "") -> void:
 	if root == null:
 		return
-	var font := _build_round_font()
+	var use_lobby_font := profile == "lobby" and str(root.scene_file_path).ends_with("main_lobby.tscn")
+	var font := _build_lobby_font() if use_lobby_font else _build_round_font()
 	_apply_node(root, font, profile)
 
 
@@ -15,6 +16,13 @@ static func _build_round_font() -> Font:
 	var font := FontVariation.new()
 	font.base_font = ROUND_FONT
 	font.set("variation_embolden", 0.45)
+	return font
+
+
+static func _build_lobby_font() -> Font:
+	var font := FontVariation.new()
+	font.base_font = ROUND_FONT
+	font.set("variation_embolden", 0.42)
 	return font
 
 

@@ -29,6 +29,8 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	_expect(ResourceLoader.exists("res://assets/images/ui/slots/battle_ui_slot_selected.png"), "battle selection should use the rounded overlay asset")
+	_expect(not ResourceLoader.exists("res://assets/images/ui/slots/battle_ui_item_slot_selected.png"), "legacy square selection asset should be removed")
 	var scene := load("res://src/ui/scenes/battle_screen.tscn").instantiate() as Control
 	root.add_child(scene)
 	await process_frame

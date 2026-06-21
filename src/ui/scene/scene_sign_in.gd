@@ -6,7 +6,7 @@ extends Control
 signal back_pressed()
 signal sign_in_complete(reward: Dictionary)
 
-const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0

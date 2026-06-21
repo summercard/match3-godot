@@ -82,7 +82,6 @@ static func normalize_instance(value: Variant) -> Dictionary:
 		"capturedAt": _normalize_timestamp_ms(captured_at),
 		"source": str(data.get("source", "migration")),
 		"favorite": bool(data.get("favorite", false)),
-		# 老存档没存 isElite 时，回退读 MONSTER_DB（默认 false）
 		"isElite": bool(data.get("isElite", template.get("isElite", false))),
 	}
 
@@ -284,12 +283,10 @@ static func remove_instance(pool: Array, instance_id: String) -> bool:
 static func get_instance_stats(instance: Dictionary) -> Dictionary:
 	if instance.is_empty():
 		return {}
-	# 统一公式：玩家宠物也走 StatCalculator（与敌人共用同一张表）
-	return StatCalculator.calc(
-		str(instance.get("monsterId", "")),
-		int(instance.get("level", 1)),
-		str(instance.get("nature", ""))
-	)
+	var monster_id := str(instance.get("monsterId", ""))
+	var level := int(instance.get("level", 1))
+	var nature := str(instance.get("nature", ""))
+	return StatCalculator.calc(monster_id, level, nature)
 
 static func add_instance_exp(instance: Dictionary, exp_gained: int) -> Dictionary:
 	var old_level := int(instance.get("level", 1))

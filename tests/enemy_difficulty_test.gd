@@ -11,8 +11,8 @@ func _run() -> void:
 	_assert(StatCalculator.enemy_combat_level("enemy_001", StatCalculator.MAX_LEVEL) == StatCalculator.MAX_LEVEL, "enemy level bonus should respect the level cap")
 
 	var boosted := StatCalculator.apply_enemy_difficulty({"hp": 100, "maxHP": 100, "atk": 100})
-	_assert(int(boosted.get("hp", 0)) == 200 and int(boosted.get("maxHP", 0)) == 200, "enemy HP should use the two-hundred-percent multiplier")
-	_assert(int(boosted.get("atk", 0)) == 200, "enemy attack should use the two-hundred-percent multiplier")
+	_assert(int(boosted.get("hp", 0)) == 100 and int(boosted.get("maxHP", 0)) == 100, "enemy compatibility path must not add a second HP formula")
+	_assert(int(boosted.get("atk", 0)) == 100, "enemy compatibility path must not add a second attack formula")
 
 	var ordinary := StatCalculator.calc_enemy("enemy_001", 10)
 	var boss := StatCalculator.calc_enemy("monster_boss_001", 10)
@@ -22,8 +22,7 @@ func _run() -> void:
 	var player_base := StatCalculator.calc("monster_001", 10, "")
 	var player_tier := StatCalculator.calc_with_tier("monster_001", 10, "", StatCalculator.EnemyTier.NORMAL)
 	_assert(int(player_tier.get("level", 0)) == 10, "captured player monster level should remain unchanged")
-	_assert(int(player_tier.get("hp", 0)) == int(player_base.get("hp", 0)) * 2, "captured player tier should not receive global enemy HP scaling")
-	_assert(int(player_tier.get("atk", 0)) == int(player_base.get("atk", 0)), "captured player tier should not receive global enemy attack scaling")
+	_assert(player_tier == player_base, "tier compatibility path must use the same base, level, and nature formula")
 
 	if _failures.is_empty():
 		print("[EnemyDifficulty] OK")

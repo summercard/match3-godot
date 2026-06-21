@@ -3,6 +3,7 @@
 class_name SceneRanch
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 signal exp_collected(total_exp: int)
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
@@ -616,6 +617,10 @@ func _select_slot(index: int) -> void:
 func _on_picker_item_pressed(instance_id: String) -> void:
 	for i in range(_slots_data.size()):
 		if _slots_data[i].get("instance_id", null) == instance_id:
+			var pending_exp := int(_idle_exp_map.get(instance_id, 0))
+			if pending_exp > 0:
+				_show_status("请先收获该精灵的牧场经验")
+				return
 			_slots_data[i] = {"instance_id": null, "placed_at": null}
 			if _care_focus_instance_id == instance_id:
 				_care_focus_instance_id = ""
@@ -630,8 +635,9 @@ func _on_picker_item_pressed(instance_id: String) -> void:
 	var old_id = _slots_data[_selected_slot].get("instance_id", null)
 	if old_id != null:
 		var old_exp := int(_idle_exp_map.get(str(old_id), 0))
-		if old_exp > 0 and _storage != null and _storage.has_method("add_shared_monster_exp"):
-			_storage.add_shared_monster_exp(old_exp)
+		if old_exp > 0:
+			_show_status("请先收获当前槽位的牧场经验")
+			return
 		if _care_focus_instance_id == str(old_id):
 			_care_focus_instance_id = ""
 	_slots_data[_selected_slot] = {
@@ -1212,14 +1218,10 @@ func _get_instance(instance_id: String) -> Dictionary:
 func _get_instance_stats(instance_id: String) -> Dictionary:
 	if _stats_by_instance.has(instance_id):
 		return _stats_by_instance[instance_id] as Dictionary
-	# 统一公式：牧场预览也走 StatCalculator（保持 nature 兼容）
 	var instance := _get_instance(instance_id)
-	var monster_id := _get_monster_id(instance_id)
-	var level := _get_monster_level(instance_id)
-	var nature := str(instance.get("nature", ""))
-	# ★ 主人定 2026-06-11：精英宠物走 ELITE tier
-	var is_elite: bool = bool(instance.get("isElite", MonsterDb.MONSTER_DB.get(monster_id, {}).get("isElite", false)))
-	var stats := MonsterService.get_owned_stats(monster_id, level, nature, is_elite)
+	var view := MonsterService.build_instance_view(instance)
+	var stats: Dictionary = view.get("stats", {})
+	_level_by_instance[instance_id] = int(instance.get("level", 1))
 	_stats_by_instance[instance_id] = stats
 	return stats
 
@@ -1615,7 +1617,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, _scale_rect(rect), Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, max_w: float = 200.0) -> void:
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	var sx := _sx()
 	var sy := _sy()
 	var sc = minf(sx, sy)

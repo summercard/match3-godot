@@ -5,7 +5,7 @@ extends Control
 signal tutorial_completed()
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
-const ROUND_FONT: Font = preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
@@ -420,7 +420,7 @@ func _offset_rect(rect: Rect2, offset: Vector2) -> Rect2:
 func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, _bold: bool = false, width: float = 160.0, opacity: float = 1.0) -> void:
 	var col := Color(color.r, color.g, color.b, color.a * opacity)
 	var outline := Color(C["shadow"].r, C["shadow"].g, C["shadow"].b, 0.58 * opacity)
-	var font := ROUND_FONT if ROUND_FONT != null else ThemeDB.fallback_font
+	var font := ROUND_FONT
 	var pos := Vector2(x - width / 2.0, y)
 	var size := int(font_size)
 	var needs_outline := _bold and not _is_dark_text(color)

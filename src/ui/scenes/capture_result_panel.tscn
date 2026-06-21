@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://box82ko1pcn26"]
 
 [ext_resource type="Texture2D" path="res://assets/images/ui/panels/result_refresh_ui_capture_status_plaque.png" id="plaque"]
-[ext_resource type="Texture2D" path="res://assets/images/effects/result_refresh_fx_golden_burst.png" id="ring"]
 
 [node name="CaptureResultPanel" type="Control" unique_id=482320752]
 layout_mode = 3
@@ -18,7 +17,6 @@ offset_top = -18.0
 offset_right = 243.0
 offset_bottom = 48.0
 mouse_filter = 2
-texture = ExtResource("ring")
 expand_mode = 1
 stretch_mode = 5
 

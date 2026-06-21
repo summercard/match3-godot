@@ -893,6 +893,7 @@ func _sync_classroom_page() -> void:
 		(panel.get_node("TargetLevel") as Label).visible = false
 		(panel.get_node("Arrow") as Label).visible = false
 		(panel.get_node("Stats") as Label).text = _classroom_stats_text(instance, monster, stats)
+		(panel.get_node("AttributeValues") as Label).text = _classroom_attribute_values_text(instance, monster, stats)
 		var current_exp := int(instance.get("exp", 0))
 		var needed_exp := GrowthRulesScript.get_exp_for_level(level)
 		_sync_exp_progress(panel.get_node("MonsterExpBar") as ProgressBar, current_exp, needed_exp)
@@ -902,7 +903,8 @@ func _sync_classroom_page() -> void:
 		_sync_exp_progress(panel.get_node("PoolBar") as ProgressBar, pool_exp, pool_capacity)
 		(panel.get_node("PoolText") as Label).text = "总经验槽 %s / %s" % [_format_resource_number(pool_exp), _format_resource_number(pool_capacity)]
 		(panel.get_node("LevelRequirement") as Label).text = "等级 %d/%d" % [level, required_level]
-		(panel.get_node("StoneRequirement") as Label).text = "%s  %d/1" % [str(info.get("item_name", "进化石")), item_count]
+		(panel.get_node("StoneRequirement") as Label).text = str(info.get("item_name", "进化石"))
+		(panel.get_node("StoneCount") as Label).text = "%d/1" % item_count
 		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
 		(panel.get_node("Upgrade") as Label).text = str(info.get("play_upgrade_text", "玩法: 无"))
 		# Even an unavailable evolution stays tappable so players receive the
@@ -927,16 +929,22 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 		stats.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
 		stats.clip_text = false
 		stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for path in ["AttributeLabels", "AttributeValues"]:
+		var attribute_label := panel.get_node_or_null(path) as Label
+		if attribute_label != null:
+			attribute_label.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
+			attribute_label.add_theme_constant_override("outline_size", 0)
+			attribute_label.clip_text = false
 	var title := panel.get_node_or_null("RequirementsTitle") as Label
 	if title != null:
 		title.add_theme_font_size_override("font_size", CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE)
 		title.clip_text = true
-	for path in ["LevelRequirement", "StoneRequirement"]:
+	for path in ["LevelRequirement", "StoneRequirement", "StoneCount"]:
 		var label := panel.get_node_or_null(path) as Label
 		if label != null:
 			label.add_theme_font_size_override("font_size", CLASSROOM_REQUIREMENT_FONT_SIZE)
 			label.add_theme_constant_override("outline_size", 0)
-			label.clip_text = true
+			label.clip_text = false
 	var evolve_text := panel.get_node_or_null("EvolveButton/Text") as Label
 	if evolve_text != null:
 		evolve_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
@@ -983,6 +991,23 @@ func _classroom_stats_text(instance: Dictionary, monster: Dictionary, stats: Dic
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
 	var power := int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
 	return "等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d" % [int(instance.get("level", 1)), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))), _get_nature_name(str(instance.get("nature", ""))), _gender_label(instance), "★".repeat(rarity), "是" if bool(instance.get("isElite", false)) else "否", int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
+
+func _classroom_attribute_values_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
+	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
+	var power := int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	return "Lv.%d\n%s\n%s\n%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d" % [
+		int(instance.get("level", 1)),
+		ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))),
+		_get_nature_name(str(instance.get("nature", ""))),
+		_gender_label(instance),
+		"★".repeat(rarity),
+		"是" if bool(instance.get("isElite", false)) else "否",
+		int(stats.get("hp", 0)),
+		int(stats.get("atk", 0)),
+		int(stats.get("def", 0)),
+		int(stats.get("spd", 0)),
+		power,
+	]
 
 func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dictionary, pool_before: int, pool_after: int) -> void:
 	var panel := _node("Pages/ClassroomPage/DetailPanel")

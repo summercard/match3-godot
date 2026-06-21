@@ -31,6 +31,10 @@ window/size/window_height_override=1334
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
 
+[gui]
+
+theme/custom="res://src/ui/theme/project_theme.tres"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

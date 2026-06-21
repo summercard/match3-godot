@@ -58,6 +58,31 @@ func _run() -> void:
 	_expect(int(battle.skill_charges.get(monster_id, -1)) == 0, "card skill use should consume charge")
 	_expect(int(battle.enemies[0].get("hp", 0)) < enemy_hp_after_direct, "card skill use should damage enemy")
 
+	if battle.player_team.size() >= 2:
+		var dead_monster: Dictionary = battle.player_team[0]
+		var alive_monster: Dictionary = battle.player_team[1]
+		var shared_name := "Same Name"
+		dead_monster["name"] = shared_name
+		alive_monster["name"] = shared_name
+		dead_monster["hp"] = 0
+		alive_monster["hp"] = 9999
+		for i in range(2, battle.player_team.size()):
+			if battle.player_team[i] != null:
+				battle.player_team[i]["hp"] = 0
+		for i in range(battle.enemies.size()):
+			if battle.enemies[i] != null:
+				battle.enemies[i]["hp"] = 0
+		battle.enemies[0]["hp"] = 9999
+		battle.enemies[0]["atk"] = 1
+		battle.battle_over = false
+		var dead_id: String = str(dead_monster.get("id", ""))
+		battle.skill_charges[dead_id] = cost
+		var dead_skill: Dictionary = battle.use_active_skill(dead_id)
+		_expect(not bool(dead_skill.get("success", true)) and str(dead_skill.get("reason", "")) == "dead", "dead monster should not release active skill")
+		var enemy_turn: Dictionary = battle.enemy_action()
+		var actions: Array = enemy_turn.get("actions", [])
+		_expect(not actions.is_empty() and int((actions[0] as Dictionary).get("target_index", -1)) == 1, "enemy action should report the alive target index when names are duplicated")
+
 	_finish()
 
 func _expect(condition: bool, message: String) -> void:

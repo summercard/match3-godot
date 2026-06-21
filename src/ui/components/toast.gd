@@ -10,6 +10,8 @@
 class_name Toast
 extends Node2D
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+
 ## 单例模式
 static var instance: Toast
 
@@ -219,7 +221,7 @@ func _draw() -> void:
 		# 文字：居中显示
 		var text_color := Color(1.0, 1.0, 1.0, toast["opacity"])
 		var text_pos := Vector2(draw_x + max_w / 2.0, draw_y + TOAST_HEIGHT / 2.0 + 5.0)
-		draw_string(ThemeDB.fallback_font, text_pos + Vector2(0.0, -2.0), toast["text"], HORIZONTAL_ALIGNMENT_CENTER, max_w - 24.0, 14.0, text_color)
+		draw_string(PROJECT_ROUND_FONT, text_pos + Vector2(0.0, -2.0), toast["text"], HORIZONTAL_ALIGNMENT_CENTER, max_w - 24.0, 14.0, text_color)
 
 ## 绘制圆角矩形
 func _draw_round_rect(rect: Rect2, color: Color, radius: float) -> void:

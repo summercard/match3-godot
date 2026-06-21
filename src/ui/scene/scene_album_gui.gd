@@ -311,11 +311,10 @@ func _sync_detail() -> void:
 	var element := str(monster.get("element", "grass"))
 	var instances := _get_instances_for_species(id)
 	var owned_count := instances.size()
-	var representative := _pick_representative_instance(instances)
 	(get_node("DetailPanel/ElementIcon") as TextureRect).texture = _element_texture(element)
 	_label("DetailPanel/Name").text = "%s  %s" % [id.replace("monster_", ""), str(monster.get("name", "???"))]
 	_label("DetailPanel/Nature").text = _detail_nature_text(id)
-	_label("DetailPanel/Owned").text = "未拥有" if owned_count <= 0 else "已拥有 %d 只  代表 Lv.%d" % [owned_count, int(representative.get("level", 1))]
+	_label("DetailPanel/Owned").text = "未收录" if owned_count <= 0 else "已收录"
 	(get_node("DetailPanel/PortraitStage/Portrait") as TextureRect).texture = _monster_texture(id, "album")
 	_sync_detail_stars(monster)
 	_sync_detail_stats(monster)
@@ -324,17 +323,7 @@ func _sync_detail() -> void:
 	_sync_detail_ecology(monster)
 
 func _detail_nature_text(monster_id: String) -> String:
-	var nature_id := ""
-	var instances := _get_instances_for_species(monster_id)
-	if not instances.is_empty():
-		nature_id = str(_pick_representative_instance(instances).get("nature", ""))
-	elif _storage and _storage.has_method("get_monster_pokedex"):
-		nature_id = str((_storage.get_monster_pokedex(monster_id) as Dictionary).get("nature", ""))
-	if nature_id.is_empty():
-		return "未收服"
-	var NatureDB = load("res://src/data/nature_db.gd")
-	var nature: Dictionary = NatureDB.get_nature(nature_id) if NatureDB and NatureDB.has_method("get_nature") else {}
-	return str(nature.get("name", "??"))
+	return "个体性格随机" if not monster_id.is_empty() else ""
 
 func _sync_detail_stars(monster: Dictionary) -> void:
 	for i in 5:
@@ -343,15 +332,8 @@ func _sync_detail_stars(monster: Dictionary) -> void:
 
 func _sync_detail_stats(monster: Dictionary) -> void:
 	var id := str(monster.get("id", ""))
-	var level := 1
-	var nature_id := ""
-	var instances := _get_instances_for_species(id)
-	if not instances.is_empty():
-		var representative := _pick_representative_instance(instances)
-		level = int(representative.get("level", 1))
-		nature_id = str(representative.get("nature", ""))
 	var MonsterDB = load("res://src/data/monster_db.gd")
-	var stats_data: Dictionary = MonsterDB.get_monster_stats(id, level, nature_id) if MonsterDB and MonsterDB.has_method("get_monster_stats") else {}
+	var stats_data: Dictionary = MonsterDB.get_monster_stats(id, 1, "") if MonsterDB and MonsterDB.has_method("get_monster_stats") else {}
 	var stats := [
 		int(stats_data.get("hp", monster.get("baseHP", 0))),
 		int(stats_data.get("atk", monster.get("baseATK", 0))),

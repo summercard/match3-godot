@@ -48,8 +48,17 @@ func _run() -> void:
 	var upgrade := ranch.get_node("Pages/ClassroomPage/DetailPanel/UpgradeButton") as TextureButton
 	var frame := evolve.get_node("Frame") as TextureRect
 	var authored_art := evolve.get_node("butter02") as CanvasItem
+	var attribute_labels := ranch.get_node("Pages/ClassroomPage/DetailPanel/AttributeLabels") as Label
+	var attribute_values := ranch.get_node("Pages/ClassroomPage/DetailPanel/AttributeValues") as Label
+	var stone_name := ranch.get_node("Pages/ClassroomPage/DetailPanel/StoneRequirement") as Label
+	var stone_count := ranch.get_node("Pages/ClassroomPage/DetailPanel/StoneCount") as Label
 
 	_expect(not evolve.disabled, "unavailable evolution button should remain tappable for feedback")
+	_expect(attribute_labels.text.count("\n") == attribute_values.text.count("\n"), "attribute labels and values should keep the same row count")
+	_expect(attribute_labels.get_theme_color("font_color") != attribute_values.get_theme_color("font_color"), "attribute labels and values should use distinct colors")
+	_expect(stone_name.size.x >= 120.0 and not stone_name.clip_text, "evolution item name should have enough unclipped width")
+	_expect(not stone_count.text.is_empty(), "evolution item count should use its own aligned label")
+	_expect((evolve.get_node("Text") as Label).position.y < 0.0 and (upgrade.get_node("Text") as Label).position.y < 0.0, "classroom action text should be optically centered upward")
 	_expect(not frame.visible, "classroom evolution should hide the legacy texture frame")
 	_expect(not evolve.has_node("ModernFrame"), "evolution should not overlay generated code UI")
 	_expect(authored_art.modulate.a < 1.0, "unavailable evolution should tint the authored art")

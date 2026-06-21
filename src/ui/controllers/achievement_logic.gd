@@ -3,6 +3,7 @@
 class_name SceneAchievement
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 const AchievementDB = preload("res://src/data/achievement_db.gd")
 
 const DESIGN_W := 375.0
@@ -508,11 +509,11 @@ func _draw_background_region(rect: Rect2) -> void:
 func _draw_centered_text(text: String, center: Vector2, color: Color, font_size: float, width: float) -> void:
 	var size_i := int(font_size)
 	var left := center.x - width / 2.0
-	draw_string(ThemeDB.fallback_font, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
-	draw_string(ThemeDB.fallback_font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+	draw_string(PROJECT_ROUND_FONT, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
+	draw_string(PROJECT_ROUND_FONT, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
 
 
 func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, width: float) -> void:
 	var size_i := int(font_size)
-	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
-	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+	draw_string(PROJECT_ROUND_FONT, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
+	draw_string(PROJECT_ROUND_FONT, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)

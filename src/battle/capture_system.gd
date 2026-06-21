@@ -323,10 +323,5 @@ static func _element_label(element: String) -> String:
 	return labels.get(element, element)
 
 
-## 计算战斗评价星级
-## @param turn_count - 战斗回合数
-## @param max_turns - 最大回合数
-## @param player_hp_ratio - 玩家剩余血量比例
-## @return 1-3 星级
-static func calc_battle_stars(turn_count: int, max_turns: int, player_hp_ratio: float) -> int:
-	return RewardRulesScript.calc_battle_stars(turn_count, max_turns, player_hp_ratio)
+static func calc_battle_stars_for_team(player_team: Array) -> int:
+	return RewardRulesScript.calc_battle_stars_for_team(player_team)

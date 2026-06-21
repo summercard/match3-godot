@@ -20,10 +20,27 @@ func _run() -> void:
 
 
 func _test_star_source() -> void:
-	_expect(RewardRulesScript.calc_battle_stars(3, 10, 0.9) == 3, "fast healthy win should be 3 stars")
-	_expect(RewardRulesScript.calc_battle_stars(8, 10, 0.1) == 1, "slow low-hp win should be 1 star")
-	var reward_stars := RewardRulesScript.calc_battle_stars(5, 10, 0.7)
-	var capture_stars := CaptureSystemScript.calc_battle_stars(5, 10, 0.7)
+	var clean_team := [
+		{"hp": 10, "maxHP": 10},
+		{"hp": 7, "maxHP": 10},
+		{"hp": 1, "maxHP": 10}
+	]
+	var one_dead_team := [
+		{"hp": 10, "maxHP": 10},
+		{"hp": 0, "maxHP": 10},
+		{"hp": 1, "maxHP": 10}
+	]
+	var two_dead_team := [
+		{"hp": 10, "maxHP": 10},
+		{"hp": 0, "maxHP": 10},
+		{"hp": 0, "maxHP": 10}
+	]
+	_expect(RewardRulesScript.calc_battle_stars_for_team(clean_team) == 3, "no deaths should be 3 stars")
+	_expect(RewardRulesScript.calc_battle_stars_for_team(one_dead_team) == 2, "one death should be 2 stars")
+	_expect(RewardRulesScript.calc_battle_stars_for_team(two_dead_team) == 1, "two deaths should be 1 star")
+	_expect(RewardRulesScript.calc_battle_stars_for_team([]) == 1, "empty team data should not award 3 stars")
+	var reward_stars := RewardRulesScript.calc_battle_stars_for_team(one_dead_team)
+	var capture_stars := CaptureSystemScript.calc_battle_stars_for_team(one_dead_team)
 	_expect(capture_stars == reward_stars, "CaptureSystem stars should delegate to RewardRules")
 
 

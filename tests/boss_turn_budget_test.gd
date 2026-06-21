@@ -49,10 +49,10 @@ func _test_turn_budget_curve(db: StageDB) -> void:
 	_expect(int(boss_10.get("maxTurns", 0)) >= 180, "late bosses should give engaged players enough turns without lowering boss HP")
 	_expect(int(boss_11.get("maxTurns", 0)) > int(boss_10.get("maxTurns", 0)), "final chapter boss should have the largest turn budget")
 
-	var skilled_stars := RewardRulesScript.calc_battle_stars(95, int(boss_11.get("maxTurns", 1)), 1.0)
-	var slow_stars := RewardRulesScript.calc_battle_stars(188, int(boss_11.get("maxTurns", 1)), 0.55)
-	_expect(skilled_stars == 3, "clean skilled late-boss clears should still be eligible for 3 stars")
-	_expect(slow_stars <= 2, "slow late-boss clears should pass but not look like mastery")
+	var clean_team := [{"hp": 1, "maxHP": 10}, {"hp": 1, "maxHP": 10}, {"hp": 1, "maxHP": 10}]
+	var two_dead_team := [{"hp": 1, "maxHP": 10}, {"hp": 0, "maxHP": 10}, {"hp": 0, "maxHP": 10}]
+	_expect(RewardRulesScript.calc_battle_stars_for_team(clean_team) == 3, "clean late-boss clears should still be eligible for 3 stars")
+	_expect(RewardRulesScript.calc_battle_stars_for_team(two_dead_team) == 1, "two deaths should lower battle mastery")
 
 
 func _test_battle_manager_uses_stage_turns(db: StageDB) -> void:

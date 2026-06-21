@@ -5,6 +5,7 @@
 class_name SceneStageSelect
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
@@ -664,9 +665,7 @@ func _stage_display_label(card: Dictionary) -> String:
 
 func _stage_number_font() -> Font:
 	if _stage_number_font_cache == null:
-		var font := SystemFont.new()
-		font.font_names = PackedStringArray(["Microsoft YaHei UI", "Microsoft YaHei", "Arial Rounded MT Bold"])
-		_stage_number_font_cache = font
+		_stage_number_font_cache = PROJECT_ROUND_FONT
 	return _stage_number_font_cache
 
 func _sample_stage_positions(count: int) -> Array[Vector2]:
@@ -1273,11 +1272,11 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 func _draw_text_center(text: String, x: float, y: float, color: Color, font_size: int, bold: bool = false, width: float = 200.0) -> void:
 	var pos := Vector2(x - width / 2.0, y)
-	draw_string(ThemeDB.fallback_font, pos + Vector2(1, 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, Color(0, 0, 0, 0.55))
-	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, color)
+	draw_string(PROJECT_ROUND_FONT, pos + Vector2(1, 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, Color(0, 0, 0, 0.55))
+	draw_string(PROJECT_ROUND_FONT, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, color)
 
 func _draw_text_in_rect(text: String, rect: Rect2, color: Color, max_font_size: int, bold: bool = false, min_font_size: int = 10) -> void:
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	var font_size := max_font_size
 	while font_size > min_font_size:
 		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1.0, font_size)

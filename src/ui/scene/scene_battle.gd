@@ -24,7 +24,7 @@ const BattleFeedbackOverlayScript = preload("res://src/ui/components/battle_feed
 const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
-const FX_ROUND_FONT: Font = preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
+const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 ## 设计尺寸
 const DESIGN_W := 375.0
@@ -381,7 +381,7 @@ const BATTLE_UI_ASSETS := {
 	"capture_toggle_off": "res://assets/images/ui/buttons/battle_ui_capture_toggle_off.png",
 	"capture_toggle_on": "res://assets/images/ui/buttons/battle_ui_capture_toggle_on.png",
 	"item_slot": "res://assets/images/ui/slots/battle_ui_item_slot.png",
-	"item_slot_selected": "res://assets/images/ui/slots/battle_ui_item_slot_selected.png",
+	"slot_selected_frame": "res://assets/images/ui/slots/battle_ui_slot_selected.png",
 	"capture_slot": "res://assets/images/ui/slots/battle_ui_capture_slot.png",
 	"item_capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
 	"item_capture_ball_plus": "res://assets/images/ui/icons/items_new_icon_capture_ball_plus.png",
@@ -1473,7 +1473,9 @@ func _start_enemy_turn() -> void:
 		if action.get("damage", 0) > 0:
 			var dmg_size := 28.0 if action.get("is_charged", false) else 16.0
 			var dmg_color := C["charged_attack"] if action.get("is_charged", false) else C["danger"]
-			var target_idx := _find_player_index(action.get("target", ""))
+			var target_idx := int(action.get("target_index", action.get("targetIndex", -1)))
+			if target_idx < 0:
+				target_idx = _find_player_index(action.get("target_id", action.get("targetId", "")), action.get("target", ""))
 			var popup_x: float = 80.0
 			var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
 			var enemy_idx: int = _find_enemy_index(action.get("attacker", ""))
@@ -2176,7 +2178,9 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 	var dmg_size: float = 28.0 if is_charged else 16.0
 	var dmg_color: Color = C["charged_attack"] if is_charged else C["danger"]
 	var target_name: String = action_info.get("target", "")
-	var target_idx: int = _find_player_index(target_name)
+	var target_idx: int = int(action_info.get("target_index", action_info.get("targetIndex", -1)))
+	if target_idx < 0:
+		target_idx = _find_player_index(str(action_info.get("target_id", action_info.get("targetId", ""))), target_name)
 
 	var popup_x: float = 80.0
 	var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
@@ -2941,10 +2945,13 @@ func _draw_item_hotbar(base_y: float) -> void:
 		var item: Dictionary = _hotbar_items[i] if i < _hotbar_items.size() else {}
 		var has_item: bool = not item.is_empty() and item.get("count", 0) > 0
 		var is_selected := _is_hotbar_item_selected(i, item)
-		var slot_key := "item_slot_selected" if is_selected else "item_slot"
-		var slot_tex := _get_texture(BATTLE_UI_ASSETS[slot_key])
+		var slot_tex := _get_texture(BATTLE_UI_ASSETS["item_slot"])
 		if slot_tex:
 			_draw_texture_fit(slot_tex, slot_rect, 1.0 if has_item else 0.72)
+		if is_selected:
+			var selected_frame := _get_texture(BATTLE_UI_ASSETS["slot_selected_frame"])
+			if selected_frame:
+				_draw_texture_fit(selected_frame, slot_rect.grow(2.0), 1.0)
 		if not has_item:
 			draw_circle(slot_rect.get_center(), 4.0, Color(1.0, 1.0, 1.0, 0.28))
 			continue
@@ -2957,9 +2964,6 @@ func _draw_item_hotbar(base_y: float) -> void:
 			else:
 				var emoji: String = item_def.get("emoji", "?")
 				_draw_text(emoji, slot_rect.get_center().x, slot_rect.position.y + 13.0, C["white"], 13.5, true)
-			if is_selected:
-				_draw_rounded_rect_outline(slot_rect.position.x + 1.0, slot_rect.position.y + 1.0, slot_rect.size.x - 2.0, slot_rect.size.y - 2.0, 9.0, C["gold"], 2.0)
-
 			# 数量标签
 			var count: int = item["count"]
 			if count > 1:
@@ -2977,7 +2981,9 @@ func _draw_capture_item_slots(base_y: float) -> void:
 		if slot_tex:
 			_draw_texture_fit(slot_tex, slot_rect, 1.0 if has_item else 0.72)
 		if selected:
-			_draw_rounded_rect_outline(slot_rect.position.x + 1.0, slot_rect.position.y + 1.0, slot_rect.size.x - 2.0, slot_rect.size.y - 2.0, 9.0, C["gold"], 2.0)
+			var selected_frame := _get_texture(BATTLE_UI_ASSETS["slot_selected_frame"])
+			if selected_frame:
+				_draw_texture_fit(selected_frame, slot_rect.grow(2.0), 1.0)
 		if not has_item:
 			draw_circle(slot_rect.get_center(), 4.0, Color(1.0, 1.0, 1.0, 0.28))
 			continue
@@ -4309,7 +4315,7 @@ func _draw_rounded_rect_outline_on(canvas: CanvasItem, x: float, y: float, w: fl
 	_draw_stroke_rect_on(canvas, x, y, w, h, line_width, color)
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, center: bool = false) -> void:
-	var font: Font = ThemeDB.fallback_font
+	var font: Font = FX_ROUND_FONT
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER if center else HORIZONTAL_ALIGNMENT_LEFT
 	if center:
 		draw_string(font, Vector2(x, y + size * 0.75), text, align, -1.0, size, color)
@@ -4480,7 +4486,7 @@ func _draw_text_with_shadow_on(canvas: CanvasItem, text: String, x: float, y: fl
 	BattleUIFeedbackScript.draw_text_with_shadow(canvas, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
 
 func _draw_hp_text_in_bar(text: String, rect: Rect2, color: Color) -> void:
-	var font := ThemeDB.fallback_font
+	var font := FX_ROUND_FONT
 	var size: int = int(round(clampf(rect.size.y * 0.36, 3.4, 5.0)))
 	var max_width: float = maxf(12.0, rect.size.x - 12.0)
 	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)

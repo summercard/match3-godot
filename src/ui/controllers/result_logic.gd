@@ -4,6 +4,7 @@
 class_name SceneResult
 extends Control
 
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
@@ -237,13 +238,10 @@ func init(data: Dictionary = {}) -> void:
 
 func _calc_stars() -> void:
 	var player_team: Array = _battle_result.get("playerTeam", [])
-	var hp_ratio := RewardRulesScript.calc_hp_ratio(player_team)
-	var turn_count: int = _battle_result.get("turnCount", 0)
-	var max_turns: int = _battle_result.get("maxTurns", 20)
-	_stars = _calculate_battle_stars(turn_count, max_turns, hp_ratio)
+	_stars = _calculate_battle_stars(player_team)
 
-func _calculate_battle_stars(turns: int, max_turns: int, hp_ratio: float) -> int:
-	return RewardRulesScript.calc_battle_stars(turns, max_turns, hp_ratio)
+func _calculate_battle_stars(player_team: Array) -> int:
+	return RewardRulesScript.calc_battle_stars_for_team(player_team)
 
 func _process_capture() -> void:
 	var enemies: Array = _battle_result.get("enemies", [])
@@ -415,6 +413,20 @@ func _setup_buttons() -> void:
 	else:
 		_has_next_stage = false
 
+static func build_captured_instance_options(target: Dictionary, battle_result: Dictionary) -> Dictionary:
+	var captured_nature := str(target.get("nature", ""))
+	if captured_nature.is_empty():
+		captured_nature = NatureDB.random_nature()
+	var monster_id := str(target.get("monsterId", target.get("id", "")))
+	var captured_level := maxi(1, int(target.get("level", battle_result.get("enemyLevel", 1))))
+	var is_elite: bool = target.get("isElite", MonsterDb.MONSTER_DB.get(monster_id, {}).get("isElite", false)) == true
+	return {
+		"source": "capture",
+		"level": captured_level,
+		"nature": captured_nature,
+		"isElite": is_elite,
+	}
+
 func _save_rewards() -> void:
 	if not _storage:
 		return
@@ -427,18 +439,10 @@ func _save_rewards() -> void:
 	_add_monster_exp_from_battle()
 	if _captured and not _capture_target.is_empty() and _capture_target.has("id"):
 		if _storage.has_method("add_monster_instance"):
-			# ★ 主人定：捕获时保留敌人身上 random 出来的性格
-			# 这是“捕获赌脸”乐趣的关键点：每次重打、同一只怪可能出不同性格
-			var captured_nature: String = str(_capture_target.get("nature", ""))
-			if captured_nature.is_empty():
-				captured_nature = NatureDB.random_nature()  # 兑底：万一敌人没性格也能 random
-			_storage.add_monster_instance(str(_capture_target["id"]), {
-				"source": "capture",
-				"level": maxi(1, int(_battle_result.get("enemyLevel", 1))),
-				"nature": captured_nature,
-				# ★ 主人定 2026-06-11：捕获精英怪 → 宠物也是精英（保留 HP×5/ATK+20%）
-				"isElite": bool(_capture_target.get("isElite", MonsterDb.MONSTER_DB.get(_capture_target["id"], {}).get("isElite", false))),
-			})
+			_storage.add_monster_instance(
+				str(_capture_target["id"]),
+				build_captured_instance_options(_capture_target, _battle_result)
+			)
 		else:
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
 			var captured_list: Array = player.get("captured", [])
@@ -644,7 +648,7 @@ func destroy() -> void:
 var _time_acc: float = 0.0
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	_time_acc += get_process_delta_time()
 	
 	var oy := _entry_offset_y  # 入场偏移
@@ -990,7 +994,7 @@ func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
 	if tex:
 		_draw_texture_fit(tex, rect)
 		return
-	var font := ThemeDB.fallback_font
+	var font := PROJECT_ROUND_FONT
 	_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.05, 0.08, 0.16, 0.78))
 	var fallback := str(monster.get("emoji", "?"))
 	_draw_centered_text(font, fallback, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y * 0.62, C["white"], minf(rect.size.x * 0.45, 20.0))

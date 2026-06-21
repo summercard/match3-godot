@@ -16,6 +16,9 @@ func _run() -> void:
 	root.add_child(prepare)
 	prepare.battle_started.connect(func(stage_id: String, _stage_data: Dictionary): _started_stage_id = stage_id)
 	prepare.init({"stageId": "stage_1_1"})
+	# Entry animation temporarily offsets panels; reset to the authored target layout
+	# before checking spacing and alignment.
+	prepare.call("_apply_concept_layout")
 	for chip_path in ["TopResourceBar/GoldChip", "TopResourceBar/DiamondChip", "TopResourceBar/HeartChip"]:
 		_expect(not (prepare.get_node(chip_path + "/Plus") as Control).visible, "%s currency add icon should be hidden" % chip_path)
 	_expect(prepare.scene_file_path == "res://src/ui/scenes/battle_prepare.tscn", "battle prepare should be an editable PackedScene")
@@ -34,10 +37,41 @@ func _run() -> void:
 	var normal_enemy_card := prepare.get_node("EnemyPanel/Cards/EnemyCard1") as Control
 	var normal_enemy_portrait := normal_enemy_card.get_node("Portrait") as Control
 	var normal_enemy_portrait_size := normal_enemy_portrait.size
+	var enemy_power_caption := prepare.get_node("EnemyPanel/PowerCaption") as Label
+	var enemy_power_value := normal_enemy_card.get_node("Power") as Label
 	_expect((prepare.get_node("EnemyPanel/ElementPill") as Control).visible, "normal enemy panel should show element info")
 	_expect((normal_enemy_card.get_node("Level") as Control).visible, "normal enemy card should show level")
 	_expect((normal_enemy_card.get_node("Power") as Control).visible, "normal enemy card should show power")
 	_expect((prepare.get_node("EnemyPanel/PowerIcon") as TextureRect).texture.resource_path.ends_with("battle_prepare_new_icon_power_swords.png"), "enemy power icon should use the cleaned crossed swords art")
+	_expect(enemy_power_caption.position.x + enemy_power_caption.size.x <= enemy_power_value.position.x, "enemy power caption and value should form one clean row without overlap")
+	for plain_label_path in [
+		"TopResourceBar/GoldChip/Value",
+		"TopResourceBar/DiamondChip/Value",
+		"TopResourceBar/HeartChip/Value",
+		"Header/StageName",
+		"EnemyPanel/Title",
+		"EnemyPanel/ElementText",
+		"EnemyPanel/PowerCaption",
+		"EnemyPanel/Cards/EnemyCard1/Name",
+		"EnemyPanel/Cards/EnemyCard1/Level",
+		"EnemyPanel/Cards/EnemyCard1/Power",
+		"PowerPanel/PlayerPower",
+		"PowerPanel/EnemyPower",
+		"PowerPanel/Diff",
+		"TeamPanel/Title",
+		"TeamPanel/Cards/TeamCard1/Name",
+		"TeamPanel/Cards/TeamCard1/Level",
+		"TeamPanel/Cards/TeamCard1/Power",
+		"RewardPreview/Title",
+	]:
+		_expect((prepare.get_node(plain_label_path) as Label).get_theme_constant("outline_size") == 0, "%s should not retain a white text edge" % plain_label_path)
+	var enemy_panel := prepare.get_node("EnemyPanel") as Control
+	var power_panel := prepare.get_node("PowerPanel") as Control
+	var team_panel := prepare.get_node("TeamPanel") as Control
+	var reward_panel := prepare.get_node("RewardPreview") as Control
+	_expect(enemy_panel.position.y + enemy_panel.size.y < power_panel.position.y, "enemy and power sections should have a visible gap")
+	_expect(power_panel.position.y + power_panel.size.y < team_panel.position.y, "power and team sections should have a visible gap")
+	_expect(team_panel.position.y + team_panel.size.y < reward_panel.position.y, "team and reward sections should have a visible gap")
 	for team_card_path in ["TeamPanel/Cards/TeamCard1", "TeamPanel/Cards/TeamCard2", "TeamPanel/Cards/TeamCard3"]:
 		var team_card := prepare.get_node(team_card_path) as Control
 		var element_badge := team_card.get_node("ElementBadge") as TextureRect
@@ -110,7 +144,7 @@ func _run() -> void:
 		],
 		"capture_played_inline": true,
 		"captured": true,
-		"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1, "isElite": true},
+		"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1, "level": 9, "isElite": true},
 		"capture_result_text": {"title": "收服成功", "reason": "窗口稳定"},
 		"capture_item_used": {"name": "捕捉球"},
 		"capture_window": {"label": "稳定", "stability": 0.82},
@@ -160,6 +194,11 @@ func _run() -> void:
 	_expect(int(inventory_after_result.get("capture_ball_plus", 0)) == 2, "result should grant the same guaranteed item count shown in the reward slot")
 	var captured_instances: Array = save_manager.get_instances_by_monster_id("enemy_001") if save_manager != null and save_manager.has_method("get_instances_by_monster_id") else []
 	_expect(not captured_instances.is_empty() and bool((captured_instances[0] as Dictionary).get("isElite", false)), "captured random elite target should keep isElite on the owned instance")
+	_expect(not captured_instances.is_empty() and int((captured_instances[0] as Dictionary).get("level", 0)) == 9, "captured target should keep its battle level instead of falling back to stage enemyLevel")
+	if not captured_instances.is_empty():
+		var captured_instance: Dictionary = captured_instances[0]
+		var captured_view: Dictionary = MonsterService.build_instance_view(captured_instance)
+		_expect(int(captured_view.get("stats", {}).get("level", 0)) == 9, "captured target stats should be recalculated from saved level and nature")
 	result.queue_free()
 	await process_frame
 
