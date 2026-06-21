@@ -14,6 +14,8 @@ func _run() -> void:
 		return
 
 	save_manager.clear_all_data()
+	for chapter_no in range(1, 9):
+		save_manager.save_stage_stars("stage_%d_12" % chapter_no, 1)
 	var scene: Control = load("res://src/ui/scenes/stage_select_map.tscn").instantiate()
 	root.add_child(scene)
 	scene.stage_selected.connect(_on_stage_selected)

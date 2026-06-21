@@ -21,6 +21,7 @@
 [ext_resource type="Script" uid="uid://bgmehtlw34xli" path="res://src/ui/scene/scene_result_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="star_dim"]
 [ext_resource type="Texture2D" uid="uid://bx41aeb4uukk8" path="res://assets/images/ui/panels/result_refresh_ui_victory_blue_banner_clean.png" id="victory"]
+[ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="dark_overlay"]
 
 [node name="BattleResultGui" type="Control" unique_id=2092080466]
 clip_contents = true
@@ -42,13 +43,16 @@ texture = ExtResource("bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Shade" type="ColorRect" parent="." unique_id=747442968]
+[node name="Shade" type="TextureRect" parent="." unique_id=747442968]
 z_index = -5
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.18)
+modulate = Color(1, 1, 1, 0.5)
+texture = ExtResource("dark_overlay")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="WinFx" type="Control" parent="." unique_id=1739148844]
 anchors_preset = 0

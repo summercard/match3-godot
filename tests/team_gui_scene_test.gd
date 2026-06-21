@@ -19,6 +19,8 @@ func _run() -> void:
 	_assert(scene != null, "team scene should instantiate as Control")
 	_assert(scene.scene_file_path == SCENE_PATH, "team scene should keep team.tscn as its formal source")
 	_assert(scene.get_script() != null and scene.get_script().resource_path == GUI_SCRIPT_PATH, "team root should use the GUI sync script")
+	for chip_path in ["CurrencyBar/GoldChip", "CurrencyBar/DiamondChip", "CurrencyBar/HeartChip"]:
+		_assert(not (scene.get_node(chip_path + "/Plus") as Control).visible, "%s currency add icon should be hidden" % chip_path)
 
 	for path in [
 		"CurrencyBar/GoldChip/Amount",

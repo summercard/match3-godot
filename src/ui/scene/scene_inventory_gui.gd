@@ -5,6 +5,8 @@ extends "res://src/ui/controllers/inventory_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 
+signal shop_pressed
+
 # === 背包入场动画时间线 ===
 const ENTRY_HEADER_DELAY := 0.00
 const ENTRY_TABS_DELAY := 0.14
@@ -86,6 +88,7 @@ func _connect_gui_actions() -> void:
 	_connect_button("GridPanel/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("DetailPanel/UseButton", _on_use_pressed)
 	_connect_button("BottomNav/HomeButton", _on_back_pressed)
+	_connect_button("BottomNav/ShopButton", _on_shop_pressed)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -94,6 +97,12 @@ func _connect_button(path: String, action: Callable) -> void:
 
 func _on_back_pressed() -> void:
 	back_pressed.emit()
+
+func _on_shop_pressed() -> void:
+	shop_pressed.emit()
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager != null and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene("shop", {}, "slide")
 
 func _on_tab_pressed(tab_id: String) -> void:
 	_active_tab = tab_id
@@ -171,7 +180,7 @@ func _sync_static_labels() -> void:
 		"DetailPanel/EmptyText": "选择一个道具查看详情",
 		"DetailPanel/UseButton/Text": "使用",
 		"BottomNav/HomeButton/Text": "主页",
-		"BottomNav/InventoryButton/Text": "背包",
+		"BottomNav/ShopButton/Text": "商店",
 	}
 	for path in labels.keys():
 		if has_node(path):
@@ -326,7 +335,7 @@ func _attach_inventory_feedback() -> void:
 		"GridPanel/PageControls/NextButton",
 		"DetailPanel/UseButton",
 		"BottomNav/HomeButton",
-		"BottomNav/InventoryButton",
+		"BottomNav/ShopButton",
 	]
 	for path in SLOT_PATHS:
 		paths.append(path)

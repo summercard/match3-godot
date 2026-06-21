@@ -68,6 +68,20 @@ func _run() -> void:
 	locked_board.locked_gems[0][1] = {"hp": 1}
 	_expect(locked_board.find_matches().get("gems", []).is_empty(), "locked gems should not be consumed by a normal match")
 
+	var falling_locked_board = BoardScript.new(4, 1)
+	falling_locked_board.grid = [[""], ["fire"], [""], ["water"]]
+	falling_locked_board.locked_gems[1][0] = {"hp": 2}
+	var locked_movements: Array = falling_locked_board.apply_gravity()
+	_expect(falling_locked_board.grid[2][0] == "fire", "a locked gem should fall into an empty cell below")
+	_expect(not falling_locked_board.is_locked(1, 0) and falling_locked_board.is_locked(2, 0), "the lock should move together with its gem")
+	_expect(int(falling_locked_board.locked_gems[2][0].get("hp", 0)) == 2, "a falling lock should preserve its durability")
+	var found_locked_fall := false
+	for move: Dictionary in locked_movements:
+		if int(move.get("fromRow", -1)) == 1 and int(move.get("toRow", -1)) == 2 and bool(move.get("locked", false)):
+			found_locked_fall = true
+			break
+	_expect(found_locked_fall, "locked gem movement should be exposed to the fall animation")
+
 	var bomb_board = BoardScript.new(5, 5)
 	_fill_board(bomb_board, "")
 	bomb_board.set_obstacles([{"row": 2, "col": 1, "type": "rock", "hp": 2}])

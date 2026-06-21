@@ -192,7 +192,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 12
-text = "上一张"
+text = "上一章"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -276,7 +276,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.05, 0.12, 0.85)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 12
-text = "下一张"
+text = "下一章"
 horizontal_alignment = 1
 vertical_alignment = 1
 

@@ -11,7 +11,6 @@
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="9_gold"]
 [ext_resource type="Texture2D" uid="uid://ssxa0rdfi21p" path="res://assets/images/ui/gems/main_icon_diamond_gem_v3.png" id="10_diamond"]
 [ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="11_plus"]
-[ext_resource type="Texture2D" uid="uid://vdants1nwxss" path="res://assets/images/ui/panels/main_ui_trophy_capsule_v3.png" id="12_trophy_capsule"]
 [ext_resource type="Texture2D" uid="uid://juqei62ypmlc" path="res://assets/images/ui/icons/main_icon_trophy_score_v3.png" id="13_trophy"]
 [ext_resource type="Texture2D" uid="uid://cdtmikm7fi6k7" path="res://assets/images/effects/ranch_fx_social_heart.png" id="14_stamina"]
 [ext_resource type="Texture2D" uid="uid://bdc3tphg7nwn5" path="res://assets/images/ui/buttons/main_ui_entry_shop_v3.png" id="15_shop_entry"]
@@ -202,6 +201,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="GoldPlus" type="TextureButton" parent="Header" unique_id=152312080]
+visible = false
 layout_mode = 0
 offset_left = 98.0
 offset_top = 17.0
@@ -249,6 +249,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="DiamondPlus" type="TextureButton" parent="Header" unique_id=1552543318]
+visible = false
 layout_mode = 0
 offset_left = 215.0
 offset_top = 17.0
@@ -296,6 +297,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="StaminaPlus" type="TextureButton" parent="Header"]
+visible = false
 layout_mode = 0
 offset_left = 332.0
 offset_top = 17.0
@@ -310,20 +312,20 @@ stretch_mode = 5
 [node name="RankPanel" type="TextureRect" parent="Header" unique_id=1402777171]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 118.0
+offset_top = 114.0
 offset_right = 146.0
-offset_bottom = 154.0
+offset_bottom = 158.0
 mouse_filter = 2
-texture = ExtResource("12_trophy_capsule")
+texture = ExtResource("8_currency")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="RankIcon" type="TextureRect" parent="Header" unique_id=734181460]
 layout_mode = 0
 offset_left = 21.0
-offset_top = 123.0
-offset_right = 49.0
-offset_bottom = 151.0
+offset_top = 120.0
+offset_right = 53.0
+offset_bottom = 152.0
 mouse_filter = 2
 texture = ExtResource("13_trophy")
 expand_mode = 1
@@ -331,10 +333,10 @@ stretch_mode = 5
 
 [node name="RankTitle" type="Label" parent="Header" unique_id=1520743959]
 layout_mode = 0
-offset_left = 49.0
-offset_top = 121.0
+offset_left = 52.0
+offset_top = 119.0
 offset_right = 143.0
-offset_bottom = 135.0
+offset_bottom = 136.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 7
 text = "成就分数"
@@ -344,10 +346,10 @@ vertical_alignment = 1
 [node name="RankScore" type="Label" parent="Header" unique_id=1466909314]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 49.0
-offset_top = 134.0
+offset_left = 52.0
+offset_top = 135.0
 offset_right = 143.0
-offset_bottom = 152.0
+offset_bottom = 155.0
 theme_override_colors/font_color = Color(0.29, 0.16, 0.06, 1)
 theme_override_font_sizes/font_size = 8
 text = "15,680"
@@ -430,7 +432,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.31, 0.06, 1)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 14
-text = "精灵牧场"
+text = "精灵课堂"
 horizontal_alignment = 1
 vertical_alignment = 1
 

@@ -22,7 +22,7 @@ const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item2",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
-const BOSS_BATTLE_VISUAL_SCALE: float = 2.0
+const BOSS_BATTLE_VISUAL_SCALE: float = 1.5
 const BOSS_STATUS_OFFSET_Y: float = -56.0
 const BATTLE_END_OVERLAY_PATH := NodePath("BattleEndOverlay")
 const BATTLE_END_TITLE_PATH := NodePath("BattleEndOverlay/Banner/Title")
@@ -217,11 +217,12 @@ func _sync_top_hud() -> void:
 func _sync_enemy_slots() -> void:
 	var enemy_count: int = mini(_battle.enemies.size(), 3)
 	var stage_slot := _control("Combatants/SingleEnemy")
-	stage_slot.visible = enemy_count == 1
-	_control("Combatants/MultiEnemies").visible = enemy_count > 1
-	if enemy_count == 1:
+	var featured_single := enemy_count == 1 and BattleCombatantRendererScript.uses_featured_single_layout(_battle.enemies[0])
+	stage_slot.visible = featured_single
+	_control("Combatants/MultiEnemies").visible = enemy_count > 1 or (enemy_count == 1 and not featured_single)
+	if featured_single:
 		_set_stage_enemy(stage_slot, _battle.enemies[0])
-		# ★ 主人定 2026-06-11：单怪 Boss 受击 portrait 柔和闪白
+		# 单体精英 / Boss 使用特殊放大槽。
 		_apply_hit_feedback(stage_slot, true, 0)
 		# ★ 主人定 2026-06-11：倒下阶段 portrait：先渐隐，再幽灵从下冲上渐显
 		_apply_defeat_feedback(stage_slot, true, 0)
@@ -229,13 +230,19 @@ func _sync_enemy_slots() -> void:
 		_apply_elastic_feedback(stage_slot, true, 0)
 	for i in MULTI_ENEMY_PATHS.size():
 		var slot := _control(MULTI_ENEMY_PATHS[i])
-		slot.visible = enemy_count > 1 and i < enemy_count
+		var enemy_index := i
+		if enemy_count == 1 and not featured_single:
+			# 普通单怪保持常规尺寸，放在三槽布局的中央。
+			slot.visible = i == 1
+			enemy_index = 0
+		else:
+			slot.visible = enemy_count > 1 and i < enemy_count
 		if slot.visible:
-			_set_combatant(slot, _battle.enemies[i], "red", true)
+			_set_combatant(slot, _battle.enemies[enemy_index], "red", true)
 			# ★ 主人定 2026-06-11：多怪受击 portrait 柔和闪白
-			_apply_hit_feedback(slot, true, i)
-			_apply_defeat_feedback(slot, true, i)
-			_apply_elastic_feedback(slot, true, i)
+			_apply_hit_feedback(slot, true, enemy_index)
+			_apply_defeat_feedback(slot, true, enemy_index)
+			_apply_elastic_feedback(slot, true, enemy_index)
 
 func _sync_player_slots() -> void:
 	var player_count: int = mini(_battle.player_team.size(), 3)
@@ -627,7 +634,8 @@ func _collect_enemy_centers() -> Array:
 	var centers: Array = []
 	var enemy_count: int = mini(_battle.enemies.size(), 3)
 	if enemy_count <= 1:
-		var path := NodePath("Combatants/SingleEnemy/Portrait")
+		var featured_single := enemy_count == 1 and BattleCombatantRendererScript.uses_featured_single_layout(_battle.enemies[0])
+		var path := NodePath("Combatants/SingleEnemy/Portrait" if featured_single else "Combatants/MultiEnemies/Enemy2/Portrait")
 		if has_node(path):
 			centers.append(_get_portrait_effect_center(path, true, 0))
 		else:

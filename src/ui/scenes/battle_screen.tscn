@@ -2,8 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://cxj7cr2pign6r" path="res://assets/images/ui/buttons/result_refresh_ui_btn_green.png" id="14_4bo1b"]
 [ext_resource type="Texture2D" uid="uid://dtxns5drwsibo" path="res://assets/images/maps/warbackgrouds/map1.png" id="bg"]
-[ext_resource type="Texture2D" uid="uid://c0h344kt4d710" path="res://assets/images/ui/buttons/capture_success_new_ui_button_blue.png" id="button_blue"]
-[ext_resource type="Texture2D" uid="uid://cdecxss8dii2d" path="res://assets/images/ui/buttons/capture_success_new_ui_button_green.png" id="button_green"]
 [ext_resource type="Texture2D" uid="uid://cco7pjt5cybu" path="res://assets/images/ui/panels/battle_flow_new_ui_capture_status_plaque.png" id="capture_plaque"]
 [ext_resource type="Texture2D" uid="uid://dewudkkfj4gke" path="res://assets/images/ui/slots/battle_ui_capture_slot.png" id="capture_slot"]
 [ext_resource type="Texture2D" uid="uid://cbbvkb1ckwkv8" path="res://assets/images/ui/buttons/battle_ui_capture_toggle_off.png" id="capture_toggle"]
@@ -20,7 +18,7 @@
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
 [ext_resource type="Texture2D" uid="uid://c8hs21avb7h1g" path="res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png" id="victory_banner"]
-[ext_resource type="Script" path="res://src/ui/components/battle_victory_halo.gd" id="victory_halo"]
+[ext_resource type="Script" uid="uid://uontc1qpv0fy" path="res://src/ui/components/battle_victory_halo.gd" id="victory_halo"]
 
 [node name="BattleScreenGui" type="Control" unique_id=807451328]
 clip_contents = true
@@ -1282,7 +1280,6 @@ layout_mode = 0
 offset_right = 80.0
 offset_bottom = 41.0
 mouse_filter = 2
-texture = ExtResource("button_green")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1315,7 +1312,6 @@ layout_mode = 0
 offset_right = 80.0
 offset_bottom = 41.0
 mouse_filter = 2
-texture = ExtResource("button_blue")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1403,7 +1399,6 @@ offset_top = 138.0
 offset_right = 118.0
 offset_bottom = 179.0
 mouse_default_cursor_shape = 2
-texture_normal = ExtResource("button_green")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -1440,7 +1435,6 @@ offset_top = 138.0
 offset_right = 230.0
 offset_bottom = 179.0
 mouse_default_cursor_shape = 2
-texture_normal = ExtResource("button_blue")
 ignore_texture_size = true
 stretch_mode = 5
 

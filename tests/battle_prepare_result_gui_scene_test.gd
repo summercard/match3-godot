@@ -16,6 +16,8 @@ func _run() -> void:
 	root.add_child(prepare)
 	prepare.battle_started.connect(func(stage_id: String, _stage_data: Dictionary): _started_stage_id = stage_id)
 	prepare.init({"stageId": "stage_1_1"})
+	for chip_path in ["TopResourceBar/GoldChip", "TopResourceBar/DiamondChip", "TopResourceBar/HeartChip"]:
+		_expect(not (prepare.get_node(chip_path + "/Plus") as Control).visible, "%s currency add icon should be hidden" % chip_path)
 	_expect(prepare.scene_file_path == "res://src/ui/scenes/battle_prepare.tscn", "battle prepare should be an editable PackedScene")
 	_expect((prepare.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle prepare should use map1 war background")
 	for path in [
@@ -49,10 +51,19 @@ func _run() -> void:
 		var reward_label := prepare.get_node(reward_slot_path + "/Label") as Label
 		var reward_icon := prepare.get_node(reward_slot_path + "/Icon") as TextureRect
 		_expect(not reward_label.visible and reward_label.text.is_empty(), "%s should hide reward text and quantity" % reward_slot_path)
-		_expect(reward_icon.position.x >= 8.0 and reward_icon.size.x >= 30.0, "%s icon should stay centered without reward text" % reward_slot_path)
+		_expect(reward_icon.size == Vector2(26.0, 26.0), "%s icon should use the compact reward size" % reward_slot_path)
+	var prepare_shade := prepare.get_node("Shade") as TextureRect
+	_expect(prepare_shade.texture.resource_path.ends_with("ui/backgrounds/black.png"), "battle prepare should use black.png between the background and UI")
+	_expect(is_equal_approx(prepare_shade.modulate.a, 0.5), "battle prepare black overlay should be 50 percent transparent")
 	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "first-clear diamond preview should use the diamond icon")
 	prepare.init({"stageId": "stage_1_2"})
 	_expect(prepare.has_node("RewardPreview/Slots/RewardSlot4"), "battle prepare should support a fourth reward preview slot")
+	var reward_slots := prepare.get_node("RewardPreview/Slots") as Control
+	var first_reward_slot := prepare.get_node("RewardPreview/Slots/RewardSlot1") as Control
+	var last_reward_slot := prepare.get_node("RewardPreview/Slots/RewardSlot4") as Control
+	var reward_group_center := (first_reward_slot.position.x + last_reward_slot.position.x + last_reward_slot.size.x) * 0.5
+	_expect(is_equal_approx(reward_slots.position.x, 0.0), "reward slot container should not retain the old left offset")
+	_expect(is_equal_approx(reward_group_center, reward_slots.size.x * 0.5), "visible reward icons should be centered as one group")
 	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "stage with guaranteed item should still preview first-clear diamonds by icon")
 	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot4/Icon") as TextureRect).texture.resource_path.ends_with("items_new_icon_capture_ball.png"), "stage guaranteed item should show its real item icon")
 	_expect(not (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).visible and (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).text.is_empty(), "stage guaranteed item should not show reward text")
@@ -112,6 +123,9 @@ func _run() -> void:
 	result.call("_sync_gui")
 	_expect(result.scene_file_path == "res://src/ui/scenes/battle_result.tscn", "battle result should be an editable PackedScene")
 	_expect((result.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map1.png"), "chapter 1 battle result should use map1 war background")
+	var result_shade := result.get_node("Shade") as TextureRect
+	_expect(result_shade.texture.resource_path.ends_with("ui/backgrounds/black.png"), "battle victory should use black.png between the background and UI")
+	_expect(is_equal_approx(result_shade.modulate.a, 0.5), "battle victory black overlay should be 50 percent transparent")
 	_expect((result.get_node("CaptureResultPanel") as Control).scene_file_path == "res://src/ui/scenes/capture_result_panel.tscn", "capture pet result should be an independent editable GUI panel")
 	for path in [
 		"Banner/Frame",

@@ -84,6 +84,8 @@ var _sweep_choice_card: Dictionary = {}
 var _anim: AnimationHelper = null
 var _focus_stage_id: String = ""
 var _focus_scroll_applied: bool = false
+var _chapter_lock_hint: Label = null
+var _chapter_lock_hint_tween: Tween = null
 
 func _get_anim() -> AnimationHelper:
 	if _anim == null:
@@ -139,6 +141,7 @@ func _create_ui() -> void:
 	_sweep_anim_title_label = get_node("PopupLayer/SweepResult/TitleLabel") as Label
 	_sweep_anim_gold_label = get_node("PopupLayer/SweepResult/GoldLabel") as Label
 	_sweep_anim_exp_label = get_node("PopupLayer/SweepResult/ExpLabel") as Label
+	_setup_chapter_lock_hint()
 	var vertical_bar := _map_scroll.get_v_scroll_bar()
 	if vertical_bar != null and not vertical_bar.value_changed.is_connected(_on_map_scroll_changed):
 		vertical_bar.value_changed.connect(_on_map_scroll_changed)
@@ -334,8 +337,79 @@ func _update_chapter_buttons() -> void:
 		_bottom_prev_map_btn.disabled = _current_chapter_index <= 0
 		_bottom_prev_map_btn.modulate.a = 0.48 if _bottom_prev_map_btn.disabled else 1.0
 	if _bottom_next_map_btn != null:
-		_bottom_next_map_btn.disabled = _current_chapter_index >= _chapters.size() - 1
-		_bottom_next_map_btn.modulate.a = 0.48 if _bottom_next_map_btn.disabled else 1.0
+		var has_next := _current_chapter_index < _chapters.size() - 1
+		var next_chapter_index := _current_chapter_index + 1
+		var next_unlocked := has_next and _is_chapter_unlocked(next_chapter_index)
+		_bottom_next_map_btn.disabled = not has_next
+		_bottom_next_map_btn.modulate = Color.WHITE if next_unlocked else Color(0.62, 0.66, 0.72, 0.82)
+		_bottom_next_map_btn.tooltip_text = "前往第%d章" % (next_chapter_index + 1) if next_unlocked else (
+			"第%d章尚未解锁，请先击败第%d章 Boss" % [next_chapter_index + 1, next_chapter_index] if has_next else "已到达最终章"
+		)
+		var next_text := _bottom_next_map_btn.get_node_or_null("Text") as Label
+		if next_text != null:
+			next_text.text = "第%d章" % (next_chapter_index + 1) if has_next else "最终章"
+			next_text.add_theme_color_override("font_color", Color.WHITE if next_unlocked else Color(0.78, 0.82, 0.88))
+		var next_arrow := _bottom_next_map_btn.get_node_or_null("Arrow") as TextureRect
+		if next_arrow != null:
+			next_arrow.visible = next_unlocked
+		var lock_icon := _ensure_next_chapter_lock_icon()
+		lock_icon.visible = has_next and not next_unlocked
+
+func _ensure_next_chapter_lock_icon() -> TextureRect:
+	var lock_icon := _bottom_next_map_btn.get_node_or_null("LockIcon") as TextureRect
+	if lock_icon != null:
+		return lock_icon
+	lock_icon = TextureRect.new()
+	lock_icon.name = "LockIcon"
+	lock_icon.position = Vector2(68.0, 9.0)
+	lock_icon.size = Vector2(20.0, 20.0)
+	lock_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lock_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	lock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	lock_icon.texture = _get_texture(STAGE_LOCK_ICON_PATH)
+	_bottom_next_map_btn.add_child(lock_icon)
+	return lock_icon
+
+func _setup_chapter_lock_hint() -> void:
+	if _chapter_lock_hint != null:
+		return
+	_chapter_lock_hint = Label.new()
+	_chapter_lock_hint.name = "ChapterLockHint"
+	_chapter_lock_hint.position = Vector2(37.5, 515.0)
+	_chapter_lock_hint.size = Vector2(300.0, 44.0)
+	_chapter_lock_hint.z_index = 3000
+	_chapter_lock_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_chapter_lock_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_chapter_lock_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_chapter_lock_hint.add_theme_font_size_override("font_size", 14)
+	_chapter_lock_hint.add_theme_color_override("font_color", Color(1.0, 0.94, 0.72))
+	_chapter_lock_hint.add_theme_color_override("font_outline_color", Color(0.05, 0.08, 0.14, 0.95))
+	_chapter_lock_hint.add_theme_constant_override("outline_size", 4)
+	var panel := StyleBoxFlat.new()
+	panel.bg_color = Color(0.035, 0.075, 0.15, 0.94)
+	panel.border_color = Color(1.0, 0.72, 0.18, 0.95)
+	panel.set_border_width_all(2)
+	panel.set_corner_radius_all(12)
+	_chapter_lock_hint.add_theme_stylebox_override("normal", panel)
+	_chapter_lock_hint.visible = false
+	add_child(_chapter_lock_hint)
+
+func _show_chapter_locked_hint(chapter_index: int) -> void:
+	_setup_chapter_lock_hint()
+	if _chapter_lock_hint_tween != null and _chapter_lock_hint_tween.is_valid():
+		_chapter_lock_hint_tween.kill()
+	_chapter_lock_hint.text = "第%d章尚未解锁，请先击败第%d章 Boss" % [chapter_index + 1, chapter_index]
+	_chapter_lock_hint.visible = true
+	_chapter_lock_hint.modulate.a = 0.0
+	_chapter_lock_hint.scale = Vector2(0.92, 0.92)
+	_chapter_lock_hint.pivot_offset = _chapter_lock_hint.size * 0.5
+	_chapter_lock_hint_tween = create_tween()
+	_chapter_lock_hint_tween.set_parallel(true)
+	_chapter_lock_hint_tween.tween_property(_chapter_lock_hint, "modulate:a", 1.0, 0.16)
+	_chapter_lock_hint_tween.tween_property(_chapter_lock_hint, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_chapter_lock_hint_tween.chain().tween_interval(1.6)
+	_chapter_lock_hint_tween.chain().tween_property(_chapter_lock_hint, "modulate:a", 0.0, 0.28)
+	_chapter_lock_hint_tween.chain().tween_callback(func(): _chapter_lock_hint.visible = false)
 
 func _update_page_dots() -> void:
 	var anim := _get_anim()
@@ -859,6 +933,9 @@ func _switch_chapter(direction: int) -> void:
 		return
 	var new_index: int = _current_chapter_index + direction
 	if new_index < 0 or new_index >= _chapters.size():
+		return
+	if direction > 0 and not _is_chapter_unlocked(new_index):
+		_show_chapter_locked_hint(new_index)
 		return
 	_play_cloud_chapter_transition(direction)
 

@@ -26,7 +26,7 @@ const BUTTON_DESCRIPTIONS := {
 	"signin": "每日签到领取奖励",
 	"shop": "购买道具和装备",
 	"inventory": "查看和管理你的物品",
-	"ranch": "牧场挂机培养，精灵自动获得经验",
+	"ranch": "进入精灵课堂，培养并进化精灵",
 	"achievement": "查看冒险成就进度",
 	"settings": "游戏设置和选项"
 }

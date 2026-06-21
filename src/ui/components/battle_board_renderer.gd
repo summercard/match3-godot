@@ -110,6 +110,7 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 		return
 	var lock_colors: Dictionary = state.get("lock_colors", {})
 	var unlock_animations: Array = state.get("unlock_animations", [])
+	var falling_gems: Array = state.get("falling_gems", [])
 	for row in range(board.rows):
 		for col in range(board.cols):
 			if not board.is_locked(row, col):
@@ -125,27 +126,41 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			var x: float = float(board.offset_x + col * board.cell_size)
 			var y: float = float(board.offset_y + row * board.cell_size)
 			var size: float = float(board.cell_size)
-			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
-			var lock_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_gem_locked_tile.png")
-			if lock_tex:
-				scene._draw_texture_fit(lock_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.96)
-				continue
+			var gem_type: String = str(board.grid[row][col])
+			var fall := _falling_entry_for(falling_gems, row, col, gem_type)
+			if not fall.is_empty():
+				var animated_y := _fall_center_y(fall, cy)
+				y += animated_y - cy
+				cy = animated_y
+			# Corner chains and a compact lock leave the gem center visible.
 			var chain_color: Color = lock_colors.get("chain", Color(0.6, 0.6, 0.7, 0.9)) if lock.get("hp", 1) >= 2 else lock_colors.get("chain_weak", Color(0.5, 0.5, 0.55, 0.7))
-			var corners: Array[Vector2] = [
-				Vector2(x + 3.0, y + 3.0), Vector2(x + size - 3.0, y + 3.0),
-				Vector2(x + 3.0, y + size - 3.0), Vector2(x + size - 3.0, y + size - 3.0)
-			]
-			for i in range(4):
-				scene.draw_line(corners[i], corners[(i + 1) % 4], chain_color, 2.5)
-			for corner in corners:
-				scene.draw_circle(corner, 3.0, Color(0.95, 0.86, 0.62, 0.78))
-				scene.draw_circle(corner, 1.6, Color(0.24, 0.22, 0.28, 0.74))
-			if lock.get("hp", 1) >= 2:
-				scene._draw_rounded_rect(cx - 7.0, cy - 4.0, 14.0, 10.0, 3.0, Color(0.20, 0.22, 0.30, 0.78))
-				scene.draw_arc(Vector2(cx, cy - 4.0), 6.0, PI, TAU, 14, Color(0.95, 0.86, 0.62, 0.80), 2.0)
-			else:
-				scene._draw_text_with_shadow("×1", cx, cy + 4.0, Color(1.0, 1.0, 1.0, 0.8), 8.0)
+			var metal := Color(0.96, 0.83, 0.46, 0.94)
+			var inset := maxf(3.0, size * 0.08)
+			var arm := maxf(7.0, size * 0.20)
+			var left := x + inset
+			var right := x + size - inset
+			var top := y + inset
+			var bottom := y + size - inset
+			var width := 2.4 if int(lock.get("hp", 1)) >= 2 else 1.9
+			for corner_data in [
+				[Vector2(left, top), Vector2(left + arm, top), Vector2(left, top + arm)],
+				[Vector2(right, top), Vector2(right - arm, top), Vector2(right, top + arm)],
+				[Vector2(left, bottom), Vector2(left + arm, bottom), Vector2(left, bottom - arm)],
+				[Vector2(right, bottom), Vector2(right - arm, bottom), Vector2(right, bottom - arm)]
+			]:
+				var corner: Vector2 = corner_data[0]
+				scene.draw_line(corner, corner_data[1], chain_color, width)
+				scene.draw_line(corner, corner_data[2], chain_color, width)
+				scene.draw_circle(corner, width + 0.8, metal)
+				scene.draw_circle(corner, maxf(1.0, width - 0.3), Color(0.22, 0.23, 0.28, 0.9))
+			var lock_cx := right - 3.0
+			var lock_cy := top + 5.0
+			scene.draw_arc(Vector2(lock_cx, lock_cy - 2.0), 4.0, PI, TAU, 10, metal, 1.8)
+			scene._draw_rounded_rect(lock_cx - 5.0, lock_cy - 1.5, 10.0, 8.0, 2.0, Color(0.24, 0.25, 0.31, 0.94))
+			scene.draw_circle(Vector2(lock_cx, lock_cy + 2.0), 1.2, metal)
+			if int(lock.get("hp", 1)) >= 2:
+				scene._draw_text_with_shadow("2", right - 3.0, bottom - 1.0, Color.WHITE, 7.0)
 
 static func draw_obstacles(scene, board, state: Dictionary) -> void:
 	if board == null:
@@ -299,6 +314,15 @@ static func _falling_entry_for(falling_gems: Array, row: int, col: int, gem_type
 		if int(entry.get("row", -999)) == row and int(entry.get("col", -999)) == col and str(entry.get("type", "")) == gem_type:
 			return entry
 	return {}
+
+static func _fall_center_y(fall: Dictionary, fallback_y: float) -> float:
+	var fall_t: float = clampf((float(fall.get("timer", 0.0)) - float(fall.get("delay", 0.0))) / maxf(0.01, float(fall.get("duration", 0.34))), 0.0, 1.0)
+	var eased := _ease_out_cubic(fall_t)
+	var bounce := 0.0
+	if fall_t > 0.72:
+		var bp := (fall_t - 0.72) / 0.28
+		bounce = -sin(bp * PI) * 5.0 * (1.0 - bp)
+	return lerpf(float(fall.get("from_y", fallback_y)), float(fall.get("to_y", fallback_y)), eased) + bounce
 
 static func _ease_out_cubic(t: float) -> float:
 	var p := clampf(t, 0.0, 1.0)

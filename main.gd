@@ -164,6 +164,8 @@ func _on_scene_button_pressed(btn_id: String) -> void:
 	var data: Dictionary = {}
 	if btn_id == "start":
 		data = _resolve_latest_stage()
+	elif btn_id == "ranch":
+		data = {"page": "classroom"}
 	_request_scene_switch(targets[btn_id], data)
 
 ## 计算用户当前可玩的"最新关卡"：

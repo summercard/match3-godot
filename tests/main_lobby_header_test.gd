@@ -18,6 +18,11 @@ func _run() -> void:
 	_expect((lobby.get_node("Header/GoldCapsule") as Control).position.y == (lobby.get_node("Header/DiamondCapsule") as Control).position.y and (lobby.get_node("Header/DiamondCapsule") as Control).position.y == (lobby.get_node("Header/StaminaCapsule") as Control).position.y, "gold, diamond and stamina should be first row")
 	_expect((lobby.get_node("Header/PlayerStatus") as Control).position.y > (lobby.get_node("Header/GoldCapsule") as Control).position.y, "owner level should be second row")
 	_expect((lobby.get_node("Header/RankPanel") as Control).position.y > (lobby.get_node("Header/PlayerStatus") as Control).position.y, "achievement score should be third row")
+	_expect((lobby.get_node("Header/RankPanel") as TextureRect).texture.resource_path.ends_with("main_ui_currency_capsule_v3.png"), "achievement score should reuse the common currency capsule")
+	_expect((lobby.get_node("Header/RankIcon") as TextureRect).texture.resource_path.ends_with("main_icon_trophy_score_v3.png"), "achievement score should keep one separate trophy icon")
+	_expect(not (lobby.get_node("Header/GoldPlus") as Control).visible, "gold add button should be hidden")
+	_expect(not (lobby.get_node("Header/DiamondPlus") as Control).visible, "diamond add button should be hidden")
+	_expect(not (lobby.get_node("Header/StaminaPlus") as Control).visible, "stamina add button should be hidden")
 	lobby.queue_free()
 	_finish()
 

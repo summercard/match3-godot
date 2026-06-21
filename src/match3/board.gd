@@ -60,7 +60,7 @@ var grid: Array = []
 var obstacles: Array = []
 
 ## 锁定宝石数据：lockedGems[row][col] = null 或 { hp: 1|2 }
-## 被锁的宝石不可移动/交换，但可参与消除
+## 被锁的宝石不可交换或参与普通消除，但会随重力下落
 ## 消除相邻同色宝石可触发解锁
 var locked_gems: Array = []
 
@@ -695,48 +695,57 @@ func remove_explosion_gems(positions: Array) -> Dictionary:
 ## 返回 movements[] 记录移动信息，用于动画
 func apply_gravity() -> Array:
 	var movements: Array = []
-	
+
 	for c: int in range(cols):
-		# 从底部向上扫描，收集非空且非障碍物的宝石
-		# 障碍物是不可移动的，宝石不能穿过障碍物
-		# 锁定宝石也是不可移动的，宝石不能穿过锁定宝石
-		# 策略：将每列按障碍物/锁定宝石分段，每段内宝石独立下沉
-		
-		var write_pos: int = rows - 1
-		
-		# 从底部向上扫描
-		for r: int in range(rows - 1, -1, -1):
-			if is_obstacle(r, c) or is_locked(r, c):
-				# 障碍物/锁定宝石格子：宝石不能落到这里或穿过
-				# writePos 重置到上方
-				write_pos = r - 1
+		# Rocks split a column into independent gravity segments. A lock belongs
+		# to its gem, so it moves with the gem instead of acting as a barrier.
+		var segment_bottom: int = rows - 1
+		while segment_bottom >= 0:
+			if is_obstacle(segment_bottom, c):
+				segment_bottom -= 1
 				continue
-			if grid[r][c] != "" and grid[r][c] != null:
-				if r != write_pos:
-					grid[write_pos][c] = grid[r][c]
-					grid[r][c] = ""
+
+			var segment_top: int = segment_bottom
+			while segment_top >= 0 and not is_obstacle(segment_top, c):
+				segment_top -= 1
+
+			var gems: Array[Dictionary] = []
+			for r: int in range(segment_bottom, segment_top, -1):
+				if grid[r][c] == "" or grid[r][c] == null:
+					continue
+				var lock_data = null
+				if is_locked(r, c):
+					lock_data = locked_gems[r][c].duplicate(true)
+				gems.append({"type": str(grid[r][c]), "fromRow": r, "lock": lock_data})
+
+			for r: int in range(segment_top + 1, segment_bottom + 1):
+				grid[r][c] = ""
+				locked_gems[r][c] = null
+
+			var write_pos: int = segment_bottom
+			for gem: Dictionary in gems:
+				grid[write_pos][c] = gem["type"]
+				locked_gems[write_pos][c] = gem["lock"]
+				var from_row: int = int(gem["fromRow"])
+				if from_row != write_pos:
 					movements.append({
-						"type": grid[write_pos][c],
-						"fromRow": r,
-						"toRow": write_pos,
-						"col": c
+						"type": gem["type"], "fromRow": from_row, "toRow": write_pos,
+						"col": c, "locked": gem["lock"] != null
 					})
 				write_pos -= 1
-		
-		# 顶部空位填充新宝石（障碍物/锁定宝石格子不填充）
-		for r: int in range(write_pos, -1, -1):
-			if is_obstacle(r, c) or is_locked(r, c):
-				continue
-			var new_type: String = _random_gem_type()
-			grid[r][c] = new_type
-			movements.append({
-				"type": new_type,
-				"fromRow": r - (write_pos + 1),  # 从上方落入
-				"toRow": r,
-				"col": c,
-				"isNew": true
-			})
-	
+
+			var empty_count: int = write_pos - segment_top
+			for r: int in range(write_pos, segment_top, -1):
+				var new_type: String = _random_gem_type()
+				grid[r][c] = new_type
+				locked_gems[r][c] = null
+				movements.append({
+					"type": new_type, "fromRow": r - empty_count, "toRow": r,
+					"col": c, "isNew": true, "locked": false
+				})
+
+			segment_bottom = segment_top - 1
+
 	return movements
 
 # ========== 死局检测与洗牌 ==========

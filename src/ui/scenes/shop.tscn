@@ -156,6 +156,7 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Plus" type="TextureRect" parent="Header/GoldChip" unique_id=2099722584]
+visible = false
 layout_mode = 0
 offset_left = 85.0
 offset_top = 10.0
@@ -208,6 +209,7 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Plus" type="TextureRect" parent="Header/DiamondChip" unique_id=927570087]
+visible = false
 layout_mode = 0
 offset_left = 85.0
 offset_top = 10.0
@@ -260,6 +262,7 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Plus" type="TextureRect" parent="Header/EnergyChip" unique_id=940319591]
+visible = false
 layout_mode = 0
 offset_left = 85.0
 offset_top = 10.0

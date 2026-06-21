@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://bgbquhjn6flga"]
 
-[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="sweep_button_new"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/ui/icons/stage_star_gold_new.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://d0oyyvwi8apuv" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_02_grassland.png" id="c01_background"]
 [ext_resource type="Texture2D" uid="uid://cxwxy00xftu6v" path="res://assets/images/maps/nodes/stage_selection_ring_pink.png" id="c01_selection_ring"]
 [ext_resource type="Texture2D" uid="uid://csush5tvay1m7" path="res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png" id="c01_stage04"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
+[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="sweep_button_new"]
 
 [node name="Chapter01BreezePlain" type="Control" unique_id=1557975011]
 custom_minimum_size = Vector2(375, 1280)
@@ -259,10 +259,10 @@ mouse_filter = 2
 
 [node name="Stage01" type="TextureButton" parent="StageNodes" unique_id=652755998]
 layout_mode = 0
-offset_left = 132.0
-offset_top = 1065.0
-offset_right = 224.0
-offset_bottom = 1163.0
+offset_left = 145.0
+offset_top = 1080.0
+offset_right = 237.0
+offset_bottom = 1178.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage01" unique_id=1992147563]
@@ -290,7 +290,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage01" unique_id=917777755]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -302,6 +301,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage01" unique_id=452854634]
 anchors_preset = 0
@@ -356,11 +356,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage01/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage01/SweepButton" unique_id=1918008577]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -370,14 +370,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage01/SweepButton/butter02" unique_id=824273502]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -388,7 +387,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -397,10 +395,10 @@ vertical_alignment = 1
 
 [node name="Stage02" type="TextureButton" parent="StageNodes" unique_id=975773793]
 layout_mode = 0
-offset_left = 190.0
-offset_top = 981.0
-offset_right = 282.0
-offset_bottom = 1079.0
+offset_left = 149.0
+offset_top = 979.0
+offset_right = 241.0
+offset_bottom = 1077.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage02" unique_id=308969304]
@@ -428,7 +426,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage02" unique_id=105725907]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -440,6 +437,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "2"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage02" unique_id=1592461029]
 anchors_preset = 0
@@ -493,11 +491,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage02/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage02/SweepButton" unique_id=1156553764]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -507,14 +505,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage02/SweepButton/butter02" unique_id=2147216694]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -525,7 +522,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -535,9 +531,9 @@ vertical_alignment = 1
 [node name="Stage03" type="TextureButton" parent="StageNodes" unique_id=546544635]
 layout_mode = 0
 offset_left = 102.0
-offset_top = 902.0
+offset_top = 885.0
 offset_right = 194.0
-offset_bottom = 1000.0
+offset_bottom = 983.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage03" unique_id=974690475]
@@ -565,7 +561,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage03" unique_id=573311962]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -577,6 +572,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "3"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage03" unique_id=641284737]
 anchors_preset = 0
@@ -631,11 +627,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage03/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage03/SweepButton" unique_id=1769489837]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -645,14 +641,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage03/SweepButton/butter02" unique_id=167346654]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -663,7 +658,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -672,10 +666,10 @@ vertical_alignment = 1
 
 [node name="Stage04" type="TextureButton" parent="StageNodes" unique_id=1885260050]
 layout_mode = 0
-offset_left = 217.0
-offset_top = 818.0
-offset_right = 309.0
-offset_bottom = 916.0
+offset_left = 165.0
+offset_top = 815.0
+offset_right = 257.0
+offset_bottom = 913.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage04" unique_id=1015613767]
@@ -703,7 +697,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage04" unique_id=1500183305]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -715,6 +708,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "4"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage04" unique_id=679221878]
 anchors_preset = 0
@@ -769,11 +763,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage04/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage04/SweepButton" unique_id=1578605072]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -783,14 +777,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage04/SweepButton/butter02" unique_id=97062783]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -801,7 +794,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -810,10 +802,10 @@ vertical_alignment = 1
 
 [node name="Stage05" type="TextureButton" parent="StageNodes" unique_id=1211006804]
 layout_mode = 0
-offset_left = 70.0
-offset_top = 774.0
-offset_right = 162.0
-offset_bottom = 872.0
+offset_left = 130.0
+offset_top = 726.0
+offset_right = 222.0
+offset_bottom = 824.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage05" unique_id=1996107933]
@@ -841,7 +833,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage05" unique_id=911978414]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -853,6 +844,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "5"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage05" unique_id=1106301991]
 anchors_preset = 0
@@ -907,11 +899,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage05/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage05/SweepButton" unique_id=1828405517]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -921,14 +913,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage05/SweepButton/butter02" unique_id=1469125644]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -939,7 +930,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -948,10 +938,10 @@ vertical_alignment = 1
 
 [node name="Stage06" type="TextureButton" parent="StageNodes" unique_id=1220990824]
 layout_mode = 0
-offset_left = 146.0
-offset_top = 699.0
-offset_right = 238.0
-offset_bottom = 797.0
+offset_left = 171.0
+offset_top = 636.0
+offset_right = 263.0
+offset_bottom = 734.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage06" unique_id=1022866939]
@@ -979,7 +969,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage06" unique_id=330431480]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -991,6 +980,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "6"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage06" unique_id=1186793687]
 anchors_preset = 0
@@ -1045,11 +1035,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage06/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage06/SweepButton" unique_id=1213747225]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1059,14 +1049,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage06/SweepButton/butter02" unique_id=1648195139]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1077,7 +1066,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1086,10 +1074,10 @@ vertical_alignment = 1
 
 [node name="Stage07" type="TextureButton" parent="StageNodes" unique_id=2108902871]
 layout_mode = 0
-offset_left = 239.0
-offset_top = 630.0
-offset_right = 331.0
-offset_bottom = 728.0
+offset_left = 96.0
+offset_top = 581.0
+offset_right = 188.0
+offset_bottom = 679.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage07" unique_id=731038834]
@@ -1117,7 +1105,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage07" unique_id=543711770]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -1129,6 +1116,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "7"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage07" unique_id=1691950225]
 anchors_preset = 0
@@ -1183,11 +1171,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage07/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage07/SweepButton" unique_id=730527439]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1197,14 +1185,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage07/SweepButton/butter02" unique_id=1334852559]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1215,7 +1202,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1224,10 +1210,10 @@ vertical_alignment = 1
 
 [node name="Stage08" type="TextureButton" parent="StageNodes" unique_id=139494644]
 layout_mode = 0
-offset_left = 151.0
-offset_top = 578.0
-offset_right = 243.0
-offset_bottom = 676.0
+offset_left = 131.0
+offset_top = 499.0
+offset_right = 223.0
+offset_bottom = 597.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage08" unique_id=1451498253]
@@ -1255,7 +1241,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage08" unique_id=2000454012]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -1267,6 +1252,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "8"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage08" unique_id=1292227972]
 anchors_preset = 0
@@ -1321,11 +1307,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage08/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage08/SweepButton" unique_id=1274404952]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1335,14 +1321,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage08/SweepButton/butter02" unique_id=1249832037]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1353,7 +1338,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1362,10 +1346,10 @@ vertical_alignment = 1
 
 [node name="Stage09" type="TextureButton" parent="StageNodes" unique_id=2068063807]
 layout_mode = 0
-offset_left = 70.0
-offset_top = 514.0
-offset_right = 162.0
-offset_bottom = 612.0
+offset_left = 204.0
+offset_top = 440.0
+offset_right = 296.0
+offset_bottom = 538.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage09" unique_id=337000322]
@@ -1393,7 +1377,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage09" unique_id=719814865]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -1405,6 +1388,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "9"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage09" unique_id=346094223]
 anchors_preset = 0
@@ -1459,11 +1443,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage09/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage09/SweepButton" unique_id=1149902683]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1473,14 +1457,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage09/SweepButton/butter02" unique_id=188378826]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1491,7 +1474,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1500,10 +1482,10 @@ vertical_alignment = 1
 
 [node name="Stage10" type="TextureButton" parent="StageNodes" unique_id=974929856]
 layout_mode = 0
-offset_left = 123.0
-offset_top = 397.0
-offset_right = 215.0
-offset_bottom = 495.0
+offset_left = 140.0
+offset_top = 285.0
+offset_right = 232.0
+offset_bottom = 383.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage10" unique_id=1347440601]
@@ -1531,7 +1513,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage10" unique_id=1542908099]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -1543,6 +1524,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "10"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage10" unique_id=834923707]
 anchors_preset = 0
@@ -1597,11 +1579,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage10/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage10/SweepButton" unique_id=611138495]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1611,14 +1593,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage10/SweepButton/butter02" unique_id=2051848473]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1629,7 +1610,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1638,10 +1618,10 @@ vertical_alignment = 1
 
 [node name="Stage11" type="TextureButton" parent="StageNodes" unique_id=775397388]
 layout_mode = 0
-offset_left = 186.0
-offset_top = 463.0
-offset_right = 278.0
-offset_bottom = 561.0
+offset_left = 209.0
+offset_top = 349.0
+offset_right = 301.0
+offset_bottom = 447.0
 ignore_texture_size = true
 
 [node name="SelectionRing" type="TextureRect" parent="StageNodes/Stage11" unique_id=1634041356]
@@ -1669,7 +1649,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageNumber" type="Label" parent="StageNodes/Stage11" unique_id=963576340]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 24.0
 offset_top = 14.0
@@ -1681,6 +1660,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "11"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="StageNodes/Stage11" unique_id=1854093451]
 anchors_preset = 0
@@ -1735,11 +1715,11 @@ offset_left = 14.0
 offset_top = 47.0
 offset_right = 333.0
 offset_bottom = 204.0
-flat = true
-mouse_filter = 2
 focus_mode = 0
+mouse_filter = 2
+flat = true
 
-[node name="butter02" type="Control" parent="StageNodes/Stage11/SweepButton"]
+[node name="butter02" type="Control" parent="StageNodes/Stage11/SweepButton" unique_id=724776172]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -0.99999905
@@ -1749,14 +1729,13 @@ offset_bottom = 142.46191
 scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="StageNodes/Stage11/SweepButton/butter02" unique_id=383545407]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("sweep_button_new")
 patch_margin_left = 72
 patch_margin_top = 44
@@ -1767,7 +1746,6 @@ patch_margin_bottom = 44
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 text = "扫荡"
@@ -1776,10 +1754,10 @@ vertical_alignment = 1
 
 [node name="BossStage" type="TextureButton" parent="." unique_id=907334876]
 layout_mode = 0
-offset_left = 129.0
-offset_top = 262.0
-offset_right = 241.0
-offset_bottom = 392.0
+offset_left = 128.0
+offset_top = 122.0
+offset_right = 240.0
+offset_bottom = 252.0
 ignore_texture_size = true
 
 [node name="Platform" type="TextureRect" parent="BossStage" unique_id=2032991965]
@@ -1807,7 +1785,6 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="StageLabel" type="Label" parent="BossStage" unique_id=2136327577]
-vertical_alignment = 1
 layout_mode = 0
 offset_left = 14.0
 offset_top = 96.48
@@ -1819,6 +1796,7 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 14
 text = "BOSS"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Stars" type="Control" parent="BossStage" unique_id=1834756799]
 anchors_preset = 0

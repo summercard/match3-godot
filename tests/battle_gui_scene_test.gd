@@ -61,8 +61,21 @@ func _run() -> void:
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
-	var normal_enemy_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
-	var normal_enemy_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
+	_expect(not (battle.get_node("Combatants/SingleEnemy") as Control).visible, "a lone ordinary enemy should not use the enlarged single-enemy slot")
+	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "a lone ordinary enemy should use the regular enemy layer")
+	_expect((battle.get_node("Combatants/MultiEnemies/Enemy2") as Control).visible, "a lone ordinary enemy should occupy the centered regular slot")
+	_expect(not (battle.get_node("Combatants/MultiEnemies/Enemy1") as Control).visible and not (battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "a lone ordinary enemy should not duplicate into side slots")
+	var normal_enemy_portrait_size := (battle.get_node("Combatants/MultiEnemies/Enemy2/Portrait") as TextureRect).size
+	var ordinary_enemy: Dictionary = battle.get("_battle").enemies[0]
+	ordinary_enemy["isElite"] = true
+	ordinary_enemy["_visualScale"] = 1.35
+	battle.call("_sync_enemy_slots")
+	_expect((battle.get_node("Combatants/SingleEnemy") as Control).visible, "a lone elite enemy should retain the featured enlarged slot")
+	_expect((battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size.x > normal_enemy_portrait_size.x, "elite single enemy portrait should remain larger than an ordinary enemy")
+	var featured_non_boss_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
+	ordinary_enemy.erase("isElite")
+	ordinary_enemy.erase("_visualScale")
+	battle.call("_sync_enemy_slots")
 	var player_slot := battle.get_node("Combatants/Players/Player1") as Control
 	var player_hp_y := (player_slot.get_node("HpFrameBase") as TextureRect).position.y
 	battle.call("_set_combatant", player_slot, {
@@ -86,8 +99,8 @@ func _run() -> void:
 	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle should use map2 war background")
 	var boss_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
 	var boss_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
-	_expect(boss_portrait_size.x >= normal_enemy_portrait_size.x * 2.0 and boss_portrait_size.y >= normal_enemy_portrait_size.y * 2.0, "boss battle portrait should be at least twice the normal single enemy size")
-	_expect(boss_hp_y <= normal_enemy_hp_y - 40.0, "boss battle hp frame should move upward without affecting normal enemies")
+	_expect(boss_portrait_size.x > normal_enemy_portrait_size.x and boss_portrait_size.x <= 192.0, "boss portrait should stay emphasized without using the oversized 2x scale")
+	_expect(boss_hp_y <= featured_non_boss_hp_y - 40.0, "boss battle hp frame should keep its special upward offset")
 
 	main.switch_scene("battle", {
 		"stageId": "stage_3_6",

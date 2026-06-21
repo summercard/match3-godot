@@ -3,7 +3,7 @@ extends RefCounted
 
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
 const SINGLE_ENEMY_SPRITE_SIZE := 128.0
-const SINGLE_BOSS_SPRITE_SIZE := 256.0
+const SINGLE_BOSS_SPRITE_SIZE := 192.0
 const MULTI_ENEMY_SPRITE_SIZE := 62.0
 const MULTI_BOSS_SPRITE_SIZE := 124.0
 const SINGLE_BOSS_STATUS_OFFSET_Y := -56.0
@@ -13,7 +13,7 @@ static func draw_enemies(scene, battle, state: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})
 	if battle == null:
 		return
-	if battle.enemies.size() == 1:
+	if battle.enemies.size() == 1 and uses_featured_single_layout(battle.enemies[0]):
 		var enemy: Dictionary = battle.enemies[0]
 		if enemy == null:
 			return
@@ -162,9 +162,14 @@ static func _draw_enemy_intent(scene, state: Dictionary, x: float, y: float, ind
 	scene._draw_text_with_shadow(display, x + card_w / 2.0, y + 111.0, text_color, 7.4, true)
 
 static func _multi_enemy_slots(enemy_count: int) -> Array[Vector2]:
+	if enemy_count <= 1:
+		return [Vector2(139.5, 63.0)]
 	if enemy_count == 2:
 		return [Vector2(82.0, 74.0), Vector2(197.0, 74.0)]
 	return [Vector2(24.0, 72.0), Vector2(139.5, 63.0), Vector2(255.0, 72.0)]
+
+static func uses_featured_single_layout(enemy: Dictionary) -> bool:
+	return enemy != null and (bool(enemy.get("isBoss", false)) or bool(enemy.get("isElite", false)))
 
 # ★ 主人定 2026-06-11：算出敌人 sprite 的真实视觉中心
 # 优先用 .tscn 里 Portrait 节点的实际位置（gui_enemy_centers），让攻击特效跟着场景布局走
@@ -182,8 +187,8 @@ static func _enemy_sprite_center(enemy: Dictionary, index: int, battle, state: D
 	var is_boss: bool = bool(enemy.get("isBoss", false))
 	var visual_scale: float = float(enemy.get("_visualScale", 1.0))
 	var enemy_count: int = battle.enemies.size() if battle != null else 1
-	if enemy_count <= 1:
-		# 单 Boss / 单怪 stage 布局
+	if enemy_count <= 1 and uses_featured_single_layout(enemy):
+		# 只有单 Boss / 单精英使用放大的 stage 布局。
 		var boss_scale: float = SINGLE_BOSS_SPRITE_SIZE if is_boss else SINGLE_ENEMY_SPRITE_SIZE
 		var final_size: float = boss_scale * visual_scale
 		var base_y: float = 104.0 if is_boss else 111.0
@@ -344,7 +349,7 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 	if battle == null:
 		return
 	var colors: Dictionary = state.get("colors", {})
-	if battle.enemies.size() == 1:
+	if battle.enemies.size() == 1 and uses_featured_single_layout(battle.enemies[0]):
 		var enemy: Dictionary = battle.enemies[0]
 		if enemy == null:
 			return

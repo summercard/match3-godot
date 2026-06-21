@@ -43,6 +43,8 @@ func _run() -> void:
 	await process_frame
 
 	_assert(scene.scene_file_path == SCENE_PATH, "shop should be a PackedScene GUI")
+	for chip_path in ["Header/GoldChip", "Header/DiamondChip", "Header/EnergyChip"]:
+		_assert(not (scene.get_node(chip_path + "/Plus") as Control).visible, "%s currency add icon should be hidden" % chip_path)
 	_assert(scene.has_node("TitlePlaque/Title"), "shop should use the concept-style title plaque")
 	_assert(not scene.has_node("Header/BackButton"), "shop concept should not keep the legacy top-left back button")
 	_assert(scene.has_node("Tabs/Gems"), "all tab should be editable")

@@ -20,6 +20,7 @@ const CLAIM_RECT := Rect2(78.0, 598.0, 220.0, 52.0)
 
 const SIGN_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"dark_overlay": "res://assets/images/ui/backgrounds/black.png",
 	"back": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"header": "res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png",
 	"day_card": "res://assets/images/ui/slots/inventory_new_ui_inventory_slot.png",
@@ -224,7 +225,7 @@ func _process(dt: float) -> void:
 
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT))
-	draw_rect(Rect2(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT), Color(1.0, 0.86, 0.48, 0.10), true)
+	_draw_texture_cover(_tex("dark_overlay"), Rect2(0.0, 0.0, DESIGN_WIDTH, DESIGN_HEIGHT), 0.5)
 	# 顶部：header 从上方滑入
 	var top_off := _entry_top_offset()
 	if top_off != 0.0:

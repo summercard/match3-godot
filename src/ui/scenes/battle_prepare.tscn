@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://bj70nl7t663xv" path="res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png" id="sword_icon"]
 [ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png" id="synergy_panel"]
 [ext_resource type="Texture2D" uid="uid://cbuoorml6pq8o" path="res://assets/images/ui/cards/battle_prepare_new_ui_monster_card.png" id="team_card"]
+[ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="dark_overlay"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_v6go8"]
 load_path = "res://.godot/imported/battle_flow_new_icon_back_arrow.png-85d2e0b3c5a40d2e5e95bb32679459c1.ctex"
@@ -77,12 +78,15 @@ texture = ExtResource("bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Shade" type="ColorRect" parent="." unique_id=1423872396]
+[node name="Shade" type="TextureRect" parent="." unique_id=1423872396]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.12, 0.05)
+modulate = Color(1, 1, 1, 0.5)
+texture = ExtResource("dark_overlay")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="Header" type="Control" parent="." unique_id=1860094280]
 anchors_preset = 0
@@ -233,6 +237,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Plus" type="TextureRect" parent="TopResourceBar/GoldChip" unique_id=228638095]
+visible = false
 layout_mode = 0
 offset_left = 70.0
 offset_top = 4.0
@@ -287,6 +292,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Plus" type="TextureRect" parent="TopResourceBar/DiamondChip" unique_id=31517327]
+visible = false
 layout_mode = 0
 offset_left = 60.0
 offset_top = 4.0
@@ -340,6 +346,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Plus" type="TextureRect" parent="TopResourceBar/HeartChip" unique_id=1673208662]
+visible = false
 layout_mode = 0
 offset_left = 60.0
 offset_top = 4.0
@@ -1342,16 +1349,17 @@ clip_text = true
 
 [node name="Slots" type="Control" parent="RewardPreview" unique_id=1081920075]
 anchors_preset = 0
-offset_left = 42.5
+offset_left = 0.0
 offset_top = 20.0
-offset_right = 276.5
+offset_right = 319.0
 offset_bottom = 80.0
 
 [node name="RewardSlot1" type="Control" parent="RewardPreview/Slots" unique_id=2007506491]
 anchors_preset = 0
-offset_top = -3.0
-offset_right = 58.0
-offset_bottom = 57.0
+offset_left = 73.5
+offset_top = 1.0
+offset_right = 121.5
+offset_bottom = 51.0
 
 [node name="black2" type="Control" parent="RewardPreview/Slots/RewardSlot1" unique_id=477005390]
 custom_minimum_size = Vector2(320, 94)
@@ -1360,7 +1368,7 @@ offset_left = -5.5000076
 offset_top = 1.9999924
 offset_right = 330.5
 offset_bottom = 266.0
-scale = Vector2(0.21, 0.21)
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="RewardPreview/Slots/RewardSlot1/black2" unique_id=131901670]
@@ -1382,10 +1390,10 @@ patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot1" unique_id=473233826]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 10.0
-offset_right = 49.0
-offset_bottom = 50.0
+offset_left = 11.0
+offset_top = 9.0
+offset_right = 37.0
+offset_bottom = 35.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1407,10 +1415,10 @@ clip_text = true
 
 [node name="RewardSlot2" type="Control" parent="RewardPreview/Slots" unique_id=2020328800]
 anchors_preset = 0
-offset_left = 85.0
-offset_top = -3.0
-offset_right = 143.0
-offset_bottom = 57.0
+offset_left = 135.5
+offset_top = 1.0
+offset_right = 183.5
+offset_bottom = 51.0
 
 [node name="black2" type="Control" parent="RewardPreview/Slots/RewardSlot2" unique_id=1456777824]
 custom_minimum_size = Vector2(320, 94)
@@ -1419,7 +1427,7 @@ offset_left = -5.5
 offset_top = 2.0
 offset_right = 330.5
 offset_bottom = 266.0
-scale = Vector2(0.21, 0.21)
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="RewardPreview/Slots/RewardSlot2/black2" unique_id=274216234]
@@ -1441,10 +1449,10 @@ patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot2" unique_id=2019123627]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 10.0
-offset_right = 49.0
-offset_bottom = 50.0
+offset_left = 11.0
+offset_top = 9.0
+offset_right = 37.0
+offset_bottom = 35.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -1466,10 +1474,10 @@ clip_text = true
 
 [node name="RewardSlot3" type="Control" parent="RewardPreview/Slots" unique_id=1715697257]
 anchors_preset = 0
-offset_left = 173.0
-offset_top = -3.0
-offset_right = 231.0
-offset_bottom = 57.0
+offset_left = 197.5
+offset_top = 1.0
+offset_right = 245.5
+offset_bottom = 51.0
 
 [node name="black2" type="Control" parent="RewardPreview/Slots/RewardSlot3" unique_id=727026557]
 custom_minimum_size = Vector2(320, 94)
@@ -1478,7 +1486,7 @@ offset_left = -5.5
 offset_top = 2.0
 offset_right = 330.5
 offset_bottom = 266.0
-scale = Vector2(0.21, 0.21)
+scale = Vector2(0.17, 0.17)
 mouse_filter = 2
 
 [node name="NinePatch" type="NinePatchRect" parent="RewardPreview/Slots/RewardSlot3/black2" unique_id=1256242777]
@@ -1500,10 +1508,10 @@ patch_margin_bottom = 54
 
 [node name="Icon" type="TextureRect" parent="RewardPreview/Slots/RewardSlot3" unique_id=22077985]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 10.0
-offset_right = 49.0
-offset_bottom = 50.0
+offset_left = 11.0
+offset_top = 9.0
+offset_right = 37.0
+offset_bottom = 35.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5

@@ -55,6 +55,7 @@
 [ext_resource type="Texture2D" uid="uid://x5biafhmen6b" path="res://assets/images/monsters/monster/monster_013_album_thumb.png" id="59_monster_014"]
 [ext_resource type="Texture2D" uid="uid://wd46tc4qqa4f" path="res://assets/images/monsters/monster/monster_015_album_thumb.png" id="60_monster_015"]
 [ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="61_black_panel"]
+[ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="62_dark_overlay"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dex_board"]
 bg_color = Color(1, 0.95, 0.82, 0.97)
@@ -123,12 +124,15 @@ mouse_filter = 2
 texture = ExtResource("2_dmak6")
 expand_mode = 1
 
-[node name="Shade" type="ColorRect" parent="." unique_id=459791384]
+[node name="Shade" type="TextureRect" parent="." unique_id=459791384]
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-color = Color(1, 0.96, 0.82, 0.08)
+modulate = Color(1, 1, 1, 0.5)
+texture = ExtResource("62_dark_overlay")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="black" type="Control" parent="." unique_id=1881530518]
 custom_minimum_size = Vector2(360, 246)

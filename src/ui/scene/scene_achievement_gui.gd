@@ -7,6 +7,7 @@ const _RoundFontSrc := preload("res://assets/fonts/ZCOOLKuaiLe-Regular.ttf")
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"dark_overlay": "res://assets/images/ui/backgrounds/black.png",
 	"currency": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
@@ -234,7 +235,7 @@ func _play_feedback(rect: Rect2) -> void:
 func _draw() -> void:
 	var font := _get_round_font()
 	_draw_texture_cover(_gui_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
-	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(1.0, 0.86, 0.48, 0.09), true)
+	_draw_texture_cover(_gui_tex("dark_overlay"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), 0.5)
 	# 顶部区域：货币 + Header，从上方滑入
 	var top_off := _entry_top_offset()
 	if top_off != 0.0:
@@ -284,7 +285,6 @@ func _draw_top_currency(font: Font) -> void:
 		else:
 			value = _format_number(int(value))
 		_draw_center_text(font, value, Vector2(rect.position.x + rect.size.x * 0.56, rect.position.y + 24.0), Color(0.32, 0.18, 0.06), 13.0, rect.size.x * 0.58)
-		_draw_texture_contain(_gui_tex("plus"), Rect2(rect.end.x - 24.0, rect.position.y + 6.0, 22.0, 22.0))
 
 
 func _draw_gui_header(font: Font) -> void:
@@ -518,15 +518,15 @@ func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) ->
 	draw_texture_rect(tex, Rect2(pos, draw_size), false, Color(1.0, 1.0, 1.0, opacity))
 
 
-func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
+func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
-		draw_rect(rect, Color(0.05, 0.08, 0.15), true)
+		draw_rect(rect, Color(0.05, 0.08, 0.15, opacity), true)
 		return
 	var size := tex.get_size()
 	var scale := maxf(rect.size.x / size.x, rect.size.y / size.y)
 	var source_size := rect.size / scale
 	var source_pos := (size - source_size) * 0.5
-	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size))
+	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 
 func _draw_center_text(font: Font, text: String, center: Vector2, color: Color, size: float, width: float) -> void:

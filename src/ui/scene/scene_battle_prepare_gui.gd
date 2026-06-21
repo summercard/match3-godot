@@ -202,6 +202,7 @@ func _create_resource_chip(parent: Control, node_name: String, icon_key: String)
 	chip.add_child(value)
 	var plus := TextureRect.new()
 	plus.name = "Plus"
+	plus.visible = false
 	plus.texture = _prepare_texture("plus")
 	plus.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plus.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -412,14 +413,15 @@ func _apply_concept_layout() -> void:
 	_style_label("RewardPreview/Title", Color.WHITE, Color(0.35, 0.08, 0.55, 0.90), 2)
 	for i in REWARD_SLOT_PATHS.size():
 		var slot_path: String = REWARD_SLOT_PATHS[i]
-		_set_rect(slot_path, 0, 0, 58, 60)
-		_set_local_rect(slot_path + "/Frame", 0, 0, 58, 60)
+		_set_rect(slot_path, 0, 1, 48, 50)
+		_set_local_rect(slot_path + "/Frame", 0, 0, 48, 50)
 		_set_local_rect(slot_path + "/black2", -5.5, 2, 336, 264)
+		(get_node(slot_path + "/black2") as Control).scale = Vector2(0.17, 0.17)
 		var patch := get_node_or_null(slot_path + "/black2/NinePatch") as NinePatchRect
 		if patch != null:
 			patch.texture = _prepare_texture("reward_slot")
 		_set_visible(slot_path + "/Frame", true)
-		_set_local_rect(slot_path + "/Icon", 13, 6, 32, 32)
+		_set_local_rect(slot_path + "/Icon", 11, 8, 26, 26)
 		_set_local_rect(slot_path + "/Label", -13, 35, 84, 24)
 		_set_visible(slot_path + "/Label", false)
 		_set_font(slot_path + "/Label", 8)
@@ -612,8 +614,8 @@ func _sync_synergy() -> void:
 func _sync_rewards() -> void:
 	var rewards := _build_reward_preview_items()
 	var visible_count := mini(rewards.size(), REWARD_SLOT_PATHS.size())
-	var slot_w := 58.0
-	var gap := 16.0 if visible_count >= 4 else 28.0
+	var slot_w := 48.0
+	var gap := 10.0 if visible_count >= 4 else 14.0
 	var total_w := float(visible_count) * slot_w + float(maxi(0, visible_count - 1)) * gap
 	var start_x := (319.0 - total_w) * 0.5
 	for i in REWARD_SLOT_PATHS.size():

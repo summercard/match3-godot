@@ -73,6 +73,9 @@ var _swipe_trail: Array[Dictionary] = []
 
 ## 浮动文字管理器
 var _floating_texts: Array[Dictionary] = []
+const EFFECTIVE_DAMAGE_POPUP_DURATION: float = 1.4
+const EFFECTIVE_DAMAGE_POPUP_SIZE: float = 28.0
+const EFFECTIVE_MESSAGE_DURATION: float = 2.2
 
 ## 连击提示
 var _combo_popup: Dictionary = {
@@ -83,10 +86,12 @@ var _combo_popup: Dictionary = {
 	"opacity": 0.0
 }
 var _combo_count_font: Font = null
+var _effective_damage_font: Font = null
 
 ## 消息
 var _message_text: String = ""
 var _message_timer: float = 0.0
+var _message_duration: float = 1.5
 
 ## 敌人攻击
 var _enemy_attacks: Array = []
@@ -955,16 +960,11 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		popup_y = 80.0
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.42, "maxTimer": 0.42})
 	if damage > 0:
-		_floating_texts.append({
-			"text": "-%d" % damage,
-			"x": popup_x,
-			"y": popup_y,
-			"color": C["gold"] if not result.get("isWeak", false) else C["text_muted"],
-			"size": 24.0 if result.get("isEffective", false) else 19.0,
-			"timer": 0.0,
-			"duration": 0.9,
-			"critical": result.get("isEffective", false)
-		})
+		var active_effective := bool(result.get("isEffective", result.get("is_effective", false)))
+		var active_weak := bool(result.get("isWeak", result.get("is_weak", false)))
+		_floating_texts.append(_damage_floating_entry(damage, popup_x, popup_y, active_effective, active_weak, 19.0, 0.9, active_effective, str(result.get("element", ""))))
+		if active_effective:
+			_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 	if shield_absorbed > 0:
 		_floating_texts.append({
 			"text": "盾-%d" % shield_absorbed,
@@ -1155,26 +1155,14 @@ func _process_matches() -> void:
 		
 		# 克制提示
 		if log_effective:
-			_show_message("效果拔群！")
+			_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 		elif log_weak:
 			_show_message("效果不佳...")
-		
-		# 克制伤害颜色/大小
-		var popup_color: Color = C["fire"] if log_effective else (C["text_muted"] if log_weak else C["gold"])
-		var popup_size: float = 24.0 if log_effective else (12.0 if log_weak else 18.0)
 		
 		if target_idx >= 0:
 			var ex := 25.0 + target_idx * 120.0 + 55.0
 			var ey := 80.0
-			_floating_texts.append({
-				"text": "-%d" % log_damage,
-				"x": ex, "y": ey,
-				"color": popup_color,
-				"size": popup_size,
-				"timer": 0.0,
-				"duration": 0.8,
-				"critical": log_effective
-			})
+			_floating_texts.append(_damage_floating_entry(log_damage, ex, ey, log_effective, log_weak, 18.0, 0.8, log_effective, log_element))
 			if not log_died:
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.4, "maxTimer": 0.4})
 				_trigger_attack_shake()
@@ -1182,14 +1170,7 @@ func _process_matches() -> void:
 				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
 		else:
 			# 找不到目标敌人在敌方列表，显示到中央
-			_floating_texts.append({
-				"text": "-%d" % log_damage,
-				"x": DESIGN_W / 2.0, "y": 95.0,
-				"color": popup_color,
-				"size": popup_size,
-				"timer": 0.0,
-				"duration": 0.8
-			})
+			_floating_texts.append(_damage_floating_entry(log_damage, DESIGN_W / 2.0, 95.0, log_effective, log_weak, 18.0, 0.8, log_effective, log_element))
 			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.4, "maxTimer": 0.4})
 			_trigger_attack_shake()
 		if attacker_idx >= 0 and target_idx >= 0:
@@ -1336,7 +1317,8 @@ func _apply_gravity() -> void:
 				"timer": 0.0,
 				"delay": delay,
 				"duration": FALL_DURATION - 0.08,
-				"is_new": bool(move.get("isNew", false))
+				"is_new": bool(move.get("isNew", false)),
+				"locked": bool(move.get("locked", false))
 			})
 
 ## 触发特殊消除动画（在对应延迟时调用，匹配微信版 setTimeout 链时序）
@@ -1772,9 +1754,33 @@ func _consume_selected_capture_item() -> Dictionary:
 # 消息与弹窗
 ## ============================================
 
-func _show_message(text: String) -> void:
+func _show_message(text: String, duration: float = 1.5) -> void:
 	_message_text = _clean_battle_fx_text(text)
-	_message_timer = 1.5
+	_message_duration = maxf(0.1, duration)
+	_message_timer = _message_duration
+
+func _damage_floating_entry(damage: int, x: float, y: float, is_effective: bool, is_weak: bool, normal_size: float = 18.0, normal_duration: float = 0.9, force_critical: bool = false, element: String = "") -> Dictionary:
+	return {
+		"text": "克制！-%d" % damage if is_effective else "-%d" % damage,
+		"x": x,
+		"y": y,
+		"color": _effective_damage_color(element) if is_effective else (C["text_muted"] if is_weak else C["gold"]),
+		"size": EFFECTIVE_DAMAGE_POPUP_SIZE if is_effective else (normal_size * 0.72 if is_weak else normal_size),
+		"timer": 0.0,
+		"duration": EFFECTIVE_DAMAGE_POPUP_DURATION if is_effective else normal_duration,
+		"critical": force_critical or is_effective,
+		"effective": is_effective,
+		"single_layer": is_effective,
+		"bold": is_effective,
+		"element": element
+	}
+
+func _effective_damage_color(element: String) -> Color:
+	if GEM_COLORS.has(element):
+		var color: Color = GEM_COLORS[element]
+		color.a = 1.0
+		return color
+	return Color(1.0, 0.72, 0.12, 1.0)
 
 func _request_battle_fx(event: Dictionary) -> void:
 	emit_signal("battle_fx_requested", event)
@@ -1964,16 +1970,10 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 		await get_tree().create_timer(0.18).timeout
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.48, "maxTimer": 0.48})
 		_trigger_attack_shake()
-		_floating_texts.append({
-			"text": "-%d" % int(log.get("remaining_damage", log.get("damage", 0))),
-			"x": target_center.x,
-			"y": target_center.y - 14.0,
-			"color": color,
-			"size": 26.0 if bool(log.get("is_effective", false)) else 21.0,
-			"timer": 0.0,
-			"duration": 0.9,
-			"critical": true
-		})
+		var leader_effective := bool(log.get("is_effective", false))
+		_floating_texts.append(_damage_floating_entry(int(log.get("remaining_damage", log.get("damage", 0))), target_center.x, target_center.y - 14.0, leader_effective, bool(log.get("is_weak", false)), 21.0, 0.9, true, element))
+		if leader_effective:
+			_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 
 	for effect: Dictionary in effects:
 		var kind := str(effect.get("kind", ""))
@@ -2120,16 +2120,9 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 		popup_x = 25.0 + target_idx * 120.0 + 55.0
 		popup_y = 80.0
 
-	_floating_texts.append({
-		"text": "-%d" % damage,
-		"x": popup_x,
-		"y": popup_y,
-		"color": popup_color,
-		"size": popup_size,
-		"timer": 0.0,
-		"duration": 0.9,
-		"critical": is_critical
-	})
+	_floating_texts.append(_damage_floating_entry(damage, popup_x, popup_y, is_critical, is_weak, popup_size, 0.9, is_critical, str(damage_info.get("element", ""))))
+	if is_critical:
+		_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 
 	# 护盾吸收显示
 	var shield_absorbed: int = damage_info.get("shieldAbsorbed", damage_info.get("shield_absorbed", 0))
@@ -2766,6 +2759,11 @@ func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 		var pop: float = 1.0 + sin(clampf(progress / 0.24, 0.0, 1.0) * PI) * (0.24 if ft.get("critical", false) else 0.16)
 		var float_y: float = y - 24.0 * (1.0 - pow(1.0 - progress, 2.0))
 		var wobble_x: float = sin(progress * TAU) * (2.2 if ft.get("critical", false) else 1.2)
+		if bool(ft.get("single_layer", false)):
+			# 克制飘字只画一层实色文字，避免通用阴影/描边产生半透明重影。
+			color.a = 1.0
+			_draw_single_layer_floating_text(canvas, text, x + wobble_x, float_y, color, size * pop)
+			continue
 		var fade: float = clampf(1.0 - maxf(0.0, progress - 0.68) / 0.32, 0.0, 1.0)
 		color.a *= fade
 		var style := "gold" if ft.get("critical", false) else _fx_text_style(text, color)
@@ -2774,6 +2772,24 @@ func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 		else:
 			_draw_soft_sparkles(canvas, Vector2(x + wobble_x, float_y - size * 0.90), color, fade, ft.get("critical", false))
 			_draw_fx_text(canvas, text, x + wobble_x, float_y, color, size * pop, 170.0, style)
+
+func _draw_single_layer_floating_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float) -> void:
+	var max_width := 170.0
+	var font := _get_effective_damage_font()
+	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)
+	var left := x - max_width * 0.5
+	var baseline_y := y + (font.get_ascent(size) - font.get_descent(size)) * 0.5
+	var outline_color := Color(0.08, 0.055, 0.035, 1.0)
+	canvas.draw_string_outline(font, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, maxi(2, int(round(size * 0.10))), outline_color)
+	canvas.draw_string(font, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, color)
+
+func _get_effective_damage_font() -> Font:
+	if _effective_damage_font == null:
+		var font := FontVariation.new()
+		font.base_font = FX_ROUND_FONT
+		font.set("variation_embolden", 1.35)
+		_effective_damage_font = font
+	return _effective_damage_font
 
 func _draw_combo_popup(canvas: CanvasItem = self) -> void:
 	if not _combo_popup.has("combo"):
@@ -3621,7 +3637,7 @@ func _draw_message(canvas: CanvasItem = self) -> void:
 		return
 	
 	var alpha: float = mini(1.0, _message_timer)
-	var progress: float = clampf(1.0 - _message_timer / 1.5, 0.0, 1.0)
+	var progress: float = clampf(1.0 - _message_timer / maxf(0.1, _message_duration), 0.0, 1.0)
 	var is_turn_message := _is_turn_message(_message_text)
 	var is_major_message := is_turn_message or _is_major_battle_message(_message_text)
 	var pop: float = 1.0 + sin(clampf(progress / 0.24, 0.0, 1.0) * PI) * (0.16 if is_major_message else 0.08)
@@ -4727,6 +4743,7 @@ func _is_turn_message(text: String) -> bool:
 func _is_major_battle_message(text: String) -> bool:
 	return text.find("释放") != -1 \
 		or text.find("充能完毕") != -1 \
+		or text.find("属性克制") != -1 \
 		or text.find("效果拔群") != -1 \
 		or text.find("十字") != -1 \
 		or text.find("范围") != -1 \
@@ -4746,7 +4763,7 @@ func _message_fx_style(text: String) -> String:
 		return "heal"
 	if text.find("冰冻") != -1 or text.find("护盾") != -1:
 		return "cool"
-	if text.find("效果拔群") != -1 or text.find("释放") != -1 or text.find("虹光") != -1 or text.find("十字") != -1 or text.find("范围") != -1 or text.find("解锁") != -1:
+	if text.find("属性克制") != -1 or text.find("效果拔群") != -1 or text.find("释放") != -1 or text.find("虹光") != -1 or text.find("十字") != -1 or text.find("范围") != -1 or text.find("解锁") != -1:
 		return "gold"
 	return "normal"
 

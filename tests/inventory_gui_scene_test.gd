@@ -1,6 +1,7 @@
 extends SceneTree
 
 const SCENE_PATH := "res://src/ui/scenes/inventory.tscn"
+var _shop_pressed := false
 
 func _init() -> void:
 	call_deferred("_run")
@@ -23,8 +24,15 @@ func _run() -> void:
 	_assert(scene.has_node("DetailPanel/BattleSlots/Slot2"), "battle equip slot 2 should be editable")
 	_assert(scene.has_node("DetailPanel/BattleSlots/Slot3"), "battle equip slot 3 should be editable")
 	_assert(scene.has_node("BottomNav/HomeButton"), "inventory should reuse the shop home navigation button")
-	_assert(scene.has_node("BottomNav/InventoryButton"), "inventory should show the selected backpack navigation button")
-	_assert((scene.get_node("BottomNav/InventoryButton/Selected") as Control).visible, "backpack navigation should show its selected state")
+	_assert(scene.has_node("BottomNav/ShopButton"), "inventory should provide a shop navigation button")
+	_assert(not (scene.get_node("BottomNav/ShopButton/Selected") as Control).visible, "shop navigation should not look selected while viewing inventory")
+	_assert((scene.get_node("BottomNav/ShopButton/Text") as Label).text == "商店", "shop navigation should use the shop label")
+	_assert((scene.get_node("BottomNav/ShopButton/Icon") as TextureRect).texture.resource_path.ends_with("common_nav_icon_nav_shop.png"), "shop navigation should use the shop icon")
+	_shop_pressed = false
+	scene.shop_pressed.connect(_on_shop_pressed)
+	(scene.get_node("BottomNav/ShopButton") as TextureButton).pressed.emit()
+	await process_frame
+	_assert(_shop_pressed, "shop navigation should trigger the shop action")
 	_assert((scene.get_node("DetailPanel") as Control).position.y + (scene.get_node("DetailPanel") as Control).size.y <= (scene.get_node("BottomNav") as Control).position.y, "compact detail panel should leave room for bottom navigation")
 
 	scene.set("_inventory", {
@@ -83,3 +91,6 @@ func _assert(condition: bool, message: String) -> void:
 		return
 	push_error("[InventoryGuiSceneTest] %s" % message)
 	quit(1)
+
+func _on_shop_pressed() -> void:
+	_shop_pressed = true

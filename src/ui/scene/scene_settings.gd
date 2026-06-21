@@ -26,6 +26,7 @@ const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
 
 const SETTINGS_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
+	"dark_overlay": "res://assets/images/ui/backgrounds/black.png",
 	"back": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"header": "res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png",
 	"title_ribbon": "res://assets/images/ui/buttons/inventory_new_ui_inventory_tab_active.png",
@@ -311,7 +312,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	_draw_texture_cover(_tex("bg"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H))
-	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.02, 0.08, 0.24), true)
+	_draw_texture_cover(_tex("dark_overlay"), Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), 0.5)
 	# 顶部：header 从上方滑入
 	var top_off := _entry_top_offset()
 	if top_off != 0.0:

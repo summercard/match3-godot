@@ -526,7 +526,8 @@ func initialize(game: Node, data: Dictionary = {}) -> void:
 	_load_stage_data()
 	
 	if data.has("chapterIndex") and typeof(data.chapterIndex) == TYPE_INT:
-		_current_chapter_index = int(clampi(data.chapterIndex, 0, _chapters.size() - 1))
+		var requested_index := int(clampi(data.chapterIndex, 0, _chapters.size() - 1))
+		_current_chapter_index = mini(requested_index, _highest_unlocked_chapter_index())
 	
 	_build_cards()
 	_update_header()
@@ -702,6 +703,9 @@ func _switch_chapter(direction: int) -> void:
 	var new_index: int = _current_chapter_index + direction
 	if new_index < 0 or new_index >= _chapters.size():
 		return
+	if direction > 0 and not _is_chapter_unlocked(new_index):
+		_show_chapter_locked_hint(new_index)
+		return
 	
 	_chapter_anim_active = true
 	_chapter_anim_progress = 0.0
@@ -712,6 +716,28 @@ func _switch_chapter(direction: int) -> void:
 	_update_header()
 	_update_chapter_buttons()
 	_update_page_dots()
+
+func _is_chapter_unlocked(chapter_index: int) -> bool:
+	if chapter_index <= 0:
+		return true
+	if chapter_index >= _chapters.size() or _storage == null or not _storage.has_method("is_stage_cleared"):
+		return false
+	var previous_chapter: Dictionary = _chapters[chapter_index - 1]
+	for stage: Dictionary in previous_chapter.get("stages", []):
+		if str(stage.get("type", "normal")) == "boss":
+			return bool(_storage.is_stage_cleared(str(stage.get("id", ""))))
+	return false
+
+func _highest_unlocked_chapter_index() -> int:
+	var highest := 0
+	for chapter_index in range(1, _chapters.size()):
+		if not _is_chapter_unlocked(chapter_index):
+			break
+		highest = chapter_index
+	return highest
+
+func _show_chapter_locked_hint(chapter_index: int) -> void:
+	push_warning("第%d章尚未解锁：请先击败上一章 Boss" % (chapter_index + 1))
 
 # ==================== 触摸处理 ====================
 
