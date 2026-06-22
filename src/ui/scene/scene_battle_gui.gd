@@ -2,6 +2,7 @@
 class_name SceneBattleGui
 extends "res://src/ui/scene/scene_battle.gd"
 
+const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const MULTI_ENEMY_PATHS := [
 	"Combatants/MultiEnemies/Enemy1",
 	"Combatants/MultiEnemies/Enemy2",
@@ -31,6 +32,52 @@ const BATTLE_END_CONTINUE_TEXT_PATH := NodePath("BattleEndOverlay/ContinueButton
 const PAUSE_DIALOG_PATH := NodePath("PauseDialog")
 const PAUSE_BUTTON_PATH := NodePath("TopHud/PauseButton")
 const GEM_CONVERT_LAYER_PATH := NodePath("GemConvertLayer")
+const GUI_CACHE_PATHS := [
+	"Background",
+	"TopHud",
+	"TopHud/TurnBadge/Value",
+	"TopHud/ObjectiveLabel",
+	"TopHud/BossPhase",
+	"TopHud/PauseButton",
+	"Combatants/SingleEnemy",
+	"Combatants/MultiEnemies",
+	"Combatants/MultiEnemies/Enemy1",
+	"Combatants/MultiEnemies/Enemy2",
+	"Combatants/MultiEnemies/Enemy3",
+	"Combatants/Players/Player1",
+	"Combatants/Players/Player2",
+	"Combatants/Players/Player3",
+	"BottomControls",
+	"BottomControls/CaptureToggle",
+	"BottomControls/CaptureToggle/Image",
+	"BottomControls/CaptureToggle/Badge",
+	"ItemConfirmLayer",
+	"ItemConfirmLayer/Panel/IconFrame/Icon",
+	"ItemConfirmLayer/Panel/Title",
+	"ItemConfirmLayer/Panel/Name",
+	"ItemConfirmLayer/Panel/Desc",
+	"ItemConfirmLayer/Panel/Count",
+	"ItemConfirmLayer/Panel/CancelButton",
+	"ItemConfirmLayer/Panel/CancelButton/Text",
+	"ItemConfirmLayer/Panel/UseButton",
+	"ItemConfirmLayer/Panel/UseButton/Text",
+	"GemConvertLayer",
+	"GemConvertLayer/Panel/SourceRow",
+	"GemConvertLayer/Panel/TargetRow",
+	"GemConvertLayer/Panel/TargetTitle",
+	"GemConvertLayer/Panel/ConfirmButton",
+	"GemConvertLayer/Panel/CancelButton",
+	"BattleEndOverlay",
+	"BattleEndOverlay/Shade",
+	"BattleEndOverlay/Burst",
+	"BattleEndOverlay/Panel",
+	"BattleEndOverlay/Banner",
+	"BattleEndOverlay/StatusGroup",
+	"BattleEndOverlay/StatusGroup/Plaque",
+	"BattleEndOverlay/StatusGroup/StatusLabel",
+	"BattleEndOverlay/ContinueButton",
+	"BattleEndOverlay/ContinueButton/Text",
+]
 
 # === 战斗界面入场动画时间线（对齐大厅 Header / BottomNav 节奏）===
 const ENTRY_TOP_DELAY := 0.00
@@ -42,6 +89,10 @@ const ENTRY_NAV_SLIDE := 30.0
 var _entry_played: bool = false
 var _battle_end_overlay_base_positions: Dictionary = {}
 var _paused_by_player: bool = false
+var _gui_node_cache: Dictionary = {}
+var _gui_dirty: bool = true
+var _last_gui_signature: String = ""
+var _sync_gui_call_count: int = 0
 
 # === 属性易形 picker 状态 ===
 var _gem_convert_stage: int = 0        # 0=hidden, 1=picking source, 2=picking target
@@ -52,18 +103,22 @@ var _gem_convert_pending_slot: int = -1
 
 func _ready() -> void:
 	super._ready()
+	_warm_gui_node_cache()
 	_connect_item_confirm_buttons()
 	_connect_gem_convert_buttons()
 	_connect_pause_buttons()
+	_attach_button_feedbacks()
 	_portrait_defeat_ghost_cache.clear()
 	_portrait_base_scale_cache.clear()
 	_portrait_base_global_center_cache.clear()
 	_portrait_hit_flash_overlay_cache.clear()
+	_mark_gui_dirty()
 	_sync_gui()
 	_maybe_play_entry()
 
 func init(data: Dictionary = {}) -> void:
 	super.init(data)
+	_mark_gui_dirty()
 	_sync_gui()
 
 func _exit_tree() -> void:
@@ -74,7 +129,8 @@ func _exit_tree() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
-	_sync_gui()
+	if _should_sync_gui_after_process():
+		_sync_gui()
 
 func _uses_editable_gui() -> bool:
 	return true
@@ -85,6 +141,7 @@ func _uses_editable_battle_end_overlay() -> bool:
 func _sync_gui() -> void:
 	if not is_inside_tree() or _battle == null:
 		return
+	_sync_gui_call_count += 1
 	_sync_background()
 	_sync_top_hud()
 	_sync_enemy_slots()
@@ -93,6 +150,109 @@ func _sync_gui() -> void:
 	_sync_item_confirm_popup()
 	_sync_gem_convert_layer()
 	_sync_battle_end_overlay()
+	_gui_dirty = false
+	_last_gui_signature = _build_gui_signature()
+
+func _mark_gui_dirty() -> void:
+	_gui_dirty = true
+
+func _should_sync_gui_after_process() -> bool:
+	if not is_inside_tree() or _battle == null:
+		return false
+	if _gui_dirty:
+		return true
+	if _has_active_gui_motion():
+		return true
+	return _build_gui_signature() != _last_gui_signature
+
+func _has_active_gui_motion() -> bool:
+	if _state == BattleState.BATTLE_END and _battle_end_overlay_timer <= BATTLE_END_TOTAL_DURATION + 0.08:
+		return true
+	if _capture_phase == "playing" or _capture_phase == "checking":
+		return true
+	return (
+		not _hit_flashes.is_empty()
+		or not _attacker_elastic_anims.is_empty()
+		or not _defeat_transitions.is_empty()
+	)
+
+func _build_gui_signature() -> String:
+	if _battle == null:
+		return "no-battle"
+	var status: Dictionary = _battle.get_status()
+	var objective: Dictionary = _battle.get_objective_state(_board)
+	var parts: Array[String] = []
+	parts.append(str(_state))
+	parts.append(str(_battle.turn_count))
+	parts.append(str(_battle.max_turns))
+	parts.append(str(_battle.battle_result))
+	parts.append(str(objective.get("mode", "")))
+	parts.append(str(objective.get("display", "")))
+	parts.append(str(status.get("current_phase", "")))
+	parts.append(str(status.get("total_phases", "")))
+	parts.append(str(status.get("is_boss_battle", false)))
+	parts.append(JSON.stringify(status.get("leader_charge_points", {})))
+	parts.append(JSON.stringify(status.get("enemy_intents", {})))
+	parts.append(_combatants_signature(_battle.enemies))
+	parts.append(_combatants_signature(_battle.player_team))
+	parts.append(JSON.stringify(_capture_slot_items))
+	parts.append(JSON.stringify(_hotbar_items))
+	parts.append(str(_auto_capture_enabled))
+	parts.append(_equipped_capture_item_id)
+	parts.append(str(_selected_hotbar_slot))
+	parts.append(str(_pending_hotbar_slot))
+	parts.append(str(_gem_convert_stage))
+	parts.append(_gem_convert_source)
+	parts.append(_gem_convert_target)
+	parts.append(_capture_phase)
+	parts.append(str(_capture_success))
+	parts.append(JSON.stringify(_capture_result_text))
+	parts.append(str(_paused_by_player))
+	return "|".join(parts)
+
+func _combatants_signature(combatants: Array) -> String:
+	var parts: Array[String] = []
+	for i in mini(combatants.size(), 3):
+		var unit: Dictionary = combatants[i] if combatants[i] is Dictionary else {}
+		parts.append("%s:%s:%s:%s:%s:%s:%s:%s" % [
+			str(unit.get("id", unit.get("monsterId", ""))),
+			str(unit.get("name", "")),
+			str(unit.get("hp", "")),
+			str(unit.get("maxHP", "")),
+			str(unit.get("element", "")),
+			str(unit.get("boardAffinity", "")),
+			str(unit.get("isBoss", false)),
+			str(unit.get("isElite", false)),
+		])
+	return ",".join(parts)
+
+func _warm_gui_node_cache() -> void:
+	_gui_node_cache.clear()
+	for path in GUI_CACHE_PATHS:
+		_cache_node_if_present(NodePath(path))
+	for path in CAPTURE_ITEM_PATHS:
+		for child in ["Base", "Icon", "Selection", "Badge"]:
+			_cache_node_if_present(NodePath("%s/%s" % [path, child]))
+	for path in ITEM_PATHS:
+		for child in ["Base", "Icon", "Selection", "Badge"]:
+			_cache_node_if_present(NodePath("%s/%s" % [path, child]))
+	for e in ["Fire", "Water", "Grass", "Thunder", "Light"]:
+		_cache_node_if_present(NodePath("GemConvertLayer/Panel/SourceRow/Src%s" % e))
+		_cache_node_if_present(NodePath("GemConvertLayer/Panel/TargetRow/Tgt%s" % e))
+
+func _cache_node_if_present(path: NodePath) -> void:
+	var node := get_node_or_null(path)
+	if node != null:
+		_gui_node_cache[str(path)] = node
+
+func _cached_node(path: NodePath) -> Node:
+	var key := str(path)
+	var cached := _gui_node_cache.get(key, null) as Node
+	if cached != null and is_instance_valid(cached):
+		return cached
+	var node := get_node(path)
+	_gui_node_cache[key] = node
+	return node
 
 func _sync_background() -> void:
 	var background := get_node_or_null("Background") as TextureRect
@@ -137,6 +297,30 @@ func _connect_pause_buttons() -> void:
 	if quit_btn != null and not quit_btn.pressed.is_connected(_on_quit_button_pressed):
 		quit_btn.pressed.connect(_on_quit_button_pressed)
 
+func _attach_button_feedbacks() -> void:
+	for button in _collect_base_buttons(self):
+		if button.has_node("CartoonFeedback"):
+			continue
+		var feedback := CartoonButtonFeedbackScript.new()
+		button.add_child(feedback)
+		feedback.setup(button, _feedback_profile_for_button(button))
+
+func _collect_base_buttons(node: Node) -> Array[BaseButton]:
+	var buttons: Array[BaseButton] = []
+	if node is BaseButton:
+		buttons.append(node as BaseButton)
+	for child in node.get_children():
+		buttons.append_array(_collect_base_buttons(child))
+	return buttons
+
+func _feedback_profile_for_button(button: BaseButton) -> int:
+	var node_name := str(button.name).to_lower()
+	if node_name.contains("confirm") or node_name.contains("use") or node_name.contains("continue"):
+		return CartoonButtonFeedback.Profile.PRIMARY
+	if node_name.contains("pause") or node_name.contains("src") or node_name.contains("tgt"):
+		return CartoonButtonFeedback.Profile.ICON
+	return CartoonButtonFeedback.Profile.NAV
+
 func _on_pause_button_pressed() -> void:
 	# 战斗结束后禁用暂停入口（结算层接管输入）
 	if _state == BattleState.BATTLE_END:
@@ -150,6 +334,7 @@ func _on_pause_button_pressed() -> void:
 	dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_paused_by_player = true
 	get_tree().paused = true
+	_mark_gui_dirty()
 
 func _on_resume_button_pressed() -> void:
 	_resume_from_pause()
@@ -162,6 +347,7 @@ func _resume_from_pause() -> void:
 	_paused_by_player = false
 	if is_instance_valid(get_tree()):
 		get_tree().paused = false
+	_mark_gui_dirty()
 
 func _on_quit_button_pressed() -> void:
 	# 先解暂停，避免场景切换时残留 paused 状态影响下一场景
@@ -210,6 +396,10 @@ func _play_entry() -> void:
 func _sync_top_hud() -> void:
 	_label("TopHud/TurnBadge/Value").text = "%d/%d" % [_battle.turn_count, _battle.max_turns]
 	var status: Dictionary = _battle.get_status()
+	var objective_label := _label("TopHud/ObjectiveLabel")
+	var objective: Dictionary = _battle.get_objective_state(_board)
+	objective_label.visible = str(objective.get("mode", "defeat_enemies")) != "defeat_enemies"
+	objective_label.text = str(objective.get("display", ""))
 	var phase_label := _label("TopHud/BossPhase")
 	phase_label.visible = status.get("is_boss_battle", false)
 	phase_label.text = "阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)]
@@ -442,6 +632,7 @@ func _open_gem_convert_picker(item_id: String, slot_idx: int) -> void:
 	_gem_convert_source = ""
 	_gem_convert_target = ""
 	_gem_convert_stage = 1
+	_mark_gui_dirty()
 	var layer := get_node_or_null(GEM_CONVERT_LAYER_PATH) as Control
 	if layer != null:
 		layer.visible = true
@@ -454,12 +645,14 @@ func _on_gem_convert_source_picked(element: String) -> void:
 	_gem_convert_source = element
 	_gem_convert_target = ""
 	_gem_convert_stage = 2
+	_mark_gui_dirty()
 	_sync_gem_convert_layer()
 
 func _on_gem_convert_target_picked(element: String) -> void:
 	if _gem_convert_stage != 2:
 		return
 	_gem_convert_target = element
+	_mark_gui_dirty()
 	_sync_gem_convert_layer()
 
 func _on_gem_convert_confirm() -> void:
@@ -488,6 +681,7 @@ func _close_gem_convert_picker(consume: bool) -> void:
 	_gem_convert_pending_slot = -1
 	# 重置 ItemConfirmLayer 状态
 	_pending_hotbar_slot = -1
+	_mark_gui_dirty()
 
 func _sync_gem_convert_layer() -> void:
 	var layer := get_node_or_null(GEM_CONVERT_LAYER_PATH) as Control
@@ -880,10 +1074,10 @@ func _apply_elastic_feedback(slot: Control, is_enemy: bool, index: int) -> void:
 	portrait.scale = base_scale * factor
 
 func _control(path: NodePath) -> Control:
-	return get_node(path) as Control
+	return _cached_node(path) as Control
 
 func _label(path: NodePath) -> Label:
-	return get_node(path) as Label
+	return _cached_node(path) as Label
 
 func _texture(path: NodePath) -> TextureRect:
-	return get_node(path) as TextureRect
+	return _cached_node(path) as TextureRect

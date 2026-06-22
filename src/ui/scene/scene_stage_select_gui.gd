@@ -19,6 +19,19 @@ const CHAPTER_MAP_NODES := {
 	"chapter_10": "MapScroll/ChapterMaps/Chapter10ChaosDomain",
 	"chapter_11": "MapScroll/ChapterMaps/Chapter11RadiantTemple",
 }
+const CHAPTER_MAP_SCENES := {
+	"chapter_1": "res://src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn",
+	"chapter_2": "res://src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn",
+	"chapter_3": "res://src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn",
+	"chapter_4": "res://src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn",
+	"chapter_5": "res://src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn",
+	"chapter_6": "res://src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn",
+	"chapter_7": "res://src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn",
+	"chapter_8": "res://src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn",
+	"chapter_9": "res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn",
+	"chapter_10": "res://src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn",
+	"chapter_11": "res://src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn",
+}
 const DOT_PATHS := [
 	"Header/Dots/Dot1", "Header/Dots/Dot2", "Header/Dots/Dot3",
 	"Header/Dots/Dot4", "Header/Dots/Dot5", "Header/Dots/Dot6",
@@ -86,6 +99,7 @@ var _focus_stage_id: String = ""
 var _focus_scroll_applied: bool = false
 var _chapter_lock_hint: Label = null
 var _chapter_lock_hint_tween: Tween = null
+var _chapter_scene_cache: Dictionary = {}
 
 func _get_anim() -> AnimationHelper:
 	if _anim == null:
@@ -494,20 +508,57 @@ func _find_stage_button(stage_id: String) -> Control:
 
 func _ensure_chapter_map() -> void:
 	var chapter_id := str(_current_chapter().get("id", ""))
-	if chapter_id.is_empty() or chapter_id == _chapter_map_id:
+	if chapter_id.is_empty():
+		return
+	if chapter_id == _chapter_map_id and is_instance_valid(_chapter_map):
 		return
 	var map_path := str(CHAPTER_MAP_NODES.get(chapter_id, ""))
-	if map_path.is_empty() or not has_node(map_path):
-		push_error("Cannot find chapter map node: " + map_path)
+	var scene_path := str(CHAPTER_MAP_SCENES.get(chapter_id, ""))
+	if map_path.is_empty() or scene_path.is_empty():
+		push_error("Cannot find chapter map scene: " + chapter_id)
 		return
-	for path: String in CHAPTER_MAP_NODES.values():
-		(get_node(path) as Control).visible = path == map_path
-	_chapter_map = get_node(map_path) as Control
+	var packed_scene := _load_chapter_scene(chapter_id, scene_path)
+	if packed_scene == null:
+		push_error("Cannot load chapter map scene: " + scene_path)
+		return
+	_clear_instanced_chapter_maps()
+	var map := packed_scene.instantiate() as Control
+	if map == null:
+		push_error("Cannot instantiate chapter map scene: " + scene_path)
+		return
+	map.name = _chapter_map_node_name(chapter_id)
+	map.visible = true
+	map.layout_mode = 0
+	_chapter_maps_content.add_child(map)
+	_chapter_map = map
 	_chapter_map_id = chapter_id
 	_prepare_chapter_map_scroll_extent()
 	_scroll_map_to_start()
 	_connect_chapter_map_actions()
 	_normalize_chapter_map_visuals()
+
+func _load_chapter_scene(chapter_id: String, scene_path: String) -> PackedScene:
+	if _chapter_scene_cache.has(chapter_id):
+		return _chapter_scene_cache[chapter_id] as PackedScene
+	var packed_scene := load(scene_path) as PackedScene
+	if packed_scene != null:
+		_chapter_scene_cache[chapter_id] = packed_scene
+	return packed_scene
+
+func _chapter_map_node_name(chapter_id: String) -> String:
+	var node_path := str(CHAPTER_MAP_NODES.get(chapter_id, ""))
+	if node_path.is_empty():
+		return "ChapterMap"
+	var parts := node_path.split("/")
+	return str(parts[parts.size() - 1])
+
+func _clear_instanced_chapter_maps() -> void:
+	if _chapter_maps_content == null:
+		return
+	for child in _chapter_maps_content.get_children():
+		child.queue_free()
+	_chapter_map = null
+	_chapter_map_id = ""
 
 func _prepare_chapter_map_scroll_extent() -> void:
 	if _chapter_map == null:
@@ -976,10 +1027,10 @@ func _play_cloud_chapter_transition(direction: int) -> void:
 	_tween_transition_clouds(open_tween, false)
 	await open_tween.finished
 
-	if outgoing_map != null:
+	if is_instance_valid(outgoing_map):
 		outgoing_map.scale = Vector2.ONE
 		outgoing_map.modulate.a = 1.0
-	if incoming_map != null:
+	if is_instance_valid(incoming_map):
 		incoming_map.scale = Vector2.ONE
 		incoming_map.modulate.a = 1.0
 	_reset_transition_clouds()

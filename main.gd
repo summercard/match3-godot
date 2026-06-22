@@ -70,28 +70,23 @@ func _create_letterbox_background() -> void:
 	add_child(_letterbox_bg)
 
 ## 切换场景（淡入淡出过渡）
-func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "") -> void:
-	# 移除当前场景
-	if _current_scene != null:
-		_current_scene.queue_free()
-		_current_scene = null
-	
+func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "") -> bool:
 	# Load scenes only from PackedScene files.
 	if not PACKED_SCENE_MAP.has(scene_name):
-		push_error("Scene not found: " + scene_name)
-		return
+		push_warning("Scene not found: " + scene_name)
+		return false
 	
 	var scene_node: Control = null
 	var packed_path: String = PACKED_SCENE_MAP[scene_name]
 	var packed_scene: PackedScene = load(packed_path) as PackedScene
 	if packed_scene == null:
-		push_error("Cannot load scene: " + packed_path)
-		return
+		push_warning("Cannot load scene: " + packed_path)
+		return false
 	scene_node = packed_scene.instantiate() as Control
 
 	if scene_node == null:
-		push_error("Cannot instantiate scene: " + scene_name)
-		return
+		push_warning("Cannot instantiate scene: " + scene_name)
+		return false
 
 	scene_node.anchor_left = 0.0
 	scene_node.anchor_top = 0.0
@@ -103,7 +98,7 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 	scene_node.mouse_filter = Control.MOUSE_FILTER_STOP
 	scene_node.name = scene_name.capitalize().replace(" ", "")
 	
-	# 添加为子节点
+	var previous_scene := _current_scene
 	add_child(scene_node)
 	_current_scene = scene_node
 	_current_scene_name = scene_name
@@ -111,6 +106,9 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 	CartoonTypographyScript.apply(scene_node, typography_profile)
 	_layout_current_scene()
 	_initialize_scene(scene_node, scene_name, data)
+	if previous_scene != null:
+		previous_scene.queue_free()
+	return true
 
 func _layout_current_scene() -> void:
 	if _current_scene == null:

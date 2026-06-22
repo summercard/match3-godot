@@ -6,6 +6,7 @@ class_name BattleManager
 extends Node
 
 const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
+const BattleObjectiveEvaluatorScript = preload("res://src/battle/battle_objective_evaluator.gd")
 
 ## 战斗核心逻辑：玩家队伍/敌方精灵初始化、连锁伤害计算、
 ## BOSS多阶段、敌人技能系统、C4状态效果、队长技能、属性协同
@@ -29,6 +30,7 @@ var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: 
 var leader_charge_points: Dictionary = {}
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
+var battle_id: String = ""
 var turn_count: int = 0
 var max_turns: int = 20
 
@@ -60,6 +62,7 @@ var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reach
 var _status_effect: BattleStatusEffect = BattleStatusEffect.new()
 var _phase_handler: PhaseHandler = PhaseHandler.new(self)
 var _damage_calc: DamageCalculator = DamageCalculator.new()
+var _objective_evaluator = BattleObjectiveEvaluatorScript.new()
 
 # 关卡数据
 var stage_data: Variant = null
@@ -92,6 +95,7 @@ func init(player_monster_ids: Array, enemy_monster_ids: Array, p_level: int = 1,
 	init_with_player_team(player_units, enemy_monster_ids, p_level, e_level, s_data, s_id)
 
 func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p_level: int = 1, e_level: int = 1, s_data: Variant = null, s_id: String = "") -> void:
+	battle_id = _generate_battle_id()
 	player_team = []
 	for unit in player_team_stats:
 		if unit is Dictionary and not (unit as Dictionary).is_empty():
@@ -181,6 +185,11 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	# 连接 EnemySkillSystem 的特定信号到 BattleManager
 	_connect_enemy_skill_signals()
+
+
+func _generate_battle_id() -> String:
+	var random_suffix := Crypto.new().generate_random_bytes(16).hex_encode()
+	return "%d-%s" % [int(Time.get_unix_time_from_system()), random_suffix]
 
 
 func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, random_elite_chance: float = 0.0) -> Dictionary:
@@ -984,6 +993,15 @@ func _stage_max_turns(s_data: Variant) -> int:
 	return 20
 
 
+func configure_objective(board) -> Dictionary:
+	var stage: Dictionary = stage_data if stage_data is Dictionary else {}
+	return _objective_evaluator.configure(stage, board, enemies)
+
+
+func get_objective_state(board = null) -> Dictionary:
+	return _objective_evaluator.evaluate(board, enemies, turn_count, max_turns)
+
+
 # ========== 敌方行动 ==========
 
 func enemy_action() -> Dictionary:
@@ -1004,6 +1022,11 @@ func enemy_action() -> Dictionary:
 		var enemy = enemies[i]
 		if enemy == null or enemy.get("hp", 0) <= 0:
 			continue
+
+		if _enemy_skill_system != null:
+			enemy["player_party"] = _build_player_party_skill_snapshot()
+			var turn_start_events: Array = _enemy_skill_system.on_enemy_turn_start(i, enemy)
+			_apply_enemy_skill_events(i, enemy, turn_start_events, actions)
 
 		var alive_team = player_team.filter(func(m): return m != null and m.get("hp", 0) > 0)
 		if alive_team.is_empty():
@@ -1026,11 +1049,12 @@ func enemy_action() -> Dictionary:
 		# 检查敌人是否有技能
 		var has_skills = false
 		if _enemy_skill_system != null:
-			has_skills = _enemy_skill_system.has_skill_type(i, "charge") or _enemy_skill_system.has_skill_type(i, "shield") or _enemy_skill_system.has_skill_type(i, "heal")
+			has_skills = not _enemy_skill_system.get_enemy_state(i).is_empty()
 
 		# 护盾检查（委托给 EnemySkillSystem）
 		if _enemy_skill_system != null and has_skills:
 			_enemy_skill_system.check_and_activate_shield(i, enemy)
+			_enemy_skill_system.check_and_activate_shield_plus(i, enemy)
 
 		# 回血检查（委托给 EnemySkillSystem）
 		if _enemy_skill_system != null and has_skills:
@@ -1101,7 +1125,7 @@ func enemy_action() -> Dictionary:
 		target["hp"] = target.get("hp", 0) - damage
 		_refresh_capture_windows()
 
-		actions.append({
+		var attack_action := {
 			"attacker": enemy.get("name", ""),
 			"attacker_emoji": enemy.get("emoji", ""),
 			"target": target.get("name", ""),
@@ -1119,10 +1143,24 @@ func enemy_action() -> Dictionary:
 			"weaken_reduction": tempo_mod.get("reduction", 0.0),
 			"guard_absorbed": guard_absorbed,
 			"shield_absorbed": shield_absorbed
-		})
+		}
+		actions.append(attack_action)
+
+		if _enemy_skill_system != null and target_idx >= 0 and damage > 0:
+			var after_attack_events: Array = _enemy_skill_system.on_enemy_after_attack(i, target_idx, damage)
+			_apply_enemy_skill_events(i, enemy, after_attack_events, actions)
 
 	# 所有敌人完成行动或跳过行动后，再统一消费一次状态持续回合。
 	status_logs.append_array(_status_effect.end_enemy_turn(enemies))
+
+	if _enemy_skill_system != null:
+		for i in range(enemies.size()):
+			var enemy = enemies[i]
+			if enemy == null or int(enemy.get("hp", 0)) <= 0:
+				continue
+			enemy["player_party"] = _build_player_party_skill_snapshot()
+			var turn_end_events: Array = _enemy_skill_system.on_enemy_turn_end(i, enemy)
+			_apply_enemy_skill_events(i, enemy, turn_end_events, actions)
 
 	for a in actions:
 		enemy_attacked.emit(a)
@@ -1147,6 +1185,113 @@ func enemy_action() -> Dictionary:
 	return { "actions": actions, "status_logs": status_logs, "dot_kills": dot_kills }
 
 
+func _build_player_party_skill_snapshot() -> Array:
+	var snapshot: Array = []
+	for idx in range(player_team.size()):
+		var unit = player_team[idx]
+		if unit == null:
+			continue
+		snapshot.append({
+			"idx": idx,
+			"id": unit.get("id", ""),
+			"name": unit.get("name", ""),
+			"hp": int(unit.get("hp", 0)),
+			"maxHP": int(unit.get("maxHP", 0))
+		})
+	return snapshot
+
+
+func _choose_enemy_skill_target_idx() -> int:
+	var best_idx := -1
+	var best_hp := -1
+	for idx in range(player_team.size()):
+		var unit = player_team[idx]
+		if unit == null:
+			continue
+		var hp := int(unit.get("hp", 0))
+		if hp > best_hp:
+			best_hp = hp
+			best_idx = idx
+	return best_idx
+
+
+func _apply_direct_player_damage(target_idx: int, damage: int) -> Dictionary:
+	if target_idx < 0 or target_idx >= player_team.size():
+		return {}
+	var target = player_team[target_idx]
+	if target == null or int(target.get("hp", 0)) <= 0:
+		return {}
+	damage = maxi(0, damage)
+	var guard_result := _apply_guard_to_damage(target, damage)
+	damage = int(guard_result.get("damage", damage))
+	var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
+	var absorb_result := _apply_absorb_shield_to_damage(target, damage)
+	var shield_absorbed := bool(absorb_result.get("absorbed", false))
+	if shield_absorbed:
+		damage = 0
+	target["hp"] = int(target.get("hp", 0)) - damage
+	return {
+		"target": target,
+		"damage": damage,
+		"guard_absorbed": guard_absorbed,
+		"shield_absorbed": shield_absorbed
+	}
+
+
+func _apply_enemy_skill_events(enemy_idx: int, enemy: Dictionary, events: Array, actions: Array) -> void:
+	for event in events:
+		if not (event is Dictionary):
+			continue
+		var event_type := str(event.get("type", ""))
+		var target_idx := int(event.get("target_idx", event.get("target_index", -1)))
+		var damage := int(event.get("damage", 0))
+		var is_damage_event := event_type in ["burn_damage", "poison_damage", "surge_damage", "thunder_strike", "life_drain"]
+		if is_damage_event:
+			if target_idx < 0:
+				target_idx = _choose_enemy_skill_target_idx()
+			var damage_result := _apply_direct_player_damage(target_idx, damage)
+			if damage_result.is_empty():
+				continue
+			if event_type == "life_drain":
+				var heal_amount := int(event.get("heal_amount", damage_result.get("damage", 0)))
+				var prev_hp := int(enemy.get("hp", 0))
+				enemy["hp"] = mini(int(enemy.get("maxHP", prev_hp)), prev_hp + heal_amount)
+			var target: Dictionary = damage_result.get("target", {})
+			actions.append({
+				"attacker": enemy.get("name", ""),
+				"attacker_emoji": enemy.get("emoji", ""),
+				"target": target.get("name", ""),
+				"target_id": target.get("id", ""),
+				"target_index": target_idx,
+				"target_emoji": target.get("emoji", ""),
+				"damage": int(damage_result.get("damage", 0)),
+				"element": enemy.get("element", ""),
+				"target_died": int(target.get("hp", 0)) <= 0,
+				"is_enemy_skill": true,
+				"skill_type": event_type,
+				"enemy_index": enemy_idx,
+				"guard_absorbed": int(damage_result.get("guard_absorbed", 0)),
+				"shield_absorbed": bool(damage_result.get("shield_absorbed", false)),
+				"heal_amount": int(event.get("heal_amount", 0))
+			})
+		elif event_type.ends_with("_apply") or event_type.ends_with("_activate") or event_type.ends_with("_expire"):
+			var target = player_team[target_idx] if target_idx >= 0 and target_idx < player_team.size() else {}
+			actions.append({
+				"attacker": enemy.get("name", ""),
+				"attacker_emoji": enemy.get("emoji", ""),
+				"target": target.get("name", ""),
+				"target_id": target.get("id", ""),
+				"target_index": target_idx,
+				"target_emoji": target.get("emoji", ""),
+				"damage": 0,
+				"element": enemy.get("element", ""),
+				"target_died": false,
+				"is_enemy_skill": true,
+				"skill_type": event_type,
+				"enemy_index": enemy_idx
+			})
+
+
 func _get_weakest_enemy() -> Variant:
 	var weakest: Dictionary = {}
 	var min_hp: int = 999999999
@@ -1162,7 +1307,19 @@ func _get_weakest_enemy() -> Variant:
 
 # ========== 战斗结束检查 ==========
 
-func check_battle_end() -> bool:
+func check_battle_end(board = null) -> bool:
+	if battle_over:
+		return true
+	if _objective_evaluator.is_non_defeat_goal():
+		if board == null:
+			return false
+		var objective := _objective_evaluator.evaluate(board, enemies, turn_count, max_turns)
+		if bool(objective.get("completed", false)):
+			battle_over = true
+			battle_result = "win"
+			battle_ended.emit("win")
+			return true
+		return false
 	var all_dead = enemies.all(func(e): return e == null or e.get("hp", 0) <= 0)
 	if all_dead:
 		battle_over = true
@@ -1242,6 +1399,7 @@ func get_status() -> Dictionary:
 		"is_boss_battle": not stage_phases.is_empty(),
 		"enemy_skill_states": _build_enemy_skill_states_dict(),
 		"enemy_intents": get_enemy_intents(),
+		"objective": _objective_evaluator.get_state(),
 		"leader_skill_info": leader_skill_info,
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
@@ -1460,8 +1618,14 @@ func _on_enemy_skill_skill_seal(enemy_idx: int, target_idx: int, chance: float, 
 # ========== 获取战斗结果（用于结算） ==========
 
 func get_battle_result() -> Dictionary:
+	var objective_state := _objective_evaluator.get_state()
+	var reward_receipt_id := "battle_reward:%s" % battle_id
 	return {
 		"result": battle_result,
+		"battle_id": battle_id,
+		"battleId": battle_id,
+		"reward_receipt_id": reward_receipt_id,
+		"rewardReceiptId": reward_receipt_id,
 		"turn_count": turn_count,
 		"max_turns": max_turns,
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
@@ -1481,5 +1645,8 @@ func get_battle_result() -> Dictionary:
 		"capture_window_best": capture_window_best.duplicate(true),
 		"best_capture_window": get_best_capture_candidate().get("window", {}),
 		"stageRewards": stage_data.get("rewards", null) if stage_data != null else null,
-		"stage_rewards": stage_data.get("rewards", null) if stage_data != null else null
+		"stage_rewards": stage_data.get("rewards", null) if stage_data != null else null,
+		"stageGoal": stage_data.get("stageGoal", {}) if stage_data != null else {},
+		"objectiveState": objective_state,
+		"objectiveCompleted": bool(objective_state.get("completed", false))
 	}

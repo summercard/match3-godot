@@ -127,6 +127,8 @@ func _init(game_ref: Node = null) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_connect_authored_hit_areas()
+	_sync_authored_controls()
 	_process_enabled = true
 	set_process(true)
 	self.modulate.a = 0.0  # 入场动画起点：透明
@@ -139,6 +141,7 @@ func init(_data: Dictionary = {}) -> void:
 	_load_settings()
 	confirm_dialog = false
 	reset_success = false
+	_sync_authored_controls()
 	queue_redraw()
 
 
@@ -192,6 +195,7 @@ func _on_tap(point: Vector2) -> void:
 			return
 		if CONFIRM_NO.has_point(point):
 			confirm_dialog = false
+			_sync_authored_controls()
 			queue_redraw()
 			return
 		return
@@ -201,6 +205,7 @@ func _on_tap(point: Vector2) -> void:
 		return
 	if RESET_RECT.has_point(point):
 		confirm_dialog = true
+		_sync_authored_controls()
 		queue_redraw()
 		return
 	if DEFAULT_RECT.has_point(point):
@@ -249,6 +254,7 @@ func _show_reset_success() -> void:
 
 func _do_reset_data() -> void:
 	confirm_dialog = false
+	_sync_authored_controls()
 	var storage := _get_storage()
 	if storage and storage.has_method("clear_all_data"):
 		storage.clear_all_data()
@@ -274,6 +280,54 @@ func _go_main() -> void:
 		var scene_manager := _get_autoload("SceneManager")
 		if scene_manager and scene_manager.has_method("switch_scene"):
 			scene_manager.switch_scene("main", {}, "slide")
+
+
+func _connect_authored_hit_areas() -> void:
+	var paths := [
+		"HitAreas/BackButton",
+		"HitAreas/Rows/SoundRow",
+		"HitAreas/Rows/MusicRow",
+		"HitAreas/Rows/VibrationRow",
+		"HitAreas/Rows/QualityLow",
+		"HitAreas/Rows/QualityMedium",
+		"HitAreas/Rows/QualityHigh",
+		"HitAreas/Rows/PerformanceLite",
+		"HitAreas/Rows/PerformanceBalanced",
+		"HitAreas/Rows/PerformanceRich",
+		"HitAreas/Actions/ResetButton",
+		"HitAreas/Actions/DefaultButton",
+		"HitAreas/ConfirmDialog/YesButton",
+		"HitAreas/ConfirmDialog/NoButton",
+	]
+	for path in paths:
+		var control := get_node_or_null(path) as Control
+		if control == null or bool(control.get_meta("_authored_hit_area_bound", false)):
+			continue
+		control.gui_input.connect(_on_authored_hit_area_input.bind(control))
+		control.set_meta("_authored_hit_area_bound", true)
+
+
+func _sync_authored_controls() -> void:
+	var confirm := get_node_or_null("HitAreas/ConfirmDialog") as Control
+	if confirm != null:
+		confirm.visible = confirm_dialog
+	var reset_btn := get_node_or_null("HitAreas/Actions/ResetButton") as BaseButton
+	if reset_btn != null:
+		reset_btn.disabled = reset_success
+
+
+func _on_authored_hit_area_input(event: InputEvent, control: Control) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+	elif event is InputEventScreenTouch and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+
+
+func _hit_area_event_to_scene_position(event_position: Vector2, control: Control) -> Vector2:
+	var global_pos := control.get_global_transform_with_canvas() * event_position
+	return get_global_transform_with_canvas().affine_inverse() * global_pos
 
 
 func _get_row_rect(index: int) -> Rect2:

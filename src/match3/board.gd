@@ -185,8 +185,12 @@ func _would_match(row: int, col: int, type: String) -> bool:
 
 ## 将屏幕坐标转换为棋盘格子坐标
 func screen_to_grid(x: float, y: float) -> Dictionary:
-	var col: int = int((x - offset_x) / cell_size)
-	var row: int = int((y - offset_y) / cell_size)
+	var local_x := x - float(offset_x)
+	var local_y := y - float(offset_y)
+	if local_x < 0.0 or local_y < 0.0:
+		return {}
+	var col: int = floori(local_x / float(cell_size))
+	var row: int = floori(local_y / float(cell_size))
 	if row >= 0 and row < rows and col >= 0 and col < cols:
 		return { "row": row, "col": col }
 	return {}

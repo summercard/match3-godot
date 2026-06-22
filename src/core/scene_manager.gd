@@ -16,6 +16,7 @@ const QUICK_TRANSITION_ALPHA: float = 0.42
 var _team_assets_warmed := false
 
 func _ready() -> void:
+	set_process_input(true)
 	# 等待主场景加载完成
 	await get_tree().process_frame
 	_main_node = get_tree().root.get_node_or_null("Main") as Control
@@ -35,8 +36,20 @@ func _setup_transition_overlay() -> void:
 	_transition_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
 	_transition_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_transition_overlay.z_index = 1000  # 最顶层
-	_transition_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE  # 不拦截点击
+	_transition_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_transition_overlay.gui_input.connect(_on_transition_overlay_gui_input)
 	get_tree().root.add_child(_transition_overlay)
+
+func _input(_event: InputEvent) -> void:
+	if _is_transitioning:
+		get_viewport().set_input_as_handled()
+
+func _on_transition_overlay_gui_input(_event: InputEvent) -> void:
+	if _is_transitioning:
+		get_viewport().set_input_as_handled()
+
+func is_transitioning() -> bool:
+	return _is_transitioning
 
 ## 切换场景（带淡入淡出效果）
 func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:
@@ -46,6 +59,7 @@ func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") 
 		_pending_scene_mode = mode
 		return
 	_is_transitioning = true
+	_set_transition_input_blocked(true)
 	if scene_name == "team":
 		_warm_team_assets()
 	var quick := mode == "quick" or scene_name == "team"
@@ -60,7 +74,14 @@ func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") 
 	await _fade_in(duration, max_alpha)
 	
 	_is_transitioning = false
+	if _pending_scene_name.is_empty():
+		_set_transition_input_blocked(false)
 	_flush_pending_scene()
+
+func _set_transition_input_blocked(blocked: bool) -> void:
+	if _transition_overlay == null:
+		return
+	_transition_overlay.mouse_filter = Control.MOUSE_FILTER_STOP if blocked else Control.MOUSE_FILTER_IGNORE
 
 func _flush_pending_scene() -> void:
 	if _pending_scene_name.is_empty():

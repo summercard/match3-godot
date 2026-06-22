@@ -1,8 +1,8 @@
 class_name BattleFlowController
 extends RefCounted
 
-static func should_end_battle(battle) -> bool:
-	return battle != null and battle.check_battle_end()
+static func should_end_battle(battle, board = null) -> bool:
+	return battle != null and battle.check_battle_end(board)
 
 static func enemy_turn_end_state(battle) -> Dictionary:
 	if battle != null and battle.battle_over:

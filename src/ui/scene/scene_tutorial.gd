@@ -104,6 +104,7 @@ static var instance: SceneTutorial
 func _ready() -> void:
 	instance = self
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_connect_authored_hit_areas()
 
 
 func init(data: Dictionary = {}) -> void:
@@ -159,6 +160,31 @@ func _on_tap(point: Vector2) -> void:
 		_complete_tutorial()
 	elif NEXT_RECT.has_point(point):
 		_next_step()
+
+
+func _connect_authored_hit_areas() -> void:
+	for path in ["HitAreas/SkipButton", "HitAreas/NextButton"]:
+		var control := get_node_or_null(path) as Control
+		if control == null or bool(control.get_meta("_authored_hit_area_bound", false)):
+			continue
+		control.gui_input.connect(_on_authored_hit_area_input.bind(control))
+		control.set_meta("_authored_hit_area_bound", true)
+
+
+func _on_authored_hit_area_input(event: InputEvent, control: Control) -> void:
+	if not _tutorial_ready:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+	elif event is InputEventScreenTouch and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+
+
+func _hit_area_event_to_scene_position(event_position: Vector2, control: Control) -> Vector2:
+	var global_pos := control.get_global_transform_with_canvas() * event_position
+	return get_global_transform_with_canvas().affine_inverse() * global_pos
 
 
 func _next_step() -> void:

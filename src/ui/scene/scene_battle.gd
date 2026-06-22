@@ -587,6 +587,7 @@ func _init_battle() -> void:
 		_battle.init_with_player_team(player_team_units, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
 	else:
 		_battle.init(player_team_ids, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
+	_battle.configure_objective(_board)
 	
 	# 连接 BOSS 技能信号
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
@@ -1545,7 +1546,7 @@ func _start_enemy_turn() -> void:
 	_show_message(next_state.get("message", "你的回合"))
 
 func _check_battle_end() -> bool:
-	if BattleFlowControllerScript.should_end_battle(_battle):
+	if BattleFlowControllerScript.should_end_battle(_battle, _board):
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
 		_begin_battle_end_capture_flow()
@@ -2640,6 +2641,10 @@ func _draw_title_bar() -> void:
 		_draw_rounded_rect(12.0, 9.0, 62.0, 42.0, 5.0, Color(0.07, 0.13, 0.26, 0.92))
 	_draw_text_with_shadow("回合", 45.0, 18.5, C["white"], 7.4, true)
 	_draw_text_with_shadow("%d/%d" % [turn_count, max_turns], 45.0, 36.5, C["gold"], 10.8, true)
+	if _battle != null and _board != null:
+		var objective: Dictionary = _battle.get_objective_state(_board)
+		if str(objective.get("mode", "defeat_enemies")) != "defeat_enemies":
+			_draw_text_with_shadow(str(objective.get("display", "")), DESIGN_W / 2.0, 24.0, C["gold"], 9.2, true)
 	_draw_pause_button_backplate(pause_rect)
 	_draw_pause_mark(pause_rect, C["white"], 1.0)
 
@@ -3346,6 +3351,7 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 			return true
 		if used:
 			_consume_hotbar_item(item_id, slot_idx)
+			call_deferred("_check_battle_end")
 		return true
 	else:
 		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))

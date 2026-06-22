@@ -90,6 +90,9 @@ var _capture_window: Dictionary = {}
 var _rewards: Dictionary = {"gold": 0, "gems": 0, "first_clear": false, "exp": 0, "item": null, "item_name": "", "item_count": 0}
 var _level_ups: Array[Dictionary] = []
 var _monster_exp_awards: Dictionary = {}
+var _reward_receipt_id: String = ""
+var _reward_claim_allowed: bool = true
+var _reward_already_claimed: bool = false
 
 # 动画进度
 var _star_anim_progress: float = 0.0
@@ -185,6 +188,13 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		_achievement_manager = _game.get_node("AchievementManager")
 	_battle_result = _normalize_battle_result(battle_result)
 	_is_win = _battle_result.get("result", "") == "win"
+	_reset_settlement_state()
+	_reward_receipt_id = _resolve_reward_receipt_id(_battle_result)
+	_reward_claim_allowed = _begin_reward_receipt_claim()
+	_reward_already_claimed = not _reward_claim_allowed
+	_battle_result["rewardReceiptId"] = _reward_receipt_id
+	_battle_result["reward_receipt_id"] = _reward_receipt_id
+	_battle_result["rewardAlreadyClaimed"] = _reward_already_claimed
 	_calc_stars()
 	var capture_played_inline: bool = _battle_result.get("capture_played_inline", false)
 	if capture_played_inline:
@@ -200,15 +210,86 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		_capture_item_used = _battle_result.get("capture_item_used", {})
 		_capture_window = _battle_result.get("capture_window", {})
 	else:
-		if _is_win:
+		if _is_win and _reward_claim_allowed:
 			_process_capture()
+		elif _is_win:
+			_capture_result = CaptureSystemScript.get_capture_skip_feedback("already_claimed")
 	_calc_rewards()
 	_setup_buttons()
+	var reward_claim_succeeded := false
+	if _reward_claim_allowed:
+		reward_claim_succeeded = _claim_rewards_atomically()
+		if not reward_claim_succeeded:
+			_cancel_reward_receipt_claim()
+			_reward_claim_allowed = false
+			push_warning("[ResultLogic] 结算奖励事务失败: %s" % _reward_receipt_id)
+	if reward_claim_succeeded:
+		_trigger_achievements()
+
+
+func _reset_settlement_state() -> void:
+	_capture_target = {}
+	_captured = false
+	_capture_result = {}
+	_capture_item_used = {}
+	_capture_window = {}
+	_level_ups.clear()
+	_monster_exp_awards.clear()
+
+
+func _resolve_reward_receipt_id(result: Dictionary) -> String:
+	var explicit_id := str(result.get("rewardReceiptId", result.get("reward_receipt_id", "")))
+	if not explicit_id.is_empty():
+		return explicit_id
+	var source_battle_id := str(result.get("battleId", result.get("battle_id", "")))
+	if not source_battle_id.is_empty():
+		return "battle_reward:%s" % source_battle_id
+	var legacy_signature := {
+		"stage_id": str(result.get("stageId", result.get("stage_id", ""))),
+		"result": str(result.get("result", "")),
+		"turn_count": int(result.get("turnCount", result.get("turn_count", 0))),
+		"max_turns": int(result.get("maxTurns", result.get("max_turns", 0))),
+		"player_team": result.get("playerTeam", result.get("player_team", [])),
+		"enemies": result.get("enemies", []),
+		"total_damage": result.get("totalDamageDealt", result.get("total_damage_dealt", {}))
+	}
+	return "legacy_battle_reward:%s" % JSON.stringify(legacy_signature).sha256_text()
+
+
+func _begin_reward_receipt_claim() -> bool:
+	if not _storage or not _storage.has_method("begin_reward_receipt_claim"):
+		return true
+	return bool(_storage.begin_reward_receipt_claim(_reward_receipt_id))
+
+
+func _complete_reward_receipt_claim() -> bool:
+	if not _storage or not _storage.has_method("complete_reward_receipt_claim"):
+		return true
+	return bool(_storage.complete_reward_receipt_claim(_reward_receipt_id))
+
+
+func _cancel_reward_receipt_claim() -> void:
+	if _storage and _storage.has_method("cancel_reward_receipt_claim"):
+		_storage.cancel_reward_receipt_claim(_reward_receipt_id)
+
+
+func _claim_rewards_atomically() -> bool:
+	if _storage and _storage.has_method("run_transaction"):
+		var tx: Dictionary = _storage.run_transaction(func():
+			_save_rewards()
+			if _is_win and _battle_result.has("stageId"):
+				if _storage.has_method("save_stage_stars") and not bool(_storage.save_stage_stars(_battle_result["stageId"], _stars)):
+					return {"ok": false, "error": "stage_stars_save_failed"}
+			if not _complete_reward_receipt_claim():
+				return {"ok": false, "error": "receipt_complete_failed"}
+			return {"ok": true}
+		)
+		return bool(tx.get("ok", false))
 	_save_rewards()
 	if _is_win and _battle_result.has("stageId"):
-		if _storage and _storage.has_method("save_stage_stars"):
-			_storage.save_stage_stars(_battle_result["stageId"], _stars)
-	_trigger_achievements()
+		if _storage and _storage.has_method("save_stage_stars") and not bool(_storage.save_stage_stars(_battle_result["stageId"], _stars)):
+			return false
+	return _complete_reward_receipt_claim()
 
 func _normalize_battle_result(result: Dictionary) -> Dictionary:
 	var normalized := result.duplicate(true)

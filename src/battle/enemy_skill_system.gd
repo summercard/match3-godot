@@ -859,15 +859,44 @@ func get_poison_stacks(enemy_idx: int) -> int:
 
 
 ## 每个敌人回合开始时调用，更新技能冷却/计时
-func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> void:
+func on_enemy_turn_start(enemy_idx: int, enemy: Dictionary) -> Array:
+	var events: Array = []
 	# 处理反弹效果持续时间（先减少）
-	process_reflect_duration(enemy_idx)
+	var reflect_result := process_reflect_duration(enemy_idx)
+	if bool(reflect_result.get("expired", false)):
+		events.append({"type": "reflect_expire", "enemy_idx": enemy_idx, "target_idx": int(reflect_result.get("target_idx", -1))})
 	# 处理灼烧伤害（对玩家目标）
-	process_burn_damage(enemy_idx)
+	var burn_result := process_burn_damage(enemy_idx)
+	if int(burn_result.get("damage", 0)) > 0:
+		events.append({
+			"type": "burn_damage",
+			"enemy_idx": enemy_idx,
+			"target_idx": int(burn_result.get("target_idx", -1)),
+			"damage": int(burn_result.get("damage", 0)),
+			"expired": bool(burn_result.get("expired", false))
+		})
 	# 处理中毒伤害（叠层机制）
-	process_poison_damage(enemy_idx)
+	var poison_result := process_poison_damage(enemy_idx)
+	if int(poison_result.get("total_damage", 0)) > 0:
+		events.append({
+			"type": "poison_damage",
+			"enemy_idx": enemy_idx,
+			"target_idx": int(poison_result.get("target_idx", -1)),
+			"damage": int(poison_result.get("total_damage", 0)),
+			"stacks": int(poison_result.get("stacks", 0)),
+			"expired": bool(poison_result.get("expired", false))
+		})
 	# 处理浪涌伤害（每回合递增）
-	process_surge_damage(enemy_idx)
+	var surge_result := process_surge_damage(enemy_idx)
+	if int(surge_result.get("damage", 0)) > 0:
+		events.append({
+			"type": "surge_damage",
+			"enemy_idx": enemy_idx,
+			"target_idx": int(surge_result.get("target_idx", -1)),
+			"damage": int(surge_result.get("damage", 0)),
+			"turn_number": int(surge_result.get("turn_number", 0))
+		})
+	return events
 
 
 ## 处理雷击技能
@@ -900,7 +929,8 @@ func execute_thunder_strike(enemy_idx: int, enemy: Dictionary) -> Dictionary:
 
 
 ## 每个敌人回合结束时调用，处理技能触发
-func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
+func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> Array:
+	var events: Array = []
 	# 检查灼烧是否应该触发（基于interval）
 	var burn_state = get_skill_state(enemy_idx, "burn")
 	if not burn_state.is_empty():
@@ -908,9 +938,48 @@ func on_enemy_turn_end(enemy_idx: int, enemy: Dictionary) -> void:
 		# interval控制的是"触发灼烧的频率"，目前burn是立即施加，不需要interval检查
 	
 	# 处理雷击
-	execute_thunder_strike(enemy_idx, enemy)
+	var thunder_result := execute_thunder_strike(enemy_idx, enemy)
+	if bool(thunder_result.get("triggered", false)):
+		events.append({
+			"type": "thunder_strike",
+			"enemy_idx": enemy_idx,
+			"target_idx": -1,
+			"damage": int(thunder_result.get("damage", 0))
+		})
 	# 处理灵魂吸取
-	execute_life_drain(enemy_idx, enemy)
+	var drain_result := execute_life_drain(enemy_idx, enemy)
+	if bool(drain_result.get("triggered", false)):
+		events.append({
+			"type": "life_drain",
+			"enemy_idx": enemy_idx,
+			"target_idx": int(drain_result.get("target_idx", -1)),
+			"damage": int(drain_result.get("drain_amount", 0)),
+			"heal_amount": int(drain_result.get("heal_amount", 0))
+		})
+	return events
+
+
+func on_enemy_after_attack(enemy_idx: int, target_idx: int, source_damage: int = 0) -> Array:
+	var events: Array = []
+	var burn_result := try_apply_burn(enemy_idx, target_idx, source_damage)
+	if bool(burn_result.get("applied", false)):
+		events.append({"type": "burn_apply", "enemy_idx": enemy_idx, "target_idx": target_idx, "damage": int(burn_result.get("damage", 0)), "duration": int(burn_result.get("duration", 0))})
+	var freeze_result := try_activate_freeze(enemy_idx, target_idx)
+	if bool(freeze_result.get("activated", false)):
+		events.append({"type": "freeze_activate", "enemy_idx": enemy_idx, "target_idx": target_idx, "duration": int(freeze_result.get("duration", 0))})
+	var poison_result := try_apply_poison(enemy_idx, target_idx)
+	if bool(poison_result.get("applied", false)):
+		events.append({"type": "poison_apply", "enemy_idx": enemy_idx, "target_idx": target_idx, "stacks": int(poison_result.get("stacks", 0)), "damage_per_stack": int(poison_result.get("damage_per_stack", 0))})
+	var surge_result := try_apply_surge(enemy_idx, target_idx)
+	if bool(surge_result.get("applied", false)):
+		events.append({"type": "surge_apply", "enemy_idx": enemy_idx, "target_idx": target_idx, "damage": int(surge_result.get("current_damage", 0))})
+	var confuse_result := try_activate_confuse(enemy_idx, target_idx)
+	if bool(confuse_result.get("activated", false)):
+		events.append({"type": "confuse_activate", "enemy_idx": enemy_idx, "target_idx": target_idx, "duration": int(confuse_result.get("duration", 0))})
+	var seal_result := try_activate_skill_seal(enemy_idx, target_idx)
+	if bool(seal_result.get("activated", false)):
+		events.append({"type": "skill_seal_activate", "enemy_idx": enemy_idx, "target_idx": target_idx, "duration": int(seal_result.get("duration", 0))})
+	return events
 
 
 # ==================== Phase 8: 灵魂吸取技能 ====================

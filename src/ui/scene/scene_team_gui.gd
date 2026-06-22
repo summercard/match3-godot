@@ -276,7 +276,7 @@ func _calc_team_power() -> int:
 		if ref_id.is_empty():
 			continue
 		var stats := _calc_stats(ref_id, _get_real_level(ref_id))
-		total += int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+		total += _calc_battle_power(stats)
 	return total
 
 
@@ -287,6 +287,10 @@ func _calc_stats(monster_id: String, level: int) -> Dictionary:
 	var stats := MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
 	_stats_cache[cache_key] = stats
 	return stats
+
+
+func _calc_battle_power(stats: Dictionary) -> int:
+	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0))
 
 
 func _clamp_roster_page() -> void:
@@ -328,7 +332,7 @@ func _get_sort_score(instance: Dictionary, sort_id: String) -> int:
 		return int(md.get("rarity", 1))
 	if sort_id == "power":
 		var stats := _calc_stats(instance_id, _get_real_level(instance_id))
-		return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+		return _calc_battle_power(stats)
 	return _get_real_level(instance_id)
 
 

@@ -314,6 +314,10 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 		return
 
 	quantity = maxi(1, quantity)
+	var storage := _get_storage()
+	if storage == null:
+		_show_toast("存档暂不可用，请稍后重试", "warning")
+		return
 	var remaining := _get_daily_remaining(item_id)
 	if remaining <= 0:
 		_show_toast("今日购买次数已用完", "warning")
@@ -329,22 +333,69 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 		if (player.get("gold", 0) as float) < total_price:
 			_show_toast("金币不足", "warning")
 			return
-		player["gold"] = (player.get("gold", 0) as float) - total_price
 	elif currency == "gems":
 		if (player.get("gems", 0) as float) < total_price:
 			_show_toast("宝石不足", "warning")
 			return
-		player["gems"] = (player.get("gems", 0) as float) - total_price
 	else:
 		_show_toast("商品货币配置错误", "warning")
 		return
 
-	_save_player_data(player)
-	player_data["gold"] = player.get("gold", 0)
-	player_data["gems"] = player.get("gems", 0)
+	var updated_player: Dictionary = {}
+	var tx: Dictionary = {"ok": false, "error": "storage_unavailable"}
+	if storage.has_method("run_transaction"):
+		tx = storage.run_transaction(func():
+			var tx_remaining := _get_daily_remaining(item_id)
+			if tx_remaining <= 0:
+				return {"ok": false, "error": "daily_limit_empty"}
+			if quantity > tx_remaining:
+				return {"ok": false, "error": "daily_limit_changed", "remaining": tx_remaining}
 
-	_add_item(item_id, quantity)
-	_record_daily_purchase(item_id, quantity)
+			var tx_player: Dictionary = _load_player_data()
+			if currency == "gold":
+				if (tx_player.get("gold", 0) as float) < total_price:
+					return {"ok": false, "error": "not_enough_gold"}
+				tx_player["gold"] = (tx_player.get("gold", 0) as float) - total_price
+			elif currency == "gems":
+				if (tx_player.get("gems", 0) as float) < total_price:
+					return {"ok": false, "error": "not_enough_gems"}
+				tx_player["gems"] = (tx_player.get("gems", 0) as float) - total_price
+			else:
+				return {"ok": false, "error": "bad_currency"}
+			_save_player_data(tx_player)
+			_add_item(item_id, quantity)
+			_record_daily_purchase(item_id, quantity)
+			updated_player = tx_player.duplicate(true)
+			return {"ok": true}
+		)
+	else:
+		if currency == "gold":
+			player["gold"] = (player.get("gold", 0) as float) - total_price
+		elif currency == "gems":
+			player["gems"] = (player.get("gems", 0) as float) - total_price
+		_save_player_data(player)
+		_add_item(item_id, quantity)
+		_record_daily_purchase(item_id, quantity)
+		updated_player = player.duplicate(true)
+		tx = {"ok": true}
+
+	if not bool(tx.get("ok", false)):
+		var error := str(tx.get("error", "save_failed"))
+		if error == "daily_limit_changed":
+			_show_toast("今日最多还能购买 %d 个" % int(tx.get("remaining", 0)), "warning")
+		elif error == "daily_limit_empty":
+			_show_toast("今日购买次数已用完", "warning")
+		elif error == "not_enough_gold":
+			_show_toast("金币不足", "warning")
+		elif error == "not_enough_gems":
+			_show_toast("宝石不足", "warning")
+		else:
+			_show_toast("购买保存失败，请重试", "warning")
+		return
+
+	player_data["gold"] = updated_player.get("gold", player.get("gold", 0))
+	player_data["gems"] = updated_player.get("gems", player.get("gems", 0))
+
 	emit_signal("purchase_completed", item_id, quantity)
 	_show_toast("获得 %s x%d" % [str(item_data.get("name", "")), quantity], "success")
 	# print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])

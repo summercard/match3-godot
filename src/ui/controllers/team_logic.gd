@@ -300,13 +300,17 @@ func _calc_team_power() -> int:
 			continue
 		var lvl: int = _get_real_level(mid)
 		var stats: Dictionary = _calc_stats(mid, lvl)
-		total += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0) + stats.get("spd", 0)
+		total += _calc_battle_power(stats)
 	return total
 
 func _calc_stats(monster_id: String, level: int) -> Dictionary:
 	if _storage and _storage.has_method("get_instance_stats") and not _storage.get_monster_instance(monster_id).is_empty():
 		return _storage.get_instance_stats(monster_id)
 	return MonsterDBScript.get_monster_stats(_get_monster_id(monster_id), level, _get_nature(monster_id))
+
+
+func _calc_battle_power(stats: Dictionary) -> int:
+	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0))
 
 func _get_catchup_state(instance_id: String) -> Dictionary:
 	if _storage and _storage.has_method("get_instance_catchup_state") and not _storage.get_monster_instance(instance_id).is_empty():
@@ -349,7 +353,7 @@ func _get_sort_score(instance: Dictionary, sort_id: String) -> int:
 		return int(md.get("rarity", 1))
 	if sort_id == "power":
 		var stats := _calc_stats(instance_id, _get_real_level(instance_id))
-		return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+		return _calc_battle_power(stats)
 	return _get_real_level(instance_id)
 
 func _select_filter(filter_id: String) -> void:

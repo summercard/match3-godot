@@ -54,6 +54,19 @@ func _run() -> void:
 	_expect((battle.get_node("BottomControls/Item1") as Control).visible, "first capture ball slot should remain visible")
 	_expect((battle.get_node("BottomControls/Item2") as Control).visible, "second capture ball slot should remain visible")
 	_expect((battle.get_node("BottomControls/Item5") as Control).visible, "third active item slot should remain visible")
+	var idle_sync_count := int(battle.get("_sync_gui_call_count"))
+	for _i in range(6):
+		await process_frame
+	_expect(int(battle.get("_sync_gui_call_count")) == idle_sync_count, "battle GUI should not run full sync every idle frame")
+	var manager = battle.get("_battle")
+	manager.turn_count += 1
+	await process_frame
+	_expect(int(battle.get("_sync_gui_call_count")) > idle_sync_count, "battle GUI should sync when battle state changes")
+	for button in _collect_base_buttons(battle):
+		_expect(button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % button.get_path())
+		if button.has_node("CartoonFeedback"):
+			var profile: Dictionary = button.get_node("CartoonFeedback").call("get_feedback_profile")
+			_expect(float(profile.get("press_scale", 1.0)) < 1.0, "%s feedback should compress on press" % button.get_path())
 	await _dispatch_battle_input_click(battle, battle.get_node("TopHud/PauseButton") as Control)
 	_expect((battle.get_node("PauseDialog") as Control).visible, "pause button should open the pause dialog from real input")
 	(battle.get_node("PauseDialog/Panel/ResumeButton") as BaseButton).pressed.emit()
@@ -121,6 +134,14 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _collect_base_buttons(node: Node) -> Array[BaseButton]:
+	var buttons: Array[BaseButton] = []
+	if node is BaseButton:
+		buttons.append(node as BaseButton)
+	for child in node.get_children():
+		buttons.append_array(_collect_base_buttons(child))
+	return buttons
 
 func _dispatch_battle_input_click(battle: Control, control: Control) -> void:
 	var center := control.get_global_transform_with_canvas() * (control.size * 0.5)

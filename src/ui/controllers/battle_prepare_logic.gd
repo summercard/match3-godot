@@ -47,7 +47,7 @@ const BTN_Y := 593.0
 const PREPARE_ASSETS := {
 	"bg": StageWarBackgroundsScript.DEFAULT_PATH,
 	"back_button": "res://assets/images/ui/buttons/battle_prepare_new_ui_back_button.png",
-	"back_arrow": "res://assets/images/ui/buttons/battle_flow_new_icon_back_arrow.png",
+	"back_arrow": "res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png",
 	"currency_chip": "res://assets/images/ui/panels/main_ui_currency_capsule_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 	"heart": "res://assets/images/effects/ranch_fx_social_heart.png",
@@ -220,7 +220,7 @@ func _load_player_team() -> void:
 	var level: int = maxi(player.get("level", 1), 5)
 	if storage and storage.has_method("get_team_battle_stats"):
 		for monster: Dictionary in storage.get_team_battle_stats():
-			monster["power"] = monster.get("hp", 0) + monster.get("atk", 0) + monster.get("def", 0) + monster.get("spd", 0)
+			monster["power"] = _calc_battle_power(monster)
 			_player_team.append(monster)
 		return
 	for slot: String in ["leader", "member1", "member2"]:
@@ -230,7 +230,7 @@ func _load_player_team() -> void:
 		# 统一公式：玩家准备预览走 StatCalculator
 		var monster: Dictionary = StatCalculator.calc(monster_id, level)
 		if not monster.is_empty():
-			monster["power"] = monster.get("hp", 0) + monster.get("atk", 0) + monster.get("def", 0) + monster.get("spd", 0)
+			monster["power"] = _calc_battle_power(monster)
 			_player_team.append(monster)
 
 func _load_enemy_team() -> void:
@@ -244,7 +244,7 @@ func _load_enemy_team() -> void:
 		var tier := StatCalculator.EnemyTier.ELITE if preview_elite else StatCalculator.EnemyTier.NORMAL
 		var enemy: Dictionary = StatCalculator.calc_enemy(enemy_id, enemy_level, tier)
 		if not enemy.is_empty():
-			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0) + enemy.get("spd", 0)
+			enemy["power"] = _calc_battle_power(enemy)
 			enemy["_isFallbackLevel"] = is_fallback  # 告诉 UI 是不是兑底值
 			# ★ 主人定 2026-06-11：让战前 UI 也能看出敌方精英怪
 			enemy["isElite"] = preview_elite
@@ -285,6 +285,10 @@ func _get_team_total_power(team: Array) -> int:
 	for monster in team:
 		total += monster.get("power", 0)
 	return total
+
+
+func _calc_battle_power(stats: Dictionary) -> int:
+	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0))
 
 func _is_player_team_empty() -> bool:
 	return _player_team.is_empty()

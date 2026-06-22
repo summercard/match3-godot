@@ -122,6 +122,7 @@ const MILESTONE_SCALE_START := 0.5
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_connect_authored_hit_areas()
 	_storage = get_node_or_null("/root/SaveManager")
 	self.modulate.a = 0.0  # 入场动画起点：透明
 
@@ -134,6 +135,7 @@ func init(_data: Dictionary = {}) -> void:
 	_animation_complete = false
 	_particles.clear()
 	_floating_rewards.clear()
+	_sync_authored_controls()
 	queue_redraw()
 
 
@@ -145,6 +147,7 @@ func do_sign_in() -> void:
 		return
 	_can_sign_in = false
 	_has_signed_in = true
+	_sync_authored_controls()
 	_sign_in_data = _storage.load_sign_in_data()
 	if _storage.has_method("set_achievement_stat"):
 		_storage.set_achievement_stat("maxConsecutiveSignIn", int(_sign_in_data.get("consecutiveDays", 1)))
@@ -171,6 +174,34 @@ func _play_sign_in_effect(reward: Dictionary) -> void:
 	_floating_rewards.append({"text": "+%d 金币" % int(reward.get("gold", 0)), "x": 125.0, "y": 586.0, "vy": -1.35, "life": 1.5, "color": C["gold"]})
 	_floating_rewards.append({"text": "+%d EXP" % int(reward.get("exp", 0)), "x": 210.0, "y": 586.0, "vy": -1.18, "life": 1.5, "color": C["green"]})
 	_animation_complete = true
+
+func _connect_authored_hit_areas() -> void:
+	for path in ["HitAreas/BackButton", "HitAreas/ClaimButton"]:
+		var control := get_node_or_null(path) as Control
+		if control == null or bool(control.get_meta("_authored_hit_area_bound", false)):
+			continue
+		control.gui_input.connect(_on_authored_hit_area_input.bind(control))
+		control.set_meta("_authored_hit_area_bound", true)
+
+
+func _sync_authored_controls() -> void:
+	var claim := get_node_or_null("HitAreas/ClaimButton") as BaseButton
+	if claim != null:
+		claim.disabled = not _can_sign_in
+
+
+func _on_authored_hit_area_input(event: InputEvent, control: Control) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+	elif event is InputEventScreenTouch and event.pressed:
+		_on_tap(_hit_area_event_to_scene_position(event.position, control))
+		control.accept_event()
+
+
+func _hit_area_event_to_scene_position(event_position: Vector2, control: Control) -> Vector2:
+	var global_pos := control.get_global_transform_with_canvas() * event_position
+	return get_global_transform_with_canvas().affine_inverse() * global_pos
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:

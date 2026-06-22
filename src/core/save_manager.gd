@@ -41,6 +41,9 @@ const SWEEP_STAMINA_COST: int = 1
 
 var _config: ConfigFile = null
 var _dirty: bool = false
+var _reward_receipts_in_progress: Dictionary = {}
+var _transaction_depth: int = 0
+var _force_save_failure: bool = false
 
 func _init() -> void:
 	_config = ConfigFile.new()
@@ -54,13 +57,99 @@ func _load_config() -> void:
 		_config = ConfigFile.new()
 
 ## 保存到文件
-func _save_config() -> void:
-	if _dirty:
-		var err: int = _config.save(_get_save_path())
-		if err == OK:
-			_dirty = false
-		else:
-			push_warning("[SaveManager] 保存失败: %d" % err)
+func _save_config() -> bool:
+	if not _dirty:
+		return true
+	if _transaction_depth > 0:
+		return true
+	return _save_config_now()
+
+
+func _save_config_now() -> bool:
+	if _force_save_failure:
+		push_warning("[SaveManager] 测试注入保存失败")
+		return false
+	var save_path := _get_save_path()
+	var global_save_path := ProjectSettings.globalize_path(save_path)
+	var base_dir := global_save_path.get_base_dir()
+	if not base_dir.is_empty():
+		DirAccess.make_dir_recursive_absolute(base_dir)
+	var temp_path := "%s.tmp" % global_save_path
+	var backup_path := "%s.bak" % global_save_path
+	var err: int = _config.save(temp_path)
+	if err != OK:
+		push_warning("[SaveManager] 保存临时文件失败: %d" % err)
+		return false
+	if FileAccess.file_exists(global_save_path):
+		var backup_err := DirAccess.copy_absolute(global_save_path, backup_path)
+		if backup_err != OK:
+			push_warning("[SaveManager] 备份旧存档失败: %d" % backup_err)
+		var remove_err := DirAccess.remove_absolute(global_save_path)
+		if remove_err != OK:
+			DirAccess.remove_absolute(temp_path)
+			push_warning("[SaveManager] 替换旧存档前删除失败: %d" % remove_err)
+			return false
+	var rename_err := DirAccess.rename_absolute(temp_path, global_save_path)
+	if rename_err != OK:
+		if FileAccess.file_exists(backup_path) and not FileAccess.file_exists(global_save_path):
+			DirAccess.copy_absolute(backup_path, global_save_path)
+		push_warning("[SaveManager] 原子替换存档失败: %d" % rename_err)
+		return false
+	_dirty = false
+	return true
+
+
+func _clone_config(source: ConfigFile) -> ConfigFile:
+	var clone := ConfigFile.new()
+	for section: String in source.get_sections():
+		for key: String in source.get_section_keys(section):
+			var value = source.get_value(section, key)
+			if value is Dictionary or value is Array:
+				value = value.duplicate(true)
+			clone.set_value(section, key, value)
+	return clone
+
+
+func set_force_save_failure(enabled: bool) -> void:
+	_force_save_failure = enabled
+
+
+func run_transaction(action: Callable) -> Dictionary:
+	if _transaction_depth > 0:
+		var nested_raw = action.call()
+		if nested_raw is Dictionary:
+			return nested_raw
+		if nested_raw is bool:
+			return {"ok": bool(nested_raw)}
+		return {"ok": true}
+
+	var snapshot := _clone_config(_config)
+	var dirty_snapshot := _dirty
+	_transaction_depth = 1
+	var raw_result = action.call()
+	var result: Dictionary = {"ok": true}
+	if raw_result is Dictionary:
+		result = raw_result
+	elif raw_result is bool:
+		result["ok"] = bool(raw_result)
+
+	if not bool(result.get("ok", true)):
+		_config = snapshot
+		_dirty = dirty_snapshot
+		_transaction_depth = 0
+		return result
+
+	_transaction_depth = 0
+	if _save_config():
+		result["ok"] = true
+		return result
+
+	_config = snapshot
+	_dirty = dirty_snapshot
+	return {
+		"ok": false,
+		"error": "save_failed"
+	}
 
 func _get_save_path() -> String:
 	var test_path := OS.get_environment("MATCH3_SAVE_PATH")
@@ -97,6 +186,7 @@ func flush() -> void:
 
 func clear_all_data() -> bool:
 	_config = ConfigFile.new()
+	_reward_receipts_in_progress.clear()
 	_dirty = true
 	_save_config()
 	return true
@@ -679,7 +769,7 @@ func calc_team_power() -> int:
 			continue
 		var stats: Dictionary = get_instance_stats(id)
 		if not stats.is_empty():
-			power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0) + stats.get("spd", 0)
+			power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0)
 
 	return power
 
@@ -789,8 +879,7 @@ func save_stage_stars(stage_id: String, stars: int) -> bool:
 		"cleared": true
 	}
 	_set_value("stageProgress", "data", all)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 获取关卡星级
 ## JS: getStageStars(stageId)
@@ -845,24 +934,27 @@ func get_sweep_reward(stage_id: String) -> Dictionary:
 ## 执行扫荡
 ## JS: doSweep(stageId)
 func do_sweep(stage_id: String) -> Dictionary:
-	if not can_sweep(stage_id):
-		return {}
-	if not spend_stamina(SWEEP_STAMINA_COST):
-		return {}
+	var reward: Dictionary = {}
+	var tx := run_transaction(func():
+		if not can_sweep(stage_id):
+			return {"ok": false, "error": "not_sweepable"}
+		if not spend_stamina(SWEEP_STAMINA_COST):
+			return {"ok": false, "error": "not_enough_stamina"}
 
-	var reward: Dictionary = get_sweep_reward(stage_id)
-	reward["staminaCost"] = SWEEP_STAMINA_COST
-	add_gold(reward["gold"])
-	add_player_exp(reward["exp"])
-	add_shared_monster_exp(int(reward["exp"]))
+		reward = get_sweep_reward(stage_id)
+		reward["staminaCost"] = SWEEP_STAMINA_COST
+		add_gold(reward["gold"])
+		add_player_exp(reward["exp"])
+		add_shared_monster_exp(int(reward["exp"]))
 
-	# 更新奖励统计
-	var rewards: Dictionary = load_rewards()
-	rewards["totalGoldEarned"] = rewards.get("totalGoldEarned", 0) + reward["gold"]
-	rewards["totalItemsGained"] = rewards.get("totalItemsGained", 0)
-	save_rewards(rewards)
-
-	return reward
+		# 更新奖励统计
+		var rewards: Dictionary = load_rewards()
+		rewards["totalGoldEarned"] = rewards.get("totalGoldEarned", 0) + reward["gold"]
+		rewards["totalItemsGained"] = rewards.get("totalItemsGained", 0)
+		save_rewards(rewards)
+		return {"ok": true, "reward": reward.duplicate(true)}
+	)
+	return tx.get("reward", {}) if bool(tx.get("ok", false)) else {}
 
 func get_stage_chapters() -> Array:
 	var db := StageDBScript.new()
@@ -976,6 +1068,45 @@ func load_rewards() -> Dictionary:
 		"captureCount": 0
 	})
 
+
+## 战斗奖励 receipt：同一场战斗只能进入一次发奖区。
+func is_reward_receipt_claimed(receipt_id: String) -> bool:
+	if receipt_id.is_empty():
+		return false
+	var claimed: Dictionary = _get_value("rewardReceipts", "claimed", {})
+	return claimed.has(receipt_id)
+
+
+func begin_reward_receipt_claim(receipt_id: String) -> bool:
+	if receipt_id.is_empty() or is_reward_receipt_claimed(receipt_id) or _reward_receipts_in_progress.has(receipt_id):
+		return false
+	_reward_receipts_in_progress[receipt_id] = true
+	return true
+
+
+func complete_reward_receipt_claim(receipt_id: String) -> bool:
+	if receipt_id.is_empty() or not _reward_receipts_in_progress.has(receipt_id):
+		return false
+	var claimed: Dictionary = _get_value("rewardReceipts", "claimed", {}).duplicate(true)
+	if claimed.has(receipt_id):
+		_reward_receipts_in_progress.erase(receipt_id)
+		return false
+	claimed[receipt_id] = {
+		"claimedAt": Time.get_unix_time_from_system()
+	}
+	_set_value("rewardReceipts", "claimed", claimed)
+	var saved := _save_config()
+	_reward_receipts_in_progress.erase(receipt_id)
+	if saved:
+		return true
+	claimed.erase(receipt_id)
+	_set_value("rewardReceipts", "claimed", claimed)
+	return false
+
+
+func cancel_reward_receipt_claim(receipt_id: String) -> void:
+	_reward_receipts_in_progress.erase(receipt_id)
+
 # ========== 成就系统（section: achievements） ==========
 ## 成就数据结构: { unlockedIds: [], unlockedDates: {}, stats: {} }
 
@@ -1063,29 +1194,32 @@ func can_sign_in_today() -> bool:
 ## 执行签到，返回奖励
 ## JS: doSignIn()
 func do_sign_in() -> Dictionary:
-	if not can_sign_in_today():
-		return {}
+	var reward: Dictionary = {}
+	var tx := run_transaction(func():
+		if not can_sign_in_today():
+			return {"ok": false, "error": "already_signed"}
 
-	var data: Dictionary = load_sign_in_data()
-	var today: String = _get_date_string(Time.get_date_string_from_system())
-	var yesterday: String = _get_date_string(_get_date_minus_days(1))
+		var data: Dictionary = load_sign_in_data()
+		var today: String = _get_date_string(Time.get_date_string_from_system())
+		var yesterday: String = _get_date_string(_get_date_minus_days(1))
 
-	# 检查是否连续
-	if data.get("lastSignInDate", "") == yesterday:
-		data["consecutiveDays"] = data.get("consecutiveDays", 0) + 1
-	else:
-		data["consecutiveDays"] = 1
+		# 检查是否连续
+		if data.get("lastSignInDate", "") == yesterday:
+			data["consecutiveDays"] = data.get("consecutiveDays", 0) + 1
+		else:
+			data["consecutiveDays"] = 1
 
-	data["lastSignInDate"] = today
-	data["totalDays"] = data.get("totalDays", 0) + 1
-	save_sign_in_data(data)
+		data["lastSignInDate"] = today
+		data["totalDays"] = data.get("totalDays", 0) + 1
+		save_sign_in_data(data)
 
-	# 发放奖励
-	var reward: Dictionary = get_sign_in_reward(data["consecutiveDays"])
-	add_gold(reward["gold"])
-	add_player_exp(reward["exp"])
-
-	return reward
+		# 发放奖励
+		reward = get_sign_in_reward(data["consecutiveDays"])
+		add_gold(reward["gold"])
+		add_player_exp(reward["exp"])
+		return {"ok": true, "reward": reward.duplicate(true)}
+	)
+	return tx.get("reward", {}) if bool(tx.get("ok", false)) else {}
 
 ## 获取签到奖励（根据连续签到天数）
 ## JS: getSignInReward(consecutiveDays)

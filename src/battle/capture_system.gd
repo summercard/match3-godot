@@ -242,6 +242,10 @@ static func get_capture_skip_feedback(reason_id: String, options: Dictionary = {
 		title = "目标不可捕捉"
 		reason = "该目标不属于本场可收服对象。"
 		advice = "Boss 默认不可捕捉；仅特殊关卡会明确开放。"
+	elif reason_id == "already_claimed":
+		title = "奖励已领取"
+		reason = "本场战斗已经完成结算，不再重复进行捕捉判定。"
+		advice = "可直接返回关卡选择；背包、金币与精灵不会重复增加。"
 	return {
 		"title": title,
 		"desc": "%s\n%s" % [reason, advice],

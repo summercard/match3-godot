@@ -76,7 +76,7 @@ func _simulate_load_enemy_team(stage_data: Dictionary) -> Array:
 	for enemy_id in enemy_ids:
 		var enemy = StatCalculator.calc(enemy_id, enemy_level)
 		if not enemy.is_empty():
-			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0) + enemy.get("spd", 0)
+			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0)
 			enemy["_isFallbackLevel"] = is_fallback
 			result.append(enemy)
 	return result
