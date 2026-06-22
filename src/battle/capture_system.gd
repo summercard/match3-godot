@@ -27,6 +27,23 @@ static var BASE_CAPTURE_RATE: Dictionary = {
 ## 前3关(stage_1_1/1_2/1_3)连续失败3次后，下次收服概率+30%
 static var ROOKIE_STAGES: Array = ["stage_1_1", "stage_1_2", "stage_1_3"]
 
+
+## 捕获资格的唯一入口。普通怪默认可捕获，Boss 默认不可捕获；
+## 特殊关卡可用 allowBossCapture 显式开放，怪物数据也可显式配置 capturable。
+static func can_capture(enemy: Dictionary, stage: Dictionary = {}) -> bool:
+	if enemy.is_empty():
+		return false
+	if bool(stage.get("allowBossCapture", false)):
+		return true
+	if enemy.has("capturable"):
+		return bool(enemy.get("capturable", false))
+	var monster_id := str(enemy.get("monsterId", enemy.get("id", "")))
+	var template: Dictionary = MonsterDbScript.get_monster(monster_id)
+	if template.has("capturable"):
+		return bool(template.get("capturable", false))
+	var is_boss := bool(enemy.get("isBoss", enemy.get("is_boss", template.get("isBoss", false))))
+	return not is_boss
+
 ## 获取新手保护加成
 ## @param stage_id - 当前关卡ID
 ## @param consecutive_fails - 连续收服失败次数
@@ -221,6 +238,10 @@ static func get_capture_skip_feedback(reason_id: String, options: Dictionary = {
 		title = "无捕捉目标"
 		reason = "本场没有可记录的捕捉目标。"
 		advice = "遇到可捕捉敌人时再开启自动捕捉。"
+	elif reason_id == "not_capturable":
+		title = "目标不可捕捉"
+		reason = "该目标不属于本场可收服对象。"
+		advice = "Boss 默认不可捕捉；仅特殊关卡会明确开放。"
 	return {
 		"title": title,
 		"desc": "%s\n%s" % [reason, advice],

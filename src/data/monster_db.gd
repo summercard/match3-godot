@@ -1,5 +1,7 @@
 class_name MonsterDb
 extends RefCounted
+
+const ElementRulesScript = preload("res://src/battle/element_rules.gd")
 ## 精灵数据库 - 从 js/battle/monsterData.js 翻译
 ##
 ## ⚠️ 数据修改指引 / DATA EDITOR GUIDE
@@ -1017,23 +1019,6 @@ const MONSTER_DB: Dictionary = {
 	}
 }
 
-# ========== 属性克制表 ==========
-const ELEMENT_CHART: Dictionary = {
-	"fire":    { "strong": "grass",  "weak": "water"   },
-	"water":   { "strong": "fire",   "weak": "grass"   },
-	"grass":   { "strong": "water",  "weak": "fire"    },
-	"thunder": { "strong": "light",  "weak": "light"   },
-	"light":   { "strong": "dark",   "weak": "void"    },
-	"earth":   { "strong": "wind",   "weak": "fire"    },
-	"wind":    { "strong": "earth",  "weak": "water"   },
-	"dark":    { "strong": "light",  "weak": "light"   },
-	"ice":     { "strong": "grass",  "weak": "fire"    },
-	"void":    { "strong": "dark",   "weak": "light"   },
-	"temporal":{ "strong": "dark",   "weak": "void"   },
-	"star":    { "strong": "temporal", "weak": "void"   },
-	"chaos":   { "strong": "star",   "weak": "light"   }
-}
-
 # ========== 棋盘能量亲和 ==========
 ## element 是世界观/克制属性，boardAffinity 是消除宝石时响应的五色棋盘能量。
 const BOARD_AFFINITY_FALLBACK: Dictionary = {
@@ -1091,14 +1076,7 @@ const RARITY_DEF_GROWTH_PER_LEVEL: Dictionary = {
 ## 获取属性克制倍率
 ## JS: getElementMultiplier(atkElement, defElement)
 static func get_element_multiplier(atk_element: String, def_element: String) -> float:
-	var chart: Dictionary = ELEMENT_CHART.get(atk_element, {})
-	if chart.is_empty():
-		return 1.0
-	if chart.get("strong") == def_element:
-		return 1.5
-	if chart.get("weak") == def_element:
-		return 0.75
-	return 1.0
+	return ElementRulesScript.get_multiplier(atk_element, def_element)
 
 ## 根据幻想属性推导棋盘能量亲和，兼容旧精灵数据。
 static func get_board_affinity_from_element(element: String) -> String:

@@ -5,23 +5,14 @@
 class_name DamageCalculator
 extends RefCounted
 
+const ElementRulesScript = preload("res://src/battle/element_rules.gd")
+
 const DEFENSE_SCALE: float = 200.0
 const MAX_DEFENSE_REDUCTION: float = 0.25
 
-# 属性克制表 (与 monster_db.gd 保持一致)
-const ELEMENT_CHART: Dictionary = {
-	"fire":    { "fire": 1.0, "water": 0.5, "grass": 2.0, "thunder": 1.0, "light": 1.0 },
-	"water":   { "fire": 2.0, "water": 1.0, "grass": 0.5, "thunder": 1.0, "light": 1.0 },
-	"grass":   { "fire": 0.5, "water": 2.0, "grass": 1.0, "thunder": 1.0, "light": 1.0 },
-	"thunder": { "fire": 1.0, "water": 1.0, "grass": 1.0, "thunder": 1.0, "light": 2.0 },
-	"light":   { "fire": 1.0, "water": 1.0, "grass": 1.0, "thunder": 0.5, "light": 1.0 }
-}
-
-# 属性克制倍率获取
+# 属性克制倍率兼容入口；实际规则只由 ElementRules 维护。
 static func get_element_multiplier(attacker_elem: String, defender_elem: String) -> float:
-	if ELEMENT_CHART.has(attacker_elem) and ELEMENT_CHART[attacker_elem].has(defender_elem):
-		return ELEMENT_CHART[attacker_elem][defender_elem]
-	return 1.0
+	return ElementRulesScript.get_multiplier(attacker_elem, defender_elem)
 
 
 static func get_defense_reduction(defense: float) -> float:

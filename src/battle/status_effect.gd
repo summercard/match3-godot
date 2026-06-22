@@ -10,7 +10,7 @@ extends RefCounted
 ## - burn: DoT, sourceATK×0.15, 3回合
 ## - freeze: ATK降低30%, 2回合
 ## - poison: DoT, sourceATK×0.20, 3回合
-## - stun: 50%跳过攻击, 1回合
+## - stun: 成功附加后跳过1次攻击, 1回合
 ## - 4颗触发50%概率，5颗+触发100%概率
 ## - Boss抗性：stun概率×50%
 
@@ -38,7 +38,6 @@ const STATUS_DEFS: Dictionary = {
 	},
 	"stun": {
 		"element": "thunder",
-		"skip_chance": 0.50,
 		"duration": 1,
 		"label": "⚡眩晕"
 	}
@@ -81,8 +80,8 @@ func is_enemy_stunned(enemy_index: int) -> bool:
 	var effect = _effects[enemy_index]
 	if effect == null or not effect is Dictionary or effect.get("type", "") != "stun":
 		return false
-	var skip_chance: float = STATUS_DEFS["stun"].get("skip_chance", 0.50)
-	return randf() < skip_chance
+	# 附加阶段已经处理触发概率和 Boss 抗性；状态存在时必须稳定生效。
+	return true
 
 
 ## 获取敌人的冰冻ATK降低倍率
@@ -141,7 +140,7 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 
 		var trigger_chance: float = 1.0 if count >= 5 else 0.5
 
-		if status_type == "stun" and weakest_enemy.get("is_boss", false):
+		if status_type == "stun" and bool(weakest_enemy.get("isBoss", weakest_enemy.get("is_boss", false))):
 			trigger_chance *= 0.5
 
 		if randf() > trigger_chance:
@@ -172,9 +171,9 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 		})
 
 
-## 处理状态效果（回合末调用）
-## 返回日志 [{ type, enemy_index, damage?, message }]
-func process_status_effects(enemies: Array) -> Array:
+## 敌方回合开始：结算 DOT 并生成当前状态提示，但不扣除持续回合。
+## 控制判断和冰冻倍率会在本轮行动阶段读取仍然有效的状态。
+func begin_enemy_turn(enemies: Array) -> Array:
 	var logs: Array = []
 
 	for i in range(enemies.size()):
@@ -215,19 +214,40 @@ func process_status_effects(enemies: Array) -> Array:
 				"message": "⚡%s 眩晕中！" % enemy.get("name", "")
 			})
 
-		var turns_left: int = effect.get("turns_left", 1) - 1
-		effect["turns_left"] = turns_left
-		if turns_left <= 0:
-			_effects[i] = null
-			var label: String = def.get("label", "")
-			logs.append({
-				"type": effect.get("type") + "_end",
-				"enemy_index": i,
-				"enemy_name": enemy.get("name", ""),
-				"message": "%s 的%s效果消失了" % [enemy.get("name", ""), label]
-			})
-
 	return logs
+
+
+## 敌方回合结束：所有仍存活状态统一扣除一次持续回合并清理到期效果。
+func end_enemy_turn(enemies: Array) -> Array:
+	var logs: Array = []
+	for i in range(_effects.size()):
+		var effect = _effects[i]
+		if effect == null or not effect is Dictionary:
+			continue
+		var enemy: Dictionary = enemies[i] if i < enemies.size() and enemies[i] is Dictionary else {}
+		if enemy.is_empty() or int(enemy.get("hp", 0)) <= 0:
+			_effects[i] = null
+			continue
+		var turns_left := int(effect.get("turns_left", 1)) - 1
+		effect["turns_left"] = turns_left
+		if turns_left > 0:
+			continue
+		_effects[i] = null
+		var status_type := str(effect.get("type", ""))
+		var def: Dictionary = STATUS_DEFS.get(status_type, {})
+		var label := str(def.get("label", status_type))
+		logs.append({
+			"type": status_type + "_end",
+			"enemy_index": i,
+			"enemy_name": enemy.get("name", ""),
+			"message": "%s 的%s效果消失了" % [enemy.get("name", ""), label]
+		})
+	return logs
+
+
+## 兼容旧调用：只执行回合开始阶段，持续时间必须由 end_enemy_turn() 消费。
+func process_status_effects(enemies: Array) -> Array:
+	return begin_enemy_turn(enemies)
 
 
 ## 获取状态效果列表（快照）

@@ -26,10 +26,17 @@ static func process_poison_turn(board, battle, damage_per_tile: float = 0.03) ->
 		return {"spread_tiles": spread_tiles, "hits": [], "fog_count": fog_count, "total_damage": 0, "all_dead": false}
 
 	var damage_per_member: int = total_damage / alive_team.size()
+	var damage_remainder: int = total_damage % alive_team.size()
 	var hits: Array = []
-	for member in alive_team:
-		member["hp"] = maxi(member.get("hp", 0) - damage_per_member, 0)
-		hits.append({"team_index": battle.player_team.find(member), "damage": damage_per_member})
+	var actual_total_damage := 0
+	for i in range(alive_team.size()):
+		var member: Dictionary = alive_team[i]
+		var requested_damage := damage_per_member + (1 if i < damage_remainder else 0)
+		var hp_before := int(member.get("hp", 0))
+		member["hp"] = maxi(hp_before - requested_damage, 0)
+		var actual_damage := hp_before - int(member.get("hp", 0))
+		actual_total_damage += actual_damage
+		hits.append({"team_index": battle.player_team.find(member), "damage": actual_damage})
 
 	var all_dead := true
 	for m in battle.player_team:
@@ -44,7 +51,7 @@ static func process_poison_turn(board, battle, damage_per_tile: float = 0.03) ->
 		"spread_tiles": spread_tiles,
 		"hits": hits,
 		"fog_count": fog_count,
-		"total_damage": total_damage,
+		"total_damage": actual_total_damage,
 		"all_dead": all_dead
 	}
 

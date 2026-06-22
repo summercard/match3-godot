@@ -58,12 +58,15 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 	var flat_def: float = float(data.get("baseDEF", 0)) + float(lv - 1) * def_per_level
 	var df  := int(flat_def * nature_mult(nature_id, "def"))
 	var spd := int(float(data.get("baseSPD", 0)) * g * nature_mult(nature_id, "spd"))
+	var is_boss := bool(data.get("isBoss", false))
 
 	return {
 		"id": str(data.get("id", monster_id)),
 		"name": str(data.get("name", "")),
 		"element": str(data.get("element", "")),
+		"boardAffinity": MonsterDb.get_board_affinity(data),
 		"rarity": rarity,
+		"emoji": str(data.get("emoji", "")),
 		"level": lv,
 		"nature": nature_id,
 		"hp": hp,
@@ -72,7 +75,13 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 		"def": df,
 		"spd": spd,
 		"growth": g,
-		"isBoss": bool(data.get("isBoss", false)),
+		"skill": MonsterDb.normalize_skill(data.get("skill", {})),
+		"skillCharge": 0,
+		"leaderSkill": str(data.get("leaderSkill", "")),
+		"enemySkills": null if not data.has("enemySkills") else data.get("enemySkills", []).duplicate(true),
+		"isBoss": is_boss,
+		"isElite": bool(data.get("isElite", false)),
+		"capturable": bool(data.get("capturable", not is_boss)),
 	}
 
 ## 敌方只负责生成随机性格并解析实际战斗等级，属性仍走 calc()。

@@ -32,16 +32,18 @@ static func apply_removals(board, context: Dictionary) -> Dictionary:
 	var rainbow_matches: Array = context.get("rainbow_matches", [])
 	var explosion_gems: Array = context.get("explosion_gems", [])
 	var bomb_gems: Array = context.get("bomb_gems", [])
-	var gem_counts: Dictionary = board.remove_matches(matches)
+	var affected_gems: Array = matches.duplicate()
+	var gem_counts: Dictionary = board.remove_matches(matches, false)
 
 	for enh in enhanced_matches:
 		var positions: Array = board.get_cross_explosion_positions(enh["row"], enh["col"])
-		_merge_counts(gem_counts, board.remove_explosion_gems(positions))
+		affected_gems.append_array(positions)
+		_merge_counts(gem_counts, board.remove_explosion_gems(positions, false))
 
 	for bomb in bomb_matches:
 		var positions: Array = board.get_bomb_explosion_positions(bomb["row"], bomb["col"])
-		board.damage_bomb_obstacles(bomb["row"], bomb["col"])
-		_merge_counts(gem_counts, board.remove_explosion_gems(positions))
+		affected_gems.append_array(positions)
+		_merge_counts(gem_counts, board.remove_explosion_gems(positions, false))
 
 	var rainbow_removed_set: Array = []
 	for m in matches:
@@ -52,13 +54,17 @@ static func apply_removals(board, context: Dictionary) -> Dictionary:
 		rainbow_removed_set.append("%d,%d" % [g["row"], g["col"]])
 	for rainbow in rainbow_matches:
 		var positions: Array = board.get_rainbow_positions(rainbow["type"], rainbow_removed_set)
-		_merge_counts(gem_counts, board.remove_explosion_gems(positions))
+		affected_gems.append_array(positions)
+		_merge_counts(gem_counts, board.remove_explosion_gems(positions, false))
 		for p in positions:
 			rainbow_removed_set.append("%d,%d" % [p["row"], p["col"]])
 
+	var obstacle_damage: Array = board.damage_obstacles_for_resolution(affected_gems, bomb_matches)
+
 	return {
 		"gem_counts": gem_counts,
-		"special_gems": explosion_gems + bomb_gems + context.get("rainbow_gems", [])
+		"special_gems": explosion_gems + bomb_gems + context.get("rainbow_gems", []),
+		"obstacle_damage": obstacle_damage
 	}
 
 static func get_special_wait(phases: Array, eliminate_duration: float, fall_duration: float) -> float:

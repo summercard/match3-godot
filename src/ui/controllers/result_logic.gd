@@ -190,7 +190,13 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 	if capture_played_inline:
 		_captured = _battle_result.get("captured", false)
 		_capture_target = _battle_result.get("capture_target", {})
-		_capture_result = _battle_result.get("capture_result_text", {})
+		var invalid_capture_target := not _capture_target.is_empty() and not CaptureSystemScript.can_capture(_capture_target)
+		if invalid_capture_target:
+			_captured = false
+			_capture_target = {}
+			_capture_result = CaptureSystemScript.get_capture_skip_feedback("not_capturable")
+		else:
+			_capture_result = _battle_result.get("capture_result_text", {})
 		_capture_item_used = _battle_result.get("capture_item_used", {})
 		_capture_window = _battle_result.get("capture_window", {})
 	else:
@@ -247,11 +253,11 @@ func _process_capture() -> void:
 	var enemies: Array = _battle_result.get("enemies", [])
 	var target_enemy: Dictionary = {}
 	for enemy: Dictionary in enemies:
-		if enemy and enemy.get("hp", 0) > 0:
+		if enemy and enemy.get("hp", 0) > 0 and CaptureSystemScript.can_capture(enemy):
 			target_enemy = enemy
 			break
 	if target_enemy.is_empty():
-		var valid_enemies: Array = enemies.filter(func(e): return e and e.has("id"))
+		var valid_enemies: Array = enemies.filter(func(e): return e and e.has("id") and CaptureSystemScript.can_capture(e))
 		if not valid_enemies.is_empty():
 			target_enemy = valid_enemies[randi() % valid_enemies.size()]
 	if target_enemy.is_empty():
@@ -437,7 +443,7 @@ func _save_rewards() -> void:
 	if _rewards["exp"] > 0 and _storage.has_method("add_player_exp"):
 		_storage.add_player_exp(_rewards["exp"])
 	_add_monster_exp_from_battle()
-	if _captured and not _capture_target.is_empty() and _capture_target.has("id"):
+	if _captured and not _capture_target.is_empty() and _capture_target.has("id") and CaptureSystemScript.can_capture(_capture_target):
 		if _storage.has_method("add_monster_instance"):
 			_storage.add_monster_instance(
 				str(_capture_target["id"]),

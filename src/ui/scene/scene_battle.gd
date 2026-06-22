@@ -23,6 +23,7 @@ const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_r
 const BattleFeedbackOverlayScript = preload("res://src/ui/components/battle_feedback_overlay.gd")
 const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
+const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
@@ -1608,11 +1609,12 @@ func _trigger_inline_capture() -> void:
 		target_window = candidate.get("window", {})
 		target_idx = int(candidate.get("enemy_index", -1))
 	if target_enemy.is_empty():
-		var valid_enemies: Array = enemies.filter(func(e): return e != null and e.has("id"))
+		var current_stage: Dictionary = _battle.stage_data if _battle.stage_data is Dictionary else {}
+		var valid_enemies: Array = enemies.filter(func(e): return e != null and e.has("id") and CaptureSystemScript.can_capture(e, current_stage))
 		if not valid_enemies.is_empty():
 			target_enemy = valid_enemies[randi() % valid_enemies.size()]
 			target_idx = enemies.find(target_enemy)
-			target_window = CaptureSystem.calc_taming_window(
+			target_window = CaptureSystemScript.calc_taming_window(
 				float(target_enemy.get("hp", 0)),
 				float(target_enemy.get("maxHP", 1))
 			)

@@ -338,18 +338,24 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		var target_idx = enemies.find(target)
 
 		# 护盾减伤（委托给 EnemySkillSystem）
-		var shield_result = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
-		target["hp"] = target.get("hp", 0) - shield_result["remaining"]
+		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
+		var shield_absorbed := int(shield_result.get("absorbed", 0))
+		var hp_damage := int(shield_result.get("remaining", total_damage))
+		target["hp"] = target.get("hp", 0) - hp_damage
 		_update_capture_window(target_idx)
 
-		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + total_damage
+		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + hp_damage
 
 		damage_log.append({
 			"attacker": monster.get("name", ""),
 			"attacker_emoji": monster.get("emoji", ""),
 			"target": target.get("name", ""),
 			"target_emoji": target.get("emoji", ""),
-			"damage": total_damage,
+			"damage": hp_damage,
+			"raw_damage": total_damage,
+			"rawDamage": total_damage,
+			"shield_absorbed": shield_absorbed,
+			"shieldAbsorbed": shield_absorbed,
 			"element": element,
 			"boardAffinity": board_affinity,
 			"combo": combo_count,
@@ -529,8 +535,8 @@ func use_active_skill(monster_id: String) -> Dictionary:
 		return { "success": false, "reason": "no_valid_effect" }
 
 	skill_charges[monster_id] = maxi(0, charge - cost)
-	if total_damage > 0:
-		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + total_damage
+	if remaining_damage > 0:
+		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + remaining_damage
 
 	var target_died: bool = target != null and target.get("hp", 0) <= 0
 	var result := {
@@ -920,6 +926,10 @@ func _update_capture_window(enemy_idx: int) -> void:
 	var enemy: Dictionary = enemies[enemy_idx]
 	if enemy == null or enemy.is_empty() or not enemy.has("id"):
 		return
+	if not CaptureSystem.can_capture(enemy, stage_data if stage_data is Dictionary else {}):
+		capture_windows.erase(enemy_idx)
+		capture_window_best.erase(enemy_idx)
+		return
 	var window := CaptureSystem.calc_taming_window(
 		float(enemy.get("hp", 0)),
 		float(enemy.get("maxHP", 1)),
@@ -941,6 +951,8 @@ func get_best_capture_candidate() -> Dictionary:
 	for idx in range(enemies.size()):
 		var enemy: Dictionary = enemies[idx]
 		if enemy == null or enemy.is_empty() or not enemy.has("id"):
+			continue
+		if not CaptureSystem.can_capture(enemy, stage_data if stage_data is Dictionary else {}):
 			continue
 		var window: Dictionary = capture_window_best.get(idx, capture_windows.get(idx, {}))
 		if window.is_empty():
@@ -979,8 +991,8 @@ func enemy_action() -> Dictionary:
 		return {}
 	var actions: Array = []
 
-	# 状态效果处理（委托给 BattleStatusEffect）
-	var status_logs = _status_effect.process_status_effects(enemies)
+	# 回合开始先结算 DOT；控制状态保持有效直到本轮敌方行动结束。
+	var status_logs: Array = _status_effect.begin_enemy_turn(enemies)
 
 	var dot_kills: Array = []
 	for i in range(enemies.size()):
@@ -1108,6 +1120,9 @@ func enemy_action() -> Dictionary:
 			"guard_absorbed": guard_absorbed,
 			"shield_absorbed": shield_absorbed
 		})
+
+	# 所有敌人完成行动或跳过行动后，再统一消费一次状态持续回合。
+	status_logs.append_array(_status_effect.end_enemy_turn(enemies))
 
 	for a in actions:
 		enemy_attacked.emit(a)

@@ -45,6 +45,8 @@ const ENHANCED_GEM: String = "enhanced"
 
 ## 炸弹宝石类型标识（L/T形消除产生）
 const BOMB_GEM: String = "bomb"
+const SHUFFLE_MAX_ATTEMPTS: int = 32
+const SHUFFLE_REGENERATE_ATTEMPTS: int = 64
 
 # ========== 实例变量 ==========
 
@@ -225,15 +227,52 @@ func damage_obstacle(row: int, col: int) -> bool:
 
 ## 消除宝石后，对相邻障碍物造成伤害
 func _damage_adjacent_obstacles(row: int, col: int) -> Array:
+	return damage_obstacles_for_resolution([{"row": row, "col": col}])
+
+
+## 一次消除结算的统一障碍伤害入口。
+## 普通、十字、彩虹按被移除宝石的四邻域收集；炸弹额外覆盖中心3×3。
+## 同一坐标先去重，再统一造成1点伤害。
+func damage_obstacles_for_resolution(gem_positions: Array, bomb_centers: Array = []) -> Array:
+	var affected: Dictionary = {}
 	var dirs: Array = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-	var destroyed: Array = []
-	for d: Array in dirs:
-		var nr: int = row + d[0]
-		var nc: int = col + d[1]
-		if nr >= 0 and nr < rows and nc >= 0 and nc < cols and is_obstacle(nr, nc):
-			if damage_obstacle(nr, nc):
-				destroyed.append({ "row": nr, "col": nc })
-	return destroyed
+	for gem in gem_positions:
+		if not gem is Dictionary:
+			continue
+		var row := int(gem.get("row", -1))
+		var col := int(gem.get("col", -1))
+		for d: Array in dirs:
+			_add_obstacle_if_valid(affected, row + int(d[0]), col + int(d[1]))
+	for bomb in bomb_centers:
+		if not bomb is Dictionary:
+			continue
+		var center_row := int(bomb.get("row", -1))
+		var center_col := int(bomb.get("col", -1))
+		for dr in range(-1, 2):
+			for dc in range(-1, 2):
+				if dr == 0 and dc == 0:
+					continue
+				_add_obstacle_if_valid(affected, center_row + dr, center_col + dc)
+
+	var results: Array = []
+	for key in affected.keys():
+		var pos: Dictionary = affected[key]
+		var row := int(pos["row"])
+		var col := int(pos["col"])
+		var destroyed := damage_obstacle(row, col)
+		results.append({
+			"row": row,
+			"col": col,
+			"destroyed": destroyed,
+			"remainingHP": 0 if destroyed else int(obstacles[row][col].get("hp", 0))
+		})
+	return results
+
+
+func _add_obstacle_if_valid(affected: Dictionary, row: int, col: int) -> void:
+	if row < 0 or row >= rows or col < 0 or col >= cols or not is_obstacle(row, col):
+		return
+	affected["%d,%d" % [row, col]] = {"row": row, "col": col}
 
 # ========== 锁定宝石相关 ==========
 
@@ -634,17 +673,7 @@ func get_bomb_explosion_positions(center_row: int, center_col: int) -> Array:
 
 ## 对炸弹范围内障碍物造成一次伤害
 func damage_bomb_obstacles(center_row: int, center_col: int) -> Array:
-	var destroyed: Array = []
-	for dr: int in range(-1, 2):
-		for dc: int in range(-1, 2):
-			if dr == 0 and dc == 0:
-				continue
-			var nr: int = center_row + dr
-			var nc: int = center_col + dc
-			if nr >= 0 and nr < rows and nc >= 0 and nc < cols and is_obstacle(nr, nc):
-				if damage_obstacle(nr, nc):
-					destroyed.append({ "row": nr, "col": nc })
-	return destroyed
+	return damage_obstacles_for_resolution([], [{"row": center_row, "col": center_col}])
 
 ## 获取棋盘上所有指定类型宝石的位置（用于彩虹消除）
 ## exclude_set: Array of "row,col" 字符串，这些位置的宝石已在普通消除中移除，不再重复
@@ -660,7 +689,7 @@ func get_rainbow_positions(match_type: String, exclude_set: Array) -> Array:
 # ========== 消除处理 ==========
 
 ## 消除匹配的宝石，返回按类型统计的消除数
-func remove_matches(matches: Array) -> Dictionary:
+func remove_matches(matches: Array, damage_adjacent_obstacles: bool = true) -> Dictionary:
 	var counts: Dictionary = {}
 	for m: Dictionary in matches:
 		var gem_type: String = m.get("type", "")
@@ -670,12 +699,12 @@ func remove_matches(matches: Array) -> Dictionary:
 			counts[gem_type] = 0
 		counts[gem_type] += 1
 		grid[m["row"]][m["col"]] = ""
-		# 消除宝石时对相邻障碍物造成1点伤害
-		_damage_adjacent_obstacles(m["row"], m["col"])
+	if damage_adjacent_obstacles:
+		damage_obstacles_for_resolution(matches)
 	return counts
 
 ## 消除十字爆炸波及的格子（设置grid为null），返回按类型统计
-func remove_explosion_gems(positions: Array) -> Dictionary:
+func remove_explosion_gems(positions: Array, damage_adjacent_obstacles: bool = true) -> Dictionary:
 	var counts: Dictionary = {}
 	for p: Dictionary in positions:
 		var gem_type: String = grid[p["row"]][p["col"]]
@@ -685,8 +714,8 @@ func remove_explosion_gems(positions: Array) -> Dictionary:
 			counts[gem_type] = 0
 		counts[gem_type] += 1
 		grid[p["row"]][p["col"]] = ""
-		# 爆炸也对相邻障碍物造成伤害
-		_damage_adjacent_obstacles(p["row"], p["col"])
+	if damage_adjacent_obstacles:
+		damage_obstacles_for_resolution(positions)
 	return counts
 
 # ========== 重力下落 ==========
@@ -775,8 +804,9 @@ func has_valid_moves() -> bool:
 				swap(r, c, r + 1, c)
 	return false
 
-## 重新洗牌
-func shuffle() -> void:
+## 重新洗牌。优先保留当前宝石集合；无法得到合法棋盘时再有界重建。
+## 返回 { success, attempts, regenerated }，任何路径都不会递归。
+func shuffle() -> Dictionary:
 	var types: Array = []
 	var positions: Array = []
 	
@@ -786,21 +816,55 @@ func shuffle() -> void:
 				types.append(grid[r][c])
 				positions.append({ "r": r, "c": c })
 	
-	# Fisher-Yates 洗牌
-	for i: int in range(types.size() - 1, 0, -1):
-		var j: int = randi() % (i + 1)
-		var tmp: Variant = types[i]
-		types[i] = types[j]
-		types[j] = tmp
-	
-	# 重新放置（只放到非障碍物且非锁定的格子）
-	for i: int in range(positions.size()):
+	if positions.size() < 2:
+		return {"success": false, "attempts": 0, "regenerated": false}
+
+	var original_types := types.duplicate()
+	for attempt in range(1, SHUFFLE_MAX_ATTEMPTS + 1):
+		var candidate := original_types.duplicate()
+		_shuffle_array(candidate)
+		_place_types(positions, candidate)
+		if _is_playable_grid():
+			return {"success": true, "attempts": attempt, "regenerated": false}
+
+	# 当前颜色分布可能不可能同时满足“无现成匹配”和“存在合法移动”。
+	# 使用新颜色有界重建；仍失败时恢复原棋盘并显式返回失败。
+	for regenerate_attempt in range(1, SHUFFLE_REGENERATE_ATTEMPTS + 1):
+		_regenerate_positions_without_matches(positions)
+		if _is_playable_grid():
+			return {
+				"success": true,
+				"attempts": SHUFFLE_MAX_ATTEMPTS + regenerate_attempt,
+				"regenerated": true
+			}
+
+	_place_types(positions, original_types)
+	return {
+		"success": false,
+		"attempts": SHUFFLE_MAX_ATTEMPTS + SHUFFLE_REGENERATE_ATTEMPTS,
+		"regenerated": true
+	}
+
+
+func _place_types(positions: Array, types: Array) -> void:
+	for i in range(mini(positions.size(), types.size())):
 		grid[positions[i]["r"]][positions[i]["c"]] = types[i]
-	
-	# 如果洗牌后有匹配，先消除
-	# 如果还是死局，再洗一次
-	if not has_valid_moves():
-		shuffle()
+
+
+func _regenerate_positions_without_matches(positions: Array) -> void:
+	for pos: Dictionary in positions:
+		var row := int(pos["r"])
+		var col := int(pos["c"])
+		var gem_type := _random_gem_type()
+		for _attempt in range(100):
+			gem_type = _random_gem_type()
+			if not _would_match(row, col, gem_type):
+				break
+		grid[row][col] = gem_type
+
+
+func _is_playable_grid() -> bool:
+	return find_matches().get("gems", []).is_empty() and has_valid_moves()
 
 # ========== 调试/工具方法 ==========
 
