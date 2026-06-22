@@ -18,4 +18,13 @@ Use Godot 4.6.x:
 godot --headless --path . --script res://tests/p0_smoke_test.gd
 ```
 
+Full local gate:
+
+```powershell
+.\tools\check_formal_scene_resources.ps1
+.\tools\run_godot_tests.ps1 -GodotBin "C:\path\to\Godot_v4.6.3-stable_win64.exe"
+```
+
+`run_godot_tests.ps1` also reads `GODOT_BIN`, PATH, or a currently running Godot process. It gives every test an isolated `MATCH3_SAVE_PATH` and fails on timeouts, engine errors, script errors, missing resources, and leak reports.
+
 The full regression list and the 2026-06-01 repository cleanup record are documented in `docs/archive/2026-06-01-version-cleanup/README.md`.

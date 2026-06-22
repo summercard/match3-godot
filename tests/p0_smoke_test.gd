@@ -6,6 +6,8 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	_scan_formal_tscn_resources()
+
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -63,6 +65,57 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _scan_formal_tscn_resources() -> void:
+	var scene_paths: Array = ["res://main.tscn"]
+	_collect_tscn_paths("res://src", scene_paths)
+	for scene_path: String in scene_paths:
+		_scan_tscn_resource_paths(scene_path)
+
+func _collect_tscn_paths(dir_path: String, result: Array) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		_failures.append("formal resource scan should open %s" % dir_path)
+		return
+	for file_name: String in dir.get_files():
+		if file_name.ends_with(".tscn"):
+			result.append("%s/%s" % [dir_path, file_name])
+	for child_name: String in dir.get_directories():
+		if child_name.begins_with("."):
+			continue
+		_collect_tscn_paths("%s/%s" % [dir_path, child_name], result)
+
+func _scan_tscn_resource_paths(scene_path: String) -> void:
+	var file := FileAccess.open(scene_path, FileAccess.READ)
+	if file == null:
+		_failures.append("formal scene should be readable: %s" % scene_path)
+		return
+	var line_number := 0
+	while not file.eof_reached():
+		line_number += 1
+		var line := file.get_line()
+		var res_path := _extract_resource_path(line)
+		if res_path.is_empty():
+			continue
+		if res_path.begins_with("res://.godot/imported") or res_path.begins_with("res://assets/MATCH3美术资产"):
+			_failures.append("%s:%d should not reference banned resource path %s" % [scene_path, line_number, res_path])
+			continue
+		if not ResourceLoader.exists(res_path) and not FileAccess.file_exists(res_path):
+			_failures.append("%s:%d missing resource %s" % [scene_path, line_number, res_path])
+
+func _extract_resource_path(line: String) -> String:
+	if not line.contains("[ext_resource"):
+		return ""
+	var marker := "path=\""
+	var start := line.find(marker)
+	if start < 0:
+		return ""
+	start += marker.length()
+	var end := line.find("\"", start)
+	if end < 0:
+		return ""
+	var path := line.substr(start, end - start)
+	return path if path.begins_with("res://") else ""
 
 func _mock_battle_result(stage_data: Dictionary) -> Dictionary:
 	return {

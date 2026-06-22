@@ -22,6 +22,8 @@ Thumbs.db
 美术开发/
 assets/images/concepts/
 tmp_*.gd.uid
+tmp/test-logs/
+tmp/test-saves/
 *.pyc
 __pycache__/
 *.bak

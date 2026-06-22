@@ -1,0 +1,46 @@
+name: Godot CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  GODOT_VERSION: "4.6.3"
+
+jobs:
+  test:
+    name: Headless import, resources, and tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Godot
+        shell: pwsh
+        run: |
+          $version = $env:GODOT_VERSION
+          $zipName = "Godot_v$version-stable_win64.exe.zip"
+          $url = "https://github.com/godotengine/godot/releases/download/$version-stable/$zipName"
+          $download = Join-Path $env:RUNNER_TEMP $zipName
+          Invoke-WebRequest -Uri $url -OutFile $download
+          $installDir = Join-Path $env:RUNNER_TEMP "godot"
+          Expand-Archive -LiteralPath $download -DestinationPath $installDir
+          $exe = Get-ChildItem -LiteralPath $installDir -Recurse -Filter "Godot*.exe" | Select-Object -First 1
+          if (-not $exe) { throw "Godot executable was not found after extraction." }
+          "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Headless import
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --path . --import --quit
+
+      - name: Formal scene resource gate
+        shell: pwsh
+        run: |
+          ./tools/check_formal_scene_resources.ps1
+
+      - name: Full Godot test suite
+        shell: pwsh
+        run: |
+          ./tools/run_godot_tests.ps1 -GodotBin $env:GODOT_BIN -TimeoutSec 60
