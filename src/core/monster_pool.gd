@@ -286,7 +286,8 @@ static func get_instance_stats(instance: Dictionary) -> Dictionary:
 	var monster_id := str(instance.get("monsterId", ""))
 	var level := int(instance.get("level", 1))
 	var nature := str(instance.get("nature", ""))
-	return StatCalculator.calc(monster_id, level, nature)
+	var tier := StatCalculator.EnemyTier.ELITE if bool(instance.get("isElite", false)) else StatCalculator.EnemyTier.NORMAL
+	return StatCalculator.calc_with_tier(monster_id, level, nature, tier)
 
 static func add_instance_exp(instance: Dictionary, exp_gained: int) -> Dictionary:
 	var old_level := int(instance.get("level", 1))

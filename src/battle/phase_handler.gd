@@ -98,9 +98,10 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 				monster["hp"] = new_max_hp
 			monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 			monster["def"] = int(monster.get("def", 0) * hp_mult)
-			if is_elite:
+			if bool(monster.get("isElite", false)):
 				monster["_visualScale"] = ELITE_VISUAL_SCALE
 				monster["isElite"] = true
+			if is_elite:
 				monster["_eliteSource"] = "random"
 			# ★ 主人定 2026-06-10：二阶段体型变大 50%
 			monster["_visualScale"] = 1.5

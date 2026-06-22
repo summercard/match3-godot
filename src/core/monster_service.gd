@@ -9,9 +9,10 @@ static func get_template(monster_id: String) -> Dictionary:
 static func get_template_stats(monster_id: String, level: int = 1, nature_id: String = "") -> Dictionary:
 	return StatCalculator.calc(monster_id, level, nature_id)
 
-## 我方普通精灵使用基础成长数值；只有明确标记为精英的实例才叠加精英倍率。
-static func get_owned_stats(monster_id: String, level: int = 1, nature_id: String = "", _is_elite: bool = false) -> Dictionary:
-	return StatCalculator.calc(monster_id, level, nature_id)
+## Owned elite instances receive the elite base stat multiplier.
+static func get_owned_stats(monster_id: String, level: int = 1, nature_id: String = "", is_elite: bool = false) -> Dictionary:
+	var tier := StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
+	return StatCalculator.calc_with_tier(monster_id, level, nature_id, tier)
 
 static func get_instance_view(instance_id: String, storage: Node = null) -> Dictionary:
 	var sm := _storage(storage)

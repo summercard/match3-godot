@@ -603,16 +603,6 @@ func _init_battle() -> void:
 	if not _battle.skill_ready.is_connected(_on_skill_ready):
 		_battle.skill_ready.connect(_on_skill_ready)
 
-	# 精英关卡：应用eliteMultiplier加成敌人属性
-	var elite_mult: float = _stage_data.get("eliteMultiplier", 0.0)
-	if elite_mult > 0.0:
-		for enemy: Dictionary in _battle.enemies:
-			if enemy and not enemy.is_empty():
-				enemy["maxHP"] = int(enemy.get("maxHP", 0) * elite_mult)
-				enemy["hp"] = enemy["maxHP"]
-				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
-				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
-	
 	var battle_hint := str(_stage_data.get("battleHint", ""))
 	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
 	_load_capture_preferences()
@@ -1138,6 +1128,7 @@ func _process_matches() -> void:
 	# ===== 第6步：执行消除（普通 + 特殊）=====
 	var removal_result: Dictionary = BattleMatchRulesScript.apply_removals(_board, match_context)
 	var gem_counts: Dictionary = removal_result.get("gem_counts", {})
+	_handle_obstacle_damage_fx(removal_result.get("obstacle_damage", []))
 	
 	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
@@ -3922,6 +3913,35 @@ func _draw_unlock_animations() -> void:
 
 func _draw_poison_fog_anims() -> void:
 	BattleBoardRendererScript.draw_poison_fog_anims(self, _board_render_state())
+
+func _handle_obstacle_damage_fx(obstacle_damage: Array) -> void:
+	var destroyed_count := 0
+	for hit in obstacle_damage:
+		if not hit is Dictionary:
+			continue
+		if not bool(hit.get("destroyed", false)):
+			continue
+		var row := int(hit.get("row", -1))
+		var col := int(hit.get("col", -1))
+		if row < 0 or col < 0:
+			continue
+		destroyed_count += 1
+		spawn_obstacle_destroy_particles(row, col)
+		var center := _board_cell_center(row, col)
+		_floating_texts.append({
+			"text": "破岩",
+			"x": center.x,
+			"y": center.y - 12.0,
+			"color": C["gold"],
+			"size": 13.0,
+			"timer": 0.0,
+			"duration": 0.75,
+			"critical": true
+		})
+	if destroyed_count <= 0:
+		return
+	_board_shake_timer = maxf(_board_shake_timer, 0.22)
+	_sfx("powerup_burst_soft")
 
 ## ============================================
 # 粒子特效系统

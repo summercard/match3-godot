@@ -104,9 +104,10 @@ func _run() -> void:
 		"nature": "brave",
 		"isElite": true,
 	})
+	var expected_elite_stats := StatCalculator.calc_with_tier("enemy_001", 15, "brave", StatCalculator.EnemyTier.ELITE)
 	assert(
-		MonsterPool.get_instance_stats(elite) == StatCalculator.calc("enemy_001", 15, "brave"),
-		"all warehouse monsters must use the same base, level, and nature formula"
+		MonsterPool.get_instance_stats(elite) == expected_elite_stats,
+		"owned elite monsters must apply the elite base stat multiplier"
 	)
 	assert(MonsterService.build_instance_view(elite).get("stats", {}) == MonsterPool.get_instance_stats(elite), "all owned-stat entry points must agree")
 

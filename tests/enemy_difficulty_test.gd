@@ -24,6 +24,20 @@ func _run() -> void:
 	_assert(int(player_tier.get("level", 0)) == 10, "captured player monster level should remain unchanged")
 	_assert(player_tier == player_base, "tier compatibility path must use the same base, level, and nature formula")
 
+	var owned_base := StatCalculator.calc("enemy_001", 10, "brave")
+	var owned_elite := StatCalculator.calc_with_tier("enemy_001", 10, "brave", StatCalculator.EnemyTier.ELITE)
+	_assert(int(owned_elite.get("hp", 0)) == int(float(owned_base.get("hp", 0)) * StatCalculator.ELITE_BASE_STAT_MULT), "owned elite should gain 10 percent HP")
+	_assert(int(owned_elite.get("atk", 0)) == int(float(owned_base.get("atk", 0)) * StatCalculator.ELITE_BASE_STAT_MULT), "owned elite should gain 10 percent ATK")
+	_assert(int(owned_elite.get("def", 0)) == int(float(owned_base.get("def", 0)) * StatCalculator.ELITE_BASE_STAT_MULT), "owned elite should gain 10 percent DEF")
+	_assert(int(owned_elite.get("spd", 0)) == int(float(owned_base.get("spd", 0)) * StatCalculator.ELITE_BASE_STAT_MULT), "owned elite should gain 10 percent SPD")
+
+	var enemy_elite := StatCalculator.calc_enemy("enemy_001", 10, StatCalculator.EnemyTier.ELITE)
+	var enemy_base := StatCalculator.calc("enemy_001", StatCalculator.enemy_combat_level("enemy_001", 10), str(enemy_elite.get("nature", "")))
+	var elite_base_hp := int(float(enemy_base.get("hp", 0)) * StatCalculator.ELITE_BASE_STAT_MULT)
+	var elite_base_atk := int(float(enemy_base.get("atk", 0)) * StatCalculator.ELITE_BASE_STAT_MULT)
+	_assert(int(enemy_elite.get("hp", 0)) == int(float(elite_base_hp) * StatCalculator.ELITE_ENEMY_HP_MULT), "enemy elite should double HP after elite base bonus")
+	_assert(int(enemy_elite.get("atk", 0)) == int(float(elite_base_atk) * StatCalculator.ELITE_ENEMY_ATK_MULT), "enemy elite should gain 1.5x ATK after elite base bonus")
+
 	if _failures.is_empty():
 		print("[EnemyDifficulty] OK")
 		quit(0)

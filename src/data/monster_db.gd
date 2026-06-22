@@ -1147,6 +1147,13 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		atk = int(atk * NatureDB.get_nature_stat_mult(nature_id, "atk"))
 		def = int(def * NatureDB.get_nature_stat_mult(nature_id, "def"))
 		spd = int(spd * NatureDB.get_nature_stat_mult(nature_id, "spd"))
+	var is_elite := bool(data.get("isElite", false))
+	if is_elite:
+		var elite_mult := 1.10
+		hp = int(float(hp) * elite_mult)
+		atk = int(float(atk) * elite_mult)
+		def = int(float(def) * elite_mult)
+		spd = int(float(spd) * elite_mult)
 
 	return {
 		"id": data.get("id", ""),
@@ -1163,6 +1170,7 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		"skill": normalize_skill(data.get("skill", {})),
 		"skillCharge": 0,
 		"isBoss": data.get("isBoss", false),
+		"isElite": is_elite,
 		"enemySkills": null if not data.has("enemySkills") else data.get("enemySkills", []).duplicate(true),
 		"leaderSkill": data.get("leaderSkill", "")
 	}

@@ -15,6 +15,9 @@ extends RefCounted
 const MAX_LEVEL: int = 100  # 等级封顶：宠物/敌人共用上限（主人定 2026-06-10）
 
 const NORMAL_ENEMY_LEVEL_BONUS: int = 5
+const ELITE_BASE_STAT_MULT: float = 1.10
+const ELITE_ENEMY_HP_MULT: float = 2.0
+const ELITE_ENEMY_ATK_MULT: float = 1.5
 
 enum EnemyTier { NORMAL, ELITE }
 
@@ -43,7 +46,7 @@ static func nature_mult(nature_id: String, stat_key: String) -> float:
 static func calc(monster_id: String, level: int, nature_id: String = "", rarity_override: int = -1) -> Dictionary:
 	return _calc(monster_id, level, nature_id, rarity_override)
 
-static func _calc(monster_id: String, level: int, nature_id: String, rarity_override: int) -> Dictionary:
+static func _calc(monster_id: String, level: int, nature_id: String, rarity_override: int, force_elite: bool = false) -> Dictionary:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
 	if data.is_empty():
 		return {}
@@ -59,8 +62,9 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 	var df  := int(flat_def * nature_mult(nature_id, "def"))
 	var spd := int(float(data.get("baseSPD", 0)) * g * nature_mult(nature_id, "spd"))
 	var is_boss := bool(data.get("isBoss", false))
+	var is_elite := bool(data.get("isElite", false)) or force_elite
 
-	return {
+	var stats := {
 		"id": str(data.get("id", monster_id)),
 		"name": str(data.get("name", "")),
 		"element": str(data.get("element", "")),
@@ -80,14 +84,20 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 		"leaderSkill": str(data.get("leaderSkill", "")),
 		"enemySkills": null if not data.has("enemySkills") else data.get("enemySkills", []).duplicate(true),
 		"isBoss": is_boss,
-		"isElite": bool(data.get("isElite", false)),
+		"isElite": is_elite,
 		"capturable": bool(data.get("capturable", not is_boss)),
 	}
+	if is_elite:
+		_apply_elite_base_modifier(stats)
+	return stats
 
 ## 敌方只负责生成随机性格并解析实际战斗等级，属性仍走 calc()。
-static func calc_enemy(monster_id: String, level: int, _tier: int = EnemyTier.NORMAL) -> Dictionary:
+static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NORMAL) -> Dictionary:
 	var nature := NatureDB.random_nature()  # ★ 主人定的：每次 random
-	return calc(monster_id, enemy_combat_level(monster_id, level), nature)
+	var stats := _calc(monster_id, enemy_combat_level(monster_id, level), nature, -1, tier == EnemyTier.ELITE)
+	if bool(stats.get("isElite", false)):
+		_apply_elite_enemy_modifier(stats)
+	return stats
 
 ## 普通敌人比关卡标注等级高 5 级；Boss 保持原关卡等级。
 static func enemy_combat_level(monster_id: String, base_level: int) -> int:
@@ -100,18 +110,34 @@ static func apply_enemy_difficulty(stats: Dictionary) -> Dictionary:
 	return stats
 
 static func calc_elite_enemy(monster_id: String, level: int) -> Dictionary:
-	return calc_enemy(monster_id, level)
+	return calc_enemy(monster_id, level, EnemyTier.ELITE)
 
-## 兼容旧入口；精英标记不改变统一属性公式。
+## 兼容旧入口；模板或随机精英都会应用敌方精英倍率。
 static func calc_enemy_auto(monster_id: String, level: int) -> Dictionary:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
 	if data.is_empty():
 		return {}
 	return calc_enemy(monster_id, level)
 
-## 兼容旧入口；tier 不再改变统一属性公式。
-static func calc_with_tier(monster_id: String, level: int, nature_id: String = "", _tier: int = EnemyTier.NORMAL) -> Dictionary:
-	return calc(monster_id, level, nature_id)
+## 兼容旧入口；ELITE tier 应用收服后的精英基础倍率。
+static func calc_with_tier(monster_id: String, level: int, nature_id: String = "", tier: int = EnemyTier.NORMAL) -> Dictionary:
+	return _calc(monster_id, level, nature_id, -1, tier == EnemyTier.ELITE)
 
-static func _apply_tier_modifier(stats: Dictionary, _tier: int) -> Dictionary:
+static func _apply_tier_modifier(stats: Dictionary, tier: int) -> Dictionary:
+	if tier != EnemyTier.ELITE or bool(stats.get("isElite", false)):
+		return stats
+	stats["isElite"] = true
+	_apply_elite_base_modifier(stats)
 	return stats
+
+static func _apply_elite_base_modifier(stats: Dictionary) -> void:
+	_scale_stats(stats, ["hp", "maxHP", "atk", "def", "spd"], ELITE_BASE_STAT_MULT)
+
+static func _apply_elite_enemy_modifier(stats: Dictionary) -> void:
+	_scale_stats(stats, ["hp", "maxHP"], ELITE_ENEMY_HP_MULT)
+	_scale_stats(stats, ["atk"], ELITE_ENEMY_ATK_MULT)
+
+static func _scale_stats(stats: Dictionary, keys: Array, multiplier: float) -> void:
+	for key in keys:
+		if stats.has(key):
+			stats[key] = int(float(stats.get(key, 0)) * multiplier)

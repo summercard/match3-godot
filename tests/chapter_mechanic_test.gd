@@ -38,11 +38,11 @@ func _test_stage_goals() -> void:
 	var stage_db := StageDBScript.new()
 	var rock_stage: Dictionary = stage_db.get_stage("stage_2_5")
 	_expect(rock_stage.has("obstacles"), "chapter 2 mid stages should introduce rock pressure")
-	_expect(rock_stage.get("stageGoal", {}).get("id", "") == "break_rocks", "rock pressure stage should expose break rocks goal")
+	_expect(rock_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "rock pressure stages should still use enemy defeat as the win goal")
 
 	var fog_stage: Dictionary = stage_db.get_stage("stage_6_5")
 	_expect(fog_stage.has("poisonFog"), "chapter 6 mid stages should introduce fog pressure")
-	_expect(fog_stage.get("stageGoal", {}).get("id", "") == "fog_control", "poison fog stage should expose fog control goal")
+	_expect(fog_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "poison fog stages should still use enemy defeat as the win goal")
 
 	var old_elite: Dictionary = stage_db.get_stage("stage_2_4e")
 	_expect(old_elite.is_empty(), "old elite branch ids should not be part of the 12-stage map")

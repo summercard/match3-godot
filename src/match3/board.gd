@@ -767,15 +767,17 @@ func apply_gravity() -> Array:
 					})
 				write_pos -= 1
 
-			var empty_count: int = write_pos - segment_top
-			for r: int in range(write_pos, segment_top, -1):
-				var new_type: String = _random_gem_type()
-				grid[r][c] = new_type
-				locked_gems[r][c] = null
-				movements.append({
-					"type": new_type, "fromRow": r - empty_count, "toRow": r,
-					"col": c, "isNew": true, "locked": false
-				})
+			# Only the top-open segment can receive new gems; rocks block refill below.
+			if segment_top < 0:
+				var empty_count: int = write_pos - segment_top
+				for r: int in range(write_pos, segment_top, -1):
+					var new_type: String = _random_gem_type()
+					grid[r][c] = new_type
+					locked_gems[r][c] = null
+					movements.append({
+						"type": new_type, "fromRow": r - empty_count, "toRow": r,
+						"col": c, "isNew": true, "locked": false
+					})
 
 			segment_bottom = segment_top - 1
 

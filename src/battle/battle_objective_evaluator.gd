@@ -1,8 +1,6 @@
 class_name BattleObjectiveEvaluator
 extends RefCounted
 
-const BOARD_GOAL_IDS: Array[String] = ["break_rocks", "fog_control", "unlock_path"]
-
 var _goal: Dictionary = {}
 var _mode := "defeat_enemies"
 var _initial_target := 0
@@ -11,13 +9,9 @@ var _last_state: Dictionary = {}
 
 
 func configure(stage: Dictionary, board, enemies: Array) -> Dictionary:
-	_goal = stage.get("stageGoal", {}).duplicate(true) if stage.get("stageGoal", {}) is Dictionary else {}
-	var goal_id := str(_goal.get("id", "defeat_enemies"))
-	_mode = goal_id if BOARD_GOAL_IDS.has(goal_id) else "defeat_enemies"
-	_initial_target = _count_remaining(board, enemies)
-	if _mode != "defeat_enemies" and _initial_target <= 0:
-		_mode = "defeat_enemies"
-		_initial_target = _count_alive_enemies(enemies)
+	_goal = {"id": "defeat_enemies", "label": "击败敌人"}
+	_mode = "defeat_enemies"
+	_initial_target = _count_alive_enemies(enemies)
 	_target = _initial_target
 	_last_state = evaluate(board, enemies, 0, 1)
 	return _last_state.duplicate(true)
@@ -58,15 +52,7 @@ func get_state() -> Dictionary:
 
 
 func _count_remaining(board, enemies: Array) -> int:
-	match _mode:
-		"break_rocks":
-			return _count_board_cells(board, "obstacle")
-		"fog_control":
-			return _count_board_cells(board, "poison")
-		"unlock_path":
-			return _count_board_cells(board, "locked")
-		_:
-			return _count_alive_enemies(enemies)
+	return _count_alive_enemies(enemies)
 
 
 func _count_board_cells(board, kind: String) -> int:
@@ -93,24 +79,8 @@ func _count_alive_enemies(enemies: Array) -> int:
 
 
 func _default_label(mode: String) -> String:
-	match mode:
-		"break_rocks":
-			return "破障"
-		"fog_control":
-			return "控雾"
-		"unlock_path":
-			return "解锁"
-		_:
-			return "击败敌人"
+	return "击败敌人"
 
 
 func _completion_reason(mode: String) -> String:
-	match mode:
-		"break_rocks":
-			return "全部岩石障碍已清除"
-		"fog_control":
-			return "全部毒雾已清除"
-		"unlock_path":
-			return "全部锁链已解除"
-		_:
-			return "敌人已全部击败"
+	return "敌人已全部击败"

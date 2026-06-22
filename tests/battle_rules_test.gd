@@ -82,6 +82,19 @@ func _run() -> void:
 			break
 	_expect(found_locked_fall, "locked gem movement should be exposed to the fall animation")
 
+	var rock_gravity_board = BoardScript.new(5, 1)
+	rock_gravity_board.grid = [["fire"], ["water"], [""], [""], ["grass"]]
+	rock_gravity_board.set_obstacles([{"row": 2, "col": 0, "type": "rock", "hp": 2}])
+	var rock_movements: Array = rock_gravity_board.apply_gravity()
+	_expect(rock_gravity_board.grid[0][0] == "fire" and rock_gravity_board.grid[1][0] == "water", "rocks should keep gems above them from falling through")
+	_expect(rock_gravity_board.grid[3][0] == "" and rock_gravity_board.grid[4][0] == "grass", "empty cells below an intact rock should not be filled from above")
+	var spawned_below_rock := false
+	for move: Dictionary in rock_movements:
+		if bool(move.get("isNew", false)) and int(move.get("toRow", -1)) > 2:
+			spawned_below_rock = true
+			break
+	_expect(not spawned_below_rock, "intact rocks should not spawn new gem fall animations below the blocker")
+
 	var bomb_board = BoardScript.new(5, 5)
 	_fill_board(bomb_board, "")
 	bomb_board.set_obstacles([{"row": 2, "col": 1, "type": "rock", "hp": 2}])

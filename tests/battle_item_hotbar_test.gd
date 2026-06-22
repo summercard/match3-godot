@@ -56,6 +56,7 @@ func _run() -> void:
 	_test_rock_hammer_clears_obstacle(scene, storage)
 	_test_rock_hammer_only_clears_one_obstacle(scene, storage)
 	_test_advanced_rock_hammer_clears_all_obstacles(scene, storage)
+	_test_match_resolution_destroyed_obstacle_spawns_particles(scene)
 	_test_active_items_spawn_use_effects(scene, storage)
 	_test_missing_inventory_blocks_effect(scene, storage)
 
@@ -221,6 +222,12 @@ func _test_advanced_rock_hammer_clears_all_obstacles(scene: Control, storage: Fa
 	_expect(not board.is_obstacle(2, 2), "advanced rock hammer should remove every weak rock obstacle")
 	_expect(not storage.inventory.has("rock_hammer_plus"), "advanced rock hammer should be consumed")
 	_expect(_count_item_effects(scene, "hammer") >= 2, "advanced rock hammer should spawn impact effects on every cleared rock")
+
+func _test_match_resolution_destroyed_obstacle_spawns_particles(scene: Control) -> void:
+	scene.set("_obstacle_particles", [])
+	scene.call("_handle_obstacle_damage_fx", [{"row": 2, "col": 2, "destroyed": true, "remainingHP": 0}])
+	var particles: Array = scene.get("_obstacle_particles")
+	_expect(not particles.is_empty(), "destroyed match obstacles should spawn rock burst particles")
 
 func _test_active_items_spawn_use_effects(scene: Control, storage: FakeStorage) -> void:
 	var battle = scene.get("_battle")

@@ -152,47 +152,11 @@ static func get_chapter_mechanic(chapter: Dictionary) -> Dictionary:
 	return template.duplicate(true)
 
 static func build_stage_goal(stage: Dictionary, chapter_mechanic: Dictionary) -> Dictionary:
-	var stage_type := str(stage.get("type", "normal"))
-	if stage_type == "boss":
-		return {
-			"id": "boss_three_layers",
-			"label": "Boss三层考题",
-			"tip": "读主节奏，处理%s，并在%s时反击。" % [chapter_mechanic.get("pressure", "章节压力"), chapter_mechanic.get("breakPoint", "破招窗口")],
-			"focus": "break"
-		}
-	if stage_type == "elite":
-		return {
-			"id": "elite_pressure",
-			"label": "精英压力关",
-			"tip": "用更少回合解决%s，别让压力滚大。" % chapter_mechanic.get("pressure", "章节机制"),
-			"focus": "efficiency"
-		}
-	if stage.has("poisonFog"):
-		return {
-			"id": "fog_control",
-			"label": "控雾",
-			"tip": "优先清理雾区附近的匹配，减少后续行动税。",
-			"focus": "board_control"
-		}
-	if stage.has("lockedGems"):
-		return {
-			"id": "unlock_path",
-			"label": "解锁",
-			"tip": "先解开关键锁定宝石，再追求连锁输出。",
-			"focus": "board_control"
-		}
-	if stage.has("obstacles"):
-		return {
-			"id": "break_rocks",
-			"label": "破障",
-			"tip": "先打通岩障密集区，打开掉落和连锁空间。",
-			"focus": "board_control"
-		}
 	return {
-		"id": str(stage.get("targetLesson", "chapter_plan")),
-		"label": chapter_mechanic.get("name", "章节目标"),
-		"tip": chapter_mechanic.get("playerPlan", "观察意图并选择行动。"),
-		"focus": "lesson"
+		"id": "defeat_enemies",
+		"label": "击败敌人",
+		"tip": "击败全部敌方精灵即可过关。",
+		"focus": "combat"
 	}
 
 static func build_boss_layers(stage: Dictionary, chapter_mechanic: Dictionary) -> Array:

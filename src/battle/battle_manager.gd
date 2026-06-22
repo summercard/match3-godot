@@ -55,6 +55,7 @@ var synergy_info: Array = []
 var player_guards: Dictionary = {}      # { monsterId: { reduction, turns } }
 var player_absorb_shields: Dictionary = {}      # { monsterId: { turns: int } }
 var enemy_tempo_mods: Dictionary = {}   # { enemyIndex: { reduction, turns } }
+var _next_enemy_attack_index: int = 0
 var capture_windows: Dictionary = {}    # { enemyIndex: current tamingWindow }
 var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reached this battle }
 
@@ -171,6 +172,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	player_guards = {}
 	player_absorb_shields = {}
 	enemy_tempo_mods = {}
+	_next_enemy_attack_index = 0
 	capture_windows = {}
 	capture_window_best = {}
 	_calc_and_apply_element_synergy()
@@ -202,9 +204,10 @@ func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, rando
 		monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 		monster["hp"] = monster["maxHP"]
 		monster["atk"] = int(monster.get("atk", 0) * hp_mult)
-	if is_elite:
+	if bool(monster.get("isElite", false)):
 		monster["_visualScale"] = ELITE_VISUAL_SCALE
 		monster["isElite"] = true
+	if is_elite:
 		monster["_eliteSource"] = "random"
 	return monster
 
@@ -1002,15 +1005,38 @@ func get_objective_state(board = null) -> Dictionary:
 	return _objective_evaluator.evaluate(board, enemies, turn_count, max_turns)
 
 
+func _next_enemy_actor_index() -> int:
+	if enemies.is_empty():
+		return -1
+	var start := clampi(_next_enemy_attack_index, 0, maxi(enemies.size() - 1, 0))
+	for offset in range(enemies.size()):
+		var idx := (start + offset) % enemies.size()
+		var enemy = enemies[idx]
+		if enemy != null and int(enemy.get("hp", 0)) > 0:
+			return idx
+	return -1
+
+
+func _advance_enemy_attack_index(current_idx: int) -> void:
+	if enemies.is_empty():
+		_next_enemy_attack_index = 0
+		return
+	_next_enemy_attack_index = posmod(current_idx + 1, enemies.size())
+
+
 # ========== 敌方行动 ==========
 
 func enemy_action() -> Dictionary:
 	if battle_over:
 		return {}
 	var actions: Array = []
+	var active_enemy_idx := _next_enemy_actor_index()
+	var active_enemy_indices: Array = []
+	if active_enemy_idx >= 0:
+		active_enemy_indices.append(active_enemy_idx)
 
 	# 回合开始先结算 DOT；控制状态保持有效直到本轮敌方行动结束。
-	var status_logs: Array = _status_effect.begin_enemy_turn(enemies)
+	var status_logs: Array = _status_effect.begin_enemy_turn_for(enemies, active_enemy_indices)
 
 	var dot_kills: Array = []
 	for i in range(enemies.size()):
@@ -1019,8 +1045,11 @@ func enemy_action() -> Dictionary:
 			dot_kills.append({ "enemy_index": i, "enemy_name": enemy.get("name", "") })
 
 	for i in range(enemies.size()):
+		if i != active_enemy_idx:
+			continue
 		var enemy = enemies[i]
 		if enemy == null or enemy.get("hp", 0) <= 0:
+			_advance_enemy_attack_index(i)
 			continue
 
 		if _enemy_skill_system != null:
@@ -1030,6 +1059,7 @@ func enemy_action() -> Dictionary:
 
 		var alive_team = player_team.filter(func(m): return m != null and m.get("hp", 0) > 0)
 		if alive_team.is_empty():
+			_advance_enemy_attack_index(i)
 			continue
 
 		# 眩晕检查（委托给 BattleStatusEffect）
@@ -1044,6 +1074,7 @@ func enemy_action() -> Dictionary:
 				"target_died": false,
 				"is_stunned": true
 			})
+			_advance_enemy_attack_index(i)
 			continue
 
 		# 检查敌人是否有技能
@@ -1082,6 +1113,7 @@ func enemy_action() -> Dictionary:
 				"target_died": false,
 				"is_charging": true
 			})
+			_advance_enemy_attack_index(i)
 			continue
 
 		# 普通攻击
@@ -1142,19 +1174,22 @@ func enemy_action() -> Dictionary:
 			"is_weakened": tempo_mult < 1.0,
 			"weaken_reduction": tempo_mod.get("reduction", 0.0),
 			"guard_absorbed": guard_absorbed,
-			"shield_absorbed": shield_absorbed
+			"shield_absorbed": shield_absorbed,
+			"enemy_index": i
 		}
 		actions.append(attack_action)
 
 		if _enemy_skill_system != null and target_idx >= 0 and damage > 0:
 			var after_attack_events: Array = _enemy_skill_system.on_enemy_after_attack(i, target_idx, damage)
 			_apply_enemy_skill_events(i, enemy, after_attack_events, actions)
+		_advance_enemy_attack_index(i)
 
 	# 所有敌人完成行动或跳过行动后，再统一消费一次状态持续回合。
-	status_logs.append_array(_status_effect.end_enemy_turn(enemies))
+	status_logs.append_array(_status_effect.end_enemy_turn_for(enemies, active_enemy_indices))
 
 	if _enemy_skill_system != null:
-		for i in range(enemies.size()):
+		for raw_i in active_enemy_indices:
+			var i := int(raw_i)
 			var enemy = enemies[i]
 			if enemy == null or int(enemy.get("hp", 0)) <= 0:
 				continue
@@ -1310,18 +1345,9 @@ func _get_weakest_enemy() -> Variant:
 func check_battle_end(board = null) -> bool:
 	if battle_over:
 		return true
-	if _objective_evaluator.is_non_defeat_goal():
-		if board == null:
-			return false
-		var objective := _objective_evaluator.evaluate(board, enemies, turn_count, max_turns)
-		if bool(objective.get("completed", false)):
-			battle_over = true
-			battle_result = "win"
-			battle_ended.emit("win")
-			return true
-		return false
 	var all_dead = enemies.all(func(e): return e == null or e.get("hp", 0) <= 0)
 	if all_dead:
+		_objective_evaluator.evaluate(board, enemies, turn_count, max_turns)
 		battle_over = true
 		battle_result = "win"
 		battle_ended.emit("win")
@@ -1353,6 +1379,7 @@ func execute_phase_transition(phase_config: Dictionary) -> Array:
 	enemies = new_enemies
 	current_phase = _phase_handler.get_current_phase()
 	enemy_tempo_mods = {}
+	_next_enemy_attack_index = 0
 	capture_windows = {}
 	capture_window_best = {}
 	_status_effect.init_effects(enemies.size())
@@ -1618,7 +1645,7 @@ func _on_enemy_skill_skill_seal(enemy_idx: int, target_idx: int, chance: float, 
 # ========== 获取战斗结果（用于结算） ==========
 
 func get_battle_result() -> Dictionary:
-	var objective_state := _objective_evaluator.get_state()
+	var objective_state := _objective_evaluator.evaluate(null, enemies, turn_count, max_turns)
 	var reward_receipt_id := "battle_reward:%s" % battle_id
 	return {
 		"result": battle_result,

@@ -174,9 +174,16 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 ## 敌方回合开始：结算 DOT 并生成当前状态提示，但不扣除持续回合。
 ## 控制判断和冰冻倍率会在本轮行动阶段读取仍然有效的状态。
 func begin_enemy_turn(enemies: Array) -> Array:
+	return begin_enemy_turn_for(enemies, _all_effect_indices(enemies))
+
+
+func begin_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 	var logs: Array = []
 
-	for i in range(enemies.size()):
+	for raw_index in enemy_indices:
+		var i := int(raw_index)
+		if i < 0 or i >= enemies.size():
+			continue
 		var enemy: Dictionary = enemies[i]
 		if enemy == null or enemy.get("hp", 0) <= 0:
 			continue
@@ -219,8 +226,15 @@ func begin_enemy_turn(enemies: Array) -> Array:
 
 ## 敌方回合结束：所有仍存活状态统一扣除一次持续回合并清理到期效果。
 func end_enemy_turn(enemies: Array) -> Array:
+	return end_enemy_turn_for(enemies, _all_effect_indices(enemies))
+
+
+func end_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 	var logs: Array = []
-	for i in range(_effects.size()):
+	for raw_index in enemy_indices:
+		var i := int(raw_index)
+		if i < 0 or i >= _effects.size():
+			continue
 		var effect = _effects[i]
 		if effect == null or not effect is Dictionary:
 			continue
@@ -243,6 +257,13 @@ func end_enemy_turn(enemies: Array) -> Array:
 			"message": "%s 的%s效果消失了" % [enemy.get("name", ""), label]
 		})
 	return logs
+
+
+func _all_effect_indices(enemies: Array) -> Array:
+	var indices: Array = []
+	for i in range(mini(enemies.size(), _effects.size())):
+		indices.append(i)
+	return indices
 
 
 ## 兼容旧调用：只执行回合开始阶段，持续时间必须由 end_enemy_turn() 消费。

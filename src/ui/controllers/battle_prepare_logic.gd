@@ -247,8 +247,9 @@ func _load_enemy_team() -> void:
 			enemy["power"] = _calc_battle_power(enemy)
 			enemy["_isFallbackLevel"] = is_fallback  # 告诉 UI 是不是兑底值
 			# ★ 主人定 2026-06-11：让战前 UI 也能看出敌方精英怪
-			enemy["isElite"] = preview_elite
-			if preview_elite:
+			var actual_elite := preview_elite or bool(enemy.get("isElite", false))
+			enemy["isElite"] = actual_elite
+			if actual_elite:
 				enemy["_visualScale"] = 1.2
 			_enemy_team.append(enemy)
 
@@ -268,6 +269,8 @@ func _should_preview_elite(enemy_id: String) -> bool:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
 	if data.is_empty() or bool(data.get("isBoss", false)):
 		return false
+	if bool(data.get("isElite", false)):
+		return true
 	var chance := _preview_random_elite_chance(_stage_data)
 	return chance >= 1.0
 

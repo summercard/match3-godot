@@ -64,9 +64,9 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="TopHud/TurnBadge" unique_id=1243297738]
 layout_mode = 0
-offset_top = 4.0
+offset_top = 9.0
 offset_right = 72.0
-offset_bottom = 22.0
+offset_bottom = 27.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.9)
 theme_override_constants/outline_size = 2
@@ -77,13 +77,13 @@ vertical_alignment = 1
 
 [node name="Value" type="Label" parent="TopHud/TurnBadge" unique_id=515103777]
 layout_mode = 0
-offset_top = 22.0
+offset_top = 18.0
 offset_right = 72.0
-offset_bottom = 46.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
 theme_override_colors/font_outline_color = Color(0.15, 0.08, 0.03, 0.95)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 12
 text = "0/20"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -111,9 +111,9 @@ stretch_mode = 5
 
 [node name="PauseIcon" type="Label" parent="TopHud/PauseButton" unique_id=1652010195]
 layout_mode = 0
-offset_top = 11.0
+offset_top = 6.0
 offset_right = 44.0
-offset_bottom = 40.0
+offset_bottom = 35.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.95)
 theme_override_constants/outline_size = 2
@@ -122,7 +122,7 @@ text = "||"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ObjectiveLabel" type="Label" parent="TopHud"]
+[node name="ObjectiveLabel" type="Label" parent="TopHud" unique_id=838899947]
 visible = false
 z_index = 2
 layout_mode = 0
@@ -130,13 +130,12 @@ offset_left = 82.0
 offset_top = 4.0
 offset_right = 315.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.86, 0.18, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.96)
 theme_override_constants/outline_size = 3
 theme_override_fonts/font = ExtResource("round_font")
 theme_override_font_sizes/font_size = 13
-text = "破障 0/6"
+text = "击败敌人"
 horizontal_alignment = 1
 vertical_alignment = 1
 
