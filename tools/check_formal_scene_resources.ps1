@@ -6,9 +6,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repo = (Get-Location).Path
+$match3ArtDir = "MATCH3" + [string]::Concat([char[]]@(0x7f8e, 0x672f, 0x8d44, 0x4ea7))
+$newArtDir = [string]::Concat([char[]]@(0x65b0, 0x7f8e, 0x672f, 0x8d44, 0x4ea7))
 $banned = @(
 	"res://.godot/imported",
-	"res://assets/MATCH3美术资产"
+	"res://assets/$match3ArtDir",
+	"res://assets/$newArtDir"
 )
 $failures = New-Object System.Collections.Generic.List[string]
 

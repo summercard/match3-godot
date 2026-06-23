@@ -4,6 +4,7 @@ extends Control
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const MonsterArtDBScript := preload("res://src/data/monster_art_db.gd")
 const MonsterDBScript := preload("res://src/data/monster_db.gd")
+const BattlePowerRulesScript := preload("res://src/core/battle_power_rules.gd")
 
 signal team_changed(team: Dictionary)
 signal scene_exit()
@@ -290,7 +291,13 @@ func _calc_stats(monster_id: String, level: int) -> Dictionary:
 
 
 func _calc_battle_power(stats: Dictionary) -> int:
-	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0))
+	return BattlePowerRulesScript.calc_battle_power(stats)
+
+
+func _get_catchup_state(instance_id: String) -> Dictionary:
+	if _storage != null and _storage.has_method("get_instance_catchup_state") and not _get_monster_instance(instance_id).is_empty():
+		return _storage.get_instance_catchup_state(instance_id)
+	return {"enabled": false, "multiplier": 1.0, "label": ""}
 
 
 func _clamp_roster_page() -> void:

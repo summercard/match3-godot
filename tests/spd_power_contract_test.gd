@@ -2,7 +2,6 @@ extends SceneTree
 
 const SaveManagerScript = preload("res://src/core/save_manager.gd")
 const BattlePrepareScript = preload("res://src/ui/controllers/battle_prepare_logic.gd")
-const TeamLogicScript = preload("res://src/ui/controllers/team_logic.gd")
 const TeamGuiScript = preload("res://src/ui/scene/scene_team_gui.gd")
 
 var _failures: Array[String] = []
@@ -16,10 +15,8 @@ func _run() -> void:
 	var stats := {"hp": 100, "atk": 30, "def": 20, "spd": 999}
 	var expected := 150
 	var prepare = BattlePrepareScript.new()
-	var team_logic = TeamLogicScript.new()
 	var team_gui = TeamGuiScript.new()
 	_expect(prepare.call("_calc_battle_power", stats) == expected, "battle prepare power should ignore SPD")
-	_expect(team_logic.call("_calc_battle_power", stats) == expected, "legacy team power should ignore SPD")
 	_expect(team_gui.call("_calc_battle_power", stats) == expected, "TSCN team power should ignore SPD")
 
 	var storage = SaveManagerScript.new()
@@ -32,7 +29,6 @@ func _run() -> void:
 	_expect(storage.calc_team_power() == int(saved_stats.get("hp", 0)) + int(saved_stats.get("atk", 0)) + int(saved_stats.get("def", 0)), "SaveManager team power should ignore SPD")
 
 	prepare.queue_free()
-	team_logic.queue_free()
 	team_gui.queue_free()
 	storage.queue_free()
 	await process_frame

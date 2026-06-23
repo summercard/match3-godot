@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cxwxy00xftu6v" path="res://assets/images/maps/nodes/stage_selection_ring_pink.png" id="c01_selection_ring"]
 [ext_resource type="Texture2D" uid="uid://csush5tvay1m7" path="res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png" id="c01_stage04"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
-[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="sweep_button_new"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]
 
 [node name="Chapter01BreezePlain" type="Control" unique_id=1557975011]
 custom_minimum_size = Vector2(375, 1280)

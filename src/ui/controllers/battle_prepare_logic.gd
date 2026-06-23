@@ -19,6 +19,7 @@ const MonsterDBScript = preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const ItemDB = preload("res://src/data/item_db.gd")
 const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_backgrounds.gd")
+const BattlePowerRulesScript = preload("res://src/core/battle_power_rules.gd")
 
 ## 信号定义
 signal battle_started(stage_id: String, stage_data: Dictionary)
@@ -291,7 +292,7 @@ func _get_team_total_power(team: Array) -> int:
 
 
 func _calc_battle_power(stats: Dictionary) -> int:
-	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0))
+	return BattlePowerRulesScript.calc_battle_power(stats)
 
 func _is_player_team_empty() -> bool:
 	return _player_team.is_empty()

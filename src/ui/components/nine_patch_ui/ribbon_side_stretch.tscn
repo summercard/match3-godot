@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/新美术资产/ui/花边01.png" id="1_texture"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/ribbon_side_01.png" id="1_texture"]
 
 [node name="RibbonSideStretch" type="Control"]
 custom_minimum_size = Vector2(360, 70)

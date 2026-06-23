@@ -6,6 +6,7 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	_mute_audio_for_smoke()
 	_scan_formal_tscn_resources()
 
 	var main: Control = load("res://main.tscn").instantiate()
@@ -54,6 +55,7 @@ func _run() -> void:
 	await process_frame
 	_expect(main.get_current_scene_name() == "result", "result scene should load")
 	
+	await _cleanup_runtime(main)
 	if _failures.is_empty():
 		print("[P0Smoke] OK")
 		quit(0)
@@ -65,6 +67,40 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _mute_audio_for_smoke() -> void:
+	var audio_manager := root.get_node_or_null("/root/AudioManager")
+	if audio_manager == null:
+		return
+	if audio_manager.has_method("set_mute"):
+		audio_manager.call("set_mute", true)
+	if audio_manager.has_method("set_bgm_mute"):
+		audio_manager.call("set_bgm_mute", true)
+
+func _cleanup_runtime(main: Control) -> void:
+	if main != null and is_instance_valid(main):
+		root.remove_child(main)
+		main.free()
+	var audio_manager := root.get_node_or_null("/root/AudioManager")
+	if audio_manager != null:
+		if audio_manager.has_method("stop_bgm"):
+			audio_manager.call("stop_bgm")
+		var bgm_player: Variant = audio_manager.get("_bgm_player")
+		if bgm_player is AudioStreamPlayer:
+			(bgm_player as AudioStreamPlayer).stop()
+			(bgm_player as AudioStreamPlayer).stream = null
+			(bgm_player as AudioStreamPlayer).queue_free()
+			audio_manager.set("_bgm_player", null)
+		for child in audio_manager.get_children():
+			if child is AudioStreamPlayer:
+				(child as AudioStreamPlayer).stop()
+				(child as AudioStreamPlayer).stream = null
+				child.queue_free()
+		var cache: Variant = audio_manager.get("_resource_cache")
+		if cache is Dictionary:
+			(cache as Dictionary).clear()
+	for _i in range(5):
+		await process_frame
 
 func _scan_formal_tscn_resources() -> void:
 	var scene_paths: Array = ["res://main.tscn"]
@@ -97,7 +133,7 @@ func _scan_tscn_resource_paths(scene_path: String) -> void:
 		var res_path := _extract_resource_path(line)
 		if res_path.is_empty():
 			continue
-		if res_path.begins_with("res://.godot/imported") or res_path.begins_with("res://assets/MATCH3美术资产"):
+		if res_path.begins_with("res://.godot/imported") or res_path.begins_with("res://assets/MATCH3美术资产") or res_path.begins_with("res://assets/新美术资产"):
 			_failures.append("%s:%d should not reference banned resource path %s" % [scene_path, line_number, res_path])
 			continue
 		if not ResourceLoader.exists(res_path) and not FileAccess.file_exists(res_path):

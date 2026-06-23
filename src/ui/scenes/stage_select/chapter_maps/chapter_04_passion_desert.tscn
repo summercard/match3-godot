@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://nd1ukitcfaxr"]
 
-[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="sweep_button_new"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://duumtigslde7x" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_desert.png" id="c04_background"]

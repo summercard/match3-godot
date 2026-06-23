@@ -114,7 +114,7 @@ const SOCIAL_ACTION_RECT := Rect2(135.0, 229.0, 105.0, 46.0)
 const SOCIAL_PLACE_SWITCH_RECT := Rect2(250.0, 91.0, 98.0, 44.0)
 const SOCIAL_RELATION_RECT := Rect2(22.0, 246.0, 331.0, 25.0)
 const SOCIAL_RESULT_POPUP_RECT := Rect2(25.0, 111.0, 325.0, 392.0)
-const SOCIAL_RESULT_CLOSE_RECT := Rect2(125.0, 443.0, 125.0, 46.0)
+const SOCIAL_RESULT_CLOSE_RECT := Rect2(125.0, 512.0, 125.0, 46.0)
 const SUBPAGE_RIBBON_RECT := Rect2(18.0, 555.0, 339.0, 42.0)
 
 var _game: Node = null
@@ -1042,21 +1042,21 @@ func _draw_social_result_popup() -> void:
 	elif tags.has("属性相克"):
 		accent = Color(1.0, 0.68, 0.18)
 	_draw_texture_contain(_tex(RANCH_ASSETS["social_result"]), SOCIAL_RESULT_POPUP_RECT)
-	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 180.0, accent, 21.0, 260.0)
+	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 178.0, accent, 20.0, 260.0)
 	_draw_text("相性 %d · %s · +%dEXP · +%d金币" % [
 		int(result.get("score", 0)),
 		str(result.get("relation_label", "初识")),
 		int(result.get("exp_each", 0)),
 		int(result.get("gold", 0))
-	], DESIGN_W / 2.0, 206.0, C["text"], 11.0, 268.0)
+	], DESIGN_W / 2.0, 206.0, C["text"], 10.0, 285.0)
 	var event: Dictionary = result.get("event", {})
 	_draw_text(str(event.get("name", "社交事件")), DESIGN_W / 2.0, 241.0, Color(0.76, 0.95, 1.0), 15.0, 260.0)
 	_draw_text(str(event.get("flavor", "关系发生了变化。")), DESIGN_W / 2.0, 266.0, C["text_muted"], 10.2, 276.0)
 	var lines := _social_result_major_lines(result)
-	var y := 318.0
+	var y := 323.0
 	for line in lines:
-		_draw_text(str(line), DESIGN_W / 2.0, y, C["text"], 11.2, 278.0)
-		y += 24.0
+		_draw_text(str(line), DESIGN_W / 2.0, y, C["text"], 10.0, 278.0)
+		y += 50.0
 	_draw_code_button(SOCIAL_RESULT_CLOSE_RECT, "确认", true)
 
 func _social_result_title(result: Dictionary) -> String:

@@ -20,6 +20,8 @@ const StatCalculator = preload("res://src/core/stat_calculator.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
 const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
+const SaveFileStoreScript = preload("res://src/core/save_file_store.gd")
+const BattlePowerRulesScript = preload("res://src/core/battle_power_rules.gd")
 
 # ========== 单例模式 ==========
 static var instance: Node
@@ -38,12 +40,16 @@ const RANCH_IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
 const STAMINA_MAX: int = 5
 const STAMINA_RECOVERY_MS: float = 6.0 * 60.0 * 60.0 * 1000.0
 const SWEEP_STAMINA_COST: int = 1
+const SAVE_SCHEMA_VERSION: int = 1
+const META_SECTION: String = "meta"
+const SCHEMA_VERSION_KEY: String = "schema_version"
 
 var _config: ConfigFile = null
 var _dirty: bool = false
 var _reward_receipts_in_progress: Dictionary = {}
 var _transaction_depth: int = 0
 var _force_save_failure: bool = false
+var _load_status: Dictionary = {"status": "empty", "ok": true, "recovered": false}
 
 func _init() -> void:
 	_config = ConfigFile.new()
@@ -51,10 +57,16 @@ func _init() -> void:
 
 ## 加载存档文件
 func _load_config() -> void:
-	var err: int = _config.load(_get_save_path())
-	if err != OK:
-		# 文件不存在或读取失败，使用默认空配置
+	var result: Dictionary = SaveFileStoreScript.load_config(_get_save_path())
+	_load_status = _build_load_status(result)
+	_config = result.get("config", ConfigFile.new()) as ConfigFile
+	if _config == null:
 		_config = ConfigFile.new()
+	if not bool(result.get("ok", false)):
+		push_warning("[SaveManager] save file is corrupt and no backup could be restored")
+	if str(result.get("status", "")) == "recovered_backup":
+		push_warning("[SaveManager] restored save data from backup")
+	_apply_schema_migrations()
 
 ## 保存到文件
 func _save_config() -> bool:
@@ -69,34 +81,38 @@ func _save_config_now() -> bool:
 	if _force_save_failure:
 		push_warning("[SaveManager] 测试注入保存失败")
 		return false
-	var save_path := _get_save_path()
-	var global_save_path := ProjectSettings.globalize_path(save_path)
-	var base_dir := global_save_path.get_base_dir()
-	if not base_dir.is_empty():
-		DirAccess.make_dir_recursive_absolute(base_dir)
-	var temp_path := "%s.tmp" % global_save_path
-	var backup_path := "%s.bak" % global_save_path
-	var err: int = _config.save(temp_path)
-	if err != OK:
-		push_warning("[SaveManager] 保存临时文件失败: %d" % err)
-		return false
-	if FileAccess.file_exists(global_save_path):
-		var backup_err := DirAccess.copy_absolute(global_save_path, backup_path)
-		if backup_err != OK:
-			push_warning("[SaveManager] 备份旧存档失败: %d" % backup_err)
-		var remove_err := DirAccess.remove_absolute(global_save_path)
-		if remove_err != OK:
-			DirAccess.remove_absolute(temp_path)
-			push_warning("[SaveManager] 替换旧存档前删除失败: %d" % remove_err)
-			return false
-	var rename_err := DirAccess.rename_absolute(temp_path, global_save_path)
-	if rename_err != OK:
-		if FileAccess.file_exists(backup_path) and not FileAccess.file_exists(global_save_path):
-			DirAccess.copy_absolute(backup_path, global_save_path)
-		push_warning("[SaveManager] 原子替换存档失败: %d" % rename_err)
+	_config.set_value(META_SECTION, SCHEMA_VERSION_KEY, SAVE_SCHEMA_VERSION)
+	var result: Dictionary = SaveFileStoreScript.save_atomic(_config, _get_save_path())
+	if not bool(result.get("ok", false)):
+		push_warning("[SaveManager] save failed: %s (%d)" % [str(result.get("error", "")), int(result.get("code", FAILED))])
 		return false
 	_dirty = false
 	return true
+
+
+func _build_load_status(result: Dictionary) -> Dictionary:
+	return {
+		"ok": bool(result.get("ok", false)),
+		"status": str(result.get("status", "unknown")),
+		"error": int(result.get("error", OK)),
+		"backup_error": int(result.get("backup_error", OK)),
+		"recovered": bool(result.get("recovered", false)),
+	}
+
+
+func _apply_schema_migrations() -> void:
+	var current := int(_config.get_value(META_SECTION, SCHEMA_VERSION_KEY, 0))
+	if current < SAVE_SCHEMA_VERSION:
+		_config.set_value(META_SECTION, SCHEMA_VERSION_KEY, SAVE_SCHEMA_VERSION)
+		_dirty = true
+
+
+func get_load_status() -> Dictionary:
+	return _load_status.duplicate(true)
+
+
+func get_save_schema_version() -> int:
+	return int(_config.get_value(META_SECTION, SCHEMA_VERSION_KEY, 0))
 
 
 func _clone_config(source: ConfigFile) -> ConfigFile:
@@ -181,15 +197,15 @@ func _erase_key(section: String, key: String) -> void:
 	_mark_dirty()
 
 ## 立即保存（外部调用）
-func flush() -> void:
-	_save_config()
+func flush() -> bool:
+	return _save_config()
 
 func clear_all_data() -> bool:
 	_config = ConfigFile.new()
 	_reward_receipts_in_progress.clear()
+	_apply_schema_migrations()
 	_dirty = true
-	_save_config()
-	return true
+	return _save_config()
 
 # ========== 玩家数据（section: player） ==========
 
@@ -267,16 +283,14 @@ func has_player_data() -> bool:
 ## JS: savePlayer(playerData)
 func save_player(player_data: Dictionary) -> bool:
 	_set_value("player", "data", player_data)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 增加金币
 ## JS: addGold(amount)
 func add_gold(amount: int) -> bool:
 	var player: Dictionary = get_player()
 	player["gold"] = player.get("gold", 0) + amount
-	save_player(player)
-	return true
+	return save_player(player)
 
 ## 花费金币（返回是否成功）
 ## JS: spendGold(amount)
@@ -285,8 +299,7 @@ func spend_gold(amount: int) -> bool:
 	if player.get("gold", 0) < amount:
 		return false
 	player["gold"] = player.get("gold", 0) - amount
-	save_player(player)
-	return true
+	return save_player(player)
 
 ## 增加玩家经验（使用 get_exp_for_level 递增公式：80 + level * 10）
 ## JS: addPlayerExp(amount)
@@ -298,15 +311,13 @@ func add_player_exp(amount: int) -> bool:
 		player["exp"] -= get_exp_for_level(current_level)
 		current_level += 1
 	player["level"] = current_level
-	save_player(player)
-	return true
+	return save_player(player)
 
 ## 增加钻石（gems）
 func add_gems(amount: int) -> bool:
 	var player: Dictionary = get_player()
 	player["gems"] = player.get("gems", 0) + amount
-	save_player(player)
-	return true
+	return save_player(player)
 
 # ========== 精灵池与旧 Pokedex 兼容 ==========
 
@@ -710,8 +721,7 @@ func save_team(team_data: Dictionary) -> bool:
 		"member1": _resolve_team_ref(team_data.get("member1", null)),
 		"member2": _resolve_team_ref(team_data.get("member2", null))
 	})
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载队伍
 ## JS: loadTeam()
@@ -769,7 +779,7 @@ func calc_team_power() -> int:
 			continue
 		var stats: Dictionary = get_instance_stats(id)
 		if not stats.is_empty():
-			power += stats.get("hp", 0) + stats.get("atk", 0) + stats.get("def", 0)
+			power += BattlePowerRulesScript.calc_battle_power(stats)
 
 	return power
 
@@ -780,8 +790,7 @@ func calc_team_power() -> int:
 ## JS: saveInventory(inventory)
 func save_inventory(inventory: Dictionary) -> bool:
 	_set_value("inventory", "data", inventory)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载背包
 ## JS: loadInventory()
@@ -838,8 +847,7 @@ func record_shop_daily_purchase(item_id: String, count: int = 1) -> bool:
 		"date": _shop_today_key(),
 		"purchases": purchases
 	})
-	_save_config()
-	return true
+	return _save_config()
 
 # ========== 关卡进度与扫荡（section: stageProgress） ==========
 ## 关卡进度数据结构: { 'stage_1_1': { stars: 2, cleared: true }, ... }
@@ -850,8 +858,7 @@ func save_stage_progress(stage_id: String, stage_data: Dictionary) -> bool:
 	var all: Dictionary = load_stage_progress()
 	all[stage_id] = stage_data
 	_set_value("stageProgress", "data", all)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载所有关卡进度
 ## JS: loadStageProgress()
@@ -1055,8 +1062,7 @@ func roll_drop() -> String:
 ## JS: saveRewards(rewardsData)
 func save_rewards(rewards_data: Dictionary) -> bool:
 	_set_value("rewards", "data", rewards_data)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载奖励记录
 ## JS: loadRewards()
@@ -1114,8 +1120,7 @@ func cancel_reward_receipt_claim(receipt_id: String) -> void:
 ## JS: saveAchievements(data)
 func save_achievements(data: Dictionary) -> bool:
 	_set_value("achievements", "data", data)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载成就
 ## JS: loadAchievements()
@@ -1170,8 +1175,7 @@ func _refresh_achievement_unlocks(data: Dictionary) -> void:
 ## JS: saveSignInData(data)
 func save_sign_in_data(data: Dictionary) -> bool:
 	_set_value("signIn", "data", data)
-	_save_config()
-	return true
+	return _save_config()
 
 ## 加载签到数据
 ## JS: loadSignInData()
@@ -1264,12 +1268,12 @@ func _get_date_minus_days(days: int) -> String:
 ## JS: saveSettings(data)
 func save_settings(data: Dictionary) -> bool:
 	_set_value("settings", "data", data)
-	_save_config()
+	var saved := _save_config()
 	# 通知 AudioManager 同步 soundOn / musicOn
 	var am := get_node_or_null("/root/AudioManager")
 	if am != null and am.has_method("_sync_with_settings"):
 		am.call("_sync_with_settings")
-	return true
+	return saved
 
 ## 加载设置
 ## JS: loadSettings()
@@ -1337,8 +1341,7 @@ func get_ranch_state() -> Dictionary:
 func set_ranch_state(state: Dictionary) -> bool:
 	_ensure_monster_pool_migrated()
 	_set_value("ranch", "data", _normalize_ranch_state(state))
-	_save_config()
-	return true
+	return _save_config()
 
 func _normalize_ranch_state(state: Dictionary) -> Dictionary:
 	var normalized: Dictionary = {
@@ -1758,8 +1761,7 @@ func save_tutorial_progress(step: int) -> bool:
 		"completed": step >= 5,
 		"currentStep": step
 	})
-	_save_config()
-	return true
+	return _save_config()
 
 func reset_tutorial_progress() -> bool:
 	return save_tutorial_progress(0)

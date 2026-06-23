@@ -2,7 +2,7 @@ extends SceneTree
 
 const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
 const SceneResultScript = preload("res://src/ui/controllers/result_logic.gd")
-const SceneTeamScript = preload("res://src/ui/controllers/team_logic.gd")
+const TEAM_SCENE_PATH := "res://src/ui/scenes/team.tscn"
 
 var _failures: Array[String] = []
 
@@ -35,7 +35,8 @@ func _run() -> void:
 
 	_test_growth_rules()
 	_test_storage_catchup(save_manager, low_id)
-	_test_team_ui_state(save_manager, low_id)
+	await _test_team_ui_state(save_manager, low_id)
+	_mute_audio_for_result_test()
 	_test_result_awards(save_manager, high_id, low_id, third_id)
 	_finish()
 
@@ -53,13 +54,24 @@ func _test_storage_catchup(save_manager: Node, low_id: String) -> void:
 
 
 func _test_team_ui_state(save_manager: Node, low_id: String) -> void:
-	var scene: Control = SceneTeamScript.new()
-	root.add_child(scene)
-	scene.init({})
+	var packed := load(TEAM_SCENE_PATH) as PackedScene
+	_expect(packed != null, "team scene should load from formal PackedScene")
+	if packed == null:
+		return
+	var scene := packed.instantiate() as Control
+	_expect(scene != null, "team scene should instantiate")
+	if scene == null:
+		return
+	_expect(scene.scene_file_path == TEAM_SCENE_PATH, "team catchup test should use the formal team.tscn")
+	_expect(not str(scene.get_script().resource_path).contains("team_logic.gd"), "team catchup test should not load the old draw controller")
+	scene.set("_storage", save_manager)
+	scene.set("_captured_monsters", save_manager.get_owned_monsters())
+	scene.call("_rebuild_instance_index")
 	var state: Dictionary = scene.call("_get_catchup_state", low_id)
 	_expect(bool(state.get("enabled", false)), "team scene should expose catchup badge state")
 	_expect(str(state.get("label", "")).contains("追赶"), "team scene catchup label should be player-facing")
-	scene.queue_free()
+	scene.free()
+	await process_frame
 
 
 func _test_result_awards(save_manager: Node, high_id: String, low_id: String, third_id: String) -> void:
@@ -84,6 +96,12 @@ func _test_result_awards(save_manager: Node, high_id: String, low_id: String, th
 	_expect(save_manager.get_instance_exp(high_id) == 0, "battle should not directly add exp to the active monster")
 	_expect(save_manager.get_instance_exp(low_id) == 0, "battle should not directly add catchup exp to a team member")
 	scene.queue_free()
+
+
+func _mute_audio_for_result_test() -> void:
+	var audio_manager := root.get_node_or_null("/root/AudioManager")
+	if audio_manager != null and audio_manager.has_method("set_mute"):
+		audio_manager.call("set_mute", true)
 
 
 func _expect(condition: bool, message: String) -> void:

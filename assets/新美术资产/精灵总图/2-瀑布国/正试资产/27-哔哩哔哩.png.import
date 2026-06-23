@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bebf3pelek3jw"
-path="res://.godot/imported/battle_ui_battle_toast_panel.png-381cb00c04a50f326708110d1c7c075d.ctex"
+uid="uid://bmma5yr6kc27s"
+path="res://.godot/imported/27-哔哩哔哩.png-bdf8033936ccb546a1a2cc8f46dccecc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/ui/panels/battle_ui_battle_toast_panel.png"
-dest_files=["res://.godot/imported/battle_ui_battle_toast_panel.png-381cb00c04a50f326708110d1c7c075d.ctex"]
+source_file="res://assets/新美术资产/精灵总图/2-瀑布国/正试资产/27-哔哩哔哩.png"
+dest_files=["res://.godot/imported/27-哔哩哔哩.png-bdf8033936ccb546a1a2cc8f46dccecc.ctex"]
 
 [params]
 

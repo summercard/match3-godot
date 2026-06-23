@@ -2,6 +2,8 @@
 ## 提供全局场景切换接口
 extends Node
 
+const TransitionProgressScript = preload("res://src/core/transition_progress.gd")
+
 var _main_node: Control = null  # main.tscn 的根节点引用
 
 ## 转场特效
@@ -98,25 +100,27 @@ func _fade_out(duration: float = TRANSITION_DURATION, max_alpha: float = 1.0) ->
 	if _transition_overlay == null:
 		return
 	var t: float = 0.0
-	var step: float = 0.016  # ~60fps
 	while t < duration:
-		t += step
-		var alpha: float = clamp(t / duration, 0.0, 1.0) * max_alpha
-		_transition_overlay.color = Color(0.0, 0.0, 0.0, alpha)
 		await get_tree().process_frame
+		t = TransitionProgressScript.advance(t, duration, _get_transition_delta())
+		_transition_overlay.color = Color(0.0, 0.0, 0.0, TransitionProgressScript.fade_alpha(t, duration, max_alpha, true))
 	_transition_overlay.color = Color(0.0, 0.0, 0.0, max_alpha)
 
 func _fade_in(duration: float = TRANSITION_DURATION, max_alpha: float = 1.0) -> void:
 	if _transition_overlay == null:
 		return
 	var t: float = 0.0
-	var step: float = 0.016  # ~60fps
 	while t < duration:
-		t += step
-		var alpha: float = (1.0 - clamp(t / duration, 0.0, 1.0)) * max_alpha
-		_transition_overlay.color = Color(0.0, 0.0, 0.0, alpha)
 		await get_tree().process_frame
+		t = TransitionProgressScript.advance(t, duration, _get_transition_delta())
+		_transition_overlay.color = Color(0.0, 0.0, 0.0, TransitionProgressScript.fade_alpha(t, duration, max_alpha, false))
 	_transition_overlay.color = Color(0.0, 0.0, 0.0, 0.0)
+
+func _get_transition_delta() -> float:
+	var delta := get_process_delta_time()
+	if delta <= 0.0:
+		return 1.0 / 60.0
+	return delta
 
 func _do_switch_scene(scene_name: String, data: Dictionary, mode: String) -> void:
 	if _main_node == null:

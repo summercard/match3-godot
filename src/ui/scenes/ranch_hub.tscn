@@ -10,18 +10,18 @@
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="8_5svvp"]
 [ext_resource type="Texture2D" uid="uid://dahjyw6jpe0r3" path="res://assets/images/ui/icons/ranch_icon_gold_coin.png" id="9_2pk37"]
 [ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="10_2bgry"]
-[ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="10_2ehnv"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black.png" id="10_2ehnv"]
 [ext_resource type="Texture2D" uid="uid://dw1ag3xhmm4ds" path="res://assets/images/ui/generated_panel_parts/panel_base3.png" id="10_e8rgr"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="12_uqcji"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="13_72f50"]
 [ext_resource type="Texture2D" uid="uid://b4b07pkclp53i" path="res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png" id="15_5g78r"]
 [ext_resource type="Texture2D" uid="uid://bkt5606dedikh" path="res://assets/images/ui/panels/ranch_ui_classroom_detail_panel.png" id="16_yskjy"]
-[ext_resource type="Texture2D" uid="uid://du0p1q7oiooq3" path="res://assets/新美术资产/ui/butter02.png" id="17_7sekf"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="17_7sekf"]
 [ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="17_qrgjm"]
 [ext_resource type="Texture2D" uid="uid://bwkgtfdik0aq7" path="res://assets/images/ui/panels/ranch_ui_relationship_ribbon.png" id="20_tn4tg"]
 [ext_resource type="Texture2D" uid="uid://dyfilvh4p2q38" path="res://assets/images/ui/panels/ranch_ui_social_place_panel.png" id="21_eayjd"]
 [ext_resource type="Texture2D" uid="uid://bj3wfdek2qibt" path="res://assets/images/ui/panels/ranch_ui_social_result_panel.png" id="23_vtvj8"]
-[ext_resource type="Texture2D" uid="uid://drkjfn43fdtbl" path="res://assets/新美术资产/ui/butter01.png" id="24_2ehnv"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_gold.png" id="24_2ehnv"]
 [ext_resource type="Texture2D" uid="uid://brjohqh01qrpi" path="res://assets/images/ui/bars/ranch_ui_header_plaque.png" id="24_87rtj"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="25_jbwww"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="26_cwols"]
@@ -4149,85 +4149,94 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=1118620564]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 49.0
+offset_top = 47.0
 offset_right = 293.0
-offset_bottom = 76.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
-theme_override_font_sizes/font_size = 21
+theme_override_font_sizes/font_size = 20
 text = "社交完成"
 horizontal_alignment = 1
 
 [node name="Score" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=1113698892]
 layout_mode = 0
-offset_left = 28.0
-offset_top = 81.0
-offset_right = 297.0
-offset_bottom = 99.0
+offset_left = 20.0
+offset_top = 80.0
+offset_right = 305.0
+offset_bottom = 101.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "相性 88 · 默契 · +36EXP · +120金币"
 horizontal_alignment = 1
+clip_text = true
 
 [node name="Event" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=415649773]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 115.0
+offset_top = 113.0
 offset_right = 293.0
-offset_bottom = 138.0
+offset_bottom = 137.0
 theme_override_colors/font_color = Color(0.76, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "追逐花瓣"
 horizontal_alignment = 1
 
 [node name="Flavor" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=1507288182]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 143.0
+offset_top = 146.0
 offset_right = 301.0
-offset_bottom = 161.0
+offset_bottom = 194.0
 theme_override_colors/font_color = Color(0.66, 0.72, 0.82, 1)
 theme_override_font_sizes/font_size = 10
 text = "微风卷起花瓣，它们并肩跑过草坡。"
 horizontal_alignment = 1
+autowrap_mode = 3
+clip_text = true
 
 [node name="Line1" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=1286927371]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 198.0
+offset_top = 212.0
 offset_right = 301.0
-offset_bottom = 218.0
+offset_bottom = 252.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "两只精灵在草坪上建立了默契。"
 horizontal_alignment = 1
+autowrap_mode = 3
+clip_text = true
 
 [node name="Line2" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=986001813]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 222.0
+offset_top = 262.0
 offset_right = 301.0
-offset_bottom = 242.0
+offset_bottom = 310.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "标签：友好交流、同伴默契"
 horizontal_alignment = 1
+autowrap_mode = 3
+clip_text = true
 
 [node name="Line3" type="Label" parent="Pages/SocialPage/ResultPopup/Panel" unique_id=1890036004]
 layout_mode = 0
 offset_left = 24.0
-offset_top = 246.0
+offset_top = 320.0
 offset_right = 301.0
-offset_bottom = 266.0
+offset_bottom = 368.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
+autowrap_mode = 3
+clip_text = true
 
 [node name="ConfirmButton" type="TextureButton" parent="Pages/SocialPage/ResultPopup" unique_id=1079053054]
 layout_mode = 0
 offset_left = 125.0
-offset_top = 443.0
+offset_top = 512.0
 offset_right = 250.0
-offset_bottom = 489.0
+offset_bottom = 558.0
 pivot_offset = Vector2(62.5, 23)
 ignore_texture_size = true
 

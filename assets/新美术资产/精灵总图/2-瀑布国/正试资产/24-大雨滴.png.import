@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3dp63mmb76rp"
-path="res://.godot/imported/battle_ui_combo_banner.png-2e22245ca1637c5f131ebc4e299947a1.ctex"
+uid="uid://j8unskquegqo"
+path="res://.godot/imported/24-大雨滴.png-031b25a1fcf76344813d7b7e37034aa3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/ui/panels/battle_ui_combo_banner.png"
-dest_files=["res://.godot/imported/battle_ui_combo_banner.png-2e22245ca1637c5f131ebc4e299947a1.ctex"]
+source_file="res://assets/新美术资产/精灵总图/2-瀑布国/正试资产/24-大雨滴.png"
+dest_files=["res://.godot/imported/24-大雨滴.png-031b25a1fcf76344813d7b7e37034aa3.ctex"]
 
 [params]
 

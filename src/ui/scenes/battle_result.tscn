@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
-[ext_resource type="Texture2D" uid="uid://ubusa7nt34o5" path="res://assets/新美术资产/ui/black.png" id="18_440ek"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black.png" id="18_440ek"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/warbackgrouds/map1.png" id="bg"]
 [ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="btn_next"]
 [ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="btn_retry"]

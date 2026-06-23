@@ -1269,15 +1269,18 @@ offset_bottom = 143.0
 
 [node name="PreviousButton" type="TextureButton" parent="RosterPanel/PageControls" unique_id=1511015937]
 layout_mode = 0
-offset_top = 1.0
-offset_right = 34.0
-offset_bottom = 35.0
-pivot_offset = Vector2(19, 19)
+offset_left = -5.0
+offset_top = -4.0
+offset_right = 39.0
+offset_bottom = 40.0
+pivot_offset = Vector2(22, 22)
 
 [node name="Icon" type="TextureRect" parent="RosterPanel/PageControls/PreviousButton" unique_id=1989928742]
 layout_mode = 0
-offset_right = 34.0
-offset_bottom = 34.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 39.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("21_page_prev")
 expand_mode = 1
@@ -1297,15 +1300,18 @@ vertical_alignment = 1
 
 [node name="NextButton" type="TextureButton" parent="RosterPanel/PageControls" unique_id=1039668682]
 layout_mode = 0
-offset_left = 108.0
-offset_right = 142.0
-offset_bottom = 34.0
-pivot_offset = Vector2(19, 19)
+offset_left = 103.0
+offset_top = -5.0
+offset_right = 147.0
+offset_bottom = 39.0
+pivot_offset = Vector2(22, 22)
 
 [node name="Icon" type="TextureRect" parent="RosterPanel/PageControls/NextButton" unique_id=928960771]
 layout_mode = 0
-offset_right = 34.0
-offset_bottom = 34.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 39.0
+offset_bottom = 39.0
 mouse_filter = 2
 texture = ExtResource("22_page_next")
 expand_mode = 1

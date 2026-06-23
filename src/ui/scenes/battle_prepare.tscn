@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="3_rlwyf"]
 [ext_resource type="Texture2D" uid="uid://cxu21xl1tnpxm" path="res://assets/images/ui/generated_panel_parts/panel_base2.png" id="18_nkwmc"]
-[ext_resource type="Texture2D" uid="uid://dwkrhwuewy1ru" path="res://assets/新美术资产/ui/black2.png" id="20_rlwyf"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black2.png" id="20_rlwyf"]
 [ext_resource type="Texture2D" uid="uid://cxj7cr2pign6r" path="res://assets/images/ui/buttons/result_refresh_ui_btn_green.png" id="21_rlwyf"]
 [ext_resource type="Texture2D" uid="uid://dtxns5drwsibo" path="res://assets/images/maps/warbackgrouds/map1.png" id="bg"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="currency_chip"]

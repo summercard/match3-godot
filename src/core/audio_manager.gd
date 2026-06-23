@@ -208,6 +208,8 @@ func play_sfx(event_key: String, volume_scale: float = 1.0, pitch_scale: float =
 
 ## 播放 BGM。loop=true 时循环。
 func play_bgm(event_key: String, volume_db: float = INF) -> void:
+	if _bgm_muted:
+		return
 	if not SFX_LIBRARY.has(event_key):
 		push_warning("AudioManager: unknown bgm key '%s'" % event_key)
 		return
