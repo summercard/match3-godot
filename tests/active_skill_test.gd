@@ -1,11 +1,14 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
+
 var _failures: Array[String] = []
 
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -22,13 +25,13 @@ func _run() -> void:
 	var battle_scene: Control = main.get_current_scene()
 	_expect(battle_scene != null, "battle scene should load")
 	if battle_scene == null:
-		_finish()
+		await _finish()
 		return
 
 	var battle = battle_scene.get("_battle")
 	_expect(battle != null, "battle manager should initialize")
 	if battle == null:
-		_finish()
+		await _finish()
 		return
 
 	var monster: Dictionary = battle.player_team[0]
@@ -83,13 +86,16 @@ func _run() -> void:
 		var actions: Array = enemy_turn.get("actions", [])
 		_expect(not actions.is_empty() and int((actions[0] as Dictionary).get("target_index", -1)) == 1, "enemy action should report the alive target index when names are duplicated")
 
-	_finish()
+	await _finish()
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
 
 func _finish() -> void:
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
 	if _failures.is_empty():
 		print("[ActiveSkill] OK")
 		quit(0)

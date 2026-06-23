@@ -7,6 +7,10 @@ const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_bu
 const TAB_ACTIVE_TEXTURE := preload("res://assets/images/ui/buttons/shop_ui_shop_tab_active_image2_clean.png")
 const TAB_NORMAL_TEXTURE := preload("res://assets/images/ui/buttons/shop_ui_shop_tab_normal_image2_clean.png")
 const PAGE_SIZE := 9
+
+signal back_pressed
+signal inventory_pressed
+
 const CARD_PATHS := [
 	"ProductGrid/Cards/Card1",
 	"ProductGrid/Cards/Card2",
@@ -477,14 +481,11 @@ func _node(path: NodePath) -> Control:
 func _label(path: NodePath) -> Label:
 	return get_node(path) as Label
 
-func _go_to_scene(scene_name: String) -> void:
-	if game and game.get("scene_manager") and game.scene_manager.has_method("switch_scene"):
-		game.scene_manager.switch_scene(scene_name, {}, "slide")
-	elif has_node("/root/SceneManager"):
-		get_node("/root/SceneManager").switch_scene(scene_name, {}, "slide")
+func _go_main() -> void:
+	back_pressed.emit()
 
 func _go_inventory() -> void:
-	_go_to_scene("inventory")
+	inventory_pressed.emit()
 
 func _popup_max_quantity() -> int:
 	if popup.is_empty():

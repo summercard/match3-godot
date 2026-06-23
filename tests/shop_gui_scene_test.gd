@@ -1,6 +1,9 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
 const SCENE_PATH := "res://src/ui/scenes/shop.tscn"
+var _failures: Array[String] = []
+var _inventory_pressed := false
 
 class FakeShopStorage extends Node:
 	var player := {"gold": 5000, "gems": 120, "stamina": 3}
@@ -32,8 +35,12 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var packed := load(SCENE_PATH) as PackedScene
 	_assert(packed != null, "shop scene should load")
+	if packed == null:
+		await _finish()
+		return
 	var scene := packed.instantiate() as Control
 	root.add_child(scene)
 	await process_frame
@@ -62,6 +69,10 @@ func _run() -> void:
 	_assert(scene.get_node("Tabs/Gems/Frame") is TextureRect, "shop tabs should use image-2 extracted tab art")
 	_assert((scene.get_node("BottomNav/HomeButton") as Control).visible, "shop bottom nav should keep the home button")
 	_assert((scene.get_node("BottomNav/InventoryButton") as Control).visible, "shop bottom nav second slot should open inventory")
+	scene.inventory_pressed.connect(func(): _inventory_pressed = true)
+	(scene.get_node("BottomNav/InventoryButton") as TextureButton).pressed.emit()
+	await process_frame
+	_assert(_inventory_pressed, "shop inventory navigation should emit a route signal")
 	_assert(not (scene.get_node("BottomNav/BattleButton") as Control).visible, "shop bottom nav battle slot should be empty")
 	_assert(not (scene.get_node("BottomNav/ShopButton") as Control).visible, "shop bottom nav shop slot should be empty")
 	_assert(not (scene.get_node("BottomNav/MenuButton") as Control).visible, "shop bottom nav menu slot should be empty")
@@ -120,11 +131,21 @@ func _run() -> void:
 	await process_frame
 	_assert((scene.get_node("Toast") as Control).visible, "purchase toast should show as a speech bubble")
 
-	print("[ShopGuiSceneTest] passed")
-	quit(0)
+	await _finish()
 
 func _assert(condition: bool, message: String) -> void:
 	if condition:
 		return
-	push_error("[ShopGuiSceneTest] %s" % message)
-	quit(1)
+	_failures.append(message)
+
+func _finish() -> void:
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
+	if _failures.is_empty():
+		print("[ShopGuiSceneTest] passed")
+		quit(0)
+	else:
+		for failure in _failures:
+			push_error("[ShopGuiSceneTest] %s" % failure)
+		quit(1)

@@ -97,6 +97,8 @@ static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NOR
 	var stats := _calc(monster_id, enemy_combat_level(monster_id, level), nature, -1, tier == EnemyTier.ELITE)
 	if bool(stats.get("isElite", false)):
 		_apply_elite_enemy_modifier(stats)
+	if bool(stats.get("isBoss", false)):
+		_apply_enemy_boss_modifier(stats)
 	return stats
 
 ## 普通敌人比关卡标注等级高 5 级；Boss 保持原关卡等级。
@@ -136,6 +138,29 @@ static func _apply_elite_base_modifier(stats: Dictionary) -> void:
 static func _apply_elite_enemy_modifier(stats: Dictionary) -> void:
 	_scale_stats(stats, ["hp", "maxHP"], ELITE_ENEMY_HP_MULT)
 	_scale_stats(stats, ["atk"], ELITE_ENEMY_ATK_MULT)
+
+static func _apply_enemy_boss_modifier(stats: Dictionary) -> void:
+	var monster_id := str(stats.get("id", ""))
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
+	if data.is_empty():
+		return
+	var multiplier_value: Variant = data.get("enemyBossMultiplier", {})
+	if not (multiplier_value is Dictionary):
+		return
+	var multiplier: Dictionary = multiplier_value
+	if multiplier.is_empty():
+		return
+	_scale_stat(stats, "hp", float(multiplier.get("hp", multiplier.get("all", 1.0))))
+	_scale_stat(stats, "maxHP", float(multiplier.get("hp", multiplier.get("all", 1.0))))
+	_scale_stat(stats, "atk", float(multiplier.get("atk", multiplier.get("all", 1.0))))
+	_scale_stat(stats, "def", float(multiplier.get("def", multiplier.get("all", 1.0))))
+	_scale_stat(stats, "spd", float(multiplier.get("spd", multiplier.get("all", 1.0))))
+	stats["enemyBossMultiplier"] = multiplier.duplicate(true)
+
+static func _scale_stat(stats: Dictionary, key: String, multiplier: float) -> void:
+	if multiplier <= 0.0 or not stats.has(key):
+		return
+	stats[key] = int(float(stats.get(key, 0)) * multiplier)
 
 static func _scale_stats(stats: Dictionary, keys: Array, multiplier: float) -> void:
 	for key in keys:

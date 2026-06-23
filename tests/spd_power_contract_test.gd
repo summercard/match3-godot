@@ -3,6 +3,7 @@ extends SceneTree
 const SaveManagerScript = preload("res://src/core/save_manager.gd")
 const BattlePrepareScript = preload("res://src/ui/controllers/battle_prepare_logic.gd")
 const TeamGuiScript = preload("res://src/ui/scene/scene_team_gui.gd")
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
 
 var _failures: Array[String] = []
 
@@ -28,9 +29,10 @@ func _run() -> void:
 	var saved_stats: Dictionary = storage.get_instance_stats(first_id)
 	_expect(storage.calc_team_power() == int(saved_stats.get("hp", 0)) + int(saved_stats.get("atk", 0)) + int(saved_stats.get("def", 0)), "SaveManager team power should ignore SPD")
 
-	prepare.queue_free()
-	team_gui.queue_free()
-	storage.queue_free()
+	prepare.free()
+	team_gui.free()
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
 	await process_frame
 	_finish()
 

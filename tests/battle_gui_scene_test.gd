@@ -1,11 +1,14 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
+
 var _failures: Array[String] = []
 
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -127,7 +130,10 @@ func _run() -> void:
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
 	_expect(battle.has_node("Combatants/MultiEnemies/Enemy3/HpFrameBase"), "multi-enemy hp bars should keep the base frame layer")
 
-	main.queue_free()
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
+	await process_frame
 	await process_frame
 	_finish()
 

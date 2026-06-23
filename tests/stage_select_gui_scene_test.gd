@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
+
 var _failures: Array[String] = []
 var _selected_stage_id: String = ""
 
@@ -7,10 +9,11 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var save_manager := root.get_node_or_null("/root/SaveManager")
 	_expect(save_manager != null, "SaveManager should exist")
 	if save_manager == null:
-		_finish()
+		await _finish()
 		return
 
 	save_manager.clear_all_data()
@@ -82,7 +85,7 @@ func _run() -> void:
 	if chapter_badge != null:
 		_expect(chapter_badge.texture.resource_path.ends_with("ui_inventory_icon_badge.png"), "chapter badge should reuse the inventory badge art")
 	var return_patch := scene.get_node("BottomNav/ReturnButton/butter01/NinePatch") as NinePatchRect
-	_expect(return_patch.texture != null and return_patch.texture.resource_path.ends_with("butter01.png"), "bottom return button should stay on shared navigation button art")
+	_expect(return_patch.texture != null and return_patch.texture.resource_path.ends_with("button_butter_gold.png"), "bottom return button should stay on shared navigation button art")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple") as Control).visible, "chapter 9 should show its independent editable map group")
 	_expect(not (scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/PathDecorations") as Control).visible, "stage path dot decorations should be hidden")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_09_starlit_temple.png"), "chapter 9 group should carry its own formal background")
@@ -213,7 +216,7 @@ func _run() -> void:
 	var sweep := scene.get_node("MapScroll/ChapterMaps/Chapter01BreezePlain/StageNodes/Stage01/SweepButton") as Button
 	_expect(sweep.visible, "cleared stage should reveal its editable sweep button")
 	_expect(sweep.mouse_filter == Control.MOUSE_FILTER_IGNORE, "sweep indicator should not own a separate touch area")
-	_expect((sweep.get_node("butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("butter02.png"), "sweep indicator should use the shared redesigned art")
+	_expect((sweep.get_node("butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("button_butter_blue.png"), "sweep indicator should use the shared redesigned art")
 	sweep.pressed.emit()
 	_expect(not (scene.get_node("PopupLayer/SweepDialog") as Control).is_visible_in_tree(), "sweep indicator should be display-only")
 	cleared_stage.pressed.emit()
@@ -221,10 +224,10 @@ func _run() -> void:
 	_expect((scene.get_node("PopupLayer") as Control).visible, "action choice should reveal its popup parent layer")
 	_expect((scene.get_node("PopupLayer/SweepDialog") as Control).is_visible_in_tree(), "action choice should be visible on screen")
 	_expect((scene.get_node("PopupLayer/SweepDialog/black3/NinePatch") as NinePatchRect).texture.resource_path.ends_with("black2.png"), "action choice should use the edited black3 panel")
-	_expect((scene.get_node("PopupLayer/SweepDialog/TitleRibbon/NinePatch") as NinePatchRect).texture.resource_path.ends_with("花边01.png"), "action choice should use the library title ribbon component")
+	_expect((scene.get_node("PopupLayer/SweepDialog/TitleRibbon/NinePatch") as NinePatchRect).texture.resource_path.ends_with("ribbon_side_01.png"), "action choice should use the library title ribbon component")
 	_expect((scene.get_node("PopupLayer/SweepDialog/black2/NinePatch") as NinePatchRect).texture.resource_path.ends_with("black2.png"), "action choice should use the edited black2 panel")
-	_expect((scene.get_node("PopupLayer/SweepDialog/ConfirmBtn/butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("butter02.png"), "sweep choice should use the edited button component")
-	_expect((scene.get_node("PopupLayer/SweepDialog/CancelBtn/butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("butter02.png"), "stage entry choice should use the edited button component")
+	_expect((scene.get_node("PopupLayer/SweepDialog/ConfirmBtn/butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("button_butter_blue.png"), "sweep choice should use the edited button component")
+	_expect((scene.get_node("PopupLayer/SweepDialog/CancelBtn/butter02/NinePatch") as NinePatchRect).texture.resource_path.ends_with("button_butter_blue.png"), "stage entry choice should use the edited button component")
 	_expect((scene.get_node("PopupLayer/SweepDialog") as Control).size == Vector2(315.0, 238.0), "action choice should use the compact mobile dialog size")
 	_expect((scene.get_node("PopupLayer/SweepDialog/ConfirmBtn") as Button).size == Vector2(140.0, 52.0), "sweep choice should keep a mobile-friendly touch target")
 	_expect((scene.get_node("PopupLayer/SweepDialog/CancelBtn") as Button).size == Vector2(140.0, 52.0), "stage entry choice should keep a mobile-friendly touch target")
@@ -249,15 +252,13 @@ func _run() -> void:
 	_expect(sweep_result.visible, "sweep confirmation should show its GUI feedback panel")
 	_expect(sweep_result.position == (scene.get_node("PopupLayer/SweepDialog") as Control).position and sweep_result.size == (scene.get_node("PopupLayer/SweepDialog") as Control).size, "sweep result should copy the edited dialog bounds")
 	_expect((sweep_result.get_node("black3/NinePatch") as NinePatchRect).texture.resource_path.ends_with("black2.png"), "sweep result should copy the edited black3 panel")
-	_expect((sweep_result.get_node("TitleRibbon/NinePatch") as NinePatchRect).texture.resource_path.ends_with("花边01.png"), "sweep result should copy the edited title ribbon")
+	_expect((sweep_result.get_node("TitleRibbon/NinePatch") as NinePatchRect).texture.resource_path.ends_with("ribbon_side_01.png"), "sweep result should copy the edited title ribbon")
 	_expect((sweep_result.get_node("black2/NinePatch") as NinePatchRect).texture.resource_path.ends_with("black2.png"), "sweep result should copy the edited reward panel")
 	_expect(not sweep_result.has_node("Frame") and not sweep_result.has_node("ConfirmBtn") and not sweep_result.has_node("CancelBtn"), "sweep result should remove the old frame and action buttons")
 	scene.call("_update_sweep_animation", 1.0)
 	_expect(not (scene.get_node("PopupLayer/Shade") as ColorRect).visible, "sweep completion should remove its modal shade")
 
-	scene.queue_free()
-	await process_frame
-	_finish()
+	await _finish()
 
 func _on_stage_selected(stage_id: String, _stage_data: Dictionary, _chapter_index: int) -> void:
 	_selected_stage_id = stage_id
@@ -271,6 +272,9 @@ func _wait_frames(count: int) -> void:
 		await process_frame
 
 func _finish() -> void:
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
 	if _failures.is_empty():
 		print("[StageSelectGuiScene] OK")
 		quit(0)

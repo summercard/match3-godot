@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
+
 class StartHarness:
 	extends Control
 
@@ -17,6 +19,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var harness := StartHarness.new()
 	root.add_child(harness)
 	var scene: Control = load("res://src/ui/scenes/start_screen.tscn").instantiate()
@@ -54,7 +57,9 @@ func _run() -> void:
 	_expect(button.disabled, "single press should enter after the feedback beat")
 	_expect(not harness.switched_to.is_empty(), "single press should request a destination scene")
 
-	harness.free()
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
 	if _failed:
 		quit(1)
 		return

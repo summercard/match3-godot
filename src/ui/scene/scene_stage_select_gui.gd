@@ -5,33 +5,10 @@ extends "res://src/ui/controllers/stage_select_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const AnimationHelperScript := preload("res://src/engine/animation_player.gd")
+const StageSelectChapterRegistryScript := preload("res://src/ui/scene/stage_select_chapter_registry.gd")
 
-const CHAPTER_MAP_NODES := {
-	"chapter_1": "MapScroll/ChapterMaps/Chapter01BreezePlain",
-	"chapter_2": "MapScroll/ChapterMaps/Chapter02WaterfallKingdom",
-	"chapter_3": "MapScroll/ChapterMaps/Chapter03FeatherForest",
-	"chapter_4": "MapScroll/ChapterMaps/Chapter04PassionDesert",
-	"chapter_5": "MapScroll/ChapterMaps/Chapter05SouthernSea",
-	"chapter_6": "MapScroll/ChapterMaps/Chapter06IceKingdom",
-	"chapter_7": "MapScroll/ChapterMaps/Chapter07SpiritVoid",
-	"chapter_8": "MapScroll/ChapterMaps/Chapter08BarbecueRock",
-	"chapter_9": "MapScroll/ChapterMaps/Chapter09StarlitTemple",
-	"chapter_10": "MapScroll/ChapterMaps/Chapter10ChaosDomain",
-	"chapter_11": "MapScroll/ChapterMaps/Chapter11RadiantTemple",
-}
-const CHAPTER_MAP_SCENES := {
-	"chapter_1": "res://src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn",
-	"chapter_2": "res://src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn",
-	"chapter_3": "res://src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn",
-	"chapter_4": "res://src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn",
-	"chapter_5": "res://src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn",
-	"chapter_6": "res://src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn",
-	"chapter_7": "res://src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn",
-	"chapter_8": "res://src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn",
-	"chapter_9": "res://src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn",
-	"chapter_10": "res://src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn",
-	"chapter_11": "res://src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn",
-}
+const CHAPTER_MAP_NODES := StageSelectChapterRegistryScript.CHAPTER_MAP_NODES
+const CHAPTER_MAP_SCENES := StageSelectChapterRegistryScript.CHAPTER_MAP_SCENES
 const DOT_PATHS := [
 	"Header/Dots/Dot1", "Header/Dots/Dot2", "Header/Dots/Dot3",
 	"Header/Dots/Dot4", "Header/Dots/Dot5", "Header/Dots/Dot6",

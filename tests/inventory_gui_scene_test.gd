@@ -1,14 +1,20 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
 const SCENE_PATH := "res://src/ui/scenes/inventory.tscn"
 var _shop_pressed := false
+var _failures: Array[String] = []
 
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var packed := load(SCENE_PATH) as PackedScene
 	_assert(packed != null, "inventory scene should load")
+	if packed == null:
+		await _finish()
+		return
 	var scene := packed.instantiate() as Control
 	root.add_child(scene)
 	await process_frame
@@ -83,14 +89,24 @@ func _run() -> void:
 	var use_button := scene.get_node("DetailPanel/UseButton") as BaseButton
 	_assert(not use_button.disabled, "use button should be enabled with selected item")
 
-	print("[InventoryGuiSceneTest] passed")
-	quit(0)
+	await _finish()
 
 func _assert(condition: bool, message: String) -> void:
 	if condition:
 		return
-	push_error("[InventoryGuiSceneTest] %s" % message)
-	quit(1)
+	_failures.append(message)
 
 func _on_shop_pressed() -> void:
 	_shop_pressed = true
+
+func _finish() -> void:
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
+	await process_frame
+	if _failures.is_empty():
+		print("[InventoryGuiSceneTest] passed")
+		quit(0)
+	else:
+		for failure in _failures:
+			push_error("[InventoryGuiSceneTest] %s" % failure)
+		quit(1)

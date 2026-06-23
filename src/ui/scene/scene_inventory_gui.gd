@@ -100,9 +100,6 @@ func _on_back_pressed() -> void:
 
 func _on_shop_pressed() -> void:
 	shop_pressed.emit()
-	var scene_manager := get_node_or_null("/root/SceneManager")
-	if scene_manager != null and scene_manager.has_method("switch_scene"):
-		scene_manager.switch_scene("shop", {}, "slide")
 
 func _on_tab_pressed(tab_id: String) -> void:
 	_active_tab = tab_id

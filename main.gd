@@ -135,6 +135,10 @@ func _initialize_scene(scene_node: Control, scene_name: String, data: Dictionary
 		scene_node.battle_started.connect(_on_battle_started)
 	if scene_node.has_signal("back_pressed"):
 		scene_node.back_pressed.connect(func(): _request_scene_switch("main"))
+	if scene_node.has_signal("shop_pressed"):
+		scene_node.shop_pressed.connect(func(): _request_scene_switch("shop"))
+	if scene_node.has_signal("inventory_pressed"):
+		scene_node.inventory_pressed.connect(func(): _request_scene_switch("inventory"))
 	if scene_node.has_signal("tutorial_completed"):
 		scene_node.tutorial_completed.connect(func(): _request_scene_switch("main"))
 

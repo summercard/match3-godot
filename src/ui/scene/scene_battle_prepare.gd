@@ -1,5 +1,4 @@
-# battle_prepare_scene.gd - battle_prepare.tscn node binding and sync logic
-class_name BattlePrepareScene
+# scene_battle_prepare.gd - battle_prepare.tscn node binding and sync logic
 extends "res://src/ui/controllers/battle_prepare_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")

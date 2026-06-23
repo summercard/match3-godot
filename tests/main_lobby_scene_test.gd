@@ -1,11 +1,14 @@
 extends SceneTree
 
+const TestSceneCleanup := preload("res://tests/helpers/test_scene_cleanup.gd")
+
 var _failures: Array[String] = []
 
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	TestSceneCleanup.mute_audio_for_test(self)
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -89,8 +92,8 @@ func _run() -> void:
 		await create_timer(0.17).timeout
 		_expect(emitted_ids.back() == "shop", "%s should open the shop" % plus_path)
 
-	main.queue_free()
-	lobby.queue_free()
+	TestSceneCleanup.queue_free_root(self)
+	await process_frame
 	await process_frame
 	if _failures.is_empty():
 		print("[MainLobbyScene] OK")

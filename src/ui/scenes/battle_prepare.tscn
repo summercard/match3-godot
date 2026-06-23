@@ -15,7 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://bna4bir4wsn0r" path="res://assets/images/ui/icons/main_icon_currency_plus_green.png" id="plus_icon"]
 [ext_resource type="Texture2D" uid="uid://vevgwefd4xem" path="res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png" id="power_panel"]
 [ext_resource type="Texture2D" uid="uid://dnsjcm4cpmwcl" path="res://assets/images/ui/panels/battle_prepare_new_ui_reward_panel.png" id="reward_panel"]
-[ext_resource type="Script" path="res://src/ui/controllers/battle_prepare_scene.gd" id="script"]
+[ext_resource type="Script" path="res://src/ui/scene/scene_battle_prepare.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://bj70nl7t663xv" path="res://assets/images/ui/icons/battle_prepare_new_icon_power_swords.png" id="sword_icon"]
 [ext_resource type="Texture2D" uid="uid://dqwakw21r02pa" path="res://assets/images/ui/panels/battle_prepare_new_ui_mechanic_panel.png" id="synergy_panel"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/cards/battle_flow_new_ui_monster_card.png" id="team_card"]
