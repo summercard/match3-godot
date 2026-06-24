@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q47lp3qwgdfc"
-path="res://.godot/imported/小岩球.png-76d8bcf3436552b10ef4afebf813a85c.ctex"
+uid="uid://drlogtx5fvd7a"
+path="res://.godot/imported/BOSS-5-深海霸主.png-0697101907828b173004fd0acfa9c1c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/新美术资产/精灵总图/4-热情沙漠/小岩球.png"
-dest_files=["res://.godot/imported/小岩球.png-76d8bcf3436552b10ef4afebf813a85c.ctex"]
+source_file="res://assets/新美术资产/精灵总图/5-南国海/正式资产/BOSS-5-深海霸主.png"
+dest_files=["res://.godot/imported/BOSS-5-深海霸主.png-0697101907828b173004fd0acfa9c1c6.ctex"]
 
 [params]
 
