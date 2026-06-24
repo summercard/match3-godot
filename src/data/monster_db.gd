@@ -127,7 +127,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_001", "name": "花叶兽", "element": "grass",
 		"rarity": 3, "emoji": "🌺",
 		"baseHP": 153, "baseATK": 22, "baseDEF": 8, "baseSPD": 11,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "花瓣风暴", "cost": 10, "multiplier": 3.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -139,7 +139,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_002", "name": "烈焰龙", "element": "fire",
 		"rarity": 3, "emoji": "🐉",
 		"baseHP": 161, "baseATK": 23, "baseDEF": 9, "baseSPD": 11,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "龙息烈焰", "cost": 12, "multiplier": 3.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -270,7 +270,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_003", "name": "深海海马王", "element": "water",
 		"rarity": 4, "emoji": "🦑",
 		"baseHP": 163, "baseATK": 22, "baseDEF": 11, "baseSPD": 18,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "深渊漩涡", "cost": 12, "multiplier": 3.2 },
 		"isBoss": true,
 		"enemySkills": [
@@ -283,7 +283,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_004", "name": "暗影巨龙", "element": "dark",
 		"rarity": 4, "emoji": "🐲",
 		"baseHP": 164, "baseATK": 22, "baseDEF": 14, "baseSPD": 21,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "暗影龙息", "cost": 13, "multiplier": 3.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -297,7 +297,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_005", "name": "雷霆巨兽", "element": "thunder",
 		"rarity": 4, "emoji": "⚡",
 		"baseHP": 172, "baseATK": 22, "baseDEF": 19, "baseSPD": 24,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "雷霆裁决", "cost": 14, "multiplier": 3.8 },
 		"isBoss": true,
 		"enemySkills": [
@@ -542,7 +542,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_006", "name": "冰霜巨龙", "element": "ice",
 		"rarity": 4, "emoji": "🐲",
 		"baseHP": 185, "baseATK": 22, "baseDEF": 24, "baseSPD": 19,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "绝对零度", "cost": 15, "multiplier": 4.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -628,7 +628,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_007", "name": "虚空巨龙", "element": "void",
 		"rarity": 5, "emoji": "🌑",
 		"baseHP": 203, "baseATK": 22, "baseDEF": 31, "baseSPD": 19,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "虚空湮灭", "cost": 15, "multiplier": 4.2 },
 		"isBoss": true,
 		"enemySkills": [
@@ -714,7 +714,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_008", "name": "时空巨龙", "element": "temporal",
 		"rarity": 5, "emoji": "⏳",
 		"baseHP": 232, "baseATK": 24, "baseDEF": 38, "baseSPD": 22,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "时空崩灭", "cost": 16, "multiplier": 4.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -800,7 +800,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_009", "name": "星耀巨龙", "element": "star",
 		"rarity": 5, "emoji": "✨",
 		"baseHP": 277, "baseATK": 24, "baseDEF": 48, "baseSPD": 24,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "星辰湮灭", "cost": 16, "multiplier": 4.8 },
 		"isBoss": true,
 		"enemySkills": [
@@ -886,7 +886,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_010", "name": "混沌兽神", "element": "chaos",
 		"rarity": 5, "emoji": "🐲",
 		"baseHP": 326, "baseATK": 26, "baseDEF": 57, "baseSPD": 26,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "混沌湮灭", "cost": 16, "multiplier": 5.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -1018,7 +1018,7 @@ const MONSTER_DB: Dictionary = {
 		"id": "monster_boss_011", "name": "光耀天使长", "element": "light",
 		"rarity": 5, "emoji": "👼",
 		"baseHP": 383, "baseATK": 29, "baseDEF": 68, "baseSPD": 27,
-		"enemyBossMultiplier": {"hp": 7, "atk": 1.5, "def": 2, "spd": 1},
+		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
 		"skill": { "name": "神圣制裁", "cost": 16, "multiplier": 5.2 },
 		"isBoss": true,
 		"enemySkills": [

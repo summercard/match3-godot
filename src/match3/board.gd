@@ -60,11 +60,21 @@ var grid: Array = []
 
 ## 障碍物数据：obstacles[row][col] = null 或 { type: "rock", hp: 2 }
 var obstacles: Array = []
+var fountains: Array = []
 
 ## 锁定宝石数据：lockedGems[row][col] = null 或 { hp: 1|2 }
 ## 被锁的宝石不可交换或参与普通消除，但会随重力下落
 ## 消除相邻同色宝石可触发解锁
 var locked_gems: Array = []
+var soaked_gems: Array = []
+var vine_gems: Array = []
+
+var fountain_rule: Dictionary = {
+	"eruptionCount": 1,
+	"range": "orthogonal_1",
+	"soakTurns": 1,
+	"fireVanishes": true
+}
 
 ## 毒雾数据：poisonFog[row][col] = null 或 { active: true, turnsSinceSpread: 0 }
 ## 毒雾格子上的宝石可正常参与消除，但每回合造成伤害
@@ -87,7 +97,10 @@ func _init(p_rows: int = 8, p_cols: int = 8) -> void:
 	rows = p_rows
 	cols = p_cols
 	_init_obstacles()
+	_init_fountains()
 	_init_locked_gems()
+	_init_soaked_gems()
+	_init_vine_gems()
 	_init_poison_fog()
 	_generate_initial_grid()
 
@@ -99,6 +112,13 @@ func _init_obstacles() -> void:
 		for c: int in range(cols):
 			obstacles[r].append(null)
 
+func _init_fountains() -> void:
+	fountains = []
+	for r: int in range(rows):
+		fountains.append([])
+		for c: int in range(cols):
+			fountains[r].append(null)
+
 ## 初始化锁定宝石数组（全部为 null）
 func _init_locked_gems() -> void:
 	locked_gems = []
@@ -106,6 +126,20 @@ func _init_locked_gems() -> void:
 		locked_gems.append([])
 		for c: int in range(cols):
 			locked_gems[r].append(null)
+
+func _init_soaked_gems() -> void:
+	soaked_gems = []
+	for r: int in range(rows):
+		soaked_gems.append([])
+		for c: int in range(cols):
+			soaked_gems[r].append(null)
+
+func _init_vine_gems() -> void:
+	vine_gems = []
+	for r: int in range(rows):
+		vine_gems.append([])
+		for c: int in range(cols):
+			vine_gems[r].append(null)
 
 ## 初始化毒雾数组（全部为 null）
 func _init_poison_fog() -> void:
@@ -121,7 +155,7 @@ func _generate_initial_grid() -> void:
 	for r: int in range(rows):
 		grid.append([])
 		for c: int in range(cols):
-			if is_obstacle(r, c):
+			if is_blocked_cell(r, c):
 				grid[r].append("")
 				continue
 			var type: String = ""
@@ -153,6 +187,14 @@ func is_obstacle(row: int, col: int) -> bool:
 		return false
 	return obstacles[row][col] != null
 
+func is_fountain(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	return fountains[row][col] != null
+
+func is_blocked_cell(row: int, col: int) -> bool:
+	return is_obstacle(row, col) or is_fountain(row, col)
+
 ## 检查某个格子是否被锁定
 func is_locked(row: int, col: int) -> bool:
 	if row < 0 or row >= rows or col < 0 or col >= cols:
@@ -161,6 +203,22 @@ func is_locked(row: int, col: int) -> bool:
 	if lock == null or not lock is Dictionary:
 		return false
 	return lock.get("hp", 0) > 0
+
+func is_soaked(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	var soak = soaked_gems[row][col]
+	if soak == null or not soak is Dictionary:
+		return false
+	return int(soak.get("turns", 0)) > 0
+
+func is_vined(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	var vine = vine_gems[row][col]
+	if vine == null or not vine is Dictionary:
+		return false
+	return bool(vine.get("active", true))
 
 ## 检查某个格子是否有毒雾
 func is_poison_fog(row: int, col: int) -> bool:
@@ -174,11 +232,11 @@ func is_poison_fog(row: int, col: int) -> bool:
 ## 检查放置 type 在 (r,c) 是否会立即形成匹配
 func _would_match(row: int, col: int, type: String) -> bool:
 	# 横向检查：左边2个相同（跳过障碍物格子）
-	if col >= 2 and not is_obstacle(row, col - 1) and not is_obstacle(row, col - 2):
+	if col >= 2 and not is_blocked_cell(row, col - 1) and not is_blocked_cell(row, col - 2):
 		if grid[row][col - 1] == type and grid[row][col - 2] == type:
 			return true
 	# 纵向检查：上面2个相同（跳过障碍物格子）
-	if row >= 2 and not is_obstacle(row - 1, col) and not is_obstacle(row - 2, col):
+	if row >= 2 and not is_blocked_cell(row - 1, col) and not is_blocked_cell(row - 2, col):
 		if grid[row - 1][col] == type and grid[row - 2][col] == type:
 			return true
 	return false
@@ -217,6 +275,117 @@ func set_obstacles(layout: Array) -> void:
 				"type": ob.get("type", "rock"),
 				"hp": ob.get("hp", 2)
 			}
+			if vine_gems.size() == rows and vine_gems[r].size() == cols:
+				vine_gems[r][c] = null
+
+func set_fountains(layout: Array, rule: Dictionary = {}) -> void:
+	_init_fountains()
+	clear_soaked_gems()
+	if rule != null and not rule.is_empty():
+		for key in rule:
+			fountain_rule[key] = rule[key]
+	if layout == null or layout.size() == 0:
+		return
+	for fountain: Dictionary in layout:
+		var r: int = fountain.get("row", -1)
+		var c: int = fountain.get("col", -1)
+		if r >= 0 and r < rows and c >= 0 and c < cols:
+			fountains[r][c] = {"type": fountain.get("type", "fountain")}
+			if grid.size() == rows and grid[r].size() == cols:
+				grid[r][c] = ""
+			if locked_gems.size() == rows and locked_gems[r].size() == cols:
+				locked_gems[r][c] = null
+			if vine_gems.size() == rows and vine_gems[r].size() == cols:
+				vine_gems[r][c] = null
+
+func clear_soaked_gems() -> void:
+	if soaked_gems.is_empty():
+		_init_soaked_gems()
+		return
+	for row in range(rows):
+		for col in range(cols):
+			soaked_gems[row][col] = null
+
+func get_fountain_positions() -> Array:
+	var result: Array = []
+	for row in range(rows):
+		for col in range(cols):
+			if is_fountain(row, col):
+				result.append({"row": row, "col": col})
+	return result
+
+func process_fountain_eruption() -> Dictionary:
+	clear_soaked_gems()
+	var fountain_positions := get_fountain_positions()
+	if fountain_positions.is_empty():
+		return {"erupted": [], "soaked": [], "extinguished": []}
+
+	var pool := fountain_positions.duplicate(true)
+	_shuffle_array(pool)
+	var eruption_count := clampi(int(fountain_rule.get("eruptionCount", 1)), 1, pool.size())
+	var erupted: Array = []
+	for i in range(eruption_count):
+		erupted.append(pool[i])
+
+	var affected: Dictionary = {}
+	for source: Dictionary in erupted:
+		for pos: Dictionary in _fountain_affected_positions(int(source["row"]), int(source["col"])):
+			affected["%d,%d" % [pos["row"], pos["col"]]] = pos
+
+	var soaked: Array = []
+	var extinguished: Array = []
+	for key in affected.keys():
+		var pos: Dictionary = affected[key]
+		var row := int(pos["row"])
+		var col := int(pos["col"])
+		if is_blocked_cell(row, col) or is_empty(row, col):
+			continue
+		var gem_type := str(grid[row][col])
+		if gem_type == "fire" and bool(fountain_rule.get("fireVanishes", true)):
+			grid[row][col] = ""
+			locked_gems[row][col] = null
+			soaked_gems[row][col] = null
+			extinguished.append({"row": row, "col": col, "type": gem_type})
+		else:
+			soaked_gems[row][col] = {"turns": int(fountain_rule.get("soakTurns", 1))}
+			soaked.append({"row": row, "col": col, "type": gem_type})
+
+	return {"erupted": erupted, "soaked": soaked, "extinguished": extinguished}
+
+func _fountain_affected_positions(row: int, col: int) -> Array:
+	var positions: Array = []
+	var offsets: Array = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+	var range_type := str(fountain_rule.get("range", "orthogonal_1"))
+	if range_type == "square_1":
+		offsets = []
+		for dr in range(-1, 2):
+			for dc in range(-1, 2):
+				if dr != 0 or dc != 0:
+					offsets.append([dr, dc])
+	elif range_type == "cross_2":
+		offsets = [[-2, 0], [-1, 0], [1, 0], [2, 0], [0, -2], [0, -1], [0, 1], [0, 2]]
+	for offset: Array in offsets:
+		var nr := row + int(offset[0])
+		var nc := col + int(offset[1])
+		if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
+			positions.append({"row": nr, "col": nc})
+	return positions
+
+func set_vines(layout: Array) -> void:
+	_init_vine_gems()
+	if layout == null or layout.size() == 0:
+		return
+	for vine: Dictionary in layout:
+		var r: int = vine.get("row", -1)
+		var c: int = vine.get("col", -1)
+		if r >= 0 and r < rows and c >= 0 and c < cols and not is_blocked_cell(r, c):
+			vine_gems[r][c] = {"active": true}
+
+func clear_vine(row: int, col: int) -> bool:
+	if not is_vined(row, col):
+		return false
+	vine_gems[row][col] = null
+	return true
 
 ## 对障碍物造成1点伤害，返回是否被破坏
 func damage_obstacle(row: int, col: int) -> bool:
@@ -338,7 +507,7 @@ func set_poison_fog(config: Dictionary) -> void:
 		var c: int = t.get("col", -1)
 		if r >= 0 and r < rows and c >= 0 and c < cols:
 			# 不在障碍物格子上放毒雾
-			if not is_obstacle(r, c):
+			if not is_blocked_cell(r, c):
 				poison_fog[r][c] = { "active": true, "turnsSinceSpread": 0 }
 
 ## 清除某个格子的毒雾（消除宝石时调用）
@@ -387,7 +556,7 @@ func spread_poison_fog() -> Array:
 			var nc: int = tc + d[1]
 			if nr < 0 or nr >= rows or nc < 0 or nc >= cols:
 				continue
-			if is_obstacle(nr, nc):
+			if is_blocked_cell(nr, nc):
 				continue
 			if is_poison_fog(nr, nc):
 				continue  # 已有毒雾不重复
@@ -425,11 +594,11 @@ func swap(r1: int, c1: int, r2: int, c2: int) -> bool:
 		return false
 	
 	# 检查是否有障碍物（任一格子有障碍物则拒绝交换）
-	if is_obstacle(r1, c1) or is_obstacle(r2, c2):
+	if is_blocked_cell(r1, c1) or is_blocked_cell(r2, c2):
 		return false
 	
 	# 检查是否有锁定宝石（任一格子被锁定则拒绝交换）
-	if is_locked(r1, c1) or is_locked(r2, c2):
+	if is_locked(r1, c1) or is_locked(r2, c2) or is_soaked(r1, c1) or is_soaked(r2, c2):
 		return false
 	
 	# 交换
@@ -458,12 +627,12 @@ func find_matches() -> Dictionary:
 		var c: int = 0
 		while c < cols - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_obstacle(r, c) or is_locked(r, c):
+			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or is_locked(r, c) or is_soaked(r, c):
 				c += 1
 				continue
-			if not is_obstacle(r, c + 1) and not is_obstacle(r, c + 2) and not is_locked(r, c + 1) and not is_locked(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
+			if not is_blocked_cell(r, c + 1) and not is_blocked_cell(r, c + 2) and not is_locked(r, c + 1) and not is_locked(r, c + 2) and not is_soaked(r, c + 1) and not is_soaked(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
 				var end: int = c + 2
-				while end + 1 < cols and not is_obstacle(r, end + 1) and not is_locked(r, end + 1) and grid[r][end + 1] == gem_type:
+				while end + 1 < cols and not is_blocked_cell(r, end + 1) and not is_locked(r, end + 1) and not is_soaked(r, end + 1) and grid[r][end + 1] == gem_type:
 					end += 1
 				var length: int = end - c + 1
 				var cells: Array = []
@@ -482,12 +651,12 @@ func find_matches() -> Dictionary:
 		var r: int = 0
 		while r < rows - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_obstacle(r, c) or is_locked(r, c):
+			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or is_locked(r, c) or is_soaked(r, c):
 				r += 1
 				continue
-			if not is_obstacle(r + 1, c) and not is_obstacle(r + 2, c) and not is_locked(r + 1, c) and not is_locked(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
+			if not is_blocked_cell(r + 1, c) and not is_blocked_cell(r + 2, c) and not is_locked(r + 1, c) and not is_locked(r + 2, c) and not is_soaked(r + 1, c) and not is_soaked(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
 				var end: int = r + 2
-				while end + 1 < rows and not is_obstacle(end + 1, c) and not is_locked(end + 1, c) and grid[end + 1][c] == gem_type:
+				while end + 1 < rows and not is_blocked_cell(end + 1, c) and not is_locked(end + 1, c) and not is_soaked(end + 1, c) and grid[end + 1][c] == gem_type:
 					end += 1
 				var length: int = end - r + 1
 				var cells: Array = []
@@ -650,7 +819,7 @@ func get_cross_explosion_positions(center_row: int, center_col: int) -> Array:
 		var nr: int = center_row + offset[0]
 		var nc: int = center_col + offset[1]
 		if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
-			if is_obstacle(nr, nc):
+			if is_blocked_cell(nr, nc) or is_soaked(nr, nc):
 				continue
 			var gem_type: String = grid[nr][nc]
 			if gem_type != "" and gem_type != null:
@@ -668,7 +837,7 @@ func get_bomb_explosion_positions(center_row: int, center_col: int) -> Array:
 			var nr: int = center_row + dr
 			var nc: int = center_col + dc
 			if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
-				if is_obstacle(nr, nc):
+				if is_blocked_cell(nr, nc) or is_soaked(nr, nc):
 					continue
 				var gem_type: String = grid[nr][nc]
 				if gem_type != "" and gem_type != null:
@@ -686,7 +855,7 @@ func get_rainbow_positions(match_type: String, exclude_set: Array) -> Array:
 	for r: int in range(rows):
 		for c: int in range(cols):
 			var key: String = "%d,%d" % [r, c]
-			if grid[r][c] == match_type and not _set_has(exclude_set, key):
+			if grid[r][c] == match_type and not is_soaked(r, c) and not _set_has(exclude_set, key):
 				positions.append({ "row": r, "col": c, "type": match_type })
 	return positions
 
@@ -734,12 +903,12 @@ func apply_gravity() -> Array:
 		# to its gem, so it moves with the gem instead of acting as a barrier.
 		var segment_bottom: int = rows - 1
 		while segment_bottom >= 0:
-			if is_obstacle(segment_bottom, c):
+			if is_blocked_cell(segment_bottom, c):
 				segment_bottom -= 1
 				continue
 
 			var segment_top: int = segment_bottom
-			while segment_top >= 0 and not is_obstacle(segment_top, c):
+			while segment_top >= 0 and not is_blocked_cell(segment_top, c):
 				segment_top -= 1
 
 			var gems: Array[Dictionary] = []
@@ -790,11 +959,11 @@ func has_valid_moves() -> bool:
 	for r: int in range(rows):
 		for c: int in range(cols):
 			# 跳过障碍物格子、空格子和锁定宝石
-			if is_obstacle(r, c) or is_empty(r, c) or is_locked(r, c):
+			if is_blocked_cell(r, c) or is_empty(r, c) or is_locked(r, c) or is_soaked(r, c):
 				continue
 			
 			# 尝试向右交换（目标格子也不能是锁定的）
-			if c + 1 < cols and not is_obstacle(r, c + 1) and not is_locked(r, c + 1):
+			if c + 1 < cols and not is_blocked_cell(r, c + 1) and not is_locked(r, c + 1) and not is_soaked(r, c + 1):
 				swap(r, c, r, c + 1)
 				if find_matches()["gems"].size() > 0:
 					swap(r, c, r, c + 1)  # 换回来
@@ -802,7 +971,7 @@ func has_valid_moves() -> bool:
 				swap(r, c, r, c + 1)  # 换回来
 			
 			# 尝试向下交换（目标格子也不能是锁定的）
-			if r + 1 < rows and not is_obstacle(r + 1, c) and not is_locked(r + 1, c):
+			if r + 1 < rows and not is_blocked_cell(r + 1, c) and not is_locked(r + 1, c) and not is_soaked(r + 1, c):
 				swap(r, c, r + 1, c)
 				if find_matches()["gems"].size() > 0:
 					swap(r, c, r + 1, c)
@@ -818,7 +987,7 @@ func shuffle() -> Dictionary:
 	
 	for r: int in range(rows):
 		for c: int in range(cols):
-			if not is_obstacle(r, c) and not is_locked(r, c) and grid[r][c] != "" and grid[r][c] != null:
+			if not is_blocked_cell(r, c) and not is_locked(r, c) and not is_soaked(r, c) and grid[r][c] != "" and grid[r][c] != null:
 				types.append(grid[r][c])
 				positions.append({ "r": r, "c": c })
 	

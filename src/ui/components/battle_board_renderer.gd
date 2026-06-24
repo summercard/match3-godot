@@ -41,7 +41,7 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 				scene._draw_stroke_rect(x + 1.0, y + 1.0, cell_size - 2.0, cell_size - 2.0, 1.0, Color(0.10, 0.23, 0.42, 0.82))
 			if board == null:
 				continue
-			if board.is_obstacle(row, col):
+			if board.is_obstacle(row, col) or board.is_fountain(row, col):
 				continue
 			var gem_type: String = board.grid[row][col]
 			if gem_type.is_empty():
@@ -49,10 +49,15 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 			_draw_gem_cell(scene, board, state, row, col, x, y, cell_size, gem_type)
 
 	draw_locked_gems(scene, board, state)
+	draw_vines(scene, board, state)
 	draw_obstacles(scene, board, state)
+	draw_fountains(scene, board, state)
 	draw_poison_fog(scene, board, state)
+	draw_soaked_gems(scene, board, state)
 	draw_unlock_animations(scene, board, state)
 	draw_poison_fog_anims(scene, state)
+	draw_fountain_anims(scene, state)
+	draw_vine_anims(scene, state)
 
 static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, x: float, y: float, cell_size: float, gem_type: String) -> void:
 	var colors: Dictionary = state.get("colors", {})
@@ -162,6 +167,59 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			if int(lock.get("hp", 1)) >= 2:
 				scene._draw_text_with_shadow("2", right - 3.0, bottom - 1.0, Color.WHITE, 7.0)
 
+static func draw_vines(scene, board, state: Dictionary) -> void:
+	if board == null:
+		return
+	var idle_time: float = state.get("idle_time", 0.0)
+	var backlash_anims: Array = state.get("vine_backlash_anims", [])
+	var thorn_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_gem_thorn_vine.png")
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if not board.is_vined(row, col):
+				continue
+			var x: float = float(board.offset_x + col * board.cell_size)
+			var y: float = float(board.offset_y + row * board.cell_size)
+			var size: float = float(board.cell_size)
+			var sway := sin(idle_time * TAU * 0.7 + float(row + col) * 0.6) * 1.6
+			var backlash := _vine_backlash_entry_for(backlash_anims, row, col)
+			var jump_y := 0.0
+			var red_flash := 0.0
+			if not backlash.is_empty():
+				var progress := clampf(float(backlash.get("timer", 0.0)) / 0.58, 0.0, 1.0)
+				jump_y = -sin(progress * PI) * 6.0
+				red_flash = 1.0 - progress
+			if thorn_tex:
+				var pulse := 1.0 + 0.035 * sin(idle_time * TAU * 0.8 + float(row + col) * 0.4)
+				if not backlash.is_empty():
+					var progress := clampf(float(backlash.get("timer", 0.0)) / 0.58, 0.0, 1.0)
+					pulse += sin(progress * PI) * 0.16
+				var draw_size := size * 1.08 * pulse
+				var rect := Rect2(
+					x + size / 2.0 - draw_size / 2.0 + sway * 0.18,
+					y + size / 2.0 - draw_size / 2.0 + jump_y,
+					draw_size,
+					draw_size
+				)
+				scene._draw_texture_fit(thorn_tex, rect, 0.96)
+				if red_flash > 0.0:
+					scene.draw_texture_rect(thorn_tex, rect, false, Color(1.0, 0.04, 0.02, 0.82 * red_flash))
+				continue
+			var vine_color := Color(0.13, 0.54, 0.20, 0.88)
+			if red_flash > 0.0:
+				vine_color = vine_color.lerp(Color(1.0, 0.10, 0.05, 0.95), red_flash)
+			var leaf_color := Color(0.32, 0.82, 0.30, 0.82)
+			var p1 := Vector2(x + 6.0, y + size - 8.0 + jump_y)
+			var p2 := Vector2(x + size * 0.30 + sway, y + size * 0.56 + jump_y)
+			var p3 := Vector2(x + size * 0.68 - sway, y + size * 0.34 + jump_y)
+			var p4 := Vector2(x + size - 6.0, y + 7.0 + jump_y)
+			scene.draw_line(p1, p2, vine_color, 2.5)
+			scene.draw_line(p2, p3, vine_color, 2.5)
+			scene.draw_line(p3, p4, vine_color, 2.5)
+			scene.draw_line(Vector2(x + size - 7.0, y + size - 7.0), Vector2(x + 7.0, y + 7.0), Color(0.09, 0.42, 0.15, 0.74), 1.8)
+			for leaf in [p2, p3, Vector2(x + size * 0.42, y + size * 0.24)]:
+				scene.draw_circle(leaf + Vector2(2.0, -1.0), 3.0, leaf_color)
+				scene.draw_circle(leaf + Vector2(-2.0, 1.0), 2.4, Color(0.20, 0.70, 0.24, 0.72))
+
 static func draw_obstacles(scene, board, state: Dictionary) -> void:
 	if board == null:
 		return
@@ -196,6 +254,130 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 				scene.draw_line(Vector2(cx - 3.0, cy + 1.0), Vector2(cx + 2.0, cy + 6.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.5)
 				scene.draw_line(Vector2(cx - 8.0, cy - 5.0), Vector2(cx - 1.0, cy + 2.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.8)
 				scene.draw_line(Vector2(cx - 1.0, cy + 2.0), Vector2(cx + 8.0, cy - 6.0), obstacle_colors.get("crack_line", Color(0.2, 0.18, 0.15, 0.9)), 1.8)
+
+static func draw_fountains(scene, board, state: Dictionary) -> void:
+	if board == null:
+		return
+	var idle_time: float = state.get("idle_time", 0.0)
+	var fountain_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_gem_fountain.png")
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if not board.is_fountain(row, col):
+				continue
+			var x: float = float(board.offset_x + col * board.cell_size)
+			var y: float = float(board.offset_y + row * board.cell_size)
+			var size: float = float(board.cell_size)
+			var cx := x + size / 2.0
+			var cy := y + size / 2.0
+			var pulse := 0.5 + 0.5 * sin(idle_time * TAU * 0.9 + float(row + col))
+			if fountain_tex:
+				var draw_size := size * (1.08 + pulse * 0.04)
+				scene._draw_texture_fit(
+					fountain_tex,
+					Rect2(cx - draw_size / 2.0, cy - draw_size / 2.0 - size * 0.04, draw_size, draw_size),
+					0.98
+				)
+				continue
+			scene._draw_rounded_rect(x + 4.0, y + 5.0, size - 8.0, size - 9.0, 8.0, Color(0.05, 0.22, 0.45, 0.96))
+			scene._draw_rounded_rect(x + 7.0, y + 8.0, size - 14.0, size - 15.0, 6.0, Color(0.10, 0.46, 0.78, 0.95))
+			scene.draw_arc(Vector2(cx, cy + 1.0), size * 0.26, PI * 0.12, PI * 0.88, 20, Color(0.74, 0.94, 1.0, 0.82), 2.2)
+			scene.draw_circle(Vector2(cx, cy + 3.0), size * 0.16, Color(0.35, 0.80, 1.0, 0.70 + pulse * 0.18))
+			scene.draw_circle(Vector2(cx - size * 0.12, cy - size * 0.04), 2.2, Color(0.88, 1.0, 1.0, 0.74))
+			scene.draw_line(Vector2(cx, y + 8.0), Vector2(cx, y + 2.0 - pulse * 3.0), Color(0.65, 0.93, 1.0, 0.55 + pulse * 0.25), 2.0)
+
+static func draw_soaked_gems(scene, board, state: Dictionary) -> void:
+	if board == null:
+		return
+	var idle_time: float = state.get("idle_time", 0.0)
+	var shimmer := 0.5 + 0.5 * sin(idle_time * TAU * 1.2)
+	var drop_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_fx_water_drop.png")
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if not board.is_soaked(row, col):
+				continue
+			var x: float = float(board.offset_x + col * board.cell_size)
+			var y: float = float(board.offset_y + row * board.cell_size)
+			var size: float = float(board.cell_size)
+			var alpha := 0.30 + shimmer * 0.12
+			scene._draw_rounded_rect(x + 3.0, y + 3.0, size - 6.0, size - 6.0, 9.0, Color(0.19, 0.64, 1.0, alpha))
+			scene.draw_arc(Vector2(x + size / 2.0, y + size / 2.0), size * 0.35, 0.0, TAU, 30, Color(0.82, 0.96, 1.0, 0.52), 1.8)
+			# Keep rain readable and cheap: three droplets per affected tile.
+			for i in range(3):
+				var drop_x := x + size * (0.28 + float(i) * 0.20)
+				var phase := fmod(idle_time * 0.95 + float(i) * 0.31 + float(row + col) * 0.07, 1.0)
+				var drop_y := y + size * (0.08 + phase * 0.72)
+				var drop_alpha := 0.72 * (1.0 - maxf(0.0, phase - 0.75) / 0.25)
+				if drop_tex:
+					var drop_size := size * (0.26 + 0.06 * float(i % 2))
+					scene._draw_texture_fit(drop_tex, Rect2(drop_x - drop_size / 2.0, drop_y - drop_size / 2.0, drop_size, drop_size), drop_alpha)
+				else:
+					scene.draw_line(Vector2(drop_x, drop_y - 3.0), Vector2(drop_x - 1.5, drop_y + 4.0), Color(0.90, 0.98, 1.0, drop_alpha), 1.4)
+
+static func draw_fountain_anims(scene, state: Dictionary) -> void:
+	var drop_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_fx_water_drop.png")
+	for anim: Dictionary in state.get("fountain_erupt_anims", []):
+		var progress: float = anim["timer"] / 0.62
+		if progress >= 1.0:
+			continue
+		var alpha := 1.0 - progress
+		var cx := float(anim.get("x", 0.0))
+		var cy := float(anim.get("y", 0.0))
+		var radius := 9.0 + progress * 30.0
+		scene.draw_arc(Vector2(cx, cy), radius, 0.0, TAU, 36, Color(0.55, 0.88, 1.0, alpha * 0.72), 2.4)
+		if drop_tex:
+			for i in range(5):
+				var angle := -PI * 0.5 + (float(i) - 2.0) * 0.22
+				var lift := sin(progress * PI) * (16.0 + float(i % 2) * 5.0)
+				var spread := progress * 8.0
+				var drop_size := 8.0 + sin(progress * PI) * (5.0 + float(i % 2) * 2.0)
+				var pos := Vector2(cx + cos(angle) * spread, cy - 5.0 + sin(angle) * lift)
+				scene._draw_texture_fit(drop_tex, Rect2(pos.x - drop_size / 2.0, pos.y - drop_size / 2.0, drop_size, drop_size), alpha * 0.86)
+		else:
+			scene.draw_line(Vector2(cx, cy + 10.0), Vector2(cx, cy - 20.0 * (1.0 - progress * 0.2)), Color(0.80, 0.97, 1.0, alpha * 0.82), 3.0)
+			scene.draw_circle(Vector2(cx, cy - 18.0 * (1.0 - progress)), 4.0 * alpha, Color(0.92, 1.0, 1.0, alpha))
+	for anim: Dictionary in state.get("fountain_splash_anims", []):
+		var progress: float = anim["timer"] / 0.52
+		if progress >= 1.0:
+			continue
+		var alpha := 1.0 - progress
+		var cx := float(anim.get("x", 0.0))
+		var cy := float(anim.get("y", 0.0))
+		var color := Color(0.68, 0.90, 1.0, alpha * 0.76)
+		if bool(anim.get("extinguished", false)):
+			color = Color(0.58, 0.78, 1.0, alpha * 0.88)
+		for i in range(3):
+			var offset_x := (float(i) - 1.0) * 7.0
+			var fall := progress * 18.0
+			var pos := Vector2(cx + offset_x, cy - 12.0 + fall)
+			if drop_tex:
+				var drop_size := 7.0 * alpha + 4.0
+				scene._draw_texture_fit(drop_tex, Rect2(pos.x - drop_size / 2.0, pos.y - drop_size / 2.0, drop_size, drop_size), alpha * 0.76)
+			else:
+				scene.draw_circle(pos, 3.2 * alpha, color)
+
+static func draw_vine_anims(scene, state: Dictionary) -> void:
+	for anim: Dictionary in state.get("vine_burn_anims", []):
+		var progress: float = anim["timer"] / 0.56
+		if progress >= 1.0:
+			continue
+		var alpha := 1.0 - progress
+		var cx := float(anim.get("x", 0.0))
+		var cy := float(anim.get("y", 0.0))
+		var flame := Color(1.0, 0.46, 0.10, alpha)
+		var smoke := Color(0.18, 0.18, 0.16, alpha * 0.38)
+		for i in range(5):
+			var angle := TAU * float(i) / 5.0 + progress * 1.4
+			var dist := 5.0 + progress * 18.0
+			scene.draw_circle(Vector2(cx + cos(angle) * dist, cy + sin(angle) * dist), 4.0 * alpha, flame)
+		scene.draw_arc(Vector2(cx, cy), 10.0 + progress * 20.0, 0.0, TAU, 32, smoke, 3.0)
+
+static func _vine_backlash_entry_for(anims: Array, row: int, col: int) -> Dictionary:
+	for anim in anims:
+		if not anim is Dictionary:
+			continue
+		if int(anim.get("row", -1)) == row and int(anim.get("col", -1)) == col:
+			return anim
+	return {}
 
 static func draw_poison_fog(scene, board, state: Dictionary) -> void:
 	if board == null:

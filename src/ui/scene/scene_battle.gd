@@ -100,6 +100,7 @@ var _enemy_attack_timer: float = 0.0
 
 ## 受击闪烁
 var _hit_flashes: Array[Dictionary] = []
+var _damage_edge_flash_timer: float = 0.0
 
 ## 玩家宠物弹动动画（主人定 2026-06-10：攻击时往前弹一下回位）
 var _player_lunge_anims: Array[Dictionary] = []
@@ -148,6 +149,10 @@ var _poison_fog_spread_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}
 
 ## 毒雾清除动画队列
 var _poison_fog_clear_anims: Array[Dictionary] = []  # [{row, col, x, y, timer}]
+var _fountain_erupt_anims: Array[Dictionary] = []
+var _fountain_splash_anims: Array[Dictionary] = []
+var _vine_burn_anims: Array[Dictionary] = []
+var _vine_backlash_anims: Array[Dictionary] = []
 
 ## 特殊消除动画队列
 var _special_elim_phases: Array = []  # [{type, gems, delay, timer, triggered}]
@@ -521,6 +526,7 @@ func init(data: Dictionary = {}) -> void:
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
 	_screen_flash_timer = 0.0
+	_damage_edge_flash_timer = 0.0
 	_attack_flash_timer = 0.0
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_damage_popup_queue = []
@@ -554,6 +560,11 @@ func _init_battle() -> void:
 	if _stage_data.has("obstacles"):
 		_board.set_obstacles(_stage_data.get("obstacles", []))
 		_board.init_board()
+	if _stage_data.has("fountains"):
+		_board.set_fountains(_stage_data.get("fountains", []), _stage_data.get("fountainRule", {}))
+		_board.init_board()
+	if _stage_data.has("vines"):
+		_board.set_vines(_stage_data.get("vines", []))
 	if _stage_data.has("lockedGems"):
 		_board.set_locked_gems(_stage_data.get("lockedGems", []))
 	if _stage_data.has("poisonFog"):
@@ -1129,6 +1140,7 @@ func _process_matches() -> void:
 	var removal_result: Dictionary = BattleMatchRulesScript.apply_removals(_board, match_context)
 	var gem_counts: Dictionary = removal_result.get("gem_counts", {})
 	_handle_obstacle_damage_fx(removal_result.get("obstacle_damage", []))
+	_process_vine_resolution(removal_result.get("affected_gems", []))
 	
 	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
@@ -1396,6 +1408,7 @@ func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
 	
 	# ===== 毒雾回合逻辑 =====
+	_process_fountain_turn()
 	_process_poison_fog_turn()
 	
 	_show_message("敌方回合")
@@ -1483,6 +1496,7 @@ func _start_enemy_turn() -> void:
 				popup_x = 15.0 + target_idx * 120.0 + 55.0
 				popup_y = 218.0
 				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
+			_trigger_player_damage_edge_flash()
 			# 敌人攻击音（按敌人元素）
 			_sfx("battle_player_hit_cushion")
 			# 伤害数字加入队列（依次弹出，延迟编排）
@@ -1567,6 +1581,7 @@ func _begin_battle_end_overlay() -> void:
 	_board_shake_timer = 0.0
 	_board_shake_offset = Vector2.ZERO
 	_screen_flash_timer = 0.0
+	_damage_edge_flash_timer = 0.0
 	_rainbow_flash = 0.0
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
 	if _battle != null and _battle.battle_result == "win":
@@ -1799,6 +1814,9 @@ func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.18
 	_attack_flash_timer = 0.0
 	_attack_shake_offset_x = 0.0
+
+func _trigger_player_damage_edge_flash(duration: float = 0.3) -> void:
+	_damage_edge_flash_timer = maxf(_damage_edge_flash_timer, duration)
 
 # ★ 主人定 2026-06-11：清理同 combatant 的旧 elastic anim，避免快速连击时叠加
 func _remove_elastic_anim(is_enemy: bool, index: int) -> void:
@@ -2182,6 +2200,7 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 		popup_x = 15.0 + target_idx * 120.0 + 55.0
 		popup_y = 218.0
 		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
+	_trigger_player_damage_edge_flash()
 
 	if _damage_popup_queue.size() < 5:
 		_damage_popup_queue.append({
@@ -2249,6 +2268,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 			var dmg_mult: float = event.get("damage_multiplier", 2.0)
 			_show_message("%s 蓄力攻击！×%.1f" % [enemy_name, dmg_mult])
 			_trigger_attack_shake()
+			_trigger_player_damage_edge_flash()
 			_screen_flash_timer = 0.3
 		"shield_appear":
 			vis["shield_hp"] = float(event.get("shield_hp", 0))
@@ -2368,6 +2388,7 @@ func _process(delta: float) -> void:
 	# 更新攻击震动
 	_update_attack_shake(effective_delta)
 	_screen_flash_timer = BattleAnimationControllerScript.tick_countdown(_screen_flash_timer, delta)
+	_damage_edge_flash_timer = BattleAnimationControllerScript.tick_countdown(_damage_edge_flash_timer, delta)
 	
 	# 更新 HP 渐变动画
 	_update_hp_display(effective_delta)
@@ -2400,6 +2421,8 @@ func _process(delta: float) -> void:
 	
 	# 更新毒雾扩散动画
 	_update_poison_fog_anims(effective_delta)
+	_update_fountain_anims(effective_delta)
+	_update_vine_anims(effective_delta)
 	
 	# 更新宝石消除粒子
 	_update_gem_particles(effective_delta)
@@ -2609,6 +2632,10 @@ func _board_render_state() -> Dictionary:
 		"unlock_animations": _unlock_animations,
 		"poison_fog_spread_anims": _poison_fog_spread_anims,
 		"poison_fog_clear_anims": _poison_fog_clear_anims,
+		"fountain_erupt_anims": _fountain_erupt_anims,
+		"fountain_splash_anims": _fountain_splash_anims,
+		"vine_burn_anims": _vine_burn_anims,
+		"vine_backlash_anims": _vine_backlash_anims,
 		"special_transform_anim": _special_transform_anim,
 		"falling_gems": _falling_gems,
 		"eliminate_phase1": ELIMINATE_PHASE1,
@@ -2812,12 +2839,28 @@ func _draw_combo_popup(canvas: CanvasItem = self) -> void:
 	_draw_combo_art_text(canvas, combo, cx, cy, scale, opacity)
 
 func _draw_top_feedback_layer(canvas: CanvasItem = self) -> void:
+	_draw_damage_edge_flash(canvas)
 	_draw_floating_texts(canvas)
 	_draw_combo_popup(canvas)
 	_draw_fall_messages(canvas)
 	_draw_message(canvas)
 	if _state == BattleState.BATTLE_END and not _uses_editable_battle_end_overlay():
 		_draw_battle_end_overlay(canvas)
+
+func _draw_damage_edge_flash(canvas: CanvasItem = self) -> void:
+	if _damage_edge_flash_timer <= 0.0:
+		return
+	var progress := clampf(_damage_edge_flash_timer / 0.3, 0.0, 1.0)
+	var pulse := pow(progress, 0.72)
+	var edge := 34.0 + 8.0 * pulse
+	var alpha := 0.32 * pulse
+	var red := Color(1.0, 0.04, 0.04, alpha)
+	var soft_red := Color(1.0, 0.04, 0.04, alpha * 0.38)
+	canvas.draw_rect(Rect2(0.0, 0.0, DESIGN_W, edge), red, true)
+	canvas.draw_rect(Rect2(0.0, DESIGN_H - edge, DESIGN_W, edge), red, true)
+	canvas.draw_rect(Rect2(0.0, 0.0, edge, DESIGN_H), red, true)
+	canvas.draw_rect(Rect2(DESIGN_W - edge, 0.0, edge, DESIGN_H), red, true)
+	canvas.draw_rect(Rect2(edge * 0.72, edge * 0.72, DESIGN_W - edge * 1.44, DESIGN_H - edge * 1.44), soft_red, false, 5.0)
 
 func _draw_fall_messages(canvas: CanvasItem = self) -> void:
 	for i in range(_fall_messages.size()):
@@ -4943,6 +4986,10 @@ func destroy() -> void:
 	_unlock_animations.clear()
 	_poison_fog_spread_anims.clear()
 	_poison_fog_clear_anims.clear()
+	_fountain_erupt_anims.clear()
+	_fountain_splash_anims.clear()
+	_vine_burn_anims.clear()
+	_vine_backlash_anims.clear()
 	_gem_particles.clear()
 	_obstacle_particles.clear()
 	_item_use_effects.clear()
@@ -4954,6 +5001,7 @@ func destroy() -> void:
 	_attacker_elastic_anims.clear()
 	_defeat_transitions.clear()
 	_screen_flash_timer = 0.0
+	_damage_edge_flash_timer = 0.0
 	_rainbow_flash = 0.0
 	_board_shake_timer = 0.0
 	_board_shake_offset = Vector2.ZERO
@@ -5022,9 +5070,82 @@ func _update_poison_fog_anims(delta: float) -> void:
 		if anim["timer"] >= 0.5:
 			_poison_fog_clear_anims.remove_at(i)
 
+func _update_fountain_anims(delta: float) -> void:
+	for i in range(_fountain_erupt_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _fountain_erupt_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.62:
+			_fountain_erupt_anims.remove_at(i)
+	for i in range(_fountain_splash_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _fountain_splash_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.52:
+			_fountain_splash_anims.remove_at(i)
+
+func _update_vine_anims(delta: float) -> void:
+	for i in range(_vine_burn_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _vine_burn_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.56:
+			_vine_burn_anims.remove_at(i)
+	for i in range(_vine_backlash_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _vine_backlash_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.58:
+			_vine_backlash_anims.remove_at(i)
+
 ## ============================================
 # 毒雾回合逻辑
 ## ============================================
+
+func _process_vine_resolution(removed_gems: Array) -> void:
+	var result: Dictionary = BattleHazardRulesScript.process_vine_resolution(_board, _battle, removed_gems, _stage_data.get("vineRule", {}))
+	var burned: Array = result.get("burned", [])
+	var backlash: Array = result.get("backlash", [])
+	if burned.is_empty() and backlash.is_empty():
+		return
+	for tile in burned:
+		_vine_burn_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0})
+		_floating_texts.append({"text": "BURN", "x": tile["x"], "y": tile["y"] - 12.0, "color": Color(1.0, 0.48, 0.12), "size": 12.0, "timer": 0.0, "duration": 0.72, "critical": true})
+	for tile in backlash:
+		_vine_backlash_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0})
+	if not backlash.is_empty():
+		for hit in result.get("hits", []):
+			var team_index: int = int(hit.get("team_index", -1))
+			var mx: float = 15.0 + float(team_index) * 120.0 + 55.0
+			_floating_texts.append({
+				"text": "-%d" % int(hit.get("damage", 0)),
+				"x": mx, "y": 195.0,
+				"color": Color(0.32, 0.92, 0.28),
+				"size": 15.0,
+				"timer": 0.0,
+				"duration": 0.8
+			})
+		if int(result.get("total_damage", 0)) > 0:
+			_trigger_player_damage_edge_flash()
+		_show_message("Vines backlash, spirits take damage")
+		_request_battle_fx({"type": "vine_backlash", "backlash": backlash, "hits": result.get("hits", []), "total_damage": result.get("total_damage", 0)})
+	elif not burned.is_empty():
+		_show_message("Fire burned the vines")
+		_request_battle_fx({"type": "vine_burn", "burned": burned})
+
+func _process_fountain_turn() -> void:
+	var result: Dictionary = BattleHazardRulesScript.process_fountain_turn(_board)
+	var erupted: Array = result.get("erupted", [])
+	var soaked: Array = result.get("soaked", [])
+	var extinguished: Array = result.get("extinguished", [])
+	if erupted.is_empty():
+		return
+	for tile in erupted:
+		_fountain_erupt_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0})
+	for tile in soaked:
+		_fountain_splash_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0, "extinguished": false})
+	for tile in extinguished:
+		_fountain_splash_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0, "extinguished": true})
+		_floating_texts.append({"text": "熄灭", "x": tile["x"], "y": tile["y"] - 13.0, "color": Color(0.55, 0.86, 1.0), "size": 12.0, "timer": 0.0, "duration": 0.75, "critical": true})
+	if not soaked.is_empty() or not extinguished.is_empty():
+		_show_message("喷泉喷发，水流封住了周围宝石")
+		_request_battle_fx({"type": "fountain_erupt", "erupted": erupted, "soaked": soaked, "extinguished": extinguished})
 
 func _process_poison_fog_turn() -> void:
 	var result: Dictionary = BattleHazardRulesScript.process_poison_turn(_board, _battle)

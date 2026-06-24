@@ -36,8 +36,18 @@ func _test_chapter_templates() -> void:
 
 func _test_stage_goals() -> void:
 	var stage_db := StageDBScript.new()
-	var rock_stage: Dictionary = stage_db.get_stage("stage_2_5")
-	_expect(rock_stage.has("obstacles"), "chapter 2 mid stages should introduce rock pressure")
+	var fountain_stage: Dictionary = stage_db.get_stage("stage_2_5")
+	_expect(fountain_stage.has("fountains"), "chapter 2 mid stages should introduce fountain pressure")
+	_expect(not fountain_stage.has("obstacles"), "chapter 2 should no longer use the old rock pressure")
+	_expect(fountain_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "fountain pressure stages should still use enemy defeat as the win goal")
+
+	var vine_stage: Dictionary = stage_db.get_stage("stage_3_5")
+	_expect(vine_stage.has("vines"), "chapter 3 mid stages should introduce vine pressure")
+	_expect(vine_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "vine pressure stages should still use enemy defeat as the win goal")
+
+	var rock_stage: Dictionary = stage_db.get_stage("stage_4_5")
+	_expect(rock_stage.has("obstacles"), "chapter 4 mid stages should inherit the old rock pressure")
+	_expect(not rock_stage.has("lockedGems"), "chapter 4 should not introduce locked-gem pressure now that rocks moved here")
 	_expect(rock_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "rock pressure stages should still use enemy defeat as the win goal")
 
 	var fog_stage: Dictionary = stage_db.get_stage("stage_6_5")

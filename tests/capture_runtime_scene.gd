@@ -315,6 +315,12 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		_seed_battle_art_aspect_qa(battle_scene)
 	if _read_arg("--battle-demo-hp=", "0") == "1":
 		_seed_battle_demo_hp(battle_scene)
+	if _read_arg("--battle-fountain-demo=", "0") == "1":
+		_seed_battle_fountain_demo(battle_scene)
+		return
+	if _read_arg("--battle-vine-demo=", "0") == "1":
+		_seed_battle_vine_demo(battle_scene)
+		return
 	if _read_arg("--battle-victory-overlay=", "0") == "1":
 		_seed_battle_victory_overlay(battle_scene)
 		return
@@ -349,6 +355,88 @@ func _seed_battle_demo_fx(main: Control) -> void:
 			"charge_timer": 0.8
 		}
 	})
+	battle_scene.queue_redraw()
+
+func _seed_battle_fountain_demo(battle_scene: Control) -> void:
+	var board = battle_scene.get("_board")
+	if board == null or not board.has_method("get_fountain_positions"):
+		battle_scene.queue_redraw()
+		return
+	var fountains: Array = board.get_fountain_positions()
+	if fountains.is_empty():
+		battle_scene.queue_redraw()
+		return
+	var source: Dictionary = fountains[0]
+	var cell_size: float = float(board.cell_size)
+	var source_x: float = float(board.offset_x) + float(source["col"]) * cell_size + cell_size / 2.0
+	var source_y: float = float(board.offset_y) + float(source["row"]) * cell_size + cell_size / 2.0
+	var splashes: Array[Dictionary] = []
+	for offset: Array in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
+		var row: int = int(source["row"]) + int(offset[0])
+		var col: int = int(source["col"]) + int(offset[1])
+		if row < 0 or row >= board.rows or col < 0 or col >= board.cols:
+			continue
+		if board.is_blocked_cell(row, col) or board.is_empty(row, col):
+			continue
+		board.soaked_gems[row][col] = {"turns": 1}
+		splashes.append({
+			"row": row,
+			"col": col,
+			"x": float(board.offset_x) + float(col) * cell_size + cell_size / 2.0,
+			"y": float(board.offset_y) + float(row) * cell_size + cell_size / 2.0,
+			"timer": 0.08,
+			"extinguished": false
+		})
+	battle_scene.set("_fountain_erupt_anims", [{
+		"row": source["row"],
+		"col": source["col"],
+		"x": source_x,
+		"y": source_y,
+		"timer": 0.08
+	}])
+	battle_scene.set("_fountain_splash_anims", splashes)
+	battle_scene.set("_message_text", "喷泉喷发")
+	battle_scene.set("_message_timer", 1.0)
+	battle_scene.queue_redraw()
+
+func _seed_battle_vine_demo(battle_scene: Control) -> void:
+	var board = battle_scene.get("_board")
+	if board == null:
+		battle_scene.queue_redraw()
+		return
+	var target := {}
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if board.is_vined(row, col):
+				target = {"row": row, "col": col}
+				break
+		if not target.is_empty():
+			break
+	if target.is_empty():
+		battle_scene.queue_redraw()
+		return
+	var cell_size: float = float(board.cell_size)
+	var x: float = float(board.offset_x) + float(target["col"]) * cell_size + cell_size / 2.0
+	var y: float = float(board.offset_y) + float(target["row"]) * cell_size + cell_size / 2.0
+	battle_scene.set("_vine_backlash_anims", [{
+		"row": target["row"],
+		"col": target["col"],
+		"x": x,
+		"y": y,
+		"timer": 0.14
+	}])
+	battle_scene.set("_floating_texts", [{
+		"text": "-6",
+		"x": 70.0,
+		"y": 195.0,
+		"color": Color(0.32, 0.92, 0.28),
+		"size": 15.0,
+		"timer": 0.0,
+		"duration": 0.8
+	}])
+	battle_scene.set("_message_text", "Vines backlash")
+	battle_scene.set("_message_timer", 1.0)
+	battle_scene.set("_damage_edge_flash_timer", 0.22)
 	battle_scene.queue_redraw()
 
 func _seed_battle_victory_overlay(battle_scene: Control) -> void:

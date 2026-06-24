@@ -55,6 +55,64 @@ static func process_poison_turn(board, battle, damage_per_tile: float = 0.03) ->
 		"all_dead": all_dead
 	}
 
+static func process_fountain_turn(board) -> Dictionary:
+	if board == null or not has_fountains(board):
+		return {"erupted": [], "soaked": [], "extinguished": []}
+	var result: Dictionary = board.process_fountain_eruption()
+	return {
+		"erupted": _with_positions(board, result.get("erupted", [])),
+		"soaked": _with_positions(board, result.get("soaked", [])),
+		"extinguished": _with_positions(board, result.get("extinguished", []))
+	}
+
+static func process_vine_resolution(board, battle, removed_gems: Array, rule: Dictionary = {}) -> Dictionary:
+	if board == null or removed_gems.is_empty():
+		return {"burned": [], "backlash": [], "hits": [], "total_damage": 0, "all_dead": false}
+
+	var removed: Dictionary = {}
+	var fire_removed: Array = []
+	for gem in removed_gems:
+		if not gem is Dictionary:
+			continue
+		var row := int(gem.get("row", -1))
+		var col := int(gem.get("col", -1))
+		if row < 0 or row >= board.rows or col < 0 or col >= board.cols:
+			continue
+		var key := _cell_key(row, col)
+		removed[key] = {"row": row, "col": col, "type": str(gem.get("type", ""))}
+		if str(gem.get("type", "")) == "fire":
+			fire_removed.append({"row": row, "col": col})
+
+	var burned_keys: Dictionary = {}
+	if bool(rule.get("burnedByAdjacentFire", true)):
+		for fire: Dictionary in fire_removed:
+			for pos: Dictionary in _orthogonal_positions(int(fire["row"]), int(fire["col"]), board.rows, board.cols):
+				if board.is_vined(pos["row"], pos["col"]):
+					burned_keys[_cell_key(pos["row"], pos["col"])] = pos
+
+	var burned: Array = []
+	for key in burned_keys.keys():
+		var pos: Dictionary = burned_keys[key]
+		if board.clear_vine(pos["row"], pos["col"]):
+			burned.append(_position_entry(board, pos))
+
+	var backlash: Array = []
+	for key in removed.keys():
+		if burned_keys.has(key):
+			continue
+		var pos: Dictionary = removed[key]
+		if board.is_vined(pos["row"], pos["col"]):
+			backlash.append(_position_entry(board, pos))
+
+	var damage_result := _apply_vine_backlash_damage(battle, backlash.size(), float(rule.get("backlashPercent", 0.04)))
+	return {
+		"burned": burned,
+		"backlash": backlash,
+		"hits": damage_result.get("hits", []),
+		"total_damage": int(damage_result.get("total_damage", 0)),
+		"all_dead": bool(damage_result.get("all_dead", false))
+	}
+
 static func clear_poison_for_gems(board, gems: Array) -> Array:
 	if board == null:
 		return []
@@ -94,6 +152,73 @@ static func has_poison_fog(board) -> bool:
 			if board.is_poison_fog(row, col):
 				return true
 	return false
+
+static func has_fountains(board) -> bool:
+	if board == null:
+		return false
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if board.is_fountain(row, col):
+				return true
+	return false
+
+static func has_vines(board) -> bool:
+	if board == null:
+		return false
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if board.is_vined(row, col):
+				return true
+	return false
+
+static func _apply_vine_backlash_damage(battle, vine_count: int, damage_percent: float) -> Dictionary:
+	if battle == null or vine_count <= 0:
+		return {"hits": [], "total_damage": 0, "all_dead": false}
+	var alive_team: Array = []
+	for m in battle.player_team:
+		if m != null and m.get("hp", 0) > 0:
+			alive_team.append(m)
+	if alive_team.is_empty():
+		return {"hits": [], "total_damage": 0, "all_dead": false}
+	var avg_max_hp := 0.0
+	for m in alive_team:
+		avg_max_hp += float(m.get("maxHP", 1))
+	avg_max_hp /= alive_team.size()
+	var total_damage := maxi(1, int(round(avg_max_hp * damage_percent * float(vine_count))))
+	var damage_per_member: int = total_damage / alive_team.size()
+	var damage_remainder: int = total_damage % alive_team.size()
+	var hits: Array = []
+	var actual_total := 0
+	for i in range(alive_team.size()):
+		var member: Dictionary = alive_team[i]
+		var requested_damage := damage_per_member + (1 if i < damage_remainder else 0)
+		var hp_before := int(member.get("hp", 0))
+		member["hp"] = maxi(hp_before - requested_damage, 0)
+		var actual_damage := hp_before - int(member.get("hp", 0))
+		actual_total += actual_damage
+		hits.append({"team_index": battle.player_team.find(member), "damage": actual_damage})
+
+	var all_dead := true
+	for m in battle.player_team:
+		if m != null and m.get("hp", 0) > 0:
+			all_dead = false
+			break
+	if all_dead:
+		battle.battle_over = true
+		battle.battle_result = "lose"
+	return {"hits": hits, "total_damage": actual_total, "all_dead": all_dead}
+
+static func _orthogonal_positions(row: int, col: int, rows: int, cols: int) -> Array:
+	var result: Array = []
+	for offset: Array in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
+		var nr := row + int(offset[0])
+		var nc := col + int(offset[1])
+		if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
+			result.append({"row": nr, "col": nc})
+	return result
+
+static func _cell_key(row: int, col: int) -> String:
+	return "%d,%d" % [row, col]
 
 static func _with_positions(board, tiles: Array) -> Array:
 	var result: Array = []

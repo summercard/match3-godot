@@ -64,6 +64,7 @@ static func apply_removals(board, context: Dictionary) -> Dictionary:
 	return {
 		"gem_counts": gem_counts,
 		"special_gems": explosion_gems + bomb_gems + context.get("rainbow_gems", []),
+		"affected_gems": affected_gems,
 		"obstacle_damage": obstacle_damage
 	}
 
