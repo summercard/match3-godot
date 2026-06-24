@@ -659,12 +659,18 @@ func _collect_slot(slot_index: int) -> void:
 	if exp <= 0:
 		_show_status("暂无可收获收益")
 		return
+	if not _can_add_shared_exp(exp):
+		_show_status(_shared_exp_overflow_text())
+		return
 	var added := exp
 	var overflow := 0
 	if _storage != null and _storage.has_method("add_shared_monster_exp"):
 		var add_result: Dictionary = _storage.add_shared_monster_exp(exp)
 		added = int(add_result.get("added", exp))
 		overflow = int(add_result.get("overflow", 0))
+	if added < exp or overflow > 0:
+		_show_status(_shared_exp_overflow_text())
+		return
 	slot["placed_at"] = Time.get_unix_time_from_system() * 1000.0
 	_save_ranch_state()
 	_refresh_ranch_view()
@@ -673,6 +679,7 @@ func _collect_slot(slot_index: int) -> void:
 
 func _on_collect_pressed() -> void:
 	var total_collected := 0
+	var collectable_slots: Array = []
 	for slot: Dictionary in _slots_data:
 		var monster_id = slot.get("instance_id", null)
 		if monster_id == null:
@@ -681,13 +688,25 @@ func _on_collect_pressed() -> void:
 		if exp <= 0:
 			continue
 		total_collected += exp
-		slot["placed_at"] = Time.get_unix_time_from_system() * 1000.0
+		collectable_slots.append(slot)
+	if total_collected <= 0:
+		_show_status(_no_idle_reward_text())
+		return
+	if not _can_add_shared_exp(total_collected):
+		_show_status(_shared_exp_overflow_text())
+		return
 	var added := total_collected
 	var overflow := 0
 	if total_collected > 0 and _storage != null and _storage.has_method("add_shared_monster_exp"):
 		var add_result: Dictionary = _storage.add_shared_monster_exp(total_collected)
 		added = int(add_result.get("added", total_collected))
 		overflow = int(add_result.get("overflow", 0))
+	if added < total_collected or overflow > 0:
+		_show_status(_shared_exp_overflow_text())
+		return
+	var now_ms := Time.get_unix_time_from_system() * 1000.0
+	for slot: Dictionary in collectable_slots:
+		slot["placed_at"] = now_ms
 	_save_ranch_state()
 	_refresh_ranch_view()
 	if total_collected > 0:
@@ -842,7 +861,8 @@ func _draw_slot(index: int, rect: Rect2) -> void:
 		var placement_text := _format_elapsed_short(slot.get("placed_at", null))
 		if not care_label.is_empty():
 			placement_text = "专注 " + placement_text.trim_prefix("放置 ")
-		_draw_text(placement_text, rect.get_center().x, rect.position.y + 106.0, C["text"], 9.5, rect.size.x - 24.0)
+		var timer_color := Color(0.55, 1.0, 0.42) if int(_idle_exp_map.get(id, 0)) > 0 else Color(0.70, 0.86, 1.0)
+		_draw_text(placement_text, rect.get_center().x, rect.position.y + 106.0, timer_color, 9.5, rect.size.x - 24.0)
 	else:
 		var empty_color := C["gold"] if index == _selected_slot else Color(0.98, 0.90, 0.67)
 		_draw_text("+", rect.get_center().x, rect.position.y + 69.0, empty_color, 26.0, 42.0)
@@ -941,6 +961,9 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 77.0, C["text"], 10.5, rect.size.x - 20.0)
 	_draw_text("Lv.%d · %s" % [int(instance.get("level", 1)), elem], rect.get_center().x, rect.position.y + 92.0, C["gold"], 9.0, rect.size.x - 20.0)
 	_draw_text(nature_short, rect.get_center().x, rect.position.y + 105.0, C["text_muted"], 8.0, rect.size.x - 20.0)
+
+	if _is_instance_in_team(instance_id):
+		_draw_team_badge(Rect2(rect.position.x + 9.0, rect.position.y + 53.0, 50.0, 18.0))
 
 func _draw_classroom_bottom() -> void:
 	_draw_texture_three_slice(_tex(RANCH_ASSETS["relationship"]), SUBPAGE_RIBBON_RECT, 110.0, 110.0)
@@ -1118,6 +1141,16 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	_draw_text("Lv.%d" % _get_monster_level(monster_id), rect.get_center().x, rect.position.y + 75.0, C["gold"], 9.5, rect.size.x - 12.0)
 	if in_use:
 		_draw_texture_contain(_tex(RANCH_ASSETS["check"]), Rect2(rect.position.x + rect.size.x - 21.0, rect.position.y + rect.size.y - 21.0, 20.0, 20.0))
+
+	if _is_instance_in_team(monster_id):
+		_draw_team_badge(Rect2(rect.position.x + 10.0, rect.position.y + 48.0, 50.0, 17.0))
+
+func _draw_team_badge(rect: Rect2) -> void:
+	draw_rect(_scale_rect(rect), Color(0.09, 0.44, 0.16, 0.88), true)
+	_draw_text(_team_badge_text(), rect.get_center().x, rect.position.y + rect.size.y * 0.70, Color(1.0, 0.97, 0.76), 8.0, rect.size.x - 6.0)
+
+func _team_badge_text() -> String:
+	return String.chr(24050) + String.chr(20986) + String.chr(25112)
 
 func _draw_list_controls() -> void:
 	if _max_list_page <= 0:
@@ -1426,6 +1459,26 @@ func _is_instance_in_social(instance_id: String) -> bool:
 			return true
 	return false
 
+func _team_instance_ids() -> Dictionary:
+	var ids := {}
+	if _storage == null or not _storage.has_method("load_team"):
+		return ids
+	var team: Dictionary = _storage.load_team()
+	for value in team.values():
+		if value == null:
+			continue
+		var instance_id := str(value)
+		if not instance_id.is_empty():
+			ids[instance_id] = true
+	return ids
+
+func _is_instance_in_team(instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	if _storage != null and _storage.has_method("is_instance_in_team"):
+		return bool(_storage.is_instance_in_team(instance_id))
+	return _team_instance_ids().has(instance_id)
+
 func _update_list_scroll_limit() -> void:
 	var cards_per_page := int(LIST_CLIP_RECT.size.x / (LIST_CARD_W + LIST_CARD_GAP))
 	cards_per_page = maxi(1, cards_per_page)
@@ -1458,6 +1511,24 @@ func _total_idle_exp() -> float:
 	for value in _idle_exp_map.values():
 		total += float(value)
 	return total
+
+func _shared_exp_space_remaining() -> int:
+	if _storage == null:
+		return 2147483647
+	if not _storage.has_method("get_shared_monster_exp") or not _storage.has_method("get_shared_monster_exp_capacity"):
+		return 2147483647
+	var current := int(_storage.get_shared_monster_exp())
+	var capacity := int(_storage.get_shared_monster_exp_capacity())
+	return maxi(0, capacity - current)
+
+func _can_add_shared_exp(amount: int) -> bool:
+	return maxi(0, amount) <= _shared_exp_space_remaining()
+
+func _shared_exp_overflow_text() -> String:
+	return "EXP" + String.chr(27133) + String.chr(31354) + String.chr(38388) + String.chr(19981) + String.chr(36275)
+
+func _no_idle_reward_text() -> String:
+	return String.chr(26242) + String.chr(26080) + String.chr(21487) + String.chr(25910) + String.chr(33719) + String.chr(25910) + String.chr(30410)
 
 func _get_monster_level(monster_id: String) -> int:
 	if _level_by_instance.has(monster_id):

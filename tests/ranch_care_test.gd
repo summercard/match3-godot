@@ -61,6 +61,21 @@ func _run() -> void:
 	var expected_cap: int = int((8.0 * 60.0 / 5.0) * peer_rate)
 	_expect(int(capped_collect) == expected_cap, "ranch idle collect should cap at 8 hours")
 
+	ranch = save_manager.get_ranch_state()
+	slots = ranch.get("slots", [])
+	var capacity: int = save_manager.get_shared_monster_exp_capacity()
+	var current_pool: int = save_manager.get_shared_monster_exp()
+	save_manager.add_shared_monster_exp(maxi(0, capacity - current_pool - 1))
+	var overflow_placed_at := Time.get_unix_time_from_system() * 1000.0 - 60.0 * 60.0 * 1000.0
+	slots[1]["placed_at"] = overflow_placed_at
+	ranch["slots"] = slots
+	save_manager.set_ranch_state(ranch)
+	var overflow_collect: float = save_manager.collect_idle_exp_for_instance(peer_id)
+	var ranch_after_overflow: Dictionary = save_manager.get_ranch_state()
+	var slots_after_overflow: Array = ranch_after_overflow.get("slots", [])
+	_expect(overflow_collect == 0.0, "overflowing ranch collect should be rejected")
+	_expect(float((slots_after_overflow[1] as Dictionary).get("placed_at", 0.0)) == overflow_placed_at, "overflowing ranch collect should keep idle timer")
+
 	_finish()
 
 

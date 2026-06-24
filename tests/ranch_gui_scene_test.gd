@@ -2,6 +2,80 @@ extends SceneTree
 
 var _failures: Array[String] = []
 
+class FakeTeamStorage:
+	extends Node
+
+	func load_team() -> Dictionary:
+		return {"leader": "monster_001", "member1": null, "member2": null}
+
+
+class FakeUpgradeStorage:
+	extends Node
+	var calls: int = 0
+	var pool_exp: int = 300
+	var instance: Dictionary = {
+		"instanceId": "monster_001",
+		"monsterId": "monster_001",
+		"level": 1,
+		"exp": 0,
+		"nature": "brave",
+	}
+
+	func load_team() -> Dictionary:
+		return {"leader": null, "member1": null, "member2": null}
+
+	func get_monster_instance(instance_id: String) -> Dictionary:
+		return instance.duplicate(true) if instance_id == "monster_001" else {}
+
+	func get_shared_monster_exp() -> int:
+		return pool_exp
+
+	func get_shared_monster_exp_capacity() -> int:
+		return 1000
+
+	func feed_instance_from_shared_exp(instance_id: String) -> Dictionary:
+		if instance_id != "monster_001":
+			return {"ok": false, "reason": "not_found"}
+		if pool_exp <= 0:
+			return {"ok": false, "reason": "empty"}
+		calls += 1
+		var consumed := mini(80, pool_exp)
+		pool_exp -= consumed
+		instance["exp"] = int(instance.get("exp", 0)) + consumed
+		return {
+			"ok": true,
+			"consumed": consumed,
+			"leveledUp": false,
+			"newLevel": int(instance.get("level", 1)),
+		}
+
+
+class FakeOverflowStorage:
+	extends Node
+	var pool_exp: int = 95
+	var capacity: int = 100
+	var add_calls: int = 0
+
+	func load_team() -> Dictionary:
+		return {"leader": null, "member1": null, "member2": null}
+
+	func get_shared_monster_exp() -> int:
+		return pool_exp
+
+	func get_shared_monster_exp_capacity() -> int:
+		return capacity
+
+	func add_shared_monster_exp(amount: int) -> Dictionary:
+		add_calls += 1
+		var accepted: int = mini(amount, maxi(0, capacity - pool_exp))
+		pool_exp += accepted
+		return {
+			"added": accepted,
+			"overflow": maxi(0, amount - accepted),
+			"current": pool_exp,
+			"capacity": capacity,
+		}
+
 func _init() -> void:
 	call_deferred("_run")
 
@@ -76,11 +150,18 @@ func _run() -> void:
 		])
 		ranch.call("_calc_idle_exp")
 		ranch.call("_sync_gui")
+		var fake_team_storage := FakeTeamStorage.new()
+		root.add_child(fake_team_storage)
+		ranch.set("_storage", fake_team_storage)
+		ranch.call("_sync_gui")
+		_expect((ranch.get_node("Pages/RanchPage/RosterPanel/Card1/SelectionMark") as Label).visible, "farm roster should mark team members as deployed")
 		ranch.call("_switch_to_classroom")
 		ranch.set("_class_selected_instance_id", "monster_001")
 		ranch.call("_sync_gui")
 		_expect((ranch.get_node("Pages/ClassroomPage/RosterPanel/Card1/Check") as TextureRect).visible, "classroom selection should use the shared check art")
-		_expect(not (ranch.get_node("Pages/ClassroomPage/RosterPanel/Card1/SelectionMark") as Label).visible, "classroom selection should not use the old text mark")
+		var class_team_mark := ranch.get_node("Pages/ClassroomPage/RosterPanel/Card1/SelectionMark") as Label
+		_expect(class_team_mark.visible, "classroom roster should mark team members as deployed")
+		_expect(class_team_mark.text == String.chr(24050) + String.chr(20986) + String.chr(25112), "team mark should read deployed")
 		ranch.call("_switch_to_ranch")
 		ranch.call("_sync_gui")
 		var timer := ranch.get_node("Pages/RanchPage/Slots/Slot1/Timer") as Label
@@ -93,6 +174,30 @@ func _run() -> void:
 		_expect(timer.text.count(":") == 2, "farm slot timer should expose seconds so idle time visibly advances")
 		_expect(timer.text != timer_before, "farm slot timer should refresh while the page remains open")
 		_expect(int((ranch.get("_idle_exp_map") as Dictionary).get("monster_001", 0)) > exp_before, "farm dynamic refresh should recalculate idle rewards")
+		var harvest_ready_color := timer.modulate
+		slots = ranch.get("_slots_data")
+		slots[0]["placed_at"] = Time.get_unix_time_from_system() * 1000.0
+		ranch.set("_slots_data", slots)
+		ranch.call("_calc_idle_exp")
+		ranch.call("_sync_dynamic_gui")
+		_expect(timer.modulate != harvest_ready_color, "farm slot timer color should distinguish ready harvest from waiting")
+		var fake_overflow_storage := FakeOverflowStorage.new()
+		root.add_child(fake_overflow_storage)
+		ranch.set("_storage", fake_overflow_storage)
+		var overflow_placed_at := Time.get_unix_time_from_system() * 1000.0 - 60.0 * 60.0 * 1000.0
+		ranch.set("_slots_data", [
+			{"instance_id": "monster_001", "placed_at": overflow_placed_at},
+			{"instance_id": null, "placed_at": null},
+			{"instance_id": null, "placed_at": null},
+			{"instance_id": null, "placed_at": null},
+			{"instance_id": null, "placed_at": null},
+		])
+		ranch.call("_calc_idle_exp")
+		ranch.call("_collect_slot", 0)
+		_expect(fake_overflow_storage.add_calls == 0, "overflowing harvest should not write partial shared exp")
+		_expect(float((ranch.get("_slots_data") as Array)[0].get("placed_at", 0.0)) == overflow_placed_at, "overflowing harvest should not reset idle timer")
+		fake_overflow_storage.queue_free()
+		ranch.set("_storage", null)
 		_expect(not ranch.has_node("Pages/RanchPage/CollectRow/CollectButton"), "GUI ranch page should not show the collect-all button")
 		ranch.call("_switch_to_social")
 		ranch.set("_social_places", [{
@@ -103,6 +208,9 @@ func _run() -> void:
 			"last_result": {},
 		}])
 		ranch.call("_sync_gui")
+		_expect((ranch.get_node("Pages/SocialPage/RosterPanel/Card1/SelectionMark") as Label).visible, "social roster should mark team members as deployed")
+		fake_team_storage.queue_free()
+		ranch.set("_storage", null)
 		var ranch_locked_card := ranch.get_node("Pages/SocialPage/RosterPanel/Card1") as TextureButton
 		_expect(ranch_locked_card.modulate.a < 1.0, "farm monster should appear unavailable in social roster")
 		ranch_locked_card.pressed.emit()
@@ -129,6 +237,21 @@ func _run() -> void:
 		outside_tap.pressed = true
 		(ranch.get_node("Pages/SocialPage/ResultPopup/Shade") as Control).gui_input.emit(outside_tap)
 		_expect(not (ranch.get_node("Pages/SocialPage/ResultPopup") as Control).visible, "popup shade should close result without click-through")
+		var fake_upgrade_storage := FakeUpgradeStorage.new()
+		root.add_child(fake_upgrade_storage)
+		ranch.set("_storage", fake_upgrade_storage)
+		ranch.set("_captured_monsters", [fake_upgrade_storage.instance.duplicate(true)])
+		ranch.call("_rebuild_instance_index")
+		ranch.call("_switch_to_classroom")
+		ranch.set("_class_selected_instance_id", "monster_001")
+		ranch.call("_sync_gui")
+		var upgrade_button := ranch.get_node("Pages/ClassroomPage/DetailPanel/UpgradeButton") as TextureButton
+		upgrade_button.pressed.emit()
+		_expect(fake_upgrade_storage.calls == 1, "first upgrade tap should feed shared exp")
+		_expect(not upgrade_button.disabled, "upgrade button should remain enabled during feedback")
+		upgrade_button.pressed.emit()
+		_expect(fake_upgrade_storage.calls == 2, "upgrade button should accept consecutive taps during feedback")
+		fake_upgrade_storage.queue_free()
 	main.queue_free()
 	await process_frame
 	if _failures.is_empty():

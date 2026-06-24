@@ -61,6 +61,8 @@ const SOCIAL_HEART_FX_PATHS := [
 const TEXT_WHITE := Color(1.0, 1.0, 1.0)
 const TEXT_MUTED := Color(0.66, 0.72, 0.82)
 const TEXT_GOLD := Color(1.0, 0.84, 0.25)
+const TIMER_PENDING_COLOR := Color(0.55, 1.0, 0.42)
+const TIMER_WAITING_COLOR := Color(0.70, 0.86, 1.0)
 const DYNAMIC_GUI_INTERVAL := 1.0
 const STATUS_GUI_INTERVAL := 1.0 / 15.0
 const RANCH_SLOT_LEVEL_FONT_SIZE := 8
@@ -112,6 +114,7 @@ var _hub_entry_played: bool = false
 var _portrait_path_cache: Dictionary = {}
 var _upgrade_animating: bool = false
 var _upgrade_feedback_tween: Tween = null
+var _upgrade_value_tweens: Array[Tween] = []
 
 func _ready() -> void:
 	super._ready()
@@ -254,8 +257,6 @@ func _on_evolve_button_pressed() -> void:
 	_sync_gui()
 
 func _on_upgrade_button_pressed() -> void:
-	if _upgrade_animating:
-		return
 	var instance_id := _class_selected_instance_id
 	var before := _fresh_instance(instance_id).duplicate(true)
 	var pool_before := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else 0
@@ -439,7 +440,8 @@ func _sync_ranch_slots() -> void:
 			var care: Dictionary = _care_state_map.get(instance_id, _get_care_state(instance_id))
 			_set_text(status, "EXP +%d/h" % roundi(float(care.get("rate", _get_idle_exp_rate(instance_id))) * 12.0))
 			_set_text(timer, _format_elapsed(slot.get("placed_at", null)))
-			timer.modulate = TEXT_GOLD if not str(care.get("label", "")).is_empty() else TEXT_WHITE
+			var pending_exp := int(_idle_exp_map.get(instance_id, 0))
+			timer.modulate = TIMER_PENDING_COLOR if pending_exp > 0 else TIMER_WAITING_COLOR
 			level_badge.modulate = Color(1.18, 1.06, 0.48) if selected else Color.WHITE
 			ribbon.modulate = Color(1.18, 1.08, 0.52) if selected else Color.WHITE
 		else:
@@ -1010,6 +1012,7 @@ func _classroom_attribute_values_text(instance: Dictionary, monster: Dictionary,
 	]
 
 func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dictionary, pool_before: int, pool_after: int) -> void:
+	_kill_upgrade_feedback_tweens()
 	var panel := _node("Pages/ClassroomPage/DetailPanel")
 	var feedback := panel.get_node("UpgradeFeedback") as Control
 	var glow := feedback.get_node("Glow") as TextureRect
@@ -1036,7 +1039,7 @@ func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dicti
 	var after_stats := MonsterService.get_owned_stats(str(after.get("monsterId", "")), new_level, str(after.get("nature", "")), bool(after.get("isElite", false)))
 
 	_upgrade_animating = true
-	upgrade.disabled = true
+	upgrade.disabled = false
 	feedback.visible = true
 	feedback.modulate = Color.WHITE
 	glow.pivot_offset = glow.size * 0.5
@@ -1066,16 +1069,16 @@ func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dicti
 	pool_text.text = "总经验槽 %s / %s" % [_format_resource_number(pool_before), _format_resource_number(int(pool_bar.max_value))]
 
 	var pool_tween := create_tween()
+	_upgrade_value_tweens.append(pool_tween)
 	pool_tween.tween_method(_set_pool_feedback_value.bind(pool_bar, pool_text), float(pool_before), float(pool_after), 0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	var exp_tween := create_tween()
+	_upgrade_value_tweens.append(exp_tween)
 	if leveled_up:
 		exp_tween.tween_method(_set_monster_feedback_value.bind(monster_bar, monster_text, old_needed), float(old_exp), float(old_needed), 0.42).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 		exp_tween.tween_callback(_reset_level_exp_bar.bind(monster_bar, monster_text, new_exp, new_needed, info, stats, after, after_monster, after_stats))
 	else:
 		exp_tween.tween_method(_set_monster_feedback_value.bind(monster_bar, monster_text, old_needed), float(old_exp), float(new_exp), 0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-	if _upgrade_feedback_tween != null and _upgrade_feedback_tween.is_valid():
-		_upgrade_feedback_tween.kill()
 	_upgrade_feedback_tween = create_tween()
 	_upgrade_feedback_tween.set_parallel(true)
 	_upgrade_feedback_tween.tween_property(glow, "modulate:a", 0.95 if leveled_up else 0.55, 0.18)
@@ -1120,6 +1123,7 @@ func _reset_level_exp_bar(bar: ProgressBar, label: Label, value: int, maximum: i
 
 func _finish_upgrade_feedback() -> void:
 	_upgrade_animating = false
+	_upgrade_value_tweens.clear()
 	var feedback := get_node_or_null("Pages/ClassroomPage/DetailPanel/UpgradeFeedback") as Control
 	if feedback != null:
 		feedback.visible = false
@@ -1127,6 +1131,14 @@ func _finish_upgrade_feedback() -> void:
 	if pool_title != null:
 		pool_title.visible = true
 	_sync_gui()
+
+func _kill_upgrade_feedback_tweens() -> void:
+	if _upgrade_feedback_tween != null and _upgrade_feedback_tween.is_valid():
+		_upgrade_feedback_tween.kill()
+	for tween in _upgrade_value_tweens:
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_upgrade_value_tweens.clear()
 
 func _sync_social_page() -> void:
 	_sync_social_place()
@@ -1277,6 +1289,7 @@ func _apply_social_observation_text_style() -> void:
 func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 	var used := _used_monsters()
 	var place := _current_social_place()
+	var team_ids := _team_instance_ids()
 	for i in paths.size():
 		var card := get_node(paths[i]) as TextureButton
 		var idx := start_index + i
@@ -1291,12 +1304,13 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 			selected = instance_id == _class_selected_instance_id
 		else:
 			selected = str(place.get("slot_a", "")) == instance_id or str(place.get("slot_b", "")) == instance_id
-		_sync_card(card, instance_id, selected, context)
+		var in_team := team_ids.has(instance_id) or (team_ids.is_empty() and _is_instance_in_team(instance_id))
+		_sync_card(card, instance_id, selected, context, in_team)
 		var ranch_locked := context == "social" and _is_instance_in_ranch(instance_id)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.52) if ranch_locked else Color.WHITE
 		card.tooltip_text = "农场挂机中，先从农场取下" if ranch_locked else ""
 
-func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String) -> void:
+func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String, in_team: bool = false) -> void:
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var instance := _get_instance(instance_id)
 	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
@@ -1309,7 +1323,14 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 	_set_visible(check, selected)
 	var selection_mark := card.get_node_or_null("SelectionMark") as Label
 	if selection_mark != null:
-		_set_visible(selection_mark, false)
+		selection_mark.position = Vector2(7.0, 55.0)
+		selection_mark.size = Vector2(49.0, 18.0)
+		selection_mark.text = _team_badge_text()
+		selection_mark.add_theme_font_size_override("font_size", 8)
+		selection_mark.add_theme_color_override("font_color", Color(1.0, 0.97, 0.76, 1.0))
+		selection_mark.add_theme_color_override("font_outline_color", Color(0.06, 0.28, 0.10, 1.0))
+		selection_mark.add_theme_constant_override("outline_size", 3)
+		_set_visible(selection_mark, in_team)
 
 func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	var previous := get_node(panel_path + "/PreviousButton") as TextureButton

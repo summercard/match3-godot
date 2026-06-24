@@ -533,6 +533,11 @@ func add_shared_monster_exp(amount: int) -> Dictionary:
 		"capacity": capacity,
 	}
 
+func can_add_shared_monster_exp(amount: int) -> bool:
+	var before := get_shared_monster_exp()
+	var capacity := get_shared_monster_exp_capacity()
+	return maxi(0, amount) <= maxi(0, capacity - before)
+
 func consume_shared_monster_exp(amount: int) -> int:
 	var current := get_shared_monster_exp()
 	var consumed := mini(current, maxi(0, amount))
@@ -1504,9 +1509,13 @@ func collect_idle_exp_for_instance(instance_id: String) -> float:
 
 	var rate: float = get_idle_exp_rate_for_instance(instance_id)
 	var exp: float = intervals * rate
+	if not can_add_shared_monster_exp(int(exp)):
+		return 0.0
 
 	# 挂机产出的培养经验统一进入共享经验槽。
 	var add_result := add_shared_monster_exp(int(exp))
+	if int(add_result.get("overflow", 0)) > 0:
+		return 0.0
 
 	# 重置放置时间（毫秒时间戳）
 	slot["placed_at"] = now_ms
