@@ -130,6 +130,15 @@ func _run() -> void:
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
 	_expect(battle.has_node("Combatants/MultiEnemies/Enemy3/HpFrameBase"), "multi-enemy hp bars should keep the base frame layer")
 
+	main.switch_scene("battle", {
+		"stageId": "stage_4_2",
+		"stageData": stage_db.get_stage("stage_4_2"),
+		"inputTestOnly": true,
+	})
+	await process_frame
+	battle = main.get_current_scene()
+	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map4.png"), "chapter 4 battle should use map4 war background")
+
 	TestSceneCleanup.queue_free_root(self)
 	await process_frame
 	await process_frame

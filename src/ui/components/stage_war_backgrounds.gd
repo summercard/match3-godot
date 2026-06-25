@@ -6,7 +6,7 @@ const CHAPTER_PATHS := {
 	1: "res://assets/images/maps/warbackgrouds/map1.png",
 	2: "res://assets/images/maps/warbackgrouds/map2.png",
 	3: "res://assets/images/maps/warbackgrouds/map3.png",
-	4: "res://assets/images/maps/warbackgrouds/map5.png",
+	4: "res://assets/images/maps/warbackgrouds/map4.png",
 	5: "res://assets/images/maps/warbackgrouds/map5.png",
 	6: "res://assets/images/maps/warbackgrouds/map6.png",
 	7: "res://assets/images/maps/warbackgrouds/map7.png",
