@@ -1006,6 +1006,7 @@ static func _clear_generated_pressure(stage: Dictionary) -> void:
 	stage.erase("fountains")
 	stage.erase("fountainRule")
 	stage.erase("tideRule")
+	stage.erase("iceTiles")
 	stage.erase("vines")
 	stage.erase("vineRule")
 	stage.erase("lockedGems")
@@ -1024,11 +1025,13 @@ static func _apply_stage_pressure(stage: Dictionary, chapter_num: int, stage_no:
 		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
 	if chapter_num == 5 and stage_no >= 2:
 		stage["tideRule"] = _tide_rule(stage_no, is_boss)
+	if chapter_num == 6 and stage_no >= 2:
+		stage["iceTiles"] = _ice_pattern(stage_no, is_boss)
 	if chapter_num in [7, 10] and stage_no >= 5:
 		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
 	if chapter_num in [8, 10] and stage_no >= 5:
 		stage["lockedGems"] = _locked_pattern(stage_no, is_boss)
-	if chapter_num in [6, 7, 9, 11] and stage_no >= 5:
+	if chapter_num in [7, 9, 11] and stage_no >= 5:
 		stage["poisonFog"] = _fog_pattern(stage_no, is_boss)
 
 static func _fountain_pattern(stage_no: int, is_boss: bool) -> Array:
@@ -1166,6 +1169,78 @@ static func _tide_rule(stage_no: int, is_boss: bool) -> Dictionary:
 		"maxLevel": max_level,
 		"pattern": "island_tide_stage_%02d" % stage_no
 	}
+
+static func _ice_pattern(stage_no: int, is_boss: bool) -> Array:
+	if is_boss:
+		return _ice_positions(_unique_coords([[1, 2], [1, 5], [2, 3], [2, 6], [3, 1], [3, 4], [4, 3], [4, 6], [5, 1], [5, 4], [6, 2], [6, 5]]))
+	var patterns := {
+		2: [[3, 3], [4, 4]],
+		3: [[3, 2], [3, 4], [3, 6]],
+		4: [[2, 4], [4, 4], [6, 4]],
+		5: [[2, 2], [2, 5], [5, 2], [5, 5]],
+		6: [[2, 3], [3, 4], [4, 3], [5, 4]],
+		7: [[1, 2], [2, 3], [4, 5], [5, 6], [6, 1]],
+		8: [[1, 4], [3, 1], [3, 4], [3, 6], [5, 4], [6, 2]],
+		9: [[2, 1], [2, 4], [2, 6], [4, 2], [4, 5], [6, 1], [6, 4], [6, 6]],
+		10: [[1, 1], [1, 3], [1, 6], [3, 1], [3, 6], [5, 1], [5, 6], [6, 2], [6, 4]],
+		11: [[1, 2], [1, 5], [2, 4], [3, 1], [3, 6], [4, 2], [4, 5], [5, 3], [6, 1], [6, 6]]
+	}
+	return _ice_positions(patterns.get(stage_no, [[3, 2], [3, 4], [3, 6]]))
+
+static func _line_h(row: int, col_from: int, col_to: int) -> Array:
+	var coords: Array = []
+	for col in range(col_from, col_to + 1):
+		coords.append([row, col])
+	return coords
+
+static func _line_v(col: int, row_from: int, row_to: int) -> Array:
+	var coords: Array = []
+	for row in range(row_from, row_to + 1):
+		coords.append([row, col])
+	return coords
+
+static func _diagonal_down_coords(row: int, col: int, length: int) -> Array:
+	var coords: Array = []
+	for i in range(length + 1):
+		coords.append([row + i, col + i])
+	return coords
+
+static func _diagonal_up_coords(row: int, col: int, length: int) -> Array:
+	var coords: Array = []
+	for i in range(length + 1):
+		coords.append([row - i, col + i])
+	return coords
+
+static func _ice_frame(top: int, bottom: int, left: int, right: int) -> Array:
+	var coords: Array = []
+	for col in range(left, right + 1):
+		coords.append([top, col])
+		coords.append([bottom, col])
+	for row in range(top + 1, bottom):
+		coords.append([row, left])
+		coords.append([row, right])
+	return coords
+
+static func _unique_coords(coords: Array) -> Array:
+	var seen := {}
+	var result: Array = []
+	for coord in coords:
+		if not coord is Array or coord.size() < 2:
+			continue
+		var key := "%d,%d" % [int(coord[0]), int(coord[1])]
+		if seen.has(key):
+			continue
+		seen[key] = true
+		result.append([int(coord[0]), int(coord[1])])
+	return result
+
+static func _ice_positions(coords: Array) -> Array:
+	var result: Array = []
+	for coord in coords:
+		if not coord is Array or coord.size() < 2:
+			continue
+		result.append({"row": int(coord[0]), "col": int(coord[1])})
+	return result
 
 static func _rock_pattern(stage_no: int, is_boss: bool) -> Array:
 	var hp := 3 if is_boss or stage_no >= 10 else 2

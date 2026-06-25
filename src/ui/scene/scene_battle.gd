@@ -140,6 +140,8 @@ const ELIMINATE_DURATION: float = ELIMINATE_PHASE1 + ELIMINATE_PHASE2  # 总时�
 ## 宝石下落动画
 var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
 const FALL_DURATION: float = 0.42
+var _ice_slide_anims: Array[Dictionary] = []
+const ICE_SLIDE_DURATION: float = 0.22
 
 ## 锁定宝石解锁动画队列
 var _unlock_animations: Array[Dictionary] = []  # [{row, col, x, y, timer, phase, maxTimer}]
@@ -517,6 +519,7 @@ func init(data: Dictionary = {}) -> void:
 	_boss_skill_visuals = {}
 	_eliminating_gems = []
 	_falling_gems = []
+	_ice_slide_anims = []
 	_unlock_animations = []
 	_poison_fog_spread_anims = []
 	_poison_fog_clear_anims = []
@@ -565,6 +568,8 @@ func _init_battle() -> void:
 	if _stage_data.has("fountains"):
 		_board.set_fountains(_stage_data.get("fountains", []), _stage_data.get("fountainRule", {}))
 		_board.init_board()
+	if _stage_data.has("iceTiles"):
+		_board.set_ice_tiles(_stage_data.get("iceTiles", []))
 	if _stage_data.has("tideRule"):
 		_board.set_tide(_stage_data.get("tideRule", {}))
 	if _stage_data.has("vines"):
@@ -1046,15 +1051,22 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 	if _board == null or _battle == null:
 		return
 	_state = BattleState.SWAPPING
-	if not _board.swap(r1, c1, r2, c2):
+	var before_grid: Array = _board.grid.duplicate(true)
+	var swap_result: Dictionary = _board.swap_with_ice_slide(r1, c1, r2, c2) if _board.has_method("swap_with_ice_slide") else {"success": _board.swap(r1, c1, r2, c2), "movements": [], "slid": false}
+	if not bool(swap_result.get("success", false)):
 		_state = BattleState.IDLE
 		_show_message("无法交换")
 		_sfx("ui_invalid_move_bouncy")
 		return
 	_sfx("ui_tile_swap_soft")
+	if bool(swap_result.get("slid", false)):
+		_start_ice_slide_anims(swap_result.get("movements", []))
 	var match_result: Dictionary = _board.find_matches()
 	if match_result.get("gems", []).is_empty():
-		_board.swap(r1, c1, r2, c2)
+		if bool(swap_result.get("slid", false)) and not _input_test_only:
+			await get_tree().create_timer(ICE_SLIDE_DURATION).timeout
+		_board.grid = before_grid
+		_ice_slide_anims.clear()
 		_state = BattleState.IDLE
 		_show_message("无效交换")
 		_sfx("ui_invalid_move_bouncy")
@@ -1063,12 +1075,41 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 	if _input_test_only:
 		_state = BattleState.IDLE
 		return
+	if bool(swap_result.get("slid", false)):
+		_show_message("冰面打滑！")
+		await get_tree().create_timer(ICE_SLIDE_DURATION).timeout
+		_ice_slide_anims.clear()
 	_board.cascade_count = 0
 	_process_matches()
 
 ## ============================================
 # 战斗逻辑
 ## ============================================
+
+func _start_ice_slide_anims(movements: Array) -> void:
+	_ice_slide_anims.clear()
+	if _board == null:
+		return
+	for move in movements:
+		if not move is Dictionary:
+			continue
+		var from_row := int(move.get("from_row", move.get("row", 0)))
+		var from_col := int(move.get("from_col", move.get("col", 0)))
+		var to_row := int(move.get("to_row", move.get("row", 0)))
+		var to_col := int(move.get("to_col", move.get("col", 0)))
+		var from_center := _board_cell_center(from_row, from_col)
+		var to_center := _board_cell_center(to_row, to_col)
+		_ice_slide_anims.append({
+			"row": to_row,
+			"col": to_col,
+			"type": str(move.get("type", "")),
+			"from_x": from_center.x,
+			"from_y": from_center.y,
+			"to_x": to_center.x,
+			"to_y": to_center.y,
+			"timer": 0.0,
+			"duration": ICE_SLIDE_DURATION
+		})
 
 func _process_matches() -> void:
 	if _board == null or _battle == null:
@@ -2644,6 +2685,7 @@ func _board_render_state() -> Dictionary:
 		"tide_rise_anims": _tide_rise_anims,
 		"special_transform_anim": _special_transform_anim,
 		"falling_gems": _falling_gems,
+		"ice_slide_anims": _ice_slide_anims,
 		"eliminate_phase1": ELIMINATE_PHASE1,
 		"eliminate_phase2": ELIMINATE_PHASE2,
 		"eliminate_duration": ELIMINATE_DURATION
@@ -4989,6 +5031,7 @@ func destroy() -> void:
 	_fall_messages.clear()
 	_eliminating_gems.clear()
 	_falling_gems.clear()
+	_ice_slide_anims.clear()
 	_unlock_animations.clear()
 	_poison_fog_spread_anims.clear()
 	_poison_fog_clear_anims.clear()
@@ -5053,6 +5096,11 @@ func _update_fall_animations(delta: float) -> void:
 		fg["timer"] += delta
 		if fg["timer"] >= fg.get("duration", FALL_DURATION) + fg.get("delay", 0.0):
 			_falling_gems.remove_at(i)
+	for i in range(_ice_slide_anims.size() - 1, -1, -1):
+		var slide: Dictionary = _ice_slide_anims[i]
+		slide["timer"] += delta
+		if slide["timer"] >= slide.get("duration", ICE_SLIDE_DURATION):
+			_ice_slide_anims.remove_at(i)
 
 func _update_unlock_animations(delta: float) -> void:
 	for i in range(_unlock_animations.size() - 1, -1, -1):

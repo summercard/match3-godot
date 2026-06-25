@@ -53,14 +53,14 @@ const CHAPTER_TEMPLATES := {
 		"breakPoint": "水位封住底部前完成蓄能爆发"
 	},
 	"chapter_6": {
-		"id": "fog_race",
-		"name": "寒雾竞速",
-		"tagline": "在毒雾扩散前建立清盘节奏。",
-		"pressure": "毒雾",
-		"playerPlan": "优先处理雾源附近的匹配，减少后续行动税。",
-		"bossRhythm": "雾压下蓄力",
-		"boardPressure": "毒雾按回合扩散",
-		"breakPoint": "守护承伤并抢在雾满前爆发"
+		"id": "ice_slide",
+		"name": "冰面滑行",
+		"tagline": "宝石踏上冰面会沿移动方向继续滑行，停稳后才进行三消判定。",
+		"pressure": "冰面地表",
+		"playerPlan": "预判滑行后的落点，用冰道把宝石送进更远的连线位置。",
+		"bossRhythm": "冰道扰位",
+		"boardPressure": "冰面改变交换后的最终落点",
+		"breakPoint": "利用连续冰面制造远距离三消"
 	},
 	"chapter_7": {
 		"id": "void_split",

@@ -56,9 +56,10 @@ func _test_stage_goals() -> void:
 	_expect(not tide_stage.has("lockedGems"), "chapter 5 should not introduce locked-gem pressure while teaching tide")
 	_expect(tide_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "tide pressure stages should still use enemy defeat as the win goal")
 
-	var fog_stage: Dictionary = stage_db.get_stage("stage_6_5")
-	_expect(fog_stage.has("poisonFog"), "chapter 6 mid stages should introduce fog pressure")
-	_expect(fog_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "poison fog stages should still use enemy defeat as the win goal")
+	var ice_stage: Dictionary = stage_db.get_stage("stage_6_5")
+	_expect(ice_stage.has("iceTiles"), "chapter 6 mid stages should introduce ice pressure")
+	_expect(not ice_stage.has("poisonFog"), "chapter 6 ice stages should not also introduce fog pressure")
+	_expect(ice_stage.get("stageGoal", {}).get("id", "") == "defeat_enemies", "ice pressure stages should still use enemy defeat as the win goal")
 
 	var old_elite: Dictionary = stage_db.get_stage("stage_2_4e")
 	_expect(old_elite.is_empty(), "old elite branch ids should not be part of the 12-stage map")

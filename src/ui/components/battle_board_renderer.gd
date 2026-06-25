@@ -41,6 +41,8 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 				scene._draw_stroke_rect(x + 1.0, y + 1.0, cell_size - 2.0, cell_size - 2.0, 1.0, Color(0.10, 0.23, 0.42, 0.82))
 			if board == null:
 				continue
+			if board.has_method("is_ice_tile") and board.is_ice_tile(row, col):
+				_draw_ice_tile(scene, x, y, cell_size, state, row, col)
 			if board.is_obstacle(row, col) or board.is_fountain(row, col):
 				continue
 			var gem_type: String = board.grid[row][col]
@@ -66,6 +68,7 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	var gem_colors: Dictionary = state.get("gem_colors", {})
 	var eliminating_gems: Array = state.get("eliminating_gems", [])
 	var falling_gems: Array = state.get("falling_gems", [])
+	var ice_slide_anims: Array = state.get("ice_slide_anims", [])
 	var selected_gem: Vector2i = state.get("selected_gem", Vector2i(-1, -1))
 	var idle_time: float = state.get("idle_time", 0.0)
 	var is_eliminating: bool = false
@@ -82,6 +85,16 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	if is_eliminating:
 		var scale: float = _eliminate_scale(elim_progress)
 		scene._draw_gem_animated(cx, cy, gem_type, gem_color, scale, 1.0, 0.0)
+		return
+
+	var slide := _ice_slide_entry_for(ice_slide_anims, row, col, gem_type)
+	if not slide.is_empty():
+		var slide_t: float = clampf(float(slide.get("timer", 0.0)) / maxf(0.01, float(slide.get("duration", 0.22))), 0.0, 1.0)
+		var eased_slide := _ease_out_cubic(slide_t)
+		var slide_x := lerpf(float(slide.get("from_x", cx)), float(slide.get("to_x", cx)), eased_slide)
+		var slide_y := lerpf(float(slide.get("from_y", cy)), float(slide.get("to_y", cy)), eased_slide)
+		var slip_wobble := sin(slide_t * PI) * 0.08
+		scene._draw_gem_animated(slide_x, slide_y, gem_type, gem_color, 1.0 + slip_wobble, 1.0)
 		return
 
 	var fall := _falling_entry_for(falling_gems, row, col, gem_type)
@@ -111,6 +124,17 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 		pulse_opacity = 0.85 + 0.15 * (sine_unsel + 1.0) / 2.0
 	var idle_scale: float = 1.0 + 0.02 * sin(idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
 	scene._draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, pulse_opacity)
+
+static func _draw_ice_tile(scene, x: float, y: float, size: float, state: Dictionary, row: int, col: int) -> void:
+	var idle_time: float = state.get("idle_time", 0.0)
+	var ice_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_tile_ice.png")
+	var pulse := 0.5 + 0.5 * sin(idle_time * TAU * 0.75 + float(row * 2 + col) * 0.28)
+	if ice_tex:
+		scene._draw_texture_fit(ice_tex, Rect2(x + 2.0, y + 2.0, size - 4.0, size - 4.0), 0.82 + pulse * 0.10)
+		return
+	scene._draw_rounded_rect(x + 3.0, y + 3.0, size - 6.0, size - 6.0, 8.0, Color(0.58, 0.88, 1.0, 0.34 + pulse * 0.08))
+	scene.draw_line(Vector2(x + 8.0, y + size * 0.62), Vector2(x + size - 8.0, y + size * 0.34), Color(0.93, 1.0, 1.0, 0.42), 1.5)
+	scene.draw_line(Vector2(x + size * 0.32, y + 9.0), Vector2(x + size * 0.60, y + size - 8.0), Color(0.72, 0.95, 1.0, 0.34), 1.2)
 
 static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 	if board == null:
@@ -553,6 +577,12 @@ static func _eliminate_scale(progress: float) -> float:
 
 static func _falling_entry_for(falling_gems: Array, row: int, col: int, gem_type: String) -> Dictionary:
 	for entry in falling_gems:
+		if int(entry.get("row", -999)) == row and int(entry.get("col", -999)) == col and str(entry.get("type", "")) == gem_type:
+			return entry
+	return {}
+
+static func _ice_slide_entry_for(slide_anims: Array, row: int, col: int, gem_type: String) -> Dictionary:
+	for entry in slide_anims:
 		if int(entry.get("row", -999)) == row and int(entry.get("col", -999)) == col and str(entry.get("type", "")) == gem_type:
 			return entry
 	return {}

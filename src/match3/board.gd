@@ -61,6 +61,7 @@ var grid: Array = []
 ## 障碍物数据：obstacles[row][col] = null 或 { type: "rock", hp: 2 }
 var obstacles: Array = []
 var fountains: Array = []
+var ice_tiles: Array = []
 
 ## 锁定宝石数据：lockedGems[row][col] = null 或 { hp: 1|2 }
 ## 被锁的宝石不可交换或参与普通消除，但会随重力下落
@@ -106,6 +107,7 @@ func _init(p_rows: int = 8, p_cols: int = 8) -> void:
 	cols = p_cols
 	_init_obstacles()
 	_init_fountains()
+	_init_ice_tiles()
 	_init_locked_gems()
 	_init_soaked_gems()
 	_init_vine_gems()
@@ -126,6 +128,13 @@ func _init_fountains() -> void:
 		fountains.append([])
 		for c: int in range(cols):
 			fountains[r].append(null)
+
+func _init_ice_tiles() -> void:
+	ice_tiles = []
+	for r: int in range(rows):
+		ice_tiles.append([])
+		for c: int in range(cols):
+			ice_tiles[r].append(null)
 
 ## 初始化锁定宝石数组（全部为 null）
 func _init_locked_gems() -> void:
@@ -199,6 +208,11 @@ func is_fountain(row: int, col: int) -> bool:
 	if row < 0 or row >= rows or col < 0 or col >= cols:
 		return false
 	return fountains[row][col] != null
+
+func is_ice_tile(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	return ice_tiles.size() == rows and ice_tiles[row].size() == cols and ice_tiles[row][col] != null
 
 func is_blocked_cell(row: int, col: int) -> bool:
 	return is_obstacle(row, col) or is_fountain(row, col)
@@ -301,6 +315,8 @@ func set_obstacles(layout: Array) -> void:
 				"type": ob.get("type", "rock"),
 				"hp": ob.get("hp", 2)
 			}
+			if ice_tiles.size() == rows and ice_tiles[r].size() == cols:
+				ice_tiles[r][c] = null
 			if vine_gems.size() == rows and vine_gems[r].size() == cols:
 				vine_gems[r][c] = null
 
@@ -317,12 +333,30 @@ func set_fountains(layout: Array, rule: Dictionary = {}) -> void:
 		var c: int = fountain.get("col", -1)
 		if r >= 0 and r < rows and c >= 0 and c < cols:
 			fountains[r][c] = {"type": fountain.get("type", "fountain")}
+			if ice_tiles.size() == rows and ice_tiles[r].size() == cols:
+				ice_tiles[r][c] = null
 			if grid.size() == rows and grid[r].size() == cols:
 				grid[r][c] = ""
 			if locked_gems.size() == rows and locked_gems[r].size() == cols:
 				locked_gems[r][c] = null
 			if vine_gems.size() == rows and vine_gems[r].size() == cols:
 				vine_gems[r][c] = null
+
+func set_ice_tiles(layout: Array) -> void:
+	_init_ice_tiles()
+	if layout == null:
+		return
+	for ice in layout:
+		var r := -1
+		var c := -1
+		if ice is Dictionary:
+			r = int(ice.get("row", -1))
+			c = int(ice.get("col", -1))
+		elif ice is Array and ice.size() >= 2:
+			r = int(ice[0])
+			c = int(ice[1])
+		if r >= 0 and r < rows and c >= 0 and c < cols and not is_blocked_cell(r, c):
+			ice_tiles[r][c] = {"active": true}
 
 func set_tide(rule: Dictionary = {}) -> void:
 	tide_rule = {
@@ -689,6 +723,75 @@ func swap(r1: int, c1: int, r2: int, c2: int) -> bool:
 ## 返回 { gems, enhanced, rainbow, bomb }
 ## enhanced: 4连（十字爆炸），rainbow: 5+连（全屏同色），bomb: L/T形（3×3炸弹）
 ## 优先级：5连(彩虹) > L/T形(炸弹) > 4连(十字) > 3连(普通)
+func swap_with_ice_slide(r1: int, c1: int, r2: int, c2: int) -> Dictionary:
+	var active_type: String = str(grid[r1][c1]) if r1 >= 0 and r1 < rows and c1 >= 0 and c1 < cols else ""
+	var target_type: String = str(grid[r2][c2]) if r2 >= 0 and r2 < rows and c2 >= 0 and c2 < cols else ""
+	if not swap(r1, c1, r2, c2):
+		return {"success": false, "movements": []}
+	var slide_result := _slide_active_gem_on_ice(r2, c2, r2 - r1, c2 - c1, r1, c1, active_type, target_type)
+	return {
+		"success": true,
+		"movements": slide_result.get("movements", []),
+		"slid": bool(slide_result.get("slid", false))
+	}
+
+func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, source_row: int, source_col: int, active_type: String, target_type: String) -> Dictionary:
+	var path: Array = [{"row": start_row, "col": start_col, "type": active_type}]
+	var current_row := start_row
+	var current_col := start_col
+	while is_ice_tile(current_row, current_col):
+		var next_row := current_row + dr
+		var next_col := current_col + dc
+		if not _can_slide_into(next_row, next_col):
+			break
+		path.append({"row": next_row, "col": next_col, "type": str(grid[next_row][next_col])})
+		var tmp: String = str(grid[next_row][next_col])
+		grid[next_row][next_col] = str(grid[current_row][current_col])
+		grid[current_row][current_col] = tmp
+		current_row = next_row
+		current_col = next_col
+	if path.size() <= 1:
+		return {"slid": false, "movements": []}
+	var movements: Array = [{
+		"row": source_row,
+		"col": source_col,
+		"type": target_type,
+		"from_row": start_row,
+		"from_col": start_col,
+		"to_row": source_row,
+		"to_col": source_col
+	}]
+	for i in range(1, path.size()):
+		var from_entry: Dictionary = path[i]
+		var to_entry: Dictionary = path[i - 1]
+		movements.append({
+			"row": int(to_entry["row"]),
+			"col": int(to_entry["col"]),
+			"type": str(from_entry["type"]),
+			"from_row": int(from_entry["row"]),
+			"from_col": int(from_entry["col"]),
+			"to_row": int(to_entry["row"]),
+			"to_col": int(to_entry["col"])
+		})
+	var final_entry: Dictionary = path[path.size() - 1]
+	movements.append({
+		"row": int(final_entry["row"]),
+		"col": int(final_entry["col"]),
+		"type": active_type,
+		"from_row": source_row,
+		"from_col": source_col,
+		"to_row": int(final_entry["row"]),
+		"to_col": int(final_entry["col"])
+	})
+	return {"slid": true, "movements": movements}
+
+func _can_slide_into(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	if is_blocked_cell(row, col) or is_empty(row, col):
+		return false
+	return is_gem_playable(row, col)
+
 func find_matches() -> Dictionary:
 	# 使用 Array + String key 来模拟 Set
 	var matches_keys: Array = []
