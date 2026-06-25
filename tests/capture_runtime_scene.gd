@@ -318,6 +318,9 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--battle-fountain-demo=", "0") == "1":
 		_seed_battle_fountain_demo(battle_scene)
 		return
+	if _read_arg("--battle-tide-demo=", "0") == "1":
+		_seed_battle_tide_demo(battle_scene)
+		return
 	if _read_arg("--battle-vine-demo=", "0") == "1":
 		_seed_battle_vine_demo(battle_scene)
 		return
@@ -396,6 +399,34 @@ func _seed_battle_fountain_demo(battle_scene: Control) -> void:
 	}])
 	battle_scene.set("_fountain_splash_anims", splashes)
 	battle_scene.set("_message_text", "喷泉喷发")
+	battle_scene.set("_message_timer", 1.0)
+	battle_scene.queue_redraw()
+
+func _seed_battle_tide_demo(battle_scene: Control) -> void:
+	var board = battle_scene.get("_board")
+	if board == null:
+		battle_scene.queue_redraw()
+		return
+	if board.has_method("set_tide"):
+		board.set_tide({"startLevel": 2, "risePerTurn": 1, "maxLevel": 3})
+	var cell_size: float = float(board.cell_size)
+	var tide_anims: Array[Dictionary] = []
+	for col in range(board.cols):
+		var row: int = int(board.rows) - int(board.tide_level)
+		if row >= 0 and row < board.rows:
+			tide_anims.append({
+				"row": row,
+				"col": col,
+				"x": float(board.offset_x) + float(col) * cell_size + cell_size / 2.0,
+				"y": float(board.offset_y) + float(row) * cell_size + cell_size / 2.0,
+				"size": cell_size,
+				"timer": 0.18
+			})
+	for col in range(board.cols):
+		if col % 2 == 0:
+			board.grid[board.rows - 1][col] = "water"
+	battle_scene.set("_tide_rise_anims", tide_anims)
+	battle_scene.set("_message_text", "潮水上涨")
 	battle_scene.set("_message_timer", 1.0)
 	battle_scene.queue_redraw()
 

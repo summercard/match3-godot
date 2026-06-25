@@ -37,7 +37,7 @@ func _run() -> void:
 	_expect(monster_result.get("leveledUp", false), "two first-stage monster exp grants should level a starter monster")
 
 	var idle_rate: float = save_manager.get_idle_exp_rate("monster_001")
-	_expect(idle_rate >= 6.0, "ranch idle rate should be visible in early play")
+	_expect(idle_rate >= 3.5, "ranch idle rate should be visible in early play")
 
 	_finish()
 

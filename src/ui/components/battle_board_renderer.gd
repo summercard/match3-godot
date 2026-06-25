@@ -54,10 +54,12 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 	draw_fountains(scene, board, state)
 	draw_poison_fog(scene, board, state)
 	draw_soaked_gems(scene, board, state)
+	draw_tide(scene, board, state)
 	draw_unlock_animations(scene, board, state)
 	draw_poison_fog_anims(scene, state)
 	draw_fountain_anims(scene, state)
 	draw_vine_anims(scene, state)
+	draw_tide_anims(scene, state)
 
 static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, x: float, y: float, cell_size: float, gem_type: String) -> void:
 	var colors: Dictionary = state.get("colors", {})
@@ -312,6 +314,61 @@ static func draw_soaked_gems(scene, board, state: Dictionary) -> void:
 					scene._draw_texture_fit(drop_tex, Rect2(drop_x - drop_size / 2.0, drop_y - drop_size / 2.0, drop_size, drop_size), drop_alpha)
 				else:
 					scene.draw_line(Vector2(drop_x, drop_y - 3.0), Vector2(drop_x - 1.5, drop_y + 4.0), Color(0.90, 0.98, 1.0, drop_alpha), 1.4)
+
+static func draw_tide(scene, board, state: Dictionary) -> void:
+	if board == null or not board.has_method("has_tide") or not board.has_tide() or int(board.tide_level) <= 0:
+		return
+	var idle_time: float = state.get("idle_time", 0.0)
+	var size: float = float(board.cell_size)
+	var board_x: float = float(board.offset_x)
+	var board_y: float = float(board.offset_y)
+	var water_top_row := maxi(0, board.rows - int(board.tide_level))
+	var water_top_y := board_y + float(water_top_row) * size
+	var board_w := float(board.cols) * size
+	var board_h := float(board.rows) * size
+	var water_h := board_y + board_h - water_top_y
+	var wave := sin(idle_time * TAU * 0.8) * 2.0
+	scene._draw_rounded_rect(board_x + 1.5, water_top_y + wave, board_w - 3.0, water_h - wave - 1.5, 8.0, Color(0.05, 0.38, 0.74, 0.34))
+	scene._draw_rounded_rect(board_x + 3.0, water_top_y + size * 0.12 + wave, board_w - 6.0, maxf(0.0, water_h - size * 0.12 - 3.0), 7.0, Color(0.12, 0.66, 0.92, 0.22))
+	_draw_tide_wave_line(scene, board_x, water_top_y + wave, board_w, idle_time)
+	for row in range(water_top_row, board.rows):
+		for col in range(board.cols):
+			var x := board_x + float(col) * size
+			var y := board_y + float(row) * size
+			var gem_type := str(board.grid[row][col])
+			var is_water := gem_type == "water"
+			var tint := Color(0.10, 0.48, 0.82, 0.18) if is_water else Color(0.02, 0.18, 0.36, 0.38)
+			scene._draw_rounded_rect(x + 3.0, y + 3.0, size - 6.0, size - 6.0, 8.0, tint)
+			if not is_water and not gem_type.is_empty():
+				scene.draw_line(Vector2(x + 9.0, y + size - 9.0), Vector2(x + size - 9.0, y + 9.0), Color(0.78, 0.94, 1.0, 0.38), 2.0)
+			if (row + col) % 3 == 0:
+				var bubble_phase := fmod(idle_time * 0.65 + float(row * 3 + col) * 0.11, 1.0)
+				var bubble_y := y + size * (0.78 - bubble_phase * 0.55)
+				var bubble_x := x + size * (0.26 + 0.42 * fmod(float(row + col) * 0.37, 1.0))
+				scene.draw_circle(Vector2(bubble_x, bubble_y), 1.8 + bubble_phase * 1.4, Color(0.82, 0.96, 1.0, 0.38 * (1.0 - bubble_phase)))
+
+static func _draw_tide_wave_line(scene, x: float, y: float, width: float, idle_time: float) -> void:
+	var segments := 10
+	var last := Vector2(x, y)
+	for i in range(1, segments + 1):
+		var px := x + width * float(i) / float(segments)
+		var py := y + sin(idle_time * TAU * 1.15 + float(i) * 0.9) * 2.6
+		var current := Vector2(px, py)
+		scene.draw_line(last, current, Color(0.76, 0.95, 1.0, 0.82), 2.2)
+		last = current
+	scene.draw_line(Vector2(x, y + 4.0), Vector2(x + width, y + 4.0), Color(0.18, 0.76, 1.0, 0.36), 2.4)
+
+static func draw_tide_anims(scene, state: Dictionary) -> void:
+	for anim: Dictionary in state.get("tide_rise_anims", []):
+		var progress := clampf(float(anim.get("timer", 0.0)) / 0.7, 0.0, 1.0)
+		if progress >= 1.0:
+			continue
+		var alpha := 1.0 - progress
+		var x := float(anim.get("x", 0.0))
+		var y := float(anim.get("y", 0.0))
+		var size := float(anim.get("size", 39.0))
+		scene.draw_arc(Vector2(x, y), size * (0.25 + progress * 0.55), 0.0, TAU, 28, Color(0.52, 0.88, 1.0, alpha * 0.70), 2.0)
+		scene.draw_line(Vector2(x - size * 0.35, y + size * 0.18 - progress * 9.0), Vector2(x + size * 0.35, y + size * 0.18 - progress * 9.0), Color(0.85, 0.98, 1.0, alpha * 0.58), 2.0)
 
 static func draw_fountain_anims(scene, state: Dictionary) -> void:
 	var drop_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_fx_water_drop.png")

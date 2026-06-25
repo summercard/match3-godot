@@ -21,15 +21,21 @@ func _run() -> void:
 
 func _test_stage_pressure_assignment() -> void:
 	var db := StageDBScript.new()
-	var early_ch2 := db.get_stage("stage_2_2")
+	var stage_2_1 := db.get_stage("stage_2_1")
+	var stage_2_2 := db.get_stage("stage_2_2")
+	var stage_2_3 := db.get_stage("stage_2_3")
+	var stage_2_4 := db.get_stage("stage_2_4")
 	var fountain_ch2 := db.get_stage("stage_2_5")
 	var boss_ch2 := db.get_stage("stage_2_12")
-	var rock_ch4 := db.get_stage("stage_4_5")
-	_expect(not early_ch2.has("fountains"), "chapter 2 should introduce fountains after the first teaching stages")
+	_expect(not stage_2_1.has("fountains"), "chapter 2 stage 1 should stay free of fountain pressure")
+	_expect(_positions_equal(stage_2_2.get("fountains", []), [[3, 3]]), "chapter 2 stage 2 should teach one center fountain")
+	_expect(_positions_equal(stage_2_3.get("fountains", []), [[2, 2], [5, 5]]), "chapter 2 stage 3 should use the 3,3 and 6,6 fountain points")
+	_expect(_positions_equal(stage_2_4.get("fountains", []), [[1, 1], [1, 6]]), "chapter 2 stage 4 should use upper-left and upper-right fountain points")
+	_expect(_positions_equal(fountain_ch2.get("fountains", []), [[1, 1], [1, 6], [3, 3]]), "chapter 2 stage 5 should use upper-left, upper-right, and center fountains")
 	_expect(fountain_ch2.has("fountains"), "chapter 2 mid stage should contain fountains")
 	_expect(not fountain_ch2.has("obstacles"), "chapter 2 fountain stages should not keep rock obstacles")
-	_expect(int(boss_ch2.get("fountainRule", {}).get("eruptionCount", 0)) == 2, "chapter 2 boss should erupt two fountains")
-	_expect(rock_ch4.has("obstacles"), "chapter 4 should now own rock pressure")
+	_expect(int(boss_ch2.get("fountainRule", {}).get("eruptionCount", 0)) == 1, "chapter 2 boss should only erupt one fountain per turn")
+	_expect(str(boss_ch2.get("fountainRule", {}).get("range", "")) == "orthogonal_1", "chapter 2 boss should use the normal four-direction fountain range")
 
 
 func _test_fountain_soaks_and_extinguishes() -> void:
@@ -86,6 +92,17 @@ func _fill_checker(board) -> void:
 	for row in range(board.rows):
 		for col in range(board.cols):
 			board.grid[row][col] = types[(row * 2 + col) % types.size()]
+
+
+func _positions_equal(actual: Array, expected: Array) -> bool:
+	if actual.size() != expected.size():
+		return false
+	for i in range(expected.size()):
+		var pos: Dictionary = actual[i]
+		var coord: Array = expected[i]
+		if int(pos.get("row", -1)) != int(coord[0]) or int(pos.get("col", -1)) != int(coord[1]):
+			return false
+	return true
 
 
 func _expect(condition: bool, message: String) -> void:

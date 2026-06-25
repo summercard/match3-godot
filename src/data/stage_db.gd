@@ -1005,6 +1005,7 @@ static func _clear_generated_pressure(stage: Dictionary) -> void:
 	stage.erase("obstacles")
 	stage.erase("fountains")
 	stage.erase("fountainRule")
+	stage.erase("tideRule")
 	stage.erase("vines")
 	stage.erase("vineRule")
 	stage.erase("lockedGems")
@@ -1013,13 +1014,15 @@ static func _clear_generated_pressure(stage: Dictionary) -> void:
 	stage.erase("bossLayers")
 
 static func _apply_stage_pressure(stage: Dictionary, chapter_num: int, stage_no: int, is_boss: bool) -> void:
-	if chapter_num == 2 and stage_no >= 3:
+	if chapter_num == 2 and stage_no >= 2:
 		stage["fountains"] = _fountain_pattern(stage_no, is_boss)
 		stage["fountainRule"] = _fountain_rule(stage_no, is_boss)
-	if chapter_num == 3 and stage_no >= 3:
+	if chapter_num == 3 and stage_no >= 2:
 		stage["vines"] = _vine_pattern(stage_no, is_boss)
 		stage["vineRule"] = _vine_rule(stage_no, is_boss)
-	if chapter_num in [4, 7, 10] and stage_no >= 5:
+	if chapter_num == 4 and stage_no >= 2:
+		stage["tideRule"] = _tide_rule(stage_no, is_boss)
+	if chapter_num in [7, 10] and stage_no >= 5:
 		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
 	if chapter_num in [5, 8, 10] and stage_no >= 5:
 		stage["lockedGems"] = _locked_pattern(stage_no, is_boss)
@@ -1027,62 +1030,100 @@ static func _apply_stage_pressure(stage: Dictionary, chapter_num: int, stage_no:
 		stage["poisonFog"] = _fog_pattern(stage_no, is_boss)
 
 static func _fountain_pattern(stage_no: int, is_boss: bool) -> Array:
-	var positions := [
-		{"row": 2, "col": 2},
-		{"row": 5, "col": 5},
-		{"row": 2, "col": 5},
-		{"row": 5, "col": 2},
-		{"row": 3, "col": 3},
-		{"row": 4, "col": 4}
-	]
-	var take := 1
-	if stage_no >= 6:
-		take = 2
-	if stage_no >= 10:
-		take = 3
 	if is_boss:
-		take = 3
+		return _fountain_positions([[1, 1], [1, 6], [3, 3]])
+	var patterns := {
+		2: [[3, 3]],
+		3: [[2, 2], [5, 5]],
+		4: [[1, 1], [1, 6]],
+		5: [[1, 1], [1, 6], [3, 3]],
+		6: [[2, 2], [5, 5], [3, 3]],
+		7: [[1, 1], [1, 6], [5, 5]],
+		8: [[2, 2], [5, 5], [1, 6]],
+		9: [[1, 1], [1, 6], [2, 2]],
+		10: [[1, 1], [3, 3], [5, 5]],
+		11: [[1, 6], [3, 3], [5, 5]]
+	}
+	return _fountain_positions(patterns.get(stage_no, [[2, 2], [5, 5]]))
+
+static func _fountain_positions(coords: Array) -> Array:
 	var result: Array = []
-	for i in range(mini(take, positions.size())):
-		result.append((positions[i] as Dictionary).duplicate(true))
+	for coord in coords:
+		if not coord is Array or coord.size() < 2:
+			continue
+		result.append({"row": int(coord[0]), "col": int(coord[1])})
 	return result
 
 static func _fountain_rule(stage_no: int, is_boss: bool) -> Dictionary:
-	var rule := {
+	return {
 		"eruptionCount": 1,
 		"range": "orthogonal_1",
 		"soakTurns": 1,
 		"fireVanishes": true
 	}
-	if is_boss:
-		rule["eruptionCount"] = 2
-		rule["range"] = "square_1"
-	elif stage_no >= 10:
-		rule["eruptionCount"] = 2
-	return rule
 
 static func _vine_pattern(stage_no: int, is_boss: bool) -> Array:
 	if is_boss:
-		return _vine_positions([
-			[1, 1], [1, 6],
-			[2, 3], [2, 4],
-			[3, 2], [4, 5],
-			[5, 3], [5, 4],
-			[6, 1], [6, 6]
-		])
+		return _vine_positions(_vine_unique_positions(_vine_frame(1, 6, 1, 6) + _vine_cross(1, 6)))
 	var patterns := {
-		3: [[2, 2], [5, 5]],
-		4: [[1, 5], [3, 3], [5, 1]],
-		5: [[1, 2], [1, 5], [6, 2], [6, 5]],
-		6: [[2, 3], [2, 4], [5, 3], [5, 4]],
-		7: [[1, 1], [2, 4], [3, 6], [5, 2], [6, 5]],
-		8: [[2, 2], [2, 5], [3, 3], [4, 4], [5, 2]],
-		9: [[1, 3], [2, 4], [3, 2], [4, 5], [5, 3], [6, 4]],
-		10: [[0, 3], [1, 1], [1, 6], [6, 1], [6, 6], [7, 4]],
-		11: [[1, 2], [1, 5], [2, 3], [3, 6], [4, 1], [5, 4], [6, 5]]
+		2: _vine_side_columns(0, 7),
+		3: _vine_diagonal_down(0, 0, 7),
+		4: _vine_cross(0, 7),
+		5: _vine_frame(1, 6, 1, 6),
+		6: _vine_unique_positions(_vine_side_columns(1, 6) + _vine_diagonal_down(0, 0, 7)),
+		7: _vine_unique_positions(_vine_frame(1, 6, 1, 6) + _vine_diagonal_up(7, 0, 7)),
+		8: _vine_frame(0, 7, 0, 7),
+		9: _vine_unique_positions(_vine_frame(1, 6, 1, 6) + _vine_cross(0, 7)),
+		10: _vine_unique_positions(_vine_side_columns(0, 7) + _vine_frame(2, 5, 2, 5)),
+		11: _vine_unique_positions(_vine_frame(0, 7, 0, 7) + _vine_cross(1, 6))
 	}
-	var fallback := [[1, 2], [2, 5], [4, 1], [5, 6]]
+	var fallback := _vine_unique_positions(_vine_side_columns(0, 7) + _vine_diagonal_down(0, 0, 7))
 	return _vine_positions(patterns.get(stage_no, fallback))
+
+static func _vine_side_columns(left_col: int, right_col: int) -> Array:
+	var coords: Array = []
+	for row in range(8):
+		coords.append([row, left_col])
+		coords.append([row, right_col])
+	return coords
+
+static func _vine_diagonal_down(start_row: int, start_col: int, length: int) -> Array:
+	var coords: Array = []
+	for i in range(length + 1):
+		coords.append([start_row + i, start_col + i])
+	return coords
+
+static func _vine_diagonal_up(start_row: int, start_col: int, length: int) -> Array:
+	var coords: Array = []
+	for i in range(length + 1):
+		coords.append([start_row - i, start_col + i])
+	return coords
+
+static func _vine_cross(min_index: int, max_index: int) -> Array:
+	return _vine_unique_positions(_vine_diagonal_down(min_index, min_index, max_index - min_index) + _vine_diagonal_up(max_index, min_index, max_index - min_index))
+
+static func _vine_frame(top: int, bottom: int, left: int, right: int) -> Array:
+	var coords: Array = []
+	for col in range(left, right + 1):
+		coords.append([top, col])
+		coords.append([bottom, col])
+	for row in range(top + 1, bottom):
+		coords.append([row, left])
+		coords.append([row, right])
+	return _vine_unique_positions(coords)
+
+static func _vine_unique_positions(coords: Array) -> Array:
+	var seen := {}
+	var result: Array = []
+	for coord in coords:
+		if not coord is Array or coord.size() < 2:
+			continue
+		var key := "%d,%d" % [int(coord[0]), int(coord[1])]
+		if seen.has(key):
+			continue
+		seen[key] = true
+		result.append([int(coord[0]), int(coord[1])])
+	return result
 
 static func _vine_positions(coords: Array) -> Array:
 	var result: Array = []
@@ -1097,6 +1138,29 @@ static func _vine_rule(stage_no: int, is_boss: bool) -> Dictionary:
 		"backlashPercent": 0.06 if is_boss else 0.04,
 		"burnedByAdjacentFire": true,
 		"pattern": "thorn_cage" if is_boss else "chapter3_stage_%02d" % stage_no
+	}
+
+static func _tide_rule(stage_no: int, is_boss: bool) -> Dictionary:
+	if is_boss:
+		return {
+			"startLevel": 1,
+			"risePerTurn": 1,
+			"maxLevel": 4,
+			"pattern": "island_boss_high_tide"
+		}
+	var max_level := 1
+	var start_level := 0
+	if stage_no >= 3:
+		max_level = 2
+	if stage_no >= 6:
+		max_level = 3
+	if stage_no >= 9:
+		start_level = 1
+	return {
+		"startLevel": start_level,
+		"risePerTurn": 1,
+		"maxLevel": max_level,
+		"pattern": "island_tide_stage_%02d" % stage_no
 	}
 
 static func _rock_pattern(stage_no: int, is_boss: bool) -> Array:

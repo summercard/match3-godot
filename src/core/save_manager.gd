@@ -8,7 +8,7 @@ extends Node
 ## - ConfigFile 有多个 section：player/team/inventory/stageProgress/achievements/signIn/settings/ranch/tutorial/rewards
 ## - 经验公式：每级所需 = 80 + level * 10，总经验需计算到 level-1
 ## - 扫荡奖励 = 关卡基础奖励 × 星级倍率 × 0.8
-## - 牧场挂机经验速率 = 5 + level 每5分钟，累计最多8小时
+## - 牧场挂机经验速率 = 3 + level * 0.5 每5分钟，累计最多8小时
 ## - 签到连续天数超过7天额外奖励 +20金币 +10经验
 
 const ItemDB = preload("res://src/data/item_db.gd")
@@ -1435,7 +1435,7 @@ func _normalize_ranch_timestamp_ms(value: Variant) -> Variant:
 
 ## 计算挂机经验速率（每5分钟）
 ## JS: getIdleExpRate(monsterId)
-## 公式: 5 + level，保证前期挂机也有可见成长反馈
+## 公式: 3 + level * 0.5，保证前期挂机也有可见成长反馈
 func get_idle_exp_rate(monster_id: String) -> float:
 	var instance_id := _resolve_instance_id(monster_id)
 	if instance_id.is_empty():

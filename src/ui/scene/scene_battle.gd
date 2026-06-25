@@ -153,6 +153,7 @@ var _fountain_erupt_anims: Array[Dictionary] = []
 var _fountain_splash_anims: Array[Dictionary] = []
 var _vine_burn_anims: Array[Dictionary] = []
 var _vine_backlash_anims: Array[Dictionary] = []
+var _tide_rise_anims: Array[Dictionary] = []
 
 ## 特殊消除动画队列
 var _special_elim_phases: Array = []  # [{type, gems, delay, timer, triggered}]
@@ -521,6 +522,7 @@ func init(data: Dictionary = {}) -> void:
 	_poison_fog_clear_anims = []
 	_gem_particles = []
 	_obstacle_particles = []
+	_tide_rise_anims = []
 	_leader_skill_fx = []
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
@@ -563,6 +565,8 @@ func _init_battle() -> void:
 	if _stage_data.has("fountains"):
 		_board.set_fountains(_stage_data.get("fountains", []), _stage_data.get("fountainRule", {}))
 		_board.init_board()
+	if _stage_data.has("tideRule"):
+		_board.set_tide(_stage_data.get("tideRule", {}))
 	if _stage_data.has("vines"):
 		_board.set_vines(_stage_data.get("vines", []))
 	if _stage_data.has("lockedGems"):
@@ -1409,6 +1413,7 @@ func _start_enemy_turn() -> void:
 	
 	# ===== 毒雾回合逻辑 =====
 	_process_fountain_turn()
+	_process_tide_turn()
 	_process_poison_fog_turn()
 	
 	_show_message("敌方回合")
@@ -2636,6 +2641,7 @@ func _board_render_state() -> Dictionary:
 		"fountain_splash_anims": _fountain_splash_anims,
 		"vine_burn_anims": _vine_burn_anims,
 		"vine_backlash_anims": _vine_backlash_anims,
+		"tide_rise_anims": _tide_rise_anims,
 		"special_transform_anim": _special_transform_anim,
 		"falling_gems": _falling_gems,
 		"eliminate_phase1": ELIMINATE_PHASE1,
@@ -4990,6 +4996,7 @@ func destroy() -> void:
 	_fountain_splash_anims.clear()
 	_vine_burn_anims.clear()
 	_vine_backlash_anims.clear()
+	_tide_rise_anims.clear()
 	_gem_particles.clear()
 	_obstacle_particles.clear()
 	_item_use_effects.clear()
@@ -5081,6 +5088,11 @@ func _update_fountain_anims(delta: float) -> void:
 		anim["timer"] += delta
 		if anim["timer"] >= 0.52:
 			_fountain_splash_anims.remove_at(i)
+	for i in range(_tide_rise_anims.size() - 1, -1, -1):
+		var anim: Dictionary = _tide_rise_anims[i]
+		anim["timer"] += delta
+		if anim["timer"] >= 0.7:
+			_tide_rise_anims.remove_at(i)
 
 func _update_vine_anims(delta: float) -> void:
 	for i in range(_vine_burn_anims.size() - 1, -1, -1):
@@ -5146,6 +5158,25 @@ func _process_fountain_turn() -> void:
 	if not soaked.is_empty() or not extinguished.is_empty():
 		_show_message("喷泉喷发，水流封住了周围宝石")
 		_request_battle_fx({"type": "fountain_erupt", "erupted": erupted, "soaked": soaked, "extinguished": extinguished})
+
+func _process_tide_turn() -> void:
+	var result: Dictionary = BattleHazardRulesScript.process_tide_turn(_board)
+	var old_level := int(result.get("old_level", 0))
+	var new_level := int(result.get("new_level", 0))
+	if new_level <= old_level:
+		return
+	for row_entry in result.get("risen_rows", []):
+		for tile in row_entry.get("tiles", []):
+			_tide_rise_anims.append({
+				"row": tile["row"],
+				"col": tile["col"],
+				"x": tile["x"],
+				"y": tile["y"],
+				"size": float(_board.cell_size) if _board != null else 39.0,
+				"timer": 0.0
+			})
+	_show_message("潮水上涨，水中只有水元素还能操作")
+	_request_battle_fx({"type": "tide_rise", "old_level": old_level, "new_level": new_level, "risen_rows": result.get("risen_rows", [])})
 
 func _process_poison_fog_turn() -> void:
 	var result: Dictionary = BattleHazardRulesScript.process_poison_turn(_board, _battle)

@@ -1,7 +1,7 @@
 class_name RanchCareRules
 extends RefCounted
 
-const BASE_IDLE_EXP: float = 5.0
+const BASE_IDLE_EXP: float = 3.0
 const COMPANION_BONUS_PER_PARTNER: float = 0.15
 const COMPANION_BONUS_MAX: float = 0.45
 const NATURE_IDLE_MULTIPLIERS := {
@@ -17,7 +17,7 @@ const NATURE_IDLE_MULTIPLIERS := {
 
 
 static func calc_base_rate(level: int) -> float:
-	return BASE_IDLE_EXP + float(maxi(1, level))
+	return BASE_IDLE_EXP + float(maxi(1, level)) * 0.5
 
 
 static func calc_nature_multiplier(nature_id: String) -> float:

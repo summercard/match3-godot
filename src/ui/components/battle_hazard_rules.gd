@@ -65,6 +65,28 @@ static func process_fountain_turn(board) -> Dictionary:
 		"extinguished": _with_positions(board, result.get("extinguished", []))
 	}
 
+static func process_tide_turn(board) -> Dictionary:
+	if board == null or not has_tide(board):
+		return {"old_level": 0, "new_level": 0, "risen_rows": [], "flooded": []}
+	var result: Dictionary = board.process_tide_rise()
+	var flooded: Array = []
+	for row in range(board.rows):
+		for col in range(board.cols):
+			if board.is_tide_flooded(row, col):
+				flooded.append(_position_entry(board, {"row": row, "col": col}))
+	var risen_rows: Array = []
+	for row in result.get("risen_rows", []):
+		var row_tiles: Array = []
+		for col in range(board.cols):
+			row_tiles.append(_position_entry(board, {"row": int(row), "col": col}))
+		risen_rows.append({"row": int(row), "tiles": row_tiles})
+	return {
+		"old_level": int(result.get("old_level", 0)),
+		"new_level": int(result.get("new_level", 0)),
+		"risen_rows": risen_rows,
+		"flooded": flooded
+	}
+
 static func process_vine_resolution(board, battle, removed_gems: Array, rule: Dictionary = {}) -> Dictionary:
 	if board == null or removed_gems.is_empty():
 		return {"burned": [], "backlash": [], "hits": [], "total_damage": 0, "all_dead": false}
@@ -161,6 +183,9 @@ static func has_fountains(board) -> bool:
 			if board.is_fountain(row, col):
 				return true
 	return false
+
+static func has_tide(board) -> bool:
+	return board != null and board.has_method("has_tide") and board.has_tide()
 
 static func has_vines(board) -> bool:
 	if board == null:

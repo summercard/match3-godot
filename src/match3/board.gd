@@ -68,6 +68,12 @@ var fountains: Array = []
 var locked_gems: Array = []
 var soaked_gems: Array = []
 var vine_gems: Array = []
+var tide_level: int = 0
+var tide_rule: Dictionary = {
+	"startLevel": 0,
+	"risePerTurn": 1,
+	"maxLevel": 3
+}
 
 var fountain_rule: Dictionary = {
 	"eruptionCount": 1,
@@ -220,6 +226,24 @@ func is_vined(row: int, col: int) -> bool:
 		return false
 	return bool(vine.get("active", true))
 
+func has_tide() -> bool:
+	return int(tide_rule.get("maxLevel", 0)) > 0
+
+func is_tide_flooded(row: int, col: int) -> bool:
+	if row < 0 or row >= rows or col < 0 or col >= cols:
+		return false
+	return tide_level > 0 and row >= rows - tide_level
+
+func is_tide_restricted(row: int, col: int) -> bool:
+	if not is_tide_flooded(row, col):
+		return false
+	return str(grid[row][col]) != "water"
+
+func is_gem_playable(row: int, col: int) -> bool:
+	if is_locked(row, col) or is_soaked(row, col):
+		return false
+	return not is_tide_restricted(row, col)
+
 ## 检查某个格子是否有毒雾
 func is_poison_fog(row: int, col: int) -> bool:
 	if row < 0 or row >= rows or col < 0 or col >= cols:
@@ -298,6 +322,27 @@ func set_fountains(layout: Array, rule: Dictionary = {}) -> void:
 			if vine_gems.size() == rows and vine_gems[r].size() == cols:
 				vine_gems[r][c] = null
 
+func set_tide(rule: Dictionary = {}) -> void:
+	tide_rule = {
+		"startLevel": int(rule.get("startLevel", 0)),
+		"risePerTurn": maxi(1, int(rule.get("risePerTurn", 1))),
+		"maxLevel": clampi(int(rule.get("maxLevel", 3)), 0, rows)
+	}
+	tide_level = clampi(int(tide_rule.get("startLevel", 0)), 0, int(tide_rule.get("maxLevel", 0)))
+
+func process_tide_rise() -> Dictionary:
+	var old_level := tide_level
+	var max_level := clampi(int(tide_rule.get("maxLevel", 0)), 0, rows)
+	if max_level <= 0 or tide_level >= max_level:
+		return {"old_level": old_level, "new_level": tide_level, "risen_rows": []}
+	var rise := maxi(1, int(tide_rule.get("risePerTurn", 1)))
+	tide_level = mini(max_level, tide_level + rise)
+	var risen_rows: Array = []
+	for row in range(rows - tide_level, rows - old_level):
+		if row >= 0 and row < rows:
+			risen_rows.append(row)
+	return {"old_level": old_level, "new_level": tide_level, "risen_rows": risen_rows}
+
 func clear_soaked_gems() -> void:
 	if soaked_gems.is_empty():
 		_init_soaked_gems()
@@ -375,9 +420,15 @@ func set_vines(layout: Array) -> void:
 	_init_vine_gems()
 	if layout == null or layout.size() == 0:
 		return
-	for vine: Dictionary in layout:
-		var r: int = vine.get("row", -1)
-		var c: int = vine.get("col", -1)
+	for vine in layout:
+		var r := -1
+		var c := -1
+		if vine is Dictionary:
+			r = int(vine.get("row", -1))
+			c = int(vine.get("col", -1))
+		elif vine is Array and vine.size() >= 2:
+			r = int(vine[0])
+			c = int(vine[1])
 		if r >= 0 and r < rows and c >= 0 and c < cols and not is_blocked_cell(r, c):
 			vine_gems[r][c] = {"active": true}
 
@@ -598,7 +649,7 @@ func swap(r1: int, c1: int, r2: int, c2: int) -> bool:
 		return false
 	
 	# 检查是否有锁定宝石（任一格子被锁定则拒绝交换）
-	if is_locked(r1, c1) or is_locked(r2, c2) or is_soaked(r1, c1) or is_soaked(r2, c2):
+	if not is_gem_playable(r1, c1) or not is_gem_playable(r2, c2):
 		return false
 	
 	# 交换
@@ -627,12 +678,12 @@ func find_matches() -> Dictionary:
 		var c: int = 0
 		while c < cols - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or is_locked(r, c) or is_soaked(r, c):
+			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or not is_gem_playable(r, c):
 				c += 1
 				continue
-			if not is_blocked_cell(r, c + 1) and not is_blocked_cell(r, c + 2) and not is_locked(r, c + 1) and not is_locked(r, c + 2) and not is_soaked(r, c + 1) and not is_soaked(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
+			if not is_blocked_cell(r, c + 1) and not is_blocked_cell(r, c + 2) and is_gem_playable(r, c + 1) and is_gem_playable(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
 				var end: int = c + 2
-				while end + 1 < cols and not is_blocked_cell(r, end + 1) and not is_locked(r, end + 1) and not is_soaked(r, end + 1) and grid[r][end + 1] == gem_type:
+				while end + 1 < cols and not is_blocked_cell(r, end + 1) and is_gem_playable(r, end + 1) and grid[r][end + 1] == gem_type:
 					end += 1
 				var length: int = end - c + 1
 				var cells: Array = []
@@ -651,12 +702,12 @@ func find_matches() -> Dictionary:
 		var r: int = 0
 		while r < rows - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or is_locked(r, c) or is_soaked(r, c):
+			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or not is_gem_playable(r, c):
 				r += 1
 				continue
-			if not is_blocked_cell(r + 1, c) and not is_blocked_cell(r + 2, c) and not is_locked(r + 1, c) and not is_locked(r + 2, c) and not is_soaked(r + 1, c) and not is_soaked(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
+			if not is_blocked_cell(r + 1, c) and not is_blocked_cell(r + 2, c) and is_gem_playable(r + 1, c) and is_gem_playable(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
 				var end: int = r + 2
-				while end + 1 < rows and not is_blocked_cell(end + 1, c) and not is_locked(end + 1, c) and not is_soaked(end + 1, c) and grid[end + 1][c] == gem_type:
+				while end + 1 < rows and not is_blocked_cell(end + 1, c) and is_gem_playable(end + 1, c) and grid[end + 1][c] == gem_type:
 					end += 1
 				var length: int = end - r + 1
 				var cells: Array = []
@@ -819,7 +870,7 @@ func get_cross_explosion_positions(center_row: int, center_col: int) -> Array:
 		var nr: int = center_row + offset[0]
 		var nc: int = center_col + offset[1]
 		if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
-			if is_blocked_cell(nr, nc) or is_soaked(nr, nc):
+			if is_blocked_cell(nr, nc) or not is_gem_playable(nr, nc):
 				continue
 			var gem_type: String = grid[nr][nc]
 			if gem_type != "" and gem_type != null:
@@ -837,7 +888,7 @@ func get_bomb_explosion_positions(center_row: int, center_col: int) -> Array:
 			var nr: int = center_row + dr
 			var nc: int = center_col + dc
 			if nr >= 0 and nr < rows and nc >= 0 and nc < cols:
-				if is_blocked_cell(nr, nc) or is_soaked(nr, nc):
+				if is_blocked_cell(nr, nc) or not is_gem_playable(nr, nc):
 					continue
 				var gem_type: String = grid[nr][nc]
 				if gem_type != "" and gem_type != null:
@@ -855,7 +906,7 @@ func get_rainbow_positions(match_type: String, exclude_set: Array) -> Array:
 	for r: int in range(rows):
 		for c: int in range(cols):
 			var key: String = "%d,%d" % [r, c]
-			if grid[r][c] == match_type and not is_soaked(r, c) and not _set_has(exclude_set, key):
+			if grid[r][c] == match_type and is_gem_playable(r, c) and not _set_has(exclude_set, key):
 				positions.append({ "row": r, "col": c, "type": match_type })
 	return positions
 
@@ -959,11 +1010,11 @@ func has_valid_moves() -> bool:
 	for r: int in range(rows):
 		for c: int in range(cols):
 			# 跳过障碍物格子、空格子和锁定宝石
-			if is_blocked_cell(r, c) or is_empty(r, c) or is_locked(r, c) or is_soaked(r, c):
+			if is_blocked_cell(r, c) or is_empty(r, c) or not is_gem_playable(r, c):
 				continue
 			
 			# 尝试向右交换（目标格子也不能是锁定的）
-			if c + 1 < cols and not is_blocked_cell(r, c + 1) and not is_locked(r, c + 1) and not is_soaked(r, c + 1):
+			if c + 1 < cols and not is_blocked_cell(r, c + 1) and is_gem_playable(r, c + 1):
 				swap(r, c, r, c + 1)
 				if find_matches()["gems"].size() > 0:
 					swap(r, c, r, c + 1)  # 换回来
@@ -971,7 +1022,7 @@ func has_valid_moves() -> bool:
 				swap(r, c, r, c + 1)  # 换回来
 			
 			# 尝试向下交换（目标格子也不能是锁定的）
-			if r + 1 < rows and not is_blocked_cell(r + 1, c) and not is_locked(r + 1, c) and not is_soaked(r + 1, c):
+			if r + 1 < rows and not is_blocked_cell(r + 1, c) and is_gem_playable(r + 1, c):
 				swap(r, c, r + 1, c)
 				if find_matches()["gems"].size() > 0:
 					swap(r, c, r + 1, c)
@@ -987,7 +1038,7 @@ func shuffle() -> Dictionary:
 	
 	for r: int in range(rows):
 		for c: int in range(cols):
-			if not is_blocked_cell(r, c) and not is_locked(r, c) and not is_soaked(r, c) and grid[r][c] != "" and grid[r][c] != null:
+			if not is_blocked_cell(r, c) and is_gem_playable(r, c) and grid[r][c] != "" and grid[r][c] != null:
 				types.append(grid[r][c])
 				positions.append({ "r": r, "c": c })
 	

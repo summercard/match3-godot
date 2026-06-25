@@ -33,14 +33,14 @@ const CHAPTER_TEMPLATES := {
 		"breakPoint": "提前压低危险目标"
 	},
 	"chapter_4": {
-		"id": "lock_cleanse",
-		"name": "锁链解盘",
-		"tagline": "清锁定宝石，避免棋盘被拖进低行动区。",
-		"pressure": "锁定宝石",
-		"playerPlan": "先解锁关键列，再利用连锁恢复输出节奏。",
-		"bossRhythm": "封锁后爆发",
-		"boardPressure": "锁定宝石限制可交换空间",
-		"breakPoint": "解锁后打断关键意图"
+		"id": "island_tide",
+		"name": "海岛涨潮",
+		"tagline": "每回合海水从底部上涨，水中只有水元素宝石还能正常操作。",
+		"pressure": "涨潮水位",
+		"playerPlan": "优先在干区建立连线，把水元素留在低位作为退路。",
+		"bossRhythm": "高潮线压缩",
+		"boardPressure": "底部水位逐步压缩可操作区域",
+		"breakPoint": "水位封住底部前完成蓄能爆发"
 	},
 	"chapter_5": {
 		"id": "storm_sync",
