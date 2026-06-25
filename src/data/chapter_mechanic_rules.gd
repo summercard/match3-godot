@@ -33,6 +33,16 @@ const CHAPTER_TEMPLATES := {
 		"breakPoint": "提前压低危险目标"
 	},
 	"chapter_4": {
+		"id": "rock_pressure",
+		"name": "沙漠岩障",
+		"tagline": "利用消除和爆炸清开岩石，重新打开沙漠棋盘的落点。",
+		"pressure": "岩障",
+		"playerPlan": "优先打通岩石密集区，保留爆发处理关键堵点。",
+		"bossRhythm": "岩障压缩",
+		"boardPressure": "岩石封锁关键落点和连线空间",
+		"breakPoint": "清开主通路后集中爆发"
+	},
+	"chapter_5": {
 		"id": "island_tide",
 		"name": "海岛涨潮",
 		"tagline": "每回合海水从底部上涨，水中只有水元素宝石还能正常操作。",
@@ -41,16 +51,6 @@ const CHAPTER_TEMPLATES := {
 		"bossRhythm": "高潮线压缩",
 		"boardPressure": "底部水位逐步压缩可操作区域",
 		"breakPoint": "水位封住底部前完成蓄能爆发"
-	},
-	"chapter_5": {
-		"id": "storm_sync",
-		"name": "雷锁共鸣",
-		"tagline": "用高连锁和共鸣穿过雷系封锁。",
-		"pressure": "锁定宝石",
-		"playerPlan": "围绕雷/光共鸣做连锁，快速拆掉封锁点。",
-		"bossRhythm": "高频压迫",
-		"boardPressure": "边角锁定和分区障碍",
-		"breakPoint": "共鸣爆发打穿护盾"
 	},
 	"chapter_6": {
 		"id": "fog_race",

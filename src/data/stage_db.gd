@@ -1021,10 +1021,12 @@ static func _apply_stage_pressure(stage: Dictionary, chapter_num: int, stage_no:
 		stage["vines"] = _vine_pattern(stage_no, is_boss)
 		stage["vineRule"] = _vine_rule(stage_no, is_boss)
 	if chapter_num == 4 and stage_no >= 2:
+		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
+	if chapter_num == 5 and stage_no >= 2:
 		stage["tideRule"] = _tide_rule(stage_no, is_boss)
 	if chapter_num in [7, 10] and stage_no >= 5:
 		stage["obstacles"] = _rock_pattern(stage_no, is_boss)
-	if chapter_num in [5, 8, 10] and stage_no >= 5:
+	if chapter_num in [8, 10] and stage_no >= 5:
 		stage["lockedGems"] = _locked_pattern(stage_no, is_boss)
 	if chapter_num in [6, 7, 9, 11] and stage_no >= 5:
 		stage["poisonFog"] = _fog_pattern(stage_no, is_boss)
@@ -1145,6 +1147,7 @@ static func _tide_rule(stage_no: int, is_boss: bool) -> Dictionary:
 		return {
 			"startLevel": 1,
 			"risePerTurn": 1,
+			"ebbPerTurn": 1,
 			"maxLevel": 4,
 			"pattern": "island_boss_high_tide"
 		}
@@ -1159,6 +1162,7 @@ static func _tide_rule(stage_no: int, is_boss: bool) -> Dictionary:
 	return {
 		"startLevel": start_level,
 		"risePerTurn": 1,
+		"ebbPerTurn": 1,
 		"maxLevel": max_level,
 		"pattern": "island_tide_stage_%02d" % stage_no
 	}

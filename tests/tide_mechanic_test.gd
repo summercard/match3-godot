@@ -13,6 +13,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_stage_pressure_assignment()
+	_test_tide_is_disabled_by_default()
 	_test_tide_rises_from_bottom()
 	_test_flooded_non_water_blocks_swap_and_match()
 	_test_flooded_water_remains_playable()
@@ -24,14 +25,29 @@ func _test_stage_pressure_assignment() -> void:
 	var db := StageDBScript.new()
 	var early_ch4 := db.get_stage("stage_4_1")
 	var intro_ch4 := db.get_stage("stage_4_2")
-	var late_ch4 := db.get_stage("stage_4_9")
-	var boss_ch4 := db.get_stage("stage_4_12")
-	_expect(not early_ch4.has("tideRule"), "chapter 4 stage 1 should be a no-tide island primer")
-	_expect(intro_ch4.has("tideRule"), "chapter 4 stage 2 should introduce tide pressure")
-	_expect(int(intro_ch4.get("tideRule", {}).get("maxLevel", 0)) == 1, "chapter 4 intro tide should only flood one row")
-	_expect(int(late_ch4.get("tideRule", {}).get("startLevel", 0)) == 1, "late chapter 4 should start with one flooded row")
-	_expect(int(boss_ch4.get("tideRule", {}).get("maxLevel", 0)) == 4, "chapter 4 boss should allow a four-row high tide")
-	_expect(not intro_ch4.has("obstacles"), "chapter 4 tide stages should not also generate old rock pressure")
+	var early_ch5 := db.get_stage("stage_5_1")
+	var intro_ch5 := db.get_stage("stage_5_2")
+	var late_ch5 := db.get_stage("stage_5_9")
+	var boss_ch5 := db.get_stage("stage_5_12")
+	var boss_ch3 := db.get_stage("stage_3_12")
+	_expect(not boss_ch3.has("tideRule"), "chapter 3 boss should not receive tide pressure")
+	_expect(not early_ch4.has("tideRule"), "chapter 4 stage 1 should not receive tide pressure")
+	_expect(not intro_ch4.has("tideRule"), "chapter 4 should keep tide out of the desert rock chapter")
+	_expect(intro_ch4.has("obstacles"), "chapter 4 stage 2 should introduce rock pressure")
+	_expect(not early_ch5.has("tideRule"), "chapter 5 stage 1 should be a no-tide island primer")
+	_expect(intro_ch5.has("tideRule"), "chapter 5 stage 2 should introduce tide pressure")
+	_expect(int(intro_ch5.get("tideRule", {}).get("maxLevel", 0)) == 1, "chapter 5 intro tide should only flood one row")
+	_expect(int(late_ch5.get("tideRule", {}).get("startLevel", 0)) == 1, "late chapter 5 should start with one flooded row")
+	_expect(int(boss_ch5.get("tideRule", {}).get("maxLevel", 0)) == 4, "chapter 5 boss should allow a four-row high tide")
+	_expect(not intro_ch5.has("obstacles"), "chapter 5 tide stages should not also generate rock pressure")
+	_expect(not intro_ch5.has("lockedGems"), "chapter 5 tide stages should not also generate locked-gem pressure")
+
+
+func _test_tide_is_disabled_by_default() -> void:
+	var board = BoardScript.new(5, 5)
+	_expect(not board.has_tide(), "boards without a tideRule should not process tide")
+	var result: Dictionary = HazardRulesScript.process_tide_turn(board)
+	_expect(int(result.get("new_level", 0)) == 0, "disabled tide should keep water level at zero")
 
 
 func _test_tide_rises_from_bottom() -> void:
@@ -44,6 +60,9 @@ func _test_tide_rises_from_bottom() -> void:
 	var second: Dictionary = HazardRulesScript.process_tide_turn(board)
 	_expect(int(second.get("new_level", 0)) == 2, "second tide turn should flood the second row")
 	_expect(board.is_tide_flooded(3, 2), "second tide turn should flood row above bottom")
+	var third: Dictionary = HazardRulesScript.process_tide_turn(board)
+	_expect(int(third.get("new_level", 0)) == 1, "tide should ebb on the turn after reaching the fixed max level")
+	_expect(not board.is_tide_flooded(3, 2), "ebb should expose the row above bottom again")
 
 
 func _test_flooded_non_water_blocks_swap_and_match() -> void:

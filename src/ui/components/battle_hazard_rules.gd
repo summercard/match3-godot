@@ -67,7 +67,7 @@ static func process_fountain_turn(board) -> Dictionary:
 
 static func process_tide_turn(board) -> Dictionary:
 	if board == null or not has_tide(board):
-		return {"old_level": 0, "new_level": 0, "risen_rows": [], "flooded": []}
+		return {"old_level": 0, "new_level": 0, "risen_rows": [], "ebbed_rows": [], "flooded": [], "phase": "none"}
 	var result: Dictionary = board.process_tide_rise()
 	var flooded: Array = []
 	for row in range(board.rows):
@@ -80,11 +80,19 @@ static func process_tide_turn(board) -> Dictionary:
 		for col in range(board.cols):
 			row_tiles.append(_position_entry(board, {"row": int(row), "col": col}))
 		risen_rows.append({"row": int(row), "tiles": row_tiles})
+	var ebbed_rows: Array = []
+	for row in result.get("ebbed_rows", []):
+		var row_tiles: Array = []
+		for col in range(board.cols):
+			row_tiles.append(_position_entry(board, {"row": int(row), "col": col}))
+		ebbed_rows.append({"row": int(row), "tiles": row_tiles})
 	return {
 		"old_level": int(result.get("old_level", 0)),
 		"new_level": int(result.get("new_level", 0)),
 		"risen_rows": risen_rows,
-		"flooded": flooded
+		"ebbed_rows": ebbed_rows,
+		"flooded": flooded,
+		"phase": str(result.get("phase", "none"))
 	}
 
 static func process_vine_resolution(board, battle, removed_gems: Array, rule: Dictionary = {}) -> Dictionary:

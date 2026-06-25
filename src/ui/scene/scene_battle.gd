@@ -5163,9 +5163,11 @@ func _process_tide_turn() -> void:
 	var result: Dictionary = BattleHazardRulesScript.process_tide_turn(_board)
 	var old_level := int(result.get("old_level", 0))
 	var new_level := int(result.get("new_level", 0))
-	if new_level <= old_level:
+	if new_level == old_level:
 		return
-	for row_entry in result.get("risen_rows", []):
+	var changed_rows: Array = result.get("risen_rows", []) if new_level > old_level else result.get("ebbed_rows", [])
+	var anim_mode := "rise" if new_level > old_level else "ebb"
+	for row_entry in changed_rows:
 		for tile in row_entry.get("tiles", []):
 			_tide_rise_anims.append({
 				"row": tile["row"],
@@ -5173,10 +5175,14 @@ func _process_tide_turn() -> void:
 				"x": tile["x"],
 				"y": tile["y"],
 				"size": float(_board.cell_size) if _board != null else 39.0,
-				"timer": 0.0
+				"timer": 0.0,
+				"mode": anim_mode
 			})
-	_show_message("潮水上涨，水中只有水元素还能操作")
-	_request_battle_fx({"type": "tide_rise", "old_level": old_level, "new_level": new_level, "risen_rows": result.get("risen_rows", [])})
+	if new_level > old_level:
+		_show_message("潮水上涨，水中只有水元素还能操作")
+	else:
+		_show_message("潮水退去，底部格子重新露出")
+	_request_battle_fx({"type": "tide_change", "old_level": old_level, "new_level": new_level, "phase": result.get("phase", "none"), "risen_rows": result.get("risen_rows", []), "ebbed_rows": result.get("ebbed_rows", [])})
 
 func _process_poison_fog_turn() -> void:
 	var result: Dictionary = BattleHazardRulesScript.process_poison_turn(_board, _battle)

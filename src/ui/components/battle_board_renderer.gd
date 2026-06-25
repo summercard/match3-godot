@@ -367,8 +367,11 @@ static func draw_tide_anims(scene, state: Dictionary) -> void:
 		var x := float(anim.get("x", 0.0))
 		var y := float(anim.get("y", 0.0))
 		var size := float(anim.get("size", 39.0))
-		scene.draw_arc(Vector2(x, y), size * (0.25 + progress * 0.55), 0.0, TAU, 28, Color(0.52, 0.88, 1.0, alpha * 0.70), 2.0)
-		scene.draw_line(Vector2(x - size * 0.35, y + size * 0.18 - progress * 9.0), Vector2(x + size * 0.35, y + size * 0.18 - progress * 9.0), Color(0.85, 0.98, 1.0, alpha * 0.58), 2.0)
+		var mode := str(anim.get("mode", "rise"))
+		var ring_color := Color(0.52, 0.88, 1.0, alpha * 0.70) if mode == "rise" else Color(0.86, 0.98, 1.0, alpha * 0.52)
+		var line_y := y + size * 0.18 - progress * 9.0 if mode == "rise" else y - size * 0.18 + progress * 9.0
+		scene.draw_arc(Vector2(x, y), size * (0.25 + progress * 0.55), 0.0, TAU, 28, ring_color, 2.0)
+		scene.draw_line(Vector2(x - size * 0.35, line_y), Vector2(x + size * 0.35, line_y), Color(0.85, 0.98, 1.0, alpha * 0.58), 2.0)
 
 static func draw_fountain_anims(scene, state: Dictionary) -> void:
 	var drop_tex: Texture2D = scene._get_texture("res://assets/images/ui/gems/battle_fx_water_drop.png")

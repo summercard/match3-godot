@@ -69,10 +69,12 @@ var locked_gems: Array = []
 var soaked_gems: Array = []
 var vine_gems: Array = []
 var tide_level: int = 0
+var tide_direction: int = 1
 var tide_rule: Dictionary = {
 	"startLevel": 0,
 	"risePerTurn": 1,
-	"maxLevel": 3
+	"ebbPerTurn": 1,
+	"maxLevel": 0
 }
 
 var fountain_rule: Dictionary = {
@@ -326,22 +328,44 @@ func set_tide(rule: Dictionary = {}) -> void:
 	tide_rule = {
 		"startLevel": int(rule.get("startLevel", 0)),
 		"risePerTurn": maxi(1, int(rule.get("risePerTurn", 1))),
-		"maxLevel": clampi(int(rule.get("maxLevel", 3)), 0, rows)
+		"ebbPerTurn": maxi(1, int(rule.get("ebbPerTurn", 1))),
+		"maxLevel": clampi(int(rule.get("maxLevel", 0)), 0, rows)
 	}
 	tide_level = clampi(int(tide_rule.get("startLevel", 0)), 0, int(tide_rule.get("maxLevel", 0)))
+	tide_direction = -1 if tide_level >= int(tide_rule.get("maxLevel", 0)) and tide_level > 0 else 1
 
 func process_tide_rise() -> Dictionary:
 	var old_level := tide_level
 	var max_level := clampi(int(tide_rule.get("maxLevel", 0)), 0, rows)
-	if max_level <= 0 or tide_level >= max_level:
-		return {"old_level": old_level, "new_level": tide_level, "risen_rows": []}
-	var rise := maxi(1, int(tide_rule.get("risePerTurn", 1)))
-	tide_level = mini(max_level, tide_level + rise)
+	if max_level <= 0:
+		return {"old_level": old_level, "new_level": tide_level, "risen_rows": [], "ebbed_rows": [], "phase": "none"}
+	var min_level := clampi(int(tide_rule.get("startLevel", 0)), 0, max_level)
+	if tide_direction >= 0 and tide_level >= max_level:
+		tide_direction = -1
+	elif tide_direction < 0 and tide_level <= min_level:
+		tide_direction = 1
+	var phase := "rise" if tide_direction >= 0 else "ebb"
+	if tide_direction >= 0:
+		var rise := maxi(1, int(tide_rule.get("risePerTurn", 1)))
+		tide_level = mini(max_level, tide_level + rise)
+		if tide_level >= max_level:
+			tide_direction = -1
+	else:
+		var ebb := maxi(1, int(tide_rule.get("ebbPerTurn", 1)))
+		tide_level = maxi(min_level, tide_level - ebb)
+		if tide_level <= min_level:
+			tide_direction = 1
 	var risen_rows: Array = []
-	for row in range(rows - tide_level, rows - old_level):
-		if row >= 0 and row < rows:
-			risen_rows.append(row)
-	return {"old_level": old_level, "new_level": tide_level, "risen_rows": risen_rows}
+	var ebbed_rows: Array = []
+	if tide_level > old_level:
+		for row in range(rows - tide_level, rows - old_level):
+			if row >= 0 and row < rows:
+				risen_rows.append(row)
+	elif tide_level < old_level:
+		for row in range(rows - old_level, rows - tide_level):
+			if row >= 0 and row < rows:
+				ebbed_rows.append(row)
+	return {"old_level": old_level, "new_level": tide_level, "risen_rows": risen_rows, "ebbed_rows": ebbed_rows, "phase": phase}
 
 func clear_soaked_gems() -> void:
 	if soaked_gems.is_empty():
