@@ -141,7 +141,10 @@ const ELIMINATE_DURATION: float = ELIMINATE_PHASE1 + ELIMINATE_PHASE2  # 总时�
 var _falling_gems: Array[Dictionary] = []  # [{row, col, from_y, to_y, timer, duration}]
 const FALL_DURATION: float = 0.42
 var _ice_slide_anims: Array[Dictionary] = []
+const SWAP_MOVE_DURATION: float = 0.14
 const ICE_SLIDE_DURATION: float = 0.22
+const ICE_SLIDE_STEP_DURATION: float = 0.13
+const ICE_SLIDE_STEP_PAUSE: float = 0.07
 
 ## 锁定宝石解锁动画队列
 var _unlock_animations: Array[Dictionary] = []  # [{row, col, x, y, timer, phase, maxTimer}]
@@ -1059,25 +1062,40 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 		_sfx("ui_invalid_move_bouncy")
 		return
 	_sfx("ui_tile_swap_soft")
+	var move_duration := SWAP_MOVE_DURATION
 	if bool(swap_result.get("slid", false)):
-		_start_ice_slide_anims(swap_result.get("movements", []))
+		move_duration = _start_ice_slide_anims(swap_result.get("movements", []), ICE_SLIDE_STEP_DURATION, true)
+	else:
+		move_duration = _start_ice_slide_anims(_build_swap_movements(r1, c1, r2, c2, before_grid), move_duration, false)
 	var match_result: Dictionary = _board.find_matches()
 	if match_result.get("gems", []).is_empty():
-		if bool(swap_result.get("slid", false)) and not _input_test_only:
-			await get_tree().create_timer(ICE_SLIDE_DURATION).timeout
-		_board.grid = before_grid
+		if not _ice_slide_anims.is_empty() and not _input_test_only:
+			await get_tree().create_timer(move_duration).timeout
 		_ice_slide_anims.clear()
+		if bool(swap_result.get("slid", false)):
+			_battle.turn_count += 1
+			if _input_test_only:
+				_state = BattleState.IDLE
+				return
+			_board.cascade_count = 0
+			_process_matches()
+			return
+		_board.grid = before_grid
 		_state = BattleState.IDLE
 		_show_message("无效交换")
 		_sfx("ui_invalid_move_bouncy")
 		return
 	_battle.turn_count += 1
 	if _input_test_only:
+		_ice_slide_anims.clear()
 		_state = BattleState.IDLE
 		return
+	if not bool(swap_result.get("slid", false)) and not _ice_slide_anims.is_empty():
+		await get_tree().create_timer(move_duration).timeout
+		_ice_slide_anims.clear()
 	if bool(swap_result.get("slid", false)):
 		_show_message("冰面打滑！")
-		await get_tree().create_timer(ICE_SLIDE_DURATION).timeout
+		await get_tree().create_timer(move_duration).timeout
 		_ice_slide_anims.clear()
 	_board.cascade_count = 0
 	_process_matches()
@@ -1086,10 +1104,21 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 # 战斗逻辑
 ## ============================================
 
-func _start_ice_slide_anims(movements: Array) -> void:
+func _build_swap_movements(r1: int, c1: int, r2: int, c2: int, before_grid: Array) -> Array:
+	var movements: Array = []
+	var type1 := str(before_grid[r1][c1])
+	var type2 := str(before_grid[r2][c2])
+	if not type1.is_empty():
+		movements.append({"type": type1, "from_row": r1, "from_col": c1, "to_row": r2, "to_col": c2})
+	if not type2.is_empty():
+		movements.append({"type": type2, "from_row": r2, "from_col": c2, "to_row": r1, "to_col": c1})
+	return movements
+
+func _start_ice_slide_anims(movements: Array, duration: float = ICE_SLIDE_DURATION, slippery: bool = true) -> float:
 	_ice_slide_anims.clear()
 	if _board == null:
-		return
+		return 0.0
+	var total_duration := 0.0
 	for move in movements:
 		if not move is Dictionary:
 			continue
@@ -1099,6 +1128,18 @@ func _start_ice_slide_anims(movements: Array) -> void:
 		var to_col := int(move.get("to_col", move.get("col", 0)))
 		var from_center := _board_cell_center(from_row, from_col)
 		var to_center := _board_cell_center(to_row, to_col)
+		var delay := 0.0
+		if slippery:
+			delay = float(int(move.get("step", 0))) * (ICE_SLIDE_STEP_DURATION + ICE_SLIDE_STEP_PAUSE)
+		var move_duration := duration
+		var points: Array = []
+		for point in move.get("points", []):
+			if point is Dictionary:
+				var point_center := _board_cell_center(int(point.get("row", 0)), int(point.get("col", 0)))
+				points.append({"x": point_center.x, "y": point_center.y})
+		if points.size() >= 2:
+			move_duration = float(points.size() - 1) * duration + float(maxi(points.size() - 2, 0)) * ICE_SLIDE_STEP_PAUSE
+			delay = 0.0
 		_ice_slide_anims.append({
 			"row": to_row,
 			"col": to_col,
@@ -1108,8 +1149,13 @@ func _start_ice_slide_anims(movements: Array) -> void:
 			"to_x": to_center.x,
 			"to_y": to_center.y,
 			"timer": 0.0,
-			"duration": ICE_SLIDE_DURATION
+			"delay": delay,
+			"duration": move_duration,
+			"slippery": slippery,
+			"points": points
 		})
+		total_duration = maxf(total_duration, delay + move_duration)
+	return total_duration
 
 func _process_matches() -> void:
 	if _board == null or _battle == null:
@@ -5099,7 +5145,7 @@ func _update_fall_animations(delta: float) -> void:
 	for i in range(_ice_slide_anims.size() - 1, -1, -1):
 		var slide: Dictionary = _ice_slide_anims[i]
 		slide["timer"] += delta
-		if slide["timer"] >= slide.get("duration", ICE_SLIDE_DURATION):
+		if slide["timer"] >= slide.get("duration", SWAP_MOVE_DURATION) + slide.get("delay", 0.0):
 			_ice_slide_anims.remove_at(i)
 
 func _update_unlock_animations(delta: float) -> void:

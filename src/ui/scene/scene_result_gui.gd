@@ -515,19 +515,29 @@ func _sync_levelups() -> void:
 		sweep_unlocked.visible = false
 
 func _sync_buttons() -> void:
-	_node("Buttons/BackButton").visible = _is_win or _has_next_stage
-	_node("Buttons/NextButton").visible = _is_win and _has_next_stage
+	_node("Buttons/BackButton").visible = true
+	_node("Buttons/NextButton").visible = (not _is_win) or _has_next_stage
 	_node("Buttons/RetryButton").visible = true
 	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else ("返回关卡" if _is_win else "重试")
 	_label("Buttons/NextButton/Text").text = "下一关"
 	_label("Buttons/RetryButton/Text").text = "课堂升级精灵" if _is_win else "重试"
 	_style_compact_label(_label("Buttons/RetryButton/Text"), 10 if _is_win else 13, 2)
 
+	if not _is_win:
+		_label("Buttons/BackButton/Text").text = "返回庄园"
+		_label("Buttons/NextButton/Text").text = "回精灵课堂升级"
+		_style_compact_label(_label("Buttons/NextButton/Text"), 9, 2)
+
 func _on_result_back_pressed() -> void:
 	_run_after_result_button_feedback(func(): _on_back_btn_pressed())
 
 func _on_result_next_pressed() -> void:
-	_run_after_result_button_feedback(func(): _on_next_btn_pressed())
+	_run_after_result_button_feedback(func():
+		if _is_win:
+			_on_next_btn_pressed()
+		else:
+			_on_classroom_btn_pressed()
+	)
 
 func _on_result_retry_pressed() -> void:
 	_run_after_result_button_feedback(func():

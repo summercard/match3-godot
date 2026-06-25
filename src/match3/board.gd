@@ -739,7 +739,10 @@ func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, 
 	var path: Array = [{"row": start_row, "col": start_col, "type": active_type}]
 	var current_row := start_row
 	var current_col := start_col
-	while is_ice_tile(current_row, current_col):
+	if not is_ice_tile(current_row, current_col):
+		return {"slid": false, "movements": []}
+	var slide_steps := 0
+	while slide_steps < 2:
 		var next_row := current_row + dr
 		var next_col := current_col + dc
 		if not _can_slide_into(next_row, next_col):
@@ -750,6 +753,7 @@ func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, 
 		grid[current_row][current_col] = tmp
 		current_row = next_row
 		current_col = next_col
+		slide_steps += 1
 	if path.size() <= 1:
 		return {"slid": false, "movements": []}
 	var movements: Array = [{
@@ -759,8 +763,12 @@ func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, 
 		"from_row": start_row,
 		"from_col": start_col,
 		"to_row": source_row,
-		"to_col": source_col
+		"to_col": source_col,
+		"step": 0
 	}]
+	var active_points: Array = [{"row": source_row, "col": source_col}]
+	for entry in path:
+		active_points.append({"row": int(entry["row"]), "col": int(entry["col"])})
 	for i in range(1, path.size()):
 		var from_entry: Dictionary = path[i]
 		var to_entry: Dictionary = path[i - 1]
@@ -771,7 +779,8 @@ func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, 
 			"from_row": int(from_entry["row"]),
 			"from_col": int(from_entry["col"]),
 			"to_row": int(to_entry["row"]),
-			"to_col": int(to_entry["col"])
+			"to_col": int(to_entry["col"]),
+			"step": i
 		})
 	var final_entry: Dictionary = path[path.size() - 1]
 	movements.append({
@@ -781,7 +790,9 @@ func _slide_active_gem_on_ice(start_row: int, start_col: int, dr: int, dc: int, 
 		"from_row": source_row,
 		"from_col": source_col,
 		"to_row": int(final_entry["row"]),
-		"to_col": int(final_entry["col"])
+		"to_col": int(final_entry["col"]),
+		"points": active_points,
+		"step": 0
 	})
 	return {"slid": true, "movements": movements}
 
@@ -1075,6 +1086,7 @@ func remove_explosion_gems(positions: Array, damage_adjacent_obstacles: bool = t
 ## 返回 movements[] 记录移动信息，用于动画
 func apply_gravity() -> Array:
 	var movements: Array = []
+	var new_gem_positions: Array = []
 
 	for c: int in range(cols):
 		# Rocks split a column into independent gravity segments. A lock belongs
@@ -1121,6 +1133,7 @@ func apply_gravity() -> Array:
 					var new_type: String = _random_gem_type()
 					grid[r][c] = new_type
 					locked_gems[r][c] = null
+					new_gem_positions.append({"row": r, "col": c})
 					movements.append({
 						"type": new_type, "fromRow": r - empty_count, "toRow": r,
 						"col": c, "isNew": true, "locked": false
@@ -1128,6 +1141,55 @@ func apply_gravity() -> Array:
 
 			segment_bottom = segment_top - 1
 
+	movements.append_array(_slide_new_gems_down_on_ice(new_gem_positions, 2))
+	return movements
+
+func _slide_new_gems_down_on_ice(new_positions: Array, max_steps: int) -> Array:
+	var movements: Array = []
+	var positions := new_positions.duplicate(true)
+	positions.sort_custom(func(a, b): return int(a.get("row", 0)) > int(b.get("row", 0)))
+	for pos in positions:
+		if not pos is Dictionary:
+			continue
+		var start_row := int(pos.get("row", -1))
+		var col := int(pos.get("col", -1))
+		if start_row < 0 or start_row >= rows or col < 0 or col >= cols:
+			continue
+		if not is_ice_tile(start_row, col) or is_empty(start_row, col):
+			continue
+		movements.append_array(_slide_gem_down_limited(start_row, col, max_steps))
+	return movements
+
+func _slide_gem_down_limited(start_row: int, col: int, max_steps: int) -> Array:
+	var movements: Array = []
+	var current_row := start_row
+	var active_type := str(grid[current_row][col])
+	var steps := 0
+	while steps < max_steps:
+		var next_row := current_row + 1
+		if not _can_slide_into(next_row, col):
+			break
+		var displaced_type := str(grid[next_row][col])
+		grid[next_row][col] = str(grid[current_row][col])
+		grid[current_row][col] = displaced_type
+		movements.append({
+			"type": displaced_type,
+			"fromRow": next_row,
+			"toRow": current_row,
+			"col": col,
+			"iceSlide": true
+		})
+		current_row = next_row
+		steps += 1
+	if current_row != start_row:
+		movements.append({
+			"type": active_type,
+			"fromRow": start_row,
+			"toRow": current_row,
+			"col": col,
+			"isNew": true,
+			"iceSlide": true
+		})
 	return movements
 
 # ========== 死局检测与洗牌 ==========

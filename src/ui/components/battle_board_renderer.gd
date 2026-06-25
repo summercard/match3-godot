@@ -50,6 +50,7 @@ static func draw_board(scene, board, state: Dictionary) -> void:
 				continue
 			_draw_gem_cell(scene, board, state, row, col, x, y, cell_size, gem_type)
 
+	_draw_gem_move_anims(scene, state)
 	draw_locked_gems(scene, board, state)
 	draw_vines(scene, board, state)
 	draw_obstacles(scene, board, state)
@@ -68,7 +69,7 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	var gem_colors: Dictionary = state.get("gem_colors", {})
 	var eliminating_gems: Array = state.get("eliminating_gems", [])
 	var falling_gems: Array = state.get("falling_gems", [])
-	var ice_slide_anims: Array = state.get("ice_slide_anims", [])
+	var gem_move_anims: Array = state.get("gem_move_anims", state.get("ice_slide_anims", []))
 	var selected_gem: Vector2i = state.get("selected_gem", Vector2i(-1, -1))
 	var idle_time: float = state.get("idle_time", 0.0)
 	var is_eliminating: bool = false
@@ -82,19 +83,12 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	var gem_color: Color = gem_colors.get(gem_type, colors.get("white", Color.WHITE))
 	var cx: float = x + cell_size / 2.0
 	var cy: float = y + cell_size / 2.0
+	var move := _gem_move_entry_for(gem_move_anims, row, col, gem_type)
+	if not move.is_empty():
+		return
 	if is_eliminating:
 		var scale: float = _eliminate_scale(elim_progress)
 		scene._draw_gem_animated(cx, cy, gem_type, gem_color, scale, 1.0, 0.0)
-		return
-
-	var slide := _ice_slide_entry_for(ice_slide_anims, row, col, gem_type)
-	if not slide.is_empty():
-		var slide_t: float = clampf(float(slide.get("timer", 0.0)) / maxf(0.01, float(slide.get("duration", 0.22))), 0.0, 1.0)
-		var eased_slide := _ease_out_cubic(slide_t)
-		var slide_x := lerpf(float(slide.get("from_x", cx)), float(slide.get("to_x", cx)), eased_slide)
-		var slide_y := lerpf(float(slide.get("from_y", cy)), float(slide.get("to_y", cy)), eased_slide)
-		var slip_wobble := sin(slide_t * PI) * 0.08
-		scene._draw_gem_animated(slide_x, slide_y, gem_type, gem_color, 1.0 + slip_wobble, 1.0)
 		return
 
 	var fall := _falling_entry_for(falling_gems, row, col, gem_type)
@@ -124,6 +118,33 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 		pulse_opacity = 0.85 + 0.15 * (sine_unsel + 1.0) / 2.0
 	var idle_scale: float = 1.0 + 0.02 * sin(idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
 	scene._draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, pulse_opacity)
+
+static func _draw_gem_move_anims(scene, state: Dictionary) -> void:
+	var move_anims: Array = state.get("gem_move_anims", state.get("ice_slide_anims", []))
+	if move_anims.is_empty():
+		return
+	var colors: Dictionary = state.get("colors", {})
+	var gem_colors: Dictionary = state.get("gem_colors", {})
+	for move in move_anims:
+		if not move is Dictionary:
+			continue
+		var gem_type := str(move.get("type", ""))
+		if gem_type.is_empty():
+			continue
+		var gem_color: Color = gem_colors.get(gem_type, colors.get("white", Color.WHITE))
+		var local_timer := maxf(0.0, float(move.get("timer", 0.0)) - float(move.get("delay", 0.0)))
+		var duration := maxf(0.01, float(move.get("duration", 0.14)))
+		var move_t: float = clampf(local_timer / duration, 0.0, 1.0)
+		var eased_move := _ease_out_cubic(move_t)
+		var move_x := lerpf(float(move.get("from_x", move.get("to_x", 0.0))), float(move.get("to_x", 0.0)), eased_move)
+		var move_y := lerpf(float(move.get("from_y", move.get("to_y", 0.0))), float(move.get("to_y", 0.0)), eased_move)
+		var path_points: Array = move.get("points", [])
+		if path_points.size() >= 2:
+			var path_pos := _path_position(path_points, local_timer, duration)
+			move_x = path_pos.x
+			move_y = path_pos.y
+		var slip_wobble := sin(move_t * PI) * 0.08 if bool(move.get("slippery", false)) else 0.0
+		scene._draw_gem_animated(move_x, move_y, gem_type, gem_color, 1.0 + slip_wobble, 1.0)
 
 static func _draw_ice_tile(scene, x: float, y: float, size: float, state: Dictionary, row: int, col: int) -> void:
 	var idle_time: float = state.get("idle_time", 0.0)
@@ -581,11 +602,33 @@ static func _falling_entry_for(falling_gems: Array, row: int, col: int, gem_type
 			return entry
 	return {}
 
-static func _ice_slide_entry_for(slide_anims: Array, row: int, col: int, gem_type: String) -> Dictionary:
-	for entry in slide_anims:
+static func _gem_move_entry_for(move_anims: Array, row: int, col: int, gem_type: String) -> Dictionary:
+	for entry in move_anims:
 		if int(entry.get("row", -999)) == row and int(entry.get("col", -999)) == col and str(entry.get("type", "")) == gem_type:
 			return entry
 	return {}
+
+static func _path_position(points: Array, local_timer: float, total_duration: float) -> Vector2:
+	var segment_count := maxi(points.size() - 1, 1)
+	var pause := 0.07
+	var segment_duration := maxf(0.01, (total_duration - pause * float(maxi(segment_count - 1, 0))) / float(segment_count))
+	var cursor := maxf(0.0, local_timer)
+	for i in range(segment_count):
+		var from_point: Dictionary = points[i]
+		var to_point: Dictionary = points[i + 1]
+		if cursor <= segment_duration or i == segment_count - 1:
+			var t := clampf(cursor / segment_duration, 0.0, 1.0)
+			var eased := _ease_out_cubic(t)
+			return Vector2(
+				lerpf(float(from_point.get("x", 0.0)), float(to_point.get("x", 0.0)), eased),
+				lerpf(float(from_point.get("y", 0.0)), float(to_point.get("y", 0.0)), eased)
+			)
+		cursor -= segment_duration
+		if cursor <= pause:
+			return Vector2(float(to_point.get("x", 0.0)), float(to_point.get("y", 0.0)))
+		cursor -= pause
+	var final_point: Dictionary = points[points.size() - 1]
+	return Vector2(float(final_point.get("x", 0.0)), float(final_point.get("y", 0.0)))
 
 static func _fall_center_y(fall: Dictionary, fallback_y: float) -> float:
 	var fall_t: float = clampf((float(fall.get("timer", 0.0)) - float(fall.get("delay", 0.0))) / maxf(0.01, float(fall.get("duration", 0.34))), 0.0, 1.0)

@@ -639,8 +639,11 @@ func _on_tap(x: float, y: float) -> void:
 		return
 	
 	# 下一关
-	if _has_next_stage and _next_btn_rect.has_point(Vector2(x, y)):
-		_on_next_btn_pressed()
+	if _next_btn_rect.has_point(Vector2(x, y)):
+		if _is_win:
+			_on_next_btn_pressed()
+		else:
+			_on_classroom_btn_pressed()
 		return
 	
 	# 返回/重试
@@ -681,7 +684,7 @@ func _on_back_btn_pressed() -> void:
 	if _is_win:
 		_go_to_scene("stage_select", {"chapter_index": chapter_index})
 	else:
-		_on_retry_btn_pressed()
+		_go_to_scene("main")
 
 func _on_retry_btn_pressed() -> void:
 	var stage_id: String = _battle_result.get("stageId", "stage_1_1")
@@ -982,7 +985,23 @@ func _draw_buttons(font: Font, y: float) -> void:
 			_draw_centered_text(font, "重试", btn_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
 			_back_btn_rect = Rect2(btn_x, y, btn_w, btn_h)
 			_retry_btn_rect = Rect2()
-		_next_btn_rect = Rect2()
+			var back_x := 24.0
+			var next_x := DESIGN_W / 2.0 - btn_w / 2.0
+			var retry_x := DESIGN_W - btn_w - 24.0
+			_draw_texture_fit(_tex("btn_secondary"), Rect2(back_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h))
+			_draw_centered_text(font, "返回庄园", back_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 12.0)
+			_back_btn_rect = Rect2(back_x, y, btn_w, btn_h)
+
+			var next_scaled_w := btn_w * 1.25 * base_scale
+			_draw_texture_fit(_tex("btn_next"), Rect2(next_x - (next_scaled_w - btn_w) / 2.0, draw_y, next_scaled_w, scaled_h))
+			_draw_centered_text(font, "回精灵课堂升级", next_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 9.0)
+			_next_btn_rect = Rect2(next_x, y, btn_w, btn_h)
+
+			_draw_texture_fit(_tex("btn_retry"), Rect2(retry_x + (btn_w - scaled_w) / 2.0, draw_y, scaled_w, scaled_h))
+			_draw_centered_text(font, "重试", retry_x + btn_w / 2.0, y + btn_h / 2.0 + 5, C["white"], 16.0)
+			_retry_btn_rect = Rect2(retry_x, y, btn_w, btn_h)
+		if _is_win:
+			_next_btn_rect = Rect2()
 
 # ==================== 绘制辅助 ====================
 
