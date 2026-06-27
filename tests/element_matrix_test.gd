@@ -13,12 +13,12 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_all_element_entry_points_share_one_matrix()
-	_test_extended_elements_affect_enemy_damage()
+	_test_removed_elements_are_neutral()
 	_finish()
 
 
 func _test_all_element_entry_points_share_one_matrix() -> void:
-	_expect(ElementRulesScript.ELEMENTS.size() == 13, "v0.3 should expose all 13 fantasy elements")
+	_expect(ElementRulesScript.ELEMENTS.size() == 8, "battle rules should expose the 8 active fantasy elements")
 	for attacker in ElementRulesScript.ELEMENTS:
 		_expect(ElementRulesScript.is_known_element(attacker), "%s should be a known fantasy element" % attacker)
 		for defender in ElementRulesScript.ELEMENTS:
@@ -33,15 +33,19 @@ func _test_all_element_entry_points_share_one_matrix() -> void:
 	_expect(is_equal_approx(ElementRulesScript.get_multiplier("unknown", "fire"), 1.0), "unknown attacker should remain neutral")
 
 
-func _test_extended_elements_affect_enemy_damage() -> void:
+func _test_removed_elements_are_neutral() -> void:
+	for element in ["ice", "void", "temporal", "star", "chaos"]:
+		_expect(not ElementRulesScript.is_known_element(element), "%s should not be a battle-rule element" % element)
+		_expect(is_equal_approx(ElementRulesScript.get_multiplier(element, "fire"), 1.0), "%s attacker should be neutral" % element)
+		_expect(is_equal_approx(ElementRulesScript.get_multiplier("fire", element), 1.0), "%s defender should be neutral" % element)
+
 	seed(20260622)
-	var neutral := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "water")
+	var fire_target := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "fire")
 	seed(20260622)
-	var strong := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "star")
+	var water_target := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "water")
 	seed(20260622)
-	var weak := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "light")
-	_expect(strong > neutral, "extended strong relation should increase enemy damage")
-	_expect(weak < neutral, "extended weak relation should reduce enemy damage")
+	var grass_target := DamageCalculatorScript.calc_enemy_damage(100.0, "chaos", 0.0, "grass")
+	_expect(fire_target == water_target and water_target == grass_target, "removed elements should deal neutral enemy damage")
 
 
 func _expect(condition: bool, message: String) -> void:

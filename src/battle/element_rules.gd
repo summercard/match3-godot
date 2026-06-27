@@ -16,12 +16,7 @@ const ELEMENTS: Array[String] = [
 	"light",
 	"earth",
 	"wind",
-	"dark",
-	"ice",
-	"void",
-	"temporal",
-	"star",
-	"chaos"
+	"dark"
 ]
 
 const ELEMENT_RELATIONS: Dictionary = {
@@ -29,15 +24,10 @@ const ELEMENT_RELATIONS: Dictionary = {
 	"water": {"strong": "fire", "weak": "grass"},
 	"grass": {"strong": "water", "weak": "fire"},
 	"thunder": {"strong": "light", "weak": "light"},
-	"light": {"strong": "dark", "weak": "void"},
+	"light": {"strong": "dark"},
 	"earth": {"strong": "wind", "weak": "fire"},
 	"wind": {"strong": "earth", "weak": "water"},
-	"dark": {"strong": "light", "weak": "light"},
-	"ice": {"strong": "grass", "weak": "fire"},
-	"void": {"strong": "dark", "weak": "light"},
-	"temporal": {"strong": "dark", "weak": "void"},
-	"star": {"strong": "temporal", "weak": "void"},
-	"chaos": {"strong": "star", "weak": "light"}
+	"dark": {"strong": "light", "weak": "light"}
 }
 
 
