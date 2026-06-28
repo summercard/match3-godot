@@ -77,7 +77,8 @@ const RANCH_SLOT_EMPTY_OUTLINE_SIZE := 4
 const RANCH_SLOT_EMPTY_SELECTED_OUTLINE_SIZE := 6
 const RANCH_SLOT_EMPTY_SELECTED_TEXT_COLOR := Color(1.0, 0.42, 0.04)
 const CLASSROOM_INFO_FONT_SIZE := 11
-const CLASSROOM_STATS_FONT_SIZE := 8
+const CLASSROOM_STATS_FONT_SIZE := 12
+const CLASSROOM_LEADER_SKILL_FONT_SIZE := 11
 const CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE := 11
 const CLASSROOM_REQUIREMENT_FONT_SIZE := 9
 const CLASSROOM_EVOLVE_BUTTON_FONT_SIZE := 13
@@ -115,6 +116,8 @@ var _portrait_path_cache: Dictionary = {}
 var _upgrade_animating: bool = false
 var _upgrade_feedback_tween: Tween = null
 var _upgrade_value_tweens: Array[Tween] = []
+var _sell_pending_instance_id: String = ""
+var _sell_pending_quote: Dictionary = {}
 
 func _ready() -> void:
 	super._ready()
@@ -175,6 +178,9 @@ func _connect_gui_actions() -> void:
 
 	_connect_button("Pages/ClassroomPage/DetailPanel/EvolveButton", _on_evolve_button_pressed)
 	_connect_button("Pages/ClassroomPage/DetailPanel/UpgradeButton", _on_upgrade_button_pressed)
+	_connect_button("Pages/ClassroomPage/DetailPanel/SellButton", _on_sell_button_pressed)
+	_connect_button("Pages/ClassroomPage/SellConfirmPopup/CancelButton", _on_sell_dialog_cancelled)
+	_connect_button("Pages/ClassroomPage/SellConfirmPopup/ConfirmButton", _on_sell_dialog_confirmed)
 	_connect_button("Pages/ClassroomPage/BottomButtons/RanchButton", _switch_to_ranch)
 	_connect_button("Pages/ClassroomPage/BottomButtons/SocialButton", _switch_to_social)
 	_connect_button("Pages/ClassroomPage/RosterPanel/PreviousButton", _on_class_previous_pressed)
@@ -195,6 +201,9 @@ func _connect_gui_actions() -> void:
 		result_shade.gui_input.connect(_on_result_shade_input)
 	for i in SOCIAL_CARD_PATHS.size():
 		_connect_button(SOCIAL_CARD_PATHS[i], _on_social_card_pressed.bind(i))
+	var sell_shade := get_node("Pages/ClassroomPage/SellConfirmPopup/Shade") as Control
+	if not sell_shade.gui_input.is_connected(_on_sell_shade_input):
+		sell_shade.gui_input.connect(_on_sell_shade_input)
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -250,13 +259,16 @@ func _on_class_card_pressed(visible_index: int) -> void:
 	var idx := _class_page * CLASS_CARD_PATHS.size() + visible_index
 	if idx < _captured_monsters.size():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[idx])
+		_clear_sell_pending()
 		_sync_gui()
 
 func _on_evolve_button_pressed() -> void:
+	_clear_sell_pending()
 	_on_evolve_pressed()
 	_sync_gui()
 
 func _on_upgrade_button_pressed() -> void:
+	_clear_sell_pending()
 	var instance_id := _class_selected_instance_id
 	var before := _fresh_instance(instance_id).duplicate(true)
 	var pool_before := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else 0
@@ -269,6 +281,58 @@ func _on_upgrade_button_pressed() -> void:
 		_status_timer = 0.0
 		_sync_status()
 		_play_upgrade_feedback(before, after, result, pool_before, pool_after)
+
+func _on_sell_button_pressed() -> void:
+	var instance_id := _class_selected_instance_id
+	if instance_id.is_empty():
+		_show_status("请选择要出售的精灵")
+		return
+	if _storage == null or not _storage.has_method("get_monster_sell_quote") or not _storage.has_method("sell_monster_instance"):
+		_show_status("出售系统不可用")
+		return
+	var quote: Dictionary = _storage.get_monster_sell_quote(instance_id)
+	if not bool(quote.get("ok", false)):
+		_clear_sell_pending()
+		_show_status("无法出售该精灵")
+		_sync_gui()
+		return
+	_sell_pending_instance_id = instance_id
+	_sell_pending_quote = quote.duplicate(true)
+	_show_sell_confirm_dialog(quote)
+
+func _on_sell_dialog_confirmed() -> void:
+	var instance_id := _sell_pending_instance_id
+	if instance_id.is_empty():
+		return
+	_hide_sell_confirm_popup()
+	if _storage == null or not _storage.has_method("sell_monster_instance"):
+		_clear_sell_pending()
+		_show_status("出售系统不可用")
+		return
+	var result: Dictionary = _storage.sell_monster_instance(instance_id)
+	_clear_sell_pending()
+	if not bool(result.get("ok", false)):
+		var error := str(result.get("error", "unknown"))
+		var message := "出售失败"
+		if error == "last_monster":
+			message = "至少保留 1 只精灵"
+		_show_status(message)
+		_sync_gui()
+		return
+	_load_data()
+	_select_classroom_after_removed(instance_id)
+	_sync_gui()
+	_show_status("出售成功：%s" % _sell_reward_text(result))
+
+func _on_sell_dialog_cancelled() -> void:
+	_hide_sell_confirm_popup()
+	_clear_sell_pending()
+
+func _on_sell_shade_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_sell_dialog_cancelled()
+	elif event is InputEventScreenTouch and event.pressed:
+		_on_sell_dialog_cancelled()
 
 func _on_place_switch_pressed() -> void:
 	_cycle_social_place()
@@ -804,6 +868,8 @@ func _attach_interaction_feedback() -> void:
 		"Pages/SocialPage/PlacePanel/SwitchButton",
 		"Pages/SocialPage/BottomButtons/ActionButton",
 		"Pages/SocialPage/ResultPopup/ConfirmButton",
+		"Pages/ClassroomPage/SellConfirmPopup/CancelButton",
+		"Pages/ClassroomPage/SellConfirmPopup/ConfirmButton",
 	]
 	paths.append_array(SLOT_PATHS)
 	paths.append_array(RANCH_CARD_PATHS)
@@ -814,6 +880,7 @@ func _attach_interaction_feedback() -> void:
 		_attach_button_feedback(button, CartoonButtonFeedback.Profile.NAV, false)
 	_attach_button_feedback(get_node_or_null("Pages/ClassroomPage/DetailPanel/UpgradeButton") as BaseButton, CartoonButtonFeedback.Profile.PRIMARY, true)
 	_attach_button_feedback(get_node_or_null("Pages/ClassroomPage/DetailPanel/EvolveButton") as BaseButton, CartoonButtonFeedback.Profile.ENTRY, true)
+	_attach_button_feedback(get_node_or_null("Pages/ClassroomPage/DetailPanel/SellButton") as BaseButton, CartoonButtonFeedback.Profile.ENTRY, true)
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
 	if nav != null:
 		for i in 5:
@@ -859,15 +926,24 @@ func _sync_classroom_page() -> void:
 	var empty := panel.get_node("Empty") as Label
 	var evolve := panel.get_node("EvolveButton") as TextureButton
 	var upgrade := panel.get_node("UpgradeButton") as TextureButton
+	var sell := panel.get_node("SellButton") as TextureButton
 	var stone_icon := panel.get_node("StoneIcon") as TextureRect
 	_apply_classroom_detail_text_style(panel)
 	if instance_id.is_empty():
+		_clear_sell_pending()
 		portrait.visible = false
 		target_portrait.visible = false
 		stone_icon.visible = false
 		empty.visible = true
 		evolve.disabled = true
 		upgrade.disabled = true
+		sell.disabled = true
+		(panel.get_node("Stats") as Label).text = ""
+		(panel.get_node("AttributeLabels") as Label).text = ""
+		(panel.get_node("AttributeValues") as Label).text = ""
+		(panel.get_node("AttributeStats") as Label).text = ""
+		(panel.get_node("LeaderSkill") as Label).text = ""
+		(panel.get_node("SellButton/Text") as Label).text = "出售"
 		_set_action_frame(evolve, false)
 	else:
 		var instance := _fresh_instance(instance_id)
@@ -895,7 +971,10 @@ func _sync_classroom_page() -> void:
 		(panel.get_node("TargetLevel") as Label).visible = false
 		(panel.get_node("Arrow") as Label).visible = false
 		(panel.get_node("Stats") as Label).text = _classroom_stats_text(instance, monster, stats)
+		(panel.get_node("AttributeLabels") as Label).text = _classroom_attribute_labels_text()
 		(panel.get_node("AttributeValues") as Label).text = _classroom_attribute_values_text(instance, monster, stats)
+		(panel.get_node("AttributeStats") as Label).text = _classroom_attribute_stats_text(instance, stats)
+		(panel.get_node("LeaderSkill") as Label).text = _classroom_leader_skill_text(monster)
 		var current_exp := int(instance.get("exp", 0))
 		var needed_exp := GrowthRulesScript.get_exp_for_level(level)
 		_sync_exp_progress(panel.get_node("MonsterExpBar") as ProgressBar, current_exp, needed_exp)
@@ -915,6 +994,7 @@ func _sync_classroom_page() -> void:
 		_set_action_frame(evolve, bool(info.get("can_evolve", false)))
 		upgrade.disabled = false
 		_set_action_frame(upgrade, pool_exp > 0 and level < StatCalculator.MAX_LEVEL)
+		_sync_sell_button(panel, instance_id)
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
 	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
 
@@ -931,12 +1011,19 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 		stats.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
 		stats.clip_text = false
 		stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for path in ["AttributeLabels", "AttributeValues"]:
+	for path in ["AttributeLabels", "AttributeValues", "AttributeStats"]:
 		var attribute_label := panel.get_node_or_null(path) as Label
 		if attribute_label != null:
 			attribute_label.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
 			attribute_label.add_theme_constant_override("outline_size", 0)
 			attribute_label.clip_text = false
+			attribute_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var leader_skill := panel.get_node_or_null("LeaderSkill") as Label
+	if leader_skill != null:
+		leader_skill.add_theme_font_size_override("font_size", CLASSROOM_LEADER_SKILL_FONT_SIZE)
+		leader_skill.add_theme_constant_override("outline_size", 0)
+		leader_skill.clip_text = false
+		leader_skill.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var title := panel.get_node_or_null("RequirementsTitle") as Label
 	if title != null:
 		title.add_theme_font_size_override("font_size", CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE)
@@ -953,6 +1040,9 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 	var upgrade_text := panel.get_node_or_null("UpgradeButton/Text") as Label
 	if upgrade_text != null:
 		upgrade_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
+	var sell_text := panel.get_node_or_null("SellButton/Text") as Label
+	if sell_text != null:
+		sell_text.add_theme_font_size_override("font_size", CLASSROOM_EVOLVE_BUTTON_FONT_SIZE)
 
 func _sync_exp_progress(bar: ProgressBar, value: int, maximum: int) -> void:
 	bar.max_value = max(1, maximum)
@@ -991,25 +1081,95 @@ func _classroom_info_text(instance: Dictionary, monster: Dictionary) -> String:
 
 func _classroom_stats_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
-	var power := int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+	var power := _classroom_power(stats)
 	return "等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d" % [int(instance.get("level", 1)), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))), _get_nature_name(str(instance.get("nature", ""))), _gender_label(instance), "★".repeat(rarity), "是" if bool(instance.get("isElite", false)) else "否", int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
+
+func _classroom_attribute_labels_text() -> String:
+	return "等级\n属性\n性格\n性别\n稀有度\n精英"
 
 func _classroom_attribute_values_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
-	var power := int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
-	return "Lv.%d\n%s\n%s\n%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d" % [
+	return "Lv.%d\n%s\n%s\n%s\n%s\n%s" % [
 		int(instance.get("level", 1)),
 		ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))),
 		_get_nature_name(str(instance.get("nature", ""))),
 		_gender_label(instance),
 		"★".repeat(rarity),
 		"是" if bool(instance.get("isElite", false)) else "否",
+	]
+
+func _classroom_attribute_stats_text(instance: Dictionary, stats: Dictionary) -> String:
+	return "HP：%d\nATK：%d\nDEF：%d\nSPD：%d\n战力：%d\n满级：%s" % [
 		int(stats.get("hp", 0)),
 		int(stats.get("atk", 0)),
 		int(stats.get("def", 0)),
 		int(stats.get("spd", 0)),
-		power,
+		_classroom_power(stats),
+		"是" if int(instance.get("level", 1)) >= StatCalculator.MAX_LEVEL else "否",
 	]
+
+func _classroom_leader_skill_text(monster: Dictionary) -> String:
+	var skill_id := str(monster.get("leaderSkill", ""))
+	if skill_id.is_empty():
+		return "队长技能：无"
+	var skill := LeaderSkillDb.get_leader_skill(skill_id)
+	if skill.is_empty():
+		return "队长技能：未知"
+	var desc := str(skill.get("desc", ""))
+	var skill_name := str(skill.get("name", "未知"))
+	if desc.is_empty():
+		return "队长技能：%s" % skill_name
+	return "队长技能：%s - %s" % [skill_name, desc]
+
+func _classroom_power(stats: Dictionary) -> int:
+	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
+
+func _sync_sell_button(panel: Control, instance_id: String) -> void:
+	var sell := panel.get_node_or_null("SellButton") as TextureButton
+	if sell == null:
+		return
+	sell.disabled = false
+	var text := sell.get_node_or_null("Text") as Label
+	if text != null:
+		text.text = "出售"
+
+func _show_sell_confirm_dialog(quote: Dictionary) -> void:
+	var popup := get_node_or_null("Pages/ClassroomPage/SellConfirmPopup") as Control
+	if popup == null:
+		_show_status("出售确认界面不可用")
+		return
+	(popup.get_node("Panel/Name") as Label).text = str(quote.get("name", "该精灵"))
+	(popup.get_node("Panel/Detail") as Label).text = "星级 %s · Lv.%d" % ["★".repeat(int(quote.get("rarity", 1))), int(quote.get("level", 1))]
+	(popup.get_node("Panel/Reward") as Label).text = "可获得 %s" % _sell_reward_text(quote)
+	popup.visible = true
+
+func _hide_sell_confirm_popup() -> void:
+	var popup := get_node_or_null("Pages/ClassroomPage/SellConfirmPopup") as Control
+	if popup != null:
+		popup.visible = false
+
+func _clear_sell_pending() -> void:
+	_sell_pending_instance_id = ""
+	_sell_pending_quote = {}
+	_hide_sell_confirm_popup()
+
+func _sell_reward_text(quote: Dictionary) -> String:
+	var amount := int(quote.get("amount", 0))
+	var currency := str(quote.get("currency", "gold"))
+	return "+%d%s" % [amount, "宝石" if currency == "gems" else "金币"]
+
+func _select_classroom_after_removed(removed_instance_id: String) -> void:
+	if _captured_monsters.is_empty():
+		_class_selected_instance_id = ""
+		_class_page = 0
+		return
+	_class_page = clampi(_class_page, 0, _context_max_page())
+	for instance: Dictionary in _captured_monsters:
+		var instance_id := _get_instance_id(instance)
+		if instance_id != removed_instance_id:
+			_class_selected_instance_id = instance_id
+			return
+	_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
 
 func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dictionary, pool_before: int, pool_after: int) -> void:
 	_kill_upgrade_feedback_tweens()

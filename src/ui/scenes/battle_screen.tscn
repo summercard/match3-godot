@@ -91,9 +91,9 @@ vertical_alignment = 1
 [node name="PauseButton" type="TextureButton" parent="TopHud" unique_id=1876612873]
 layout_mode = 0
 offset_left = 316.0
-offset_top = 8.0
+offset_top = 1.0
 offset_right = 360.0
-offset_bottom = 50.0
+offset_bottom = 43.0
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("turn_badge")
 ignore_texture_size = true

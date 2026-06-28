@@ -150,22 +150,36 @@ func _sync_capture_success_data(layer: Control) -> void:
 	var portrait := layer.get_node_or_null("Stage/MonsterPortrait") as TextureRect
 	if portrait != null:
 		portrait.texture = _monster_texture(_capture_target, "result")
-	var name_label := layer.get_node_or_null("InfoPlaque/PetName") as Label
+	var name_label := layer.get_node_or_null("InfoPlaque/Badge") as Label
 	if name_label != null:
 		name_label.text = _capture_monster_name()
+	var summary_label := layer.get_node_or_null("InfoPlaque/PetName") as Label
+	if summary_label != null:
+		summary_label.text = _capture_summary_label()
 	var element_label := layer.get_node_or_null("InfoPlaque/ElementLabel") as Label
 	if element_label != null:
-		element_label.text = _capture_element_label()
+		element_label.text = "性格：" + _capture_nature_label()
 	var star_label := layer.get_node_or_null("InfoPlaque/StarLabel") as Label
 	if star_label != null:
-		var rarity := clampi(int(_capture_target.get("rarity", 1)), 1, 5)
-		star_label.text = "★".repeat(rarity) + "☆".repeat(5 - rarity)
+		star_label.text = "属性：" + _capture_element_label()
 
 func _capture_monster_name() -> String:
 	var name_text := str(_capture_target.get("name", ""))
 	if name_text.is_empty():
 		name_text = str(_capture_target.get("monsterId", _capture_target.get("id", "新精灵")))
 	return name_text
+
+func _capture_summary_label() -> String:
+	var rarity := clampi(int(_capture_target.get("rarity", 1)), 1, 5)
+	var level := maxi(1, int(_capture_target.get("level", _battle_result.get("enemyLevel", 1))))
+	return "星级：%d星  等级：Lv.%d" % [rarity, level]
+
+func _capture_nature_label() -> String:
+	var nature_id := str(_capture_target.get("nature", ""))
+	if nature_id.is_empty():
+		return "未知"
+	var nature := NatureDB.get_nature(nature_id)
+	return str(nature.get("name", nature_id)) if not nature.is_empty() else nature_id
 
 func _capture_element_label() -> String:
 	var raw := str(_capture_target.get("element", _capture_target.get("type", _capture_target.get("boardAffinity", ""))))
@@ -331,7 +345,7 @@ func _update_capture_success_animation(delta: float) -> void:
 	if layer == null:
 		return
 	var t := _capture_success_time
-	_set_fx_node(layer, "Stage/MagicCircle", 0.96 + sin(t * 2.2) * 0.035, fposmod(t * 0.18, TAU), 0.82 + sin(t * 3.1) * 0.08)
+	_set_fx_node(layer, "Stage/MagicCircle", 0.96 + sin(t * 2.2) * 0.035, 0.0, 1.0)
 	_set_fx_node(layer, "Stage/MonsterPortrait", 1.0 + sin(t * 2.8) * 0.018, 0.0, 1.0)
 	_set_fx_node(layer, "SparklesA", 1.0 + sin(t * 3.8) * 0.04, 0.0, 0.62 + sin(t * 4.3) * 0.22)
 	_set_fx_node(layer, "SparklesB", 1.0 + sin(t * 3.0 + 1.3) * 0.04, 0.0, 0.44 + sin(t * 4.1 + 0.8) * 0.18)

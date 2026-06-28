@@ -43,6 +43,17 @@ const SWEEP_STAMINA_COST: int = 1
 const SAVE_SCHEMA_VERSION: int = 1
 const META_SECTION: String = "meta"
 const SCHEMA_VERSION_KEY: String = "schema_version"
+const MONSTER_SELL_GOLD_BY_RARITY := {
+	1: 40,
+	2: 120,
+	3: 300,
+}
+const MONSTER_SELL_GEMS_BY_RARITY := {
+	4: 10,
+	5: 25,
+}
+const MONSTER_SELL_GOLD_LEVEL_RATE: int = 10
+const MONSTER_SELL_GEM_LEVEL_STEP: int = 5
 
 var _config: ConfigFile = null
 var _dirty: bool = false
@@ -468,6 +479,51 @@ func remove_monster_instance(instance_id: String) -> bool:
 		ranch["care_focus_instance_id"] = null
 	set_ranch_state(ranch)
 	return save_monster_pool(pool)
+
+func get_monster_sell_quote(instance_id: String) -> Dictionary:
+	var instance := get_monster_instance(instance_id)
+	if instance.is_empty():
+		return {"ok": false, "error": "not_found"}
+	var monster_id := str(instance.get("monsterId", ""))
+	var monster := MonsterDb.get_monster(monster_id)
+	if monster.is_empty():
+		return {"ok": false, "error": "not_found"}
+	var rarity := clampi(int(monster.get("rarity", 1)), 1, 5)
+	var level := maxi(1, int(instance.get("level", 1)))
+	var currency := "gold"
+	var amount := int(MONSTER_SELL_GOLD_BY_RARITY.get(mini(rarity, 3), 40)) + level * rarity * MONSTER_SELL_GOLD_LEVEL_RATE
+	if rarity >= 4:
+		currency = "gems"
+		amount = int(MONSTER_SELL_GEMS_BY_RARITY.get(rarity, MONSTER_SELL_GEMS_BY_RARITY[5])) + ceili(float(level) / float(MONSTER_SELL_GEM_LEVEL_STEP)) * rarity
+	return {
+		"ok": true,
+		"instance_id": instance_id,
+		"monster_id": monster_id,
+		"name": str(monster.get("name", monster_id)),
+		"rarity": rarity,
+		"level": level,
+		"currency": currency,
+		"amount": amount,
+	}
+
+func sell_monster_instance(instance_id: String) -> Dictionary:
+	var quote := get_monster_sell_quote(instance_id)
+	if not bool(quote.get("ok", false)):
+		return quote
+	if get_monster_pool().size() <= 1:
+		return {"ok": false, "error": "last_monster"}
+	return run_transaction(func() -> Dictionary:
+		var currency := str(quote.get("currency", "gold"))
+		var amount := int(quote.get("amount", 0))
+		var reward_ok := add_gems(amount) if currency == "gems" else add_gold(amount)
+		if not reward_ok:
+			return {"ok": false, "error": "reward_failed"}
+		if not remove_monster_instance(instance_id):
+			return {"ok": false, "error": "remove_failed"}
+		var result := quote.duplicate(true)
+		result["ok"] = true
+		return result
+	)
 
 func get_owned_monsters(filters: Dictionary = {}) -> Array:
 	var pool := get_monster_pool()

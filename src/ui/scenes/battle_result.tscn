@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://beu7d4n487scj"]
 
+[ext_resource type="Texture2D" uid="uid://dgfpolwnsb55k" path="res://assets/images/effects/bg_01.png" id="10_2t3lm"]
 [ext_resource type="Texture2D" uid="uid://cakn78kpwv1r1" path="res://assets/images/ui/nine_patch/panel_black.png" id="18_440ek"]
 [ext_resource type="Texture2D" uid="uid://dtxns5drwsibo" path="res://assets/images/maps/warbackgrouds/map1.png" id="bg"]
 [ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="btn_next"]
 [ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="capture_btn_blue"]
 [ext_resource type="Texture2D" uid="uid://cxj7cr2pign6r" path="res://assets/images/ui/buttons/result_refresh_ui_btn_green.png" id="capture_btn_green"]
-[ext_resource type="Texture2D" uid="uid://dsys4c4hrwoep" path="res://assets/images/effects/capture_success_new_fx_magic_circle.png" id="capture_circle"]
 [ext_resource type="Texture2D" uid="uid://dqeylminseuf6" path="res://assets/images/effects/capture_success_new_fx_confetti_strip.png" id="capture_confetti"]
 [ext_resource type="Texture2D" uid="uid://c1w6vhwhj0q5a" path="res://assets/images/ui/panels/capture_success_new_ui_info_plaque.png" id="capture_info"]
 [ext_resource type="PackedScene" uid="uid://box82ko1pcn26" path="res://src/ui/scenes/capture_result_panel.tscn" id="capture_panel"]
@@ -119,7 +119,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CaptureSuccessLayer" type="Control" parent="." unique_id=2026060401]
-visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -214,12 +213,12 @@ mouse_filter = 2
 
 [node name="MagicCircle" type="TextureRect" parent="CaptureSuccessLayer/Stage" unique_id=2026060410]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 68.0
-offset_right = 279.0
-offset_bottom = 300.0
+offset_left = -84.0
+offset_top = -241.0
+offset_right = 378.0
+offset_bottom = 551.0
 mouse_filter = 2
-texture = ExtResource("capture_circle")
+texture = ExtResource("10_2t3lm")
 expand_mode = 1
 stretch_mode = 5
 
@@ -255,9 +254,9 @@ stretch_mode = 5
 
 [node name="BadgeRibbon" type="TextureRect" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060426]
 layout_mode = 0
-offset_left = 88.0
+offset_left = 56.0
 offset_top = -21.0
-offset_right = 235.0
+offset_right = 267.0
 offset_bottom = 27.0
 mouse_filter = 2
 texture = ExtResource("capture_btn_blue")
@@ -266,66 +265,66 @@ stretch_mode = 5
 
 [node name="Badge" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060414]
 layout_mode = 0
-offset_left = 94.0
+offset_left = 62.0
 offset_top = -13.0
-offset_right = 229.0
+offset_right = 261.0
 offset_bottom = 23.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.37, 0.84, 0.86)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 22
-text = "New Pet!"
+theme_override_font_sizes/font_size = 24
+text = "新精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PetName" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060415]
 layout_mode = 0
-offset_left = 28.0
-offset_top = 29.0
-offset_right = 295.0
-offset_bottom = 67.0
+offset_left = 24.0
+offset_top = 32.0
+offset_right = 299.0
+offset_bottom = 64.0
 theme_override_colors/font_color = Color(0.45, 0.2, 0.05, 1)
 theme_override_colors/font_outline_color = Color(1, 0.96, 0.82, 0.65)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 26
-text = "新精灵"
+theme_override_font_sizes/font_size = 21
+text = "星级：1星  等级：Lv.1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Divider" type="ColorRect" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060416]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 76.0
+offset_top = 72.0
 offset_right = 273.0
-offset_bottom = 78.0
+offset_bottom = 74.0
 mouse_filter = 2
 color = Color(0.88, 0.62, 0.29, 0.55)
 
 [node name="ElementLabel" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060417]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 90.0
-offset_right = 147.0
-offset_bottom = 121.0
+offset_left = 32.0
+offset_top = 82.0
+offset_right = 162.0
+offset_bottom = 116.0
 theme_override_colors/font_color = Color(0.46, 0.22, 0.07, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 0.55)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 18
-text = "属性"
+theme_override_font_sizes/font_size = 20
+text = "性格：未知"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarLabel" type="Label" parent="CaptureSuccessLayer/InfoPlaque" unique_id=2026060418]
 layout_mode = 0
-offset_left = 145.0
-offset_top = 89.0
-offset_right = 280.0
-offset_bottom = 122.0
-theme_override_colors/font_color = Color(1, 0.75, 0.04, 1)
-theme_override_colors/font_outline_color = Color(0.55, 0.25, 0.03, 0.82)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 21
-text = "★★★★★"
+offset_left = 164.0
+offset_top = 82.0
+offset_right = 292.0
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(0.46, 0.22, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 0.55)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "属性：未知"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -394,6 +393,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarRow" type="Control" parent="." unique_id=232303451]
+visible = false
 anchors_preset = 0
 offset_left = 88.0
 offset_top = 178.0
@@ -431,6 +431,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="BattleInfo" type="Control" parent="." unique_id=1626943882]
+visible = false
 anchors_preset = 0
 offset_left = 28.0
 offset_top = 236.0
@@ -502,11 +503,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CaptureResultPanel" parent="." unique_id=707313623 instance=ExtResource("capture_panel")]
+visible = false
 layout_mode = 0
 offset_top = 272.0
 offset_bottom = 320.0
 
 [node name="RewardPanel" type="Control" parent="." unique_id=1054542105]
+visible = false
 anchors_preset = 0
 offset_left = 16.0
 offset_top = 318.0
@@ -693,6 +696,7 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="ExpPanel" type="Control" parent="." unique_id=823335105]
+visible = false
 anchors_preset = 0
 offset_left = 16.0
 offset_top = 456.0

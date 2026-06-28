@@ -526,9 +526,13 @@ func _save_rewards() -> void:
 	_add_monster_exp_from_battle()
 	if _captured and not _capture_target.is_empty() and _capture_target.has("id") and CaptureSystemScript.can_capture(_capture_target):
 		if _storage.has_method("add_monster_instance"):
+			var captured_options := build_captured_instance_options(_capture_target, _battle_result)
+			_capture_target["level"] = int(captured_options.get("level", _capture_target.get("level", 1)))
+			_capture_target["nature"] = str(captured_options.get("nature", _capture_target.get("nature", "")))
+			_capture_target["isElite"] = bool(captured_options.get("isElite", _capture_target.get("isElite", false)))
 			_storage.add_monster_instance(
 				str(_capture_target["id"]),
-				build_captured_instance_options(_capture_target, _battle_result)
+				captured_options
 			)
 		else:
 			var player: Dictionary = _storage.load_player() if _storage.has_method("load_player") else {}
