@@ -219,8 +219,8 @@ func get_player() -> Dictionary:
 		"stamina": 5,
 		"staminaUpdatedAt": Time.get_unix_time_from_system() * 1000.0,
 		"exp": 0,
-		"team": ["monster_001", "monster_002", "monster_003"],
-		"captured": ["monster_001", "monster_002", "monster_003"],
+		"team": MonsterPool.DEFAULT_STARTERS.duplicate(),
+		"captured": MonsterPool.DEFAULT_STARTERS.duplicate(),
 		"monster_pool": [],
 		"monsterPoolVersion": 0,
 		"stageProgress": { "chapter": 1, "stage": 1 },
@@ -342,20 +342,22 @@ func _ensure_monster_pool_migrated() -> void:
 		if not MonsterDb.has_monster(monster_id):
 			continue
 		var old_entry: Dictionary = pokedex.get(monster_id, {})
+		var is_default_starter := old_entry.is_empty() and MonsterPool.DEFAULT_STARTERS.has(monster_id)
+		var default_level := MonsterPool.STARTER_INITIAL_LEVEL if is_default_starter else 1
 		var instance := MonsterPool.create_instance(monster_id, {
-			"level": int(old_entry.get("level", 1)),
+			"level": int(old_entry.get("level", default_level)),
 			"exp": int(old_entry.get("exp", 0)),
 			"nature": str(old_entry.get("nature", NatureDB.random_nature())),
-			"source": "migration",
+			"source": "starter" if is_default_starter else "migration",
 		})
 		pool.append(instance)
 		if not monster_to_instance.has(monster_id):
 			monster_to_instance[monster_id] = instance.get("instanceId", "")
 
 	var old_team: Dictionary = _get_value("team", "data", {
-		"leader": "monster_001",
-		"member1": "monster_002",
-		"member2": "monster_003"
+		"leader": MonsterPool.DEFAULT_STARTERS[0],
+		"member1": MonsterPool.DEFAULT_STARTERS[1],
+		"member2": MonsterPool.DEFAULT_STARTERS[2]
 	})
 	var new_team := {}
 	for slot in ["leader", "member1", "member2"]:

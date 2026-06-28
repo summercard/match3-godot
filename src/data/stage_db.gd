@@ -7,6 +7,29 @@ const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rule
 const STAGES_PER_CHAPTER := 12
 const NORMAL_STAGES_PER_CHAPTER := 11
 const BOSS_STAGE_NO := 12
+const STAGE_EXP_REWARD_MULTIPLIER := 1.30
+
+const CHAPTER_ENEMY_POOLS := {
+	1: ["monster_001", "monster_002", "monster_003", "monster_005", "monster_006", "monster_007", "monster_009", "monster_011", "monster_012"],
+	2: ["monster_014", "monster_015", "monster_017", "monster_018", "monster_020", "monster_021", "monster_023", "monster_024", "monster_026", "monster_027"],
+	3: ["monster_029", "monster_030", "monster_031", "monster_032", "monster_034", "monster_035", "monster_036", "monster_037", "monster_039"],
+	4: ["monster_040", "monster_041", "monster_042", "monster_043", "monster_045", "monster_046", "monster_047", "monster_048", "monster_049", "monster_050", "monster_051", "monster_052"],
+	5: ["monster_053", "monster_054", "monster_055", "monster_056", "monster_057", "monster_058", "monster_059", "monster_060", "monster_061", "monster_062", "monster_063", "monster_064", "monster_065"],
+	6: ["monster_067", "monster_068", "monster_070", "monster_071", "monster_073", "monster_074", "monster_076", "monster_077", "monster_079", "monster_080"],
+	7: ["monster_081", "monster_082", "monster_084", "monster_085", "monster_087", "monster_088", "monster_090", "monster_091"],
+	8: ["monster_093", "monster_094", "monster_095", "monster_096", "monster_097", "monster_098", "monster_099", "monster_100", "monster_101", "monster_102"]
+}
+
+const CHAPTER_BOSS_IDS := {
+	1: "monster_boss_001",
+	2: "monster_boss_002",
+	3: "monster_boss_003",
+	4: "monster_boss_004",
+	5: "monster_boss_005",
+	6: "monster_boss_006",
+	7: "monster_boss_007",
+	8: "monster_boss_008"
+}
 
 # ========== 关卡数据库 ==========
 const STAGES_DATA: Dictionary = {
@@ -18,7 +41,7 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_1_1", "name": "能量响应训练", "type": "normal",
-					"enemies": ["enemy_001"],
+					"enemies": ["monster_001"],
 					"enemyLevel": 1,
 					"rewards": {"gold": 45, "exp": 45},
 					"designGoal": "学会棋盘亲和会驱动对应精灵行动与技能充能。",
@@ -28,7 +51,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_1_2", "name": "捕捉窗口练习", "type": "normal",
-					"enemies": ["enemy_003"],
+					"enemies": ["monster_002"],
 					"enemyLevel": 2,
 					"rewards": {"gold": 65, "exp": 60, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
 					"designGoal": "让玩家第一次看到低血会打开捕捉窗口。",
@@ -38,7 +61,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_1_3", "name": "守护与续航", "type": "normal",
-					"enemies": ["enemy_001", "enemy_003"],
+					"enemies": ["monster_003", "monster_005"],
 					"enemyLevel": 3,
 					"rewards": {"gold": 85, "exp": 75},
 					"designGoal": "让水龟仔的守护技能有明确价值。",
@@ -48,7 +71,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_1_4", "name": "藤蔓束缚", "type": "normal",
-					"enemies": ["enemy_002", "enemy_003"],
+					"enemies": ["monster_006", "monster_007"],
 					"enemyLevel": 3,
 					"rewards": {"gold": 105, "exp": 90},
 					"designGoal": "让草苗儿的控场技能为 Boss 前做铺垫。",
@@ -78,31 +101,31 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_2_1", "name": "火山口", "type": "normal",
-					"enemies": ["enemy_047", "enemy_047"],
+					"enemies": ["monster_014", "monster_015"],
 					"enemyLevel": 4,
 					"rewards": {"gold": 60, "exp": 35}
 				},
 				{
 					"id": "stage_2_2", "name": "岩浆洞窟", "type": "normal",
-					"enemies": ["enemy_047", "enemy_048"],
+					"enemies": ["monster_017", "monster_018"],
 					"enemyLevel": 5,
 					"rewards": {"gold": 80, "exp": 48}
 				},
 				{
 					"id": "stage_2_3", "name": "烈焰荒原", "type": "normal",
-					"enemies": ["enemy_048", "enemy_047"],
+					"enemies": ["monster_020", "monster_021"],
 					"enemyLevel": 5,
 					"rewards": {"gold": 95, "exp": 58}
 				},
 				{
 					"id": "stage_2_4", "name": "火焰池", "type": "normal",
-					"enemies": ["enemy_049", "enemy_048"],
+					"enemies": ["monster_023", "monster_024"],
 					"enemyLevel": 6,
 					"rewards": {"gold": 110, "exp": 65}
 				},
 				{
 					"id": "stage_2_4e", "name": "精英·烈焰守卫", "type": "elite",
-					"enemies": ["enemy_049"],
+					"enemies": ["monster_026"],
 					"enemyLevel": 8,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 165, "exp": 98},
@@ -145,25 +168,25 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_3_1", "name": "暗影小径", "type": "normal",
-					"enemies": ["enemy_004", "enemy_006"],
+					"enemies": ["monster_029", "monster_030"],
 					"enemyLevel": 7,
 					"rewards": {"gold": 80, "exp": 45}
 				},
 				{
 					"id": "stage_3_2", "name": "迷雾沼泽", "type": "normal",
-					"enemies": ["enemy_004", "enemy_005", "enemy_005"],
+					"enemies": ["monster_031", "monster_032", "monster_034"],
 					"enemyLevel": 8,
 					"rewards": {"gold": 100, "exp": 55}
 				},
 				{
 					"id": "stage_3_3", "name": "暗礁深谷", "type": "normal",
-					"enemies": ["enemy_006", "enemy_007", "enemy_008"],
+					"enemies": ["monster_035", "monster_036", "monster_037"],
 					"enemyLevel": 9,
 					"rewards": {"gold": 120, "exp": 70}
 				},
 				{
 					"id": "stage_3_3e", "name": "精英·暗影猎手", "type": "elite",
-					"enemies": ["enemy_007"],
+					"enemies": ["monster_039"],
 					"enemyLevel": 11,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 180, "exp": 105},
@@ -180,7 +203,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_3_4", "name": "幽灵池塘", "type": "normal",
-					"enemies": ["enemy_004", "enemy_007"],
+					"enemies": ["monster_029", "monster_030"],
 					"enemyLevel": 10,
 					"rewards": {"gold": 140, "exp": 85}
 				},
@@ -202,13 +225,13 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_4_1", "name": "幽暗入口", "type": "normal",
-					"enemies": ["enemy_009", "enemy_011"],
+					"enemies": ["monster_040", "monster_041"],
 					"enemyLevel": 11,
 					"rewards": {"gold": 90, "exp": 55}
 				},
 				{
 					"id": "stage_4_2", "name": "毒蛛巢穴", "type": "normal",
-					"enemies": ["enemy_010", "enemy_010"],
+					"enemies": ["monster_042", "monster_043"],
 					"enemyLevel": 12,
 					"rewards": {"gold": 110, "exp": 65},
 					"lockedGems": [
@@ -218,7 +241,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_4_3", "name": "暗翼盘旋", "type": "normal",
-					"enemies": ["enemy_009", "enemy_011", "enemy_009"],
+					"enemies": ["monster_045", "monster_046", "monster_047"],
 					"enemyLevel": 13,
 					"rewards": {"gold": 130, "exp": 80},
 					"lockedGems": [
@@ -229,7 +252,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_4_4", "name": "幽灵徘徊", "type": "normal",
-					"enemies": ["enemy_010", "enemy_011"],
+					"enemies": ["monster_048", "monster_049"],
 					"enemyLevel": 14,
 					"rewards": {"gold": 150, "exp": 95},
 					"lockedGems": [
@@ -241,7 +264,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_4_3e", "name": "精英·沙漠蜃影", "type": "elite",
-					"enemies": ["enemy_011", "enemy_011"],
+					"enemies": ["monster_050", "monster_051"],
 					"enemyLevel": 15,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 220, "exp": 130},
@@ -288,31 +311,31 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_5_1", "name": "雷霆入口", "type": "normal",
-					"enemies": ["enemy_012", "enemy_013"],
+					"enemies": ["monster_053", "monster_054"],
 					"enemyLevel": 16,
 					"rewards": {"gold": 100, "exp": 60}
 				},
 				{
 					"id": "stage_5_2", "name": "雷鹰巢穴", "type": "normal",
-					"enemies": ["enemy_014", "enemy_014"],
+					"enemies": ["monster_055", "monster_056"],
 					"enemyLevel": 17,
 					"rewards": {"gold": 120, "exp": 75}
 				},
 				{
 					"id": "stage_5_3", "name": "光蝶谷", "type": "normal",
-					"enemies": ["enemy_015", "enemy_015", "enemy_016"],
+					"enemies": ["monster_057", "monster_058", "monster_059"],
 					"enemyLevel": 18,
 					"rewards": {"gold": 140, "exp": 90}
 				},
 				{
 					"id": "stage_5_4", "name": "元素风暴", "type": "normal",
-					"enemies": ["enemy_012", "enemy_016", "enemy_013"],
+					"enemies": ["monster_060", "monster_061", "monster_062"],
 					"enemyLevel": 19,
 					"rewards": {"gold": 160, "exp": 105}
 				},
 				{
 					"id": "stage_5_3e", "name": "精英·雷暴守卫", "type": "elite",
-					"enemies": ["enemy_014", "enemy_016"],
+					"enemies": ["monster_063", "monster_064"],
 					"enemyLevel": 20,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 260, "exp": 155},
@@ -347,13 +370,13 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_6_1", "name": "寒冰入口", "type": "normal",
-					"enemies": ["enemy_017", "enemy_018"],
+					"enemies": ["monster_067", "monster_068"],
 					"enemyLevel": 21,
 					"rewards": {"gold": 110, "exp": 65}
 				},
 				{
 					"id": "stage_6_2", "name": "霜狼巢穴", "type": "normal",
-					"enemies": ["enemy_018", "enemy_019"],
+					"enemies": ["monster_070", "monster_071"],
 					"enemyLevel": 22,
 					"rewards": {"gold": 130, "exp": 80},
 					"poisonFog": {
@@ -363,7 +386,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_6_3", "name": "极地冰原", "type": "normal",
-					"enemies": ["enemy_019", "enemy_020", "enemy_021"],
+					"enemies": ["monster_073", "monster_074", "monster_076"],
 					"enemyLevel": 23,
 					"rewards": {"gold": 150, "exp": 95},
 					"poisonFog": {
@@ -373,7 +396,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_6_4", "name": "冰晶洞穴", "type": "normal",
-					"enemies": ["enemy_017", "enemy_021", "enemy_020"],
+					"enemies": ["monster_077", "monster_079", "monster_080"],
 					"enemyLevel": 24,
 					"rewards": {"gold": 170, "exp": 110},
 					"poisonFog": {
@@ -383,7 +406,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_6_3e", "name": "精英·深渊使者", "type": "elite",
-					"enemies": ["enemy_020", "enemy_021"],
+					"enemies": ["monster_067", "monster_068"],
 					"enemyLevel": 25,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 300, "exp": 175},
@@ -428,25 +451,25 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_7_1", "name": "虚空入口", "type": "normal",
-					"enemies": ["enemy_022", "enemy_023"],
+					"enemies": ["monster_081", "monster_082"],
 					"enemyLevel": 26,
 					"rewards": {"gold": 120, "exp": 70}
 				},
 				{
 					"id": "stage_7_2", "name": "噬魂巢穴", "type": "normal",
-					"enemies": ["enemy_023", "enemy_024"],
+					"enemies": ["monster_084", "monster_085"],
 					"enemyLevel": 27,
 					"rewards": {"gold": 140, "exp": 85}
 				},
 				{
 					"id": "stage_7_3", "name": "虚空裂隙", "type": "normal",
-					"enemies": ["enemy_024", "enemy_025", "enemy_026"],
+					"enemies": ["monster_087", "monster_088", "monster_090"],
 					"enemyLevel": 28,
 					"rewards": {"gold": 160, "exp": 100}
 				},
 				{
 					"id": "stage_7_3e", "name": "精英·虚空裂隙", "type": "elite",
-					"enemies": ["enemy_025", "enemy_026"],
+					"enemies": ["monster_091", "monster_081"],
 					"enemyLevel": 30,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 270, "exp": 155},
@@ -472,7 +495,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_7_4", "name": "暗蚀深渊", "type": "normal",
-					"enemies": ["enemy_022", "enemy_026", "enemy_025"],
+					"enemies": ["monster_082", "monster_084", "monster_085"],
 					"enemyLevel": 29,
 					"rewards": {"gold": 180, "exp": 115}
 				},
@@ -494,25 +517,25 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_8_1", "name": "时空入口", "type": "normal",
-					"enemies": ["enemy_027", "enemy_028"],
+					"enemies": ["monster_093", "monster_094"],
 					"enemyLevel": 31,
 					"rewards": {"gold": 130, "exp": 80}
 				},
 				{
 					"id": "stage_8_2", "name": "时间乱流", "type": "normal",
-					"enemies": ["enemy_028", "enemy_029"],
+					"enemies": ["monster_095", "monster_096"],
 					"enemyLevel": 32,
 					"rewards": {"gold": 150, "exp": 95}
 				},
 				{
 					"id": "stage_8_3", "name": "时空漩涡", "type": "normal",
-					"enemies": ["enemy_029", "enemy_030", "enemy_031"],
+					"enemies": ["monster_097", "monster_098", "monster_099"],
 					"enemyLevel": 33,
 					"rewards": {"gold": 170, "exp": 110}
 				},
 				{
 					"id": "stage_8_3e", "name": "精英·时空漩涡", "type": "elite",
-					"enemies": ["enemy_030", "enemy_031"],
+					"enemies": ["monster_100", "monster_101"],
 					"enemyLevel": 35,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 320, "exp": 180},
@@ -531,7 +554,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_8_4", "name": "时空迷宫", "type": "normal",
-					"enemies": ["enemy_027", "enemy_031", "enemy_030"],
+					"enemies": ["monster_102", "monster_093", "monster_094"],
 					"enemyLevel": 34,
 					"rewards": {"gold": 190, "exp": 125}
 				},
@@ -553,25 +576,25 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_9_1", "name": "星耀入口", "type": "normal",
-					"enemies": ["enemy_032", "enemy_033"],
+					"enemies": ["monster_093", "monster_094"],
 					"enemyLevel": 36,
 					"rewards": {"gold": 140, "exp": 90}
 				},
 				{
 					"id": "stage_9_2", "name": "星光回廊", "type": "normal",
-					"enemies": ["enemy_033", "enemy_034"],
+					"enemies": ["monster_095", "monster_096"],
 					"enemyLevel": 37,
 					"rewards": {"gold": 160, "exp": 105}
 				},
 				{
 					"id": "stage_9_3", "name": "星耀祭坛", "type": "normal",
-					"enemies": ["enemy_034", "enemy_035", "enemy_036"],
+					"enemies": ["monster_097", "monster_098", "monster_099"],
 					"enemyLevel": 38,
 					"rewards": {"gold": 180, "exp": 120}
 				},
 				{
 					"id": "stage_9_3e", "name": "精英·星耀祭坛", "type": "elite",
-					"enemies": ["enemy_035", "enemy_036"],
+					"enemies": ["monster_100", "monster_101"],
 					"enemyLevel": 40,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 370, "exp": 200},
@@ -604,7 +627,7 @@ const STAGES_DATA: Dictionary = {
 				},
 				{
 					"id": "stage_9_4", "name": "星辰迷宫", "type": "normal",
-					"enemies": ["enemy_032", "enemy_036", "enemy_035"],
+					"enemies": ["monster_102", "monster_093", "monster_094"],
 					"enemyLevel": 39,
 					"rewards": {"gold": 200, "exp": 135}
 				},
@@ -626,31 +649,31 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_10_1", "name": "混沌入口", "type": "normal",
-					"enemies": ["enemy_037", "enemy_038"],
+					"enemies": ["monster_093", "monster_094"],
 					"enemyLevel": 41,
 					"rewards": {"gold": 145, "exp": 95}
 				},
 				{
 					"id": "stage_10_2", "name": "混沌回廊", "type": "normal",
-					"enemies": ["enemy_038", "enemy_039"],
+					"enemies": ["monster_095", "monster_096"],
 					"enemyLevel": 42,
 					"rewards": {"gold": 165, "exp": 110}
 				},
 				{
 					"id": "stage_10_3", "name": "混沌祭坛", "type": "normal",
-					"enemies": ["enemy_039", "enemy_040", "enemy_041"],
+					"enemies": ["monster_097", "monster_098", "monster_099"],
 					"enemyLevel": 43,
 					"rewards": {"gold": 185, "exp": 125}
 				},
 				{
 					"id": "stage_10_4", "name": "混沌迷宫", "type": "normal",
-					"enemies": ["enemy_037", "enemy_041", "enemy_040"],
+					"enemies": ["monster_100", "monster_101", "monster_102"],
 					"enemyLevel": 44,
 					"rewards": {"gold": 205, "exp": 140}
 				},
 				{
 					"id": "stage_10_4e", "name": "精英·混沌祭坛", "type": "elite",
-					"enemies": ["enemy_039", "enemy_040", "enemy_041"],
+					"enemies": ["monster_093", "monster_094", "monster_095"],
 					"enemyLevel": 43,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 350, "exp": 195},
@@ -693,31 +716,31 @@ const STAGES_DATA: Dictionary = {
 			"stages": [
 				{
 					"id": "stage_11_1", "name": "光耀入口", "type": "normal",
-					"enemies": ["enemy_042", "enemy_043"],
+					"enemies": ["monster_093", "monster_094"],
 					"enemyLevel": 46,
 					"rewards": {"gold": 150, "exp": 100}
 				},
 				{
 					"id": "stage_11_2", "name": "光耀回廊", "type": "normal",
-					"enemies": ["enemy_043", "enemy_044"],
+					"enemies": ["monster_095", "monster_096"],
 					"enemyLevel": 47,
 					"rewards": {"gold": 170, "exp": 115}
 				},
 				{
 					"id": "stage_11_3", "name": "光耀祭坛", "type": "normal",
-					"enemies": ["enemy_044", "enemy_045", "enemy_046"],
+					"enemies": ["monster_097", "monster_098", "monster_099"],
 					"enemyLevel": 48,
 					"rewards": {"gold": 190, "exp": 130}
 				},
 				{
 					"id": "stage_11_4", "name": "光耀迷宫", "type": "normal",
-					"enemies": ["enemy_042", "enemy_046", "enemy_045"],
+					"enemies": ["monster_100", "monster_101", "monster_102"],
 					"enemyLevel": 49,
 					"rewards": {"gold": 210, "exp": 145}
 				},
 				{
 					"id": "stage_11_4e", "name": "精英·光耀祭坛", "type": "elite",
-					"enemies": ["enemy_044", "enemy_045", "enemy_046"],
+					"enemies": ["monster_093", "monster_094", "monster_095"],
 					"enemyLevel": 48,
 					"eliteMultiplier": 1.5,
 					"rewards": {"gold": 380, "exp": 220},
@@ -902,8 +925,8 @@ static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
 	return chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
 
 static func _boss_enemy_level(chapter_num: int) -> int:
-	# ★ 主人定 2026-06-10：ch1 Boss = Lv20（跨度 15），每章 Boss +5
-	return 5 + (chapter_num - 1) * 5 + 15
+	# ★ 主人定 2026-06-28：ch1 Boss = Lv10，每章 Boss +5
+	return 10 + (chapter_num - 1) * 5
 
 static func _normal_max_turns(chapter_num: int, stage_no: int) -> int:
 	# 普通关仍保持短节奏；中后期机制关给少量读盘/清障空间。
@@ -936,6 +959,7 @@ static func _boss_rewards(chapter_num: int) -> Dictionary:
 
 static func _merge_rewards(seed_rewards: Dictionary, target_rewards: Dictionary, chapter_num: int, stage_no: int, is_boss: bool) -> Dictionary:
 	var rewards := target_rewards.duplicate(true)
+	rewards["exp"] = _boost_stage_exp(int(rewards.get("exp", 0)))
 	if seed_rewards.has("guaranteedItems"):
 		rewards["guaranteedItems"] = seed_rewards.get("guaranteedItems", []).duplicate(true)
 	if chapter_num == 1 and stage_no == 1:
@@ -946,16 +970,18 @@ static func _merge_rewards(seed_rewards: Dictionary, target_rewards: Dictionary,
 		rewards["guaranteedItems"] = [{"id": "capture_ball_plus", "count": 1}]
 	return rewards
 
+static func _boost_stage_exp(exp: int) -> int:
+	if exp <= 0:
+		return 0
+	return int(round(float(exp) * STAGE_EXP_REWARD_MULTIPLIER))
+
 static func _enemy_pool_from_seeds(normal_seeds: Array, chapter_num: int) -> Array:
-	var pool: Array = []
-	for seed: Dictionary in normal_seeds:
-		for enemy_id in seed.get("enemies", []):
-			var id := str(enemy_id)
-			if not id.is_empty() and not pool.has(id):
-				pool.append(id)
-	if pool.is_empty():
-		pool.append(_fallback_enemy_id(chapter_num))
-	return pool
+	var configured: Array = CHAPTER_ENEMY_POOLS.get(chapter_num, [])
+	if configured.is_empty() and chapter_num > 8:
+		configured = CHAPTER_ENEMY_POOLS.get(8, [])
+	if not configured.is_empty():
+		return configured.duplicate()
+	return [_fallback_enemy_id(chapter_num)]
 
 static func _enemy_group_for_stage(pool: Array, stage_no: int) -> Array:
 	var count := 1
@@ -964,16 +990,30 @@ static func _enemy_group_for_stage(pool: Array, stage_no: int) -> Array:
 	elif stage_no >= 6:
 		count = 3
 	var group: Array = []
-	for offset in count:
-		group.append(pool[(stage_no + offset - 1) % pool.size()])
+	var candidates := pool.duplicate()
+	for _i in count:
+		if candidates.is_empty():
+			candidates = pool.duplicate()
+		var pick_index := randi() % candidates.size()
+		group.append(candidates[pick_index])
+		candidates.remove_at(pick_index)
 	return group
 
 static func _fallback_enemy_id(chapter_num: int) -> String:
-	var enemy_num := mini(46, maxi(1, (chapter_num - 1) * 4 + 1))
-	return "enemy_%03d" % enemy_num
+	var configured: Array = CHAPTER_ENEMY_POOLS.get(chapter_num, [])
+	if configured.is_empty() and chapter_num > 8:
+		configured = CHAPTER_ENEMY_POOLS.get(8, [])
+	if not configured.is_empty():
+		return str(configured[0])
+	return "monster_001"
 
 static func _boss_monster_id(chapter_num: int) -> String:
-	return "monster_boss_%03d" % chapter_num
+	var boss_id := str(CHAPTER_BOSS_IDS.get(chapter_num, ""))
+	if boss_id.is_empty() and chapter_num > 8:
+		boss_id = str(CHAPTER_BOSS_IDS.get(8, ""))
+	if boss_id.is_empty():
+		boss_id = "monster_boss_001"
+	return boss_id
 
 static func _normal_target_lesson(stage_no: int) -> String:
 	if stage_no <= 2:

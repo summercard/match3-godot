@@ -201,7 +201,7 @@ func _get_default_stage_data() -> Dictionary:
 	return {
 		"id": "stage_1_1",
 		"name": "新手训练",
-		"enemies": ["enemy_001", "enemy_002", "enemy_003"],
+		"enemies": MonsterPool.DEFAULT_STARTERS.duplicate(),
 		"enemyLevel": 3
 	}
 
@@ -213,9 +213,9 @@ func _load_player_team() -> void:
 	_player_team = []
 	var storage := get_node_or_null("/root/SaveManager")
 	var team_data: Dictionary = storage.load_team() if storage else {
-		"leader": "monster_001",
-		"member1": "monster_002",
-		"member2": "monster_003"
+		"leader": MonsterPool.DEFAULT_STARTERS[0],
+		"member1": MonsterPool.DEFAULT_STARTERS[1],
+		"member2": MonsterPool.DEFAULT_STARTERS[2]
 	}
 	var player: Dictionary = storage.load_player() if storage else {"level": 5}
 	var level: int = maxi(player.get("level", 1), 5)
@@ -251,7 +251,7 @@ func _load_enemy_team() -> void:
 			var actual_elite := preview_elite or bool(enemy.get("isElite", false))
 			enemy["isElite"] = actual_elite
 			if actual_elite:
-				enemy["_visualScale"] = 1.2
+				enemy["_visualScale"] = StatCalculator.visual_scale_for_stats(enemy)
 			_enemy_team.append(enemy)
 
 func _get_preview_enemy_ids(stage_data: Dictionary) -> Array:
@@ -264,7 +264,7 @@ func _get_preview_enemy_ids(stage_data: Dictionary) -> Array:
 		var phase_enemies: Array = first_phase.get("enemies", [])
 		if not phase_enemies.is_empty():
 			return phase_enemies
-	return ["enemy_001", "enemy_002", "enemy_003"]
+	return MonsterPool.DEFAULT_STARTERS.duplicate()
 
 func _should_preview_elite(enemy_id: String) -> bool:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
@@ -818,9 +818,14 @@ func _draw_monster_portrait(monster: Dictionary, rect: Rect2) -> void:
 	var path: String = MonsterArtDBScript.get_art_path(monster_id, "team")
 	var tex := _get_texture(path)
 	if tex != null:
-		_draw_texture_contain(tex, rect)
+		_draw_texture_contain(tex, _scaled_portrait_rect(rect, float(monster.get("_visualScale", StatCalculator.visual_scale_for_stats(monster)))))
 	else:
 		_draw_text_with_shadow(monster.get("emoji", "?"), rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0, C["white"], 28.0)
+
+func _scaled_portrait_rect(rect: Rect2, scale: float) -> Rect2:
+	var safe_scale := maxf(0.1, scale)
+	var size := rect.size * safe_scale
+	return Rect2(rect.position + (rect.size - size) * 0.5, size)
 
 func _draw_element_badge(element: String, x: float, y: float, size: float = 20.0) -> void:
 	var path: String = ELEMENT_ICON_ASSETS.get(element, "")

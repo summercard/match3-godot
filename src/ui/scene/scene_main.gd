@@ -40,7 +40,8 @@ const BUTTON_IDS := {
 	"InventoryButton": "inventory",
 	"AchievementButton": "achievement",
 	"SettingsButton": "settings",
-	"SigninButton": "signin"
+	"SigninButton": "signin",
+	"TestToolButton": "test_tool"
 }
 static var instance: SceneMain
 
@@ -78,7 +79,7 @@ func _ready() -> void:
 		var button_id: String = BUTTON_IDS[button_name]
 		_attach_button_feedback(button, _feedback_profile(button_id))
 		button.pressed.connect(_queue_button_pressed.bind(button_id))
-		button.tooltip_text = BUTTON_DESCRIPTIONS[button_id]
+		button.tooltip_text = str(BUTTON_DESCRIPTIONS.get(button_id, "测试队长技能表现"))
 	for plus_path in ["Header/GoldPlus", "Header/DiamondPlus", "Header/StaminaPlus"]:
 		var plus_button := get_node_or_null(plus_path) as TextureButton
 		if plus_button != null:

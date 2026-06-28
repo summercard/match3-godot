@@ -47,12 +47,7 @@ static func wrap_text(font: Font, text: String, max_width: float, size: float) -
 static func draw_text_with_shadow(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 200.0, alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER, bold: bool = false) -> void:
 	var font := PROJECT_ROUND_FONT
 	var safe_text := fit_text(font, text, max_width, size)
-	var shadow_color := Color(0.07, 0.16, 0.24, 0.78)
+	var outline_color := Color(0.07, 0.16, 0.24, 0.92)
 	var left := x - max_width / 2.0 if alignment == HORIZONTAL_ALIGNMENT_CENTER else x
-	canvas.draw_string(font, Vector2(left - 1.0, y), safe_text, alignment, max_width, size, shadow_color)
-	canvas.draw_string(font, Vector2(left + 1.0, y), safe_text, alignment, max_width, size, shadow_color)
-	canvas.draw_string(font, Vector2(left, y - 1.0), safe_text, alignment, max_width, size, shadow_color)
-	canvas.draw_string(font, Vector2(left, y + 2.0), safe_text, alignment, max_width, size, shadow_color)
+	canvas.draw_string_outline(font, Vector2(left, y), safe_text, alignment, max_width, size, maxi(1, int(round(size * 0.10))), outline_color)
 	canvas.draw_string(font, Vector2(left, y), safe_text, alignment, max_width, size, color)
-	if bold:
-		canvas.draw_string(font, Vector2(left + 0.7, y), safe_text, alignment, max_width, size, color)

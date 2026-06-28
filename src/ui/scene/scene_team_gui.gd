@@ -203,6 +203,43 @@ func _load_team_state() -> void:
 		}
 	else:
 		_team = {"leader": null, "member1": null, "member2": null}
+	_sanitize_team_unique_refs()
+
+
+func _get_team_slots_for_instance(instance_id: String) -> Array:
+	var slots: Array = []
+	if instance_id.is_empty():
+		return slots
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		if value != null and str(value) == instance_id:
+			slots.append(key)
+	return slots
+
+
+func _remove_from_team(instance_id: String) -> bool:
+	var removed := false
+	for key: String in _get_team_slots_for_instance(instance_id):
+		_team[key] = null
+		if _selected_slot == key:
+			_selected_slot = ""
+		removed = true
+	return removed
+
+
+func _sanitize_team_unique_refs() -> void:
+	var seen := {}
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		if value == null:
+			continue
+		var instance_id := str(value)
+		if instance_id.is_empty() or seen.has(instance_id):
+			_team[key] = null
+			if _selected_slot == key:
+				_selected_slot = ""
+			continue
+		seen[instance_id] = true
 
 
 func _get_captured_monsters() -> Array:
@@ -365,24 +402,31 @@ func _turn_roster_page(direction: int) -> void:
 func _assign_to_slot(monster_id: String) -> void:
 	if monster_id.is_empty():
 		return
+	if _selected_slot.is_empty() and not _get_team_slots_for_instance(monster_id).is_empty():
+		_remove_from_team(monster_id)
+		return
 	if _selected_slot.is_empty():
 		for key in ["leader", "member1", "member2"]:
 			if _team.get(key) == null:
 				_team[key] = monster_id
 				return
 		_team["leader"] = monster_id
+		_sanitize_team_unique_refs()
 		return
 	var existing: Variant = _team[_selected_slot]
 	_team[_selected_slot] = monster_id
+	var swapped := false
 	for key in ["leader", "member1", "member2"]:
 		if key != _selected_slot and _team.get(key) == monster_id:
-			_team[key] = existing
-			break
+			_team[key] = existing if not swapped else null
+			swapped = true
 	_selected_slot = ""
+	_sanitize_team_unique_refs()
 
 
 func _save_team() -> void:
 	if _storage != null and _storage.has_method("save_team"):
+		_sanitize_team_unique_refs()
 		_storage.save_team(_team)
 		emit_signal("team_changed", _team)
 

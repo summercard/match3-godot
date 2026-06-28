@@ -25,6 +25,7 @@ const StageWarBackgroundsScript = preload("res://src/ui/components/stage_war_bac
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
+const LeaderSkillVisualDbScript = preload("res://src/data/leader_skill_visual_db.gd")
 const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 ## 设计尺寸
@@ -36,6 +37,14 @@ const ATTACK_CUE_DURATION := 0.58
 const ATTACK_IMPACT_DELAY := 0.24
 const ATTACK_RECOVERY_DELAY := 0.16
 const MATCH_CHAIN_TAIL_WAIT_MAX := 0.72
+const LEADER_BURST_SCALE_IN_DURATION := 1.00
+const LEADER_BURST_BANNER_DURATION := 1.00
+const LEADER_BURST_SCALE_OUT_DURATION := 0.50
+const LEADER_BURST_EFFECT_HOLD := 2.00
+const LEADER_BURST_RESTORE_DURATION := 0.50
+const LEADER_BURST_SHOWCASE_BASE_SIZE := 76.0
+const LEADER_BURST_SHOWCASE_SCALE := 1.5
+const LEADER_BURST_BANNER_TEXT_SIZE := 40.0
 const HOTBAR_SLOT_COUNT := 3
 
 ## 状态枚举
@@ -178,6 +187,7 @@ var _item_use_effects: Array[Dictionary] = []  # [{kind, x, y, timer, duration, 
 const ITEM_USE_EFFECT_LIMIT: int = 24
 var _leader_skill_fx: Array[Dictionary] = []
 const LEADER_SKILL_FX_LIMIT: int = 12
+var _leader_burst_showcase: Dictionary = {}
 
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
@@ -431,8 +441,20 @@ const BATTLE_FX_ASSETS := {
 	"stage_ring_fire": "res://assets/images/effects/battle_fx_stage_ring_fire.png",
 	"stage_ring_void": "res://assets/images/effects/battle_fx_stage_ring_void.png",
 	"selected_cell": "res://assets/images/effects/battle_fx_selected_cell.png",
-	"gem_pop": "res://assets/images/effects/battle_fx_gem_pop.png"
+	"gem_pop": "res://assets/images/effects/battle_fx_gem_pop.png",
+	"leader_mote": "res://assets/images/ui/leader_skills/particles/leader_fx_mote.png",
+	"leader_shard": "res://assets/images/ui/leader_skills/particles/leader_fx_shard.png",
+	"leader_fire_particle": "res://assets/images/ui/leader_skills/particles/leader_fx_fire_particle.png"
 }
+const LEADER_FIRE_TRAIL_OUTER_WIDTH := 14.0
+const LEADER_FIRE_TRAIL_MID_WIDTH := 8.0
+const LEADER_FIRE_TRAIL_CORE_WIDTH := 3.2
+const LEADER_FIRE_TRAIL_PARTICLE_SIZE := 36.0
+const LEADER_FIRE_TRAIL_PARTICLE_VARIANCE := 14.0
+const LEADER_FIRE_BURST_PARTICLE_SIZE := 32.0
+const LEADER_FIRE_BURST_PARTICLE_VARIANCE := 17.0
+const LEADER_FIRE_IMPACT_SPRITE_SIZE := 112.0
+const LEADER_FIRE_IMPACT_SPRITE_VARIANCE := 34.0
 
 const BATTLE_RESULT_OVERLAY_ASSETS := {
 	"victory_banner": "res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png",
@@ -489,6 +511,21 @@ func _uses_editable_gui() -> bool:
 func _uses_editable_battle_end_overlay() -> bool:
 	return false
 
+func get_leader_burst_showcase_test_profile() -> Dictionary:
+	return {
+		"active": not _leader_burst_showcase.is_empty(),
+		"leader_index": int(_leader_burst_showcase.get("leader_index", -1)),
+		"skill_name": str(_leader_burst_showcase.get("skill_name", "")),
+		"scale": LEADER_BURST_SHOWCASE_SCALE,
+		"scale_in": LEADER_BURST_SCALE_IN_DURATION,
+		"banner": LEADER_BURST_BANNER_DURATION,
+		"banner_text_size": LEADER_BURST_BANNER_TEXT_SIZE,
+		"text_rendering": "crisp_outline",
+		"scale_out": LEADER_BURST_SCALE_OUT_DURATION,
+		"effect_hold": LEADER_BURST_EFFECT_HOLD,
+		"restore": LEADER_BURST_RESTORE_DURATION
+	}
+
 func _ensure_feedback_overlay() -> void:
 	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
 		return
@@ -530,6 +567,7 @@ func init(data: Dictionary = {}) -> void:
 	_obstacle_particles = []
 	_tide_rise_anims = []
 	_leader_skill_fx = []
+	_leader_burst_showcase = {}
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
@@ -583,7 +621,7 @@ func _init_battle() -> void:
 		_board.set_poison_fog(_stage_data.get("poisonFog", {}))
 	
 	var player_level := 5
-	var player_team_ids: Array = ["monster_001", "monster_002", "monster_003"]
+	var player_team_ids: Array = MonsterPool.DEFAULT_STARTERS.duplicate()
 	var player_team_units: Array = []
 	if _storage:
 		var player: Dictionary = _storage.load_player()
@@ -598,9 +636,9 @@ func _init_battle() -> void:
 				if monster_id != "":
 					player_team_ids.append(monster_id)
 			if player_team_ids.is_empty():
-				player_team_ids = ["monster_001", "monster_002", "monster_003"]
+				player_team_ids = MonsterPool.DEFAULT_STARTERS.duplicate()
 	
-	var enemy_ids: Array = _stage_data.get("enemies", ["enemy_001"])
+	var enemy_ids: Array = _stage_data.get("enemies", ["monster_001"])
 	var enemy_level: int = _stage_data.get("enemyLevel", 1)
 	if is_instance_valid(_battle):
 		_battle.queue_free()
@@ -951,7 +989,9 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			_show_message("技能暂时无法释放")
 		return
 	# 玩家技能释放音（按释放者元素选攻击音）
-	var attacker_idx: int = _find_player_index(result.get("attacker", ""))
+	var attacker_idx: int = int(result.get("attacker_index", result.get("attackerIndex", -1)))
+	if attacker_idx < 0:
+		attacker_idx = _find_player_index(str(result.get("attacker_id", result.get("attackerId", ""))), str(result.get("attacker", "")))
 	if attacker_idx >= 0 and _battle != null and attacker_idx < _battle.player_team.size():
 		var attacker: Dictionary = _battle.player_team[attacker_idx]
 		_sfx_attack_by_element(str(attacker.get("element", "fire")))
@@ -1243,8 +1283,12 @@ func _process_matches() -> void:
 		var log_died: bool = bool(log.get("targetDied", log.get("target_died", false)))
 		var log_attacker: String = str(log.get("attacker", "伙伴"))
 		var log_element: String = str(log.get("element", "fire"))
-		var attacker_idx := _find_player_index(log_attacker)
-		var target_idx := _find_enemy_index(log_target)
+		var attacker_idx := int(log.get("attacker_index", log.get("attackerIndex", -1)))
+		if attacker_idx < 0:
+			attacker_idx = _find_player_index(str(log.get("attacker_id", log.get("attackerId", ""))), log_attacker)
+		var target_idx := int(log.get("target_index", log.get("targetIndex", -1)))
+		if target_idx < 0:
+			target_idx = _find_enemy_index(log_target)
 		if attacker_idx >= 0 and target_idx >= 0:
 			_sfx_attack_by_element(log_element)
 			await _play_attack_observation(false, attacker_idx, true, target_idx, log_element, "%s → %s" % [log_attacker, log_target], log_effective)
@@ -1347,14 +1391,73 @@ func _wait_for_player_resolution_tail() -> void:
 func _play_ready_leader_burst_after_combo() -> void:
 	if _battle == null or not _battle.has_method("consume_ready_leader_burst"):
 		return
+	if _battle.has_method("is_leader_burst_ready") and not bool(_battle.call("is_leader_burst_ready")):
+		return
+	var preview: Dictionary = {}
+	if _battle.has_method("get_ready_leader_burst_preview"):
+		preview = _battle.call("get_ready_leader_burst_preview")
+	if not preview.is_empty():
+		_start_leader_burst_showcase(preview)
+		_state = BattleState.MATCHING
+		_sfx("powerup_burst_soft")
+		await _advance_leader_burst_showcase_phase("scale_in", LEADER_BURST_SCALE_IN_DURATION)
+		await _advance_leader_burst_showcase_phase("banner", LEADER_BURST_BANNER_DURATION)
+		await _advance_leader_burst_showcase_phase("scale_out", LEADER_BURST_SCALE_OUT_DURATION)
 	var result: Dictionary = _battle.consume_ready_leader_burst()
 	var leader_skill_log: Dictionary = result.get("leader_skill_log", {})
 	if leader_skill_log.is_empty():
+		_clear_leader_burst_showcase()
 		return
 	_state = BattleState.MATCHING
-	await get_tree().create_timer(0.18).timeout
+	if preview.is_empty():
+		await get_tree().create_timer(0.18).timeout
+	else:
+		_set_leader_burst_showcase_phase("effect")
 	await _play_leader_skill_log(leader_skill_log)
+	await get_tree().create_timer(LEADER_BURST_EFFECT_HOLD).timeout
+	if not _leader_burst_showcase.is_empty():
+		await _advance_leader_burst_showcase_phase("restore", LEADER_BURST_RESTORE_DURATION)
+	_clear_leader_burst_showcase()
 	await _handle_phase_transition_result(result.get("phase_transition", {}))
+
+
+func _start_leader_burst_showcase(preview: Dictionary) -> void:
+	var leader_index := int(preview.get("leader_index", -1))
+	if leader_index < 0:
+		return
+	_leader_burst_showcase = preview.duplicate(true)
+	_leader_burst_showcase["timer"] = 0.0
+	_leader_burst_showcase["phase"] = "scale_in"
+	_leader_burst_showcase["active"] = true
+	_screen_flash_timer = maxf(_screen_flash_timer, 0.18)
+	queue_redraw()
+	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
+		_feedback_overlay.queue_redraw()
+
+
+func _set_leader_burst_showcase_phase(phase: String) -> void:
+	if _leader_burst_showcase.is_empty():
+		return
+	_leader_burst_showcase["phase"] = phase
+	_leader_burst_showcase["timer"] = 0.0
+	queue_redraw()
+	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
+		_feedback_overlay.queue_redraw()
+
+
+func _advance_leader_burst_showcase_phase(phase: String, duration: float) -> void:
+	_set_leader_burst_showcase_phase(phase)
+	await get_tree().create_timer(maxf(0.01, duration)).timeout
+
+
+func _clear_leader_burst_showcase() -> void:
+	if _leader_burst_showcase.is_empty():
+		return
+	_leader_burst_showcase = {}
+	queue_redraw()
+	if _feedback_overlay != null and is_instance_valid(_feedback_overlay):
+		_feedback_overlay.queue_redraw()
+
 
 func _handle_phase_transition_result(phase_transition: Dictionary) -> void:
 	if phase_transition.is_empty() or _battle == null:
@@ -2042,16 +2145,27 @@ func _handle_leader_charge_events(events: Array) -> void:
 
 func _play_leader_skill_log(log: Dictionary) -> void:
 	var element := str(log.get("element", "fire"))
+	var visual: Dictionary = log.get("visual", {}) if log.get("visual", {}) is Dictionary else {}
+	var tone := str(visual.get("tone", _leader_fx_default_tone(element)))
 	var color := _leader_fx_color(element)
 	var board_center := _board_center()
 	_trigger_element_glow(element, Color(color.r, color.g, color.b, 0.18))
 	_trigger_element_ripple(element, color)
 	_show_message("LEADER BURST")
 	_sfx("powerup_burst_soft")
+	_leader_skill_fx.append({
+		"kind": "crest",
+		"element": element,
+		"tone": tone,
+		"center": board_center,
+		"timer": 0.74,
+		"maxTimer": 0.74
+	})
 	for i in range(mini(3, _battle.player_team.size() if _battle != null else 0)):
 		_leader_skill_fx.append({
 			"kind": "gather",
 			"element": element,
+			"tone": tone,
 			"from": _combatant_effect_center(false, i),
 			"to": board_center,
 			"timer": 0.42,
@@ -2067,6 +2181,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 		_leader_skill_fx.append({
 			"kind": "beam",
 			"element": element,
+			"tone": tone,
 			"from": board_center,
 			"to": target_center,
 			"timer": 0.56,
@@ -2077,7 +2192,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.48, "maxTimer": 0.48})
 		_trigger_attack_shake()
 		var leader_effective := bool(log.get("is_effective", false))
-		_floating_texts.append(_damage_floating_entry(int(log.get("remaining_damage", log.get("damage", 0))), target_center.x, target_center.y - 14.0, leader_effective, bool(log.get("is_weak", false)), 21.0, 0.9, true, element))
+		_floating_texts.append(_damage_floating_entry(int(log.get("remaining_damage", log.get("damage", 0))), target_center.x, target_center.y - 14.0, leader_effective, bool(log.get("is_weak", false)), 21.0, LEADER_BURST_EFFECT_HOLD, true, element))
 		if leader_effective:
 			_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 
@@ -2091,16 +2206,34 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 			_leader_skill_fx.append({
 				"kind": "ally_burst",
 				"element": element,
+				"tone": tone,
 				"center": ally_center,
 				"timer": 0.66,
 				"maxTimer": 0.66
 			})
 			if kind == "heal" or kind == "lifesteal":
 				_sfx("battle_heal_leaf_bubble")
-				_floating_texts.append({"text": "+%d" % int(effect.get("amount", 0)), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"], "size": 20.0, "timer": 0.0, "duration": 0.85, "critical": true})
+				_floating_texts.append({"text": "+%d" % int(effect.get("amount", 0)), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"], "size": 20.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 			else:
 				_sfx("battle_shield_soft_bloom")
-				_floating_texts.append({"text": "GUARD", "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
+				_floating_texts.append({"text": "GUARD", "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+		elif kind == "team_shield":
+			_sfx("battle_shield_soft_bloom")
+			var targets: Array = effect.get("targets", [])
+			for target_info: Dictionary in targets:
+				var p_idx := int(target_info.get("target_index", -1))
+				if p_idx < 0:
+					continue
+				var ally_center := _combatant_effect_center(false, p_idx)
+				_leader_skill_fx.append({
+					"kind": "ally_burst",
+					"element": element,
+					"tone": "guard",
+					"center": ally_center,
+					"timer": 0.76,
+					"maxTimer": 0.76
+				})
+				_floating_texts.append({"text": "护盾+%d" % int(target_info.get("amount", effect.get("amount", 0))), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 18.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind == "convert_gems":
 			var converted := _convert_random_gems_to(str(effect.get("target_element", "light")), int(effect.get("count", 2)))
 			if not converted.is_empty():
@@ -2108,16 +2241,16 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				_spawn_item_use_effect("gem_shift", board_center, color, 0.72, {"source": "mixed", "target": str(effect.get("target_element", "light")), "affected": converted.size()})
 				for cell: Dictionary in converted:
 					var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
-					_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", "light")), "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
-				_floating_texts.append({"text": "星星 x%d" % converted.size(), "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
+					_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", "light")), "tone": tone, "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
+				_floating_texts.append({"text": "星星 x%d" % converted.size(), "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind == "status" or kind == "weaken":
 			var e_idx := int(effect.get("target_index", target_idx))
 			if e_idx < 0:
 				continue
 			var e_center := _combatant_effect_center(true, e_idx)
-			_leader_skill_fx.append({"kind": "mark", "element": element, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
+			_leader_skill_fx.append({"kind": "mark", "element": element, "tone": tone, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
 			var label := str(effect.get("status", "DOWN")).to_upper() if kind == "status" else "DOWN"
-			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": 0.75, "critical": true})
+			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 	await get_tree().create_timer(0.28).timeout
 
 func _board_center() -> Vector2:
@@ -2191,6 +2324,25 @@ func _leader_fx_color(element: String) -> Color:
 		_:
 			return C["gold"]
 
+func _leader_fx_default_tone(element: String) -> String:
+	match element:
+		"fire":
+			return "fire"
+		"earth":
+			return "bulwark"
+		"dark":
+			return "siphon"
+		"thunder":
+			return "chain"
+		"wind":
+			return "speed"
+		"water":
+			return "guard"
+		"grass":
+			return "balanced"
+		_:
+			return "strike"
+
 func _on_damage_dealt(damage_info: Dictionary) -> void:
 	"""处理 BattleManager.damage_dealt 信号，显示浮动伤害数字"""
 	var damage: int = damage_info.get("damage", 0)
@@ -2249,7 +2401,9 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 
 	# ★ 主人定 2026-06-10：我方宠物弹动 + 同属性弹道
 	if info_type != "active_skill":  # 主动技能已经有弹道，只补常规攻击
-		var attacker_idx: int = _find_player_index(attacker_name)
+		var attacker_idx: int = int(damage_info.get("attacker_index", damage_info.get("attackerIndex", -1)))
+		if attacker_idx < 0:
+			attacker_idx = _find_player_index(str(damage_info.get("attacker_id", damage_info.get("attackerId", ""))), attacker_name)
 		if attacker_idx >= 0:
 			# 1) 玩家宠物往前弹一下回位（0.3s）
 			_player_lunge_anims.append({
@@ -2419,7 +2573,19 @@ func _find_player_index(name: String, fallback_name: String = "") -> int:
 	for i in range(team.size()):
 		if team[i] == null:
 			continue
-		if not name.is_empty() and (team[i].get("name", "") == name or team[i].get("id", "") == name):
+		if not name.is_empty() and team[i].get("id", "") == name:
+			return i
+	for i in range(team.size()):
+		if team[i] == null or int(team[i].get("hp", 0)) <= 0:
+			continue
+		if not name.is_empty() and team[i].get("name", "") == name:
+			return i
+		if not fallback_name.is_empty() and team[i].get("name", "") == fallback_name:
+			return i
+	for i in range(team.size()):
+		if team[i] == null:
+			continue
+		if not name.is_empty() and team[i].get("name", "") == name:
 			return i
 		if not fallback_name.is_empty() and team[i].get("name", "") == fallback_name:
 			return i
@@ -2525,6 +2691,8 @@ func _process(delta: float) -> void:
 	# 更新道具使用特效
 	_update_item_use_effects(effective_delta)
 	BattleAnimationControllerScript.tick_timed_entries(_leader_skill_fx, effective_delta)
+	if not _leader_burst_showcase.is_empty():
+		_leader_burst_showcase["timer"] = float(_leader_burst_showcase.get("timer", 0.0)) + effective_delta
 	
 	# 更新敌人倒下粒子
 	_update_defeat_particles(effective_delta)
@@ -2893,7 +3061,6 @@ func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 		if _is_digit_fx_text(text):
 			_draw_digit_fx_text(canvas, text, x + wobble_x, float_y, size * pop, fade, style)
 		else:
-			_draw_soft_sparkles(canvas, Vector2(x + wobble_x, float_y - size * 0.90), color, fade, ft.get("critical", false))
 			_draw_fx_text(canvas, text, x + wobble_x, float_y, color, size * pop, 170.0, style)
 
 func _draw_single_layer_floating_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float) -> void:
@@ -2938,8 +3105,86 @@ func _draw_top_feedback_layer(canvas: CanvasItem = self) -> void:
 	_draw_combo_popup(canvas)
 	_draw_fall_messages(canvas)
 	_draw_message(canvas)
+	_draw_leader_burst_showcase(canvas)
 	if _state == BattleState.BATTLE_END and not _uses_editable_battle_end_overlay():
 		_draw_battle_end_overlay(canvas)
+
+
+func _draw_leader_burst_showcase(canvas: CanvasItem = self) -> void:
+	if _leader_burst_showcase.is_empty() or _battle == null:
+		return
+	var leader_index := int(_leader_burst_showcase.get("leader_index", -1))
+	if leader_index < 0 or leader_index >= _battle.player_team.size():
+		return
+	var leader_value = _battle.player_team[leader_index]
+	if not leader_value is Dictionary:
+		return
+	var leader: Dictionary = leader_value
+	if leader.is_empty():
+		return
+	var timer := float(_leader_burst_showcase.get("timer", 0.0))
+	var phase := str(_leader_burst_showcase.get("phase", "scale_in"))
+	var alpha := clampf(timer / 0.18, 0.0, 1.0)
+	var dark_alpha := 0.16 * alpha
+	if phase == "restore":
+		var restore_p := clampf(timer / maxf(0.01, LEADER_BURST_RESTORE_DURATION), 0.0, 1.0)
+		dark_alpha = 0.16 * (1.0 - restore_p)
+	elif phase == "effect":
+		dark_alpha = 0.10
+	canvas.draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.05, 0.04, 0.04, dark_alpha), true)
+	if phase == "banner":
+		_draw_leader_burst_banner(canvas, timer)
+	if phase == "effect" or phase == "restore":
+		return
+	var scale := LEADER_BURST_SHOWCASE_SCALE
+	if phase == "scale_in":
+		var intro_p := clampf(timer / maxf(0.01, LEADER_BURST_SCALE_IN_DURATION), 0.0, 1.0)
+		var ease := 1.0 - pow(1.0 - intro_p, 3.0)
+		scale = lerpf(1.0, LEADER_BURST_SHOWCASE_SCALE, ease)
+	elif phase == "scale_out":
+		var out_p := clampf(timer / maxf(0.01, LEADER_BURST_SCALE_OUT_DURATION), 0.0, 1.0)
+		var out_ease := 1.0 - pow(1.0 - out_p, 3.0)
+		scale = lerpf(LEADER_BURST_SHOWCASE_SCALE, 1.0, out_ease)
+	var pulse := sin(minf(timer, 0.70) * TAU * 1.6) * 0.025
+	scale += pulse if phase != "scale_out" else 0.0
+	var element := str(_leader_burst_showcase.get("element", leader.get("element", "fire")))
+	var color := _leader_fx_color(element)
+	var center := _combatant_effect_center(false, leader_index)
+	center.y -= 12.0 * clampf(scale - 1.0, 0.0, 1.0)
+	var size := LEADER_BURST_SHOWCASE_BASE_SIZE * scale
+	canvas.draw_circle(center, size * 0.52, Color(color.r, color.g, color.b, 0.22 * alpha))
+	canvas.draw_arc(center, size * 0.54, -PI * 0.18 + timer * 1.5, PI * 1.22 + timer * 1.5, 64, Color(color.r, color.g, color.b, 0.92 * alpha), 4.8, true)
+	canvas.draw_arc(center, size * 0.42, PI * 0.70 - timer * 1.2, PI * 1.86 - timer * 1.2, 52, Color(1.0, 0.94, 0.52, 0.72 * alpha), 2.4, true)
+	var tex := _get_monster_texture(leader)
+	if tex:
+		_draw_texture_contain_on(canvas, tex, Rect2(center.x - size * 0.5, center.y - size * 0.56, size, size), alpha)
+	else:
+		canvas.draw_circle(center, size * 0.34, Color(color.r, color.g, color.b, 0.84 * alpha))
+		_draw_fx_text(canvas, str(leader.get("name", "")), center.x, center.y + 5.0, C["white"], 15.0, size, "gold")
+	_draw_soft_sparkles(canvas, center + Vector2(0.0, -size * 0.30), color, alpha, true)
+
+
+func _draw_leader_burst_banner(canvas: CanvasItem, timer: float) -> void:
+	var skill_name := str(_leader_burst_showcase.get("skill_name", "LEADER BURST"))
+	if skill_name.is_empty():
+		skill_name = "LEADER BURST"
+	var p := clampf(timer / maxf(0.01, LEADER_BURST_BANNER_DURATION), 0.0, 1.0)
+	var banner_w := 330.0
+	var center_x := DESIGN_W * 0.5
+	if p < 0.24:
+		var slide := 1.0 - pow(1.0 - p / 0.24, 3.0)
+		center_x = lerpf(-banner_w * 0.55, DESIGN_W * 0.5, slide)
+	elif p > 0.76:
+		var slide_out := pow((p - 0.76) / 0.24, 2.0)
+		center_x = lerpf(DESIGN_W * 0.5, DESIGN_W + banner_w * 0.55, slide_out)
+	var y := 132.0
+	var alpha := clampf(sin(p * PI) * 1.35, 0.0, 1.0)
+	var element := str(_leader_burst_showcase.get("element", "fire"))
+	var color := _leader_fx_color(element)
+	canvas.draw_line(Vector2(center_x - banner_w * 0.45, y - 13.0), Vector2(center_x + banner_w * 0.45, y - 13.0), Color(color.r, color.g, color.b, 0.58 * alpha), 4.2)
+	canvas.draw_line(Vector2(center_x - banner_w * 0.50, y + 15.0), Vector2(center_x + banner_w * 0.50, y + 15.0), Color(1.0, 0.86, 0.34, 0.48 * alpha), 2.2)
+	_draw_fx_text(canvas, skill_name, center_x, y, C["gold"], LEADER_BURST_BANNER_TEXT_SIZE, banner_w, "gold")
+
 
 func _draw_damage_edge_flash(canvas: CanvasItem = self) -> void:
 	if _damage_edge_flash_timer <= 0.0:
@@ -3796,7 +4041,6 @@ func _draw_message(canvas: CanvasItem = self) -> void:
 	var msg_style := _message_fx_style(_message_text)
 	var msg_color := _message_fx_color(_message_text, alpha)
 	if is_major_message:
-		_draw_soft_sparkles(canvas, Vector2(DESIGN_W / 2.0, toast_y - 9.0), msg_color, alpha, true)
 		canvas.draw_arc(Vector2(DESIGN_W / 2.0, toast_y + 1.0), (92.0 if is_turn_message else 74.0) * pop, -0.08 * PI, 1.08 * PI, 46, Color(msg_color.r, msg_color.g, msg_color.b, 0.22 * alpha), 2.6, true)
 		canvas.draw_circle(Vector2(DESIGN_W / 2.0 - toast_w * 0.42, toast_y - toast_h * 0.18), 2.4 * pop, Color(1.0, 1.0, 0.78, 0.55 * alpha))
 		canvas.draw_circle(Vector2(DESIGN_W / 2.0 + toast_w * 0.42, toast_y - toast_h * 0.20), 2.1 * pop, Color(1.0, 0.86, 0.42, 0.48 * alpha))
@@ -4294,8 +4538,12 @@ func _draw_leader_skill_fx() -> void:
 		var progress := clampf(1.0 - remaining / duration, 0.0, 1.0)
 		var alpha := clampf(1.0 - maxf(0.0, progress - 0.72) / 0.28, 0.0, 1.0)
 		var element := str(fx.get("element", "fire"))
+		var tone := str(fx.get("tone", _leader_fx_default_tone(element)))
 		var color := _leader_fx_color(element)
 		match str(fx.get("kind", "")):
+			"crest":
+				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				_draw_leader_crest(center, color, tone, progress, alpha)
 			"charge_full":
 				var center: Vector2 = fx.get("center", Vector2.ZERO)
 				var pulse := sin(progress * PI)
@@ -4310,29 +4558,49 @@ func _draw_leader_skill_fx() -> void:
 				draw_line(start, pos, Color(color.r, color.g, color.b, 0.34 * alpha), 2.0)
 				draw_circle(pos, 5.5 + 3.0 * sin(progress * PI), Color(color.r, color.g, color.b, 0.86 * alpha))
 				draw_circle(pos, 2.5, Color(1.0, 1.0, 0.88, 0.88 * alpha))
+				_draw_leader_particles(pos, color, tone, progress, alpha * 0.72, 2, 12.0, false)
 			"beam":
 				var start: Vector2 = fx.get("from", Vector2.ZERO)
 				var finish: Vector2 = fx.get("to", Vector2.ZERO)
 				var reach := clampf(progress / 0.42, 0.0, 1.0)
 				var tip := start.lerp(finish, 1.0 - pow(1.0 - reach, 3.0))
-				draw_line(start, tip, Color(color.r, color.g, color.b, 0.80 * alpha), 5.0)
-				draw_line(start, tip, Color(1.0, 1.0, 0.92, 0.72 * alpha), 2.2)
-				draw_circle(start, 18.0 + sin(progress * PI) * 8.0, Color(color.r, color.g, color.b, 0.18 * alpha))
-				if reach >= 0.98:
-					draw_circle(finish, 16.0 + progress * 20.0, Color(color.r, color.g, color.b, 0.18 * alpha))
-					_draw_soft_sparkles(self, finish, color, alpha, true)
+				if tone == "fire":
+					_draw_leader_fire_beam(start, finish, progress, alpha)
+				else:
+					var beam_width := 6.4 if tone == "chain" else 5.0
+					draw_line(start, tip, Color(color.r, color.g, color.b, 0.80 * alpha), beam_width)
+					draw_line(start, tip, Color(1.0, 1.0, 0.92, 0.72 * alpha), 2.2)
+					if tone == "siphon":
+						draw_line(tip, start.lerp(finish, maxf(0.0, reach - 0.22)), Color(0.20, 0.08, 0.36, 0.55 * alpha), 2.0)
+					elif tone == "chain":
+						_draw_leader_chain_zap(start, tip, color, progress, alpha)
+					draw_circle(start, 18.0 + sin(progress * PI) * 8.0, Color(color.r, color.g, color.b, 0.18 * alpha))
+					if reach >= 0.98:
+						_draw_leader_vfx_texture(finish, tone, 86.0, alpha, progress, "impact")
+						draw_circle(finish, 16.0 + progress * 20.0, Color(color.r, color.g, color.b, 0.18 * alpha))
+						_draw_leader_particles(finish, color, tone, progress, alpha, 5, 22.0, tone == "bulwark")
 			"ally_burst":
 				var center: Vector2 = fx.get("center", Vector2.ZERO)
 				var pulse := sin(clampf(progress / 0.55, 0.0, 1.0) * PI)
+				_draw_leader_vfx_texture(center, tone, 78.0, alpha * 0.92, progress, "ally")
 				draw_circle(center, 20.0 + progress * 26.0, Color(color.r, color.g, color.b, 0.13 * alpha))
-				draw_arc(center, 22.0 + pulse * 8.0, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.78 * alpha), 2.4, true)
-				draw_line(center + Vector2(-8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
-				draw_line(center + Vector2(0.0, -8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
-				_draw_soft_sparkles(self, center, color, alpha, true)
+				if tone == "bulwark" or tone == "guard":
+					_draw_leader_shield_shell(center, color, tone, pulse, alpha)
+				else:
+					draw_arc(center, 22.0 + pulse * 8.0, 0.0, TAU, 48, Color(color.r, color.g, color.b, 0.78 * alpha), 2.4, true)
+					draw_line(center + Vector2(-8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
+					draw_line(center + Vector2(0.0, -8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 1.0, 0.78 * alpha), 2.4)
+				_draw_leader_particles(center, color, tone, progress, alpha, 4, 26.0, tone == "bulwark")
 			"mark":
 				var center: Vector2 = fx.get("center", Vector2.ZERO)
+				_draw_leader_vfx_texture(center, tone, 70.0, alpha * 0.95, progress, "mark")
 				draw_arc(center, 18.0 + progress * 18.0, -PI * 0.4, PI * 1.4, 46, Color(color.r, color.g, color.b, 0.78 * alpha), 2.4, true)
 				draw_arc(center, 10.0 + progress * 10.0, PI * 0.6, PI * 1.9, 32, Color(1.0, 1.0, 0.92, 0.50 * alpha), 1.3, true)
+				if tone == "chain":
+					_draw_leader_chain_zap(center + Vector2(-18.0, -10.0), center + Vector2(18.0, 10.0), color, progress, alpha)
+				elif tone == "siphon":
+					draw_circle(center, 7.0 + sin(progress * PI) * 4.0, Color(0.16, 0.04, 0.27, 0.46 * alpha))
+				_draw_leader_particles(center, color, tone, progress, alpha * 0.8, 3, 20.0, false)
 			"convert_cell":
 				var center: Vector2 = fx.get("center", Vector2.ZERO)
 				var burst := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
@@ -4341,6 +4609,183 @@ func _draw_leader_skill_fx() -> void:
 				draw_line(center - Vector2(8.0, 0.0), center + Vector2(8.0, 0.0), Color(1.0, 1.0, 0.88, 0.88 * alpha), 1.6)
 				draw_line(center - Vector2(0.0, 8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 0.88, 0.88 * alpha), 1.6)
 				_draw_soft_sparkles(self, center, color, alpha, true)
+
+func _draw_leader_crest(center: Vector2, color: Color, tone: String, progress: float, alpha: float) -> void:
+	if tone == "fire":
+		_draw_leader_fire_emitter(center, progress, alpha)
+		return
+	var bloom := sin(clampf(progress / 0.58, 0.0, 1.0) * PI)
+	var radius := 24.0 + progress * 34.0
+	draw_circle(center, radius, Color(color.r, color.g, color.b, 0.10 * alpha))
+	_draw_leader_vfx_texture(center, tone, 92.0, alpha * 0.96, progress, "crest")
+	draw_arc(center, 20.0 + bloom * 8.0, -PI * 0.10, PI * 1.10, 56, Color(color.r, color.g, color.b, 0.82 * alpha), 2.8, true)
+	draw_arc(center, 28.0 + bloom * 10.0, PI * 0.72, PI * 1.88, 56, Color(1.0, 1.0, 0.88, 0.42 * alpha), 1.6, true)
+	match tone:
+		"bulwark":
+			_draw_leader_shield_shell(center, color, tone, bloom, alpha)
+			_draw_leader_particles(center, color, tone, progress, alpha, 6, 34.0, true)
+		"siphon":
+			draw_arc(center, 14.0 + bloom * 10.0, progress * TAU, progress * TAU + PI * 1.38, 44, Color(0.15, 0.04, 0.28, 0.76 * alpha), 3.0, true)
+			_draw_leader_particles(center, color, tone, progress, alpha, 5, 30.0, false)
+		"chain":
+			_draw_leader_chain_zap(center + Vector2(-28.0, 0.0), center + Vector2(28.0, 0.0), color, progress, alpha)
+			_draw_leader_particles(center, color, tone, progress, alpha, 5, 32.0, false)
+		"guard":
+			_draw_leader_shield_shell(center, color, tone, bloom, alpha)
+			_draw_leader_particles(center, color, tone, progress, alpha, 5, 32.0, false)
+		_:
+			_draw_leader_particles(center, color, tone, progress, alpha, 5, 30.0, false)
+
+func _draw_leader_shield_shell(center: Vector2, color: Color, tone: String, pulse: float, alpha: float) -> void:
+	var radius := 21.0 + pulse * 8.0
+	var shell_color := Color(color.r, color.g, color.b, 0.18 * alpha)
+	if tone == "bulwark":
+		shell_color = Color(0.58, 0.38, 0.18, 0.24 * alpha)
+	draw_circle(center, radius, shell_color)
+	_draw_leader_vfx_texture(center, tone, 74.0, alpha * 0.88, pulse, "shell")
+	draw_arc(center, radius + 1.0, -PI * 0.88, PI * 0.10, 36, Color(color.r, color.g, color.b, 0.86 * alpha), 3.0, true)
+	draw_arc(center, radius + 1.0, PI * 0.20, PI * 1.18, 36, Color(1.0, 0.96, 0.72, 0.45 * alpha), 1.5, true)
+	if tone == "bulwark":
+		for i in range(5):
+			var angle := -PI * 0.78 + float(i) * PI * 0.39
+			var p := center + Vector2(cos(angle), sin(angle)) * (radius + 3.0)
+			_draw_rounded_rect(p.x - 3.0, p.y - 3.0, 6.0, 6.0, 1.5, Color(0.66, 0.45, 0.25, 0.70 * alpha))
+
+func _draw_leader_chain_zap(start: Vector2, finish: Vector2, color: Color, progress: float, alpha: float) -> void:
+	var dir := finish - start
+	if dir.length() <= 0.1:
+		return
+	var normal := dir.normalized().orthogonal()
+	var prev := start
+	for i in range(1, 5):
+		var t := float(i) / 5.0
+		var jag := sin(progress * TAU * 2.0 + float(i) * 2.1) * 6.0
+		var point := start.lerp(finish, t) + normal * jag
+		draw_line(prev, point, Color(1.0, 0.94, 0.32, 0.80 * alpha), 2.2)
+		draw_line(prev, point, Color(color.r, color.g, color.b, 0.72 * alpha), 4.2)
+		prev = point
+	draw_line(prev, finish, Color(1.0, 0.96, 0.42, 0.86 * alpha), 2.0)
+
+func _draw_leader_vfx_texture(center: Vector2, tone: String, size: float, alpha: float, progress: float = 0.0, phase: String = "burst") -> void:
+	var tex := _get_texture(LeaderSkillVisualDbScript.get_asset_path(tone))
+	if tex == null:
+		return
+	var clamped_size := maxf(8.0, size * LeaderSkillVisualDbScript.get_motion_scale(tone, progress, phase))
+	var draw_alpha := LeaderSkillVisualDbScript.get_motion_alpha(tone, progress, alpha)
+	draw_texture_rect(
+		tex,
+		Rect2(center.x - clamped_size * 0.5, center.y - clamped_size * 0.5, clamped_size, clamped_size),
+		false,
+		Color(1.0, 1.0, 1.0, draw_alpha)
+	)
+
+func _draw_leader_particles(center: Vector2, color: Color, tone: String, progress: float, alpha: float, count: int, radius: float, shard: bool) -> void:
+	if tone == "fire":
+		_draw_leader_fire_particles(center, progress, alpha, count, radius)
+		return
+	var mote_tex := _get_texture(BATTLE_FX_ASSETS["leader_mote"])
+	var shard_tex := _get_texture(BATTLE_FX_ASSETS["leader_shard"]) if shard else null
+	var limit := mini(maxi(count, 0), mini(8, LeaderSkillVisualDbScript.get_particle_budget(tone)))
+	for i in range(limit):
+		var spin := progress * TAU * (0.65 if tone == "bulwark" else 1.05)
+		var angle := spin + float(i) * TAU / float(limit)
+		var drift := radius * (0.42 + 0.58 * progress)
+		var pos := center + Vector2(cos(angle), sin(angle * 1.12)) * drift
+		var size := (9.0 if shard else 11.0) + 3.0 * sin(progress * PI + float(i))
+		var modulate := Color(color.r, color.g, color.b, clampf(alpha * (0.40 + 0.18 * sin(float(i) + progress * TAU)), 0.0, 0.72))
+		var tex: Texture2D = shard_tex if shard_tex != null and i % 2 == 0 else mote_tex
+		if tex:
+			draw_texture_rect(tex, Rect2(pos.x - size * 0.5, pos.y - size * 0.5, size, size), false, modulate)
+		else:
+			draw_circle(pos, size * 0.28, modulate)
+
+func _draw_leader_fire_emitter(center: Vector2, progress: float, alpha: float) -> void:
+	var pulse := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
+	draw_circle(center, 30.0 + pulse * 18.0, Color(1.0, 0.24, 0.03, 0.20 * alpha))
+	draw_arc(center, 24.0 + pulse * 12.0, -PI * 0.14, PI * 1.22, 48, Color(1.0, 0.42, 0.08, 0.90 * alpha), 4.8, true)
+	_draw_leader_fire_particles(center, progress, alpha, 8, 44.0)
+
+func _draw_leader_fire_beam(start: Vector2, finish: Vector2, progress: float, alpha: float) -> void:
+	var reach := clampf(progress / 0.48, 0.0, 1.0)
+	var eased := 1.0 - pow(1.0 - reach, 3.0)
+	var tip := start.lerp(finish, eased)
+	var dir := tip - start
+	if dir.length() <= 0.1:
+		return
+	var normal := dir.normalized().orthogonal()
+	var points: Array[Vector2] = []
+	var segments := 10
+	for i in range(segments + 1):
+		var t := float(i) / float(segments)
+		var heat := sin(progress * TAU * 3.3 + t * TAU * 1.8)
+		var curl := sin(progress * TAU * 1.6 + float(i) * 1.17)
+		var offset := normal * (heat * 11.0 + curl * 5.0) * sin(t * PI)
+		points.append(start.lerp(tip, t) + offset)
+	for i in range(points.size() - 1):
+		var a := points[i]
+		var b := points[i + 1]
+		draw_line(a, b, Color(0.92, 0.08, 0.01, 0.90 * alpha), LEADER_FIRE_TRAIL_OUTER_WIDTH)
+		draw_line(a, b, Color(1.0, 0.48, 0.04, 0.96 * alpha), LEADER_FIRE_TRAIL_MID_WIDTH)
+		draw_line(a, b, Color(1.0, 0.95, 0.50, 0.90 * alpha), LEADER_FIRE_TRAIL_CORE_WIDTH)
+	for i in range(8):
+		var t := clampf((float(i) + 0.35) / 8.0, 0.0, reach)
+		var base := start.lerp(tip, t)
+		var flicker := normal * sin(progress * TAU * 4.4 + float(i) * 1.9) * (12.0 + 7.0 * sin(t * PI))
+		var size := LEADER_FIRE_TRAIL_PARTICLE_SIZE + LEADER_FIRE_TRAIL_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i)))
+		_draw_leader_fire_sprite(base + flicker, i, size, alpha * (0.88 - t * 0.16), progress * 0.8 + t)
+	draw_circle(start, 18.0 + sin(progress * PI) * 8.0, Color(1.0, 0.26, 0.02, 0.18 * alpha))
+	if reach >= 0.96:
+		_draw_leader_fire_impact(finish, progress, alpha)
+
+func _draw_leader_fire_impact(center: Vector2, progress: float, alpha: float) -> void:
+	var hit := sin(clampf(progress / 0.46, 0.0, 1.0) * PI)
+	draw_circle(center, 24.0 + progress * 42.0, Color(1.0, 0.20, 0.02, 0.25 * alpha))
+	draw_arc(center, 31.0 + hit * 22.0, -PI * 0.24, PI * 1.42, 62, Color(1.0, 0.39, 0.03, 0.94 * alpha), 6.0, true)
+	draw_arc(center, 16.0 + hit * 14.0, PI * 0.04, PI * 1.28, 46, Color(1.0, 0.92, 0.36, 0.80 * alpha), 3.2, true)
+	_draw_leader_fire_sprite(center + Vector2(0.0, -6.0), 7, LEADER_FIRE_IMPACT_SPRITE_SIZE + hit * LEADER_FIRE_IMPACT_SPRITE_VARIANCE, alpha, -progress * 0.5)
+	_draw_leader_fire_particles(center, progress, alpha, 8, 56.0)
+
+func _draw_leader_fire_particles(center: Vector2, progress: float, alpha: float, count: int, radius: float) -> void:
+	var limit := mini(maxi(count, 0), mini(8, LeaderSkillVisualDbScript.get_particle_budget("fire")))
+	for i in range(limit):
+		var angle := progress * TAU * 1.35 + float(i) * TAU / float(limit)
+		var drift := radius * (0.26 + progress * 0.78)
+		var pos := center + Vector2(cos(angle), sin(angle * 1.18)) * drift
+		var size := LEADER_FIRE_BURST_PARTICLE_SIZE + LEADER_FIRE_BURST_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i) * 0.7))
+		_draw_leader_fire_sprite(pos, i, size, alpha * 0.86, angle)
+
+func _draw_leader_fire_sprite(center: Vector2, index: int, size_px: float, alpha: float, spin: float) -> void:
+	var tex := _get_texture(BATTLE_FX_ASSETS["leader_fire_particle"])
+	if tex == null:
+		var a := clampf(alpha, 0.0, 1.0)
+		draw_circle(center + Vector2(0.0, size_px * 0.14), size_px * 0.32, Color(1.0, 0.26, 0.02, a))
+		draw_colored_polygon(PackedVector2Array([
+			center + Vector2(0.0, -size_px * 0.55),
+			center + Vector2(size_px * 0.34, size_px * 0.18),
+			center + Vector2(0.0, size_px * 0.45),
+			center + Vector2(-size_px * 0.34, size_px * 0.18)
+		]), Color(1.0, 0.52, 0.04, a))
+		draw_circle(center + Vector2(0.0, size_px * 0.08), size_px * 0.16, Color(1.0, 0.90, 0.22, a))
+		return
+	var src := _leader_fire_particle_region(index)
+	var aspect := src.size.x / maxf(1.0, src.size.y)
+	var w := size_px * aspect
+	var h := size_px
+	var wobble := Vector2(cos(spin) * 1.5, sin(spin * 1.7) * 1.5)
+	draw_texture_rect_region(tex, Rect2(center.x - w * 0.5 + wobble.x, center.y - h * 0.5 + wobble.y, w, h), src, Color(1.0, 1.0, 1.0, clampf(alpha, 0.0, 1.0)))
+
+func _leader_fire_particle_region(index: int) -> Rect2:
+	var regions := [
+		Rect2(28, 42, 100, 160),
+		Rect2(176, 52, 132, 96),
+		Rect2(392, 44, 96, 118),
+		Rect2(286, 154, 86, 96),
+		Rect2(22, 266, 150, 94),
+		Rect2(214, 282, 106, 126),
+		Rect2(362, 330, 136, 128),
+		Rect2(218, 418, 76, 72)
+	]
+	return regions[abs(index) % regions.size()]
 
 func _draw_item_fx_hammer(fx: Dictionary, center: Vector2, color: Color, progress: float, alpha: float) -> void:
 	var swing := clampf(progress / 0.38, 0.0, 1.0)
@@ -4528,6 +4973,17 @@ func _draw_texture_fit_on(canvas: CanvasItem, tex: Texture2D, rect: Rect2, opaci
 		return
 	canvas.draw_texture_rect(tex, rect, false, Color(1, 1, 1, opacity))
 
+func _draw_texture_contain_on(canvas: CanvasItem, tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
+	if tex == null:
+		return
+	var tex_size := tex.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var scale: float = minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var draw_size := tex_size * scale
+	var target := Rect2(rect.position + (rect.size - draw_size) / 2.0, draw_size)
+	canvas.draw_texture_rect(tex, target, false, Color(1.0, 1.0, 1.0, opacity))
+
 func _draw_texture_contain(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> void:
 	if tex == null:
 		return
@@ -4658,11 +5114,8 @@ func _draw_hp_text_in_bar(text: String, rect: Rect2, color: Color) -> void:
 	var center_x := rect.get_center().x
 	var baseline_y := rect.position.y + rect.size.y * 0.64
 	var left := center_x - max_width * 0.5
-	var shadow := Color(0.06, 0.10, 0.13, 0.82)
-	draw_string(font, Vector2(left - 0.45, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
-	draw_string(font, Vector2(left + 0.45, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
-	draw_string(font, Vector2(left, baseline_y - 0.45), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
-	draw_string(font, Vector2(left, baseline_y + 0.55), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
+	var outline := Color(0.06, 0.10, 0.13, 0.92)
+	draw_string_outline(font, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, 1, outline)
 	draw_string(font, Vector2(left, baseline_y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, color)
 
 func _draw_battle_end_text_on(canvas: CanvasItem, text: String, center: Vector2, color: Color, size: float, max_width: float) -> void:
@@ -4687,41 +5140,18 @@ func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: 
 	var safe_text := BattleUIFeedbackScript.fit_text(FX_ROUND_FONT, text, max_width, size)
 	var left := x - max_width / 2.0
 	var palette := _fx_text_palette(style, color)
-	var shadow: Color = palette["shadow"]
 	var outline: Color = palette["outline"]
-	var rim: Color = palette["rim"]
 	var fill: Color = palette["fill"]
-	var shine: Color = palette["shine"]
 	var solid_combo_count := style == "combo_number" or style == "combo_label"
 	var alpha := 1.0 if solid_combo_count and color.a > 0.0 else color.a
-	shadow.a *= alpha
-	outline.a *= alpha
-	rim.a *= alpha
+	outline.a = clampf(alpha, 0.0, 1.0)
 	fill.a *= alpha
-	shine.a *= alpha
 	if solid_combo_count:
 		outline.a = 1.0
-		rim.a = 1.0
 		fill.a = 1.0
-	var outline_size := maxf(2.0, size * 0.15)
-	var rim_size := maxf(1.0, size * 0.07)
-	if not solid_combo_count:
-		canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.0, y + outline_size + 1.4), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, shadow)
-	var outline_steps := [
-		Vector2(-outline_size, 0.0), Vector2(outline_size, 0.0),
-		Vector2(0.0, -outline_size), Vector2(0.0, outline_size),
-		Vector2(-outline_size * 0.72, -outline_size * 0.72),
-		Vector2(outline_size * 0.72, -outline_size * 0.72),
-		Vector2(-outline_size * 0.72, outline_size * 0.72),
-		Vector2(outline_size * 0.72, outline_size * 0.72)
-	]
-	for offset: Vector2 in outline_steps:
-		canvas.draw_string(FX_ROUND_FONT, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline)
-	canvas.draw_string(FX_ROUND_FONT, Vector2(left - rim_size, y - rim_size), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, rim)
+	var outline_size := maxi(2, int(round(maxf(2.0, size * (0.11 if solid_combo_count else 0.09)))))
+	canvas.draw_string_outline(FX_ROUND_FONT, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline_size, outline)
 	canvas.draw_string(FX_ROUND_FONT, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
-	if not solid_combo_count:
-		canvas.draw_string(FX_ROUND_FONT, Vector2(left + 0.8, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
-		canvas.draw_string(FX_ROUND_FONT, Vector2(left, y - size * 0.13), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size * 0.92, shine)
 
 func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, scale: float, opacity: float) -> void:
 	var combo_tex := _get_texture(BATTLE_FX_ASSETS["combo_word"])
@@ -4744,22 +5174,9 @@ func _draw_combo_count_text(canvas: CanvasItem, text: String, x: float, y: float
 	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)
 	var left := x - max_width * 0.5
 	var outline_size := maxf(4.5, size * 0.14)
-	var rim_size := maxf(2.0, size * 0.06)
 	var outline := Color(0.50, 0.16, 0.03, 1.0)
-	var rim := Color(1.0, 0.46, 0.08, 1.0)
 	var fill := Color(1.0, 0.92, 0.18, 1.0)
-	var outline_steps := [
-		Vector2(-outline_size, 0.0), Vector2(outline_size, 0.0),
-		Vector2(0.0, -outline_size), Vector2(0.0, outline_size),
-		Vector2(-outline_size * 0.72, -outline_size * 0.72),
-		Vector2(outline_size * 0.72, -outline_size * 0.72),
-		Vector2(-outline_size * 0.72, outline_size * 0.72),
-		Vector2(outline_size * 0.72, outline_size * 0.72)
-	]
-	for offset: Vector2 in outline_steps:
-		canvas.draw_string(font, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, outline)
-	for offset: Vector2 in [Vector2(-rim_size, 0.0), Vector2(rim_size, 0.0), Vector2(0.0, -rim_size), Vector2(0.0, rim_size)]:
-		canvas.draw_string(font, Vector2(left + offset.x, y + offset.y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, rim)
+	canvas.draw_string_outline(font, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, maxi(4, int(round(outline_size))), outline)
 	canvas.draw_string(font, Vector2(left, y), safe_text, HORIZONTAL_ALIGNMENT_CENTER, max_width, size, fill)
 
 func _is_digit_fx_text(text: String) -> bool:

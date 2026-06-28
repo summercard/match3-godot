@@ -436,6 +436,31 @@ text = "精灵课堂"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="TestToolButton" type="TextureButton" parent="PrimaryButtons"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 277.0
+offset_top = 166.0
+offset_right = 365.0
+offset_bottom = 196.0
+texture_normal = ExtResource("16_inn_entry")
+texture_pressed = ExtResource("16_inn_entry")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Text" type="Label" parent="PrimaryButtons/TestToolButton"]
+layout_mode = 0
+offset_left = 10.0
+offset_right = 86.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.24, 0.08, 0.44, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "测试工具"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="StartButton" type="TextureButton" parent="PrimaryButtons" unique_id=318868816]
 unique_name_in_owner = true
 layout_mode = 0

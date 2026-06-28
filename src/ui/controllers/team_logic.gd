@@ -58,7 +58,10 @@ const ELEMENT_ICON_ASSETS := {
 	"water": "res://assets/images/ui/elements/element_water.png",
 	"grass": "res://assets/images/ui/elements/element_grass.png",
 	"thunder": "res://assets/images/ui/elements/element_thunder.png",
+	"earth": "res://assets/images/ui/elements/element_earth.png",
+	"wind": "res://assets/images/ui/elements/element_wind.png",
 	"light": "res://assets/images/ui/elements/element_light.png",
+	"dark": "res://assets/images/ui/elements/element_dark.png",
 }
 
 # 颜色
@@ -188,6 +191,7 @@ func init(data: Dictionary = {}) -> void:
 		}
 	else:
 		_team = {"leader": null, "member1": null, "member2": null}
+	_sanitize_team_unique_refs()
 	
 	_roster_page = 0
 	_selected_slot = ""
@@ -520,6 +524,39 @@ func _handle_slot_tap(slot_key: String) -> void:
 		_selected_slot = "" if _selected_slot == slot_key else slot_key
 	queue_redraw()
 
+func _get_team_slots_for_instance(instance_id: String) -> Array:
+	var slots: Array = []
+	if instance_id.is_empty():
+		return slots
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		if value != null and str(value) == instance_id:
+			slots.append(key)
+	return slots
+
+func _remove_from_team(instance_id: String) -> bool:
+	var removed := false
+	for key: String in _get_team_slots_for_instance(instance_id):
+		_team[key] = null
+		if _selected_slot == key:
+			_selected_slot = ""
+		removed = true
+	return removed
+
+func _sanitize_team_unique_refs() -> void:
+	var seen := {}
+	for key in ["leader", "member1", "member2"]:
+		var value: Variant = _team.get(key, null)
+		if value == null:
+			continue
+		var instance_id := str(value)
+		if instance_id.is_empty() or seen.has(instance_id):
+			_team[key] = null
+			if _selected_slot == key:
+				_selected_slot = ""
+			continue
+		seen[instance_id] = true
+
 func _turn_roster_page(direction: int) -> void:
 	if direction == 0:
 		return
@@ -531,6 +568,12 @@ func _turn_roster_page(direction: int) -> void:
 	queue_redraw()
 
 func _assign_to_slot(monster_id: String) -> void:
+	if monster_id.is_empty():
+		return
+	if _selected_slot.is_empty() and not _get_team_slots_for_instance(monster_id).is_empty():
+		_remove_from_team(monster_id)
+		queue_redraw()
+		return
 	if _selected_slot.is_empty():
 		# 自动填入第一个空槽位
 		for key in ["leader", "member1", "member2"]:
@@ -542,16 +585,19 @@ func _assign_to_slot(monster_id: String) -> void:
 		# 队伍满了，替换队长
 		_team["leader"] = monster_id
 		_trigger_assign_pop("leader")
+		_sanitize_team_unique_refs()
 	else:
 		# 替换目标槽位
 		var existing: Variant = _team[_selected_slot]
 		_team[_selected_slot] = monster_id
 		# 防止重复：如果其他槽已有这个精灵，交换
+		var swapped := false
 		for key in ["leader", "member1", "member2"]:
 			if key != _selected_slot and _team[key] == monster_id:
-				_team[key] = existing
-				break
+				_team[key] = existing if not swapped else null
+				swapped = true
 		_selected_slot = ""
+		_sanitize_team_unique_refs()
 	queue_redraw()
 
 func _get_monster_index_at_pos(pos: Vector2) -> int:
@@ -664,6 +710,7 @@ func _draw_team_summary(font: Font) -> void:
 	var leader_id := "" if leader_value == null else str(leader_value)
 	var skill_text := "未设置队长技能"
 	var skill_color := C["text_muted"]
+	var skill_element := ""
 	if not leader_id.is_empty():
 		var md := _get_monster_data(leader_id)
 		var skill_id: String = md.get("leaderSkill", md.get("leader_skill", ""))
@@ -673,7 +720,11 @@ func _draw_team_summary(font: Font) -> void:
 				if skill:
 					skill_text = "%s：%s" % [skill.get("name", "队长技"), skill.get("desc", "")]
 					skill_color = C["gold"]
-	_draw_text_in_rect(font, skill_text, Rect2(196.0, 263.0, 158.0, 24.0), skill_color, 12.0, 10.0)
+					var visual: Dictionary = skill.get("visual", {})
+					skill_element = str(visual.get("element", md.get("element", "")))
+	if not skill_element.is_empty() and ELEMENT_ICON_ASSETS.has(skill_element):
+		_draw_texture_fit(_tex(str(ELEMENT_ICON_ASSETS.get(skill_element, ""))), Rect2(161.0, 262.0, 24.0, 24.0))
+	_draw_text_in_rect(font, skill_text, Rect2(190.0, 263.0, 164.0, 24.0), skill_color, 12.0, 10.0)
 
 func _draw_bond_summary(font: Font) -> void:
 	var branches: Array = EcologyBondRulesScript.calc_team_bond_branches(_get_team_units())
@@ -1016,6 +1067,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 func _save_team() -> void:
 	if _storage:
+		_sanitize_team_unique_refs()
 		_storage.save_team(_team)
 		emit_signal("team_changed", _team)
 

@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://bewmx8fg4phvd"]
 
+[ext_resource type="Script" uid="uid://137b318ft2c6" path="res://src/ui/components/battle_leader_charge_bead.gd" id="charge_bead"]
 [ext_resource type="Script" uid="uid://c54domcnrvfux" path="res://src/ui/components/battle_leader_charge_point.gd" id="charge_point"]
 [ext_resource type="Script" uid="uid://e8d055pley2n" path="res://src/ui/components/battle_hp_bar.gd" id="hp_bar"]
 [ext_resource type="Texture2D" uid="uid://ckj73sky5lin" path="res://assets/images/ui/bars/battle_ui_hp_frame.png" id="hp_frame_base"]
@@ -94,9 +95,52 @@ vertical_alignment = 1
 [node name="LeaderChargePoint" type="Control" parent="." unique_id=1919228401]
 z_index = 4
 anchors_preset = 0
-offset_left = 19.0
-offset_top = 40.0
-offset_right = 58.0
-offset_bottom = 48.0
+offset_left = 20.0
+offset_top = 39.0
+offset_right = 92.0
+offset_bottom = 53.0
 mouse_filter = 2
 script = ExtResource("charge_point")
+
+[node name="Point1" type="Control" parent="LeaderChargePoint" unique_id=1554036473]
+anchors_preset = 0
+offset_top = 22.0
+offset_right = 4.0
+offset_bottom = 26.0
+mouse_filter = 2
+script = ExtResource("charge_bead")
+
+[node name="Point2" type="Control" parent="LeaderChargePoint" unique_id=1134783359]
+anchors_preset = 0
+offset_left = -3.0
+offset_top = 19.0
+offset_right = 1.0
+offset_bottom = 23.0
+mouse_filter = 2
+script = ExtResource("charge_bead")
+
+[node name="Point3" type="Control" parent="LeaderChargePoint" unique_id=1731953732]
+anchors_preset = 0
+offset_left = -5.0
+offset_top = 14.0
+offset_bottom = 19.0
+mouse_filter = 2
+script = ExtResource("charge_bead")
+
+[node name="Point4" type="Control" parent="LeaderChargePoint" unique_id=895939353]
+anchors_preset = 0
+offset_left = -4.0
+offset_top = 9.0
+offset_right = 2.0
+offset_bottom = 15.0
+mouse_filter = 2
+script = ExtResource("charge_bead")
+
+[node name="Point5" type="Control" parent="LeaderChargePoint" unique_id=840473426]
+anchors_preset = 0
+offset_left = -1.0
+offset_top = 5.0
+offset_right = 6.0
+offset_bottom = 12.0
+mouse_filter = 2
+script = ExtResource("charge_bead")

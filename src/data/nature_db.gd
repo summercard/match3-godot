@@ -16,7 +16,7 @@ const NATURES: Dictionary = {
 		"emoji": "⚔️",
 		"desc": "勇往直前，攻击更强但略显莽撞",
 		"boost": "atk",
-		"boostRate": 0.10,
+		"boostRate": 0.15,
 		"nerf": "spd",
 		"nerfRate": 0.05
 	},
@@ -26,7 +26,7 @@ const NATURES: Dictionary = {
 		"emoji": "🛡️",
 		"desc": "防御至上，坚若磐石",
 		"boost": "def",
-		"boostRate": 0.10,
+		"boostRate": 0.15,
 		"nerf": "atk",
 		"nerfRate": 0.05
 	},
@@ -36,7 +36,7 @@ const NATURES: Dictionary = {
 		"emoji": "💨",
 		"desc": "速度就是一切",
 		"boost": "spd",
-		"boostRate": 0.10,
+		"boostRate": 0.15,
 		"nerf": "def",
 		"nerfRate": 0.05
 	},
@@ -46,7 +46,7 @@ const NATURES: Dictionary = {
 		"emoji": "📖",
 		"desc": "技能大师",
 		"boost": "skillDmg",
-		"boostRate": 0.15,
+		"boostRate": 0.20,
 		"nerf": "atk",
 		"nerfRate": 0.05
 	},
@@ -56,7 +56,7 @@ const NATURES: Dictionary = {
 		"emoji": "💚",
 		"desc": "生命力顽强",
 		"boost": "hp",
-		"boostRate": 0.10,
+		"boostRate": 0.15,
 		"nerf": "atk",
 		"nerfRate": 0.05
 	},
@@ -66,7 +66,7 @@ const NATURES: Dictionary = {
 		"emoji": "🔥",
 		"desc": "暴躁的打击更致命",
 		"boost": "critRate",
-		"boostRate": 0.08,
+		"boostRate": 0.12,
 		"nerf": "def",
 		"nerfRate": 0.05
 	},
@@ -76,7 +76,7 @@ const NATURES: Dictionary = {
 		"emoji": "❄️",
 		"desc": "泰山崩于前而色不变",
 		"boost": "dmgResist",
-		"boostRate": 0.08,
+		"boostRate": 0.12,
 		"nerf": "critRate",
 		"nerfRate": 0.03
 	},
@@ -86,7 +86,7 @@ const NATURES: Dictionary = {
 		"emoji": "🌀",
 		"desc": "均衡但平庸",
 		"boost": "all",
-		"boostRate": 0.03,
+		"boostRate": 0.05,
 		"nerf": "",        ## JS 原为 null，GDScript 用空字符串标记"无减弱"
 		"nerfRate": 0.0
 	}

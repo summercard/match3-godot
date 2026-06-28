@@ -36,7 +36,7 @@ const SIGN_ASSETS := {
 	"progress": "res://assets/images/ui/buttons/inventory_new_ui_inventory_use_button.png",
 	"warning": "res://assets/images/ui/icons/main_icon_plus_v3.png",
 	"calendar": "res://assets/images/ui/icons/common_nav_icon_nav_signin.png",
-	"mascot": "res://assets/images/monsters/monster/monster_grass_leaf.png",
+	"mascot": "res://assets/images/monsters/monster/monster_002.png",
 	"check": "res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png",
 	"fx": "res://assets/images/effects/album_fx_sparkle_cluster.png",
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",

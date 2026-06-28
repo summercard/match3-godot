@@ -93,10 +93,13 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(template)
 	var is_elite: bool = bool(instance.get("isElite", template.get("isElite", false)))
 	var stats: Dictionary = MonsterPool.get_instance_stats(instance)
+	var display_name := _display_name_for_instance(instance, template, monster_id)
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,
-		"name": str(instance.get("name", template.get("name", monster_id))),
+		"name": display_name,
+		"savedName": str(instance.get("name", "")),
+		"nickname": str(instance.get("nickname", "")),
 		"templateName": str(template.get("name", monster_id)),
 		"element": str(template.get("element", "")),
 		"boardAffinity": MonsterDb.get_board_affinity(template),
@@ -124,6 +127,12 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 		"art": MonsterArtDB.get_art_bundle(monster_id),
 		"template": template.duplicate(true),
 	}
+
+static func _display_name_for_instance(instance: Dictionary, template: Dictionary, monster_id: String) -> String:
+	var nickname := str(instance.get("nickname", "")).strip_edges()
+	if not nickname.is_empty():
+		return nickname
+	return str(template.get("name", monster_id))
 
 static func get_monster_art(monster_id: String, usage: String = "battle") -> String:
 	return MonsterArtDB.get_art_path(monster_id, usage)

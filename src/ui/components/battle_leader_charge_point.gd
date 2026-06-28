@@ -4,16 +4,19 @@ extends Control
 @export_range(0.0, 1.0, 0.01) var progress: float = 0.0:
 	set(value):
 		progress = clampf(value, 0.0, 1.0)
+		_sync_scene_beads()
 		queue_redraw()
 
 @export var element: String = "fire":
 	set(value):
 		element = value
+		_sync_scene_beads()
 		queue_redraw()
 
 @export_range(1, 8, 1) var point_count: int = 5:
 	set(value):
 		point_count = clampi(value, 1, 8)
+		_sync_scene_beads()
 		queue_redraw()
 
 var _pulse: float = 0.0
@@ -38,31 +41,36 @@ const COLORS := {
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_process(true)
+	_sync_scene_beads()
 
 
 func _process(delta: float) -> void:
 	_pulse += delta
 	if progress > 0.0:
+		_sync_scene_beads()
 		queue_redraw()
 
 
 func _draw() -> void:
+	if not _get_scene_beads().is_empty():
+		return
 	if point_count <= 0 or size.x <= 0.0 or size.y <= 0.0:
 		return
 	var color: Color = COLORS.get(element, Color(1.0, 0.75, 0.24, 1.0))
 	var full := progress >= 1.0
-	var gap := 1.4
-	var diameter := minf(size.y - 1.2, (size.x - gap * float(point_count - 1)) / float(point_count))
+	var diameter := minf(size.y * 0.72, size.x / float(point_count) * 0.78)
 	var radius := maxf(2.0, diameter * 0.5)
-	var total_w := diameter * float(point_count) + gap * float(point_count - 1)
-	var start_x := (size.x - total_w) * 0.5 + radius
-	var center_y := size.y * 0.5
+	var start_x := radius + 1.0
+	var end_x := size.x - radius - 1.0
+	var base_y := size.y * 0.70
+	var arc_height := size.y * 0.34
 	var fill_progress := clampf(progress * float(point_count), 0.0, float(point_count))
 	var pulse := 0.5 + 0.5 * sin(_pulse * 7.0)
 
-	for i in point_count:
+	for i in range(point_count):
 		var bead_progress := clampf(fill_progress - float(i), 0.0, 1.0)
-		var center := Vector2(start_x + float(i) * (diameter + gap), center_y)
+		var t := 0.5 if point_count == 1 else float(i) / float(point_count - 1)
+		var center := Vector2(lerpf(start_x, end_x, t), base_y - sin(t * PI) * arc_height)
 		var lit_color := color.lerp(Color(1.0, 0.96, 0.72, 1.0), 0.28 + 0.12 * bead_progress)
 		var scale := 1.0 + 0.10 * bead_progress
 		if full:
@@ -81,3 +89,34 @@ func _draw() -> void:
 		else:
 			draw_circle(center, bead_radius * 0.70, Color(0.62, 0.38, 0.12, 0.76))
 			draw_circle(center - Vector2(bead_radius * 0.22, bead_radius * 0.26), bead_radius * 0.15, Color(1.0, 0.78, 0.36, 0.28))
+
+
+func _get_scene_beads() -> Array[Control]:
+	var beads: Array[Control] = []
+	for child in get_children():
+		var bead := child as Control
+		if bead != null and str(bead.name).begins_with("Point"):
+			beads.append(bead)
+	beads.sort_custom(func(a: Control, b: Control) -> bool:
+		return str(a.name).naturalnocasecmp_to(str(b.name)) < 0
+	)
+	return beads
+
+
+func _sync_scene_beads() -> void:
+	if not is_inside_tree():
+		return
+	var beads := _get_scene_beads()
+	if beads.is_empty():
+		return
+	var fill_progress := clampf(progress * float(point_count), 0.0, float(point_count))
+	var full := progress >= 1.0
+	for i in beads.size():
+		var bead := beads[i]
+		bead.visible = i < point_count
+		if not bead.visible:
+			continue
+		var bead_progress := clampf(fill_progress - float(i), 0.0, 1.0)
+		bead.set("progress", bead_progress)
+		bead.set("element", element)
+		bead.set("full_charge", full)

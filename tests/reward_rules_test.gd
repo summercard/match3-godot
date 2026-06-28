@@ -78,7 +78,9 @@ func _test_save_manager_sweep() -> void:
 	save_manager.save_stage_stars("stage_1_1", 3)
 	var reward: Dictionary = save_manager.get_sweep_reward("stage_1_1")
 	var stage_db := StageDBScript.new()
-	var expected := RewardRulesScript.calc_sweep_rewards(stage_db.get_stage("stage_1_1").get("rewards", {}), 3)
+	var stage_rewards: Dictionary = stage_db.get_stage("stage_1_1").get("rewards", {})
+	_expect(int(stage_rewards.get("exp", 0)) == 59, "stage_1_1 base exp should include the 30 percent stage exp bonus")
+	var expected := RewardRulesScript.calc_sweep_rewards(stage_rewards, 3)
 	_expect(reward == expected, "SaveManager sweep reward should use RewardRules")
 
 

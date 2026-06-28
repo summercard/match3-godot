@@ -327,7 +327,15 @@ static func _draw_enemy_status(scene, battle, state: Dictionary, x: float, y: fl
 	var blink_alpha: float = 0.7 + 0.3 * sin(state.get("idle_time", 0.0) * PI * 3.0)
 	var status_color: Color = state.get("status_colors", {}).get(status_type, state.get("colors", {}).get("text_muted", Color.GRAY))
 	status_color.a = blink_alpha
-	scene._draw_text_with_shadow("%s%d" % [emoji, turns], x + card_w - 10.0, y - 2.0, status_color, 11.0)
+	var label := "%s%d" % [emoji, turns]
+	var hp_rects: Array = state.get("gui_enemy_hp_rects", [])
+	if index >= 0 and index < hp_rects.size() and hp_rects[index] is Rect2:
+		var hp_rect: Rect2 = hp_rects[index]
+		var text_x := hp_rect.end.x - 8.0
+		var text_y := hp_rect.end.y + 9.0
+		scene._draw_text_with_shadow(label, text_x, text_y, status_color, 9.5, true)
+		return
+	scene._draw_text_with_shadow(label, x + card_w - 8.0, y + 104.0, status_color, 9.5, true)
 
 static func _ensure_enemy_defeat_fx(scene, state: Dictionary, index: int, center: Vector2, color: Color) -> void:
 	var defeated_enemies: Array = state.get("defeated_enemies", [])
@@ -527,6 +535,7 @@ static func draw_player_card(scene, battle, state: Dictionary, x: float, y: floa
 
 	# ★ 主人定 2026-06-11：攻击者弹性放大
 	var elastic := _attacker_elastic_factor(state, false, index)
+	var visual_scale := _combatant_visual_scale(monster)
 	var monster_tex: Texture2D = scene._get_monster_texture(monster)
 	if hp <= 0:
 		# ★ 主人定 2026-06-11：倒下阶段：先活体图渐隐，再幽灵从下冲上渐显
@@ -537,11 +546,11 @@ static func draw_player_card(scene, battle, state: Dictionary, x: float, y: floa
 		if bool(phase.get("alive_visible", false)):
 			var fade_alpha: float = float(phase.get("alive_alpha", 0.0))
 			if monster_tex:
-				scene._draw_texture_contain(monster_tex, Rect2(x + 8.0, y + 3.0 + lunge_offset_y + sin(idle_time * TAU / 1.5) * 1.2, 90.0, 58.0), fade_alpha)
+				scene._draw_texture_contain(monster_tex, _player_sprite_rect(x, y, lunge_offset_y, idle_time, index, visual_scale, 1.0), fade_alpha)
 			else:
 				scene._draw_text_with_shadow(monster.get("emoji", "👾"), x + 53.0, y + 36.0 + lunge_offset_y, colors.get("white", Color.WHITE).darkened(0.0), fade_alpha)
 	elif monster_tex:
-		var sprite_rect := Rect2(x + 8.0, y + 3.0 + lunge_offset_y + sin(idle_time * TAU / 1.5) * 1.2, 90.0 * elastic, 58.0 * elastic)
+		var sprite_rect := _player_sprite_rect(x, y, lunge_offset_y, idle_time, index, visual_scale, elastic)
 		scene._draw_texture_contain(monster_tex, sprite_rect, 1.0)
 		if not flash.is_empty():
 			_draw_soft_hit_flash(scene, monster_tex, sprite_rect, flash[0])
@@ -551,6 +560,16 @@ static func draw_player_card(scene, battle, state: Dictionary, x: float, y: floa
 	var player_hp_rect := Rect2(x + 4.0, y + 52.0, card_w - 8.0, 11.0)
 	scene._draw_hp_bar(player_hp_rect.position.x, player_hp_rect.position.y, player_hp_rect.size.x, player_hp_rect.size.y, float(hp), float(max_hp), colors.get("success", Color.GREEN))
 	scene._draw_hp_text_in_bar("%d/%d" % [hp, max_hp], player_hp_rect, colors.get("white", Color.WHITE))
+
+static func _combatant_visual_scale(unit: Dictionary) -> float:
+	return float(unit.get("_visualScale", StatCalculator.visual_scale_for_stats(unit)))
+
+static func _player_sprite_rect(x: float, y: float, lunge_offset_y: float, idle_time: float, _index: int, visual_scale: float, elastic: float) -> Rect2:
+	var base_pos := Vector2(x + 8.0, y + 3.0 + lunge_offset_y + sin(idle_time * TAU / 1.5) * 1.2)
+	var base_size := Vector2(90.0, 58.0)
+	var scale := maxf(0.1, visual_scale * elastic)
+	var size := base_size * scale
+	return Rect2(base_pos + (base_size - size) * 0.5, size)
 
 static func _draw_defeated_ghost(scene, center: Vector2, size: Vector2) -> void:
 	# legacy 入口（仅在 GUI 模式下保留向后兼容）

@@ -2,7 +2,8 @@ class_name MonsterPool
 extends RefCounted
 
 const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
-const DEFAULT_STARTERS: Array[String] = ["monster_001", "monster_002", "monster_003"]
+const DEFAULT_STARTERS: Array[String] = ["monster_002", "monster_093", "monster_053"]
+const STARTER_INITIAL_LEVEL: int = 6
 
 static func generate_instance_id() -> String:
 	return "m_%d_%04x%04x" % [Time.get_ticks_msec(), randi() & 0xffff, randi() & 0xffff]
@@ -17,6 +18,7 @@ static func create_instance(monster_id: String, options: Dictionary = {}) -> Dic
 		"instanceId": str(options.get("instanceId", generate_instance_id())),
 		"monsterId": monster_id,
 		"name": str(options.get("name", template.get("name", monster_id))),
+		"nickname": str(options.get("nickname", "")),
 		"level": int(options.get("level", 1)),
 		"exp": int(options.get("exp", 0)),
 		"nature": str(options.get("nature", NatureDB.random_nature())),
@@ -66,6 +68,7 @@ static func normalize_instance(value: Variant) -> Dictionary:
 		"instanceId": instance_id,
 		"monsterId": monster_id,
 		"name": str(data.get("name", template.get("name", monster_id))),
+		"nickname": str(data.get("nickname", "")),
 		"level": maxi(1, int(data.get("level", 1))),
 		"exp": maxi(0, int(data.get("exp", 0))),
 		"nature": nature_id,

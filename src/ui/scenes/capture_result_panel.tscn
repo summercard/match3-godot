@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://box82ko1pcn26"]
 
-[ext_resource type="Texture2D" path="res://assets/images/ui/panels/result_refresh_ui_capture_status_plaque.png" id="plaque"]
+[ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="1_atrk1"]
 
 [node name="CaptureResultPanel" type="Control" unique_id=482320752]
 layout_mode = 3
@@ -38,7 +38,7 @@ offset_top = 4.0
 offset_right = 287.0
 offset_bottom = 52.0
 mouse_filter = 2
-texture = ExtResource("plaque")
+texture = ExtResource("1_atrk1")
 expand_mode = 1
 stretch_mode = 5
 

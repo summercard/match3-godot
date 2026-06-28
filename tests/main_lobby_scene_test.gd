@@ -44,7 +44,8 @@ func _run() -> void:
 		"InventoryButton": "inventory",
 		"AchievementButton": "achievement",
 		"SettingsButton": "settings",
-		"SigninButton": "signin"
+		"SigninButton": "signin",
+		"TestToolButton": "test_tool"
 	}
 	_expect((lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).text == "精灵课堂", "lobby ranch entry should be labeled as the spirit classroom")
 	var lobby_font := (lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).get_theme_font("font") as FontVariation

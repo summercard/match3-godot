@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://b7f5aj58wm7lh"]
+
+[ext_resource type="Script" path="res://src/ui/scene/scene_leader_skill_test.gd" id="1_script"]
+
+[node name="LeaderSkillTest" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 375.0
+offset_bottom = 667.0
+mouse_filter = 1
+script = ExtResource("1_script")

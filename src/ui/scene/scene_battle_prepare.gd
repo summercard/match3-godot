@@ -45,6 +45,8 @@ const RED_TEXT := Color(0.9, 0.16, 0.09, 1.0)
 const CREAM_PANEL := Color(1.0, 0.94, 0.74, 0.90)
 const STAGE_PANEL := Color(1.0, 0.95, 0.76, 0.58)
 
+var _portrait_base_rect_cache: Dictionary = {}
+
 func _ready() -> void:
 	instance = self
 	set_process(false)
@@ -243,6 +245,7 @@ func _style_label(path: NodePath, color: Color, outline_color: Color, outline_si
 func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(monster, "team" if is_team else "battle")
+	_apply_portrait_visual_scale(portrait, _monster_visual_scale(monster))
 	# ★ 主人定 2026-06-11：精英宠物/精英怪名字前缀 ★精英
 	var is_elite := bool(monster.get("isElite", false))
 	var elite_prefix: String = "★精英 " if is_elite else ""
@@ -274,6 +277,7 @@ func _set_enemy_boss_card(card: Control, enemy: Dictionary) -> void:
 	_set_enemy_card_details_visible(card, false)
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(enemy, "battle")
+	_apply_portrait_visual_scale(portrait, _monster_visual_scale(enemy))
 	var name_label := card.get_node("Name") as Label
 	name_label.visible = true
 	name_label.text = str(enemy.get("name", "BOSS"))
@@ -435,6 +439,20 @@ func _element_texture(element: String) -> Texture2D:
 func _monster_texture(monster: Dictionary, variant: String) -> Texture2D:
 	var monster_id := str(monster.get("monsterId", monster.get("id", "")))
 	return _get_texture(MonsterArtDBScript.get_art_path(monster_id, variant))
+
+func _monster_visual_scale(monster: Dictionary) -> float:
+	return float(monster.get("_visualScale", StatCalculator.visual_scale_for_stats(monster)))
+
+func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) -> void:
+	var portrait_id := portrait.get_instance_id()
+	if not _portrait_base_rect_cache.has(portrait_id):
+		_portrait_base_rect_cache[portrait_id] = Rect2(portrait.position, portrait.size)
+	var base_rect: Rect2 = _portrait_base_rect_cache[portrait_id]
+	var scale := maxf(0.1, visual_scale)
+	var scaled_size := base_rect.size * scale
+	portrait.position = base_rect.position + (base_rect.size - scaled_size) * 0.5
+	portrait.size = scaled_size
+	portrait.pivot_offset = scaled_size * 0.5
 
 func _node(path: String) -> Control:
 	return get_node(path) as Control

@@ -23,7 +23,6 @@ const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item2",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
-const BOSS_BATTLE_VISUAL_SCALE: float = 1.5
 const BOSS_STATUS_OFFSET_Y: float = -56.0
 const BATTLE_END_OVERLAY_PATH := NodePath("BattleEndOverlay")
 const BATTLE_END_TITLE_PATH := NodePath("BattleEndOverlay/Banner/Title")
@@ -499,10 +498,7 @@ var _status_base_rect_cache: Dictionary = {}
 func _combatant_portrait_scale(unit: Dictionary, hp: int) -> float:
 	if hp <= 0:
 		return 1.0
-	var scale := float(unit.get("_visualScale", 1.0))
-	if bool(unit.get("isBoss", false)):
-		scale *= BOSS_BATTLE_VISUAL_SCALE
-	return scale
+	return float(unit.get("_visualScale", StatCalculator.visual_scale_for_stats(unit)))
 
 func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) -> void:
 	var portrait_id := portrait.get_instance_id()
@@ -822,6 +818,7 @@ func _combatant_render_state() -> Dictionary:
 	if is_inside_tree() and _battle != null:
 		state["gui_enemy_centers"] = _collect_enemy_centers()
 		state["gui_player_centers"] = _collect_player_centers()
+		state["gui_enemy_hp_rects"] = _collect_enemy_hp_rects()
 	return state
 
 func _collect_enemy_centers() -> Array:
@@ -842,6 +839,19 @@ func _collect_enemy_centers() -> Array:
 			else:
 				centers.append(Vector2.ZERO)
 	return centers
+
+func _collect_enemy_hp_rects() -> Array:
+	var rects: Array = []
+	var enemy_count: int = mini(_battle.enemies.size(), 3)
+	if enemy_count <= 1:
+		var featured_single := enemy_count == 1 and BattleCombatantRendererScript.uses_featured_single_layout(_battle.enemies[0])
+		var path := NodePath("Combatants/SingleEnemy/HpFrame" if featured_single else "Combatants/MultiEnemies/Enemy2/HpFrame")
+		rects.append(_control_rect(path) if has_node(path) else Rect2())
+	else:
+		for i in MULTI_ENEMY_PATHS.size():
+			var path := NodePath("%s/HpFrame" % MULTI_ENEMY_PATHS[i])
+			rects.append(_control_rect(path) if has_node(path) else Rect2())
+	return rects
 
 func _collect_player_centers() -> Array:
 	var centers: Array = []

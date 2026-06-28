@@ -7,6 +7,7 @@ extends Node
 
 const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
 const BattleObjectiveEvaluatorScript = preload("res://src/battle/battle_objective_evaluator.gd")
+const LeaderSkillExecutorScript = preload("res://src/battle/leader_skill_executor.gd")
 
 ## 战斗核心逻辑：玩家队伍/敌方精灵初始化、连锁伤害计算、
 ## BOSS多阶段、敌人技能系统、C4状态效果、队长技能、属性协同
@@ -64,6 +65,7 @@ var _status_effect: BattleStatusEffect = BattleStatusEffect.new()
 var _phase_handler: PhaseHandler = PhaseHandler.new(self)
 var _damage_calc: DamageCalculator = DamageCalculator.new()
 var _objective_evaluator = BattleObjectiveEvaluatorScript.new()
+var _leader_skill_executor = LeaderSkillExecutorScript.new(self)
 
 # 关卡数据
 var stage_data: Variant = null
@@ -74,7 +76,6 @@ var player_level: int = 1
 var enemy_level: int = 1
 
 const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
-const ELITE_VISUAL_SCALE: float = 1.2
 const LEADER_CHARGE_MAX: int = 5
 
 # ========== 单例模式 ==========
@@ -158,14 +159,15 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 				"desc": skill_data.get("desc", ""),
 				"icon": skill_data.get("icon", "")
 			}
-			if skill_data.get("type") == "hp_boost":
-				var hp_mult_ls = skill_data.get("hpMultiplier", 1.2)
+			var hp_mult_ls := LeaderSkillDb.get_leader_hp_boost(skill_data)
+			if hp_mult_ls != 1.0:
 				for m in player_team:
 					if m != null:
 						m["maxHP"] = int(m.get("maxHP", 0) * hp_mult_ls)
 						m["hp"] = m["maxHP"]
-			if skill_data.get("type") == "combo_start":
-				combo = skill_data.get("initialCombo", 1)
+			var combo_start := LeaderSkillDb.get_leader_combo_start(skill_data)
+			if combo_start > 0:
+				combo = combo_start
 
 	synergy_bonuses = null
 	synergy_info = []
@@ -205,8 +207,8 @@ func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, rando
 		monster["hp"] = monster["maxHP"]
 		monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 	if bool(monster.get("isElite", false)):
-		monster["_visualScale"] = ELITE_VISUAL_SCALE
 		monster["isElite"] = true
+		monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster)
 	if is_elite:
 		monster["_eliteSource"] = "random"
 	return monster
@@ -358,10 +360,17 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 
 		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + hp_damage
 
+		var attacker_idx := _player_index_by_id(mon_id)
 		damage_log.append({
 			"attacker": monster.get("name", ""),
+			"attacker_id": mon_id,
+			"attackerId": mon_id,
+			"attacker_index": attacker_idx,
+			"attackerIndex": attacker_idx,
 			"attacker_emoji": monster.get("emoji", ""),
 			"target": target.get("name", ""),
+			"target_index": target_idx,
+			"targetIndex": target_idx,
 			"target_emoji": target.get("emoji", ""),
 			"damage": hp_damage,
 			"raw_damage": total_damage,
@@ -384,7 +393,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		return {
 			"damage_log": damage_log,
 			"leader_charge_events": leader_charge_events,
-			"leader_skill_pending": _all_leader_charges_ready() and _get_weakest_enemy() != null,
+			"leader_skill_pending": is_leader_burst_ready(),
 			"phase_transition": phase_to_trigger
 		}
 
@@ -395,7 +404,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 	return {
 		"damage_log": damage_log,
 		"leader_charge_events": leader_charge_events,
-		"leader_skill_pending": _all_leader_charges_ready() and _get_weakest_enemy() != null,
+		"leader_skill_pending": is_leader_burst_ready(),
 		"status_effect_log": _status_effect.get_effect_log()
 	}
 
@@ -594,6 +603,32 @@ func use_active_skill(monster_id: String) -> Dictionary:
 	return result
 
 
+func is_leader_burst_ready() -> bool:
+	return _all_leader_charges_ready() and _get_weakest_enemy() != null
+
+
+func get_ready_leader_burst_preview() -> Dictionary:
+	if not is_leader_burst_ready():
+		return {}
+	var leader_idx := _active_leader_index()
+	if leader_idx < 0:
+		return {}
+	var leader: Dictionary = player_team[leader_idx]
+	var skill_data := _leader_skill_data_for(leader)
+	if skill_data.is_empty():
+		return {}
+	var element := str(_fantasy_element(leader))
+	return {
+		"leader_index": leader_idx,
+		"leader": str(leader.get("name", "")),
+		"leader_id": str(leader.get("id", "")),
+		"skill_id": str(skill_data.get("id", "")),
+		"skill_name": str(skill_data.get("name", "")),
+		"element": element,
+		"visual": skill_data.get("visual", {}).duplicate(true) if skill_data.get("visual", {}) is Dictionary else {}
+	}
+
+
 func _add_leader_charge(monster: Dictionary, amount: int, events: Array) -> void:
 	var monster_id := str(monster.get("id", ""))
 	if monster_id.is_empty() or amount <= 0:
@@ -615,16 +650,55 @@ func _add_leader_charge(monster: Dictionary, amount: int, events: Array) -> void
 
 
 func _all_leader_charges_ready() -> bool:
-	if player_team.size() < 3:
-		return false
-	for i in range(3):
-		var monster = player_team[i]
+	var alive_count := 0
+	for monster in player_team:
 		if monster == null or int(monster.get("hp", 0)) <= 0:
-			return false
+			continue
+		alive_count += 1
 		var monster_id := str(monster.get("id", ""))
+		if monster_id.is_empty():
+			return false
 		if int(leader_charge_points.get(monster_id, 0)) < LEADER_CHARGE_MAX:
 			return false
-	return true
+	return alive_count > 0
+
+
+func _active_leader_index() -> int:
+	for i in range(player_team.size()):
+		var monster = player_team[i]
+		if monster != null and int(monster.get("hp", 0)) > 0:
+			return i
+	return -1
+
+
+func _active_leader() -> Dictionary:
+	var idx := _active_leader_index()
+	if idx < 0:
+		return {}
+	var leader: Dictionary = player_team[idx]
+	return leader
+
+
+func _leader_skill_data_for(leader: Dictionary) -> Dictionary:
+	if leader.is_empty() or not leader.has("leaderSkill"):
+		return {}
+	var skill_data := LeaderSkillDb.get_leader_skill(leader.get("leaderSkill", ""))
+	return skill_data if not skill_data.is_empty() else {}
+
+
+func _active_leader_skill_info() -> Variant:
+	var leader := _active_leader()
+	var skill_data := _leader_skill_data_for(leader)
+	if skill_data.is_empty():
+		return null
+	return {
+		"id": skill_data.get("id", ""),
+		"name": skill_data.get("name", ""),
+		"desc": skill_data.get("desc", ""),
+		"icon": skill_data.get("icon", ""),
+		"leader_id": str(leader.get("id", "")),
+		"leader_index": _active_leader_index()
+	}
 
 
 func _reset_leader_charges() -> void:
@@ -637,203 +711,16 @@ func _reset_leader_charges() -> void:
 
 
 func _execute_leader_burst() -> Dictionary:
-	var leader: Dictionary = player_team[0] if player_team.size() > 0 and player_team[0] != null else {}
-	if leader.is_empty() or int(leader.get("hp", 0)) <= 0:
+	var leader_idx := _active_leader_index()
+	if leader_idx < 0:
 		return {}
-	var element := _fantasy_element(leader)
-	var log := {
-		"type": "leader_burst",
-		"element": element,
-		"leader": str(leader.get("name", "")),
-		"leader_id": str(leader.get("id", "")),
-		"effects": [],
-		"battle_ended": false
-	}
-
-	match element:
-		"grass":
-			_leader_heal_lowest(log, 0.42, int(round(float(leader.get("atk", 10)) * 1.4)), "Verdant Mend")
-		"water":
-			_leader_guard_lowest(log, 0.50, 2, "Tide Shell")
-		"earth":
-			_leader_guard_lowest(log, 0.62, 2, "Stone Bulwark")
-		"light":
-			_leader_convert_gems(log, 2, "light", "Star Calling")
-		"dark":
-			_leader_damage_weakest(log, leader, 1.65, false, "Night Siphon")
-			_leader_lifesteal_lowest(log, 0.55, "Siphon Heal")
-		"thunder":
-			_leader_damage_weakest(log, leader, 1.75, false, "Thunder Pin")
-			_leader_status_weakest(log, "stun", leader)
-		"ice":
-			_leader_damage_weakest(log, leader, 1.35, false, "Frost Needle")
-			_leader_status_weakest(log, "freeze", leader)
-		"wind":
-			_leader_weaken_weakest(log, 0.40, 2, "Gale Break")
-		"void":
-			_leader_damage_weakest(log, leader, 1.95, true, "Void Pierce")
-		"temporal":
-			_leader_damage_weakest(log, leader, 1.25, false, "Time Nick")
-			_leader_weaken_weakest(log, 0.45, 1, "Time Slow")
-		"star":
-			_leader_damage_weakest(log, leader, 1.55, false, "Starfall")
-			_leader_heal_lowest(log, 0.16, int(round(float(leader.get("atk", 10)) * 1.1)), "Star Gleam")
-		"chaos":
-			_leader_damage_weakest(log, leader, 1.85, false, "Chaos Spike")
-			_leader_status_weakest(log, "burn", leader)
-		_:
-			_leader_damage_weakest(log, leader, 1.55, false, "Leader Strike")
-
-	if check_battle_end():
-		log["battle_ended"] = true
+	var leader: Dictionary = player_team[leader_idx]
+	var skill_data := _leader_skill_data_for(leader)
+	var log: Dictionary = _leader_skill_executor.execute_burst(leader, skill_data)
+	if log.is_empty():
+		return {}
+	log["leader_index"] = leader_idx
 	return log
-
-
-func _leader_damage_weakest(log: Dictionary, leader: Dictionary, mult: float, pierce: bool, label: String) -> void:
-	var target = _get_weakest_enemy()
-	if target == null:
-		return
-	var target_idx := enemies.find(target)
-	var element := str(log.get("element", _fantasy_element(leader)))
-	var element_mult := MonsterDb.get_element_multiplier(element, target.get("element", ""))
-	var target_def := 0 if pierce else int(target.get("def", 0))
-	var damage := _damage_calc.calc_player_damage(
-		float(leader.get("atk", 10)),
-		element,
-		float(target_def),
-		3,
-		1,
-		element_mult,
-		1.0,
-		get_synergy_atk_mult(_board_affinity(leader))
-	)
-	damage = maxi(1, int(round(float(damage) * mult)))
-	var remaining := damage
-	var absorbed := 0
-	if _enemy_skill_system != null and target_idx >= 0 and not pierce:
-		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, damage)
-		absorbed = int(shield_result.get("absorbed", 0))
-		remaining = int(shield_result.get("remaining", damage))
-	target["hp"] = int(target.get("hp", 0)) - remaining
-	_update_capture_window(target_idx)
-	log["damage"] = int(log.get("damage", 0)) + damage
-	log["remaining_damage"] = int(log.get("remaining_damage", 0)) + remaining
-	log["target"] = str(target.get("name", ""))
-	log["target_index"] = target_idx
-	log["is_effective"] = element_mult > 1.0
-	log["is_weak"] = element_mult < 1.0
-	log["target_died"] = int(target.get("hp", 0)) <= 0
-	log["effects"].append({
-		"kind": "damage",
-		"label": label,
-		"target": str(target.get("name", "")),
-		"target_index": target_idx,
-		"amount": damage,
-		"remaining": remaining,
-		"shield_absorbed": absorbed,
-		"pierce": pierce
-	})
-
-
-func _leader_heal_lowest(log: Dictionary, ratio: float, minimum: int, label: String) -> void:
-	var ally := _get_lowest_hp_ally()
-	if ally.is_empty():
-		return
-	var max_hp := maxi(1, int(ally.get("maxHP", 1)))
-	var prev_hp := int(ally.get("hp", 0))
-	var amount := maxi(minimum, int(round(float(max_hp) * ratio)))
-	ally["hp"] = mini(max_hp, prev_hp + amount)
-	var actual := int(ally.get("hp", 0)) - prev_hp
-	log["effects"].append({
-		"kind": "heal",
-		"label": label,
-		"target": str(ally.get("name", "")),
-		"target_id": str(ally.get("id", "")),
-		"target_index": _player_index_by_id(str(ally.get("id", ""))),
-		"amount": actual
-	})
-
-
-func _leader_lifesteal_lowest(log: Dictionary, ratio: float, label: String) -> void:
-	var ally := _get_lowest_hp_ally()
-	if ally.is_empty():
-		return
-	var damage_done := int(log.get("remaining_damage", log.get("damage", 0)))
-	if damage_done <= 0:
-		return
-	var max_hp := maxi(1, int(ally.get("maxHP", 1)))
-	var prev_hp := int(ally.get("hp", 0))
-	var amount := maxi(1, int(round(float(damage_done) * clampf(ratio, 0.0, 2.0))))
-	ally["hp"] = mini(max_hp, prev_hp + amount)
-	var actual := int(ally.get("hp", 0)) - prev_hp
-	log["effects"].append({
-		"kind": "lifesteal",
-		"label": label,
-		"target": str(ally.get("name", "")),
-		"target_id": str(ally.get("id", "")),
-		"target_index": _player_index_by_id(str(ally.get("id", ""))),
-		"amount": actual,
-		"source_damage": damage_done
-	})
-
-
-func _leader_convert_gems(log: Dictionary, count: int, target_element: String, label: String) -> void:
-	log["effects"].append({
-		"kind": "convert_gems",
-		"label": label,
-		"count": maxi(1, count),
-		"target_element": target_element
-	})
-
-
-func _leader_guard_lowest(log: Dictionary, reduction: float, turns: int, label: String) -> void:
-	var ally := _get_lowest_hp_ally()
-	if ally.is_empty():
-		return
-	_apply_player_guard(ally, reduction, turns)
-	log["effects"].append({
-		"kind": "guard",
-		"label": label,
-		"target": str(ally.get("name", "")),
-		"target_id": str(ally.get("id", "")),
-		"target_index": _player_index_by_id(str(ally.get("id", ""))),
-		"reduction": clampf(reduction, 0.0, 0.8),
-		"turns": maxi(1, turns)
-	})
-
-
-func _leader_status_weakest(log: Dictionary, status_type: String, leader: Dictionary) -> void:
-	var target = _get_weakest_enemy()
-	if target == null:
-		return
-	var target_idx := enemies.find(target)
-	var status_log := _status_effect.apply_status(target_idx, status_type, int(leader.get("atk", 10)), str(target.get("name", "")))
-	if status_log.is_empty():
-		return
-	_refresh_capture_windows()
-	log["effects"].append({
-		"kind": "status",
-		"status": status_type,
-		"target": str(target.get("name", "")),
-		"target_index": target_idx
-	})
-
-
-func _leader_weaken_weakest(log: Dictionary, reduction: float, turns: int, label: String) -> void:
-	var target = _get_weakest_enemy()
-	if target == null:
-		return
-	var target_idx := enemies.find(target)
-	_apply_enemy_tempo_mod(target_idx, reduction, turns)
-	_refresh_capture_windows()
-	log["effects"].append({
-		"kind": "weaken",
-		"label": label,
-		"target": str(target.get("name", "")),
-		"target_index": target_idx,
-		"reduction": clampf(reduction, 0.0, 0.8),
-		"turns": maxi(1, turns)
-	})
 
 
 func _player_index_by_id(monster_id: String) -> int:
@@ -889,8 +776,25 @@ func _apply_absorb_shield_to_damage(target: Dictionary, damage: int) -> Dictiona
 	var target_id := str(target.get("id", ""))
 	if target_id.is_empty() or not player_absorb_shields.has(target_id):
 		return { "damage": damage, "absorbed": false }
-	player_absorb_shields.erase(target_id)
-	return { "damage": 0, "absorbed": true }
+	var shield: Dictionary = player_absorb_shields.get(target_id, {})
+	if not shield.has("current_hp") and not shield.has("hp"):
+		player_absorb_shields.erase(target_id)
+		return { "damage": 0, "absorbed": true }
+	var shield_hp := maxi(0, int(shield.get("current_hp", shield.get("hp", 0))))
+	var absorbed := mini(shield_hp, maxi(0, damage))
+	var remaining := maxi(0, damage - absorbed)
+	shield_hp -= absorbed
+	if shield_hp <= 0:
+		player_absorb_shields.erase(target_id)
+	else:
+		shield["current_hp"] = shield_hp
+		shield["hp"] = shield_hp
+		player_absorb_shields[target_id] = shield
+	return {
+		"damage": remaining,
+		"absorbed": absorbed > 0,
+		"shield_absorbed": absorbed
+	}
 
 
 func _apply_enemy_tempo_mod(enemy_idx: int, reduction: float, turns: int) -> void:
@@ -1427,7 +1331,7 @@ func get_status() -> Dictionary:
 		"enemy_skill_states": _build_enemy_skill_states_dict(),
 		"enemy_intents": get_enemy_intents(),
 		"objective": _objective_evaluator.get_state(),
-		"leader_skill_info": leader_skill_info,
+		"leader_skill_info": _active_leader_skill_info(),
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,
 		"player_guards": player_guards.duplicate(true),

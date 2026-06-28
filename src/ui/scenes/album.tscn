@@ -39,21 +39,21 @@
 [ext_resource type="Texture2D" uid="uid://65c54i6uf8si" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="43_menu"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="44_dex_prev"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="45_dex_next"]
-[ext_resource type="Texture2D" uid="uid://b102vvut68pah" path="res://assets/images/monsters/monster/monster_001_album_thumb.png" id="46_monster_001"]
-[ext_resource type="Texture2D" uid="uid://ctd58sy8qnll6" path="res://assets/images/monsters/monster/monster_006_album_thumb.png" id="47_monster_002"]
-[ext_resource type="Texture2D" uid="uid://fsp5ly7qw313" path="res://assets/images/monsters/enemy/enemy_001_album_thumb.png" id="48_monster_003"]
-[ext_resource type="Texture2D" uid="uid://b68x6hbc3mh1s" path="res://assets/images/monsters/monster/monster_002_album_thumb.png" id="49_monster_004"]
-[ext_resource type="Texture2D" uid="uid://crjlplsrciptn" path="res://assets/images/monsters/monster/monster_011_album_thumb.png" id="50_monster_005"]
-[ext_resource type="Texture2D" uid="uid://bgntotebrcg6h" path="res://assets/images/monsters/monster/monster_012_album_thumb.png" id="51_monster_006"]
-[ext_resource type="Texture2D" uid="uid://dvgxhki4ft2yo" path="res://assets/images/monsters/monster/monster_007_album_thumb.png" id="52_monster_007"]
-[ext_resource type="Texture2D" uid="uid://cv6xrl7h8tv0j" path="res://assets/images/monsters/monster/monster_033_album_thumb.png" id="53_monster_008"]
-[ext_resource type="Texture2D" uid="uid://goa8wsf1p0p1" path="res://assets/images/monsters/monster/monster_034_album_thumb.png" id="54_monster_009"]
-[ext_resource type="Texture2D" uid="uid://1hrxegjfsbbf" path="res://assets/images/monsters/monster/monster_035_album_thumb.png" id="55_monster_010"]
-[ext_resource type="Texture2D" uid="uid://cmdms6jnmapcg" path="res://assets/images/monsters/monster/monster_036_album_thumb.png" id="56_monster_011"]
-[ext_resource type="Texture2D" uid="uid://dpmsdihr0kndq" path="res://assets/images/monsters/monster/monster_003_album_thumb.png" id="57_monster_012"]
-[ext_resource type="Texture2D" uid="uid://d3facgc8uk2bs" path="res://assets/images/monsters/monster/monster_008_album_thumb.png" id="58_monster_013"]
-[ext_resource type="Texture2D" uid="uid://x5biafhmen6b" path="res://assets/images/monsters/monster/monster_013_album_thumb.png" id="59_monster_014"]
-[ext_resource type="Texture2D" uid="uid://wd46tc4qqa4f" path="res://assets/images/monsters/monster/monster_015_album_thumb.png" id="60_monster_015"]
+[ext_resource type="Texture2D" uid="uid://wveh3u7p25lf" path="res://assets/images/monsters/monster/monster_001.png" id="46_monster_001"]
+[ext_resource type="Texture2D" uid="uid://uqmo07c7wx56" path="res://assets/images/monsters/monster/monster_006.png" id="47_monster_002"]
+[ext_resource type="Texture2D" uid="uid://6frrete1u1t0" path="res://assets/images/monsters/monster/monster_003.png" id="48_monster_003"]
+[ext_resource type="Texture2D" uid="uid://g37gnfn1jwjr" path="res://assets/images/monsters/monster/monster_002.png" id="49_monster_004"]
+[ext_resource type="Texture2D" uid="uid://dnh7y8dqfm2kn" path="res://assets/images/monsters/monster/monster_011.png" id="50_monster_005"]
+[ext_resource type="Texture2D" uid="uid://5w8f5c2wkpiv" path="res://assets/images/monsters/monster/monster_012.png" id="51_monster_006"]
+[ext_resource type="Texture2D" uid="uid://hkyhdbjwhrak" path="res://assets/images/monsters/monster/monster_007.png" id="52_monster_007"]
+[ext_resource type="Texture2D" uid="uid://de54jc56aesb7" path="res://assets/images/monsters/monster/monster_033.png" id="53_monster_008"]
+[ext_resource type="Texture2D" uid="uid://byfmmq26w427s" path="res://assets/images/monsters/monster/monster_034.png" id="54_monster_009"]
+[ext_resource type="Texture2D" uid="uid://c55ihvkxmb04n" path="res://assets/images/monsters/monster/monster_035.png" id="55_monster_010"]
+[ext_resource type="Texture2D" uid="uid://igy02wcyepog" path="res://assets/images/monsters/monster/monster_036.png" id="56_monster_011"]
+[ext_resource type="Texture2D" uid="uid://6frrete1u1t0" path="res://assets/images/monsters/monster/monster_003.png" id="57_monster_012"]
+[ext_resource type="Texture2D" uid="uid://bmr3hnni6tuoy" path="res://assets/images/monsters/monster/monster_008.png" id="58_monster_013"]
+[ext_resource type="Texture2D" uid="uid://c3a0dt5i4onma" path="res://assets/images/monsters/monster/monster_013.png" id="59_monster_014"]
+[ext_resource type="Texture2D" uid="uid://bix5y1v7px7hq" path="res://assets/images/monsters/monster/monster_015.png" id="60_monster_015"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black.png" id="61_black_panel"]
 [ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="62_dark_overlay"]
 
@@ -349,7 +349,7 @@ mouse_filter = 2
 texture = ExtResource("4_ynhr1")
 expand_mode = 1
 
-[node name="花边01" type="Control" parent="Header" unique_id=1166182551]
+[node name="閼鸿精绔?1" type="Control" parent="Header" unique_id=1166182551]
 custom_minimum_size = Vector2(520, 100)
 anchors_preset = 0
 offset_left = 6.0
@@ -359,7 +359,7 @@ offset_bottom = 165.0
 scale = Vector2(0.67, 0.67)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="Header/花边01" unique_id=1670829549]
+[node name="NinePatch" type="NinePatchRect" parent="Header/閼鸿精绔?1" unique_id=1670829549]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

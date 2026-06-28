@@ -445,18 +445,7 @@ func _element_texture(element: String) -> Texture2D:
 	return _tex(str(ELEMENT_ICON_ASSETS.get(element, "")))
 
 func _monster_texture(id: String, variant: String) -> Texture2D:
-	if variant == "album":
-		var album_path := _album_portrait_path(id)
-		if ResourceLoader.exists(album_path):
-			return _tex(album_path)
 	return _tex(MonsterArtDBScript.get_art_path(id, variant))
-
-func _album_portrait_path(monster_id: String) -> String:
-	if monster_id.begins_with("monster_boss_"):
-		return "res://assets/images/monsters/boss/%s_album_thumb.png" % monster_id
-	if monster_id.begins_with("enemy_"):
-		return "res://assets/images/monsters/enemy/%s_album_thumb.png" % monster_id
-	return "res://assets/images/monsters/monster/%s_album_thumb.png" % monster_id
 
 func _node(path: String) -> Control:
 	return get_node(path) as Control

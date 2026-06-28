@@ -14,10 +14,11 @@ extends RefCounted
 
 const MAX_LEVEL: int = 100  # 等级封顶：宠物/敌人共用上限（主人定 2026-06-10）
 
-const NORMAL_ENEMY_LEVEL_BONUS: int = 5
+const NORMAL_ENEMY_LEVEL_BONUS: int = 3
 const ELITE_BASE_STAT_MULT: float = 1.10
 const ELITE_ENEMY_HP_MULT: float = 2.0
 const ELITE_ENEMY_ATK_MULT: float = 1.5
+const ELITE_VISUAL_SCALE_MULT: float = 1.2
 
 enum EnemyTier { NORMAL, ELITE }
 
@@ -37,6 +38,19 @@ static func nature_mult(nature_id: String, stat_key: String) -> float:
 	if nature_id.is_empty():
 		return 1.0
 	return NatureDB.get_nature_stat_mult(nature_id, stat_key)
+
+static func visual_scale_for_rarity(rarity: int) -> float:
+	return 0.6 + float(clampi(rarity, 1, 5)) * 0.2
+
+static func visual_scale_for_stats(stats: Dictionary) -> float:
+	var monster_id := str(stats.get("monsterId", stats.get("id", "")))
+	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
+	var rarity := int(stats.get("rarity", data.get("rarity", 1)))
+	var is_elite := bool(stats.get("isElite", data.get("isElite", false)))
+	var scale := visual_scale_for_rarity(rarity)
+	if is_elite:
+		scale *= ELITE_VISUAL_SCALE_MULT
+	return scale
 
 ## ★ 统一入口
 ## monster_id: MONSTER_DB 中的 key（例 "monster_001"）
@@ -87,6 +101,7 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 		"isElite": is_elite,
 		"capturable": bool(data.get("capturable", not is_boss)),
 	}
+	stats["_visualScale"] = visual_scale_for_stats(stats)
 	if is_elite:
 		_apply_elite_base_modifier(stats)
 	return stats
@@ -101,7 +116,7 @@ static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NOR
 		_apply_enemy_boss_modifier(stats)
 	return stats
 
-## 普通敌人比关卡标注等级高 5 级；Boss 保持原关卡等级。
+## 普通敌人比关卡标注等级高 3 级；Boss 保持原关卡等级。
 static func enemy_combat_level(monster_id: String, base_level: int) -> int:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(monster_id, {})
 	var bonus := 0 if bool(data.get("isBoss", false)) else NORMAL_ENEMY_LEVEL_BONUS
@@ -129,6 +144,7 @@ static func _apply_tier_modifier(stats: Dictionary, tier: int) -> Dictionary:
 	if tier != EnemyTier.ELITE or bool(stats.get("isElite", false)):
 		return stats
 	stats["isElite"] = true
+	stats["_visualScale"] = visual_scale_for_stats(stats)
 	_apply_elite_base_modifier(stats)
 	return stats
 

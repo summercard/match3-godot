@@ -8,20 +8,19 @@
 [ext_resource type="Texture2D" uid="uid://cnmlb3gxmjnee" path="res://assets/images/ui/panels/ranch_ui_status_ribbon_green.png" id="6_evj83"]
 [ext_resource type="Texture2D" uid="uid://cbxsgj8tlo60a" path="res://assets/images/ui/panels/ranch_ui_timer_plate.png" id="7_1yngj"]
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="8_5svvp"]
-[ext_resource type="Texture2D" uid="uid://dahjyw6jpe0r3" path="res://assets/images/ui/icons/ranch_icon_gold_coin.png" id="9_2pk37"]
 [ext_resource type="Texture2D" uid="uid://dtw8m40v5vpgi" path="res://assets/images/ui/buttons/result_refresh_ui_btn_gold_full.png" id="10_2bgry"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black.png" id="10_2ehnv"]
+[ext_resource type="Texture2D" uid="uid://cakn78kpwv1r1" path="res://assets/images/ui/nine_patch/panel_black.png" id="10_2ehnv"]
 [ext_resource type="Texture2D" uid="uid://dw1ag3xhmm4ds" path="res://assets/images/ui/generated_panel_parts/panel_base3.png" id="10_e8rgr"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="12_uqcji"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="13_72f50"]
 [ext_resource type="Texture2D" uid="uid://b4b07pkclp53i" path="res://assets/images/ui/icons/ranch_icon_check_badge_glossy.png" id="15_5g78r"]
 [ext_resource type="Texture2D" uid="uid://bkt5606dedikh" path="res://assets/images/ui/panels/ranch_ui_classroom_detail_panel.png" id="16_yskjy"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="17_7sekf"]
+[ext_resource type="Texture2D" uid="uid://bnh5oyfaim0w4" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="17_7sekf"]
 [ext_resource type="Texture2D" uid="uid://v43q5ujc4gyn" path="res://assets/images/ui/buttons/result_refresh_ui_btn_blue_full.png" id="17_qrgjm"]
 [ext_resource type="Texture2D" uid="uid://bwkgtfdik0aq7" path="res://assets/images/ui/panels/ranch_ui_relationship_ribbon.png" id="20_tn4tg"]
 [ext_resource type="Texture2D" uid="uid://dyfilvh4p2q38" path="res://assets/images/ui/panels/ranch_ui_social_place_panel.png" id="21_eayjd"]
 [ext_resource type="Texture2D" uid="uid://bj3wfdek2qibt" path="res://assets/images/ui/panels/ranch_ui_social_result_panel.png" id="23_vtvj8"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_gold.png" id="24_2ehnv"]
+[ext_resource type="Texture2D" uid="uid://bfp4op44gh4aj" path="res://assets/images/ui/nine_patch/button_butter_gold.png" id="24_2ehnv"]
 [ext_resource type="Texture2D" uid="uid://brjohqh01qrpi" path="res://assets/images/ui/bars/ranch_ui_header_plaque.png" id="24_87rtj"]
 [ext_resource type="Texture2D" uid="uid://bnnmirp78xjbd" path="res://assets/images/ui/panels/main_ui_currency_capsule_v3.png" id="25_jbwww"]
 [ext_resource type="Texture2D" uid="uid://dgjfl2sau47pt" path="res://assets/images/ui/icons/main_icon_gold_coin_v3.png" id="26_cwols"]
@@ -38,6 +37,9 @@
 [ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="37_card_back"]
 [ext_resource type="Texture2D" uid="uid://d0vsl4s2lgjbr" path="res://assets/images/ui/panels/team_new_ui_empty_pedestal_plus.png" id="38_empty_plus"]
 [ext_resource type="Texture2D" uid="uid://cxwjj7iyiuq0s" path="res://assets/images/effects/result_refresh_fx_sparkles.png" id="39_upgrade_sparkles"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2ehnv"]
+load_path = "res://.godot/imported/ranch_icon_gold_coin.png-31efb687dc40df4756c5930446727523.ctex"
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r8pwf"]
 bg_color = Color(1, 0.96, 0.84, 0.99)
@@ -131,7 +133,6 @@ offset_bottom = 667.0
 mouse_filter = 2
 
 [node name="RanchPage" type="Control" parent="Pages" unique_id=644873063]
-visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -160,11 +161,11 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot1" unique_id=1366583310]
-visible = false
 layout_mode = 0
 offset_left = 14.0
+offset_top = -16.0
 offset_right = 92.0
-offset_bottom = 76.0
+offset_bottom = 60.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -297,11 +298,11 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot2" unique_id=1157801372]
-visible = false
 layout_mode = 0
 offset_left = 14.0
+offset_top = -15.0
 offset_right = 92.0
-offset_bottom = 76.0
+offset_bottom = 61.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -440,11 +441,11 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot3" unique_id=1025689886]
-visible = false
 layout_mode = 0
 offset_left = 14.0
+offset_top = -15.0
 offset_right = 92.0
-offset_bottom = 76.0
+offset_bottom = 61.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -586,11 +587,11 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot4" unique_id=1530923397]
-visible = false
 layout_mode = 0
 offset_left = 14.0
+offset_top = -15.0
 offset_right = 92.0
-offset_bottom = 76.0
+offset_bottom = 61.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -729,11 +730,11 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Portrait" type="TextureRect" parent="Pages/RanchPage/Slots/Slot5" unique_id=899441358]
-visible = false
 layout_mode = 0
 offset_left = 14.0
+offset_top = -15.0
 offset_right = 92.0
-offset_bottom = 76.0
+offset_bottom = 61.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -894,7 +895,7 @@ offset_top = 7.0
 offset_right = 277.0
 offset_bottom = 35.0
 mouse_filter = 2
-texture = ExtResource("9_2pk37")
+texture = SubResource("CompressedTexture2D_2ehnv")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1793,9 +1794,8 @@ offset_bottom = 207.0
 theme_override_colors/font_color = Color(0.49, 0.31, 0.13, 1)
 theme_override_font_sizes/font_size = 9
 text = "HP 100   ATK 32   DEF 25"
-vertical_alignment = 0
 
-[node name="AttributeLabels" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="AttributeLabels" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1601134001]
 layout_mode = 0
 offset_left = 176.0
 offset_top = 46.0
@@ -1804,10 +1804,19 @@ offset_bottom = 207.0
 theme_override_colors/font_color = Color(0.64, 0.36, 0.14, 1)
 theme_override_constants/line_spacing = 2
 theme_override_font_sizes/font_size = 8
-text = "等级\n属性\n性格\n性别\n稀有度\n精英\nHP\nATK\nDEF\nSPD\n战力"
-vertical_alignment = 0
+text = "等级
+属性
+性格
+性别
+稀有度
+精英
+HP
+ATK
+DEF
+SPD
+战力"
 
-[node name="AttributeValues" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="AttributeValues" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1588979911]
 layout_mode = 0
 offset_left = 220.0
 offset_top = 46.0
@@ -1816,9 +1825,8 @@ offset_bottom = 207.0
 theme_override_colors/font_color = Color(0.31, 0.16, 0.06, 1)
 theme_override_constants/line_spacing = 2
 theme_override_font_sizes/font_size = 8
-vertical_alignment = 0
 
-[node name="MonsterExpBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="MonsterExpBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel" unique_id=2064385153]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 176.0
@@ -1827,7 +1835,7 @@ offset_bottom = 188.0
 mouse_filter = 2
 show_percentage = false
 
-[node name="MonsterExpText" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="MonsterExpText" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=65173546]
 layout_mode = 0
 offset_left = 14.0
 offset_top = 188.0
@@ -1976,10 +1984,9 @@ offset_bottom = 306.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 9
-horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="StoneCount" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="StoneCount" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1965240486]
 layout_mode = 0
 offset_left = 260.0
 offset_top = 282.0
@@ -2065,7 +2072,7 @@ text = "进化"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PoolBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="PoolBar" type="ProgressBar" parent="Pages/ClassroomPage/DetailPanel" unique_id=228055161]
 layout_mode = 0
 offset_left = 24.0
 offset_top = 238.0
@@ -2074,7 +2081,7 @@ offset_bottom = 251.0
 mouse_filter = 2
 show_percentage = false
 
-[node name="PoolText" type="Label" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="PoolText" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=437194651]
 layout_mode = 0
 offset_left = 18.0
 offset_top = 251.0
@@ -2086,7 +2093,7 @@ text = "总经验槽 0 / 1,500"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="UpgradeButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="UpgradeButton" type="TextureButton" parent="Pages/ClassroomPage/DetailPanel" unique_id=1376793238]
 layout_mode = 0
 offset_left = 181.0
 offset_top = 248.0
@@ -2096,7 +2103,7 @@ pivot_offset = Vector2(35, 18)
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="butter02" type="Control" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+[node name="butter02" type="Control" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton" unique_id=256301612]
 custom_minimum_size = Vector2(260, 85)
 anchors_preset = 0
 offset_left = -1.0
@@ -2106,7 +2113,7 @@ offset_bottom = 201.0
 scale = Vector2(0.18, 0.18)
 mouse_filter = 2
 
-[node name="NinePatch" type="NinePatchRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton/butter02"]
+[node name="NinePatch" type="NinePatchRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton/butter02" unique_id=594101475]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -2119,7 +2126,7 @@ patch_margin_top = 44
 patch_margin_right = 72
 patch_margin_bottom = 44
 
-[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+[node name="Frame" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton" unique_id=1879918452]
 visible = false
 layout_mode = 0
 offset_right = 70.0
@@ -2128,7 +2135,7 @@ mouse_filter = 2
 texture = ExtResource("17_qrgjm")
 expand_mode = 1
 
-[node name="Text" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton"]
+[node name="Text" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeButton" unique_id=1859339519]
 layout_mode = 0
 offset_top = -3.0
 offset_right = 70.0
@@ -2139,15 +2146,15 @@ text = "升级"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="UpgradeFeedback" type="Control" parent="Pages/ClassroomPage/DetailPanel"]
+[node name="UpgradeFeedback" type="Control" parent="Pages/ClassroomPage/DetailPanel" unique_id=1588174679]
 visible = false
 z_index = 30
-layout_mode = 0
+anchors_preset = 0
 offset_right = 351.0
 offset_bottom = 316.0
 mouse_filter = 2
 
-[node name="Glow" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+[node name="Glow" type="TextureRect" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback" unique_id=21641483]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 18.0
@@ -2158,7 +2165,7 @@ texture = ExtResource("39_upgrade_sparkles")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Message" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+[node name="Message" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback" unique_id=1642247413]
 z_index = 2
 layout_mode = 0
 offset_left = 67.0
@@ -2173,7 +2180,7 @@ text = "升级成功！"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Transfer" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback"]
+[node name="Transfer" type="Label" parent="Pages/ClassroomPage/DetailPanel/UpgradeFeedback" unique_id=992098756]
 z_index = 2
 layout_mode = 0
 offset_left = 81.0
@@ -2999,6 +3006,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SocialPage" type="Control" parent="Pages" unique_id=174540711]
+visible = false
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0
@@ -4101,6 +4109,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("24_2ehnv")
 patch_margin_left = 112
 patch_margin_top = 72

@@ -20,6 +20,8 @@ func _run() -> void:
 		if matches.is_empty():
 			continue
 		var instance: Dictionary = matches[0]
+		_expect(int(instance.get("level", 1)) == MonsterPool.STARTER_INITIAL_LEVEL, "%s should start at level %d" % [starter_id, MonsterPool.STARTER_INITIAL_LEVEL])
+		_expect(str(instance.get("source", "")) == "starter", "%s should be marked as a starter source" % starter_id)
 		var expected := StatCalculator.calc(starter_id, int(instance.get("level", 1)), str(instance.get("nature", "")))
 		var view := MonsterService.build_instance_view(instance)
 		_expect(not bool(instance.get("isElite", false)), "%s should start as a normal non-elite pet" % starter_id)

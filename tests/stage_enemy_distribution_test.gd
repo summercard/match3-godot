@@ -9,34 +9,34 @@ func _init() -> void:
 
 func _run() -> void:
 	var db := StageDB.new()
-	var non_boss_owners: Dictionary = {}
-	var boss_owners: Dictionary = {}
 	for raw_chapter: Dictionary in StageDB.STAGES_DATA.get("chapters", []):
 		var chapter: Dictionary = db._expanded_chapter(raw_chapter)
-		var chapter_id := str(chapter.get("id", ""))
+		var chapter_num := _chapter_number(chapter)
+		var expected_pool: Array = StageDB.CHAPTER_ENEMY_POOLS.get(chapter_num, [])
+		if expected_pool.is_empty() and chapter_num > 8:
+			expected_pool = StageDB.CHAPTER_ENEMY_POOLS.get(8, [])
+		var expected_boss := str(StageDB.CHAPTER_BOSS_IDS.get(chapter_num, ""))
+		if expected_boss.is_empty() and chapter_num > 8:
+			expected_boss = str(StageDB.CHAPTER_BOSS_IDS.get(8, ""))
+
 		for stage: Dictionary in chapter.get("stages", []):
 			var enemy_ids := _stage_enemy_ids(stage)
 			for enemy_id in enemy_ids:
+				var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
+				_expect(not data.is_empty(), "%s should exist in MonsterDb" % enemy_id)
 				if enemy_id.begins_with("monster_boss_"):
-					if not boss_owners.has(enemy_id):
-						boss_owners[enemy_id] = {}
-					boss_owners[enemy_id][chapter_id] = true
-				elif enemy_id.begins_with("enemy_"):
-					if not non_boss_owners.has(enemy_id):
-						non_boss_owners[enemy_id] = {}
-					non_boss_owners[enemy_id][chapter_id] = true
-
-	for enemy_id in non_boss_owners.keys():
-		var chapters: Array = non_boss_owners[enemy_id].keys()
-		_expect(chapters.size() == 1, "%s should belong to one map only, got %s" % [enemy_id, ", ".join(chapters)])
-
-	for boss_id in boss_owners.keys():
-		var chapters: Array = boss_owners[boss_id].keys()
-		_expect(chapters.size() == 1, "%s boss should be exclusive to one map, got %s" % [boss_id, ", ".join(chapters)])
-		var expected_chapter := "chapter_%d" % int(boss_id.get_slice("_", 2))
-		_expect(chapters[0] == expected_chapter, "%s should only appear in %s, got %s" % [boss_id, expected_chapter, chapters[0]])
+					_expect(enemy_id == expected_boss, "%s should use chapter boss %s" % [str(stage.get("id", "")), expected_boss])
+				else:
+					_expect(enemy_id.begins_with("monster_"), "%s should use unified monster_* ids" % enemy_id)
+					_expect(expected_pool.has(enemy_id), "%s should belong to chapter %d pool" % [enemy_id, chapter_num])
+					_expect(int(data.get("rarity", 0)) <= 2, "%s should not be a direct 3-star stage spawn" % enemy_id)
 
 	_finish()
+
+
+func _chapter_number(chapter: Dictionary) -> int:
+	var chapter_id := str(chapter.get("id", "chapter_1"))
+	return int(chapter_id.get_slice("_", 1))
 
 
 func _stage_enemy_ids(stage: Dictionary) -> Array[String]:

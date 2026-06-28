@@ -69,6 +69,7 @@ func _run() -> void:
 		alive_monster["name"] = shared_name
 		dead_monster["hp"] = 0
 		alive_monster["hp"] = 9999
+		_expect(int(battle_scene.call("_find_player_index", shared_name)) == 1, "battle scene should resolve same-name attackers to the living member")
 		for i in range(2, battle.player_team.size()):
 			if battle.player_team[i] != null:
 				battle.player_team[i]["hp"] = 0

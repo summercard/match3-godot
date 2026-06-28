@@ -22,7 +22,7 @@ var _phase_configs: Array = []
 var _triggered_phases: Dictionary = {}  # { phaseNum: true }
 
 const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
-const ELITE_VISUAL_SCALE: float = 1.2
+const PHASE_TWO_VISUAL_SCALE_MULT: float = 1.5
 
 
 func _init(bm: Node = null) -> void:
@@ -99,12 +99,12 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 			monster["atk"] = int(monster.get("atk", 0) * hp_mult)
 			monster["def"] = int(monster.get("def", 0) * hp_mult)
 			if bool(monster.get("isElite", false)):
-				monster["_visualScale"] = ELITE_VISUAL_SCALE
 				monster["isElite"] = true
+				monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster)
 			if is_elite:
 				monster["_eliteSource"] = "random"
 			# ★ 主人定 2026-06-10：二阶段体型变大 50%
-			monster["_visualScale"] = 1.5
+			monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster) * PHASE_TWO_VISUAL_SCALE_MULT
 		new_enemies.append(monster)
 
 	# 重置敌人技能状态

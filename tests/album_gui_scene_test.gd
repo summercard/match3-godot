@@ -21,7 +21,8 @@ func _run() -> void:
 	_assert(tscn_card_frame.texture.resource_path.ends_with("panel_base.png"), "album tscn should use the handmade spirit card backing component")
 	_assert(not (scene.get_node("AlbumPage/Grid/Card1/LockIcon") as TextureRect).visible, "album tscn should hide the legacy lock icon before runtime sync")
 	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture != null, "album tscn should show a concept-style portrait in the editor")
-	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "album tscn should use normalized dex portraits instead of raw battle art")
+	var editor_portrait_path := (scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path
+	_assert(editor_portrait_path.ends_with(".png") and not editor_portrait_path.contains("_album_thumb"), "album tscn should reuse formal portraits without duplicate album thumb files")
 	_assert(not scene.has_node("AlbumPage/PreviewPanel"), "album should remove the right-side persistent pet detail panel")
 	_assert(not scene.has_node("AlbumPage/PreviewEmpty"), "album should remove the right-side empty preview hint")
 	_assert((scene.get_node("AlbumPage/Grid") as Control).size.x > 330.0, "album roster grid should use the space freed by the removed preview")
@@ -120,7 +121,8 @@ func _run() -> void:
 	var roster_frame := scene.get_node("AlbumPage/Grid/Card1/CardBack/NinePatch") as NinePatchRect
 	_assert(roster_frame.visible, "unlocked roster portrait should sit on a light card backing")
 	_assert(roster_frame.texture.resource_path.ends_with("panel_base.png"), "album roster should use the handmade spirit card backing component")
-	_assert((scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path.ends_with("_album_thumb.png"), "runtime album grid should keep normalized dex portraits")
+	var runtime_portrait_path := (scene.get_node("AlbumPage/Grid/Card1/Portrait") as TextureRect).texture.resource_path
+	_assert(runtime_portrait_path.ends_with(".png") and not runtime_portrait_path.contains("_album_thumb"), "runtime album grid should reuse formal portraits without duplicate album thumb files")
 
 	var close := scene.get_node("DetailPanel/CloseButton") as BaseButton
 	close.pressed.emit()

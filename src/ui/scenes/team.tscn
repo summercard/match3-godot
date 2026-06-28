@@ -25,9 +25,9 @@
 [ext_resource type="Texture2D" uid="uid://ckhxak6dyn6th" path="res://assets/images/ui/icons/main_icon_level_shield_v3.png" id="23_def"]
 [ext_resource type="Texture2D" uid="uid://c3p401pkxuq8m" path="res://assets/images/ui/icons/ranch_icon_exp_badge.png" id="24_spd"]
 [ext_resource type="Texture2D" uid="uid://dw1ag3xhmm4ds" path="res://assets/images/ui/generated_panel_parts/panel_base3.png" id="25_roster_bg"]
-[ext_resource type="Texture2D" uid="uid://dmascmt2urjay" path="res://assets/images/monsters/monster/monster_001_fire_lizard.png" id="26_preview_member1"]
-[ext_resource type="Texture2D" uid="uid://dlewxgo3udhbp" path="res://assets/images/monsters/monster/monster_002_water_cub.png" id="27_preview_leader"]
-[ext_resource type="Texture2D" uid="uid://3mpnbnr2angk" path="res://assets/images/monsters/monster/monster_003_grass_leaf.png" id="28_preview_member2"]
+[ext_resource type="Texture2D" uid="uid://drmla1fo2jqjo" path="res://assets/images/monsters/monster/monster_093.png" id="26_preview_member1"]
+[ext_resource type="Texture2D" uid="uid://g37gnfn1jwjr" path="res://assets/images/monsters/monster/monster_002.png" id="27_preview_leader"]
+[ext_resource type="Texture2D" uid="uid://c8blti1351cbb" path="res://assets/images/monsters/monster/monster_053.png" id="28_preview_member2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selection"]
 bg_color = Color(1, 0.82, 0.26, 0.08)
@@ -418,21 +418,19 @@ offset_bottom = 348.0
 pivot_offset = Vector2(39, 80)
 
 [node name="Selection" type="Panel" parent="TeamSlots/Member1Slot" unique_id=757131685]
-visible = false
 layout_mode = 0
-offset_left = -6.0
-offset_top = -9.0
-offset_right = 72.0
-offset_bottom = 151.0
+offset_left = -9.0
+offset_top = -18.0
+offset_right = 79.0
+offset_bottom = 149.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
 
 [node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2011852903]
 layout_mode = 0
-offset_left = -11.000002
-offset_top = -0.9999976
-offset_right = 67.0
-offset_bottom = 77.0
+offset_left = -5.000002
+offset_right = 73.0
+offset_bottom = 78.0
 scale = Vector2(0.8520866, 0.8520866)
 pivot_offset = Vector2(39, 39)
 mouse_filter = 2
@@ -453,6 +451,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 4.0
+offset_right = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -482,10 +482,10 @@ layout_mode = 0
 
 [node name="Label" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2029213049]
 layout_mode = 0
-offset_left = -5.0
-offset_top = 121.0
-offset_right = 73.0
-offset_bottom = 149.0
+offset_left = -3.0
+offset_top = 115.0
+offset_right = 75.0
+offset_bottom = 143.0
 mouse_filter = 2
 texture = ExtResource("10_pedestal_label")
 expand_mode = 1
@@ -510,9 +510,9 @@ pivot_offset = Vector2(59.5, 105)
 
 [node name="EmptyPlus" type="TextureRect" parent="TeamSlots/LeaderSlot" unique_id=743580315]
 layout_mode = 0
-offset_left = 15.0
+offset_left = 18.0
 offset_top = 34.0
-offset_right = 93.0
+offset_right = 96.0
 offset_bottom = 112.0
 scale = Vector2(0.9535238, 0.9535238)
 pivot_offset = Vector2(39, 39)
@@ -534,6 +534,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = -7.0
+offset_right = 5.0
+offset_bottom = -7.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -613,9 +617,9 @@ pivot_offset = Vector2(39, 80)
 
 [node name="EmptyPlus" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=102303894]
 layout_mode = 0
-offset_left = -7.0
+offset_left = -6.0
 offset_top = -2.0
-offset_right = 71.0
+offset_right = 72.0
 offset_bottom = 76.0
 scale = Vector2(0.9594732, 0.9594732)
 pivot_offset = Vector2(39, 39)
@@ -637,6 +641,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 2.0
+offset_right = 3.0
+offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -663,19 +671,20 @@ visible = false
 layout_mode = 0
 
 [node name="Selection" type="Panel" parent="TeamSlots/Member2Slot" unique_id=2133127440]
-visible = false
 layout_mode = 0
-offset_right = 78.0
-offset_bottom = 160.0
+offset_left = -8.0
+offset_top = -18.0
+offset_right = 79.0
+offset_bottom = 146.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_selection")
 
 [node name="Label" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=1537775982]
 layout_mode = 0
-offset_left = -1.0
-offset_top = 121.0
-offset_right = 77.0
-offset_bottom = 149.0
+offset_left = -3.0
+offset_top = 113.0
+offset_right = 75.0
+offset_bottom = 141.0
 mouse_filter = 2
 texture = ExtResource("10_pedestal_label")
 expand_mode = 1

@@ -85,6 +85,9 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "battle":
 		_seed_battle_demo_fx(main)
 		return
+	if scene_name == "leader_skill_test":
+		_seed_leader_skill_test_demo(main)
+		return
 	if scene_name == "ranch":
 		_seed_ranch_demo(main)
 		return
@@ -126,6 +129,12 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	team_scene.set("_roster_page", int(_read_arg("--team-demo-page=", "0")))
 	team_scene.call("_clamp_roster_page")
 	team_scene.queue_redraw()
+
+func _seed_leader_skill_test_demo(main: Control) -> void:
+	var scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
+	if scene == null or not scene.has_method("_trigger_tone"):
+		return
+	scene.call("_trigger_tone", _read_arg("--leader-tone=", "chain"))
 
 func _seed_ranch_demo(main: Control) -> void:
 	if _read_arg("--ranch-demo=", "0") != "1":

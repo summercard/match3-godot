@@ -20,1016 +20,868 @@ const ElementRulesScript = preload("res://src/battle/element_rules.gd")
 # ========== 精灵数据库 ==========
 const MONSTER_DB: Dictionary = {
 	"monster_001": {
-		"id": "monster_001", "name": "小火龙", "element": "fire",
-		"rarity": 2, "emoji": "🦎",
-		"baseHP": 180, "baseATK": 45, "baseDEF": 30, "baseSPD": 15,
-		"skill": {
-			"name": "火焰冲击", "cost": 8, "type": "strike", "multiplier": 2.5,
-			"effects": [
-				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 2.5 }
-			]
-		},
-		"evolution": { "level": 16, "target": "monster_006" }
+		"id": "monster_001", "name": "大眼蜗", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 160, "baseATK": 20, "baseDEF": 11, "baseSPD": 12,
+		"skill": {"name": "大眼蜗冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_001"
 	},
 	"monster_002": {
-		"id": "monster_002", "name": "水龟仔", "element": "water",
-		"rarity": 2, "emoji": "🐢",
-		"baseHP": 200, "baseATK": 35, "baseDEF": 40, "baseSPD": 12,
-		"skill": {
-			"name": "水之护盾", "cost": 7, "type": "ward", "multiplier": 1.0,
-			"effects": [
-				{ "kind": "heal", "target": "lowest_ally", "ratio": 0.28, "min": 24 },
-				{ "kind": "guard", "target": "lowest_ally", "reduction": 0.25, "turns": 1 }
-			]
-		},
-		"evolution": { "level": 16, "target": "monster_007" }
+		"id": "monster_002", "name": "草兔兔", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 162, "baseATK": 16, "baseDEF": 22, "baseSPD": 15,
+		"skill": {"name": "草兔兔冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_002",
+		"evolution": {"level": 16, "target": "monster_003"}
 	},
 	"monster_003": {
-		"id": "monster_003", "name": "草苗儿", "element": "grass",
-		"rarity": 2, "emoji": "🌱",
-		"baseHP": 170, "baseATK": 38, "baseDEF": 35, "baseSPD": 18,
-		"skill": {
-			"name": "藤蔓束缚", "cost": 6, "type": "tempo", "multiplier": 1.35,
-			"effects": [
-				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 1.35 },
-				{ "kind": "weaken", "target": "damaged_enemy", "reduction": 0.35, "turns": 1 }
-			]
-		},
-		"evolution": { "level": 16, "target": "monster_008" }
+		"id": "monster_003", "name": "兔八子", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 206, "baseATK": 33, "baseDEF": 19, "baseSPD": 23,
+		"skill": {"name": "兔八子冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_003",
+		"evolution": {"level": 30, "target": "monster_004"}
 	},
 	"monster_004": {
-		"id": "monster_004", "name": "雷小鼠", "element": "thunder",
-		"rarity": 2, "emoji": "🐭",
-		"baseHP": 100, "baseATK": 40, "baseDEF": 15, "baseSPD": 25,
-		"skill": { "name": "雷电箭", "cost": 9, "multiplier": 3.0 },
-		"evolution": { "level": 18, "target": "monster_009" }
+		"id": "monster_004", "name": "草兔王", "element": "grass",
+		"rarity": 3, "emoji": "",
+		"baseHP": 293, "baseATK": 39, "baseDEF": 51, "baseSPD": 20,
+		"skill": {"name": "草兔王冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_004"
 	},
 	"monster_005": {
-		"id": "monster_005", "name": "光精灵", "element": "light",
-		"rarity": 2, "emoji": "🧚",
-		"baseHP": 90, "baseATK": 38, "baseDEF": 18, "baseSPD": 22,
-		"skill": { "name": "星光爆裂", "cost": 10, "multiplier": 3.5 },
-		"evolution": { "level": 20, "target": "monster_010" }
+		"id": "monster_005", "name": "风铃猫头鹰", "element": "wind",
+		"rarity": 1, "emoji": "",
+		"baseHP": 104, "baseATK": 29, "baseDEF": 6, "baseSPD": 39,
+		"skill": {"name": "风铃猫头鹰冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_005",
+		"evolution": {"level": 16, "target": "monster_006"}
 	},
 	"monster_006": {
-		"id": "monster_006", "name": "火恐龙", "element": "fire",
-		"rarity": 3, "emoji": "🔥",
-		"baseHP": 160, "baseATK": 55, "baseDEF": 30, "baseSPD": 22,
-		"skill": {
-			"name": "烈焰冲击", "cost": 10, "type": "strike", "multiplier": 3.0,
-			"effects": [
-				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 3.0 }
-			]
-		},
-		"leaderSkill": "ATK_BOOST_FIRE"
+		"id": "monster_006", "name": "飓风猫头鹰", "element": "wind",
+		"rarity": 2, "emoji": "",
+		"baseHP": 150, "baseATK": 44, "baseDEF": 8, "baseSPD": 49,
+		"skill": {"name": "飓风猫头鹰冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_006",
+		"evolution": {"level": 30, "target": "monster_008"}
 	},
 	"monster_007": {
-		"id": "monster_007", "name": "水箭龟", "element": "water",
-		"rarity": 3, "emoji": "🐢",
-		"baseHP": 180, "baseATK": 42, "baseDEF": 45, "baseSPD": 18,
-		"skill": {
-			"name": "水流护盾", "cost": 9, "type": "ward", "multiplier": 1.0,
-			"effects": [
-				{ "kind": "heal", "target": "lowest_ally", "ratio": 0.34, "min": 36 },
-				{ "kind": "guard", "target": "lowest_ally", "reduction": 0.35, "turns": 1 }
-			]
-		},
-		"leaderSkill": "ATK_BOOST_WATER"
+		"id": "monster_007", "name": "草洋洋", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 164, "baseATK": 18, "baseDEF": 20, "baseSPD": 18,
+		"skill": {"name": "草洋洋冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_007",
+		"evolution": {"level": 16, "target": "monster_009"}
 	},
 	"monster_008": {
-		"id": "monster_008", "name": "妙蛙草", "element": "grass",
-		"rarity": 3, "emoji": "🌿",
-		"baseHP": 150, "baseATK": 48, "baseDEF": 38, "baseSPD": 25,
-		"skill": {
-			"name": "藤蔓束缚", "cost": 8, "type": "tempo", "multiplier": 1.65,
-			"effects": [
-				{ "kind": "damage", "target": "weakest_enemy", "multiplier": 1.65 },
-				{ "kind": "weaken", "target": "damaged_enemy", "reduction": 0.45, "turns": 1 }
-			]
-		},
-		"leaderSkill": "ATK_BOOST_GRASS"
+		"id": "monster_008", "name": "猫头鹰王", "element": "wind",
+		"rarity": 3, "emoji": "",
+		"baseHP": 270, "baseATK": 46, "baseDEF": 48, "baseSPD": 32,
+		"skill": {"name": "猫头鹰王冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_008"
 	},
 	"monster_009": {
-		"id": "monster_009", "name": "雷丘", "element": "thunder",
-		"rarity": 3, "emoji": "⚡",
-		"baseHP": 135, "baseATK": 60, "baseDEF": 22, "baseSPD": 35,
-		"skill": { "name": "雷霆万钧", "cost": 12, "multiplier": 3.8 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_009", "name": "花洋洋", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 210, "baseATK": 31, "baseDEF": 31, "baseSPD": 23,
+		"skill": {"name": "花洋洋冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_009",
+		"evolution": {"level": 30, "target": "monster_010"}
 	},
 	"monster_010": {
-		"id": "monster_010", "name": "光耀兽", "element": "light",
-		"rarity": 3, "emoji": "✨",
-		"baseHP": 125, "baseATK": 58, "baseDEF": 28, "baseSPD": 32,
-		"skill": { "name": "圣光爆破", "cost": 13, "multiplier": 4.2 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
-	},
-	"monster_boss_001": {
-		"id": "monster_boss_001", "name": "花叶兽", "element": "grass",
-		"rarity": 3, "emoji": "🌺",
-		"baseHP": 153, "baseATK": 22, "baseDEF": 8, "baseSPD": 11,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "花瓣风暴", "cost": 10, "multiplier": 3.0 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 3, "damageMultiplier": 2.5 }
-		],
-		"leaderSkill": "ATK_BOOST_GRASS"
-	},
-	"monster_boss_002": {
-		"id": "monster_boss_002", "name": "烈焰龙", "element": "fire",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 161, "baseATK": 23, "baseDEF": 9, "baseSPD": 11,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "龙息烈焰", "cost": 12, "multiplier": 3.5 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 3, "damageMultiplier": 2.5 },
-			{ "type": "shield", "hp": 50, "cooldown": 5 }
-		],
-		"leaderSkill": "ATK_BOOST_FIRE"
-	},
-	"enemy_001": {
-		"id": "enemy_001", "name": "野火虫", "element": "fire",
-		"rarity": 1, "emoji": "🐛",
-		"baseHP": 136, "baseATK": 20, "baseDEF": 7, "baseSPD": 10,
-		"skill": { "name": "火星", "cost": 5, "multiplier": 1.5 }
-	},
-	"enemy_002": {
-		"id": "enemy_002", "name": "水泡泡", "element": "water",
-		"rarity": 1, "emoji": "🫧",
-		"baseHP": 152, "baseATK": 20, "baseDEF": 7, "baseSPD": 8,
-		"skill": { "name": "水泡", "cost": 5, "multiplier": 1.5 }
-	},
-	"enemy_003": {
-		"id": "enemy_003", "name": "草精灵", "element": "grass",
-		"rarity": 1, "emoji": "🍃", "isElite": true,
-		"baseHP": 128, "baseATK": 20, "baseDEF": 7, "baseSPD": 12,
-		"skill": { "name": "叶刃", "cost": 5, "multiplier": 1.5 }
+		"id": "monster_010", "name": "绵洋洋", "element": "grass",
+		"rarity": 3, "emoji": "",
+		"baseHP": 260, "baseATK": 45, "baseDEF": 33, "baseSPD": 26,
+		"skill": {"name": "绵洋洋冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_010"
 	},
 	"monster_011": {
-		"id": "monster_011", "name": "冰鳞兽", "element": "water",
-		"rarity": 2, "emoji": "🐧",
-		"baseHP": 145, "baseATK": 30, "baseDEF": 35, "baseSPD": 10,
-		"skill": { "name": "寒冰冲击", "cost": 8, "multiplier": 2.3 },
-		"evolution": { "level": 18, "target": "monster_012" }
+		"id": "monster_011", "name": "水珠花", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 167, "baseATK": 15, "baseDEF": 23, "baseSPD": 16,
+		"skill": {"name": "水珠花冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_011",
+		"evolution": {"level": 16, "target": "monster_012"}
 	},
 	"monster_012": {
-		"id": "monster_012", "name": "冰甲龙", "element": "water",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 200, "baseATK": 45, "baseDEF": 55, "baseSPD": 14,
-		"skill": { "name": "极寒吐息", "cost": 10, "multiplier": 2.8 },
-		"leaderSkill": "DEF_BOOST"
+		"id": "monster_012", "name": "小喷嘴", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 210, "baseATK": 33, "baseDEF": 24, "baseSPD": 22,
+		"skill": {"name": "小喷嘴冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_012",
+		"evolution": {"level": 30, "target": "monster_013"}
 	},
 	"monster_013": {
-		"id": "monster_013", "name": "岩甲龙", "element": "earth",
-		"rarity": 3, "emoji": "🦕",
-		"baseHP": 170, "baseATK": 42, "baseDEF": 50, "baseSPD": 8,
-		"skill": { "name": "岩石崩落", "cost": 9, "multiplier": 2.5 },
-		"leaderSkill": "ATK_BOOST_EARTH"
+		"id": "monster_013", "name": "大喷嘴", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 262, "baseATK": 44, "baseDEF": 35, "baseSPD": 24,
+		"skill": {"name": "大喷嘴冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_013"
 	},
 	"monster_014": {
-		"id": "monster_014", "name": "山岭龙", "element": "earth",
-		"rarity": 4, "emoji": "⛰️",
-		"baseHP": 230, "baseATK": 58, "baseDEF": 70, "baseSPD": 10,
-		"skill": { "name": "大地之力", "cost": 11, "multiplier": 3.0 },
-		"leaderSkill": "DEF_BOOST"
+		"id": "monster_014", "name": "矿鼠鼠", "element": "earth",
+		"rarity": 1, "emoji": "",
+		"baseHP": 193, "baseATK": 14, "baseDEF": 34, "baseSPD": 6,
+		"skill": {"name": "矿鼠鼠冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_014",
+		"evolution": {"level": 16, "target": "monster_015"}
 	},
 	"monster_015": {
-		"id": "monster_015", "name": "风羽鹰", "element": "wind",
-		"rarity": 2, "emoji": "🦅",
-		"baseHP": 95, "baseATK": 36, "baseDEF": 18, "baseSPD": 28,
-		"skill": { "name": "风刃切割", "cost": 7, "multiplier": 2.4 },
-		"evolution": { "level": 18, "target": "monster_016" }
+		"id": "monster_015", "name": "矿伯鼠", "element": "earth",
+		"rarity": 2, "emoji": "",
+		"baseHP": 241, "baseATK": 27, "baseDEF": 46, "baseSPD": 10,
+		"skill": {"name": "矿伯鼠冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_015",
+		"evolution": {"level": 30, "target": "monster_016"}
 	},
 	"monster_016": {
-		"id": "monster_016", "name": "苍穹鹰", "element": "wind",
-		"rarity": 3, "emoji": "🌪️",
-		"baseHP": 130, "baseATK": 52, "baseDEF": 25, "baseSPD": 38,
-		"skill": { "name": "风暴降临", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_WIND"
+		"id": "monster_016", "name": "矿山老板", "element": "earth",
+		"rarity": 3, "emoji": "",
+		"baseHP": 298, "baseATK": 39, "baseDEF": 56, "baseSPD": 14,
+		"skill": {"name": "矿山老板冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_016"
 	},
 	"monster_017": {
-		"id": "monster_017", "name": "暗影猫", "element": "dark",
-		"rarity": 3, "emoji": "🐱",
-		"baseHP": 85, "baseATK": 50, "baseDEF": 12, "baseSPD": 30,
-		"skill": { "name": "暗影利爪", "cost": 9, "multiplier": 3.0 },
-		"leaderSkill": "ATK_BOOST_DARK"
+		"id": "monster_017", "name": "不高兴", "element": "dark",
+		"rarity": 1, "emoji": "",
+		"baseHP": 111, "baseATK": 52, "baseDEF": 6, "baseSPD": 20,
+		"skill": {"name": "不高兴冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_017",
+		"evolution": {"level": 16, "target": "monster_018"}
 	},
 	"monster_018": {
-		"id": "monster_018", "name": "幽冥虎", "element": "dark",
-		"rarity": 4, "emoji": "🐯",
-		"baseHP": 120, "baseATK": 70, "baseDEF": 18, "baseSPD": 40,
-		"skill": { "name": "暗夜终结", "cost": 13, "multiplier": 4.0 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_018", "name": "很不高兴", "element": "dark",
+		"rarity": 2, "emoji": "",
+		"baseHP": 155, "baseATK": 62, "baseDEF": 8, "baseSPD": 23,
+		"skill": {"name": "很不高兴冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_018",
+		"evolution": {"level": 30, "target": "monster_019"}
 	},
 	"monster_019": {
-		"id": "monster_019", "name": "圣光雀", "element": "light",
-		"rarity": 3, "emoji": "🐦",
-		"baseHP": 115, "baseATK": 52, "baseDEF": 22, "baseSPD": 20,
-		"skill": { "name": "圣光射线", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_019", "name": "特别不高兴", "element": "dark",
+		"rarity": 3, "emoji": "",
+		"baseHP": 205, "baseATK": 82, "baseDEF": 22, "baseSPD": 30,
+		"skill": {"name": "特别不高兴冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_019"
 	},
 	"monster_020": {
-		"id": "monster_020", "name": "天使兽", "element": "light",
-		"rarity": 4, "emoji": "👼",
-		"baseHP": 155, "baseATK": 68, "baseDEF": 32, "baseSPD": 28,
-		"skill": { "name": "天堂之光", "cost": 14, "multiplier": 4.5 },
-		"leaderSkill": "HP_BOOST"
-	},
-	"enemy_004": {
-		"id": "enemy_004", "name": "深海鱼", "element": "water",
-		"rarity": 1, "emoji": "🐟",
-		"baseHP": 156, "baseATK": 20, "baseDEF": 10, "baseSPD": 14,
-		"skill": { "name": "水弹", "cost": 5, "multiplier": 1.6 }
-	},
-	"enemy_005": {
-		"id": "enemy_005", "name": "岩蜥", "element": "earth",
-		"rarity": 1, "emoji": "🦎",
-		"baseHP": 140, "baseATK": 20, "baseDEF": 10, "baseSPD": 8,
-		"skill": { "name": "石击", "cost": 5, "multiplier": 1.5 }
-	},
-	"enemy_006": {
-		"id": "enemy_006", "name": "风蛾", "element": "wind",
-		"rarity": 1, "emoji": "🦋",
-		"baseHP": 148, "baseATK": 20, "baseDEF": 10, "baseSPD": 18,
-		"skill": { "name": "风切", "cost": 5, "multiplier": 1.7 }
-	},
-	"enemy_007": {
-		"id": "enemy_007", "name": "暗蛛", "element": "dark",
-		"rarity": 1, "emoji": "🕷️", "isElite": true,
-		"baseHP": 164, "baseATK": 20, "baseDEF": 10, "baseSPD": 20,
-		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_008": {
-		"id": "enemy_008", "name": "光蝇", "element": "light",
-		"rarity": 1, "emoji": "✨",
-		"baseHP": 132, "baseATK": 20, "baseDEF": 10, "baseSPD": 22,
-		"skill": { "name": "光刺", "cost": 5, "multiplier": 1.9 }
-	},
-	"monster_boss_003": {
-		"id": "monster_boss_003", "name": "深海海马王", "element": "water",
-		"rarity": 4, "emoji": "🦑",
-		"baseHP": 163, "baseATK": 22, "baseDEF": 11, "baseSPD": 18,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "深渊漩涡", "cost": 12, "multiplier": 3.2 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 3, "damageMultiplier": 2.5 },
-			{ "type": "heal", "percent": 0.15, "interval": 4 }
-		],
-		"leaderSkill": "DEF_BOOST"
-	},
-	"monster_boss_004": {
-		"id": "monster_boss_004", "name": "暗影巨龙", "element": "dark",
-		"rarity": 4, "emoji": "🐲",
-		"baseHP": 164, "baseATK": 22, "baseDEF": 14, "baseSPD": 21,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "暗影龙息", "cost": 13, "multiplier": 3.5 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 3, "damageMultiplier": 2.5 },
-			{ "type": "shield", "hp": 60, "cooldown": 5 },
-			{ "type": "heal", "percent": 0.12, "interval": 5 }
-		],
-		"leaderSkill": "ATK_BOOST_DARK"
-	},
-	"monster_boss_005": {
-		"id": "monster_boss_005", "name": "雷霆巨兽", "element": "thunder",
-		"rarity": 4, "emoji": "⚡",
-		"baseHP": 172, "baseATK": 22, "baseDEF": 19, "baseSPD": 24,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "雷霆裁决", "cost": 14, "multiplier": 3.8 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.0 },
-			{ "type": "shield", "hp": 70, "cooldown": 4 }
-		],
-		"leaderSkill": "ATK_BOOST_THUNDER"
+		"id": "monster_020", "name": "迷路绵阳", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 159, "baseATK": 18, "baseDEF": 11, "baseSPD": 12,
+		"skill": {"name": "迷路绵阳冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_020",
+		"evolution": {"level": 16, "target": "monster_021"}
 	},
 	"monster_021": {
-		"id": "monster_021", "name": "暗夜蝠", "element": "dark",
-		"rarity": 2, "emoji": "🦇",
-		"baseHP": 80, "baseATK": 38, "baseDEF": 12, "baseSPD": 28,
-		"skill": { "name": "暗影突袭", "cost": 7, "multiplier": 2.4 },
-		"evolution": { "level": 18, "target": "monster_022" }
+		"id": "monster_021", "name": "还在迷路咩", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 198, "baseATK": 31, "baseDEF": 23, "baseSPD": 18,
+		"skill": {"name": "还在迷路咩冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_021",
+		"evolution": {"level": 30, "target": "monster_022"}
 	},
 	"monster_022": {
-		"id": "monster_022", "name": "暗翼魔", "element": "dark",
-		"rarity": 3, "emoji": "🧛",
-		"baseHP": 110, "baseATK": 55, "baseDEF": 18, "baseSPD": 38,
-		"skill": { "name": "暗翼斩", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_022", "name": "超级路痴羊", "element": "grass",
+		"rarity": 3, "emoji": "",
+		"baseHP": 258, "baseATK": 46, "baseDEF": 31, "baseSPD": 29,
+		"skill": {"name": "超级路痴羊冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_022"
 	},
 	"monster_023": {
-		"id": "monster_023", "name": "毒蛛王", "element": "dark",
-		"rarity": 3, "emoji": "🕷️",
-		"baseHP": 130, "baseATK": 55, "baseDEF": 20, "baseSPD": 12,
-		"skill": { "name": "毒液射击", "cost": 8, "multiplier": 2.8 },
-		"leaderSkill": "ATK_BOOST_DARK"
+		"id": "monster_023", "name": "小雨滴", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 167, "baseATK": 18, "baseDEF": 22, "baseSPD": 17,
+		"skill": {"name": "小雨滴冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_023",
+		"evolution": {"level": 16, "target": "monster_024"}
 	},
 	"monster_024": {
-		"id": "monster_024", "name": "剧毒蛛后", "element": "dark",
-		"rarity": 4, "emoji": "🕸️",
-		"baseHP": 180, "baseATK": 75, "baseDEF": 28, "baseSPD": 16,
-		"skill": { "name": "剧毒蛛网", "cost": 12, "multiplier": 3.8 },
-		"leaderSkill": "ATK_BOOST_DARK"
-	},
-	"enemy_009": {
-		"id": "enemy_009", "name": "暗夜蝙蝠", "element": "dark",
-		"rarity": 1, "emoji": "🦇",
-		"baseHP": 140, "baseATK": 20, "baseDEF": 13, "baseSPD": 22,
-		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_010": {
-		"id": "enemy_010", "name": "暗毒蛛", "element": "dark",
-		"rarity": 1, "emoji": "🕷️",
-		"baseHP": 164, "baseATK": 20, "baseDEF": 13, "baseSPD": 10,
-		"skill": { "name": "毒咬", "cost": 5, "multiplier": 1.9 }
-	},
-	"enemy_011": {
-		"id": "enemy_011", "name": "暗幽灵", "element": "dark",
-		"rarity": 1, "emoji": "👻", "isElite": true,
-		"baseHP": 144, "baseATK": 20, "baseDEF": 13, "baseSPD": 25,
-		"skill": { "name": "穿体", "cost": 5, "multiplier": 2.0 }
+		"id": "monster_024", "name": "大雨滴", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 216, "baseATK": 28, "baseDEF": 30, "baseSPD": 19,
+		"skill": {"name": "大雨滴冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_024",
+		"evolution": {"level": 30, "target": "monster_025"}
 	},
 	"monster_025": {
-		"id": "monster_025", "name": "雷翼龙", "element": "thunder",
-		"rarity": 2, "emoji": "🐉",
-		"baseHP": 105, "baseATK": 42, "baseDEF": 16, "baseSPD": 26,
-		"skill": { "name": "雷电冲击", "cost": 8, "multiplier": 2.6 },
-		"evolution": { "level": 18, "target": "monster_026" }
+		"id": "monster_025", "name": "暴雨来咯", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 264, "baseATK": 40, "baseDEF": 44, "baseSPD": 28,
+		"skill": {"name": "暴雨来咯冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_025"
 	},
 	"monster_026": {
-		"id": "monster_026", "name": "雷鸣龙", "element": "thunder",
-		"rarity": 3, "emoji": "⚡",
-		"baseHP": 145, "baseATK": 62, "baseDEF": 24, "baseSPD": 36,
-		"skill": { "name": "雷霆万钧", "cost": 12, "multiplier": 3.5 },
-		"leaderSkill": "ATK_BOOST_THUNDER"
+		"id": "monster_026", "name": "哔哩", "element": "thunder",
+		"rarity": 1, "emoji": "",
+		"baseHP": 106, "baseATK": 35, "baseDEF": 6, "baseSPD": 41,
+		"skill": {"name": "哔哩冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_026",
+		"evolution": {"level": 16, "target": "monster_027"}
 	},
 	"monster_027": {
-		"id": "monster_027", "name": "光辉兽", "element": "light",
-		"rarity": 2, "emoji": "🦄",
-		"baseHP": 115, "baseATK": 45, "baseDEF": 20, "baseSPD": 20,
-		"skill": { "name": "光辉射击", "cost": 9, "multiplier": 2.8 },
-		"evolution": { "level": 18, "target": "monster_028" }
+		"id": "monster_027", "name": "哔哩哔哩", "element": "thunder",
+		"rarity": 2, "emoji": "",
+		"baseHP": 148, "baseATK": 46, "baseDEF": 7, "baseSPD": 44,
+		"skill": {"name": "哔哩哔哩冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_027",
+		"evolution": {"level": 30, "target": "monster_028"}
 	},
 	"monster_028": {
-		"id": "monster_028", "name": "圣光龙", "element": "light",
-		"rarity": 3, "emoji": "🌟",
-		"baseHP": 155, "baseATK": 65, "baseDEF": 30, "baseSPD": 28,
-		"skill": { "name": "圣光裁决", "cost": 12, "multiplier": 3.6 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_028", "name": "普拉哔哩", "element": "thunder",
+		"rarity": 3, "emoji": "",
+		"baseHP": 193, "baseATK": 58, "baseDEF": 20, "baseSPD": 55,
+		"skill": {"name": "普拉哔哩冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_028"
 	},
 	"monster_029": {
-		"id": "monster_029", "name": "雷光兽", "element": "thunder",
-		"rarity": 3, "emoji": "🦁",
-		"baseHP": 140, "baseATK": 60, "baseDEF": 22, "baseSPD": 24,
-		"skill": { "name": "雷光斩", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_029", "name": "小拳拳菇", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 132, "baseATK": 39, "baseDEF": 10, "baseSPD": 16,
+		"skill": {"name": "小拳拳菇冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_029",
+		"evolution": {"level": 16, "target": "monster_030"}
 	},
 	"monster_030": {
-		"id": "monster_030", "name": "雷霆圣龙", "element": "thunder",
-		"rarity": 4, "emoji": "👑",
-		"baseHP": 195, "baseATK": 80, "baseDEF": 32, "baseSPD": 30,
-		"skill": { "name": "圣雷灭世", "cost": 14, "multiplier": 4.2 },
-		"leaderSkill": "ATK_BOOST_THUNDER"
+		"id": "monster_030", "name": "拳菇王", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 235, "baseATK": 25, "baseDEF": 39, "baseSPD": 15,
+		"skill": {"name": "拳菇王冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_030"
 	},
 	"monster_031": {
-		"id": "monster_031", "name": "光明天使", "element": "light",
-		"rarity": 3, "emoji": "🕊️",
-		"baseHP": 130, "baseATK": 58, "baseDEF": 26, "baseSPD": 32,
-		"skill": { "name": "天使之光", "cost": 11, "multiplier": 3.4 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_031", "name": "摇滚蝠", "element": "wind",
+		"rarity": 1, "emoji": "",
+		"baseHP": 105, "baseATK": 29, "baseDEF": 6, "baseSPD": 40,
+		"skill": {"name": "摇滚蝠冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_031",
+		"evolution": {"level": 16, "target": "monster_032"}
 	},
 	"monster_032": {
-		"id": "monster_032", "name": "神圣巨龙", "element": "light",
-		"rarity": 4, "emoji": "🏛️",
-		"baseHP": 175, "baseATK": 75, "baseDEF": 35, "baseSPD": 38,
-		"skill": { "name": "神光净化", "cost": 15, "multiplier": 4.5 },
-		"leaderSkill": "HP_BOOST"
-	},
-	"enemy_012": {
-		"id": "enemy_012", "name": "雷球", "element": "thunder",
-		"rarity": 1, "emoji": "⚡",
-		"baseHP": 168, "baseATK": 20, "baseDEF": 17, "baseSPD": 18,
-		"skill": { "name": "电击", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_013": {
-		"id": "enemy_013", "name": "光球", "element": "light",
-		"rarity": 1, "emoji": "✨",
-		"baseHP": 144, "baseATK": 20, "baseDEF": 17, "baseSPD": 20,
-		"skill": { "name": "光刺", "cost": 5, "multiplier": 1.9 }
-	},
-	"enemy_014": {
-		"id": "enemy_014", "name": "雷鹰", "element": "thunder",
-		"rarity": 1, "emoji": "🦅", "isElite": true,
-		"baseHP": 164, "baseATK": 20, "baseDEF": 17, "baseSPD": 26,
-		"skill": { "name": "雷翼斩", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_015": {
-		"id": "enemy_015", "name": "光蝶", "element": "light",
-		"rarity": 1, "emoji": "🦋",
-		"baseHP": 148, "baseATK": 20, "baseDEF": 17, "baseSPD": 24,
-		"skill": { "name": "光翼", "cost": 5, "multiplier": 2.1 }
-	},
-	"enemy_016": {
-		"id": "enemy_016", "name": "雷光元素", "element": "thunder",
-		"rarity": 1, "emoji": "💡", "isElite": true,
-		"baseHP": 156, "baseATK": 20, "baseDEF": 17, "baseSPD": 22,
-		"skill": { "name": "元素雷电", "cost": 5, "multiplier": 2.2 }
+		"id": "monster_032", "name": "叛逆蝠", "element": "wind",
+		"rarity": 2, "emoji": "",
+		"baseHP": 150, "baseATK": 41, "baseDEF": 12, "baseSPD": 45,
+		"skill": {"name": "叛逆蝠冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_032",
+		"evolution": {"level": 30, "target": "monster_033"}
 	},
 	"monster_033": {
-		"id": "monster_033", "name": "冰晶兽", "element": "ice",
-		"rarity": 2, "emoji": "💎",
-		"baseHP": 120, "baseATK": 32, "baseDEF": 28, "baseSPD": 16,
-		"skill": { "name": "冰晶冲击", "cost": 7, "multiplier": 2.3 },
-		"evolution": { "level": 18, "target": "monster_034" }
+		"id": "monster_033", "name": "迪杰蝠", "element": "wind",
+		"rarity": 3, "emoji": "",
+		"baseHP": 200, "baseATK": 58, "baseDEF": 21, "baseSPD": 57,
+		"skill": {"name": "迪杰蝠冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_033"
 	},
 	"monster_034": {
-		"id": "monster_034", "name": "冰晶龙", "element": "ice",
-		"rarity": 3, "emoji": "🔷",
-		"baseHP": 165, "baseATK": 48, "baseDEF": 40, "baseSPD": 22,
-		"skill": { "name": "冰晶风暴", "cost": 10, "multiplier": 2.9 },
-		"leaderSkill": "ATK_BOOST_ICE"
+		"id": "monster_034", "name": "路灯草", "element": "light",
+		"rarity": 1, "emoji": "",
+		"baseHP": 156, "baseATK": 23, "baseDEF": 19, "baseSPD": 18,
+		"skill": {"name": "路灯草冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_034",
+		"evolution": {"level": 16, "target": "monster_035"}
 	},
 	"monster_035": {
-		"id": "monster_035", "name": "霜狼", "element": "ice",
-		"rarity": 2, "emoji": "🐺",
-		"baseHP": 95, "baseATK": 42, "baseDEF": 18, "baseSPD": 22,
-		"skill": { "name": "霜咬", "cost": 8, "multiplier": 2.5 },
-		"evolution": { "level": 18, "target": "monster_036" }
+		"id": "monster_035", "name": "路灯亮亮", "element": "light",
+		"rarity": 2, "emoji": "",
+		"baseHP": 192, "baseATK": 39, "baseDEF": 19, "baseSPD": 21,
+		"skill": {"name": "路灯亮亮冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_035"
 	},
 	"monster_036": {
-		"id": "monster_036", "name": "寒霜狼王", "element": "ice",
-		"rarity": 3, "emoji": "❄️",
-		"baseHP": 130, "baseATK": 62, "baseDEF": 26, "baseSPD": 30,
-		"skill": { "name": "寒霜撕裂", "cost": 11, "multiplier": 3.3 },
-		"leaderSkill": "ATK_BOOST_ICE"
+		"id": "monster_036", "name": "托尼", "element": "light",
+		"rarity": 1, "emoji": "",
+		"baseHP": 154, "baseATK": 26, "baseDEF": 9, "baseSPD": 14,
+		"skill": {"name": "托尼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_036",
+		"evolution": {"level": 16, "target": "monster_037"}
 	},
 	"monster_037": {
-		"id": "monster_037", "name": "雪狐", "element": "ice",
-		"rarity": 2, "emoji": "🦊",
-		"baseHP": 85, "baseATK": 38, "baseDEF": 14, "baseSPD": 30,
-		"skill": { "name": "雪遁", "cost": 6, "multiplier": 2.2 },
-		"evolution": { "level": 18, "target": "monster_038" }
+		"id": "monster_037", "name": "时尚托尼", "element": "light",
+		"rarity": 2, "emoji": "",
+		"baseHP": 191, "baseATK": 36, "baseDEF": 18, "baseSPD": 20,
+		"skill": {"name": "时尚托尼冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_037",
+		"evolution": {"level": 30, "target": "monster_038"}
 	},
 	"monster_038": {
-		"id": "monster_038", "name": "冰霜妖狐", "element": "ice",
-		"rarity": 3, "emoji": "🧊",
-		"baseHP": 115, "baseATK": 55, "baseDEF": 20, "baseSPD": 42,
-		"skill": { "name": "冰霜幻舞", "cost": 9, "multiplier": 3.1 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_038", "name": "托尼大师", "element": "light",
+		"rarity": 3, "emoji": "",
+		"baseHP": 255, "baseATK": 52, "baseDEF": 32, "baseSPD": 32,
+		"skill": {"name": "托尼大师冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_038"
 	},
 	"monster_039": {
-		"id": "monster_039", "name": "寒龟", "element": "ice",
-		"rarity": 2, "emoji": "🐧",
-		"baseHP": 150, "baseATK": 25, "baseDEF": 35, "baseSPD": 10,
-		"skill": { "name": "冰甲护体", "cost": 7, "multiplier": 2.0 },
-		"evolution": { "level": 20, "target": "monster_040" }
+		"id": "monster_039", "name": "幽幽鱼", "element": "dark",
+		"rarity": 1, "emoji": "",
+		"baseHP": 118, "baseATK": 51, "baseDEF": 6, "baseSPD": 23,
+		"skill": {"name": "幽幽鱼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_039"
 	},
 	"monster_040": {
-		"id": "monster_040", "name": "极地冰龟", "element": "ice",
-		"rarity": 3, "emoji": "🧊",
-		"baseHP": 210, "baseATK": 38, "baseDEF": 52, "baseSPD": 14,
-		"skill": { "name": "极寒护盾", "cost": 10, "multiplier": 2.5 },
-		"leaderSkill": "DEF_BOOST"
+		"id": "monster_040", "name": "小木木", "element": "dark",
+		"rarity": 1, "emoji": "",
+		"baseHP": 115, "baseATK": 47, "baseDEF": 6, "baseSPD": 19,
+		"skill": {"name": "小木木冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_040",
+		"evolution": {"level": 16, "target": "monster_041"}
 	},
 	"monster_041": {
-		"id": "monster_041", "name": "冰龙", "element": "ice",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 155, "baseATK": 58, "baseDEF": 30, "baseSPD": 20,
-		"skill": { "name": "冰龙吐息", "cost": 10, "multiplier": 3.0 },
-		"leaderSkill": "ATK_BOOST_ICE"
+		"id": "monster_041", "name": "阿木阿木", "element": "dark",
+		"rarity": 2, "emoji": "",
+		"baseHP": 154, "baseATK": 63, "baseDEF": 12, "baseSPD": 25,
+		"skill": {"name": "阿木阿木冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_041"
 	},
 	"monster_042": {
-		"id": "monster_042", "name": "霜翼龙", "element": "ice",
-		"rarity": 4, "emoji": "🌨️",
-		"baseHP": 200, "baseATK": 75, "baseDEF": 40, "baseSPD": 26,
-		"skill": { "name": "暴风雪降临", "cost": 13, "multiplier": 3.8 },
-		"leaderSkill": "ATK_BOOST_ICE"
-	},
-	"enemy_017": {
-		"id": "enemy_017", "name": "冰晶怪", "element": "ice",
-		"rarity": 1, "emoji": "💠",
-		"baseHP": 156, "baseATK": 20, "baseDEF": 22, "baseSPD": 12,
-		"skill": { "name": "冰刺", "cost": 5, "multiplier": 1.7 }
-	},
-	"enemy_018": {
-		"id": "enemy_018", "name": "霜雪狼", "element": "ice",
-		"rarity": 1, "emoji": "🐺",
-		"baseHP": 180, "baseATK": 20, "baseDEF": 22, "baseSPD": 20,
-		"skill": { "name": "霜咬", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_019": {
-		"id": "enemy_019", "name": "冰幽灵", "element": "ice",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 168, "baseATK": 20, "baseDEF": 22, "baseSPD": 24,
-		"skill": { "name": "穿体", "cost": 5, "multiplier": 1.9 }
-	},
-	"enemy_020": {
-		"id": "enemy_020", "name": "极地熊", "element": "ice",
-		"rarity": 1, "emoji": "🐻", "isElite": true,
-		"baseHP": 156, "baseATK": 20, "baseDEF": 22, "baseSPD": 10,
-		"skill": { "name": "冰掌", "cost": 5, "multiplier": 1.6 }
-	},
-	"enemy_021": {
-		"id": "enemy_021", "name": "冰翼龙", "element": "ice",
-		"rarity": 1, "emoji": "🐉", "isElite": true,
-		"baseHP": 180, "baseATK": 20, "baseDEF": 22, "baseSPD": 22,
-		"skill": { "name": "冰息", "cost": 5, "multiplier": 2.0 }
-	},
-	"monster_boss_006": {
-		"id": "monster_boss_006", "name": "冰霜巨龙", "element": "ice",
-		"rarity": 4, "emoji": "🐲",
-		"baseHP": 185, "baseATK": 22, "baseDEF": 24, "baseSPD": 19,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "绝对零度", "cost": 15, "multiplier": 4.0 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.0 },
-			{ "type": "shield", "hp": 80, "cooldown": 4 },
-			{ "type": "heal", "percent": 0.10, "interval": 4 }
-		],
-		"leaderSkill": "ATK_BOOST_ICE"
+		"id": "monster_042", "name": "甲球", "element": "earth",
+		"rarity": 1, "emoji": "",
+		"baseHP": 195, "baseATK": 14, "baseDEF": 37, "baseSPD": 6,
+		"skill": {"name": "甲球冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_042",
+		"evolution": {"level": 16, "target": "monster_043"}
 	},
 	"monster_043": {
-		"id": "monster_043", "name": "虚影兽", "element": "void",
-		"rarity": 2, "emoji": "👤",
-		"baseHP": 100, "baseATK": 40, "baseDEF": 16, "baseSPD": 24,
-		"skill": { "name": "虚影冲击", "cost": 8, "multiplier": 2.5 },
-		"evolution": { "level": 18, "target": "monster_044" }
+		"id": "monster_043", "name": "刺球怪", "element": "earth",
+		"rarity": 2, "emoji": "",
+		"baseHP": 239, "baseATK": 26, "baseDEF": 45, "baseSPD": 7,
+		"skill": {"name": "刺球怪冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_043",
+		"evolution": {"level": 30, "target": "monster_044"}
 	},
 	"monster_044": {
-		"id": "monster_044", "name": "虚影魔", "element": "void",
-		"rarity": 3, "emoji": "👻",
-		"baseHP": 140, "baseATK": 58, "baseDEF": 24, "baseSPD": 32,
-		"skill": { "name": "虚空撕裂", "cost": 11, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_VOID"
+		"id": "monster_044", "name": "刺刺哥哥", "element": "earth",
+		"rarity": 3, "emoji": "",
+		"baseHP": 225, "baseATK": 68, "baseDEF": 36, "baseSPD": 23,
+		"skill": {"name": "刺刺哥哥冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_044"
 	},
 	"monster_045": {
-		"id": "monster_045", "name": "噬魂虫", "element": "void",
-		"rarity": 2, "emoji": "🪱",
-		"baseHP": 80, "baseATK": 36, "baseDEF": 12, "baseSPD": 32,
-		"skill": { "name": "灵魂吸收", "cost": 7, "multiplier": 2.4 },
-		"evolution": { "level": 18, "target": "monster_046" }
+		"id": "monster_045", "name": "酒蝎", "element": "dark",
+		"rarity": 1, "emoji": "",
+		"baseHP": 113, "baseATK": 51, "baseDEF": 6, "baseSPD": 19,
+		"skill": {"name": "酒蝎冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_045",
+		"evolution": {"level": 16, "target": "monster_046"}
 	},
 	"monster_046": {
-		"id": "monster_046", "name": "噬魂蛾", "element": "void",
-		"rarity": 3, "emoji": "🦋",
-		"baseHP": 110, "baseATK": 52, "baseDEF": 18, "baseSPD": 44,
-		"skill": { "name": "虚空幻翼", "cost": 10, "multiplier": 3.3 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_046", "name": "豪华酒蝎", "element": "dark",
+		"rarity": 2, "emoji": "",
+		"baseHP": 150, "baseATK": 62, "baseDEF": 12, "baseSPD": 23,
+		"skill": {"name": "豪华酒蝎冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_046"
 	},
 	"monster_047": {
-		"id": "monster_047", "name": "虚空幼龙", "element": "void",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 150, "baseATK": 55, "baseDEF": 30, "baseSPD": 20,
-		"skill": { "name": "虚空吐息", "cost": 10, "multiplier": 3.0 },
-		"leaderSkill": "ATK_BOOST_VOID"
+		"id": "monster_047", "name": "小岩球", "element": "earth",
+		"rarity": 1, "emoji": "",
+		"baseHP": 198, "baseATK": 14, "baseDEF": 36, "baseSPD": 6,
+		"skill": {"name": "小岩球冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_047",
+		"evolution": {"level": 16, "target": "monster_048"}
 	},
 	"monster_048": {
-		"id": "monster_048", "name": "虚空巨龙", "element": "void",
-		"rarity": 4, "emoji": "🌑",
-		"baseHP": 200, "baseATK": 72, "baseDEF": 40, "baseSPD": 26,
-		"skill": { "name": "虚空灭世", "cost": 14, "multiplier": 4.0 },
-		"leaderSkill": "ATK_BOOST_VOID"
-	},
-	"enemy_022": {
-		"id": "enemy_022", "name": "虚影", "element": "void",
-		"rarity": 1, "emoji": "👤",
-		"baseHP": 188, "baseATK": 20, "baseDEF": 28, "baseSPD": 18,
-		"skill": { "name": "虚袭", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_023": {
-		"id": "enemy_023", "name": "噬魂蛛", "element": "void",
-		"rarity": 1, "emoji": "🕷️",
-		"baseHP": 180, "baseATK": 20, "baseDEF": 28, "baseSPD": 12,
-		"skill": { "name": "魂咬", "cost": 5, "multiplier": 1.9 }
-	},
-	"enemy_024": {
-		"id": "enemy_024", "name": "虚空幽灵", "element": "void",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 200, "baseATK": 20, "baseDEF": 28, "baseSPD": 24,
-		"skill": { "name": "穿魂", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_025": {
-		"id": "enemy_025", "name": "暗蚀兽", "element": "void",
-		"rarity": 1, "emoji": "🐺", "isElite": true,
-		"baseHP": 172, "baseATK": 20, "baseDEF": 28, "baseSPD": 14,
-		"skill": { "name": "暗蚀", "cost": 5, "multiplier": 1.7 }
-	},
-	"enemy_026": {
-		"id": "enemy_026", "name": "虚空元素", "element": "void",
-		"rarity": 1, "emoji": "🌀", "isElite": true,
-		"baseHP": 184, "baseATK": 20, "baseDEF": 28, "baseSPD": 20,
-		"skill": { "name": "虚空弹", "cost": 5, "multiplier": 2.1 }
-	},
-	"monster_boss_007": {
-		"id": "monster_boss_007", "name": "虚空巨龙", "element": "void",
-		"rarity": 5, "emoji": "🌑",
-		"baseHP": 203, "baseATK": 22, "baseDEF": 31, "baseSPD": 19,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "虚空湮灭", "cost": 15, "multiplier": 4.2 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.0 },
-			{ "type": "shield", "hp": 90, "cooldown": 4 },
-			{ "type": "heal", "percent": 0.12, "interval": 4 }
-		],
-		"leaderSkill": "ATK_BOOST_VOID"
+		"id": "monster_048", "name": "大岩球", "element": "earth",
+		"rarity": 2, "emoji": "",
+		"baseHP": 248, "baseATK": 26, "baseDEF": 44, "baseSPD": 9,
+		"skill": {"name": "大岩球冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_048"
 	},
 	"monster_049": {
-		"id": "monster_049", "name": "时空狼", "element": "temporal",
-		"rarity": 2, "emoji": "🐺",
-		"baseHP": 110, "baseATK": 38, "baseDEF": 22, "baseSPD": 22,
-		"skill": { "name": "时空撕裂", "cost": 8, "multiplier": 2.4 },
-		"evolution": { "level": 18, "target": "monster_050" }
+		"id": "monster_049", "name": "绿洲蜥", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 152, "baseATK": 20, "baseDEF": 11, "baseSPD": 17,
+		"skill": {"name": "绿洲蜥冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_049",
+		"evolution": {"level": 16, "target": "monster_050"}
 	},
 	"monster_050": {
-		"id": "monster_050", "name": "时空狼王", "element": "temporal",
-		"rarity": 3, "emoji": "🌟",
-		"baseHP": 155, "baseATK": 55, "baseDEF": 32, "baseSPD": 30,
-		"skill": { "name": "时空裂斩", "cost": 11, "multiplier": 3.1 },
-		"leaderSkill": "ATK_BOOST_TEMPORAL"
+		"id": "monster_050", "name": "绿洲巨蜥", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 200, "baseATK": 30, "baseDEF": 23, "baseSPD": 18,
+		"skill": {"name": "绿洲巨蜥冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_050"
 	},
 	"monster_051": {
-		"id": "monster_051", "name": "时空幼龙", "element": "temporal",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 145, "baseATK": 52, "baseDEF": 28, "baseSPD": 18,
-		"skill": { "name": "时空吐息", "cost": 10, "multiplier": 2.9 },
-		"leaderSkill": "ATK_BOOST_TEMPORAL"
+		"id": "monster_051", "name": "沙漠粉狐", "element": "wind",
+		"rarity": 1, "emoji": "",
+		"baseHP": 109, "baseATK": 32, "baseDEF": 6, "baseSPD": 43,
+		"skill": {"name": "沙漠粉狐冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_051",
+		"evolution": {"level": 16, "target": "monster_052"}
 	},
 	"monster_052": {
-		"id": "monster_052", "name": "时空巨龙", "element": "temporal",
-		"rarity": 4, "emoji": "⏳",
-		"baseHP": 195, "baseATK": 68, "baseDEF": 38, "baseSPD": 24,
-		"skill": { "name": "时空湮灭", "cost": 13, "multiplier": 3.6 },
-		"leaderSkill": "ATK_BOOST_TEMPORAL"
+		"id": "monster_052", "name": "沙漠魅影", "element": "dark",
+		"rarity": 2, "emoji": "",
+		"baseHP": 151, "baseATK": 66, "baseDEF": 12, "baseSPD": 26,
+		"skill": {"name": "沙漠魅影冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_052"
 	},
 	"monster_053": {
-		"id": "monster_053", "name": "时空狐", "element": "temporal",
-		"rarity": 2, "emoji": "🦊",
-		"baseHP": 88, "baseATK": 40, "baseDEF": 14, "baseSPD": 32,
-		"skill": { "name": "时空穿梭", "cost": 7, "multiplier": 2.3 },
-		"evolution": { "level": 18, "target": "monster_054" }
+		"id": "monster_053", "name": "信使龟", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 195, "baseATK": 14, "baseDEF": 31, "baseSPD": 11,
+		"skill": {"name": "信使龟冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_053",
+		"evolution": {"level": 16, "target": "monster_055"}
 	},
 	"monster_054": {
-		"id": "monster_054", "name": "时空妖狐", "element": "temporal",
-		"rarity": 3, "emoji": "🔮",
-		"baseHP": 120, "baseATK": 58, "baseDEF": 20, "baseSPD": 44,
-		"skill": { "name": "时空幻舞", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "COMBO_START"
-	},
-	"enemy_027": {
-		"id": "enemy_027", "name": "时空狼崽", "element": "temporal",
-		"rarity": 1, "emoji": "🐺",
-		"baseHP": 204, "baseATK": 22, "baseDEF": 35, "baseSPD": 18,
-		"skill": { "name": "时空爪", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_028": {
-		"id": "enemy_028", "name": "时空幽灵", "element": "temporal",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 220, "baseATK": 22, "baseDEF": 35, "baseSPD": 26,
-		"skill": { "name": "穿时", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_029": {
-		"id": "enemy_029", "name": "时空调律者", "element": "temporal",
-		"rarity": 1, "emoji": "🕰️",
-		"baseHP": 196, "baseATK": 22, "baseDEF": 34, "baseSPD": 14,
-		"skill": { "name": "时间扭曲", "cost": 5, "multiplier": 1.7 }
-	},
-	"enemy_030": {
-		"id": "enemy_030", "name": "虚空噬时兽", "element": "temporal",
-		"rarity": 1, "emoji": "🦎", "isElite": true,
-		"baseHP": 228, "baseATK": 22, "baseDEF": 36, "baseSPD": 20,
-		"skill": { "name": "时间啃噬", "cost": 5, "multiplier": 1.9 }
-	},
-	"enemy_031": {
-		"id": "enemy_031", "name": "时空元素", "element": "temporal",
-		"rarity": 1, "emoji": "🌀", "isElite": true,
-		"baseHP": 208, "baseATK": 22, "baseDEF": 35, "baseSPD": 22,
-		"skill": { "name": "时空弹", "cost": 5, "multiplier": 2.1 }
-	},
-	"monster_boss_008": {
-		"id": "monster_boss_008", "name": "时空巨龙", "element": "temporal",
-		"rarity": 5, "emoji": "⏳",
-		"baseHP": 232, "baseATK": 24, "baseDEF": 38, "baseSPD": 22,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "时空崩灭", "cost": 16, "multiplier": 4.5 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.0 },
-			{ "type": "shield", "hp": 100, "cooldown": 4 },
-			{ "type": "heal", "percent": 0.12, "interval": 3 }
-		],
-		"leaderSkill": "ATK_BOOST_TEMPORAL"
+		"id": "monster_054", "name": "破浪鬼", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 156, "baseATK": 19, "baseDEF": 13, "baseSPD": 16,
+		"skill": {"name": "破浪鬼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_054"
 	},
 	"monster_055": {
-		"id": "monster_055", "name": "星耀狼", "element": "star",
-		"rarity": 2, "emoji": "🐺",
-		"baseHP": 115, "baseATK": 40, "baseDEF": 24, "baseSPD": 24,
-		"skill": { "name": "星光撕裂", "cost": 8, "multiplier": 2.5 },
-		"evolution": { "level": 18, "target": "monster_056" }
+		"id": "monster_055", "name": "超速闪电龟", "element": "thunder",
+		"rarity": 2, "emoji": "",
+		"baseHP": 215, "baseATK": 32, "baseDEF": 32, "baseSPD": 26,
+		"skill": {"name": "超速闪电龟冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_055"
 	},
 	"monster_056": {
-		"id": "monster_056", "name": "星耀狼王", "element": "star",
-		"rarity": 3, "emoji": "🌟",
-		"baseHP": 160, "baseATK": 58, "baseDEF": 34, "baseSPD": 32,
-		"skill": { "name": "星耀裂斩", "cost": 11, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_STAR"
+		"id": "monster_056", "name": "水泡泡", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 165, "baseATK": 16, "baseDEF": 21, "baseSPD": 12,
+		"skill": {"name": "水泡泡冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_056",
+		"evolution": {"level": 16, "target": "monster_057"}
 	},
 	"monster_057": {
-		"id": "monster_057", "name": "星耀幼龙", "element": "star",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 150, "baseATK": 55, "baseDEF": 30, "baseSPD": 20,
-		"skill": { "name": "星耀吐息", "cost": 10, "multiplier": 3.0 },
-		"leaderSkill": "ATK_BOOST_STAR"
+		"id": "monster_057", "name": "啪噗", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 210, "baseATK": 29, "baseDEF": 21, "baseSPD": 18,
+		"skill": {"name": "啪噗冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_057"
 	},
 	"monster_058": {
-		"id": "monster_058", "name": "星耀巨龙", "element": "star",
-		"rarity": 4, "emoji": "✨",
-		"baseHP": 205, "baseATK": 72, "baseDEF": 42, "baseSPD": 26,
-		"skill": { "name": "星耀灭世", "cost": 14, "multiplier": 3.8 },
-		"leaderSkill": "ATK_BOOST_STAR"
+		"id": "monster_058", "name": "光宝", "element": "light",
+		"rarity": 1, "emoji": "",
+		"baseHP": 158, "baseATK": 23, "baseDEF": 18, "baseSPD": 16,
+		"skill": {"name": "光宝冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_058",
+		"evolution": {"level": 16, "target": "monster_059"}
 	},
 	"monster_059": {
-		"id": "monster_059", "name": "星耀狐", "element": "star",
-		"rarity": 2, "emoji": "🦊",
-		"baseHP": 90, "baseATK": 42, "baseDEF": 16, "baseSPD": 34,
-		"skill": { "name": "星耀穿梭", "cost": 7, "multiplier": 2.4 },
-		"evolution": { "level": 18, "target": "monster_060" }
+		"id": "monster_059", "name": "宝霸", "element": "light",
+		"rarity": 2, "emoji": "",
+		"baseHP": 199, "baseATK": 36, "baseDEF": 17, "baseSPD": 24,
+		"skill": {"name": "宝霸冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_059"
 	},
 	"monster_060": {
-		"id": "monster_060", "name": "星耀妖狐", "element": "star",
-		"rarity": 3, "emoji": "🔮",
-		"baseHP": 125, "baseATK": 60, "baseDEF": 22, "baseSPD": 46,
-		"skill": { "name": "星耀幻舞", "cost": 10, "multiplier": 3.3 },
-		"leaderSkill": "COMBO_START"
-	},
-	"enemy_032": {
-		"id": "enemy_032", "name": "星耀狼崽", "element": "star",
-		"rarity": 1, "emoji": "🐺",
-		"baseHP": 264, "baseATK": 22, "baseDEF": 44, "baseSPD": 20,
-		"skill": { "name": "星爪", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_033": {
-		"id": "enemy_033", "name": "星耀幽灵", "element": "star",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 232, "baseATK": 22, "baseDEF": 42, "baseSPD": 28,
-		"skill": { "name": "穿星", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_034": {
-		"id": "enemy_034", "name": "星耀祭司", "element": "star",
-		"rarity": 1, "emoji": "🕯️",
-		"baseHP": 252, "baseATK": 22, "baseDEF": 43, "baseSPD": 16,
-		"skill": { "name": "星光祈福", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_035": {
-		"id": "enemy_035", "name": "星蚀兽", "element": "star",
-		"rarity": 1, "emoji": "🦎", "isElite": true,
-		"baseHP": 240, "baseATK": 22, "baseDEF": 43, "baseSPD": 22,
-		"skill": { "name": "星蚀", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_036": {
-		"id": "enemy_036", "name": "星耀元素", "element": "star",
-		"rarity": 1, "emoji": "💫", "isElite": true,
-		"baseHP": 272, "baseATK": 22, "baseDEF": 44, "baseSPD": 24,
-		"skill": { "name": "星弹", "cost": 5, "multiplier": 2.2 }
-	},
-	"monster_boss_009": {
-		"id": "monster_boss_009", "name": "星耀巨龙", "element": "star",
-		"rarity": 5, "emoji": "✨",
-		"baseHP": 277, "baseATK": 24, "baseDEF": 48, "baseSPD": 24,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "星辰湮灭", "cost": 16, "multiplier": 4.8 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.5 },
-			{ "type": "shield", "hp": 110, "cooldown": 3 },
-			{ "type": "heal", "percent": 0.15, "interval": 4 }
-		],
-		"leaderSkill": "ATK_BOOST_STAR"
+		"id": "monster_060", "name": "水晶豹", "element": "light",
+		"rarity": 1, "emoji": "",
+		"baseHP": 118, "baseATK": 33, "baseDEF": 6, "baseSPD": 37,
+		"skill": {"name": "水晶豹冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_060",
+		"evolution": {"level": 16, "target": "monster_061"}
 	},
 	"monster_061": {
-		"id": "monster_061", "name": "混沌狼", "element": "chaos",
-		"rarity": 2, "emoji": "🐺",
-		"baseHP": 118, "baseATK": 42, "baseDEF": 26, "baseSPD": 25,
-		"skill": { "name": "混沌撕裂", "cost": 8, "multiplier": 2.6 },
-		"evolution": { "level": 18, "target": "monster_062" }
+		"id": "monster_061", "name": "成年水晶豹", "element": "light",
+		"rarity": 2, "emoji": "",
+		"baseHP": 159, "baseATK": 43, "baseDEF": 14, "baseSPD": 45,
+		"skill": {"name": "成年水晶豹冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_061"
 	},
 	"monster_062": {
-		"id": "monster_062", "name": "混沌狼王", "element": "chaos",
-		"rarity": 3, "emoji": "🌟",
-		"baseHP": 165, "baseATK": 60, "baseDEF": 36, "baseSPD": 34,
-		"skill": { "name": "混沌裂斩", "cost": 11, "multiplier": 3.3 },
-		"leaderSkill": "ATK_BOOST_CHAOS"
+		"id": "monster_062", "name": "海噜噜", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 170, "baseATK": 14, "baseDEF": 20, "baseSPD": 15,
+		"skill": {"name": "海噜噜冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_062",
+		"evolution": {"level": 16, "target": "monster_063"}
 	},
 	"monster_063": {
-		"id": "monster_063", "name": "混沌幼龙", "element": "chaos",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 155, "baseATK": 58, "baseDEF": 32, "baseSPD": 22,
-		"skill": { "name": "混沌吐息", "cost": 10, "multiplier": 3.1 },
-		"leaderSkill": "ATK_BOOST_CHAOS"
+		"id": "monster_063", "name": "深海噜噜", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 218, "baseATK": 28, "baseDEF": 30, "baseSPD": 17,
+		"skill": {"name": "深海噜噜冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_063"
 	},
 	"monster_064": {
-		"id": "monster_064", "name": "混沌巨龙", "element": "chaos",
-		"rarity": 4, "emoji": "🌑",
-		"baseHP": 210, "baseATK": 75, "baseDEF": 44, "baseSPD": 28,
-		"skill": { "name": "混沌灭世", "cost": 14, "multiplier": 3.9 },
-		"leaderSkill": "ATK_BOOST_CHAOS"
+		"id": "monster_064", "name": "椰果果", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 165, "baseATK": 15, "baseDEF": 18, "baseSPD": 12,
+		"skill": {"name": "椰果果冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_064",
+		"evolution": {"level": 16, "target": "monster_065"}
 	},
 	"monster_065": {
-		"id": "monster_065", "name": "混沌狐", "element": "chaos",
-		"rarity": 2, "emoji": "🦊",
-		"baseHP": 92, "baseATK": 44, "baseDEF": 16, "baseSPD": 36,
-		"skill": { "name": "混沌穿梭", "cost": 7, "multiplier": 2.5 },
-		"evolution": { "level": 18, "target": "monster_066" }
+		"id": "monster_065", "name": "大椰果果", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 209, "baseATK": 30, "baseDEF": 28, "baseSPD": 21,
+		"skill": {"name": "大椰果果冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_065",
+		"evolution": {"level": 30, "target": "monster_066"}
 	},
 	"monster_066": {
-		"id": "monster_066", "name": "混沌妖狐", "element": "chaos",
-		"rarity": 3, "emoji": "🔮",
-		"baseHP": 128, "baseATK": 62, "baseDEF": 24, "baseSPD": 48,
-		"skill": { "name": "混沌幻舞", "cost": 10, "multiplier": 3.4 },
-		"leaderSkill": "COMBO_START"
-	},
-	"enemy_037": {
-		"id": "enemy_037", "name": "混沌狼崽", "element": "chaos",
-		"rarity": 1, "emoji": "🐺",
-		"baseHP": 288, "baseATK": 24, "baseDEF": 52, "baseSPD": 20,
-		"skill": { "name": "混沌爪", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_038": {
-		"id": "enemy_038", "name": "混沌幽灵", "element": "chaos",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 296, "baseATK": 24, "baseDEF": 52, "baseSPD": 30,
-		"skill": { "name": "穿混沌", "cost": 5, "multiplier": 2.0 }
-	},
-	"enemy_039": {
-		"id": "enemy_039", "name": "混沌祭司", "element": "chaos",
-		"rarity": 1, "emoji": "🕯️", "isElite": true,
-		"baseHP": 276, "baseATK": 24, "baseDEF": 51, "baseSPD": 16,
-		"skill": { "name": "混沌祈福", "cost": 5, "multiplier": 1.8 }
-	},
-	"enemy_040": {
-		"id": "enemy_040", "name": "混沌噬星兽", "element": "chaos",
-		"rarity": 1, "emoji": "🦎", "isElite": true,
-		"baseHP": 316, "baseATK": 24, "baseDEF": 53, "baseSPD": 24,
-		"skill": { "name": "星蚀混沌", "cost": 5, "multiplier": 2.2 }
-	},
-	"enemy_041": {
-		"id": "enemy_041", "name": "混沌元素", "element": "chaos",
-		"rarity": 1, "emoji": "🌀", "isElite": true,
-		"baseHP": 304, "baseATK": 24, "baseDEF": 52, "baseSPD": 26,
-		"skill": { "name": "混沌弹", "cost": 5, "multiplier": 2.1 }
-	},
-	"monster_boss_010": {
-		"id": "monster_boss_010", "name": "混沌兽神", "element": "chaos",
-		"rarity": 5, "emoji": "🐲",
-		"baseHP": 326, "baseATK": 26, "baseDEF": 57, "baseSPD": 26,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "混沌湮灭", "cost": 16, "multiplier": 5.0 },
-		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 3.5 },
-			{ "type": "shield", "hp": 120, "cooldown": 3 },
-			{ "type": "heal", "percent": 0.15, "interval": 3 }
-		],
-		"leaderSkill": "ATK_BOOST_CHAOS"
+		"id": "monster_066", "name": "肥椰果", "element": "grass",
+		"rarity": 3, "emoji": "",
+		"baseHP": 267, "baseATK": 45, "baseDEF": 40, "baseSPD": 25,
+		"skill": {"name": "肥椰果冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_066"
 	},
 	"monster_067": {
-		"id": "monster_067", "name": "光耀狼", "element": "light",
-		"rarity": 2, "emoji": "🐺",
-		"baseHP": 120, "baseATK": 42, "baseDEF": 28, "baseSPD": 26,
-		"skill": { "name": "光耀撕裂", "cost": 8, "multiplier": 2.6 },
-		"evolution": { "level": 18, "target": "monster_068" }
+		"id": "monster_067", "name": "哧溜豹", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 124, "baseATK": 23, "baseDEF": 12, "baseSPD": 26,
+		"skill": {"name": "哧溜豹冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_067",
+		"evolution": {"level": 16, "target": "monster_068"}
 	},
 	"monster_068": {
-		"id": "monster_068", "name": "光耀狼王", "element": "light",
-		"rarity": 3, "emoji": "🌟",
-		"baseHP": 170, "baseATK": 62, "baseDEF": 38, "baseSPD": 35,
-		"skill": { "name": "光耀裂斩", "cost": 11, "multiplier": 3.3 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_068", "name": "哧溜溜豹", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 167, "baseATK": 40, "baseDEF": 20, "baseSPD": 32,
+		"skill": {"name": "哧溜溜豹冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_068",
+		"evolution": {"level": 30, "target": "monster_069"}
 	},
 	"monster_069": {
-		"id": "monster_069", "name": "光耀幼龙", "element": "light",
-		"rarity": 3, "emoji": "🐉",
-		"baseHP": 160, "baseATK": 60, "baseDEF": 34, "baseSPD": 24,
-		"skill": { "name": "光耀吐息", "cost": 10, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_069", "name": "哧溜溜溜溜豹", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 213, "baseATK": 52, "baseDEF": 33, "baseSPD": 43,
+		"skill": {"name": "哧溜溜溜溜豹冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_069"
 	},
 	"monster_070": {
-		"id": "monster_070", "name": "光耀巨龙", "element": "light",
-		"rarity": 4, "emoji": "✨",
-		"baseHP": 215, "baseATK": 78, "baseDEF": 46, "baseSPD": 30,
-		"skill": { "name": "光耀灭世", "cost": 14, "multiplier": 4.0 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_070", "name": "冰帝小企鹅", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 164, "baseATK": 15, "baseDEF": 25, "baseSPD": 14,
+		"skill": {"name": "冰帝小企鹅冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_070",
+		"evolution": {"level": 16, "target": "monster_071"}
 	},
 	"monster_071": {
-		"id": "monster_071", "name": "光耀狐", "element": "light",
-		"rarity": 2, "emoji": "🦊",
-		"baseHP": 95, "baseATK": 46, "baseDEF": 18, "baseSPD": 38,
-		"skill": { "name": "光耀穿梭", "cost": 7, "multiplier": 2.6 },
-		"evolution": { "level": 18, "target": "monster_072" }
+		"id": "monster_071", "name": "冰帝企鹅", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 213, "baseATK": 27, "baseDEF": 33, "baseSPD": 20,
+		"skill": {"name": "冰帝企鹅冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_071",
+		"evolution": {"level": 30, "target": "monster_072"}
 	},
 	"monster_072": {
-		"id": "monster_072", "name": "光耀妖狐", "element": "light",
-		"rarity": 3, "emoji": "🔮",
-		"baseHP": 132, "baseATK": 65, "baseDEF": 26, "baseSPD": 50,
-		"skill": { "name": "光耀幻舞", "cost": 10, "multiplier": 3.5 },
-		"leaderSkill": "COMBO_START"
+		"id": "monster_072", "name": "冰帝企鹅王", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 293, "baseATK": 38, "baseDEF": 57, "baseSPD": 21,
+		"skill": {"name": "冰帝企鹅王冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_072"
 	},
 	"monster_073": {
-		"id": "monster_073", "name": "光耀战鹰", "element": "light",
-		"rarity": 3, "emoji": "🦅",
-		"baseHP": 130, "baseATK": 62, "baseDEF": 22, "baseSPD": 28,
-		"skill": { "name": "光耀翼斩", "cost": 9, "multiplier": 3.2 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_073", "name": "噗尼", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 169, "baseATK": 15, "baseDEF": 23, "baseSPD": 9,
+		"skill": {"name": "噗尼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_073",
+		"evolution": {"level": 16, "target": "monster_074"}
 	},
 	"monster_074": {
-		"id": "monster_074", "name": "光耀圣鹰", "element": "light",
-		"rarity": 4, "emoji": "🕊️",
-		"baseHP": 180, "baseATK": 80, "baseDEF": 32, "baseSPD": 36,
-		"skill": { "name": "圣光裁决", "cost": 13, "multiplier": 4.2 },
-		"leaderSkill": "ATK_BOOST_LIGHT"
+		"id": "monster_074", "name": "噗尼蚌蚌", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 232, "baseATK": 27, "baseDEF": 44, "baseSPD": 14,
+		"skill": {"name": "噗尼蚌蚌冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_074",
+		"evolution": {"level": 30, "target": "monster_075"}
 	},
 	"monster_075": {
-		"id": "monster_075", "name": "光耀守护者", "element": "light",
-		"rarity": 3, "emoji": "🛡️",
-		"baseHP": 200, "baseATK": 38, "baseDEF": 48, "baseSPD": 12,
-		"skill": { "name": "圣光护盾", "cost": 8, "multiplier": 2.2 },
-		"leaderSkill": "DEF_BOOST"
+		"id": "monster_075", "name": "噗尼尼蚌蚌蚌", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 298, "baseATK": 38, "baseDEF": 56, "baseSPD": 20,
+		"skill": {"name": "噗尼尼蚌蚌蚌冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_075"
 	},
 	"monster_076": {
-		"id": "monster_076", "name": "光耀巨灵", "element": "light",
-		"rarity": 4, "emoji": "👼",
-		"baseHP": 270, "baseATK": 50, "baseDEF": 65, "baseSPD": 16,
-		"skill": { "name": "神圣庇护", "cost": 11, "multiplier": 2.8 },
-		"leaderSkill": "DEF_BOOST"
+		"id": "monster_076", "name": "小白", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 191, "baseATK": 14, "baseDEF": 37, "baseSPD": 6,
+		"skill": {"name": "小白冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_076",
+		"evolution": {"level": 16, "target": "monster_077"}
 	},
-	"enemy_042": {
-		"id": "enemy_042", "name": "光耀狼崽", "element": "light",
-		"rarity": 1, "emoji": "🐺",
-		"baseHP": 360, "baseATK": 26, "baseDEF": 62, "baseSPD": 22,
-		"skill": { "name": "光爪", "cost": 5, "multiplier": 1.9 }
+	"monster_077": {
+		"id": "monster_077", "name": "九尾小白", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 236, "baseATK": 24, "baseDEF": 46, "baseSPD": 13,
+		"skill": {"name": "九尾小白冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_077",
+		"evolution": {"level": 30, "target": "monster_078"}
 	},
-	"enemy_043": {
-		"id": "enemy_043", "name": "光耀幽灵", "element": "light",
-		"rarity": 1, "emoji": "👻",
-		"baseHP": 336, "baseATK": 26, "baseDEF": 62, "baseSPD": 30,
-		"skill": { "name": "穿光", "cost": 5, "multiplier": 2.1 }
+	"monster_078": {
+		"id": "monster_078", "name": "水晶小白", "element": "water",
+		"rarity": 3, "emoji": "",
+		"baseHP": 271, "baseATK": 44, "baseDEF": 48, "baseSPD": 26,
+		"skill": {"name": "水晶小白冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_078"
 	},
-	"enemy_044": {
-		"id": "enemy_044", "name": "光耀祭司", "element": "light",
-		"rarity": 1, "emoji": "🕯️", "isElite": true,
-		"baseHP": 376, "baseATK": 26, "baseDEF": 63, "baseSPD": 18,
-		"skill": { "name": "光祈", "cost": 5, "multiplier": 1.9 }
+	"monster_079": {
+		"id": "monster_079", "name": "极光小熊", "element": "water",
+		"rarity": 1, "emoji": "",
+		"baseHP": 165, "baseATK": 18, "baseDEF": 24, "baseSPD": 11,
+		"skill": {"name": "极光小熊冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_079",
+		"evolution": {"level": 16, "target": "monster_080"}
 	},
-	"enemy_045": {
-		"id": "enemy_045", "name": "光蚀兽", "element": "light",
-		"rarity": 1, "emoji": "🦎", "isElite": true,
-		"baseHP": 312, "baseATK": 26, "baseDEF": 61, "baseSPD": 26,
-		"skill": { "name": "光蚀", "cost": 5, "multiplier": 2.0 }
+	"monster_080": {
+		"id": "monster_080", "name": "五彩小可爱", "element": "water",
+		"rarity": 2, "emoji": "",
+		"baseHP": 233, "baseATK": 24, "baseDEF": 41, "baseSPD": 13,
+		"skill": {"name": "五彩小可爱冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_080"
 	},
-	"enemy_046": {
-		"id": "enemy_046", "name": "光耀元素", "element": "light",
-		"rarity": 1, "emoji": "💫", "isElite": true,
-		"baseHP": 356, "baseATK": 26, "baseDEF": 62, "baseSPD": 28,
-		"skill": { "name": "光弹", "cost": 5, "multiplier": 2.2 }
+	"monster_081": {
+		"id": "monster_081", "name": "指路星", "element": "light",
+		"rarity": 1, "emoji": "",
+		"baseHP": 116, "baseATK": 33, "baseDEF": 6, "baseSPD": 34,
+		"skill": {"name": "指路星冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_081",
+		"evolution": {"level": 16, "target": "monster_082"}
 	},
-	"enemy_047": {
-		"id": "enemy_047", "name": "熔火幼蜥", "element": "fire",
-		"rarity": 1, "emoji": "🦎",
-		"baseHP": 144, "baseATK": 20, "baseDEF": 8, "baseSPD": 10,
-		"skill": { "name": "火苗扑击", "cost": 5, "multiplier": 1.6 }
+	"monster_082": {
+		"id": "monster_082", "name": "启明星", "element": "light",
+		"rarity": 2, "emoji": "",
+		"baseHP": 152, "baseATK": 46, "baseDEF": 12, "baseSPD": 41,
+		"skill": {"name": "启明星冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_082",
+		"evolution": {"level": 30, "target": "monster_083"}
 	},
-	"enemy_048": {
-		"id": "enemy_048", "name": "岩浆泡泡", "element": "fire",
-		"rarity": 1, "emoji": "🔥",
-		"baseHP": 160, "baseATK": 20, "baseDEF": 9, "baseSPD": 8,
-		"skill": { "name": "熔泡", "cost": 5, "multiplier": 1.5 }
+	"monster_083": {
+		"id": "monster_083", "name": "萤火彗星", "element": "light",
+		"rarity": 3, "emoji": "",
+		"baseHP": 201, "baseATK": 59, "baseDEF": 24, "baseSPD": 48,
+		"skill": {"name": "萤火彗星冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_083"
 	},
-	"enemy_049": {
-		"id": "enemy_049", "name": "火绒精", "element": "fire",
-		"rarity": 1, "emoji": "✨", "isElite": true,
-		"baseHP": 136, "baseATK": 22, "baseDEF": 8, "baseSPD": 12,
-		"skill": { "name": "火绒爆", "cost": 5, "multiplier": 1.7 }
+	"monster_084": {
+		"id": "monster_084", "name": "瞌睡熊", "element": "dark",
+		"rarity": 1, "emoji": "",
+		"baseHP": 144, "baseATK": 30, "baseDEF": 7, "baseSPD": 18,
+		"skill": {"name": "瞌睡熊冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_084",
+		"evolution": {"level": 16, "target": "monster_085"}
 	},
-	"monster_boss_011": {
-		"id": "monster_boss_011", "name": "光耀天使长", "element": "light",
-		"rarity": 5, "emoji": "👼",
-		"baseHP": 383, "baseATK": 29, "baseDEF": 68, "baseSPD": 27,
-		"enemyBossMultiplier": {"hp": 5, "atk": 1.2, "def": 2, "spd": 1},
-		"skill": { "name": "神圣制裁", "cost": 16, "multiplier": 5.2 },
+	"monster_085": {
+		"id": "monster_085", "name": "还在瞌睡熊", "element": "dark",
+		"rarity": 2, "emoji": "",
+		"baseHP": 198, "baseATK": 39, "baseDEF": 18, "baseSPD": 24,
+		"skill": {"name": "还在瞌睡熊冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_085",
+		"evolution": {"level": 30, "target": "monster_086"}
+	},
+	"monster_086": {
+		"id": "monster_086", "name": "赖床熊", "element": "dark",
+		"rarity": 3, "emoji": "",
+		"baseHP": 252, "baseATK": 53, "baseDEF": 29, "baseSPD": 28,
+		"skill": {"name": "赖床熊冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_086"
+	},
+	"monster_087": {
+		"id": "monster_087", "name": "小地龙", "element": "earth",
+		"rarity": 1, "emoji": "",
+		"baseHP": 132, "baseATK": 34, "baseDEF": 14, "baseSPD": 13,
+		"skill": {"name": "小地龙冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_087",
+		"evolution": {"level": 16, "target": "monster_088"}
+	},
+	"monster_088": {
+		"id": "monster_088", "name": "成年地龙", "element": "earth",
+		"rarity": 2, "emoji": "",
+		"baseHP": 177, "baseATK": 51, "baseDEF": 21, "baseSPD": 19,
+		"skill": {"name": "成年地龙冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_088",
+		"evolution": {"level": 30, "target": "monster_089"}
+	},
+	"monster_089": {
+		"id": "monster_089", "name": "地龙领主", "element": "earth",
+		"rarity": 3, "emoji": "",
+		"baseHP": 225, "baseATK": 66, "baseDEF": 36, "baseSPD": 19,
+		"skill": {"name": "地龙领主冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_089"
+	},
+	"monster_090": {
+		"id": "monster_090", "name": "夜来香", "element": "grass",
+		"rarity": 1, "emoji": "",
+		"baseHP": 168, "baseATK": 15, "baseDEF": 21, "baseSPD": 12,
+		"skill": {"name": "夜来香冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_090",
+		"evolution": {"level": 16, "target": "monster_091"}
+	},
+	"monster_091": {
+		"id": "monster_091", "name": "花满楼", "element": "grass",
+		"rarity": 2, "emoji": "",
+		"baseHP": 205, "baseATK": 29, "baseDEF": 30, "baseSPD": 19,
+		"skill": {"name": "花满楼冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_091",
+		"evolution": {"level": 30, "target": "monster_092"}
+	},
+	"monster_092": {
+		"id": "monster_092", "name": "小凤仙", "element": "grass",
+		"rarity": 3, "emoji": "",
+		"baseHP": 260, "baseATK": 45, "baseDEF": 41, "baseSPD": 30,
+		"skill": {"name": "小凤仙冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_092"
+	},
+	"monster_093": {
+		"id": "monster_093", "name": "火焰犬", "element": "fire",
+		"rarity": 1, "emoji": "",
+		"baseHP": 110, "baseATK": 37, "baseDEF": 6, "baseSPD": 34,
+		"skill": {"name": "火焰犬冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_093",
+		"evolution": {"level": 16, "target": "monster_094"}
+	},
+	"monster_094": {
+		"id": "monster_094", "name": "熔岩犬", "element": "fire",
+		"rarity": 2, "emoji": "",
+		"baseHP": 223, "baseATK": 35, "baseDEF": 33, "baseSPD": 15,
+		"skill": {"name": "熔岩犬冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_094"
+	},
+	"monster_095": {
+		"id": "monster_095", "name": "熔岩蟹宝宝", "element": "fire",
+		"rarity": 1, "emoji": "",
+		"baseHP": 175, "baseATK": 21, "baseDEF": 24, "baseSPD": 9,
+		"skill": {"name": "熔岩蟹宝宝冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_095",
+		"evolution": {"level": 16, "target": "monster_096"}
+	},
+	"monster_096": {
+		"id": "monster_096", "name": "熔岩蟹", "element": "fire",
+		"rarity": 2, "emoji": "",
+		"baseHP": 217, "baseATK": 33, "baseDEF": 31, "baseSPD": 17,
+		"skill": {"name": "熔岩蟹冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_096"
+	},
+	"monster_097": {
+		"id": "monster_097", "name": "生气野猪", "element": "fire",
+		"rarity": 1, "emoji": "",
+		"baseHP": 112, "baseATK": 46, "baseDEF": 6, "baseSPD": 15,
+		"skill": {"name": "生气野猪冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_097",
+		"evolution": {"level": 16, "target": "monster_098"}
+	},
+	"monster_098": {
+		"id": "monster_098", "name": "愤怒野猪", "element": "fire",
+		"rarity": 2, "emoji": "",
+		"baseHP": 154, "baseATK": 60, "baseDEF": 11, "baseSPD": 26,
+		"skill": {"name": "愤怒野猪冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_098"
+	},
+	"monster_099": {
+		"id": "monster_099", "name": "热辣锅", "element": "fire",
+		"rarity": 1, "emoji": "",
+		"baseHP": 112, "baseATK": 51, "baseDEF": 6, "baseSPD": 16,
+		"skill": {"name": "热辣锅冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_099",
+		"evolution": {"level": 16, "target": "monster_100"}
+	},
+	"monster_100": {
+		"id": "monster_100", "name": "火山烧", "element": "fire",
+		"rarity": 2, "emoji": "",
+		"baseHP": 153, "baseATK": 60, "baseDEF": 12, "baseSPD": 22,
+		"skill": {"name": "火山烧冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_100"
+	},
+	"monster_101": {
+		"id": "monster_101", "name": "炎鱼", "element": "fire",
+		"rarity": 2, "emoji": "",
+		"baseHP": 155, "baseATK": 63, "baseDEF": 10, "baseSPD": 22,
+		"skill": {"name": "炎鱼冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"leaderSkill": "LS_MONSTER_101",
+		"evolution": {"level": 30, "target": "monster_103"}
+	},
+	"monster_102": {
+		"id": "monster_102", "name": "炎鱼宝宝", "element": "fire",
+		"rarity": 1, "emoji": "",
+		"baseHP": 113, "baseATK": 49, "baseDEF": 6, "baseSPD": 18,
+		"skill": {"name": "炎鱼宝宝冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"leaderSkill": "LS_MONSTER_102",
+		"evolution": {"level": 16, "target": "monster_101"}
+	},
+	"monster_103": {
+		"id": "monster_103", "name": "斗炎鱼", "element": "fire",
+		"rarity": 3, "emoji": "",
+		"baseHP": 203, "baseATK": 78, "baseDEF": 23, "baseSPD": 27,
+		"skill": {"name": "斗炎鱼冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
+		"leaderSkill": "LS_MONSTER_103"
+	},
+	"monster_boss_001": {
+		"id": "monster_boss_001", "name": "花草兽", "element": "grass",
+		"rarity": 4, "emoji": "",
+		"baseHP": 339, "baseATK": 51, "baseDEF": 59, "baseSPD": 27,
+		"skill": {"name": "花草兽冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_001",
 		"isBoss": true,
-		"enemySkills": [
-			{ "type": "charge", "interval": 2, "damageMultiplier": 4.0 },
-			{ "type": "shield", "hp": 130, "cooldown": 3 },
-			{ "type": "heal", "percent": 0.18, "interval": 3 }
-		],
-		"leaderSkill": "HP_BOOST"
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_002": {
+		"id": "monster_boss_002", "name": "我的刀盾", "element": "earth",
+		"rarity": 4, "emoji": "",
+		"baseHP": 406, "baseATK": 51, "baseDEF": 87, "baseSPD": 11,
+		"skill": {"name": "我的刀盾冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_002",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_003": {
+		"id": "monster_boss_003", "name": "瑞幸", "element": "light",
+		"rarity": 4, "emoji": "",
+		"baseHP": 338, "baseATK": 62, "baseDEF": 47, "baseSPD": 30,
+		"skill": {"name": "瑞幸冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_003",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_004": {
+		"id": "monster_boss_004", "name": "巨石王", "element": "earth",
+		"rarity": 4, "emoji": "",
+		"baseHP": 407, "baseATK": 47, "baseDEF": 87, "baseSPD": 10,
+		"skill": {"name": "巨石王冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_004",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_005": {
+		"id": "monster_boss_005", "name": "深海霸主", "element": "water",
+		"rarity": 4, "emoji": "",
+		"baseHP": 402, "baseATK": 51, "baseDEF": 83, "baseSPD": 16,
+		"skill": {"name": "深海霸主冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_005",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_006": {
+		"id": "monster_boss_006", "name": "雪狐王", "element": "water",
+		"rarity": 4, "emoji": "",
+		"baseHP": 407, "baseATK": 50, "baseDEF": 90, "baseSPD": 16,
+		"skill": {"name": "雪狐王冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_006",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_007": {
+		"id": "monster_boss_007", "name": "混沌虚空", "element": "dark",
+		"rarity": 4, "emoji": "",
+		"baseHP": 297, "baseATK": 100, "baseDEF": 50, "baseSPD": 27,
+		"skill": {"name": "混沌虚空冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_007",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
+	},
+	"monster_boss_008": {
+		"id": "monster_boss_008", "name": "山火巨灵", "element": "fire",
+		"rarity": 4, "emoji": "",
+		"baseHP": 383, "baseATK": 69, "baseDEF": 79, "baseSPD": 18,
+		"skill": {"name": "山火巨灵冲击", "cost": 12, "type": "strike", "multiplier": 2.2, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 2.2}]},
+		"leaderSkill": "LS_BOSS_008",
+		"isBoss": true,
+		"enemyBossMultiplier": {"hp": 2.5, "atk": 0.6, "def": 1, "spd": 0.5},
+		"enemySkills": [{"type": "charge", "interval": 3, "damageMultiplier": 2.5}]
 	}
 }
-
 # ========== 棋盘能量亲和 ==========
 ## element 是世界观/克制属性，boardAffinity 是消除宝石时响应的五色棋盘能量。
 const BOARD_AFFINITY_FALLBACK: Dictionary = {
@@ -1066,20 +918,20 @@ const SKILL_TYPE_LABELS: Dictionary = {
 
 # ========== 稀有度成长率 ==========
 const RARITY_GROWTH_RATE: Dictionary = {
-	1: 0.05,  # ★1 普通：每级 +5%
-	2: 0.07,  # ★2 常见：每级 +7%
-	3: 0.08,  # ★3 稀有：每级 +8%
-	4: 0.12,  # ★4 史诗：每级 +12%
-	5: 0.15   # ★5 传说：每级 +15%
+	1: 0.065,  # ★1 普通：每级 +6.5%
+	2: 0.091,  # ★2 常见：每级 +9.1%
+	3: 0.104,  # ★3 稀有：每级 +10.4%
+	4: 0.156,  # ★4 史诗：每级 +15.6%
+	5: 0.195   # ★5 传说：每级 +19.5%
 }
 
 # DEF 不参与百分比复利，只按等级增加固定数值。
 const RARITY_DEF_GROWTH_PER_LEVEL: Dictionary = {
-	1: 0.10,
-	2: 0.15,
-	3: 0.20,
-	4: 0.25,
-	5: 0.30
+	1: 0.13,
+	2: 0.195,
+	3: 0.26,
+	4: 0.325,
+	5: 0.39
 }
 
 # ========== 静态工具函数 ==========

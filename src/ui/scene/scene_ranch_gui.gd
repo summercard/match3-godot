@@ -1380,20 +1380,9 @@ func _monster_portrait_texture(monster_id: String) -> Texture2D:
 func _portrait_path(monster_id: String) -> String:
 	if _portrait_path_cache.has(monster_id):
 		return str(_portrait_path_cache[monster_id])
-	var album_path := _album_portrait_path(monster_id)
-	if ResourceLoader.exists(album_path):
-		_portrait_path_cache[monster_id] = album_path
-		return album_path
-	var fallback := MonsterArtDBScript.get_art_path(monster_id, "ranch")
-	_portrait_path_cache[monster_id] = fallback
-	return fallback
-
-func _album_portrait_path(monster_id: String) -> String:
-	if monster_id.begins_with("monster_boss_"):
-		return "res://assets/images/monsters/boss/%s_album_thumb.png" % monster_id
-	if monster_id.begins_with("enemy_"):
-		return "res://assets/images/monsters/enemy/%s_album_thumb.png" % monster_id
-	return "res://assets/images/monsters/monster/%s_album_thumb.png" % monster_id
+	var path := MonsterArtDBScript.get_art_path(monster_id, "ranch")
+	_portrait_path_cache[monster_id] = path
+	return path
 
 func _button_label(button: TextureButton) -> Label:
 	return button.get_node("Text") as Label

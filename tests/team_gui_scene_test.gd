@@ -63,6 +63,38 @@ func _run() -> void:
 	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderBadge") as CanvasItem).visible, "nested leader badge should show for an occupied leader slot")
 	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderText") as CanvasItem).visible, "nested leader text should show for an occupied leader slot")
 
+	scene.set("_team", {"leader": null, "member1": null, "member2": null})
+	scene.set("_selected_slot", "")
+	scene.call("_assign_to_slot", "monster_001")
+	var team: Dictionary = scene.get("_team")
+	_assert(team.get("leader") == "monster_001", "first roster tap should assign the monster to the leader slot")
+	_assert(team.get("member1") == null and team.get("member2") == null, "first roster tap should not duplicate the monster into other slots")
+	scene.call("_assign_to_slot", "monster_001")
+	team = scene.get("_team")
+	_assert(team.get("leader") == null and team.get("member1") == null and team.get("member2") == null, "second roster tap on an assigned monster should remove it from the team")
+
+	scene.set("_team", {"leader": "monster_002", "member1": "monster_002", "member2": "monster_002"})
+	scene.set("_selected_slot", "")
+	scene.call("_assign_to_slot", "monster_002")
+	team = scene.get("_team")
+	_assert(team.get("leader") == null and team.get("member1") == null and team.get("member2") == null, "tapping a duplicated assigned monster should clear all duplicate slots")
+
+	scene.set_process(false)
+	for _i in range(30):
+		var pending: Dictionary = scene.get("_pending_portrait_loads")
+		if pending.is_empty():
+			break
+		scene.call("_poll_portrait_loads")
+		await process_frame
+	for property_name in ["_texture_cache", "_team_portrait_cache", "_roster_texture_cache", "_pending_portrait_loads"]:
+		var value: Variant = scene.get(property_name)
+		if value is Dictionary:
+			(value as Dictionary).clear()
+	root.remove_child(scene)
+	scene.free()
+	for _i in range(3):
+		await process_frame
+
 	print("[TeamGuiSceneTest] passed")
 	quit(0)
 

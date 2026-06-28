@@ -23,6 +23,7 @@ const PACKED_SCENE_MAP: Dictionary = {
 	"settings": "res://src/ui/scenes/settings.tscn",
 	"sign_in": "res://src/ui/scenes/sign_in.tscn",
 	"tutorial": "res://src/ui/scenes/tutorial.tscn",
+	"leader_skill_test": "res://src/ui/scenes/leader_skill_test.tscn",
 }
 
 var _current_scene: Control = null
@@ -159,7 +160,8 @@ func _on_scene_button_pressed(btn_id: String) -> void:
 		"inventory": "inventory",
 		"ranch": "ranch",
 		"achievement": "achievement",
-		"settings": "settings"
+		"settings": "settings",
+		"test_tool": "leader_skill_test"
 	}
 	if not targets.has(btn_id):
 		return
