@@ -1,0 +1,24 @@
+﻿{
+  "game_name": "萌灵消消大冒险",
+  "name_status": "verified_from_project",
+  "engine": "Godot 4.6.3",
+  "project_features": ["竖屏移动端", "三消战斗", "五系棋盘能量", "精灵收集", "队伍编成", "捕捉窗口", "章节与 Boss", "成长与进化", "牧场", "商店", "背包", "签到", "成就", "教程"],
+  "runtime_orientation": "portrait",
+  "logical_viewport": {"width": 375, "height": 667},
+  "capture_framebuffer": {"width": 750, "height": 1334},
+  "source_files": [
+    "project.godot",
+    "README.md",
+    "docs/design/00_设计接手总纲.md",
+    "docs/design/01_核心玩法与系统重构.md",
+    "docs/design/04_当前完成度目标清单.md",
+    "main.gd"
+  ],
+  "git": {
+    "branch": "dev-0.3",
+    "head_short": "a1802f2",
+    "head_subject": "调整部分贴图 ，符合版权规格",
+    "working_tree_note": "生成前已有未提交改动；本次未回滚用户改动。"
+  },
+  "console_confirmation_required": true
+}

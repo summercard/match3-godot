@@ -1,0 +1,10 @@
+﻿{
+  "git_branch": "dev-0.3",
+  "git_head_short": "a1802f2",
+  "git_head_subject": "调整部分贴图 ，符合版权规格",
+  "start_screen_version_text": "v0.1.0",
+  "android_template_version_name": "1.0",
+  "android_template_version_code": 1,
+  "recommended_release_note_status": "draft",
+  "console_confirmation_required": true
+}

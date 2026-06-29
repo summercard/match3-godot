@@ -1,0 +1,148 @@
+{
+  "core_images": [
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 515829,
+      "luma_min": 42.58,
+      "luma_max": 248.63,
+      "luma_range": 206.04,
+      "color_buckets": 196,
+      "dhash": "1110110011110110101011110001110100011111110011110000011100010111"
+    },
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 640824,
+      "luma_min": 32.61,
+      "luma_max": 234.4,
+      "luma_range": 201.79,
+      "color_buckets": 188,
+      "dhash": "0001001101001011000101110101011101100010101001000100100100001111"
+    },
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 465296,
+      "luma_min": 24.74,
+      "luma_max": 255.0,
+      "luma_range": 230.26,
+      "color_buckets": 96,
+      "dhash": "0110110101010111010110010101010101010101000101010001100100000101"
+    },
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 462211,
+      "luma_min": 29.86,
+      "luma_max": 255.0,
+      "luma_range": 225.14,
+      "color_buckets": 109,
+      "dhash": "1010111100000111010001110101010100001101011010010010101100010111"
+    },
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 467875,
+      "luma_min": 18.4,
+      "luma_max": 253.41,
+      "luma_range": 235.02,
+      "color_buckets": 94,
+      "dhash": "0000111100010111010110010100110101001011011001010101000101010101"
+    },
+    {
+      "file": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "width": 1080,
+      "height": 1920,
+      "bytes": 268599,
+      "luma_min": 104.62,
+      "luma_max": 248.32,
+      "luma_range": 143.7,
+      "color_buckets": 48,
+      "dhash": "1000101101001110000011110000111100110011011100110010111110101010"
+    }
+  ],
+  "dhash_pairs": [
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "hamming_distance": 38
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "hamming_distance": 27
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "hamming_distance": 23
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "hamming_distance": 30
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/01_home.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "hamming_distance": 29
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "hamming_distance": 27
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "hamming_distance": 27
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "hamming_distance": 26
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/02_gameplay.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "hamming_distance": 27
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "hamming_distance": 22
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "hamming_distance": 17
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/03_collection.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "hamming_distance": 34
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "hamming_distance": 21
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/04_challenge.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "hamming_distance": 26
+    },
+    {
+      "a": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/05_progression.jpg",
+      "b": "06_运营与推广-可选素材（非提审必填）/03_core_screenshots/06_result_or_second_mode.jpg",
+      "hamming_distance": 33
+    }
+  ],
+  "min_hamming_distance": 17
+}

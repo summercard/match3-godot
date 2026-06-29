@@ -1,0 +1,5 @@
+﻿萌灵消消大冒险
+
+状态：verified_from_project
+来源：`project.godot` 的 `config/name` 与 README 标题一致。
+人工确认：需要在微信小游戏后台当天页面确认最终展示名称、命名合规和字数限制。

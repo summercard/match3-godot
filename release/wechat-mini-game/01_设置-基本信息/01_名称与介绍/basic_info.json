@@ -1,0 +1,18 @@
+﻿{
+  "game_name": {
+    "value": "萌灵消消大冒险",
+    "status": "verified",
+    "sources": ["project.godot", "README.md"]
+  },
+  "summary": {
+    "value": "竖屏移动端三消战斗游戏，玩家通过五系棋盘能量驱动精灵行动，推进章节、收服精灵并培养队伍。",
+    "status": "draft_from_verified_sources",
+    "sources": ["README.md", "docs/design/00_设计接手总纲.md", "docs/design/01_核心玩法与系统重构.md", "runtime captures"]
+  },
+  "orientation": {
+    "value": "portrait",
+    "status": "verified_runtime_capture",
+    "sources": ["project.godot", "90_交付报告与追溯/run_report.md"]
+  },
+  "console_confirmation_required": true
+}

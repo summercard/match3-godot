@@ -1,0 +1,28 @@
+﻿{
+  "spec_version": "2.0.0",
+  "generated_at": "2026-06-29T00:00:00+08:00",
+  "output_root": "release/wechat-mini-game",
+  "project": "萌灵消消大冒险",
+  "final_status": "READY_FOR_CONSOLE_CONFIRMATION",
+  "status_note": "平台核心资料和真实截图已完成；微信后台当天字段、尺寸、格式、字数和必填状态未由用户页面确认；Godot 运行时存在若干缺失资源警告。",
+  "orientation": {
+    "detected_runtime": "portrait",
+    "logical_viewport": "375x667",
+    "capture_framebuffer": "750x1334",
+    "confirmation_required": true
+  },
+  "default_optional_asset_exports": {
+    "cover": {"width": 1080, "height": 1920, "format": "jpg", "platform_required": false},
+    "screenshots": {"count": 6, "width": 1080, "height": 1920, "format": "jpg", "platform_required": false},
+    "share_images": {"count": 2, "width": 1000, "height": 800, "format": "jpg", "platform_required": false},
+    "logo": {"long_edge": 2000, "format": "png", "platform_required": false},
+    "avatar_source": {"width": 1024, "height": 1024, "format": "png", "platform_required": false}
+  },
+  "non_actions": [
+    "未登录微信公众平台",
+    "未上传素材",
+    "未提交审核",
+    "未进行真实支付、广告点击、外链跳转或社交邀请",
+    "未修改生产代码、玩法或资源"
+  ]
+}
