@@ -4,7 +4,9 @@
 class_name SceneResult
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")

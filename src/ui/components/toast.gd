@@ -10,7 +10,9 @@
 class_name Toast
 extends Node2D
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 
 ## 单例模式
 static var instance: Toast

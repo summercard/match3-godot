@@ -14,7 +14,6 @@
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Texture2D" uid="uid://bb3x7iav4isqg" path="res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png" id="popup_panel"]
 [ext_resource type="Texture2D" uid="uid://b5fu6nd6om8c2" path="res://assets/images/ui/panels/battle_flow_new_ui_panel_large.png" id="result_panel"]
-[ext_resource type="FontFile" uid="uid://6bc8xraoqdbk" path="res://assets/fonts/jf-openhuninn-2.1.ttf" id="round_font"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
 [ext_resource type="Texture2D" uid="uid://c8hs21avb7h1g" path="res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png" id="victory_banner"]
@@ -133,7 +132,6 @@ offset_bottom = 30.0
 theme_override_colors/font_color = Color(1, 0.86, 0.18, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.1, 0.2, 0.96)
 theme_override_constants/outline_size = 3
-theme_override_fonts/font = ExtResource("round_font")
 theme_override_font_sizes/font_size = 13
 text = "击败敌人"
 horizontal_alignment = 1
@@ -734,7 +732,6 @@ offset_top = 4.0
 offset_right = 243.0
 offset_bottom = 72.0
 theme_override_colors/font_color = Color(1, 0.8, 0, 1)
-theme_override_fonts/font = ExtResource("round_font")
 theme_override_font_sizes/font_size = 44
 text = "胜利"
 horizontal_alignment = 1
@@ -785,7 +782,6 @@ offset_top = 11.0
 offset_right = 195.0
 offset_bottom = 43.0
 theme_override_colors/font_color = Color(0.31, 0.78, 0.31, 1)
-theme_override_fonts/font = ExtResource("round_font")
 theme_override_font_sizes/font_size = 16
 text = "收服成功"
 horizontal_alignment = 1
@@ -816,7 +812,6 @@ offset_top = 12.0
 offset_right = 167.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("round_font")
 theme_override_font_sizes/font_size = 15
 text = "点击继续"
 horizontal_alignment = 1

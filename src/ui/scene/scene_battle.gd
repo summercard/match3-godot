@@ -11,6 +11,8 @@
 class_name SceneBattle
 extends Control
 
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const BattleUIFeedbackScript = preload("res://src/ui/components/battle_ui_feedback.gd")
 const BattleInputMapperScript = preload("res://src/ui/components/battle_input_mapper.gd")
@@ -26,7 +28,7 @@ const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const LeaderSkillVisualDbScript = preload("res://src/data/leader_skill_visual_db.gd")
-const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+var FX_ROUND_FONT: Font = SystemFontScript.regular()
 
 ## 设计尺寸
 const DESIGN_W := 375.0

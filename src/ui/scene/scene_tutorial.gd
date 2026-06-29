@@ -2,10 +2,12 @@
 class_name SceneTutorial
 extends Control
 
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
 signal tutorial_completed()
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
-const ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+var ROUND_FONT: Font = SystemFontScript.regular()
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0

@@ -2,8 +2,10 @@
 class_name SceneAchievementGui
 extends "res://src/ui/controllers/achievement_logic.gd"
 
+const AchievementGuiSystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
-const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+var _RoundFontSrc: Font = AchievementGuiSystemFontScript.regular()
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",

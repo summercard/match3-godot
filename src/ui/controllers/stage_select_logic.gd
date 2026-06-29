@@ -5,7 +5,9 @@
 class_name SceneStageSelect
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0

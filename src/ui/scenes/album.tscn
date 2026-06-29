@@ -2,22 +2,20 @@
 
 [ext_resource type="Script" uid="uid://bkirs7m3op3cc" path="res://src/ui/scene/scene_album_gui.gd" id="1_5sexc"]
 [ext_resource type="Texture2D" uid="uid://287wgurvcwv4" path="res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png" id="2_dmak6"]
-[ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="3_kv2bi"]
 [ext_resource type="Texture2D" uid="uid://dfkq5q22r37w2" path="res://assets/images/ui/bars/album_ui_header_plaque.png" id="4_ynhr1"]
 [ext_resource type="Texture2D" uid="uid://l0pqtw1u4d0x" path="res://assets/images/ui/buttons/album_ui_dex_filter_normal.png" id="5_4r3yu"]
 [ext_resource type="Texture2D" uid="uid://l4s3pgst6tic" path="res://assets/images/ui/elements/element_fire.png" id="6_lwaa5"]
 [ext_resource type="Texture2D" uid="uid://cjd20ccr8fuw1" path="res://assets/images/ui/elements/element_water.png" id="7_u1fqi"]
 [ext_resource type="Texture2D" uid="uid://qpsbefn0h7rh" path="res://assets/images/ui/elements/element_grass.png" id="8_snesh"]
 [ext_resource type="Texture2D" uid="uid://dgbatkboi0f0i" path="res://assets/images/ui/elements/element_thunder.png" id="9_w0q78"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/ribbon_side_01.png" id="10_2ugvr"]
+[ext_resource type="Texture2D" uid="uid://cv6htvwdspgew" path="res://assets/images/ui/nine_patch/ribbon_side_01.png" id="10_2ugvr"]
 [ext_resource type="Texture2D" uid="uid://3w3ruout6cnp" path="res://assets/images/ui/elements/element_light.png" id="10_dmuhb"]
 [ext_resource type="Texture2D" uid="uid://bfl1k1oc8nc5o" path="res://assets/images/ui/elements/element_earth.png" id="11_b1baw"]
 [ext_resource type="Texture2D" uid="uid://cqr4a0niglspq" path="res://assets/images/ui/elements/element_wind.png" id="12_084vh"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black2.png" id="12_fxvvh"]
+[ext_resource type="Texture2D" uid="uid://b5lbgg4mmgb50" path="res://assets/images/ui/nine_patch/panel_black2.png" id="12_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://c7g0266wyvygp" path="res://assets/images/ui/elements/element_dark.png" id="13_cw21g"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/ui/icons/album_icon_lock.png" id="15_7dl6j"]
 [ext_resource type="Texture2D" uid="uid://no5qkdwpa1bp" path="res://assets/images/ui/icons/battle_flow_new_icon_star_silver.png" id="16_qr0pi"]
-[ext_resource type="FontFile" uid="uid://6bc8xraoqdbk" path="res://assets/fonts/jf-openhuninn-2.1.ttf" id="17_card_font"]
 [ext_resource type="Texture2D" uid="uid://dtrqp0fe8pxpg" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="18_star_gold"]
 [ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="19_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://b6t57fnwq57pl" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="22_fxvvh"]
@@ -41,7 +39,6 @@
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="45_dex_next"]
 [ext_resource type="Texture2D" uid="uid://wveh3u7p25lf" path="res://assets/images/monsters/monster/monster_001.png" id="46_monster_001"]
 [ext_resource type="Texture2D" uid="uid://uqmo07c7wx56" path="res://assets/images/monsters/monster/monster_006.png" id="47_monster_002"]
-[ext_resource type="Texture2D" uid="uid://6frrete1u1t0" path="res://assets/images/monsters/monster/monster_003.png" id="48_monster_003"]
 [ext_resource type="Texture2D" uid="uid://g37gnfn1jwjr" path="res://assets/images/monsters/monster/monster_002.png" id="49_monster_004"]
 [ext_resource type="Texture2D" uid="uid://dnh7y8dqfm2kn" path="res://assets/images/monsters/monster/monster_011.png" id="50_monster_005"]
 [ext_resource type="Texture2D" uid="uid://5w8f5c2wkpiv" path="res://assets/images/monsters/monster/monster_012.png" id="51_monster_006"]
@@ -54,7 +51,7 @@
 [ext_resource type="Texture2D" uid="uid://bmr3hnni6tuoy" path="res://assets/images/monsters/monster/monster_008.png" id="58_monster_013"]
 [ext_resource type="Texture2D" uid="uid://c3a0dt5i4onma" path="res://assets/images/monsters/monster/monster_013.png" id="59_monster_014"]
 [ext_resource type="Texture2D" uid="uid://bix5y1v7px7hq" path="res://assets/images/monsters/monster/monster_015.png" id="60_monster_015"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/panel_black.png" id="61_black_panel"]
+[ext_resource type="Texture2D" uid="uid://cakn78kpwv1r1" path="res://assets/images/ui/nine_patch/panel_black.png" id="61_black_panel"]
 [ext_resource type="Texture2D" uid="uid://bpuwrt4emah3s" path="res://assets/images/ui/backgrounds/black.png" id="62_dark_overlay"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dex_board"]
@@ -82,7 +79,6 @@ corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
-
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_bar_bg"]
 bg_color = Color(0.79, 0.56, 0.27, 0.28)
@@ -125,11 +121,11 @@ texture = ExtResource("2_dmak6")
 expand_mode = 1
 
 [node name="Shade" type="TextureRect" parent="." unique_id=459791384]
+modulate = Color(1, 1, 1, 0.5)
 layout_mode = 0
 offset_right = 375.0
 offset_bottom = 667.0
 mouse_filter = 2
-modulate = Color(1, 1, 1, 0.5)
 texture = ExtResource("62_dark_overlay")
 expand_mode = 1
 stretch_mode = 6
@@ -334,7 +330,7 @@ layout_mode = 0
 offset_right = 44.0
 offset_bottom = 44.0
 mouse_filter = 2
-texture = ExtResource("3_kv2bi")
+texture = ExtResource("44_dex_prev")
 expand_mode = 1
 stretch_mode = 5
 
@@ -951,7 +947,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "小火龙"
 horizontal_alignment = 1
@@ -1125,7 +1120,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "火恐龙"
 horizontal_alignment = 1
@@ -1271,7 +1265,7 @@ offset_top = 10.0
 offset_right = 94.0
 offset_bottom = 128.0
 mouse_filter = 2
-texture = ExtResource("48_monster_003")
+texture = ExtResource("57_monster_012")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1299,7 +1293,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "火灵虎"
 horizontal_alignment = 1
@@ -1473,7 +1466,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "烈焰龙"
 horizontal_alignment = 1
@@ -1647,7 +1639,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "水泡龟"
 horizontal_alignment = 1
@@ -1821,7 +1812,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "深海龟"
 horizontal_alignment = 1
@@ -1996,7 +1986,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "水龟仔"
 horizontal_alignment = 1
@@ -2171,7 +2160,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "水箭龟"
 horizontal_alignment = 1
@@ -2346,7 +2334,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "冰啾兽"
 horizontal_alignment = 1
@@ -2521,7 +2508,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "冰甲龙"
 horizontal_alignment = 1
@@ -2695,7 +2681,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "深渊海马王"
 horizontal_alignment = 1
@@ -2870,7 +2855,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "翠精灵"
 horizontal_alignment = 1
@@ -3045,7 +3029,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "草苗儿"
 horizontal_alignment = 1
@@ -3220,7 +3203,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "妙蛙草"
 horizontal_alignment = 1
@@ -3395,7 +3377,6 @@ theme_override_colors/font_outline_color = Color(1, 0.96, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_fonts/font = ExtResource("17_card_font")
 theme_override_font_sizes/font_size = 15
 text = "花叶兽"
 horizontal_alignment = 1
@@ -4119,7 +4100,6 @@ text = "关闭"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
-
 
 [node name="BondPage" type="Control" parent="." unique_id=1441497115]
 visible = false

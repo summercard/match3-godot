@@ -4,7 +4,9 @@
 class_name SceneTeam
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")

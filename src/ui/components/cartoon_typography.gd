@@ -1,8 +1,7 @@
 class_name CartoonTypography
 extends RefCounted
 
-const ROUND_FONT := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
-
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
 
 static func apply(root: Node, profile: String = "") -> void:
 	if root == null:
@@ -13,17 +12,11 @@ static func apply(root: Node, profile: String = "") -> void:
 
 
 static func _build_round_font() -> Font:
-	var font := FontVariation.new()
-	font.base_font = ROUND_FONT
-	font.set("variation_embolden", 0.45)
-	return font
+	return SystemFontScript.emboldened(0.45)
 
 
 static func _build_lobby_font() -> Font:
-	var font := FontVariation.new()
-	font.base_font = ROUND_FONT
-	font.set("variation_embolden", 0.42)
-	return font
+	return SystemFontScript.emboldened(0.42)
 
 
 static func _apply_node(node: Node, font: Font, profile: String) -> void:

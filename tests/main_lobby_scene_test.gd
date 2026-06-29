@@ -49,9 +49,9 @@ func _run() -> void:
 	}
 	_expect((lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).text == "精灵课堂", "lobby ranch entry should be labeled as the spirit classroom")
 	var lobby_font := (lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).get_theme_font("font") as FontVariation
-	_expect(lobby_font != null and lobby_font.base_font != null, "lobby labels should use the bundled rounded-font profile")
+	_expect(lobby_font != null and lobby_font.base_font != null, "lobby labels should use the system rounded-font profile")
 	if lobby_font != null and lobby_font.base_font != null:
-		_expect(lobby_font.base_font.resource_path.ends_with("jf-openhuninn-2.1.ttf"), "lobby rounded font profile should use bundled jf open huninn")
+		_expect(lobby_font.base_font is SystemFont, "lobby rounded font profile should use SystemFont")
 	for button_name in expected_buttons:
 		var button := lobby.get_node("%" + button_name) as TextureButton
 		_expect(button != null, "%s should be editable TextureButton" % button_name)

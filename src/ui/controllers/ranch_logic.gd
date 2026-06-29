@@ -3,7 +3,9 @@
 class_name SceneRanch
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 signal exp_collected(total_exp: int)
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")

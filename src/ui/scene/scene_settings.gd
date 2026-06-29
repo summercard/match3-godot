@@ -3,9 +3,11 @@
 class_name SceneSettings
 extends Control
 
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
 signal back_pressed()
 
-const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+var _RoundFontSrc: Font = SystemFontScript.regular()
 
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0

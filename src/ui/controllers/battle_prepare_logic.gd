@@ -11,7 +11,9 @@
 class_name SceneBattlePrepare
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")

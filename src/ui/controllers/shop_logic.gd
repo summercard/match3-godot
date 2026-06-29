@@ -3,7 +3,9 @@
 class_name SceneShop
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 const ItemDB = preload("res://src/data/item_db.gd")
 
 signal purchase_completed(item_id: String, quantity: int)

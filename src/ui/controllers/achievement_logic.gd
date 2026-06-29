@@ -3,7 +3,9 @@
 class_name SceneAchievement
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
+
+var PROJECT_ROUND_FONT: Font = SystemFontScript.regular()
 const AchievementDB = preload("res://src/data/achievement_db.gd")
 
 const DESIGN_W := 375.0

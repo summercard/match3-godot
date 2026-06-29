@@ -1,7 +1,7 @@
 class_name BattleUIFeedback
 extends RefCounted
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SystemFontScript = preload("res://src/ui/theme/system_font.gd")
 
 static func shake_offset(timer: float, duration: float = 0.18, amplitude: float = 2.4) -> Vector2:
 	# ★ 主人定 2026-06-11：缩减震动为轻抖动（amp 9→2.4，去垂直分量）
@@ -45,7 +45,7 @@ static func wrap_text(font: Font, text: String, max_width: float, size: float) -
 	return lines
 
 static func draw_text_with_shadow(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 200.0, alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER, bold: bool = false) -> void:
-	var font := PROJECT_ROUND_FONT
+	var font := SystemFontScript.regular()
 	var safe_text := fit_text(font, text, max_width, size)
 	var outline_color := Color(0.07, 0.16, 0.24, 0.92)
 	var left := x - max_width / 2.0 if alignment == HORIZONTAL_ALIGNMENT_CENTER else x
