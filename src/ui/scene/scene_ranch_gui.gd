@@ -116,6 +116,7 @@ var _portrait_path_cache: Dictionary = {}
 var _upgrade_animating: bool = false
 var _upgrade_feedback_tween: Tween = null
 var _upgrade_value_tweens: Array[Tween] = []
+var _harvest_float_tweens: Array[Tween] = []
 var _sell_pending_instance_id: String = ""
 var _sell_pending_quote: Dictionary = {}
 
@@ -224,6 +225,82 @@ func _on_ranch_slot_pressed(index: int) -> void:
 	_select_slot(index)
 	_collect_slot(index)
 	_sync_gui()
+
+func _collect_slot(slot_index: int) -> void:
+	if slot_index < 0 or slot_index >= _slots_data.size():
+		return
+	var slot: Dictionary = _slots_data[slot_index]
+	var instance_id = slot.get("instance_id", null)
+	if instance_id == null:
+		_show_status("选择空位后从列表放入精灵")
+		return
+	var exp := int(_idle_exp_map.get(str(instance_id), 0))
+	if exp <= 0:
+		_show_status("暂无可收获收益")
+		return
+	if not _can_add_shared_exp(exp):
+		_show_status(_shared_exp_overflow_text())
+		return
+	var added := exp
+	var overflow := 0
+	if _storage != null and _storage.has_method("add_shared_monster_exp"):
+		var add_result: Dictionary = _storage.add_shared_monster_exp(exp)
+		added = int(add_result.get("added", exp))
+		overflow = int(add_result.get("overflow", 0))
+	if added < exp or overflow > 0:
+		_show_status(_shared_exp_overflow_text())
+		return
+	slot["placed_at"] = Time.get_unix_time_from_system() * 1000.0
+	_save_ranch_state()
+	_refresh_ranch_view()
+	_clear_status_feedback()
+	exp_collected.emit(added)
+	if added > 0:
+		_show_slot_harvest_float(slot_index, added)
+	else:
+		_show_status("经验槽已满")
+
+func _on_collect_pressed() -> void:
+	var total_collected := 0
+	var collectable_slots: Array[Dictionary] = []
+	for i in range(_slots_data.size()):
+		var slot: Dictionary = _slots_data[i]
+		var monster_id = slot.get("instance_id", null)
+		if monster_id == null:
+			continue
+		var exp := int(_idle_exp_map.get(str(monster_id), 0))
+		if exp <= 0:
+			continue
+		total_collected += exp
+		collectable_slots.append({"slot": slot, "index": i, "exp": exp})
+	if total_collected <= 0:
+		_show_status(_no_idle_reward_text())
+		return
+	if not _can_add_shared_exp(total_collected):
+		_show_status(_shared_exp_overflow_text())
+		return
+	var added := total_collected
+	var overflow := 0
+	if total_collected > 0 and _storage != null and _storage.has_method("add_shared_monster_exp"):
+		var add_result: Dictionary = _storage.add_shared_monster_exp(total_collected)
+		added = int(add_result.get("added", total_collected))
+		overflow = int(add_result.get("overflow", 0))
+	if added < total_collected or overflow > 0:
+		_show_status(_shared_exp_overflow_text())
+		return
+	var now_ms := Time.get_unix_time_from_system() * 1000.0
+	for entry: Dictionary in collectable_slots:
+		var slot: Dictionary = entry.get("slot", {})
+		slot["placed_at"] = now_ms
+	_save_ranch_state()
+	_refresh_ranch_view()
+	_clear_status_feedback()
+	if added > 0:
+		exp_collected.emit(added)
+		for entry: Dictionary in collectable_slots:
+			_show_slot_harvest_float(int(entry.get("index", 0)), int(entry.get("exp", 0)))
+	else:
+		_show_status("经验槽已满")
 
 func _on_ranch_card_pressed(visible_index: int) -> void:
 	var idx := _list_page * RANCH_CARD_PATHS.size() + visible_index
@@ -389,10 +466,21 @@ func _refresh_ranch_view() -> void:
 	_update_class_scroll_limit()
 	_sync_gui()
 
+func _init_bubbles() -> void:
+	_bubbles = []
+
+func _add_bubble(_slot_index: int) -> void:
+	pass
+
 func _show_status(text: String) -> void:
 	super._show_status(text)
 	_sync_status()
 	_play_toast_feedback()
+
+func _clear_status_feedback() -> void:
+	_status_text = ""
+	_status_timer = 0.0
+	_sync_status()
 
 func _sync_gui() -> void:
 	if not is_inside_tree() or not has_node("Pages"):
@@ -492,7 +580,7 @@ func _sync_ranch_slots() -> void:
 		_set_visible(status, occupied)
 		_set_visible(timer_plate, occupied)
 		_set_visible(timer, occupied)
-		_set_visible(sparkle, occupied)
+		_set_visible(sparkle, false)
 		_set_visible(plus, not occupied)
 		_set_visible(empty_text, not occupied)
 		var selected := i == _selected_slot
@@ -546,6 +634,44 @@ func _sync_collect_row() -> void:
 	var total_coin := total_exp * 1.25
 	_set_text(_label("Pages/RanchPage/CollectRow/ExpValue"), "+" + _format_count(total_exp))
 	_set_text(_label("Pages/RanchPage/CollectRow/CoinValue"), "+" + _format_count(total_coin))
+
+func _show_slot_harvest_float(slot_index: int, amount: int) -> void:
+	if amount <= 0 or slot_index < 0 or slot_index >= SLOT_PATHS.size():
+		return
+	var page := get_node_or_null("Pages/RanchPage") as Control
+	var slot_node := get_node_or_null(SLOT_PATHS[slot_index]) as Control
+	if page == null or slot_node == null:
+		return
+	var label := Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.z_index = 80
+	label.text = "EXP +%d" % amount
+	label.size = Vector2(112.0, 28.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font", PROJECT_ROUND_FONT)
+	label.add_theme_font_size_override("font_size", 17)
+	label.add_theme_color_override("font_color", Color(0.74, 1.0, 0.32, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(0.06, 0.22, 0.03, 0.92))
+	label.add_theme_constant_override("outline_size", 4)
+	var slot_center := slot_node.position + slot_node.size * 0.5
+	var start_pos := Vector2(slot_center.x - label.size.x * 0.5, slot_node.position.y - 32.0)
+	label.position = start_pos
+	label.pivot_offset = label.size * 0.5
+	label.scale = Vector2(0.92, 0.92)
+	page.add_child(label)
+	var tween := create_tween()
+	_harvest_float_tweens.append(tween)
+	tween.tween_property(label, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "position", start_pos + Vector2(0.0, -12.0), 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "position", start_pos + Vector2(0.0, -44.0), 1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_callback(_cleanup_harvest_float.bind(label, tween))
+
+func _cleanup_harvest_float(label: Label, tween: Tween) -> void:
+	_harvest_float_tweens.erase(tween)
+	if label != null and is_instance_valid(label):
+		label.queue_free()
 
 func _ensure_pet_farm_layout() -> void:
 	# Visual structure lives in ranch_hub.tscn so the Godot editor is the

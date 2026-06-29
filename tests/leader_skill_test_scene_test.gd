@@ -37,9 +37,9 @@ func _run() -> void:
 					var active_kinds: Array = after_profile.get("active_kinds", [])
 					_expect(active_kinds.has("fire_beam"), "fire should schedule the disturbed flame beam renderer")
 					_expect(active_kinds.has("fire_impact"), "fire should schedule the target burn impact renderer")
-					_expect(float(after_profile.get("fire_trail_width", 0.0)) >= 14.0, "fire beam should have a thick disturbed trail")
-					_expect(float(after_profile.get("fire_particle_min_size", 0.0)) >= 32.0, "fire particles should be large enough for visual acceptance")
-					_expect(float(after_profile.get("fire_impact_size", 0.0)) >= 110.0, "fire impact should use a large burst sprite")
+					_expect(float(after_profile.get("fire_trail_width", 99.0)) <= 8.5, "fire beam should read as a controlled trail, not a thick texture band")
+					_expect(float(after_profile.get("fire_particle_min_size", 0.0)) >= 38.0 and float(after_profile.get("fire_particle_min_size", 99.0)) <= 44.0, "fire particles should use fewer larger sprites for mobile performance")
+					_expect(float(after_profile.get("fire_impact_size", 0.0)) >= 54.0 and float(after_profile.get("fire_impact_size", 99.0)) <= 62.0, "fire impact particles should be larger while keeping the draw count low")
 
 	var lobby: Control = load("res://src/ui/scenes/main_lobby.tscn").instantiate()
 	root.add_child(lobby)

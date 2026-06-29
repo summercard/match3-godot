@@ -136,7 +136,7 @@ func _run() -> void:
 	_expect(chapter_2_boss_portrait.visible and chapter_2_boss_portrait.texture != null, "chapter 2 boss portrait should show by default")
 	_expect(absf((chapter_2_boss_portrait.position.x + chapter_2_boss_portrait.size.x * 0.5) - (chapter_2_boss_platform.position.x + chapter_2_boss_platform.size.x * 0.5)) <= 1.0, "chapter 2 boss portrait should be centered on its platform")
 	_expect(absf((chapter_2_boss_portrait.position.y + chapter_2_boss_portrait.size.y) - (chapter_2_boss_platform.position.y + chapter_2_boss_platform.size.y * 0.58)) <= 1.0, "chapter 2 boss portrait should sit on the platform anchor")
-	_expect(chapter_2_boss_portrait.texture is AtlasTexture, "chapter 2 boss portrait should crop source label padding in stage select")
+	_expect(not (chapter_2_boss_portrait.texture is AtlasTexture), "chapter 2 boss portrait should use the full source art without stage-select cropping")
 
 	scene.init({"chapterIndex": 2})
 	await process_frame

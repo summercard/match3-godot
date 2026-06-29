@@ -150,6 +150,7 @@ func _run() -> void:
 		])
 		ranch.call("_calc_idle_exp")
 		ranch.call("_sync_gui")
+		_expect(not (ranch.get_node("Pages/RanchPage/Slots/Slot1/Sparkle") as TextureRect).visible, "occupied farm slot should not show the old sparkle particle")
 		var fake_team_storage := FakeTeamStorage.new()
 		root.add_child(fake_team_storage)
 		ranch.set("_storage", fake_team_storage)
@@ -181,6 +182,17 @@ func _run() -> void:
 		ranch.call("_calc_idle_exp")
 		ranch.call("_sync_dynamic_gui")
 		_expect(timer.modulate != harvest_ready_color, "farm slot timer color should distinguish ready harvest from waiting")
+		slots = ranch.get("_slots_data")
+		slots[0]["placed_at"] = Time.get_unix_time_from_system() * 1000.0 - 10.0 * 60.0 * 1000.0
+		ranch.set("_slots_data", slots)
+		ranch.call("_calc_idle_exp")
+		ranch.call("_collect_slot", 0)
+		var harvest_float_found := false
+		for child: Node in (ranch.get_node("Pages/RanchPage") as Control).get_children():
+			if child is Label and str((child as Label).text).begins_with("EXP +"):
+				harvest_float_found = true
+				break
+		_expect(harvest_float_found, "farm slot harvest should show a slow floating reward above the monster instead of only using the shared toast")
 		var fake_overflow_storage := FakeOverflowStorage.new()
 		root.add_child(fake_overflow_storage)
 		ranch.set("_storage", fake_overflow_storage)

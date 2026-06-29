@@ -6,16 +6,37 @@ const MonsterDbScript := preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript := preload("res://src/data/monster_art_db.gd")
 const LeaderSkillVisualDbScript := preload("res://src/data/leader_skill_visual_db.gd")
 const MOTE_PATH := "res://assets/images/ui/leader_skills/particles/leader_fx_mote.png"
-const FIRE_PARTICLE_PATH := "res://assets/images/ui/leader_skills/particles/leader_fx_fire_particle.png"
-const FIRE_TRAIL_OUTER_WIDTH := 14.0
-const FIRE_TRAIL_MID_WIDTH := 8.0
-const FIRE_TRAIL_CORE_WIDTH := 3.2
-const FIRE_TRAIL_PARTICLE_SIZE := 36.0
-const FIRE_TRAIL_PARTICLE_VARIANCE := 14.0
-const FIRE_BURST_PARTICLE_SIZE := 32.0
-const FIRE_BURST_PARTICLE_VARIANCE := 17.0
-const FIRE_IMPACT_SPRITE_SIZE := 112.0
-const FIRE_IMPACT_SPRITE_VARIANCE := 34.0
+const FIRE_PARTICLE_PATH := "res://assets/images/ui/leader_skills/particles/leader_fx_element_fire.png"
+const ELEMENT_PARTICLE_PATHS := {
+	"fire": "res://assets/images/ui/leader_skills/particles/leader_fx_element_fire.png",
+	"water": "res://assets/images/ui/leader_skills/particles/leader_fx_element_water.png",
+	"grass": "res://assets/images/ui/leader_skills/particles/leader_fx_element_grass.png",
+	"wind": "res://assets/images/ui/leader_skills/particles/leader_fx_element_wind.png",
+	"earth": "res://assets/images/ui/leader_skills/particles/leader_fx_element_earth.png",
+	"light": "res://assets/images/ui/leader_skills/particles/leader_fx_element_light.png",
+	"dark": "res://assets/images/ui/leader_skills/particles/leader_fx_element_dark.png",
+	"thunder": "res://assets/images/ui/leader_skills/particles/leader_fx_element_thunder.png",
+	"ice": "res://assets/images/ui/leader_skills/particles/leader_fx_element_ice.png"
+}
+const TONE_ELEMENT_PARTICLES := {
+	"fire": "fire",
+	"balanced": "grass",
+	"heal": "grass",
+	"speed": "wind",
+	"guard": "water",
+	"bulwark": "earth",
+	"siphon": "dark",
+	"chain": "thunder"
+}
+const FIRE_TRAIL_OUTER_WIDTH := 8.0
+const FIRE_TRAIL_MID_WIDTH := 4.8
+const FIRE_TRAIL_CORE_WIDTH := 1.8
+const FIRE_TRAIL_PARTICLE_SIZE := 42.0
+const FIRE_TRAIL_PARTICLE_VARIANCE := 22.0
+const FIRE_BURST_PARTICLE_SIZE := 40.0
+const FIRE_BURST_PARTICLE_VARIANCE := 24.0
+const FIRE_IMPACT_SPRITE_SIZE := 58.0
+const FIRE_IMPACT_SPRITE_VARIANCE := 30.0
 
 const DESIGN_SIZE := Vector2(375.0, 667.0)
 const TEAM_IDS := ["monster_002", "monster_093", "monster_053"]
@@ -293,7 +314,7 @@ func _draw_fx() -> void:
 					_draw_fire_emitter(fx.get("center", Vector2.ZERO), progress, alpha)
 				else:
 					_draw_vfx_texture(fx.get("center", Vector2.ZERO), tone, 96.0, alpha * 0.98, progress, "crest")
-					_draw_particles(fx.get("center", Vector2.ZERO), color, progress, alpha, 5, 34.0)
+					_draw_particles(fx.get("center", Vector2.ZERO), color, tone, progress, alpha, 5, 34.0)
 			"beam":
 				_draw_beam(fx.get("from", Vector2.ZERO), fx.get("to", Vector2.ZERO), tone, color, progress, alpha)
 			"fire_beam":
@@ -302,7 +323,7 @@ func _draw_fx() -> void:
 				_draw_fire_impact(fx.get("center", Vector2.ZERO), progress, alpha)
 			"ally":
 				_draw_vfx_texture(fx.get("center", Vector2.ZERO), tone, 82.0, alpha * 0.92, progress, "ally")
-				_draw_particles(fx.get("center", Vector2.ZERO), color, progress, alpha, 4, 26.0)
+				_draw_particles(fx.get("center", Vector2.ZERO), color, tone, progress, alpha, 4, 26.0)
 			"shell":
 				_draw_shell(fx.get("center", Vector2.ZERO), tone, color, progress, alpha)
 			"mark":
@@ -317,9 +338,46 @@ func _draw_beam(start: Vector2, finish: Vector2, tone: String, color: Color, pro
 	draw_line(start, tip, Color(1.0, 1.0, 0.90, 0.68 * alpha), 2.2)
 	if tone == "chain":
 		_draw_zap(start, tip, color, progress, alpha)
+	_draw_element_trail_particles(start, tip, tone, progress, alpha)
 	if reach >= 0.95:
 		_draw_vfx_texture(finish, tone, 90.0, alpha, progress, "impact")
-		_draw_particles(finish, color, progress, alpha, 5, 24.0)
+		_draw_particles(finish, color, tone, progress, alpha, 5, 24.0)
+
+
+func _draw_element_trail_particles(start: Vector2, finish: Vector2, tone: String, progress: float, alpha: float) -> void:
+	var dir := finish - start
+	if dir.length() <= 0.1:
+		return
+	var tex := _get_texture(str(ELEMENT_PARTICLE_PATHS.get(str(TONE_ELEMENT_PARTICLES.get(tone, "grass")), "")))
+	if tex == null:
+		return
+	var normal := dir.normalized().orthogonal()
+	var reach := clampf(progress / 0.45, 0.0, 1.0)
+	var count := 2 if tone == "chain" else 1
+	for i in range(count):
+		var t := clampf((float(i) + 0.45) / float(count + 1), 0.0, reach)
+		if t > reach:
+			continue
+		var wave := sin(progress * TAU * 2.4 + float(i) * 1.71)
+		var pos := start.lerp(finish, t) + normal * wave * 6.0
+		match tone:
+			"siphon":
+				var back_t := clampf(1.0 - t * 0.72 - progress * 0.12, 0.0, 1.0)
+				pos = start.lerp(finish, back_t) - normal * wave * 5.0
+			"speed":
+				pos += normal * (10.0 + 5.0 * sin(progress * PI)) + dir.normalized() * progress * 9.0
+			"guard":
+				pos = start.lerp(finish, t) + normal * sin(progress * TAU + float(i)) * 8.0
+			"bulwark":
+				pos = start.lerp(finish, t) + Vector2(0.0, 8.0 - progress * 14.0) + normal * wave * 3.0
+			"heal":
+				pos = start.lerp(finish, t) + Vector2(0.0, -8.0 - progress * 8.0) + normal * wave * 4.0
+			"chain":
+				pos = start.lerp(finish, t) + normal * sin(progress * TAU * 3.0 + float(i) * 2.2) * 10.0
+		var size: float = (30.0 + 12.0 * absf(sin(float(i) * 1.83 + progress * PI))) * (1.12 if tone == "chain" else 1.0)
+		var disappear_scale: float = 1.0 - smoothstep(0.70, 1.0, progress)
+		var draw_size: float = size * clampf(disappear_scale, 0.05, 1.0)
+		draw_texture_rect(tex, Rect2(pos.x - draw_size * 0.5, pos.y - draw_size * 0.5, draw_size, draw_size), false, Color.WHITE)
 
 
 func _draw_shell(center: Vector2, tone: String, color: Color, progress: float, alpha: float) -> void:
@@ -351,19 +409,57 @@ func _draw_vfx_texture(center: Vector2, tone: String, size_px: float, alpha: flo
 		return
 	var s := maxf(8.0, size_px * LeaderSkillVisualDbScript.get_motion_scale(tone, progress, phase))
 	var draw_alpha := LeaderSkillVisualDbScript.get_motion_alpha(tone, progress, alpha)
-	draw_texture_rect(tex, Rect2(center.x - s * 0.5, center.y - s * 0.5, s, s), false, Color(1.0, 1.0, 1.0, draw_alpha))
+	var disappear_scale := smoothstep(0.08, 0.38, clampf(draw_alpha, 0.0, 1.0))
+	var draw_size := s * clampf(disappear_scale, 0.08, 1.0)
+	draw_texture_rect(tex, Rect2(center.x - draw_size * 0.5, center.y - draw_size * 0.5, draw_size, draw_size), false, Color.WHITE)
 
 
-func _draw_particles(center: Vector2, color: Color, progress: float, alpha: float, count: int, radius: float) -> void:
+func _draw_particles(center: Vector2, color: Color, tone: String, progress: float, alpha: float, count: int, radius: float) -> void:
 	if color.r > 0.95 and color.g < 0.45:
 		_draw_fire_particles(center, progress, alpha, count, radius)
 		return
 	var tex := _get_texture(MOTE_PATH)
-	for i in range(count):
-		var angle := progress * TAU + float(i) * TAU / float(count)
+	var element_tex := _get_texture(str(ELEMENT_PARTICLE_PATHS.get(str(TONE_ELEMENT_PARTICLES.get(tone, "grass")), "")))
+	var limit := mini(maxi(count, 0), 2)
+	for i in range(limit):
+		var angle := progress * TAU + float(i) * TAU / float(limit)
 		var pos := center + Vector2(cos(angle), sin(angle * 1.18)) * radius * (0.40 + progress * 0.60)
+		match tone:
+			"heal":
+				var bloom_angle := -PI * 0.5 + (float(i) - 0.5) * 0.72 + sin(progress * PI) * 0.18
+				pos = center + Vector2(cos(bloom_angle) * radius * (0.32 + progress * 0.30), -radius * (0.16 + progress * 0.58) + sin(float(i) + progress * TAU) * 5.0)
+			"speed":
+				var swirl := progress * TAU * 1.35 + float(i) * PI
+				pos = center + Vector2(cos(swirl) * radius * (0.34 + progress * 0.46), sin(swirl) * radius * (0.18 + progress * 0.38)) + Vector2(progress * 12.0, -progress * 8.0)
+			"guard":
+				var shell_angle := -PI * 0.82 + progress * PI * 1.25 + float(i) * PI * 0.52
+				pos = center + Vector2(cos(shell_angle), sin(shell_angle)) * radius * (0.74 + 0.12 * sin(progress * PI))
+			"bulwark":
+				var side := -1.0 if i == 0 else 1.0
+				pos = center + Vector2(side * radius * (0.22 + progress * 0.18), radius * (0.40 - progress * 0.74) + sin(float(i) + progress * PI) * 3.0)
+			"siphon":
+				var spiral := -progress * TAU * 1.15 + float(i) * PI
+				var pull := radius * (0.86 - progress * 0.54)
+				pos = center + Vector2(cos(spiral), sin(spiral * 1.08)) * pull
+			"chain":
+				var snap_angle := -PI * 0.16 + float(i) * PI * 1.12 + sin(progress * TAU * 2.0) * 0.12
+				pos = center + Vector2(cos(snap_angle), sin(snap_angle)) * radius * (0.42 + progress * 0.42)
+			_:
+				var leaf_angle := -PI * 0.25 + float(i) * PI * 0.88 + progress * TAU * 0.24
+				pos = center + Vector2(cos(leaf_angle), sin(leaf_angle * 1.12)) * radius * (0.34 + progress * 0.48)
 		var s := 9.0 + sin(progress * PI + float(i)) * 2.0
+		var element_size := (30.0 + 11.0 * absf(sin(float(i) * 1.67 + progress * PI))) * (0.88 if tone == "bulwark" else 1.0)
+		if tone == "bulwark":
+			element_size *= 1.18
+		elif tone == "chain":
+			element_size *= 0.96
+		elif tone == "speed":
+			element_size *= 0.90
 		var modulate := Color(color.r, color.g, color.b, alpha * 0.58)
+		if element_tex != null:
+			var disappear_scale: float = 1.0 - smoothstep(0.72, 1.0, progress)
+			var draw_size: float = element_size * clampf(disappear_scale, 0.05, 1.0)
+			draw_texture_rect(element_tex, Rect2(pos.x - draw_size * 0.5, pos.y - draw_size * 0.5, draw_size, draw_size), false, Color.WHITE)
 		if tex != null:
 			draw_texture_rect(tex, Rect2(pos.x - s * 0.5, pos.y - s * 0.5, s, s), false, modulate)
 		else:
@@ -372,9 +468,9 @@ func _draw_particles(center: Vector2, color: Color, progress: float, alpha: floa
 
 func _draw_fire_emitter(center: Vector2, progress: float, alpha: float) -> void:
 	var pulse := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
-	draw_circle(center, 30.0 + pulse * 18.0, Color(1.0, 0.24, 0.03, 0.20 * alpha))
-	draw_arc(center, 24.0 + pulse * 12.0, -PI * 0.14, PI * 1.22, 48, Color(1.0, 0.42, 0.08, 0.90 * alpha), 4.8, true)
-	_draw_fire_particles(center, progress, alpha, 8, 44.0)
+	draw_circle(center, 24.0 + pulse * 13.0, Color(1.0, 0.24, 0.03, 0.14 * alpha))
+	draw_arc(center, 22.0 + pulse * 9.0, -PI * 0.14, PI * 1.22, 48, Color(1.0, 0.42, 0.08, 0.78 * alpha), 3.2, true)
+	_draw_fire_particles(center, progress, alpha, 3, 38.0)
 
 
 func _draw_fire_beam(start: Vector2, finish: Vector2, progress: float, alpha: float) -> void:
@@ -399,32 +495,39 @@ func _draw_fire_beam(start: Vector2, finish: Vector2, progress: float, alpha: fl
 		draw_line(a, b, Color(1.0, 0.16, 0.02, 0.90 * alpha), FIRE_TRAIL_OUTER_WIDTH)
 		draw_line(a, b, Color(1.0, 0.50, 0.03, 0.96 * alpha), FIRE_TRAIL_MID_WIDTH)
 		draw_line(a, b, Color(1.0, 0.92, 0.40, 0.90 * alpha), FIRE_TRAIL_CORE_WIDTH)
-	for i in range(8):
-		var t := clampf((float(i) + 0.35) / 8.0, 0.0, reach)
+	for i in range(4):
+		var t := clampf((float(i) + 0.30) / 4.0, 0.0, reach)
 		var base := start.lerp(tip, t)
-		var flicker := normal * sin(progress * TAU * 4.4 + float(i) * 1.9) * (12.0 + 7.0 * sin(t * PI))
-		var size := FIRE_TRAIL_PARTICLE_SIZE + FIRE_TRAIL_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i)))
-		_draw_fire_sprite(base + flicker, i, size, alpha * (0.88 - t * 0.16), progress * 0.8 + t)
+		var flicker := normal * sin(progress * TAU * 4.4 + float(i) * 1.9) * (9.0 + 5.0 * sin(t * PI))
+		var size_jitter: float = 0.78 + 0.44 * absf(sin(float(i) * 1.73 + 0.35))
+		var size: float = (FIRE_TRAIL_PARTICLE_SIZE + FIRE_TRAIL_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i)))) * size_jitter
+		_draw_fire_sprite(base + flicker, i, size, alpha * (0.72 - t * 0.12), progress * 0.8 + t)
 	if reach >= 0.96:
 		_draw_fire_impact(finish, progress, alpha)
 
 
 func _draw_fire_impact(center: Vector2, progress: float, alpha: float) -> void:
 	var hit := sin(clampf(progress / 0.46, 0.0, 1.0) * PI)
-	draw_circle(center, 24.0 + progress * 42.0, Color(1.0, 0.20, 0.02, 0.25 * alpha))
-	draw_arc(center, 31.0 + hit * 22.0, -PI * 0.24, PI * 1.42, 62, Color(1.0, 0.39, 0.03, 0.94 * alpha), 6.0, true)
-	draw_arc(center, 16.0 + hit * 14.0, PI * 0.04, PI * 1.28, 46, Color(1.0, 0.92, 0.36, 0.80 * alpha), 3.2, true)
-	_draw_fire_sprite(center + Vector2(0.0, -6.0), 7, FIRE_IMPACT_SPRITE_SIZE + hit * FIRE_IMPACT_SPRITE_VARIANCE, alpha, -progress * 0.5)
-	_draw_fire_particles(center, progress, alpha, 8, 56.0)
+	draw_circle(center, 20.0 + progress * 34.0, Color(1.0, 0.20, 0.02, 0.18 * alpha))
+	draw_arc(center, 27.0 + hit * 18.0, -PI * 0.24, PI * 1.42, 62, Color(1.0, 0.39, 0.03, 0.82 * alpha), 4.0, true)
+	draw_arc(center, 14.0 + hit * 11.0, PI * 0.04, PI * 1.28, 46, Color(1.0, 0.92, 0.36, 0.72 * alpha), 2.2, true)
+	for i in range(2):
+		var angle := -PI * 0.78 + float(i) * PI * 0.26 + progress * 0.35
+		var pos := center + Vector2(cos(angle), sin(angle)) * (8.0 + hit * (10.0 + float(i % 3) * 3.0))
+		var size_jitter: float = 0.82 + 0.54 * absf(sin(float(i) * 1.37 + 0.6))
+		var size: float = (FIRE_IMPACT_SPRITE_SIZE + FIRE_IMPACT_SPRITE_VARIANCE * (0.35 + 0.65 * sin(progress * PI + float(i) * 0.6))) * size_jitter
+		_draw_fire_sprite(pos, i + 2, size, alpha * 0.76, angle)
+	_draw_fire_particles(center, progress, alpha * 0.9, 3, 52.0)
 
 
 func _draw_fire_particles(center: Vector2, progress: float, alpha: float, count: int, radius: float) -> void:
-	var limit := mini(maxi(count, 0), 8)
+	var limit := mini(maxi(count, 0), 3)
 	for i in range(limit):
 		var angle := progress * TAU * 1.3 + float(i) * TAU / float(limit)
 		var drift := radius * (0.26 + progress * 0.78)
 		var pos := center + Vector2(cos(angle), sin(angle * 1.18)) * drift
-		var size := FIRE_BURST_PARTICLE_SIZE + FIRE_BURST_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i) * 0.7))
+		var size_jitter: float = 0.72 + 0.62 * absf(sin(float(i) * 1.91 + 0.2))
+		var size: float = (FIRE_BURST_PARTICLE_SIZE + FIRE_BURST_PARTICLE_VARIANCE * (0.5 + 0.5 * sin(progress * PI + float(i) * 0.7))) * size_jitter
 		_draw_fire_sprite(pos, i, size, alpha * 0.86, angle)
 
 
@@ -441,26 +544,12 @@ func _draw_fire_sprite(center: Vector2, index: int, size_px: float, alpha: float
 		]), Color(1.0, 0.52, 0.04, a))
 		draw_circle(center + Vector2(0.0, size_px * 0.08), size_px * 0.16, Color(1.0, 0.90, 0.22, a))
 		return
-	var src := _fire_particle_region(index)
-	var aspect := src.size.x / maxf(1.0, src.size.y)
-	var w := size_px * aspect
-	var h := size_px
+	var disappear_scale := smoothstep(0.04, 0.32, clampf(alpha, 0.0, 1.0))
+	var draw_size := size_px * clampf(disappear_scale, 0.05, 1.0)
+	var w := draw_size
+	var h := draw_size
 	var wobble := Vector2(cos(spin) * 1.5, sin(spin * 1.7) * 1.5)
-	draw_texture_rect_region(tex, Rect2(center.x - w * 0.5 + wobble.x, center.y - h * 0.5 + wobble.y, w, h), src, Color(1.0, 1.0, 1.0, clampf(alpha, 0.0, 1.0)))
-
-
-func _fire_particle_region(index: int) -> Rect2:
-	var regions := [
-		Rect2(28, 42, 100, 160),
-		Rect2(176, 52, 132, 96),
-		Rect2(392, 44, 96, 118),
-		Rect2(286, 154, 86, 96),
-		Rect2(22, 266, 150, 94),
-		Rect2(214, 282, 106, 126),
-		Rect2(362, 330, 136, 128),
-		Rect2(218, 418, 76, 72)
-	]
-	return regions[abs(index) % regions.size()]
+	draw_texture_rect(tex, Rect2(center.x - w * 0.5 + wobble.x, center.y - h * 0.5 + wobble.y, w, h), false, Color.WHITE)
 
 
 func _draw_float_texts() -> void:

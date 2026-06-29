@@ -620,7 +620,6 @@ const _BOSS_PORTRAIT_FALLBACK_POS := Vector2(30.0, 10.0)
 const _STAGE_PORTRAIT_LIFT := 4.0
 const _BOSS_PORTRAIT_LIFT := -5.0
 const _BOSS_PORTRAIT_PEDESTAL_ANCHOR_Y := 0.58
-const _BOSS_PORTRAIT_CROP_BOTTOM_RATIO := 0.79
 
 var _boss_stage_portrait_texture_cache: Dictionary = {}
 
@@ -705,14 +704,7 @@ func _stage_select_boss_portrait_texture(path: String) -> Texture2D:
 	var source := load(path) as Texture2D
 	if source == null:
 		return null
-	if path.contains("/boss/monster_boss_") and not path.ends_with("monster_boss_001_grass_flower_512.png"):
-		var atlas := AtlasTexture.new()
-		atlas.atlas = source
-		var source_size := source.get_size()
-		atlas.region = Rect2(Vector2.ZERO, Vector2(source_size.x, source_size.y * _BOSS_PORTRAIT_CROP_BOTTOM_RATIO))
-		_boss_stage_portrait_texture_cache[path] = atlas
-	else:
-		_boss_stage_portrait_texture_cache[path] = source
+	_boss_stage_portrait_texture_cache[path] = source
 	return _boss_stage_portrait_texture_cache[path]
 
 ## 把 portrait 放在台子中心：图片底部贴着 button 垂直中线，水平居中。

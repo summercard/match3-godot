@@ -9,9 +9,9 @@ const TYPES: Dictionary = {
 		"id": "fire",
 		"name": "烈焰攻势型",
 		"dispatch": "fire_burst",
-		"asset": PARTICLE_DIR + "/leader_fx_fire_particle.png",
+		"asset": PARTICLE_DIR + "/leader_fx_element_fire.png",
 		"motion": "fire_impact",
-		"particleBudget": 8,
+		"particleBudget": 3,
 		"summary": "饱和火焰环向外爆发，适合火属性攻击、灼烧和强打击队长技表现。"
 	},
 	"balanced": {
@@ -20,7 +20,7 @@ const TYPES: Dictionary = {
 		"dispatch": "crest_beam",
 		"asset": ASSET_DIR + "/leader_skill_vfx_balanced.png",
 		"motion": "impact",
-		"particleBudget": 5,
+		"particleBudget": 2,
 		"summary": "草金聚能、叶片与暖光爆发，适合稳定伤害和通用增益的队长技表现。"
 	},
 	"heal": {
@@ -29,7 +29,7 @@ const TYPES: Dictionary = {
 		"dispatch": "ally_bloom",
 		"asset": ASSET_DIR + "/leader_skill_vfx_heal.png",
 		"motion": "soft_bloom",
-		"particleBudget": 5,
+		"particleBudget": 2,
 		"summary": "柔和花瓣、泡泡与生命光点绽放，适合治疗和生命加成表现。"
 	},
 	"speed": {
@@ -38,7 +38,7 @@ const TYPES: Dictionary = {
 		"dispatch": "enemy_mark",
 		"asset": ASSET_DIR + "/leader_skill_vfx_speed.png",
 		"motion": "quick_swirl",
-		"particleBudget": 4,
+		"particleBudget": 2,
 		"summary": "圆润旋风与羽刃轨迹快速扫过，适合Combo、风伤和削弱表现。"
 	},
 	"guard": {
@@ -47,7 +47,7 @@ const TYPES: Dictionary = {
 		"dispatch": "ally_shell",
 		"asset": ASSET_DIR + "/leader_skill_vfx_guard.png",
 		"motion": "steady_shell",
-		"particleBudget": 5,
+		"particleBudget": 2,
 		"summary": "水波护体、泡泡与蓝色光环包裹队友，适合水系护盾和生命加成表现。"
 	},
 	"bulwark": {
@@ -56,7 +56,7 @@ const TYPES: Dictionary = {
 		"dispatch": "ally_shell",
 		"asset": ASSET_DIR + "/leader_skill_vfx_bulwark.png",
 		"motion": "heavy_shell",
-		"particleBudget": 6,
+		"particleBudget": 2,
 		"summary": "圆润碎石、暖尘与地面冲击环撑起防线，适合土系减伤和守护表现。"
 	},
 	"siphon": {
@@ -65,7 +65,7 @@ const TYPES: Dictionary = {
 		"dispatch": "beam_lifesteal",
 		"asset": ASSET_DIR + "/leader_skill_vfx_siphon.png",
 		"motion": "impact",
-		"particleBudget": 5,
+		"particleBudget": 2,
 		"summary": "紫黑影雾命中后带回粉紫生命回流，适合暗伤和吸血表现。"
 	},
 	"chain": {
@@ -74,7 +74,7 @@ const TYPES: Dictionary = {
 		"dispatch": "beam_status",
 		"asset": ASSET_DIR + "/leader_skill_vfx_chain.png",
 		"motion": "snap_chain",
-		"particleBudget": 5,
+		"particleBudget": 2,
 		"summary": "蓝金雷链与弹跳火花连锁穿击，适合雷伤和控制标记表现。"
 	}
 }

@@ -1,6 +1,17 @@
 extends SceneTree
 
 var _failures: Array[String] = []
+const ELEMENT_PARTICLE_PATHS := {
+	"fire": "res://assets/images/ui/leader_skills/particles/leader_fx_element_fire.png",
+	"water": "res://assets/images/ui/leader_skills/particles/leader_fx_element_water.png",
+	"grass": "res://assets/images/ui/leader_skills/particles/leader_fx_element_grass.png",
+	"thunder": "res://assets/images/ui/leader_skills/particles/leader_fx_element_thunder.png",
+	"ice": "res://assets/images/ui/leader_skills/particles/leader_fx_element_ice.png",
+	"light": "res://assets/images/ui/leader_skills/particles/leader_fx_element_light.png",
+	"earth": "res://assets/images/ui/leader_skills/particles/leader_fx_element_earth.png",
+	"wind": "res://assets/images/ui/leader_skills/particles/leader_fx_element_wind.png",
+	"dark": "res://assets/images/ui/leader_skills/particles/leader_fx_element_dark.png"
+}
 
 
 func _init() -> void:
@@ -31,17 +42,56 @@ func _run() -> void:
 		scene.queue_free()
 	_expect(ResourceLoader.exists("res://assets/images/ui/leader_skills/particles/leader_fx_mote.png"), "leader mote texture should exist")
 	_expect(ResourceLoader.exists("res://assets/images/ui/leader_skills/particles/leader_fx_shard.png"), "leader shard texture should exist")
-	_expect(ResourceLoader.exists("res://assets/images/ui/leader_skills/particles/leader_fx_fire_particle.png"), "leader fire particle texture should exist")
+	_check_element_particle_assets()
 	for tone in ["fire", "balanced", "heal", "speed", "guard", "bulwark", "siphon", "chain"]:
 		var profile := LeaderSkillVisualDb.get_profile(tone)
 		_expect(str(profile.get("id", "")) == tone, "%s visual profile should resolve" % tone)
 		var asset_path := str(profile.get("asset", ""))
 		_expect(ResourceLoader.exists(asset_path), "%s visual VFX texture should exist" % tone)
 		_expect(str(profile.get("motion", "")).length() > 0, "%s visual profile should expose motion timing" % tone)
-		_expect(int(profile.get("particleBudget", 0)) > 0 and int(profile.get("particleBudget", 0)) <= 8, "%s particle budget should stay bounded" % tone)
+		var max_budget := 10 if tone == "fire" else 8
+		_expect(int(profile.get("particleBudget", 0)) > 0 and int(profile.get("particleBudget", 0)) <= max_budget, "%s particle budget should stay bounded" % tone)
 		_check_asset_alpha(tone, asset_path)
 	_check_motion_curves()
 	_finish()
+
+
+func _check_element_particle_assets() -> void:
+	for element in ELEMENT_PARTICLE_PATHS.keys():
+		var path := str(ELEMENT_PARTICLE_PATHS[element])
+		_expect(ResourceLoader.exists(path), "%s element particle texture should exist" % element)
+		var image := Image.new()
+		var err := image.load(ProjectSettings.globalize_path(path))
+		_expect(err == OK, "%s element particle PNG should be readable" % element)
+		if err != OK:
+			continue
+		_expect(image.get_width() == 256 and image.get_height() == 256, "%s element particle should be 256x256" % element)
+		var corners := [
+			image.get_pixel(0, 0).a,
+			image.get_pixel(image.get_width() - 1, 0).a,
+			image.get_pixel(0, image.get_height() - 1).a,
+			image.get_pixel(image.get_width() - 1, image.get_height() - 1).a
+		]
+		for a in corners:
+			_expect(a <= 0.02, "%s element particle corners should be transparent" % element)
+		var opaque_count := 0
+		var semitransparent_count := 0
+		var magenta_fringe_count := 0
+		var total := image.get_width() * image.get_height()
+		for y in range(image.get_height()):
+			for x in range(image.get_width()):
+				var c := image.get_pixel(x, y)
+				var alpha := c.a
+				if alpha > 0.08:
+					opaque_count += 1
+				if alpha > 0.0 and alpha < 0.99:
+					semitransparent_count += 1
+				if alpha > 0.08 and c.r > 0.72 and c.g < 0.18 and c.b > 0.32 and c.b < 0.72:
+					magenta_fringe_count += 1
+		var coverage := float(opaque_count) / float(total)
+		_expect(coverage > 0.08 and coverage < 0.32, "%s element particle should keep the painted effect without a full-frame background" % element)
+		_expect(semitransparent_count > 0, "%s element particle should preserve soft antialiasing and glow alpha" % element)
+		_expect(float(magenta_fringe_count) / float(total) < 0.01, "%s element particle should not keep the magenta source background as visible fringe" % element)
 
 
 func _check_asset_alpha(tone: String, asset_path: String) -> void:
@@ -50,7 +100,10 @@ func _check_asset_alpha(tone: String, asset_path: String) -> void:
 	_expect(err == OK, "%s VFX PNG should be readable for art QA" % tone)
 	if err != OK:
 		return
-	_expect(image.get_width() == 512 and image.get_height() == 512, "%s VFX texture should be 512x512 1:1" % tone)
+	if tone == "fire":
+		_expect(image.get_width() == 256 and image.get_height() == 256, "fire VFX particle texture should be 256x256 1:1")
+	else:
+		_expect(image.get_width() == 512 and image.get_height() == 512, "%s VFX texture should be 512x512 1:1" % tone)
 	var corners := [
 		image.get_pixel(0, 0).a,
 		image.get_pixel(image.get_width() - 1, 0).a,
@@ -80,13 +133,17 @@ func _check_asset_alpha(tone: String, asset_path: String) -> void:
 	var soft_ratio := float(soft_count) / maxf(1.0, float(opaque_count))
 	var white_ratio := float(white_opaque_count) / float(total)
 	if tone == "fire":
-		_expect(coverage > 0.16 and coverage < 0.34, "fire VFX texture should be a particle sheet, not a thin ring or full background")
+		_expect(coverage > 0.08 and coverage < 0.32, "fire VFX texture should be a centered particle texture, not a full background")
 		_expect(str(LeaderSkillVisualDb.get_dispatch("fire")) == "fire_burst", "fire visual should dispatch through the particle burst renderer")
-		_expect(str(LeaderSkillVisualDb.get_asset_path("fire")).contains("leader_fx_fire_particle"), "fire visual should use the dedicated flame particle texture")
+		_expect(str(LeaderSkillVisualDb.get_asset_path("fire")).contains("leader_fx_element_fire"), "fire visual should use the new non-directional element particle texture")
 	else:
 		_expect(coverage > 0.035 and coverage < 0.18, "%s VFX texture should have ring coverage, not blank or full background" % tone)
-	_expect(solid_ratio > 0.82, "%s VFX texture body should be solid, not mostly semi-transparent" % tone)
-	_expect(soft_ratio < 0.18, "%s VFX texture should keep semitransparency only on antialiasing edges" % tone)
+	if tone == "fire":
+		_expect(solid_ratio > 0.35, "fire VFX particle should keep a solid painted core")
+		_expect(soft_ratio < 0.70, "fire VFX particle should use soft alpha only around the painted effect")
+	else:
+		_expect(solid_ratio > 0.82, "%s VFX texture body should be solid, not mostly semi-transparent" % tone)
+		_expect(soft_ratio < 0.18, "%s VFX texture should keep semitransparency only on antialiasing edges" % tone)
 	_expect(white_ratio < 0.012, "%s VFX texture should not contain a white opaque background" % tone)
 
 
