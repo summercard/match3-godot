@@ -94,9 +94,12 @@ static func build_instance_view(instance: Dictionary) -> Dictionary:
 	var is_elite: bool = bool(instance.get("isElite", template.get("isElite", false)))
 	var stats: Dictionary = MonsterPool.get_instance_stats(instance)
 	var display_name := _display_name_for_instance(instance, template, monster_id)
+	var owned_no := int(instance.get("ownedNo", 0))
 	return {
 		"instanceId": str(instance.get("instanceId", "")),
 		"monsterId": monster_id,
+		"ownedNo": owned_no,
+		"ownedNoLabel": format_owned_no(owned_no),
 		"name": display_name,
 		"savedName": str(instance.get("name", "")),
 		"nickname": str(instance.get("nickname", "")),
@@ -133,6 +136,11 @@ static func _display_name_for_instance(instance: Dictionary, template: Dictionar
 	if not nickname.is_empty():
 		return nickname
 	return str(template.get("name", monster_id))
+
+static func format_owned_no(owned_no: int) -> String:
+	if owned_no <= 0:
+		return ""
+	return "%04d" % owned_no
 
 static func get_monster_art(monster_id: String, usage: String = "battle") -> String:
 	return MonsterArtDB.get_art_path(monster_id, usage)

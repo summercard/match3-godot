@@ -561,9 +561,6 @@ func _sync_team_slots() -> void:
 		var leader_badge := slot_node.find_child("LeaderBadge", true, false) as CanvasItem
 		if leader_badge != null:
 			leader_badge.visible = key == "leader" and occupied
-		var leader_text := slot_node.find_child("LeaderText", true, false) as CanvasItem
-		if leader_text != null:
-			leader_text.visible = key == "leader" and occupied
 		(slot_node.get_node("Label/Text") as Label).text = str(SLOT_LABELS[key])
 		if not occupied or portrait == null:
 			continue
@@ -632,6 +629,7 @@ func _sync_roster_card(card: TextureButton, instance: Dictionary) -> void:
 	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
 	_request_portrait_texture(monster_id, card.get_node("Portrait") as TextureRect, "roster")
 	(card.get_node("Check") as TextureRect).visible = in_team
+	_sync_owned_no_label(card, instance_id)
 	(card.get_node("Level") as Label).text = "Lv.%d" % _get_real_level(instance_id)
 
 
@@ -642,6 +640,7 @@ func _sync_empty_roster_card(card: TextureButton) -> void:
 	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
 	(card.get_node("Portrait") as TextureRect).texture = null
 	(card.get_node("Check") as TextureRect).visible = false
+	_sync_owned_no_label(card, "")
 	(card.get_node("Level") as Label).text = ""
 
 
@@ -695,6 +694,29 @@ func _format_number(value: int) -> String:
 
 func _get_monster_texture(monster_id: String) -> Texture2D:
 	return _get_texture(MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team"))
+
+
+func _owned_no_label(instance_id: String) -> String:
+	var instance := _get_monster_instance(instance_id)
+	var view := MonsterService.build_instance_view(instance)
+	return str(view.get("ownedNoLabel", ""))
+
+
+func _sync_owned_no_label(card: TextureButton, instance_id: String) -> void:
+	var label := card.get_node_or_null("OwnedNo") as Label
+	if label == null:
+		return
+	label.position = Vector2(25.0, 3.0)
+	label.size = Vector2(26.0, 14.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 6)
+	label.add_theme_color_override("font_color", Color(0.43, 0.24, 0.07, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.84, 1.0))
+	label.add_theme_constant_override("outline_size", 1)
+	var owned_no := _owned_no_label(instance_id)
+	label.text = owned_no
+	label.visible = not owned_no.is_empty()
 
 
 func _prepare_roster_texture_page(page: int) -> void:

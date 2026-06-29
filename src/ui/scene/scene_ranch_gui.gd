@@ -1602,6 +1602,7 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
 	_set_text(card.get_node("Name") as Label, "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))])
 	_set_text(card.get_node("Level") as Label, "Lv.%d" % _get_monster_level(instance_id))
+	_sync_owned_no_label(card, instance_id)
 	var detail_label := card.get_node("Detail") as Label
 	_set_visible(detail_label, false)
 	_set_text(detail_label, _get_nature_name(str(instance.get("nature", ""))).substr(0, 3))
@@ -1617,6 +1618,25 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 		selection_mark.add_theme_color_override("font_outline_color", Color(0.06, 0.28, 0.10, 1.0))
 		selection_mark.add_theme_constant_override("outline_size", 3)
 		_set_visible(selection_mark, in_team)
+
+func _sync_owned_no_label(card: TextureButton, instance_id: String) -> void:
+	var label := card.get_node_or_null("OwnedNo") as Label
+	if label == null:
+		label = Label.new()
+		label.name = "OwnedNo"
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(label)
+	label.position = Vector2(24.0, 3.0)
+	label.size = Vector2(28.0, 15.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 8)
+	label.add_theme_color_override("font_color", Color(0.43, 0.24, 0.07, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.84, 1.0))
+	label.add_theme_constant_override("outline_size", 1)
+	var owned_no := _owned_no_label(instance_id)
+	label.text = owned_no
+	label.visible = not owned_no.is_empty()
 
 func _sync_page_buttons(panel_path: String, page: int, page_max: int) -> void:
 	var previous := get_node(panel_path + "/PreviousButton") as TextureButton

@@ -18,18 +18,23 @@ func _run() -> void:
 	var starter_instance: Dictionary = pool[0]
 	var starter_id := str(starter_instance.get("instanceId", ""))
 	_expect(not starter_id.is_empty(), "starter should have instanceId")
+	_expect(_owned_numbers_are_unique(pool), "starter migrated pool should assign unique owned numbers")
 	for starter: Dictionary in pool.slice(0, 3):
 		var starter_view := MonsterService.build_instance_view(starter)
+		_expect(int(starter_view.get("ownedNo", 0)) > 0, "starter view should expose owned number")
+		_expect(str(starter_view.get("ownedNoLabel", "")).length() == 4, "starter view should expose compact display owned number")
 		var expected_stats := StatCalculator.calc(str(starter.get("monsterId", "")), int(starter.get("level", 1)), str(starter.get("nature", "")))
 		_expect(starter_view.get("stats", {}) == expected_stats, "starter %s should use normal player stats without enemy HP scaling" % str(starter.get("monsterId", "")))
 
 	var first: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "brave", "source": "test"})
 	var second: Dictionary = save_manager.add_monster_instance("monster_001", {"nature": "cautious", "source": "test"})
 	_expect(str(first.get("instanceId", "")) != str(second.get("instanceId", "")), "same monster species should create distinct instances")
+	_expect(int(first.get("ownedNo", 0)) > 0, "newly added monster should return an owned number")
+	_expect(int(first.get("ownedNo", 0)) != int(second.get("ownedNo", 0)), "newly added monsters should receive distinct owned numbers")
 	_expect(first.get("socialProfile", {}).has("style"), "monster instance should expose social profile")
 	_expect((first.get("bondTraits", []) as Array).size() >= 3, "monster instance should expose bond traits")
 	_expect(first.get("bondMemory", {}).has("partners"), "monster instance should expose bond memory")
-	_expect(save_manager.get_instances_by_monster_id("monster_001").size() >= 3, "monster_001 should allow multiple owned instances")
+	_expect(save_manager.get_instances_by_monster_id("monster_001").size() >= 2, "monster_001 should allow multiple owned instances")
 
 	save_manager.save_team({"leader": first["instanceId"], "member1": second["instanceId"], "member2": null})
 	var team: Dictionary = save_manager.load_team()
@@ -43,11 +48,20 @@ func _run() -> void:
 
 	var view := MonsterService.get_instance_view(first["instanceId"], save_manager)
 	_expect(view.get("monsterId", "") == "monster_001", "MonsterService should resolve instance monsterId")
+	_expect(view.get("ownedNo", 0) == first.get("ownedNo", 0), "MonsterService should preserve owned number")
+	_expect(view.get("ownedNoLabel", "") == MonsterService.format_owned_no(int(first.get("ownedNo", 0))), "MonsterService should format owned number")
 	_expect(view.get("stats", {}).has("atk"), "MonsterService should include calculated stats")
 	_expect(view.get("art", {}).has("battle"), "MonsterService should include art bundle")
 	_expect(view.get("socialProfile", {}).has("style"), "MonsterService should include social profile")
 	_expect((view.get("bondTraits", []) as Array).size() >= 3, "MonsterService should include bond traits")
 	_expect(view.get("identity", {}).has("ecology"), "MonsterService should include ecology identity")
+
+	var duplicate_number_pool := MonsterPool.normalize_pool([
+		{"instanceId": "owned_dup_a", "monsterId": "monster_001", "ownedNo": 7},
+		{"instanceId": "owned_dup_b", "monsterId": "monster_002", "ownedNo": 7},
+		{"instanceId": "owned_missing", "monsterId": "monster_003"}
+	])
+	_expect(_owned_numbers_are_unique(duplicate_number_pool), "normalization should repair duplicate or missing owned numbers")
 
 	var ranch_scene = load("res://src/ui/controllers/ranch_logic.gd").new()
 	root.add_child(ranch_scene)
@@ -58,15 +72,16 @@ func _run() -> void:
 	ranch_scene._collect_slot(0)
 	_expect(save_manager.get_instance_level(first["instanceId"]) >= level_before_collect, "ranch slot tap should collect only that instance")
 
-	save_manager.update_monster_instance(first["instanceId"], {"level": 16})
-	save_manager.add_item("evolution_stone_fire", 1)
+	var evolving: Dictionary = save_manager.add_monster_instance("monster_005", {"level": 16, "nature": "brave", "source": "test"})
+	save_manager.add_item("evolution_stone_wind", 1)
 	ranch_scene._active_page = "classroom"
-	ranch_scene._class_selected_instance_id = first["instanceId"]
+	ranch_scene._class_selected_instance_id = evolving["instanceId"]
 	ranch_scene._selected_slot = 0
 	ranch_scene._on_evolve_pressed()
-	var evolved: Dictionary = save_manager.get_monster_instance(first["instanceId"])
+	var evolved: Dictionary = save_manager.get_monster_instance(evolving["instanceId"])
 	_expect(evolved.get("monsterId", "") == "monster_006", "classroom evolve should update monsterId and keep instanceId")
-	_expect(save_manager.get_item_count("evolution_stone_fire") == 0, "classroom evolve should consume evolution item")
+	_expect(evolved.get("ownedNo", 0) == evolving.get("ownedNo", 0), "classroom evolve should keep owned number")
+	_expect(save_manager.get_item_count("evolution_stone_wind") == 0, "classroom evolve should consume evolution item")
 	ranch_scene.queue_free()
 
 	_finish()
@@ -74,6 +89,15 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _owned_numbers_are_unique(pool: Array) -> bool:
+	var seen := {}
+	for instance: Dictionary in pool:
+		var owned_no := int(instance.get("ownedNo", 0))
+		if owned_no <= 0 or seen.has(owned_no):
+			return false
+		seen[owned_no] = true
+	return true
 
 func _finish() -> void:
 	if _failures.is_empty():

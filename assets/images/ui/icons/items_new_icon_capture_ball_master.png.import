@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqtxpcrs2gnb"
-path="res://.godot/imported/stage_icon_chapter_badge.png-a85d751c13fbfdc0e52c56951b7a23e3.ctex"
+uid="uid://cu7370o764gsx"
+path="res://.godot/imported/items_new_icon_capture_ball_master.png-0506434ceb25412e1b242f303e627e54.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/ui/icons/stage_icon_chapter_badge.png"
-dest_files=["res://.godot/imported/stage_icon_chapter_badge.png-a85d751c13fbfdc0e52c56951b7a23e3.ctex"]
+source_file="res://assets/images/ui/icons/items_new_icon_capture_ball_master.png"
+dest_files=["res://.godot/imported/items_new_icon_capture_ball_master.png-0506434ceb25412e1b242f303e627e54.ctex"]
 
 [params]
 

@@ -39,6 +39,8 @@ func _run() -> void:
 		"Combatants/SingleEnemy/HpFrameBase",
 		"Combatants/Players/Player1/HpBar",
 		"Combatants/Players/Player1/HpFrameBase",
+		"Combatants/Players/Player1/LeaderBadge",
+		"Combatants/Players/Player2/LeaderBadge",
 		"BottomControls/CaptureToggle/Image",
 		"BottomControls/Item1/Base",
 		"BottomControls/Item1/Icon",
@@ -76,7 +78,9 @@ func _run() -> void:
 	_expect(not (battle.get_node("PauseDialog") as Control).visible, "resume button should close the pause dialog while the tree is paused")
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
-	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
+	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(191.0, 216.0)), "leader skill hit area should follow the centered leader slot")
+	_expect((battle.get_node("Combatants/Players/Player2/LeaderBadge") as TextureRect).visible, "active leader badge should start on the centered leader slot")
+	_expect(not (battle.get_node("Combatants/Players/Player1/LeaderBadge") as TextureRect).visible, "left member should not show the leader badge while the leader is alive")
 	_expect(not (battle.get_node("Combatants/SingleEnemy") as Control).visible, "a lone ordinary enemy should not use the enlarged single-enemy slot")
 	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "a lone ordinary enemy should use the regular enemy layer")
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy2") as Control).visible, "a lone ordinary enemy should occupy the centered regular slot")
@@ -103,6 +107,12 @@ func _run() -> void:
 		"element": "grass",
 	}, "green", false)
 	_expect(is_equal_approx((player_slot.get_node("HpFrameBase") as TextureRect).position.y, player_hp_y), "captured boss player hp frame should stay at the same bottom position as ordinary player monsters")
+	var battle_manager = battle.get("_battle")
+	if battle_manager != null and battle_manager.player_team.size() >= 2:
+		battle_manager.player_team[0]["hp"] = 0
+		battle.call("_sync_player_slots")
+		_expect(not (battle.get_node("Combatants/Players/Player2/LeaderBadge") as TextureRect).visible, "center leader badge should hide after the leader falls")
+		_expect((battle.get_node("Combatants/Players/Player1/LeaderBadge") as TextureRect).visible, "leader badge should move to the left member after the leader falls")
 
 	main.switch_scene("battle", {
 		"stageId": "stage_2_12",

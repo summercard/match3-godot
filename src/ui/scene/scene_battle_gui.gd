@@ -13,6 +13,7 @@ const PLAYER_PATHS := [
 	"Combatants/Players/Player2",
 	"Combatants/Players/Player3",
 ]
+const PLAYER_SLOT_TEAM_INDICES := [1, 0, 2]
 const ITEM_PATHS := [
 	"BottomControls/Item3",
 	"BottomControls/Item4",
@@ -437,14 +438,50 @@ func _sync_player_slots() -> void:
 	var player_count: int = mini(_battle.player_team.size(), 3)
 	for i in PLAYER_PATHS.size():
 		var slot := _control(PLAYER_PATHS[i])
-		slot.visible = i < player_count
+		var team_index := _team_index_for_player_slot(i)
+		slot.visible = team_index >= 0 and team_index < player_count
 		if slot.visible:
-			_set_combatant(slot, _battle.player_team[i], "green", false)
-			_sync_leader_charge_point(slot, _battle.player_team[i])
+			_set_combatant(slot, _battle.player_team[team_index], "green", false)
+			_sync_leader_charge_point(slot, _battle.player_team[team_index])
+			_sync_leader_badge(slot, team_index)
 			# ★ 主人定 2026-06-11：玩家受击 portrait 柔和闪白
-			_apply_hit_feedback(slot, false, i)
-			_apply_defeat_feedback(slot, false, i)
-			_apply_elastic_feedback(slot, false, i)
+			_apply_hit_feedback(slot, false, team_index)
+			_apply_defeat_feedback(slot, false, team_index)
+			_apply_elastic_feedback(slot, false, team_index)
+		else:
+			_sync_leader_badge(slot, -1)
+
+func _team_index_for_player_slot(slot_index: int) -> int:
+	if slot_index < 0 or slot_index >= PLAYER_SLOT_TEAM_INDICES.size():
+		return slot_index
+	return int(PLAYER_SLOT_TEAM_INDICES[slot_index])
+
+func _player_slot_index_for_team_index(team_index: int) -> int:
+	for slot_index in PLAYER_SLOT_TEAM_INDICES.size():
+		if int(PLAYER_SLOT_TEAM_INDICES[slot_index]) == team_index:
+			return slot_index
+	return team_index
+
+func _active_leader_index_for_gui() -> int:
+	if _battle == null:
+		return -1
+	var status: Dictionary = _battle.get_status()
+	var leader_info: Variant = status.get("leader_skill_info", null)
+	if leader_info is Dictionary:
+		var leader_index := int((leader_info as Dictionary).get("leader_index", -1))
+		if leader_index >= 0:
+			return leader_index
+	for i in range(_battle.player_team.size()):
+		var unit = _battle.player_team[i]
+		if unit != null and int(unit.get("hp", 0)) > 0:
+			return i
+	return -1
+
+func _sync_leader_badge(slot: Control, team_index: int) -> void:
+	var badge := slot.get_node_or_null("LeaderBadge") as TextureRect
+	if badge == null:
+		return
+	badge.visible = team_index >= 0 and team_index == _active_leader_index_for_gui()
 
 func _sync_leader_charge_point(slot: Control, unit: Dictionary) -> void:
 	var point := slot.get_node_or_null("LeaderChargePoint") as Control
@@ -806,8 +843,9 @@ func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
 	return super._get_hotbar_slot_rect(base_y, slot_idx)
 
 func _get_player_card_rect(index: int) -> Rect2:
-	if is_inside_tree() and index >= 0 and index < PLAYER_PATHS.size():
-		return _control_rect("%s/SkillHitArea" % PLAYER_PATHS[index])
+	var slot_index := _player_slot_index_for_team_index(index)
+	if is_inside_tree() and slot_index >= 0 and slot_index < PLAYER_PATHS.size():
+		return _control_rect("%s/SkillHitArea" % PLAYER_PATHS[slot_index])
 	return super._get_player_card_rect(index)
 
 # ★ 主人定 2026-06-11：把 .tscn 里的 Portrait 真实中心位置喂给 renderer
@@ -855,10 +893,12 @@ func _collect_enemy_hp_rects() -> Array:
 
 func _collect_player_centers() -> Array:
 	var centers: Array = []
-	for i in PLAYER_PATHS.size():
-		var path := NodePath("%s/Portrait" % PLAYER_PATHS[i])
+	var player_count: int = mini(_battle.player_team.size(), 3) if _battle != null else PLAYER_PATHS.size()
+	for team_index in range(player_count):
+		var slot_index := _player_slot_index_for_team_index(team_index)
+		var path := NodePath("%s/Portrait" % PLAYER_PATHS[slot_index])
 		if has_node(path):
-			centers.append(_get_portrait_effect_center(path, false, i))
+			centers.append(_get_portrait_effect_center(path, false, team_index))
 		else:
 			centers.append(Vector2.ZERO)
 	return centers

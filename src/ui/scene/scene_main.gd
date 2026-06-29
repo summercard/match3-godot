@@ -76,6 +76,8 @@ func _ready() -> void:
 		am.call("play_bgm", "bgm_town")
 	for button_name in BUTTON_IDS:
 		var button := get_node("%" + button_name) as TextureButton
+		if not button.visible:
+			continue
 		var button_id: String = BUTTON_IDS[button_name]
 		_attach_button_feedback(button, _feedback_profile(button_id))
 		button.pressed.connect(_queue_button_pressed.bind(button_id))

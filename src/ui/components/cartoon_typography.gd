@@ -62,7 +62,7 @@ static func _target_font_size(label: Label, profile: String) -> int:
 		"OwnerLevelTitle":
 			return 14
 		"LevelValue":
-			return 12
+			return 22
 		"ExpValue":
 			return 9
 		"GoldValue", "DiamondValue":

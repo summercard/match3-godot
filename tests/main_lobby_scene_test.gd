@@ -70,8 +70,10 @@ func _run() -> void:
 	_expect(exp_profile.get("style", "") == "lobby_refresh", "owner level experience bar should use the lobby refresh art style")
 	_expect(bool(exp_profile.get("draws_frame", false)), "owner level experience bar should draw its own frame")
 	var level_badge := lobby.get_node("Header/LevelBadge") as TextureRect
+	var level_value := lobby.get_node("%LevelValue") as Label
 	var exp_bar := lobby.get_node("%ExperienceFill") as Control
 	_expect(level_badge.visible, "owner level badge should be visible beside the experience bar")
+	_expect(level_value.get_theme_font_size("font_size") == 22, "owner level number should keep the requested 22px runtime font size")
 	_expect(exp_bar.size.y >= 15.0, "owner level experience bar should be tall enough to read")
 	_expect(absf((level_badge.position.y + level_badge.size.y * 0.5) - (exp_bar.position.y + exp_bar.size.y * 0.5)) <= 2.0, "owner level badge and experience bar should align on the same center line")
 	_expect((lobby.get_node("%StaminaValue") as Label).text == "3/5", "top resource row should show stamina as current over max")

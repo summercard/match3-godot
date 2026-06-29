@@ -18,11 +18,11 @@
 [ext_resource type="Texture2D" uid="uid://dfkl83jl7tvt0" path="res://assets/images/ui/buttons/main_ui_entry_ranch_v3.png" id="17_ranch_entry"]
 [ext_resource type="Texture2D" uid="uid://scamfhbqqsp3" path="res://assets/images/ui/buttons/main_ui_start_adventure_v3.png" id="18_start"]
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="19_bottom_nav"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_album.png" id="20_album"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_inventory.png" id="21_inventory"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_achievement.png" id="22_achievement"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_settings.png" id="23_settings_gear"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_signin.png" id="24_signin"]
+[ext_resource type="Texture2D" uid="uid://bw1jaf0yyn5aw" path="res://assets/images/ui/icons/common_nav_icon_nav_album.png" id="20_album"]
+[ext_resource type="Texture2D" uid="uid://b05c207rjkvfb" path="res://assets/images/ui/icons/common_nav_icon_nav_inventory.png" id="21_inventory"]
+[ext_resource type="Texture2D" uid="uid://drcb2owij5xa4" path="res://assets/images/ui/icons/common_nav_icon_nav_achievement.png" id="22_achievement"]
+[ext_resource type="Texture2D" uid="uid://by34aa0xc5ux8" path="res://assets/images/ui/icons/common_nav_icon_nav_settings.png" id="23_settings_gear"]
+[ext_resource type="Texture2D" uid="uid://bcoulol5qnmmg" path="res://assets/images/ui/icons/common_nav_icon_nav_signin.png" id="24_signin"]
 
 [node name="MainLobby" type="Control" unique_id=194569078]
 clip_contents = true
@@ -62,6 +62,17 @@ offset_right = 375.0
 offset_bottom = 158.0
 mouse_filter = 2
 
+[node name="Avatar" type="TextureRect" parent="Header" unique_id=331730849]
+layout_mode = 0
+offset_left = 21.0
+offset_top = 58.0
+offset_right = 69.0
+offset_bottom = 106.0
+mouse_filter = 2
+texture = ExtResource("5_avatar")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="PlayerStatus" type="TextureRect" parent="Header" unique_id=1230815732]
 layout_mode = 0
 offset_left = 16.0
@@ -70,17 +81,6 @@ offset_right = 143.0
 offset_bottom = 113.0
 mouse_filter = 2
 texture = ExtResource("4_player_card")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Avatar" type="TextureRect" parent="Header" unique_id=331730849]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 61.0
-offset_right = 65.0
-offset_bottom = 102.0
-mouse_filter = 2
-texture = ExtResource("5_avatar")
 expand_mode = 1
 stretch_mode = 5
 
@@ -108,10 +108,10 @@ text = "冒险者"
 
 [node name="LevelBadge" type="TextureRect" parent="Header" unique_id=939879965]
 layout_mode = 0
-offset_left = 63.0
-offset_top = 86.0
-offset_right = 84.0
-offset_bottom = 108.0
+offset_left = 65.0
+offset_top = 85.0
+offset_right = 86.0
+offset_bottom = 107.0
 mouse_filter = 2
 texture = ExtResource("6_level")
 expand_mode = 1
@@ -120,14 +120,14 @@ stretch_mode = 5
 [node name="LevelValue" type="Label" parent="Header" unique_id=852806575]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 64.0
-offset_top = 89.0
-offset_right = 83.0
-offset_bottom = 106.0
+offset_left = 24.0
+offset_top = 67.0
+offset_right = 64.0
+offset_bottom = 101.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.45, 0.16, 0.03, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 9
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
 text = "28"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -261,7 +261,7 @@ texture_pressed = ExtResource("11_plus")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="StaminaCapsule" type="TextureRect" parent="Header"]
+[node name="StaminaCapsule" type="TextureRect" parent="Header" unique_id=27628985]
 layout_mode = 0
 offset_left = 249.0
 offset_top = 8.0
@@ -272,7 +272,7 @@ texture = ExtResource("8_currency")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StaminaIcon" type="TextureRect" parent="Header"]
+[node name="StaminaIcon" type="TextureRect" parent="Header" unique_id=1606193597]
 layout_mode = 0
 offset_left = 254.0
 offset_top = 14.0
@@ -283,7 +283,7 @@ texture = ExtResource("14_stamina")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StaminaValue" type="Label" parent="Header"]
+[node name="StaminaValue" type="Label" parent="Header" unique_id=182639664]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 283.0
@@ -296,7 +296,7 @@ text = "5/5"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="StaminaPlus" type="TextureButton" parent="Header"]
+[node name="StaminaPlus" type="TextureButton" parent="Header" unique_id=217711687]
 visible = false
 layout_mode = 0
 offset_left = 332.0
@@ -436,8 +436,9 @@ text = "精灵课堂"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TestToolButton" type="TextureButton" parent="PrimaryButtons"]
+[node name="TestToolButton" type="TextureButton" parent="PrimaryButtons" unique_id=1320913285]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 277.0
 offset_top = 166.0
@@ -448,7 +449,7 @@ texture_pressed = ExtResource("16_inn_entry")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Text" type="Label" parent="PrimaryButtons/TestToolButton"]
+[node name="Text" type="Label" parent="PrimaryButtons/TestToolButton" unique_id=629939278]
 layout_mode = 0
 offset_left = 10.0
 offset_right = 86.0

@@ -33,6 +33,7 @@ static func create_instance(monster_id: String, options: Dictionary = {}) -> Dic
 		"evolutionHistory": options.get("evolutionHistory", []),
 		"evolutionCount": int(options.get("evolutionCount", 0)),
 		"capturedAt": int(options.get("capturedAt", now_ms)),
+		"ownedNo": int(options.get("ownedNo", options.get("owned_no", 0))),
 		"source": str(options.get("source", "capture")),
 		"favorite": bool(options.get("favorite", false)),
 		"isElite": bool(options.get("isElite", default_elite)),
@@ -83,6 +84,7 @@ static func normalize_instance(value: Variant) -> Dictionary:
 		"evolutionHistory": history.duplicate(true),
 		"evolutionCount": maxi(0, int(data.get("evolutionCount", data.get("evolution_count", 0)))),
 		"capturedAt": _normalize_timestamp_ms(captured_at),
+		"ownedNo": maxi(0, int(data.get("ownedNo", data.get("owned_no", data.get("collectionNo", data.get("serialNo", 0)))))),
 		"source": str(data.get("source", "migration")),
 		"favorite": bool(data.get("favorite", false)),
 		"isElite": bool(data.get("isElite", template.get("isElite", false))),
@@ -221,7 +223,32 @@ static func normalize_pool(pool: Array) -> Array:
 			instance_id = str(instance["instanceId"])
 		seen[instance_id] = true
 		normalized.append(instance)
+	_assign_owned_numbers(normalized)
 	return normalized
+
+static func _assign_owned_numbers(pool: Array) -> void:
+	var used := {}
+	var max_owned_no := 0
+	for i in range(pool.size()):
+		var instance: Dictionary = pool[i]
+		var owned_no := int(instance.get("ownedNo", 0))
+		if owned_no <= 0 or used.has(owned_no):
+			instance["ownedNo"] = 0
+		else:
+			used[owned_no] = true
+			max_owned_no = maxi(max_owned_no, owned_no)
+		pool[i] = instance
+	var next_no := max_owned_no + 1
+	for i in range(pool.size()):
+		var instance: Dictionary = pool[i]
+		if int(instance.get("ownedNo", 0)) > 0:
+			continue
+		while used.has(next_no):
+			next_no += 1
+		instance["ownedNo"] = next_no
+		used[next_no] = true
+		pool[i] = instance
+		next_no += 1
 
 static func find_index(pool: Array, instance_id: String) -> int:
 	for i in range(pool.size()):

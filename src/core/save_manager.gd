@@ -441,8 +441,9 @@ func add_monster_instance(monster_id: String, options: Dictionary = {}) -> Dicti
 	var pool := get_monster_pool()
 	var instance := MonsterPool.create_instance(monster_id, options)
 	pool.append(instance)
-	save_monster_pool(pool)
-	return instance.duplicate(true)
+	var normalized_pool := MonsterPool.normalize_pool(pool)
+	save_monster_pool(normalized_pool)
+	return MonsterPool.get_instance(normalized_pool, str(instance.get("instanceId", "")))
 
 func get_monster_instance(instance_id: String) -> Dictionary:
 	var pool := get_monster_pool()

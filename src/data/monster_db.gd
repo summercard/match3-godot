@@ -385,18 +385,18 @@ const MONSTER_DB: Dictionary = {
 		"leaderSkill": "LS_MONSTER_048"
 	},
 	"monster_049": {
-		"id": "monster_049", "name": "绿洲蜥", "element": "grass",
+		"id": "monster_049", "name": "肖肖蜥", "element": "grass",
 		"rarity": 1, "emoji": "",
 		"baseHP": 152, "baseATK": 20, "baseDEF": 11, "baseSPD": 17,
-		"skill": {"name": "绿洲蜥冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
+		"skill": {"name": "肖肖蜥冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_049",
 		"evolution": {"level": 16, "target": "monster_050"}
 	},
 	"monster_050": {
-		"id": "monster_050", "name": "绿洲巨蜥", "element": "grass",
+		"id": "monster_050", "name": "肖恩蜥", "element": "grass",
 		"rarity": 2, "emoji": "",
 		"baseHP": 200, "baseATK": 30, "baseDEF": 23, "baseSPD": 18,
-		"skill": {"name": "绿洲巨蜥冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
+		"skill": {"name": "肖恩蜥冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
 		"leaderSkill": "LS_MONSTER_050"
 	},
 	"monster_051": {

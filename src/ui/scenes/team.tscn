@@ -476,10 +476,6 @@ layout_mode = 0
 mouse_filter = 2
 texture = ExtResource("9_leader_badge")
 
-[node name="LeaderText" type="Label" parent="TeamSlots/Member1Slot" unique_id=1934468344]
-visible = false
-layout_mode = 0
-
 [node name="Label" type="TextureRect" parent="TeamSlots/Member1Slot" unique_id=2029213049]
 layout_mode = 0
 offset_left = -3.0
@@ -595,18 +591,6 @@ texture = ExtResource("9_leader_badge")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeaderText" type="Label" parent="TeamSlots/LeaderSlot/Label" unique_id=749417123]
-layout_mode = 0
-offset_left = 11.0
-offset_top = -13.0
-offset_right = 65.0
-offset_bottom = 10.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 5
-text = "Leader"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="Member2Slot" type="TextureButton" parent="TeamSlots" unique_id=714256556]
 layout_mode = 0
 offset_left = 254.0
@@ -663,10 +647,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LeaderBadge" type="TextureRect" parent="TeamSlots/Member2Slot" unique_id=2065459914]
-visible = false
-layout_mode = 0
-
-[node name="LeaderText" type="Label" parent="TeamSlots/Member2Slot" unique_id=1086156895]
 visible = false
 layout_mode = 0
 
@@ -991,6 +971,20 @@ texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card1"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card1" unique_id=614892046]
 layout_mode = 0
 offset_left = 3.0
@@ -1043,6 +1037,20 @@ mouse_filter = 2
 texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card2"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card2" unique_id=281328799]
 layout_mode = 0
@@ -1097,6 +1105,20 @@ texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card3"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card3" unique_id=919030829]
 layout_mode = 0
 offset_left = 3.0
@@ -1149,6 +1171,20 @@ mouse_filter = 2
 texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card4"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card4" unique_id=1021574191]
 layout_mode = 0
@@ -1203,6 +1239,20 @@ texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card5"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card5" unique_id=2082951979]
 layout_mode = 0
 offset_left = 3.0
@@ -1255,6 +1305,20 @@ mouse_filter = 2
 texture = ExtResource("13_check")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="OwnedNo" type="Label" parent="RosterPanel/Cards/Card6"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.43, 0.24, 0.07, 1)
+theme_override_colors/font_outline_color = Color(1, 0.96, 0.84, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="Level" type="Label" parent="RosterPanel/Cards/Card6" unique_id=1379830234]
 layout_mode = 0

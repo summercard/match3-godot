@@ -856,6 +856,7 @@ func _draw_slot(index: int, rect: Rect2) -> void:
 		_draw_monster_portrait(id, Rect2(rect.position.x + 22.0, rect.position.y + 17.0, rect.size.x - 44.0, 58.0))
 		var care: Dictionary = _care_state_map.get(id, _get_care_state(id))
 		var care_label := str(care.get("label", ""))
+		_draw_owned_no_badge(id, rect)
 		_draw_text("Lv.%d" % level, rect.get_center().x, rect.position.y + 89.0, C["text"], 12.0, 72.0)
 		_draw_texture_fit(_tex(RANCH_ASSETS["status_ribbon"]), Rect2(rect.position.x + 11.0, rect.position.y + 93.0, rect.size.x - 22.0, 18.0))
 		var placement_text := _format_elapsed_short(slot.get("placed_at", null))
@@ -929,6 +930,7 @@ func _draw_classroom_detail() -> void:
 	var target_name := str(target.get("name", "无")) if not target.is_empty() else "无"
 	_draw_monster_portrait(instance_id, Rect2(28.0, 112.0, 91.0, 85.0))
 	_draw_text(str(monster.get("name", monster_id)), 222.0, 130.0, C["text"], 16.0, 130.0)
+	_draw_text(_owned_no_label(instance_id), 302.0, 130.0, Color(0.43, 0.24, 0.07), 10.0, 58.0)
 	_draw_text("Lv.%d · %s · %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))], 222.0, 151.0, C["text_muted"], 10.5, 132.0)
 	_draw_text("HP %d   ATK %d   DEF %d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0))], 222.0, 171.0, Color(0.82, 0.92, 1.0), 10.0, 132.0)
 	_draw_text("进化目标：%s" % target_name, 222.0, 193.0, C["gold"] if bool(info.get("has_evolution", false)) else C["text_muted"], 11.5, 132.0)
@@ -958,6 +960,7 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	if nature_short.length() > 3:
 		nature_short = nature_short.substr(0, 3)
 	var elem: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
+	_draw_owned_no_badge(instance_id, rect)
 	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 77.0, C["text"], 10.5, rect.size.x - 20.0)
 	_draw_text("Lv.%d · %s" % [int(instance.get("level", 1)), elem], rect.get_center().x, rect.position.y + 92.0, C["gold"], 9.0, rect.size.x - 20.0)
 	_draw_text(nature_short, rect.get_center().x, rect.position.y + 105.0, C["text_muted"], 8.0, rect.size.x - 20.0)
@@ -1010,8 +1013,9 @@ func _draw_social_slot(slot_key: String, rect: Rect2, place: Dictionary) -> void
 	var instance := _get_instance(instance_id)
 	var monster := MonsterDb.get_monster(str(instance.get("monsterId", "")))
 	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 20.0, rect.position.y + 6.0, rect.size.x - 40.0, 50.0))
-	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 67.0, C["text"], 9.5, rect.size.x - 12.0)
-	_draw_text("%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))], rect.get_center().x, rect.position.y + 82.0, C["text_muted"], 8.0, rect.size.x - 12.0)
+	_draw_owned_no_badge(instance_id, rect)
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 73.0, C["text"], 9.0, rect.size.x - 12.0)
+	_draw_text("%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))], rect.get_center().x, rect.position.y + 86.0, C["text_muted"], 7.5, rect.size.x - 12.0)
 
 func _draw_social_list() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["care_roster_panel"]), CLASS_LIST_RECT)
@@ -1137,8 +1141,9 @@ func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	var monster := MonsterDb.get_monster(monster_id)
 	_draw_texture_contain(_tex(RANCH_ASSETS["roster_card_selected" if highlighted else "roster_card"]), rect)
 	_draw_monster_portrait(monster_id, Rect2(rect.position.x + 11.0, rect.position.y + 7.0, rect.size.x - 22.0, 43.0))
-	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 61.0, C["text"], 9.5, rect.size.x - 12.0)
-	_draw_text("Lv.%d" % _get_monster_level(monster_id), rect.get_center().x, rect.position.y + 75.0, C["gold"], 9.5, rect.size.x - 12.0)
+	_draw_owned_no_badge(monster_id, rect, 34.0)
+	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 63.0, C["text"], 8.5, rect.size.x - 12.0)
+	_draw_text("Lv.%d" % _get_monster_level(monster_id), rect.get_center().x, rect.position.y + 77.0, C["gold"], 8.5, rect.size.x - 12.0)
 	if in_use:
 		_draw_texture_contain(_tex(RANCH_ASSETS["check"]), Rect2(rect.position.x + rect.size.x - 21.0, rect.position.y + rect.size.y - 21.0, 20.0, 20.0))
 
@@ -1331,6 +1336,33 @@ func _get_nature_name(nature_id: String) -> String:
 func _gender_label(instance: Dictionary) -> String:
 	var gender := SocialRulesScript.gender_for_instance(instance)
 	return str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
+
+func _draw_owned_no_badge(instance_id: String, rect: Rect2, width: float = 38.0) -> void:
+	var label := _owned_no_label(instance_id)
+	if label.is_empty():
+		return
+	var badge := Rect2(rect.end.x - width - 5.0, rect.position.y + 5.0, width, 14.0)
+	draw_rect(_scale_rect(badge), Color(1.0, 0.95, 0.78, 0.86), true)
+	_draw_text(label, badge.get_center().x, badge.position.y + 10.5, Color(0.43, 0.24, 0.07), 7.5, badge.size.x - 4.0)
+
+func _owned_no_label(instance_id: String) -> String:
+	var instance := _get_instance(instance_id)
+	if int(instance.get("ownedNo", 0)) <= 0 and _storage != null and _storage.has_method("get_owned_monsters"):
+		var wanted_monster_id := _get_monster_id(instance_id)
+		for owned: Dictionary in _storage.get_owned_monsters():
+			var owned_instance_id := str(owned.get("instanceId", ""))
+			var owned_monster_id := str(owned.get("monsterId", owned.get("id", "")))
+			if owned_instance_id == instance_id or (MonsterDb.has_monster(instance_id) and owned_monster_id == wanted_monster_id):
+				instance = owned
+				break
+	var view := MonsterService.build_instance_view(instance)
+	var label := str(view.get("ownedNoLabel", ""))
+	if not label.is_empty():
+		return label
+	for i in range(_captured_monsters.size()):
+		if _get_instance_id(_captured_monsters[i]) == instance_id:
+			return MonsterService.format_owned_no(i + 1)
+	return ""
 
 # ★ 主人定 2026-06-11：精英宠物名字前缀
 #   instance.isElite=true 时返回 "★精英 "，否则空字符串
