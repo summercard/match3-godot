@@ -50,7 +50,7 @@ const CHAPTER_BOSS_LAYOUT_OVERRIDES := {
 const STAGE_NODE_ASSETS_DEFAULT := {
 	"node_normal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
 	"node_selected": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
-	"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_elite.png",
+	"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
 	"node_chest": "res://assets/images/maps/nodes/stage_node_chest.png",
 	"node_locked": "res://assets/images/maps/nodes/stage_node_locked.png"
 }
@@ -58,57 +58,57 @@ const CHAPTER_STAGE_NODE_ASSET_OVERRIDES := {
 	"chapter_1": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png"
 	},
 	"chapter_2": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch02_castle_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png"
 	},
 	"chapter_3": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch03_mystic_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch03_mystic_normal.png"
 	},
 	"chapter_4": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch04_desert_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png"
 	},
 	"chapter_5": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch05_island_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch05_island_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch05_island_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch05_island_normal.png"
 	},
 	"chapter_6": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png"
 	},
 	"chapter_7": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch07_void_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch07_void_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch07_void_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch07_void_normal.png"
 	},
 	"chapter_8": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch08_lava_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png"
 	},
 	"chapter_9": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch09_star_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch09_star_normal.png"
 	},
 	"chapter_10": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch10_chaos_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png"
 	},
 	"chapter_11": {
 		"node_normal": "res://assets/images/maps/nodes/stage_node_ch11_light_normal.png",
 		"node_selected": "res://assets/images/maps/nodes/stage_node_ch11_light_normal.png",
-		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch11_light_elite.png"
+		"node_crystal": "res://assets/images/maps/nodes/stage_node_ch11_light_normal.png"
 	}
 }
 const CHAPTER_STAGE_NODE_SIZE_OVERRIDES := {

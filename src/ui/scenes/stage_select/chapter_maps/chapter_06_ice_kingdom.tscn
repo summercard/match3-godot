@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://cu6qyvlswj3ct" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage04"]
-[ext_resource type="Texture2D" uid="uid://b8xsquivli7td" path="res://assets/images/maps/nodes/stage_node_ch06_frost_elite.png" id="c06_stage05"]
+[ext_resource type="Texture2D" uid="uid://cu6qyvlswj3ct" path="res://assets/images/maps/nodes/stage_node_ch06_frost_normal.png" id="c06_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter06IceKingdom" type="Control" unique_id=1903609080]

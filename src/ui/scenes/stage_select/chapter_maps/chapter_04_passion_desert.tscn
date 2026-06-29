@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://duumtigslde7x" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_04_desert.png" id="c04_background"]
 [ext_resource type="Texture2D" uid="uid://bcoh16yideaq0" path="res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png" id="c04_stage04"]
-[ext_resource type="Texture2D" uid="uid://lj0qsyctrfh5" path="res://assets/images/maps/nodes/stage_node_ch04_desert_elite.png" id="c04_stage05"]
+[ext_resource type="Texture2D" uid="uid://bcoh16yideaq0" path="res://assets/images/maps/nodes/stage_node_ch04_desert_normal.png" id="c04_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter04PassionDesert" type="Control" unique_id=710567033]

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://47dnmie1paa4" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_05_island.png" id="c05_background"]
 [ext_resource type="Texture2D" uid="uid://cljtf2k1g6epp" path="res://assets/images/maps/nodes/stage_node_ch05_island_normal.png" id="c05_stage04"]
-[ext_resource type="Texture2D" uid="uid://bv4o5nd3iwi0x" path="res://assets/images/maps/nodes/stage_node_ch05_island_elite.png" id="c05_stage05"]
+[ext_resource type="Texture2D" uid="uid://cljtf2k1g6epp" path="res://assets/images/maps/nodes/stage_node_ch05_island_normal.png" id="c05_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter05SouthernSea" type="Control" unique_id=510191570]

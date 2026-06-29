@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://c4tklxp8dg7d" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_07_underground.png" id="1_0tcrg"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
-[ext_resource type="Texture2D" uid="uid://dstria83kyfjg" path="res://assets/images/maps/nodes/stage_node_ch07_void_elite.png" id="c07_stage04"]
+[ext_resource type="Texture2D" uid="uid://d4cb4rbn067q2" path="res://assets/images/maps/nodes/stage_node_ch07_void_normal.png" id="c07_stage04"]
 [ext_resource type="Texture2D" uid="uid://d4cb4rbn067q2" path="res://assets/images/maps/nodes/stage_node_ch07_void_normal.png" id="c07_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]

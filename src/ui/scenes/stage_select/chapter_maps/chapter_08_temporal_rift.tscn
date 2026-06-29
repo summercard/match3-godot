@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://dj0u1jobqsedo" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_06_volcano.png" id="1_3adt3"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
-[ext_resource type="Texture2D" uid="uid://brsnk3giql00t" path="res://assets/images/maps/nodes/stage_node_ch08_lava_elite.png" id="c08_stage04"]
+[ext_resource type="Texture2D" uid="uid://7luvua8bmbpp" path="res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png" id="c08_stage04"]
 [ext_resource type="Texture2D" uid="uid://7luvua8bmbpp" path="res://assets/images/maps/nodes/stage_node_ch08_lava_normal.png" id="c08_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 [ext_resource type="Texture2D" uid="uid://bnh5oyfaim0w4" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]

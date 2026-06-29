@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch11_light_normal.png" id="c11_stage02"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch11_light_normal.png" id="c11_stage03"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch11_light_normal.png" id="c11_stage04"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch11_light_elite.png" id="c11_stage05"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch11_light_normal.png" id="c11_stage05"]
 [ext_resource type="Texture2D" uid="uid://ccfpld5g56rvj" path="res://assets/images/maps/boss/stage_boss_badge_star.png" id="c11_boss_platform"]
 [ext_resource type="Texture2D" path="res://assets/images/monsters/boss/monster_boss_011_light.png" id="c11_boss_art"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://ds6htx6jjmwwl" path="res://assets/images/maps/backgrounds/stage_bg_chapter_01_grassland_540x960.png" id="c02_background"]
 [ext_resource type="Texture2D" uid="uid://bikdymdnk3r7t" path="res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png" id="c02_stage04"]
-[ext_resource type="Texture2D" uid="uid://csi68y5g2u88n" path="res://assets/images/maps/nodes/stage_node_ch02_castle_elite.png" id="c02_stage05"]
+[ext_resource type="Texture2D" uid="uid://bikdymdnk3r7t" path="res://assets/images/maps/nodes/stage_node_ch02_castle_normal.png" id="c02_stage05"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter02FireValley" type="Control" unique_id=841225865]

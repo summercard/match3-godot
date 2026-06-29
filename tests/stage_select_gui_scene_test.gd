@@ -160,7 +160,7 @@ func _run() -> void:
 	await process_frame
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_05_island.png"), "chapter 5 should use the island palace formal background")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch05_island_normal.png"), "chapter 5 normal stages should use the island pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/StageNodes/Stage05/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch05_island_elite.png"), "chapter 5 elite stages should use the island elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/StageNodes/Stage05/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch05_island_normal.png"), "chapter 5 elite stages should share the island normal pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch05_island_normal.png"), "chapter 5 boss should use the compact ordinary island pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter05SouthernSea/BossStage/BossArt"), "chapter 5 boss should not keep the old boss art overlay")
 	var chapter_5_boss_portrait := scene.get_node("MapScroll/ChapterMaps/Chapter05SouthernSea/BossStage/MonsterPortrait") as TextureRect
@@ -177,7 +177,7 @@ func _run() -> void:
 	_expect((scene.get_node("Header/ChapterName") as Label).text == "冰之国", "chapter 6 title should match the configured folder-derived name")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_08_icefield.png"), "chapter 6 should keep its configured formal background asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch06_frost_normal.png"), "chapter 6 normal stages should use the frost pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/StageNodes/Stage05/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch06_frost_elite.png"), "chapter 6 elite stages should use the frost elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/StageNodes/Stage05/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch06_frost_normal.png"), "chapter 6 elite stages should share the frost normal pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch06_frost_normal.png"), "chapter 6 boss should use the compact ordinary frost pedestal asset")
 	_expect(not scene.has_node("MapScroll/ChapterMaps/Chapter06IceKingdom/BossStage/BossArt"), "chapter 6 boss should not keep the old boss art overlay")
 	var chapter_6_boss_portrait := scene.get_node("MapScroll/ChapterMaps/Chapter06IceKingdom/BossStage/MonsterPortrait") as TextureRect
@@ -188,7 +188,7 @@ func _run() -> void:
 	_expect((scene.get_node("Header/ChapterName") as Label).text == "精灵虚空", "chapter 7 title should match the configured folder-derived name")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_07_underground.png"), "chapter 7 should keep its configured formal background asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_normal.png"), "chapter 7 normal stages should use the void pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_elite.png"), "chapter 7 elite stages should use the void elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_normal.png"), "chapter 7 elite stages should share the void normal pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/StageNodes/Stage01/StageNumber") as Label).text == "7-1", "chapter 7 stage numbers should use chapter-stage format")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/StageNodes/Stage02/StageNumber") as Label).visible, "locked chapter 7 stages should still show their chapter-stage number")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter07SpiritVoid/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch07_void_normal.png"), "chapter 7 boss should use the compact ordinary void pedestal asset")
@@ -201,7 +201,7 @@ func _run() -> void:
 	_expect((scene.get_node("Header/ChapterName") as Label).text == "烧烤岩", "chapter 8 title should match the configured folder-derived name")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/Background") as TextureRect).texture.resource_path.ends_with("stage_map_bg_chapter_06_volcano.png"), "chapter 8 should use the lava volcano formal background")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/StageNodes/Stage01/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_normal.png"), "chapter 8 normal stages should use the lava pedestal asset")
-	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_elite.png"), "chapter 8 elite stages should use the lava elite pedestal asset")
+	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/StageNodes/Stage04/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_normal.png"), "chapter 8 elite stages should share the lava normal pedestal asset")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/StageNodes/Stage01/StageNumber") as Label).text == "8-1", "chapter 8 stage numbers should use chapter-stage format")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/StageNodes/Stage02/StageNumber") as Label).visible, "locked chapter 8 stages should still show their chapter-stage number")
 	_expect((scene.get_node("MapScroll/ChapterMaps/Chapter08BarbecueRock/BossStage/Platform") as TextureRect).texture.resource_path.ends_with("stage_node_ch08_lava_normal.png"), "chapter 8 boss should use the compact ordinary lava pedestal asset")
