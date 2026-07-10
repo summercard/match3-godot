@@ -2,6 +2,7 @@ class_name MonsterDb
 extends RefCounted
 
 const ElementRulesScript = preload("res://src/battle/element_rules.gd")
+const LEGACY_ENEMY_IDS := ["enemy_001", "enemy_002", "enemy_003"]
 ## 精灵数据库 - 从 js/battle/monsterData.js 翻译
 ##
 ## ⚠️ 数据修改指引 / DATA EDITOR GUIDE
@@ -19,6 +20,29 @@ const ElementRulesScript = preload("res://src/battle/element_rules.gd")
 
 # ========== 精灵数据库 ==========
 const MONSTER_DB: Dictionary = {
+	# 保留早期关卡、存档与测试所使用的敌人 ID。新主线不会以这些 ID
+	# 生成敌人，但旧记录仍可被读取、结算和捕获，避免数据迁移丢失。
+	"enemy_001": {
+		"id": "enemy_001", "name": "野火虫", "element": "fire",
+		"rarity": 1, "emoji": "🐛",
+		"baseHP": 136, "baseATK": 20, "baseDEF": 7, "baseSPD": 10,
+		"growthRate": 0.05, "defGrowthPerLevel": 0.10,
+		"skill": {"name": "火星", "cost": 5, "type": "strike", "multiplier": 1.5}
+	},
+	"enemy_002": {
+		"id": "enemy_002", "name": "水泡泡", "element": "water",
+		"rarity": 1, "emoji": "🫧",
+		"baseHP": 152, "baseATK": 20, "baseDEF": 7, "baseSPD": 8,
+		"growthRate": 0.05, "defGrowthPerLevel": 0.10,
+		"skill": {"name": "水泡", "cost": 5, "type": "strike", "multiplier": 1.5}
+	},
+	"enemy_003": {
+		"id": "enemy_003", "name": "草精灵", "element": "grass",
+		"rarity": 2, "emoji": "🍃", "isElite": true,
+		"baseHP": 128, "baseATK": 20, "baseDEF": 7, "baseSPD": 12,
+		"growthRate": 0.05, "defGrowthPerLevel": 0.10,
+		"skill": {"name": "叶刃", "cost": 5, "type": "strike", "multiplier": 1.5}
+	},
 	"monster_001": {
 		"id": "monster_001", "name": "大眼蜗", "element": "grass",
 		"rarity": 1, "emoji": "",
@@ -994,9 +1018,9 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		return {}
 	var safe_level := clampi(level, 1, 100)
 	var rarity := int(data.get("rarity", 2))
-	var growth_rate: float = RARITY_GROWTH_RATE.get(data.get("rarity", 2), 0.08)
+	var growth_rate: float = float(data.get("growthRate", RARITY_GROWTH_RATE.get(data.get("rarity", 2), 0.08)))
 	var mult: float = pow(1.0 + growth_rate, float(safe_level - 1))
-	var def_per_level: float = RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)
+	var def_per_level: float = float(data.get("defGrowthPerLevel", RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)))
 
 	# 计算基础属性
 	var hp: int = int(data.get("baseHP", 0) * mult)
@@ -1044,8 +1068,10 @@ static func get_monster(monster_id: String) -> Dictionary:
 
 static func get_all() -> Array:
 	var result: Array = []
-	for monster: Dictionary in MONSTER_DB.values():
-		result.append(with_board_affinity(monster))
+	for monster_id: String in MONSTER_DB:
+		if monster_id in LEGACY_ENEMY_IDS:
+			continue
+		result.append(with_board_affinity(MONSTER_DB[monster_id]))
 	return result
 
 static func has_monster(monster_id: String) -> bool:

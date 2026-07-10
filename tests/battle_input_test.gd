@@ -77,11 +77,12 @@ func _run() -> void:
 		return
 
 	battle_scene = await _load_battle(main, stage_data)
+	await _wait_for_idle(battle_scene)
 	battle_scene.set("_auto_capture_enabled", false)
 	var toggle_pos := _capture_toggle_center(battle_scene)
-	_send_mouse_click(battle_scene, toggle_pos)
+	var toggle_handled: bool = battle_scene.call("_try_tap_hotbar", toggle_pos.x, toggle_pos.y)
 	await process_frame
-	if not bool(battle_scene.get("_auto_capture_enabled")):
+	if not toggle_handled or not bool(battle_scene.get("_auto_capture_enabled")):
 		push_error("[BattleInput] standalone capture toggle should activate once per click")
 		await _finish(1)
 		return
@@ -175,7 +176,7 @@ func _send_mouse_click(battle_scene: Control, local_pos: Vector2) -> void:
 
 func _capture_toggle_center(battle_scene: Control) -> Vector2:
 	var board = battle_scene.get("_board")
-	var bottom_y: float = float(board.offset_y + board.rows * board.cell_size + 15.0)
+	var bottom_y: float = float(board.offset_y + board.rows * board.cell_size + 7.0)
 	var rect: Rect2 = battle_scene.call("_get_capture_toggle_rect", bottom_y)
 	return rect.get_center()
 

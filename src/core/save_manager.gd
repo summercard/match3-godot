@@ -20,6 +20,9 @@ const StatCalculator = preload("res://src/core/stat_calculator.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
 const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
+const TowerDBScript = preload("res://src/data/tower_db.gd")
+const TowerRulesScript = preload("res://src/core/tower_rules.gd")
+const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const SaveFileStoreScript = preload("res://src/core/save_file_store.gd")
 const BattlePowerRulesScript = preload("res://src/core/battle_power_rules.gd")
 
@@ -40,7 +43,7 @@ const RANCH_IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
 const STAMINA_MAX: int = 5
 const STAMINA_RECOVERY_MS: float = 6.0 * 60.0 * 60.0 * 1000.0
 const SWEEP_STAMINA_COST: int = 1
-const SAVE_SCHEMA_VERSION: int = 1
+const SAVE_SCHEMA_VERSION: int = 2
 const META_SECTION: String = "meta"
 const SCHEMA_VERSION_KEY: String = "schema_version"
 const MONSTER_SELL_GOLD_BY_RARITY := {
@@ -1176,6 +1179,61 @@ func complete_reward_receipt_claim(receipt_id: String) -> bool:
 
 func cancel_reward_receipt_claim(receipt_id: String) -> void:
 	_reward_receipts_in_progress.erase(receipt_id)
+
+# ========== 共鸣塔（section: tower） ==========
+
+func is_tower_unlocked() -> bool:
+	return is_stage_cleared(TowerDBScript.UNLOCK_STAGE_ID)
+
+
+func get_tower_unlock_state() -> Dictionary:
+	var unlocked := is_tower_unlocked()
+	return {
+		"unlocked": unlocked,
+		"requiredStageId": TowerDBScript.UNLOCK_STAGE_ID,
+		"reason": "" if unlocked else "clear_required_stage"
+	}
+
+
+func get_tower_state() -> Dictionary:
+	var raw: Variant = _get_value("tower", "data", TowerRulesScript.default_state())
+	var normalized := TowerRulesScript.normalize_state(raw)
+	if raw != normalized:
+		_set_value("tower", "data", normalized)
+		_save_config()
+	return normalized.duplicate(true)
+
+
+func save_tower_state(state: Dictionary) -> bool:
+	_set_value("tower", "data", TowerRulesScript.normalize_state(state))
+	return _save_config()
+
+
+func reset_tower_run() -> bool:
+	var current := get_tower_state()
+	var next := TowerRulesScript.default_state()
+	next["highest_floor"] = int(current.get("highest_floor", 0))
+	next["total_player_turns"] = int(current.get("total_player_turns", 0))
+	next["highest_turn_damage"] = int(current.get("highest_turn_damage", 0))
+	next["claimed_stage_rewards"] = current.get("claimed_stage_rewards", []).duplicate()
+	return save_tower_state(next)
+
+# ========== 远行信箱（section: mailbox） ==========
+
+func get_mailbox_state() -> Dictionary:
+	var today_key := Time.get_date_string_from_system(false)
+	var raw: Variant = _get_value("mailbox", "data", MailboxRulesScript.default_state())
+	var normalized := MailboxRulesScript.normalize_state(raw, today_key)
+	if raw != normalized:
+		_set_value("mailbox", "data", normalized)
+		_save_config()
+	return normalized.duplicate(true)
+
+
+func save_mailbox_state(state: Dictionary) -> bool:
+	var today_key := Time.get_date_string_from_system(false)
+	_set_value("mailbox", "data", MailboxRulesScript.normalize_state(state, today_key))
+	return _save_config()
 
 # ========== 成就系统（section: achievements） ==========
 ## 成就数据结构: { unlockedIds: [], unlockedDates: {}, stats: {} }

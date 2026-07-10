@@ -34,6 +34,10 @@ var battle_result: String = ""     # 'win' | 'lose'
 var battle_id: String = ""
 var turn_count: int = 0
 var max_turns: int = 20
+var battle_mode: String = "main"
+var tower_buffs: Array = []
+var current_player_turn_damage: int = 0
+var highest_player_turn_damage: int = 0
 
 # BOSS多阶段
 var current_phase: int = 1
@@ -105,6 +109,8 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	stage_data = s_data
 	stage_id = s_id
+	battle_mode = str(s_data.get("mode", "main")) if s_data is Dictionary else "main"
+	tower_buffs = (s_data.get("towerBuffs", []) as Array).duplicate(true) if s_data is Dictionary else []
 
 	stage_phases = []
 	current_phase = 1
@@ -133,6 +139,8 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	battle_result = ""
 	turn_count = 0
 	max_turns = _stage_max_turns(s_data)
+	current_player_turn_damage = 0
+	highest_player_turn_damage = 0
 	skill_charges = {}
 	leader_charge_points = {}
 
@@ -188,6 +196,76 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	_enemy_skill_system.init_skill_state(enemies)
 
 	# 连接 EnemySkillSystem 的特定信号到 BattleManager
+	_connect_enemy_skill_signals()
+
+
+func is_tower_mode() -> bool:
+	return battle_mode == "tower"
+
+
+func begin_player_turn() -> void:
+	current_player_turn_damage = 0
+
+
+func get_tower_continuation() -> Dictionary:
+	return {
+		"party_snapshot": player_team.map(func(m): return m.duplicate(true) if m != null else null),
+		"skill_charges": skill_charges.duplicate(true),
+		"leader_charge_points": leader_charge_points.duplicate(true),
+		"player_guards": player_guards.duplicate(true),
+		"player_absorb_shields": player_absorb_shields.duplicate(true),
+		"highest_turn_damage": highest_player_turn_damage,
+	}
+
+
+func restore_tower_continuation(continuation: Dictionary) -> void:
+	var saved_party: Array = continuation.get("party_snapshot", [])
+	for saved in saved_party:
+		if not saved is Dictionary:
+			continue
+		var saved_unit: Dictionary = saved
+		var unit_id := str(saved_unit.get("id", ""))
+		var player_idx := _player_index_by_id(unit_id)
+		if player_idx < 0 or player_idx >= player_team.size() or player_team[player_idx] == null:
+			continue
+		var unit: Dictionary = player_team[player_idx]
+		unit["hp"] = clampi(int(saved_unit.get("hp", unit.get("hp", 0))), 0, int(unit.get("maxHP", 0)))
+		player_team[player_idx] = unit
+	skill_charges = (continuation.get("skill_charges", {}) as Dictionary).duplicate(true)
+	leader_charge_points = (continuation.get("leader_charge_points", {}) as Dictionary).duplicate(true)
+	player_guards = (continuation.get("player_guards", {}) as Dictionary).duplicate(true)
+	player_absorb_shields = (continuation.get("player_absorb_shields", {}) as Dictionary).duplicate(true)
+	highest_player_turn_damage = maxi(highest_player_turn_damage, int(continuation.get("highest_turn_damage", 0)))
+
+
+func begin_tower_wave(next_stage: Dictionary) -> void:
+	if not is_tower_mode():
+		return
+	stage_data = next_stage.duplicate(true)
+	stage_id = str(stage_data.get("id", stage_id))
+	enemy_level = int(stage_data.get("enemyLevel", enemy_level))
+	tower_buffs = (stage_data.get("towerBuffs", tower_buffs) as Array).duplicate(true)
+	stage_phases = []
+	current_phase = 1
+	phase_transition_triggered = {}
+	var enemy_ids: Array = stage_data.get("enemies", [])
+	enemies = enemy_ids.map(func(enemy_id):
+		return _build_enemy_unit(str(enemy_id), enemy_level, 1.0, 0.0)
+	)
+	max_turns = _stage_max_turns(stage_data)
+	turn_count = 0
+	combo = 0
+	current_player_turn_damage = 0
+	battle_over = false
+	battle_result = ""
+	_next_enemy_attack_index = 0
+	capture_windows = {}
+	capture_window_best = {}
+	_status_effect.init_effects(enemies.size())
+	if _enemy_skill_system == null:
+		_enemy_skill_system = EnemySkillSystem.new()
+	_enemy_skill_system.init_skill_state(enemies)
+	_refresh_capture_windows()
 	_connect_enemy_skill_signals()
 
 
@@ -340,11 +418,12 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 			leader_atk_boost,
 			synergy_atk_mult
 		)
+		total_damage = _apply_tower_player_damage(total_damage)
 
 		var mon_id = monster.get("id", "")
 		var skill_cost: int = int(monster.get("skill", {}).get("cost", 999))
 		var prev_charge: int = int(skill_charges.get(mon_id, 0))
-		var next_charge: int = mini(prev_charge + gem_count, skill_cost)
+		var next_charge: int = mini(prev_charge + gem_count + _tower_bonus_charge_per_match(), skill_cost)
 		skill_charges[mon_id] = next_charge
 		if prev_charge < skill_cost and next_charge >= skill_cost:
 			skill_ready.emit(monster)
@@ -359,6 +438,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		_update_capture_window(target_idx)
 
 		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + hp_damage
+		_record_player_turn_damage(hp_damage)
 
 		var attacker_idx := _player_index_by_id(mon_id)
 		damage_log.append({
@@ -483,6 +563,7 @@ func use_active_skill(monster_id: String) -> Dictionary:
 				synergy_atk_mult
 			)
 			effect_damage = maxi(1, int(round(effect_damage * effect_mult)))
+			effect_damage = _apply_tower_player_damage(effect_damage)
 			var effect_remaining := effect_damage
 			var effect_absorbed := 0
 			if _enemy_skill_system != null and target_idx >= 0:
@@ -558,6 +639,7 @@ func use_active_skill(monster_id: String) -> Dictionary:
 	skill_charges[monster_id] = maxi(0, charge - cost)
 	if remaining_damage > 0:
 		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + remaining_damage
+		_record_player_turn_damage(remaining_damage)
 
 	var target_died: bool = target != null and target.get("hp", 0) <= 0
 	var result := {
@@ -1049,7 +1131,7 @@ func enemy_action() -> Dictionary:
 			synergy_def_mult
 		)
 
-		damage = int(damage * damage_multiplier)
+		damage = int(damage * damage_multiplier * _tower_enemy_damage_multiplier())
 		var guard_result := _apply_guard_to_damage(target, damage)
 		damage = int(guard_result.get("damage", damage))
 		var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
@@ -1259,6 +1341,43 @@ func check_battle_end(board = null) -> bool:
 	return false
 
 
+func _apply_tower_player_damage(amount: int) -> int:
+	if not is_tower_mode():
+		return amount
+	var multiplier := 1.0
+	for raw_buff in tower_buffs:
+		if raw_buff is Dictionary:
+			multiplier += float((raw_buff as Dictionary).get("damage_bonus", 0.0))
+	return maxi(1, int(round(float(amount) * multiplier)))
+
+
+func _tower_enemy_damage_multiplier() -> float:
+	if not is_tower_mode():
+		return 1.0
+	var multiplier := 1.0
+	for raw_buff in tower_buffs:
+		if raw_buff is Dictionary:
+			multiplier -= float((raw_buff as Dictionary).get("enemy_damage_reduction", 0.0))
+	return clampf(multiplier, 0.35, 1.0)
+
+
+func _tower_bonus_charge_per_match() -> int:
+	if not is_tower_mode():
+		return 0
+	var bonus := 0
+	for raw_buff in tower_buffs:
+		if raw_buff is Dictionary:
+			bonus += int((raw_buff as Dictionary).get("bonus_charge_per_match", 0))
+	return bonus
+
+
+func _record_player_turn_damage(amount: int) -> void:
+	if amount <= 0:
+		return
+	current_player_turn_damage += amount
+	highest_player_turn_damage = maxi(highest_player_turn_damage, current_player_turn_damage)
+
+
 # ========== 辅助函数 ==========
 
 func get_enemies() -> Array:
@@ -1317,6 +1436,9 @@ func get_enemy_intents() -> Dictionary:
 func get_status() -> Dictionary:
 	return {
 		"turn_count": turn_count,
+		"mode": battle_mode,
+		"current_player_turn_damage": current_player_turn_damage,
+		"highest_player_turn_damage": highest_player_turn_damage,
 		"combo": combo,
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),

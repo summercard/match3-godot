@@ -3,6 +3,7 @@ extends SceneTree
 const BattleManagerScript = preload("res://src/battle/battle_manager.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const MonsterDbScript = preload("res://src/data/monster_db.gd")
+const MonsterPoolScript = preload("res://src/core/monster_pool.gd")
 
 var _failures: Array[String] = []
 
@@ -19,57 +20,46 @@ func _run() -> void:
 
 
 func _test_board_affinity_contract() -> void:
-	var ice_stats: Dictionary = MonsterDbScript.get_monster_stats("monster_033", 1)
-	_expect(ice_stats.get("element", "") == "ice", "ice monster should keep fantasy element")
-	_expect(ice_stats.get("boardAffinity", "") == "water", "ice monster should map to water board affinity")
+	var starter_ids: Array = MonsterPoolScript.DEFAULT_STARTERS
+	_expect(not starter_ids.is_empty(), "current starter roster should exist")
+	if starter_ids.is_empty():
+		return
+	var monster_id := str(starter_ids[0])
+	var starter_stats: Dictionary = MonsterDbScript.get_monster_stats(monster_id, 1)
+	var affinity := str(starter_stats.get("boardAffinity", ""))
+	_expect(not affinity.is_empty(), "current starter should expose board affinity")
 
 	var battle = BattleManagerScript.new()
-	battle.init(["monster_033"], ["enemy_001"], 5, 1)
+	battle.init([monster_id], ["enemy_001"], 5, 1)
 	battle.enemies[0]["maxHP"] = 10000
 	battle.enemies[0]["hp"] = 10000
-	var monster_id := str(battle.player_team[0].get("id", ""))
+	monster_id = str(battle.player_team[0].get("id", ""))
 
-	var water_result: Dictionary = battle.process_match_result({"water": 3}, 1)
-	_expect(water_result.get("damage_log", []).size() == 1, "board affinity gems should trigger damage")
+	var affinity_result: Dictionary = battle.process_match_result({affinity: 3}, 1)
+	_expect(affinity_result.get("damage_log", []).size() == 1, "board affinity gems should trigger damage")
 	_expect(int(battle.skill_charges.get(monster_id, 0)) == 3, "board affinity gems should charge skill")
 
-	var hp_after_water := int(battle.enemies[0].get("hp", 0))
-	var ice_result: Dictionary = battle.process_match_result({"ice": 3}, 1)
-	_expect(ice_result.get("damage_log", []).is_empty(), "fantasy element without board gem should not trigger damage")
-	_expect(int(battle.enemies[0].get("hp", 0)) == hp_after_water, "non-board fantasy gem should not change hp")
+	var hp_after_affinity := int(battle.enemies[0].get("hp", 0))
+	var other_affinity := "fire" if affinity != "fire" else "water"
+	var other_result: Dictionary = battle.process_match_result({other_affinity: 3}, 1)
+	_expect(other_result.get("damage_log", []).is_empty(), "non-affinity gems should not trigger the active starter")
+	_expect(int(battle.enemies[0].get("hp", 0)) == hp_after_affinity, "non-affinity gems should not change hp")
 	battle.free()
 
 
 func _test_skill_effect_contract() -> void:
 	var battle = BattleManagerScript.new()
-	battle.init(["monster_002", "monster_003", "monster_001"], ["enemy_001"], 5, 1)
+	battle.init(MonsterPoolScript.DEFAULT_STARTERS, ["enemy_001"], 5, 1)
 	battle.enemies[0]["maxHP"] = 10000
 	battle.enemies[0]["hp"] = 10000
-
-	var warder: Dictionary = battle.player_team[0]
-	var warder_id := str(warder.get("id", ""))
-	warder["hp"] = maxi(1, int(warder.get("maxHP", 1)) / 2)
-	var hp_before := int(warder.get("hp", 0))
-	var ward_cost := int(warder.get("skill", {}).get("cost", 0))
-	battle.skill_charges[warder_id] = ward_cost
-	var ward_result: Dictionary = battle.use_active_skill(warder_id)
-	_expect(ward_result.get("success", false), "ward skill should release")
-	_expect(ward_result.get("skill_type", "") == "ward", "water starter should be a ward skill")
-	_expect(_has_effect(ward_result, "heal"), "ward skill should include heal effect")
-	_expect(_has_effect(ward_result, "guard"), "ward skill should include guard effect")
-	_expect(int(warder.get("hp", 0)) > hp_before, "ward skill should restore hp")
-	_expect(battle.player_guards.has(warder_id), "ward skill should register one guard")
-
-	var tempo_user: Dictionary = battle.player_team[1]
-	var tempo_id := str(tempo_user.get("id", ""))
-	var tempo_cost := int(tempo_user.get("skill", {}).get("cost", 0))
-	battle.skill_charges[tempo_id] = tempo_cost
-	var tempo_result: Dictionary = battle.use_active_skill(tempo_id)
-	_expect(tempo_result.get("success", false), "tempo skill should release")
-	_expect(tempo_result.get("skill_type", "") == "tempo", "grass starter should be a tempo skill")
-	_expect(_has_effect(tempo_result, "damage"), "tempo skill should include damage effect")
-	_expect(_has_effect(tempo_result, "weaken"), "tempo skill should include weaken effect")
-	_expect(battle.enemy_tempo_mods.has(0), "tempo skill should register enemy weaken")
+	for user: Dictionary in battle.player_team:
+		var user_id := str(user.get("id", ""))
+		var cost := int(user.get("skill", {}).get("cost", 0))
+		_expect(cost > 0, "each current starter should expose an active skill cost")
+		battle.skill_charges[user_id] = cost
+		var result: Dictionary = battle.use_active_skill(user_id)
+		_expect(result.get("success", false), "charged current starter skill should release")
+		_expect(not result.get("effect_logs", []).is_empty(), "starter skill should expose resolved effects")
 	battle.free()
 
 

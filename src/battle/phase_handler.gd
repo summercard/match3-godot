@@ -104,7 +104,13 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1, hp
 			if is_elite:
 				monster["_eliteSource"] = "random"
 			# ★ 主人定 2026-06-10：二阶段体型变大 50%
-			monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster) * PHASE_TWO_VISUAL_SCALE_MULT
+			# Current species retain their rarity silhouette before the phase-two
+			# enlargement. The retained legacy enemy IDs used a fixed 1.5x state,
+			# so keep that visual contract for old saves and replay data.
+			if enemy_id_str in MonsterDb.LEGACY_ENEMY_IDS:
+				monster["_visualScale"] = PHASE_TWO_VISUAL_SCALE_MULT
+			else:
+				monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster) * PHASE_TWO_VISUAL_SCALE_MULT
 		new_enemies.append(monster)
 
 	# 重置敌人技能状态

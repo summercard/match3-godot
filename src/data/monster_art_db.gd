@@ -2,6 +2,11 @@ class_name MonsterArtDB
 extends RefCounted
 
 const MONSTER_ART := {
+	# 早期敌人 ID 的兼容肖像。它们仅用于旧存档、旧关卡和回归路径，
+	# 复用同元素的正式精灵图，不进入图鉴物种列表。
+	"enemy_001": {"battle": "res://assets/images/monsters/monster/monster_001.png"},
+	"enemy_002": {"battle": "res://assets/images/monsters/monster/monster_011.png"},
+	"enemy_003": {"battle": "res://assets/images/monsters/monster/monster_002.png"},
 	"monster_001": {"battle": "res://assets/images/monsters/monster/monster_001.png"},
 	"monster_002": {"battle": "res://assets/images/monsters/monster/monster_002.png"},
 	"monster_003": {"battle": "res://assets/images/monsters/monster/monster_003.png"},

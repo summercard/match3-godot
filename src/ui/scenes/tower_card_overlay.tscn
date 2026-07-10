@@ -1,0 +1,237 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/ui/components/tower_card_overlay.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StylePanel"]
+bg_color = Color(0.047, 0.09, 0.19, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.99, 0.79, 0.27, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleCard"]
+bg_color = Color(0.11, 0.24, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.39, 0.72, 0.96, 0.92)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleCardHover"]
+bg_color = Color(0.18, 0.39, 0.66, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.36, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleCardPressed"]
+bg_color = Color(0.08, 0.16, 0.31, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.95, 0.64, 0.18, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="TowerCardOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_script")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.02, 0.07, 0.78)
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 143.0
+offset_right = 363.0
+offset_bottom = 510.0
+theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="Title" type="Label" parent="Panel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 333.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(1, 0.9, 0.52, 1)
+theme_override_font_sizes/font_size = 17
+text = "Boss 突破 · 选择一张共鸣卡"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Hint" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 56.0
+offset_right = 333.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(0.73, 0.83, 0.96, 1)
+theme_override_font_sizes/font_size = 11
+text = "卡牌仅在本次共鸣塔远征中生效"
+horizontal_alignment = 1
+
+[node name="Cards" type="HBoxContainer" parent="Panel"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 98.0
+offset_right = 338.0
+offset_bottom = 342.0
+theme_override_constants/separation = 8
+
+[node name="Card0" type="Button" parent="Panel/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(103, 235)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleCard")
+theme_override_styles/hover = SubResource("StyleCardHover")
+theme_override_styles/pressed = SubResource("StyleCardPressed")
+
+[node name="Kind" type="Label" parent="Panel/Cards/Card0"]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 103.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(0.57, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "共鸣增益"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Panel/Cards/Card0"]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 51.0
+offset_right = 96.0
+offset_bottom = 93.0
+theme_override_colors/font_color = Color(1, 0.92, 0.63, 1)
+theme_override_font_sizes/font_size = 15
+text = "强攻共鸣"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Desc" type="Label" parent="Panel/Cards/Card0"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 107.0
+offset_right = 94.0
+offset_bottom = 211.0
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "本次远征中，我方造成的伤害提高。"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Card1" type="Button" parent="Panel/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(103, 235)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleCard")
+theme_override_styles/hover = SubResource("StyleCardHover")
+theme_override_styles/pressed = SubResource("StyleCardPressed")
+
+[node name="Kind" type="Label" parent="Panel/Cards/Card1"]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 103.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(0.57, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "塔内补给"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Panel/Cards/Card1"]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 51.0
+offset_right = 96.0
+offset_bottom = 93.0
+theme_override_colors/font_color = Color(1, 0.92, 0.63, 1)
+theme_override_font_sizes/font_size = 15
+text = "生机花苞"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Desc" type="Label" parent="Panel/Cards/Card1"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 107.0
+offset_right = 94.0
+offset_bottom = 211.0
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "全队立刻回复生命。"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Card2" type="Button" parent="Panel/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(103, 235)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleCard")
+theme_override_styles/hover = SubResource("StyleCardHover")
+theme_override_styles/pressed = SubResource("StyleCardPressed")
+
+[node name="Kind" type="Label" parent="Panel/Cards/Card2"]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 103.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(0.57, 0.86, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "风险契约"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Panel/Cards/Card2"]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 51.0
+offset_right = 96.0
+offset_bottom = 93.0
+theme_override_colors/font_color = Color(1, 0.92, 0.63, 1)
+theme_override_font_sizes/font_size = 15
+text = "锋芒契约"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Desc" type="Label" parent="Panel/Cards/Card2"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 107.0
+offset_right = 94.0
+offset_bottom = 211.0
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "更高伤害，也承担风险。"
+horizontal_alignment = 1
+autowrap_mode = 2

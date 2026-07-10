@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]
-[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chaos.png" id="c10_background"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png" id="c10_background"]
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png" id="c10_stage01"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png" id="c10_stage04"]
 [ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_ch10_chaos_normal.png" id="c10_stage05"]
 [ext_resource type="Texture2D" uid="uid://ccfpld5g56rvj" path="res://assets/images/maps/boss/stage_boss_badge_star.png" id="c10_boss_platform"]
-[ext_resource type="Texture2D" path="res://assets/images/monsters/boss/monster_boss_010_chaos.png" id="c10_boss_art"]
+[ext_resource type="Texture2D" path="res://assets/images/monsters/boss/monster_boss_008.png" id="c10_boss_art"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 
 [node name="Chapter10ChaosDomain" type="Control"]

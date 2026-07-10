@@ -38,7 +38,7 @@ func _test_target_value_tags() -> void:
 	var tags: Array[String] = CaptureSystemScript.get_target_value_tags(monster)
 	_expect(tags.has("★2"), "target tags should include rarity")
 	_expect(tags.has("草能量"), "target tags should include board affinity")
-	_expect(tags.has("控场技"), "target tags should include skill role")
+	_expect(tags.has("输出技"), "current target tags should include its configured skill role")
 
 
 func _expect(condition: bool, message: String) -> void:

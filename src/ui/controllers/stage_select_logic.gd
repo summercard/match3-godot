@@ -40,7 +40,7 @@ const CHAPTER_BOSS_LAYOUT_OVERRIDES := {
 		"position": Vector2(274.0, 182.0),
 		"card_size": Vector2(208.0, 236.0),
 		"badge_path": "res://assets/images/maps/boss/stage_boss_badge_star.png",
-		"art_path": "res://assets/images/monsters/boss/boss_star_dragon.png",
+		"art_path": "res://assets/images/monsters/boss/monster_boss_008.png",
 		"badge_rect": Rect2(-104.0, -148.0, 208.0, 304.0),
 		"art_rect": Rect2(-102.0, -142.0, 204.0, 184.0),
 		"label_y": 90.0,
@@ -158,8 +158,8 @@ const CHAPTER_THEME_BACKGROUNDS := {
 	"void": "res://assets/images/maps/backgrounds/stage_map_bg_void.png",
 	"temporal": "res://assets/images/maps/backgrounds/stage_map_bg_temporal.png",
 	"star": "res://assets/images/maps/backgrounds/stage_map_bg_star.png",
-	"chaos": "res://assets/images/maps/backgrounds/stage_map_bg_chaos.png",
-	"light": "res://assets/images/maps/backgrounds/stage_map_bg_light.png"
+	"chaos": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png",
+	"light": "res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png"
 }
 
 const CHAPTER_BACKGROUND_OVERRIDES := {
@@ -188,7 +188,7 @@ const CHAPTER_THEME_TINTS := {
 }
 
 const CHAPTER_BOSS_ART := {
-	"grass": "res://assets/images/monsters/boss/boss_flower.png",
+	"grass": "res://assets/images/monsters/boss/monster_boss_003.png",
 	"fire": "res://assets/images/monsters/boss/monster_boss_002_fire.png",
 	"water": "res://assets/images/monsters/boss/monster_boss_003_water.png",
 	"dark": "res://assets/images/monsters/boss/monster_boss_004_dark.png",
@@ -197,8 +197,8 @@ const CHAPTER_BOSS_ART := {
 	"void": "res://assets/images/monsters/boss/monster_boss_007_void.png",
 	"temporal": "res://assets/images/monsters/boss/monster_boss_008_temporal.png",
 	"star": "res://assets/images/monsters/boss/monster_boss_009_star.png",
-	"chaos": "res://assets/images/monsters/boss/monster_boss_010_chaos.png",
-	"light": "res://assets/images/monsters/boss/monster_boss_011_light.png"
+	"chaos": "res://assets/images/monsters/boss/monster_boss_008.png",
+	"light": "res://assets/images/monsters/boss/monster_boss_008.png"
 }
 
 const REWARD_ITEMS: Array[Dictionary] = [
@@ -214,7 +214,7 @@ const REWARD_ITEMS: Array[Dictionary] = [
 
 const REWARD_ICON_PATHS := {
 	"gold_coin": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
-	"exp_badge": "res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png",
+	"exp_badge": "res://assets/images/ui/icons/items_new_icon_exp_potion.png",
 	"capture_ball": "res://assets/images/ui/icons/items_new_icon_capture_ball.png",
 	"gem_fire": "res://assets/images/ui/gems/battle_gem_fire.png",
 	"gem_water": "res://assets/images/ui/gems/battle_gem_water.png",
@@ -1147,7 +1147,7 @@ func _draw_stage_card(card: Dictionary) -> void:
 		var art_rect: Rect2 = boss_layout["art_rect"]
 		var boss_origin := Vector2(draw_cx, card.get("cy", 0.0))
 		_draw_texture_contain(_get_texture(str(boss_layout["badge_path"])), Rect2(badge_rect.position + boss_origin, badge_rect.size), boss_alpha)
-		var boss_path := str(boss_layout.get("art_path", CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/monsters/boss/boss_flower.png")))
+		var boss_path := str(boss_layout.get("art_path", CHAPTER_BOSS_ART.get(_current_chapter_element(), "res://assets/images/monsters/boss/monster_boss_003.png")))
 		_draw_texture_contain(_get_texture(boss_path), Rect2(art_rect.position + boss_origin, art_rect.size), boss_alpha)
 		_draw_text_center(_stage_display_label(card), draw_cx, card.get("cy", 0.0) + float(boss_layout["label_y"]), Color(1.0, 0.82, 0.0), 13, true, 70)
 		_draw_stars(draw_cx - 22, card.get("cy", 0.0) + float(boss_layout["stars_y"]), card.get("stars", 0))
@@ -1197,7 +1197,7 @@ func _draw_stars(x: float, y: float, count: int) -> void:
 		_draw_texture_fit(_get_texture(path), Rect2(x + i * 16.0, y - 7.0, 14, 14), 1.0 if lit else 0.45)
 
 func _draw_reward_panel() -> void:
-	var panel := _get_texture("res://assets/images/ui/panels/stage_ui_reward_panel_clean.png")
+	var panel := _get_texture("res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png")
 	if panel == null:
 		return
 	var panel_rect := REWARD_PANEL_RECT
@@ -1222,7 +1222,7 @@ func _draw_sweep_dialog() -> void:
 	var dlg_x := (DESIGN_W - dlg_w) / 2.0
 	var dlg_y := (DESIGN_H - dlg_h) / 2.0
 	draw_rect(Rect2(0, 0, DESIGN_W, DESIGN_H), Color(0, 0, 0, 0.45))
-	_draw_texture_fit(_get_texture("res://assets/images/ui/panels/stage_ui_reward_panel_clean.png"), Rect2(dlg_x, dlg_y, dlg_w, dlg_h), 0.96)
+	_draw_texture_fit(_get_texture("res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png"), Rect2(dlg_x, dlg_y, dlg_w, dlg_h), 0.96)
 	_draw_text_center("确认扫荡", DESIGN_W / 2.0, dlg_y + 35, Color.WHITE, 18, true, 180)
 	_draw_text_center(_sweep_dialog_stage_name, DESIGN_W / 2.0, dlg_y + 62, Color(0.8, 0.85, 1.0), 13, false, 200)
 	_draw_text_center("+%d 金币    +%d 经验" % [int(_sweep_dialog_reward.get("gold", 0)), int(_sweep_dialog_reward.get("exp", 0))], DESIGN_W / 2.0, dlg_y + 91, Color(1.0, 0.86, 0.3), 15, true, 230)

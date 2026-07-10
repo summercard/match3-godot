@@ -174,7 +174,7 @@ func _test_social_rules() -> void:
 	}
 	var b := {
 		"instanceId": "test_b",
-		"monsterId": "monster_006",
+		"monsterId": "monster_002",
 		"nature": "cautious",
 		"gender": "female"
 	}
@@ -258,7 +258,7 @@ func _test_social_birth_major_outcome() -> void:
 		return
 	save_manager.clear_all_data()
 	var parent_a: Dictionary = save_manager.add_monster_instance("monster_001", {"level": 10, "nature": "brave", "gender": "male", "source": "test"})
-	var parent_b: Dictionary = save_manager.add_monster_instance("monster_006", {"level": 10, "nature": "cautious", "gender": "female", "source": "test"})
+	var parent_b: Dictionary = save_manager.add_monster_instance("monster_002", {"level": 10, "nature": "cautious", "gender": "female", "source": "test"})
 	var a_id := str(parent_a.get("instanceId", ""))
 	var b_id := str(parent_b.get("instanceId", ""))
 	save_manager.update_monster_instance(a_id, {
@@ -296,10 +296,11 @@ func _test_social_erosion_is_protected() -> void:
 	if save_manager == null:
 		return
 	save_manager.clear_all_data()
-	var aggressor: Dictionary = save_manager.add_monster_instance("monster_061", {"level": 8, "nature": "fierce", "gender": "male", "source": "test"})
-	var victim: Dictionary = save_manager.add_monster_instance("monster_002", {"level": 8, "nature": "gentle", "gender": "male", "source": "test"})
+	var aggressor: Dictionary = save_manager.add_monster_instance("monster_boss_007", {"level": 8, "nature": "chaos", "gender": "male", "source": "test"})
+	var victim: Dictionary = save_manager.add_monster_instance("monster_061", {"level": 8, "nature": "gentle", "gender": "male", "source": "test"})
 	var aggressor_id := str(aggressor.get("instanceId", ""))
 	var victim_id := str(victim.get("instanceId", ""))
+	_expect(save_manager.cycle_social_place(0), "erosion test should use a neutral social place")
 	_expect(save_manager.assign_social_slot(0, "slot_a", aggressor_id), "erosion test should assign aggressor")
 	_expect(save_manager.assign_social_slot(0, "slot_b", victim_id), "erosion test should assign victim")
 	_expect(bool(save_manager.start_social(0).get("ok", false)), "erosion test should start social")

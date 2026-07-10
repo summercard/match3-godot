@@ -20,7 +20,7 @@
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_menu.png" id="20_nav_menu"]
 [ext_resource type="Texture2D" uid="uid://ddpkanskxcvuc" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="24_prev"]
 [ext_resource type="Texture2D" uid="uid://c2yrfatlnjc5t" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="25_next"]
-[ext_resource type="Texture2D" uid="uid://dlewxgo3udhbp" path="res://assets/images/monsters/monster/monster_002_water_cub.png" id="26_mascot"]
+[ext_resource type="Texture2D" path="res://assets/images/monsters/monster/monster_002.png" id="26_mascot"]
 [ext_resource type="Texture2D" uid="uid://cb64xl44av3cn" path="res://assets/images/ui/cards/shop_ui_shop_card_panel_image2_clean.png" id="27_card_image2"]
 [ext_resource type="Texture2D" uid="uid://br2kbvfo4hdoq" path="res://assets/images/ui/buttons/shop_ui_shop_price_button_image2_clean.png" id="28_price_image2"]
 [ext_resource type="Texture2D" uid="uid://d1605iky2q7sy" path="res://assets/images/ui/buttons/shop_ui_shop_tab_active_image2_clean.png" id="29_tab_active_image2"]

@@ -103,6 +103,9 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "achievement":
 		_seed_achievement_scroll_demo(main)
 		return
+	if scene_name == "mailbox":
+		_seed_mailbox_demo(main)
+		return
 	if scene_name != "team":
 		return
 	var count := int(_read_arg("--team-demo-count=", "0"))
@@ -280,6 +283,24 @@ func _seed_achievement_scroll_demo(main: Control) -> void:
 	var offset := float(_read_arg("--achievement-scroll=", "168"))
 	achievement_scene.set("_scroll_offset", offset)
 	achievement_scene.queue_redraw()
+
+
+func _seed_mailbox_demo(main: Control) -> void:
+	var mailbox_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
+	var storage := root.get_node_or_null("/root/SaveManager")
+	if mailbox_scene == null or storage == null:
+		return
+	var service = load("res://src/core/mailbox_service.gd").new(storage)
+	var owned: Array = storage.get_owned_monsters() if storage.has_method("get_owned_monsters") else []
+	if not owned.is_empty():
+		service.select_adventurer(str((owned[0] as Dictionary).get("instanceId", "")))
+	if service.get_state().get("inbox", []).is_empty() and not owned.is_empty():
+		service.send_blessing()
+	mailbox_scene.call("_refresh")
+	if _read_arg("--mailbox-tab=", "inbox") == "blessing":
+		mailbox_scene.call("_show_blessing")
+		if _read_arg("--mailbox-send-demo=", "0") == "1":
+			mailbox_scene.call("_send_blessing")
 
 func _seed_shop_demo(main: Control) -> void:
 	var shop_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("ShopGui")

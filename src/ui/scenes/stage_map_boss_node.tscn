@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cko67qkbhlwfs"]
 
 [ext_resource type="Texture2D" uid="uid://ccfpld5g56rvj" path="res://assets/images/maps/boss/stage_boss_badge_star.png" id="1_badge"]
-[ext_resource type="Texture2D" uid="uid://cua112u0uug48" path="res://assets/images/monsters/boss/boss_flower.png" id="2_art"]
+[ext_resource type="Texture2D" path="res://assets/images/monsters/boss/monster_boss_003.png" id="2_art"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="3_star"]
 
 [node name="BossButton" type="TextureButton" unique_id=2140221094]

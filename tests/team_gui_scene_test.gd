@@ -29,7 +29,7 @@ func _run() -> void:
 		"TeamSlots/LeaderSlot/MonsterPosition/Portrait",
 		"TeamSlots/Member2Slot/MonsterPosition/Portrait",
 		"TeamSlots/LeaderSlot/Label/LeaderBadge",
-		"TeamSlots/LeaderSlot/Label/LeaderText",
+		"TeamSlots/LeaderSlot/Label/Text",
 		"TeamSlots/Member2Slot/Label/Text",
 		"PowerPanel/Power",
 		"PowerPanel/Stats/Hp/Value",
@@ -61,7 +61,7 @@ func _run() -> void:
 	scene.set("_team", {"leader": "monster_001", "member1": null, "member2": null})
 	scene.call("_sync_team_slots")
 	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderBadge") as CanvasItem).visible, "nested leader badge should show for an occupied leader slot")
-	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/LeaderText") as CanvasItem).visible, "nested leader text should show for an occupied leader slot")
+	_assert((scene.get_node("TeamSlots/LeaderSlot/Label/Text") as CanvasItem).visible, "leader text should show for an occupied leader slot")
 
 	scene.set("_team", {"leader": null, "member1": null, "member2": null})
 	scene.set("_selected_slot", "")

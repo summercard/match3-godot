@@ -39,7 +39,7 @@ func _run() -> void:
 		result.call("_on_result_back_pressed")
 		await _wait_frames(55)
 		var lobby_scene: Control = main.get_current_scene()
-		_expect(lobby_scene != null and lobby_scene.name == "MainLobby", "failure manor button should route to main lobby")
+		_expect(lobby_scene != null and main.get_current_scene_name() == "main" and lobby_scene.scene_file_path == "res://src/ui/scenes/main_lobby.tscn", "failure manor button should route to the current main lobby scene")
 	main.queue_free()
 	await process_frame
 	_finish()

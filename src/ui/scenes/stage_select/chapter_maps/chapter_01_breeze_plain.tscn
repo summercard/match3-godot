@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://3hpw3jp7ax84" path="res://assets/images/ui/icons/stage_star_gold_new.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://d0oyyvwi8apuv" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_02_grassland.png" id="c01_background"]
-[ext_resource type="Texture2D" uid="uid://cxwxy00xftu6v" path="res://assets/images/maps/nodes/stage_selection_ring_pink.png" id="c01_selection_ring"]
+[ext_resource type="Texture2D" path="res://assets/images/maps/nodes/stage_node_selected.png" id="c01_selection_ring"]
 [ext_resource type="Texture2D" uid="uid://csush5tvay1m7" path="res://assets/images/maps/nodes/stage_node_ch01_grass_normal.png" id="c01_stage04"]
 [ext_resource type="Texture2D" uid="uid://d1uygsg2xeayr" path="res://assets/images/ui/icons/stage_lock_icon.png" id="lock_icon"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_blue.png" id="sweep_button_new"]

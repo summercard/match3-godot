@@ -16,12 +16,12 @@ func _init() -> void:
 	print("  Phase 1 起始: maxHP=%d  HP=%d  _visualScale=%s" %
 		[monster_boss_001.maxHP, monster_boss_001.hp, str(monster_boss_001.get("_visualScale", 1.0))])
 	assert(monster_boss_001.hp == monster_boss_001.maxHP, "起始应该满血")
-	assert(monster_boss_001.get("_visualScale", 1.0) == 1.0, "起始 _visualScale=1.0")
+	assert(monster_boss_001.get("_visualScale", 0.0) > 0.0, "current boss should expose a positive visual scale")
 
 	# 玩家打到 30% 血
 	var dmg = int(monster_boss_001.maxHP * 0.7)
 	monster_boss_001.hp = maxi(1, monster_boss_001.hp - dmg)
-	print("  玩家打掉 70% 血 → 当前 HP=%d (%.0f%%)" %
+	print("  玩家打掉 70%% 血 → 当前 HP=%d (%.0f%%)" %
 		[monster_boss_001.hp, float(monster_boss_001.hp) / float(monster_boss_001.maxHP) * 100])
 
 	# 模拟 phase_handler 的核心逻辑

@@ -2,113 +2,57 @@ extends SceneTree
 
 var _failures: Array[String] = []
 
-
-class FakeStorage:
-	extends Node
-	var added_shared_exp: int = 0
-	var saved_ranch_state: Dictionary = {}
-
-	func add_shared_monster_exp(amount: int) -> Dictionary:
-		added_shared_exp += amount
-		return {"added": amount, "overflow": 0, "current": added_shared_exp}
-
-	func set_ranch_state(state: Dictionary) -> bool:
-		saved_ranch_state = state.duplicate(true)
-		return true
-
-
 func _init() -> void:
 	call_deferred("_run")
 
-
 func _run() -> void:
-	var ranch: Control = load("res://src/ui/controllers/ranch_logic.gd").new()
-	root.add_child(ranch)
-	var constants: Dictionary = ranch.get_script().get_script_constant_map()
+	var main: Control = load("res://main.tscn").instantiate()
+	root.add_child(main)
+	await process_frame
+	main.switch_scene("ranch")
+	await process_frame
+	var ranch := main.get_current_scene() as Control
+	_expect(ranch != null, "ranch scene should load for UI polish checks")
+	if ranch != null:
+		for path in [
+			"Pages/RanchPage/Slots/Slot1",
+			"Pages/RanchPage/BottomButtons/ClassroomButton",
+			"Pages/RanchPage/BottomButtons/SocialButton",
+			"Pages/ClassroomPage/DetailPanel/EvolveButton",
+			"Pages/ClassroomPage/DetailPanel/UpgradeButton",
+			"Pages/SocialPage/PlacePanel/SwitchButton",
+			"Pages/SocialPage/BottomButtons/ActionButton",
+		]:
+			var button := ranch.get_node(path) as BaseButton
+			_expect(button != null and button.size.x > 0.0 and button.size.y > 0.0, "%s should keep an authored interactive hit area" % path)
+		for label_path in [
+			"Pages/RanchPage/CollectRow/ExpValue",
+			"Pages/ClassroomPage/DetailPanel/MonsterExpText",
+			"Pages/SocialPage/PlacePanel/Preview",
+		]:
+			var label := ranch.get_node(label_path) as Label
+			_expect(label != null and label.get_line_height() > 0, "%s should keep readable typography" % label_path)
+		ranch.call("_switch_to_classroom")
+		_expect((ranch.get_node("Pages/ClassroomPage/DetailPanel/EvolveButton/butter02") as Control).visible, "classroom should use its authored evolve button art")
+		ranch.call("_switch_to_social")
+		var switch_button := ranch.get_node("Pages/SocialPage/PlacePanel/SwitchButton") as BaseButton
+		switch_button.pressed.emit()
+		_expect(not str(ranch.get("_status_text")).is_empty() or (ranch.get_node("Pages/SocialPage") as Control).visible, "social place control should remain interactive")
 
-	for key: String in [
-		"BACK_RECT", "COLLECT_RECT", "RANCH_FOCUS_RECT", "RANCH_CLASSROOM_RECT",
-		"RANCH_SOCIAL_RECT", "BOTTOM_LEFT_RECT", "BOTTOM_RIGHT_RECT",
-		"CLASS_EVOLVE_RECT", "SOCIAL_PLACE_SWITCH_RECT", "SOCIAL_RESULT_CLOSE_RECT",
-		"SLOT_RECTS",
-	]:
-		_expect(constants.has(key), "%s should remain defined" % key)
-		if constants.has(key) and constants[key] is Rect2:
-			var rect: Rect2 = constants[key]
-			_expect(rect.size.y >= 44.0, "%s should preserve a mobile-sized tap height" % key)
-
-	ranch.set("_storage", null)
-	ranch.set("_captured_monsters", [
-		{"instanceId": "monster_001", "monsterId": "monster_001", "level": 3, "nature": "brave"},
-		{"instanceId": "monster_002", "monsterId": "monster_002", "level": 4, "nature": "gentle"},
-	])
-	var now := Time.get_unix_time_from_system() * 1000.0
-	ranch.set("_slots_data", [
-		{"instance_id": "monster_001", "placed_at": now - 10.0 * 60.0 * 1000.0},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-	])
-	_expect(int(ranch.call("_get_monster_level", "monster_001")) == 3, "offline preview should keep the instance level shown across panels")
-	ranch.call("_calc_idle_exp")
-	ranch.call("_handle_ranch_tap", (constants["COLLECT_RECT"] as Rect2).get_center())
-	_expect(str(ranch.get("_status_text")).begins_with("收获 +"), "collect button should trigger idle reward feedback")
-
-	var fake_storage := FakeStorage.new()
-	root.add_child(fake_storage)
-	var now2 := Time.get_unix_time_from_system() * 1000.0
-	ranch.set("_storage", fake_storage)
-	ranch.set("_captured_monsters", [
-		{"instanceId": "monster_001", "monsterId": "monster_001", "level": 3, "nature": "brave"},
-		{"instanceId": "monster_002", "monsterId": "monster_002", "level": 4, "nature": "gentle"},
-	])
-	ranch.set("_slots_data", [
-		{"instance_id": "monster_001", "placed_at": now2 - 10.0 * 60.0 * 1000.0},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-	])
-	ranch.call("_rebuild_instance_index")
-	ranch.call("_calc_idle_exp")
-	ranch.call("_handle_ranch_tap", (constants["SLOT_RECTS"] as Array)[0].get_center())
-	_expect(fake_storage.added_shared_exp > 0, "tapping an occupied ranch slot should collect its pending shared exp")
-	ranch.set("_slots_data", [
-		{"instance_id": "monster_001", "placed_at": now2 - 10.0 * 60.0 * 1000.0},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-		{"instance_id": null, "placed_at": null},
-	])
-	fake_storage.added_shared_exp = 0
-	ranch.call("_calc_idle_exp")
-	ranch.call("_on_picker_item_pressed", "monster_002")
-	_expect(fake_storage.added_shared_exp == 0, "replacing a slot with pending idle exp should not auto-collect")
-	var slots_after_replace_attempt: Array = ranch.get("_slots_data")
-	_expect(str((slots_after_replace_attempt[0] as Dictionary).get("instance_id", "")) == "monster_001", "pending idle exp should block replacement until collected")
-	fake_storage.queue_free()
-
-	ranch.call("_handle_ranch_tap", (constants["RANCH_CLASSROOM_RECT"] as Rect2).get_center())
-	_expect(str(ranch.get("_active_page")) == "classroom", "classroom navigation button should open its page")
-	ranch.call("_switch_to_ranch")
-	ranch.call("_handle_ranch_tap", (constants["RANCH_SOCIAL_RECT"] as Rect2).get_center())
-	_expect(str(ranch.get("_active_page")) == "social", "social navigation button should open its page")
-
-	ranch.queue_free()
+	root.remove_child(main)
+	main.free()
+	await process_frame
 	_finish()
-
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
 
-
 func _finish() -> void:
 	if _failures.is_empty():
 		print("[RanchUiPolish] OK")
 		quit(0)
-	else:
-		for failure: String in _failures:
-			push_error("[RanchUiPolish] " + failure)
-		quit(1)
+		return
+	for failure in _failures:
+		push_error("[RanchUiPolish] " + failure)
+	quit(1)

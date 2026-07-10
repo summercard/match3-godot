@@ -13,15 +13,17 @@ func _run() -> void:
 	var battle = BattleManagerScript.new()
 	root.add_child(battle)
 	battle.init(["monster_001"], ["monster_boss_002"], 1, 1)
+	battle.enemies[0]["enemySkills"] = [{"type": "shield", "hp": 10000, "cooldown": 99}]
+	var skill_system = battle.get("_enemy_skill_system")
+	skill_system.init_skill_state(battle.enemies)
 	var enemy: Dictionary = battle.enemies[0]
 	var enemy_hp_before := int(enemy.get("hp", 0))
-	var skill_system = battle.get("_enemy_skill_system")
 	var shield_state: Dictionary = skill_system.get_skill_state(0, "shield")
 	shield_state["current_hp"] = 10000
 	shield_state["max_hp"] = 10000
 
 	seed(20260622)
-	var result: Dictionary = battle.process_match_result({"fire": 3}, 1)
+	var result: Dictionary = battle.process_match_result({"grass": 3}, 1)
 	var logs: Array = result.get("damage_log", [])
 	_expect(logs.size() == 1, "one matching attacker should produce one damage log")
 	if not logs.is_empty():

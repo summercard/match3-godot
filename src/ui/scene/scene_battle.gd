@@ -26,6 +26,10 @@ const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const LeaderSkillVisualDbScript = preload("res://src/data/leader_skill_visual_db.gd")
+const TowerRunControllerScript = preload("res://src/core/tower_run_controller.gd")
+const TowerRulesScript = preload("res://src/core/tower_rules.gd")
+const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
+const TowerCardOverlayScene = preload("res://src/ui/scenes/tower_card_overlay.tscn")
 const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 ## 设计尺寸
@@ -296,6 +300,11 @@ var _art_ready: bool = false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
 var _feedback_overlay: Control = null
+var _tower_mode := false
+var _tower_state: Dictionary = {}
+var _tower_controller: TowerRunController = null
+var _tower_transitioning := false
+var _tower_card_overlay: TowerCardOverlay = null
 
 var _pointer_down: bool = false
 var _pointer_start_pos: Vector2 = Vector2.ZERO
@@ -607,6 +616,12 @@ func init(data: Dictionary = {}) -> void:
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
+	_tower_mode = str(_stage_data.get("mode", "")) == "tower" or bool(data.get("towerMode", false))
+	_tower_state = (data.get("towerState", {}) as Dictionary).duplicate(true)
+	_tower_transitioning = false
+	if _tower_card_overlay != null and is_instance_valid(_tower_card_overlay):
+		_tower_card_overlay.queue_free()
+	_tower_card_overlay = null
 	_set_runtime_background(StageWarBackgroundsScript.path_for(_stage_id, _stage_data, data))
 	
 	_init_battle()
@@ -670,6 +685,10 @@ func _init_battle() -> void:
 	else:
 		_battle.init(player_team_ids, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
 	_battle.configure_objective(_board)
+	if _tower_mode:
+		_tower_controller = TowerRunControllerScript.new(_storage) if _storage != null else null
+		if not _tower_state.is_empty():
+			_battle.restore_tower_continuation(_tower_state)
 	
 	# 连接 BOSS 技能信号
 	if not _battle.enemy_skill_action.is_connected(_on_enemy_skill_action):
@@ -687,8 +706,12 @@ func _init_battle() -> void:
 
 	var battle_hint := str(_stage_data.get("battleHint", ""))
 	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
-	_load_capture_preferences()
-	_load_hotbar_items()
+	if _tower_mode:
+		_auto_capture_enabled = false
+		_hotbar_items = []
+	else:
+		_load_capture_preferences()
+		_load_hotbar_items()
 
 ## ============================================
 # 输入处理
@@ -1135,6 +1158,7 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 		_ice_slide_anims.clear()
 		if bool(swap_result.get("slid", false)):
 			_battle.turn_count += 1
+			_battle.begin_player_turn()
 			if _input_test_only:
 				_state = BattleState.IDLE
 				return
@@ -1147,6 +1171,7 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 		_sfx("ui_invalid_move_bouncy")
 		return
 	_battle.turn_count += 1
+	_battle.begin_player_turn()
 	if _input_test_only:
 		_ice_slide_anims.clear()
 		_state = BattleState.IDLE
@@ -1758,6 +1783,9 @@ func _start_enemy_turn() -> void:
 	_enemy_attacks = []
 	var next_state := BattleFlowControllerScript.enemy_turn_end_state(_battle)
 	if next_state.get("state", "") == "battle_end":
+		if _tower_mode:
+			_handle_tower_battle_end()
+			return
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
 		_begin_battle_end_capture_flow()
@@ -1768,11 +1796,124 @@ func _start_enemy_turn() -> void:
 
 func _check_battle_end() -> bool:
 	if BattleFlowControllerScript.should_end_battle(_battle, _board):
+		if _tower_mode:
+			_handle_tower_battle_end()
+			return true
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
 		_begin_battle_end_capture_flow()
 		return true
 	return false
+
+
+func _handle_tower_battle_end() -> void:
+	if _tower_transitioning or _battle == null:
+		return
+	_tower_transitioning = true
+	_state = BattleState.MATCHING
+	call_deferred("_advance_tower_after_battle")
+
+
+func _advance_tower_after_battle() -> void:
+	await get_tree().create_timer(0.35).timeout
+	if not is_inside_tree() or _battle == null:
+		return
+	if _tower_controller == null:
+		_show_message("共鸣塔状态不可用")
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		return
+	if _battle.battle_result != "win":
+		var recovery := _tower_controller.restore_checkpoint()
+		if not bool(recovery.get("ok", false)):
+			_show_message("安全点恢复失败")
+			_tower_transitioning = false
+			_state = BattleState.IDLE
+			return
+		_tower_state = recovery.get("state", {}).duplicate(true)
+		_show_message("远征受挫，已回到第 %d 层安全点" % int(_tower_state.get("current_floor", 1)), 2.0)
+		await get_tree().create_timer(0.8).timeout
+		_start_tower_wave_from_state()
+		return
+	var continuation: Dictionary = _battle.get_tower_continuation()
+	var progress := _tower_controller.complete_wave(
+		continuation,
+		int(_battle.turn_count),
+		int(_battle.highest_player_turn_damage)
+	)
+	if not bool(progress.get("ok", false)):
+		_show_message("共鸣塔进度保存失败")
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		return
+	_tower_state = progress.get("state", {}).duplicate(true)
+	if str(progress.get("event", "")) == "boss_cleared":
+		var reward_floor := int(_tower_state.get("pending_reward_floor", 0))
+		var claimed_rewards: Array = _tower_state.get("claimed_stage_rewards", [])
+		if reward_floor > 0 and not claimed_rewards.has(reward_floor) and _storage != null:
+			var mailbox := MailboxServiceScript.new(_storage)
+			var delivery := mailbox.create_tower_reward_mail(str(_tower_state.get("season_id", "tower_s1")), reward_floor, progress.get("reward", {}))
+			if bool(delivery.get("ok", false)):
+				_tower_controller.mark_reward_delivered(reward_floor)
+				_tower_state = _tower_controller.get_state()
+		_show_message("Boss 突破！阶段补给已寄往信箱，选择一张共鸣卡", 2.4)
+		_show_tower_card_choice(progress.get("cards", []))
+		return
+	_show_message("第 %d 层完成，下一波来袭！" % int(_tower_state.get("highest_floor", 0)), 1.4)
+	await get_tree().create_timer(0.42).timeout
+	_start_tower_wave_from_state()
+
+
+func _start_tower_wave_from_state() -> void:
+	if _battle == null or _tower_state.is_empty():
+		_tower_transitioning = false
+		return
+	var next_stage := TowerRulesScript.current_floor_data(_tower_state)
+	if next_stage.is_empty():
+		_tower_transitioning = false
+		return
+	next_stage["towerBuffs"] = _tower_state.get("buffs", []).duplicate(true)
+	_stage_data = next_stage
+	_stage_id = str(next_stage.get("id", _stage_id))
+	_battle.begin_tower_wave(next_stage)
+	_state = BattleState.IDLE
+	_tower_transitioning = false
+	_show_message("%s · 第 %d/%d 波" % [str(next_stage.get("towerTheme", "共鸣塔")), int(next_stage.get("towerWave", 1)), int(next_stage.get("towerWaveCount", 5))])
+
+
+func _show_tower_card_choice(cards: Array) -> void:
+	if _tower_card_overlay != null and is_instance_valid(_tower_card_overlay):
+		_tower_card_overlay.queue_free()
+	_tower_card_overlay = TowerCardOverlayScene.instantiate() as TowerCardOverlay
+	if _tower_card_overlay == null:
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		return
+	add_child(_tower_card_overlay)
+	_tower_card_overlay.configure(cards, int(_tower_state.get("pending_reward_floor", _tower_state.get("highest_floor", 0))))
+	_tower_card_overlay.card_selected.connect(_on_tower_card_selected)
+
+
+func _on_tower_card_selected(card_id: String) -> void:
+	if _tower_controller == null:
+		return
+	var selection := _tower_controller.choose_card(card_id)
+	if not bool(selection.get("ok", false)):
+		_show_message("这张卡暂时无法选择")
+		return
+	_tower_state = selection.get("state", {}).duplicate(true)
+	if _tower_card_overlay != null and is_instance_valid(_tower_card_overlay):
+		_tower_card_overlay.queue_free()
+	_tower_card_overlay = null
+	if str(selection.get("event", "")) == "tower_completed":
+		_show_message("共鸣塔 99 层完成！")
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		if has_node("/root/SceneManager"):
+			await get_tree().create_timer(1.0).timeout
+			get_node("/root/SceneManager").switch_scene("tower")
+		return
+	_start_tower_wave_from_state()
 
 func _begin_battle_end_capture_flow() -> void:
 	if _battle == null or _capture_phase != "":

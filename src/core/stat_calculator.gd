@@ -67,11 +67,12 @@ static func _calc(monster_id: String, level: int, nature_id: String, rarity_over
 
 	var lv := clamp_level(level)
 	var rarity: int = rarity_override if rarity_override > 0 else int(data.get("rarity", 2))
-	var g: float = growth_mult(lv, rarity)
+	var growth_rate: float = float(data.get("growthRate", MonsterDb.RARITY_GROWTH_RATE.get(rarity, 0.08)))
+	var g: float = pow(1.0 + growth_rate, float(lv - 1))
 
 	var hp  := int(float(data.get("baseHP",  0)) * g * nature_mult(nature_id, "hp"))
 	var atk := int(float(data.get("baseATK", 0)) * g * nature_mult(nature_id, "atk"))
-	var def_per_level: float = MonsterDb.RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)
+	var def_per_level: float = float(data.get("defGrowthPerLevel", MonsterDb.RARITY_DEF_GROWTH_PER_LEVEL.get(rarity, 0.15)))
 	var flat_def: float = float(data.get("baseDEF", 0)) + float(lv - 1) * def_per_level
 	var df  := int(flat_def * nature_mult(nature_id, "def"))
 	var spd := int(float(data.get("baseSPD", 0)) * g * nature_mult(nature_id, "spd"))

@@ -37,11 +37,11 @@ func _run() -> void:
 	_expect(not first_slot.has("monster_id") and not first_slot.has("monsterId") and not first_slot.has("placedAt"), "ranch slot should not expose legacy monster keys")
 	_expect(float(first_slot.get("placed_at", 0.0)) > 100000000000.0, "ranch placed_at should be normalized to milliseconds")
 
-	var exp_before: int = save_manager.get_monster_exp("monster_001")
-	var collected: float = save_manager.collect_idle_exp("monster_001")
-	var exp_after: int = save_manager.get_monster_exp("monster_001")
+	var exp_before: int = save_manager.get_shared_monster_exp()
+	var collected: float = save_manager.collect_idle_exp_for_instance(instance_id)
+	var exp_after: int = save_manager.get_shared_monster_exp()
 	_expect(collected > 0.0, "collect_idle_exp should collect from migrated ranch timestamp")
-	_expect(exp_after > exp_before, "collect_idle_exp should add monster exp")
+	_expect(exp_after > exp_before, "collect_idle_exp should add shared training exp")
 
 	ranch = save_manager.get_ranch_state()
 	first_slot = ranch.get("slots", [])[0]

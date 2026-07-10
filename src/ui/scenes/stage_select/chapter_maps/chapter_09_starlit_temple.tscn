@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b3ur247jomdcq" path="res://assets/images/maps/nodes/stage_icon_path_dot.png" id="11_path"]
 [ext_resource type="Texture2D" uid="uid://ckw6oghwd3dy6" path="res://assets/images/ui/icons/result_refresh_icon_star_silver.png" id="11_star_dim"]
 [ext_resource type="Texture2D" uid="uid://bvgnr3oa4kskn" path="res://assets/images/maps/backgrounds/stage_map_bg_chapter_09_starlit_temple.png" id="c09_background"]
-[ext_resource type="Texture2D" uid="uid://d1wx2u73ckqu8" path="res://assets/images/monsters/boss/boss_star_dragon.png" id="c09_boss_art"]
+[ext_resource type="Texture2D" path="res://assets/images/monsters/boss/monster_boss_008.png" id="c09_boss_art"]
 [ext_resource type="Texture2D" uid="uid://ccfpld5g56rvj" path="res://assets/images/maps/boss/stage_boss_badge_star.png" id="c09_boss_platform"]
 [ext_resource type="Texture2D" uid="uid://chqyws5kjr7ju" path="res://assets/images/maps/nodes/stage_node_ch09_star_normal.png" id="c09_stage04"]
 [ext_resource type="Texture2D" uid="uid://chqyws5kjr7ju" path="res://assets/images/maps/nodes/stage_node_ch09_star_normal.png" id="c09_stage05"]

@@ -18,7 +18,7 @@ func _run() -> void:
 		return
 
 	storage.clear_all_data()
-	_expect(storage.get_save_schema_version() == 1, "new saves should carry schema_version=1")
+	_expect(storage.get_save_schema_version() == SaveManagerScript.SAVE_SCHEMA_VERSION, "new saves should carry the current schema version")
 
 	var player: Dictionary = storage.load_player()
 	player["gold"] = 123

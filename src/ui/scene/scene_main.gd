@@ -28,6 +28,8 @@ const BUTTON_DESCRIPTIONS := {
 	"inventory": "查看和管理你的物品",
 	"ranch": "进入精灵课堂，培养并进化精灵",
 	"achievement": "查看冒险成就进度",
+	"tower": "挑战共鸣塔，验证后期精灵培养",
+	"mailbox": "查看远方冒险者的祝福",
 	"settings": "游戏设置和选项"
 }
 
@@ -41,7 +43,9 @@ const BUTTON_IDS := {
 	"AchievementButton": "achievement",
 	"SettingsButton": "settings",
 	"SigninButton": "signin",
-	"TestToolButton": "test_tool"
+	"TestToolButton": "test_tool",
+	"TowerButton": "tower",
+	"MailboxButton": "mailbox"
 }
 static var instance: SceneMain
 
@@ -66,6 +70,7 @@ var _player: Dictionary = {
 @onready var _diamond_value: Label = %DiamondValue
 @onready var _stamina_value: Label = %StaminaValue
 @onready var _rank_score: Label = %RankScore
+@onready var _mailbox_badge: Label = %MailboxBadge
 
 func _ready() -> void:
 	instance = self
@@ -75,8 +80,8 @@ func _ready() -> void:
 	if am != null and am.has_method("play_bgm"):
 		am.call("play_bgm", "bgm_town")
 	for button_name in BUTTON_IDS:
-		var button := get_node("%" + button_name) as TextureButton
-		if not button.visible:
+		var button := get_node("%" + button_name) as BaseButton
+		if button == null:
 			continue
 		var button_id: String = BUTTON_IDS[button_name]
 		_attach_button_feedback(button, _feedback_profile(button_id))
@@ -125,6 +130,12 @@ func _update_player_display() -> void:
 	_diamond_value.text = _format_number(int(_player.get("gems", 0)))
 	_stamina_value.text = "%d/5" % int(_player.get("stamina", 5))
 	_rank_score.text = _format_number(int(_player.get("achievement_score", 0)))
+	if _storage != null and _storage.has_method("get_tower_state") and _storage.has_method("is_tower_unlocked") and bool(_storage.call("is_tower_unlocked")):
+		_rank_score.text = "最高 %d 层" % int((_storage.call("get_tower_state") as Dictionary).get("highest_floor", 0))
+	if _storage != null and _storage.has_method("get_mailbox_state"):
+		var unread := int((_storage.call("get_mailbox_state") as Dictionary).get("unread_count", 0))
+		_mailbox_badge.visible = unread > 0
+		_mailbox_badge.text = str(unread)
 
 func _calc_achievement_score() -> int:
 	if _storage == null or not _storage.has_method("load_achievements"):

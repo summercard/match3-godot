@@ -50,7 +50,7 @@ const ACHIEVEMENT_ASSETS := {
 	"reward_slot": "res://assets/images/ui/slots/inventory_new_ui_inventory_slot.png",
 	"gold": "res://assets/images/ui/icons/main_icon_gold_coin_v3.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
-	"exp": "res://assets/images/ui/icons/battle_flow_new_icon_exp_badge.png",
+	"exp": "res://assets/images/ui/icons/items_new_icon_exp_potion.png",
 }
 
 const C := {

@@ -55,7 +55,9 @@ func _run() -> void:
 
 	var enemy_hp_after_direct: int = int(battle.enemies[0].get("hp", 0))
 	battle.skill_charges[monster_id] = cost
-	var handled: bool = battle_scene.call("_try_use_skill_at_position", Vector2(75.0, 216.0))
+	battle_scene.set("_state", 0)
+	var card_rect: Rect2 = battle_scene.call("_get_player_card_rect", 0)
+	var handled: bool = battle_scene.call("_try_use_skill_at_position", card_rect.get_center())
 	await process_frame
 	_expect(handled, "clicking ready player card should be handled as skill use")
 	_expect(int(battle.skill_charges.get(monster_id, -1)) == 0, "card skill use should consume charge")
