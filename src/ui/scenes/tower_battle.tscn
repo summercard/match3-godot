@@ -1,0 +1,138 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://src/ui/scenes/battle_screen.tscn" id="1_base"]
+[ext_resource type="Script" path="res://src/ui/scene/scene_tower_battle.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png" id="3_background"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="4_star"]
+
+[sub_resource type="StyleBoxFlat" id="StyleTowerHud"]
+bg_color = Color(0.07, 0.25, 0.52, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.78, 0.94, 1, 0.82)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.02, 0.10, 0.27, 0.28)
+shadow_size = 5
+
+[node name="TowerBattle" instance=ExtResource("1_base")]
+editable_children = true
+script = ExtResource("2_script")
+
+[node name="Background" parent="." index="0"]
+texture = ExtResource("3_background")
+
+[node name="TopHud" parent="." index="1"]
+offset_bottom = 70.0
+
+[node name="TurnBadge" parent="TopHud" index="0"]
+offset_left = 10.0
+offset_top = 6.0
+offset_right = 82.0
+offset_bottom = 66.0
+
+[node name="PauseButton" parent="TopHud" index="3"]
+offset_left = 320.0
+offset_top = 8.0
+offset_right = 364.0
+offset_bottom = 50.0
+
+[node name="Combatants" parent="." index="2"]
+offset_top = 18.0
+offset_bottom = 318.0
+
+[node name="SingleEnemy" parent="Combatants" index="0"]
+offset_left = 9.0
+offset_top = -12.0
+offset_right = 366.0
+offset_bottom = 209.0
+
+[node name="MultiEnemies" parent="Combatants" index="1"]
+offset_top = 52.0
+offset_bottom = 273.0
+
+[node name="Enemy1" parent="Combatants/MultiEnemies" index="0"]
+offset_left = 29.0
+offset_top = 58.0
+offset_right = 125.0
+offset_bottom = 160.0
+
+[node name="Enemy2" parent="Combatants/MultiEnemies" index="1"]
+offset_left = 139.5
+offset_top = 42.0
+offset_right = 235.5
+offset_bottom = 144.0
+
+[node name="Enemy3" parent="Combatants/MultiEnemies" index="2"]
+offset_left = 250.0
+offset_top = 58.0
+offset_right = 346.0
+offset_bottom = 160.0
+
+[node name="Player1" parent="Combatants/Players" index="0"]
+offset_left = 15.0
+offset_top = 238.0
+offset_right = 121.0
+offset_bottom = 304.0
+
+[node name="Player2" parent="Combatants/Players" index="1"]
+offset_left = 134.0
+offset_top = 214.0
+offset_right = 240.0
+offset_bottom = 280.0
+
+[node name="Player3" parent="Combatants/Players" index="2"]
+offset_left = 253.0
+offset_top = 238.0
+offset_right = 359.0
+offset_bottom = 304.0
+
+[node name="TowerHud" type="Panel" parent="." index="5"]
+z_index = 4
+layout_mode = 0
+offset_left = 86.0
+offset_top = 7.0
+offset_right = 289.0
+offset_bottom = 58.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleTowerHud")
+
+[node name="Crest" type="TextureRect" parent="TowerHud"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 42.0
+offset_bottom = 40.0
+texture = ExtResource("4_star")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+modulate = Color(1, 0.86, 0.32, 1)
+
+[node name="Title" type="Label" parent="TowerHud"]
+layout_mode = 0
+offset_left = 46.0
+offset_top = 5.0
+offset_right = 193.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 0.94, 0.67, 1)
+theme_override_colors/font_outline_color = Color(0.03, 0.14, 0.32, 0.9)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+text = "共鸣远征  ·  01F"
+horizontal_alignment = 1
+
+[node name="Progress" type="Label" parent="TowerHud"]
+layout_mode = 0
+offset_left = 46.0
+offset_top = 25.0
+offset_right = 193.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0.87, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "水晶庭院  ·  第 1/5 波"
+horizontal_alignment = 1

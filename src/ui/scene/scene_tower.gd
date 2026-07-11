@@ -102,7 +102,7 @@ func _start_or_continue() -> void:
 	stage["towerBuffs"] = state.get("buffs", []).duplicate(true)
 	var scene_manager := get_node_or_null("/root/SceneManager")
 	if scene_manager != null:
-		scene_manager.switch_scene("battle", {
+		scene_manager.switch_scene("tower_battle", {
 			"stageId": str(stage.get("id", "tower_floor_001")),
 			"stageData": stage,
 			"towerMode": true,

@@ -14,6 +14,7 @@ const PACKED_SCENE_MAP: Dictionary = {
 	"stage_select": "res://src/ui/scenes/stage_select_map.tscn",
 	"battle_prepare": "res://src/ui/scenes/battle_prepare.tscn",
 	"battle": "res://src/ui/scenes/battle_screen.tscn",
+	"tower_battle": "res://src/ui/scenes/tower_battle.tscn",
 	"result": "res://src/ui/scenes/battle_result.tscn",
 	"team": "res://src/ui/scenes/team.tscn",
 	"album": "res://src/ui/scenes/album.tscn",

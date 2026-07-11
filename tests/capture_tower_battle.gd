@@ -29,7 +29,7 @@ func _capture() -> void:
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
-	main.switch_scene("battle", {"stageId": stage.get("id", ""), "stageData": stage, "towerMode": true, "towerState": state})
+	main.switch_scene("tower_battle", {"stageId": stage.get("id", ""), "stageData": stage, "towerMode": true, "towerState": state})
 	for _frame in range(8 + int(_read_arg("--settle-frames=", "24"))):
 		await process_frame
 	var image := root.get_texture().get_image()
