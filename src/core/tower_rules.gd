@@ -22,6 +22,7 @@ static func default_state() -> Dictionary:
 		"total_player_turns": 0,
 		"highest_turn_damage": 0,
 		"claimed_stage_rewards": [],
+		"claimed_failure_rewards": [],
 		"pending_cards": [],
 		"pending_reward_floor": 0,
 		"completed": false,
@@ -39,7 +40,7 @@ static func normalize_state(raw: Variant) -> Dictionary:
 	state["highest_floor"] = clampi(int(state.get("highest_floor", 0)), 0, TowerDBScript.MAX_FLOOR)
 	state["total_player_turns"] = maxi(0, int(state.get("total_player_turns", 0)))
 	state["highest_turn_damage"] = maxi(0, int(state.get("highest_turn_damage", 0)))
-	for array_key in ["party_instance_ids", "party_snapshot", "buffs", "supplies", "claimed_stage_rewards", "pending_cards"]:
+	for array_key in ["party_instance_ids", "party_snapshot", "buffs", "supplies", "claimed_stage_rewards", "claimed_failure_rewards", "pending_cards"]:
 		if not state.get(array_key, []) is Array:
 			state[array_key] = []
 	for dict_key in ["skill_charges", "leader_charge_points", "checkpoint_snapshot"]:
@@ -56,6 +57,7 @@ static func begin_run(state: Dictionary, party_instance_ids: Array, party_snapsh
 	next["total_player_turns"] = int(previous.get("total_player_turns", 0))
 	next["highest_turn_damage"] = int(previous.get("highest_turn_damage", 0))
 	next["claimed_stage_rewards"] = previous.get("claimed_stage_rewards", []).duplicate()
+	next["claimed_failure_rewards"] = previous.get("claimed_failure_rewards", []).duplicate()
 	next["active"] = true
 	next["party_instance_ids"] = party_instance_ids.duplicate()
 	next["party_snapshot"] = party_snapshot.duplicate(true)
@@ -92,6 +94,14 @@ static func complete_wave(state: Dictionary, continuation: Dictionary, wave_turn
 	return {"ok": true, "state": next, "event": "wave_cleared"}
 
 
+static func record_failed_attempt(state: Dictionary, highest_turn_damage: int) -> Dictionary:
+	var next := normalize_state(state).duplicate(true)
+	# Climb ranking records cleared floors only. Burst ranking records any actual
+	# player-turn peak, including a peak reached before the party is defeated.
+	next["highest_turn_damage"] = maxi(int(next.get("highest_turn_damage", 0)), maxi(0, highest_turn_damage))
+	return next
+
+
 static func choose_card(state: Dictionary, card_id: String) -> Dictionary:
 	var next := normalize_state(state).duplicate(true)
 	var floor := int(next.get("pending_reward_floor", 0))
@@ -125,6 +135,7 @@ static func restore_checkpoint(state: Dictionary) -> Dictionary:
 	restored["highest_floor"] = maxi(int(restored.get("highest_floor", 0)), int(normalized.get("highest_floor", 0)))
 	restored["highest_turn_damage"] = maxi(int(restored.get("highest_turn_damage", 0)), int(normalized.get("highest_turn_damage", 0)))
 	restored["claimed_stage_rewards"] = normalized.get("claimed_stage_rewards", []).duplicate()
+	restored["claimed_failure_rewards"] = normalized.get("claimed_failure_rewards", []).duplicate()
 	return restored
 
 
@@ -134,6 +145,25 @@ static func mark_stage_reward_claimed(state: Dictionary, floor: int) -> Dictiona
 	if not claimed.has(floor):
 		claimed.append(floor)
 	next["claimed_stage_rewards"] = claimed
+	return next
+
+
+static func failure_reward(checkpoint_floor: int) -> Dictionary:
+	var floor := clampi(checkpoint_floor, 1, TowerDBScript.MAX_FLOOR)
+	var stage_index := TowerDBScript.stage_index_for_floor(floor)
+	return {
+		"gold": 28 + stage_index * 12,
+		"shared_exp": 16 + stage_index * 8,
+	}
+
+
+static func mark_failure_reward_claimed(state: Dictionary, checkpoint_floor: int) -> Dictionary:
+	var next := normalize_state(state).duplicate(true)
+	var claimed: Array = next.get("claimed_failure_rewards", []).duplicate()
+	var reward_key := clampi(checkpoint_floor, 1, TowerDBScript.MAX_FLOOR)
+	if not claimed.has(reward_key):
+		claimed.append(reward_key)
+	next["claimed_failure_rewards"] = claimed
 	return next
 
 

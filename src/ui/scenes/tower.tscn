@@ -1,38 +1,41 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/ui/scene/scene_tower.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/images/tower_new/tower_resonance_casual_bg_v2.png" id="2_tower_bg"]
 
 [sub_resource type="StyleBoxFlat" id="StylePanel"]
-bg_color = Color(0.04, 0.09, 0.2, 0.96)
+bg_color = Color(0.95, 0.99, 1, 0.91)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.25, 0.64, 0.94, 0.9)
+border_color = Color(0.24, 0.66, 0.95, 0.95)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
+shadow_color = Color(0.12, 0.38, 0.67, 0.26)
+shadow_size = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleButton"]
-bg_color = Color(0.12, 0.34, 0.64, 1)
+bg_color = Color(0.19, 0.55, 0.86, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.54, 0.85, 1, 1)
+border_color = Color(0.88, 0.98, 1, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StylePrimary"]
-bg_color = Color(0.87, 0.47, 0.12, 1)
+bg_color = Color(0.98, 0.56, 0.16, 0.98)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.87, 0.38, 1)
+border_color = Color(1, 0.94, 0.62, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -47,14 +50,26 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.025, 0.05, 0.13, 1)
+texture = ExtResource("2_tower_bg")
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.36, 0.62, 0.13)
 mouse_filter = 2
 
 [node name="Title" type="Label" parent="."]
@@ -63,7 +78,9 @@ offset_left = 70.0
 offset_top = 20.0
 offset_right = 305.0
 offset_bottom = 56.0
-theme_override_colors/font_color = Color(1, 0.86, 0.39, 1)
+theme_override_colors/font_color = Color(0.12, 0.29, 0.57, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.94)
+theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 24
 text = "共鸣塔"
 horizontal_alignment = 1
@@ -77,6 +94,7 @@ offset_right = 64.0
 offset_bottom = 51.0
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "返回"
 
 [node name="UnlockText" type="Label" parent="."]
@@ -87,6 +105,8 @@ offset_top = 64.0
 offset_right = 345.0
 offset_bottom = 88.0
 theme_override_font_sizes/font_size = 13
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.92)
+theme_override_constants/outline_size = 3
 text = "未解锁：通关主线第 8 关后开放"
 horizontal_alignment = 1
 
@@ -105,8 +125,10 @@ offset_left = 22.0
 offset_top = 17.0
 offset_right = 325.0
 offset_bottom = 49.0
-theme_override_colors/font_color = Color(1, 0.91, 0.55, 1)
+theme_override_colors/font_color = Color(0.15, 0.36, 0.68, 1)
 theme_override_font_sizes/font_size = 21
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.9)
+theme_override_constants/outline_size = 3
 text = "第 1 层"
 horizontal_alignment = 1
 
@@ -117,7 +139,7 @@ offset_left = 22.0
 offset_top = 53.0
 offset_right = 325.0
 offset_bottom = 77.0
-theme_override_colors/font_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_color = Color(0.18, 0.36, 0.60, 1)
 theme_override_font_sizes/font_size = 14
 text = "风铃原野"
 horizontal_alignment = 1
@@ -129,7 +151,7 @@ offset_left = 22.0
 offset_top = 80.0
 offset_right = 325.0
 offset_bottom = 103.0
-theme_override_colors/font_color = Color(0.72, 0.84, 0.97, 1)
+theme_override_colors/font_color = Color(0.23, 0.45, 0.70, 1)
 theme_override_font_sizes/font_size = 13
 text = "第 1/5 波"
 horizontal_alignment = 1
@@ -145,30 +167,35 @@ theme_override_constants/separation = 18
 [node name="Node1" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 15
 text = "1"
 
 [node name="Node2" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 15
 text = "2"
 
 [node name="Node3" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 15
 text = "3"
 
 [node name="Node4" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 15
 text = "4"
 
 [node name="Node5" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 15
 text = "BOSS"
 
@@ -181,6 +208,8 @@ offset_right = 314.0
 offset_bottom = 316.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 19
+theme_override_colors/font_outline_color = Color(0.28, 0.08, 0.02, 1)
+theme_override_constants/outline_size = 3
 theme_override_styles/normal = SubResource("StylePrimary")
 text = "开启远征"
 
@@ -191,8 +220,10 @@ offset_left = 22.0
 offset_top = 329.0
 offset_right = 353.0
 offset_bottom = 355.0
-theme_override_colors/font_color = Color(0.79, 0.9, 1, 1)
+theme_override_colors/font_color = Color(0.17, 0.37, 0.64, 1)
 theme_override_font_sizes/font_size = 13
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.9)
+theme_override_constants/outline_size = 2
 text = "最高 0 层  ·  单回合 0"
 horizontal_alignment = 1
 
@@ -213,6 +244,7 @@ offset_right = 166.0
 offset_bottom = 49.0
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 toggle_mode = true
 text = "登塔榜"
 
@@ -225,6 +257,7 @@ offset_right = 326.0
 offset_bottom = 49.0
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleButton")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 toggle_mode = true
 text = "爆发榜"
 
@@ -235,6 +268,7 @@ offset_left = 22.0
 offset_top = 67.0
 offset_right = 326.0
 offset_bottom = 91.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank1" type="Label" parent="RankPanel"]
@@ -244,6 +278,7 @@ offset_left = 22.0
 offset_top = 95.0
 offset_right = 326.0
 offset_bottom = 119.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank2" type="Label" parent="RankPanel"]
@@ -253,6 +288,7 @@ offset_left = 22.0
 offset_top = 123.0
 offset_right = 326.0
 offset_bottom = 147.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank3" type="Label" parent="RankPanel"]
@@ -262,6 +298,7 @@ offset_left = 22.0
 offset_top = 151.0
 offset_right = 326.0
 offset_bottom = 175.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank4" type="Label" parent="RankPanel"]
@@ -271,6 +308,7 @@ offset_left = 22.0
 offset_top = 179.0
 offset_right = 326.0
 offset_bottom = 203.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank5" type="Label" parent="RankPanel"]
@@ -280,6 +318,7 @@ offset_left = 22.0
 offset_top = 207.0
 offset_right = 326.0
 offset_bottom = 231.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank6" type="Label" parent="RankPanel"]
@@ -289,4 +328,5 @@ offset_left = 22.0
 offset_top = 235.0
 offset_right = 326.0
 offset_bottom = 259.0
+theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13

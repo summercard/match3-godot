@@ -30,6 +30,7 @@ const TowerRunControllerScript = preload("res://src/core/tower_run_controller.gd
 const TowerRulesScript = preload("res://src/core/tower_rules.gd")
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
 const TowerCardOverlayScene = preload("res://src/ui/scenes/tower_card_overlay.tscn")
+const TowerFailureOverlayScene = preload("res://src/ui/scenes/tower_failure_overlay.tscn")
 const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
 
 ## 设计尺寸
@@ -305,6 +306,7 @@ var _tower_state: Dictionary = {}
 var _tower_controller: TowerRunController = null
 var _tower_transitioning := false
 var _tower_card_overlay: TowerCardOverlay = null
+var _tower_failure_overlay: Control = null
 
 var _pointer_down: bool = false
 var _pointer_start_pos: Vector2 = Vector2.ZERO
@@ -622,6 +624,9 @@ func init(data: Dictionary = {}) -> void:
 	if _tower_card_overlay != null and is_instance_valid(_tower_card_overlay):
 		_tower_card_overlay.queue_free()
 	_tower_card_overlay = null
+	if _tower_failure_overlay != null and is_instance_valid(_tower_failure_overlay):
+		_tower_failure_overlay.queue_free()
+	_tower_failure_overlay = null
 	_set_runtime_background(StageWarBackgroundsScript.path_for(_stage_id, _stage_data, data))
 	
 	_init_battle()
@@ -731,6 +736,8 @@ func _gui_input(event: InputEvent) -> void:
 	_handle_input_event(event, true)
 
 func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
+	if _tower_failure_overlay != null and is_instance_valid(_tower_failure_overlay):
+		return
 	if _try_handle_battle_gui_button_input(event, already_local):
 		get_viewport().set_input_as_handled()
 		return
@@ -1824,6 +1831,11 @@ func _advance_tower_after_battle() -> void:
 		_state = BattleState.IDLE
 		return
 	if _battle.battle_result != "win":
+		var failure_record := _tower_controller.record_failed_attempt(int(_battle.highest_player_turn_damage))
+		if not bool(failure_record.get("ok", false)):
+			_show_message("爆发纪录保存失败")
+		var checkpoint_floor := int(_tower_state.get("checkpoint_floor", _tower_state.get("current_floor", 1)))
+		var consolation := _deliver_tower_consolation(checkpoint_floor)
 		var recovery := _tower_controller.restore_checkpoint()
 		if not bool(recovery.get("ok", false)):
 			_show_message("安全点恢复失败")
@@ -1831,9 +1843,7 @@ func _advance_tower_after_battle() -> void:
 			_state = BattleState.IDLE
 			return
 		_tower_state = recovery.get("state", {}).duplicate(true)
-		_show_message("远征受挫，已回到第 %d 层安全点" % int(_tower_state.get("current_floor", 1)), 2.0)
-		await get_tree().create_timer(0.8).timeout
-		_start_tower_wave_from_state()
+		_show_tower_failure_overlay(str(_battle.battle_result), checkpoint_floor, consolation)
 		return
 	var continuation: Dictionary = _battle.get_tower_continuation()
 	var progress := _tower_controller.complete_wave(
@@ -1892,6 +1902,63 @@ func _show_tower_card_choice(cards: Array) -> void:
 	add_child(_tower_card_overlay)
 	_tower_card_overlay.configure(cards, int(_tower_state.get("pending_reward_floor", _tower_state.get("highest_floor", 0))))
 	_tower_card_overlay.card_selected.connect(_on_tower_card_selected)
+
+
+func _deliver_tower_consolation(checkpoint_floor: int) -> Dictionary:
+	if _tower_controller == null or _storage == null:
+		return {"delivered": false, "reward": {}}
+	var state := _tower_controller.get_state()
+	var delivered_floors: Array = state.get("claimed_failure_rewards", [])
+	if delivered_floors.has(checkpoint_floor):
+		return {"delivered": false, "already_delivered": true, "reward": {}}
+	var reward := TowerRulesScript.failure_reward(checkpoint_floor)
+	var mailbox := MailboxServiceScript.new(_storage)
+	var delivery := mailbox.create_tower_consolation_mail(str(state.get("season_id", "tower_s1")), checkpoint_floor, reward)
+	if not bool(delivery.get("ok", false)):
+		return {"delivered": false, "reward": {}, "error": str(delivery.get("error", "save_failed"))}
+	if not _tower_controller.mark_failure_reward_delivered(checkpoint_floor):
+		return {"delivered": false, "reward": {}, "error": "tower_save_failed"}
+	return {"delivered": true, "reward": reward}
+
+
+func _show_tower_failure_overlay(result: String, checkpoint_floor: int, consolation: Dictionary = {}) -> void:
+	if _tower_failure_overlay != null and is_instance_valid(_tower_failure_overlay):
+		_tower_failure_overlay.queue_free()
+	_tower_failure_overlay = TowerFailureOverlayScene.instantiate() as Control
+	if _tower_failure_overlay == null:
+		_show_message("远征失败，请返回共鸣塔后重试")
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		return
+	add_child(_tower_failure_overlay)
+	_tower_failure_overlay.call("configure", result, checkpoint_floor, consolation)
+	_tower_failure_overlay.connect("retry_pressed", _on_tower_failure_retry)
+	_tower_failure_overlay.connect("return_pressed", _on_tower_failure_return)
+
+
+func _on_tower_failure_retry() -> void:
+	if _tower_failure_overlay != null and is_instance_valid(_tower_failure_overlay):
+		_tower_failure_overlay.queue_free()
+	_tower_failure_overlay = null
+	if _battle == null or _tower_state.is_empty():
+		_tower_transitioning = false
+		_state = BattleState.IDLE
+		return
+	_battle.restore_tower_continuation(_tower_state)
+	_defeat_transitions.clear()
+	_fall_messages.clear()
+	_start_tower_wave_from_state()
+
+
+func _on_tower_failure_return() -> void:
+	if _tower_failure_overlay != null and is_instance_valid(_tower_failure_overlay):
+		_tower_failure_overlay.queue_free()
+	_tower_failure_overlay = null
+	_tower_transitioning = false
+	_state = BattleState.IDLE
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager != null:
+		scene_manager.switch_scene("tower")
 
 
 func _on_tower_card_selected(card_id: String) -> void:

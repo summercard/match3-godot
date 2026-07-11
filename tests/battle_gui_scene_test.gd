@@ -21,6 +21,9 @@ func _run() -> void:
 		"inputTestOnly": true,
 	})
 	await process_frame
+	# Battle slots are populated after the scene enters the tree; allow that deferred
+	# sync to finish before asserting the ordinary-enemy layout.
+	await process_frame
 	var battle: Control = main.get_current_scene()
 	_expect(battle.scene_file_path == "res://src/ui/scenes/battle_screen.tscn", "battle should load editable PackedScene")
 	_expect(bool(battle.call("_uses_editable_gui")), "battle should enable editable GUI mode")

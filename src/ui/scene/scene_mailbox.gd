@@ -3,6 +3,7 @@ extends Control
 
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
 const CartoonButtonFeedbackScript = preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 
 signal back_pressed
 
@@ -21,9 +22,10 @@ var _sending := false
 @onready var _mail_detail: Label = %MailDetail
 @onready var _claim_button: Button = %ClaimButton
 @onready var _adventurer_name: Label = %AdventurerName
+@onready var _adventurer_portrait: TextureRect = %AdventurerPortrait
 @onready var _blessing_status: Label = %BlessingStatus
 @onready var _send_button: Button = %SendButton
-@onready var _star: Label = %FlyingStar
+@onready var _star: Control = %FlyingStar
 
 
 func _ready() -> void:
@@ -89,7 +91,18 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 	if current.is_empty() and not owned.is_empty():
 		current = owned[0]
 		_selected_instance_id = str(current.get("instanceId", ""))
-	_adventurer_name.text = str(current.get("name", current.get("monsterId", "请选择精灵"))) if not current.is_empty() else "暂无可派遣精灵"
+	if current.is_empty():
+		_adventurer_name.text = "暂无可派遣精灵"
+		_adventurer_portrait.texture = null
+		_adventurer_portrait.visible = false
+	else:
+		var monster_id := str(current.get("monsterId", ""))
+		var monster: Dictionary = MonsterDb.get_monster(monster_id)
+		var display_name := str(current.get("name", monster.get("name", monster_id)))
+		_adventurer_name.text = "%s  ·  Lv.%d" % [display_name, int(current.get("level", 1))]
+		var portrait_path := MonsterArtDBScript.get_art_path(monster_id, "ranch")
+		_adventurer_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
+		_adventurer_portrait.visible = _adventurer_portrait.texture != null
 	var daily_count := int(state.get("daily_send_count", 0))
 	_blessing_status.text = "今日可送出 %d 次祝福" % maxi(0, 3 - daily_count)
 	_send_button.disabled = current.is_empty() or daily_count >= 3 or _sending
@@ -174,16 +187,19 @@ func _send_blessing() -> void:
 	_send_button.disabled = true
 	_blessing_status.text = "祝福星星正在飞往远方…"
 	_star.position = Vector2(170.0, 344.0)
+	_star.rotation = 0.0
 	_star.modulate = Color(1.0, 0.92, 0.36, 1.0)
 	_star.visible = true
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(_star, "position", Vector2(303.0, 126.0), 0.78).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_star, "scale", Vector2(0.42, 0.42), 0.78)
+	tween.tween_property(_star, "rotation", TAU * 0.7, 0.78)
 	tween.tween_property(_star, "modulate:a", 0.0, 0.78)
 	await tween.finished
 	_star.visible = false
 	_star.scale = Vector2.ONE
+	_star.rotation = 0.0
 	_sending = false
 	_blessing_status.text = "祝福已飞向远方。信箱收到了新的回应。"
 	_refresh()

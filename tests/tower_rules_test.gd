@@ -15,6 +15,7 @@ func _init() -> void:
 func _run() -> void:
 	_test_floor_structure()
 	_test_card_and_checkpoint_flow()
+	_test_failure_reward_rules()
 	_test_rank_sorting()
 	_test_save_manager_integration()
 	_finish()
@@ -58,6 +59,16 @@ func _test_card_and_checkpoint_flow() -> void:
 	_expect(int(state.get("checkpoint_floor", 0)) == 6, "boss choice should create checkpoint")
 	_expect(int(state.get("highest_floor", 0)) == 5, "tower should record highest cleared floor")
 	_expect(int(state.get("highest_turn_damage", 0)) == 680, "tower should record highest turn damage")
+
+
+func _test_failure_reward_rules() -> void:
+	var state := TowerRulesScript.default_state()
+	var reward := TowerRulesScript.failure_reward(6)
+	_expect(int(reward.get("gold", 0)) > 0 and int(reward.get("shared_exp", 0)) > 0, "a tower checkpoint failure should offer a light consolation reward")
+	state = TowerRulesScript.mark_failure_reward_claimed(state, 6)
+	_expect((state.get("claimed_failure_rewards", []) as Array).has(6), "a delivered failure reward should be tracked by checkpoint")
+	var restored := TowerRulesScript.restore_checkpoint(state)
+	_expect((restored.get("claimed_failure_rewards", []) as Array).has(6), "checkpoint recovery should preserve delivered failure rewards")
 
 
 func _test_rank_sorting() -> void:

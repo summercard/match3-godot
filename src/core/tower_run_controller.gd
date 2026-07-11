@@ -53,6 +53,13 @@ func complete_wave(continuation: Dictionary, wave_turns: int, highest_turn_damag
 	return result
 
 
+func record_failed_attempt(highest_turn_damage: int) -> Dictionary:
+	var next := TowerRulesScript.record_failed_attempt(get_state(), highest_turn_damage)
+	if not _save_state(next):
+		return {"ok": false, "error": "save_failed"}
+	return {"ok": true, "state": next}
+
+
 func choose_card(card_id: String) -> Dictionary:
 	var previous := get_state()
 	var result := TowerRulesScript.choose_card(previous, card_id)
@@ -73,6 +80,11 @@ func restore_checkpoint() -> Dictionary:
 
 func mark_reward_delivered(floor: int) -> bool:
 	var next := TowerRulesScript.mark_stage_reward_claimed(get_state(), floor)
+	return _save_state(next)
+
+
+func mark_failure_reward_delivered(checkpoint_floor: int) -> bool:
+	var next := TowerRulesScript.mark_failure_reward_claimed(get_state(), checkpoint_floor)
 	return _save_state(next)
 
 

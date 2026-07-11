@@ -106,6 +106,9 @@ func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "mailbox":
 		_seed_mailbox_demo(main)
 		return
+	if scene_name == "tower":
+		_seed_tower_demo(main)
+		return
 	if scene_name != "team":
 		return
 	var count := int(_read_arg("--team-demo-count=", "0"))
@@ -301,6 +304,15 @@ func _seed_mailbox_demo(main: Control) -> void:
 		mailbox_scene.call("_show_blessing")
 		if _read_arg("--mailbox-send-demo=", "0") == "1":
 			mailbox_scene.call("_send_blessing")
+
+
+func _seed_tower_demo(main: Control) -> void:
+	var storage := root.get_node_or_null("/root/SaveManager")
+	var tower_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
+	if storage == null or tower_scene == null:
+		return
+	storage.save_stage_stars("stage_1_8", 3)
+	tower_scene.call("_refresh")
 
 func _seed_shop_demo(main: Control) -> void:
 	var shop_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else main.get_node_or_null("ShopGui")

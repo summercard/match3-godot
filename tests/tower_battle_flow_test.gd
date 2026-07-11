@@ -35,6 +35,11 @@ func _run() -> void:
 	await process_frame
 	var battle_scene: Control = main.get_current_scene()
 	_expect(main.get_current_scene_name() == "battle", "tower should enter shared battle scene")
+	_expect((battle_scene.get_node("Background") as TextureRect).texture.resource_path == "res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png", "tower battle should use its dedicated crystal garden background")
+	var initial_enemies: Array = battle_scene.get("_battle").get("enemies")
+	for raw_enemy in initial_enemies:
+		if raw_enemy is Dictionary:
+			_expect(is_equal_approx(float((raw_enemy as Dictionary).get("_towerVisualScale", 0.0)), 1.30), "tower enemies should use the 30 percent visual-size boost")
 	for expected_floor in range(1, 5):
 		await _clear_current_wave(battle_scene)
 		await create_timer(0.95).timeout

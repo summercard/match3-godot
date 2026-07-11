@@ -287,6 +287,9 @@ func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, rando
 	if bool(monster.get("isElite", false)):
 		monster["isElite"] = true
 		monster["_visualScale"] = StatCalculator.visual_scale_for_stats(monster)
+	if is_tower_mode():
+		monster["_towerVisualScale"] = 1.30
+		monster["_visualScale"] = float(monster.get("_visualScale", 1.0)) * float(monster.get("_towerVisualScale", 1.0))
 	if is_elite:
 		monster["_eliteSource"] = "random"
 	return monster

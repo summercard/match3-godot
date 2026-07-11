@@ -45,9 +45,16 @@ func _run() -> void:
 		"AchievementButton": "achievement",
 		"SettingsButton": "settings",
 		"SigninButton": "signin",
-		"TestToolButton": "test_tool"
+		"TestToolButton": "test_tool",
+		"TowerButton": "tower",
+		"MailboxButton": "mailbox",
 	}
 	_expect((lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).text == "精灵课堂", "lobby ranch entry should be labeled as the spirit classroom")
+	for entry_path in ["PrimaryButtons/TowerButton", "PrimaryButtons/MailboxButton"]:
+		var entry := lobby.get_node(entry_path) as TextureButton
+		var shop_entry := lobby.get_node("PrimaryButtons/ShopButton") as TextureButton
+		_expect(entry != null and entry.texture_normal == shop_entry.texture_normal, "%s should reuse the shop entry button art" % entry_path)
+	_expect(not lobby.has_node("Header/TowerButton") and not lobby.has_node("Header/MailboxButton"), "tower and mailbox entries should no longer occupy the header")
 	var lobby_font := (lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).get_theme_font("font") as FontVariation
 	_expect(lobby_font != null and lobby_font.base_font != null, "lobby labels should use the bundled rounded-font profile")
 	if lobby_font != null and lobby_font.base_font != null:

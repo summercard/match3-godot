@@ -86,6 +86,33 @@ func create_tower_reward_mail(season_id: String, floor: int, reward: Dictionary)
 	return {"ok": true, "mail": mail, "state": state}
 
 
+func create_tower_consolation_mail(season_id: String, checkpoint_floor: int, reward: Dictionary) -> Dictionary:
+	if _storage == null:
+		return {"ok": false, "error": "storage_unavailable"}
+	var mail_id := "tower_consolation:%s:%d" % [season_id, checkpoint_floor]
+	var attachments: Array = []
+	if int(reward.get("gold", 0)) > 0:
+		attachments.append({"kind": "gold", "amount": int(reward.get("gold", 0))})
+	if int(reward.get("shared_exp", 0)) > 0:
+		attachments.append({"kind": "shared_exp", "amount": int(reward.get("shared_exp", 0))})
+	var mail := {
+		"id": mail_id,
+		"source": "tower_consolation",
+		"sender_name": "旅行精灵驿站",
+		"title": "第 %d 层远征鼓励" % checkpoint_floor,
+		"body": "这次远征先在第 %d 层休整吧。旅行精灵送来一份轻松补给，整理好队伍再来挑战！" % checkpoint_floor,
+		"attachments": attachments,
+		"created_at": Time.get_unix_time_from_system(),
+		"read_at": null,
+		"claimed_at": null,
+		"reward_receipt_id": "mail_reward:%s" % mail_id,
+	}
+	var state := MailboxRulesScript.append_mail(get_state(), mail)
+	if not _save_state(state):
+		return {"ok": false, "error": "save_failed"}
+	return {"ok": true, "mail": mail, "state": state}
+
+
 func mark_read(mail_id: String) -> bool:
 	var state := get_state()
 	var index := MailboxRulesScript.find_mail_index(state, mail_id)

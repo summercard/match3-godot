@@ -219,7 +219,7 @@ func _attach_button_feedback(button: BaseButton, profile: int) -> void:
 func _feedback_profile(button_id: String) -> int:
 	if button_id == "start":
 		return CartoonButtonFeedback.Profile.PRIMARY
-	if button_id in ["team", "ranch", "shop"]:
+	if button_id in ["team", "ranch", "shop", "tower", "mailbox"]:
 		return CartoonButtonFeedback.Profile.ENTRY
 	return CartoonButtonFeedback.Profile.NAV
 

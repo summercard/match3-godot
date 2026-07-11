@@ -2,6 +2,7 @@ class_name StageWarBackgrounds
 extends RefCounted
 
 const DEFAULT_PATH := "res://assets/images/maps/warbackgrouds/map1.png"
+const TOWER_CRYSTAL_GARDEN_PATH := "res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png"
 const CHAPTER_PATHS := {
 	1: "res://assets/images/maps/warbackgrouds/map1.png",
 	2: "res://assets/images/maps/warbackgrouds/map2.png",
@@ -14,6 +15,8 @@ const CHAPTER_PATHS := {
 }
 
 static func path_for(stage_id: String = "", stage_data: Dictionary = {}, context: Dictionary = {}) -> String:
+	if bool(context.get("towerMode", false)) or str(stage_data.get("mode", "")) == "tower":
+		return TOWER_CRYSTAL_GARDEN_PATH if ResourceLoader.exists(TOWER_CRYSTAL_GARDEN_PATH) else DEFAULT_PATH
 	var chapter_no := _chapter_no_from_context(stage_id, stage_data, context)
 	var path := str(CHAPTER_PATHS.get(chapter_no, DEFAULT_PATH))
 	return path if ResourceLoader.exists(path) else DEFAULT_PATH
