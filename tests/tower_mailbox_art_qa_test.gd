@@ -35,6 +35,10 @@ func _run() -> void:
 		_expect((mailbox.get_node("Background") as TextureRect).texture.resource_path == "res://assets/images/mailbox_new/mailbox_travel_casual_bg_v2.png", "mailbox should use its bright casual travel background art")
 		_expect(mailbox.has_node("TitleTrail"), "mailbox should present its travel-story header treatment")
 		_expect((mailbox.get_node("BlessingPanel/FlyingStar") as TextureRect).texture != null, "mailbox should use a formal star asset for its blessing flight")
+		_expect(mailbox.has_node("ArrivalStar") and mailbox.has_node("ArrivalTrail"), "unread mail should have dedicated arrival star visuals")
+		_expect(mailbox.has_node("BlessingPanel/BlessingStarTrail"), "sending a blessing should have a visible star trail")
+		var action_rail := mailbox.get_node("BlessingPanel/Panel/ActionRail") as Control
+		_expect(action_rail.position.x > 200.0 and action_rail.position.y > 200.0, "mailbox action rail should sit in the lower-right thumb zone")
 		mailbox.call("_show_blessing")
 		var portrait := mailbox.get_node("BlessingPanel/Panel/AdventurerFrame/AdventurerPortrait") as TextureRect
 		_expect(portrait.visible and portrait.texture != null, "blessing page should visibly show the selected adventurer")

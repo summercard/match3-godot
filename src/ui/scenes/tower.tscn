@@ -1,45 +1,88 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/ui/scene/scene_tower.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/images/tower_new/tower_resonance_casual_bg_v2.png" id="2_tower_bg"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="3_title_plaque"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="7_star"]
+[ext_resource type="Texture2D" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="8_sparkle"]
 
 [sub_resource type="StyleBoxFlat" id="StylePanel"]
-bg_color = Color(0.95, 0.99, 1, 0.91)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.24, 0.66, 0.95, 0.95)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-shadow_color = Color(0.12, 0.38, 0.67, 0.26)
-shadow_size = 6
+bg_color = Color(0.96, 0.99, 1, 0.80)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.08, 0.24, 0.46, 0.20)
+shadow_size = 7
 
-[sub_resource type="StyleBoxFlat" id="StyleButton"]
-bg_color = Color(0.19, 0.55, 0.86, 0.96)
+[sub_resource type="StyleBoxFlat" id="StyleBlueButton"]
+bg_color = Color(0.12, 0.58, 0.92, 0.98)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.88, 0.98, 1, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+border_color = Color(0.92, 0.98, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.05, 0.22, 0.48, 0.30)
+shadow_size = 5
 
-[sub_resource type="StyleBoxFlat" id="StylePrimary"]
-bg_color = Color(0.98, 0.56, 0.16, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.94, 0.62, 1)
+[sub_resource type="StyleBoxFlat" id="StyleGoldButton"]
+bg_color = Color(1, 0.71, 0.18, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.94, 0.65, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.48, 0.21, 0.03, 0.26)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleUnlock"]
+bg_color = Color(0.08, 0.34, 0.65, 0.76)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.86, 0.96, 1, 0.75)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StylePath"]
+bg_color = Color(0.10, 0.38, 0.73, 0.15)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.21, 0.61, 0.95, 0.50)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleRecord"]
+bg_color = Color(0.08, 0.33, 0.64, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.83, 0.34, 0.72)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
 
 [node name="Tower" type="Control"]
 layout_mode = 3
@@ -69,18 +112,41 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.15, 0.36, 0.62, 0.13)
+color = Color(0.09, 0.28, 0.59, 0.13)
+mouse_filter = 2
+
+[node name="HeaderSparkle" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 276.0
+offset_top = 10.0
+offset_right = 358.0
+offset_bottom = 125.0
+texture = ExtResource("8_sparkle")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+modulate = Color(0.62, 0.87, 1, 0.55)
+
+[node name="HeaderPlaque" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 61.0
+offset_top = 8.0
+offset_right = 314.0
+offset_bottom = 62.0
+texture = ExtResource("3_title_plaque")
+expand_mode = 1
+stretch_mode = 6
 mouse_filter = 2
 
 [node name="Title" type="Label" parent="."]
 layout_mode = 0
-offset_left = 70.0
-offset_top = 20.0
-offset_right = 305.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(0.12, 0.29, 0.57, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 0.94)
-theme_override_constants/outline_size = 5
+offset_left = 87.0
+offset_top = 18.0
+offset_right = 288.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 0.96, 0.73, 1)
+theme_override_colors/font_outline_color = Color(0.33, 0.11, 0.03, 1)
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 24
 text = "共鸣塔"
 horizontal_alignment = 1
@@ -90,161 +156,231 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_left = 14.0
 offset_top = 17.0
-offset_right = 64.0
-offset_bottom = 51.0
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleButton")
+offset_right = 62.0
+offset_bottom = 50.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.22, 0.44, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBlueButton")
 text = "返回"
 
-[node name="UnlockText" type="Label" parent="."]
-unique_name_in_owner = true
+[node name="UnlockPill" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 64.0
-offset_right = 345.0
-offset_bottom = 88.0
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_outline_color = Color(1, 1, 1, 0.92)
-theme_override_constants/outline_size = 3
+offset_left = 43.0
+offset_top = 68.0
+offset_right = 332.0
+offset_bottom = 94.0
+theme_override_styles/panel = SubResource("StyleUnlock")
+
+[node name="UnlockText" type="Label" parent="UnlockPill"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_outline_color = Color(0.04, 0.19, 0.42, 0.95)
+theme_override_constants/outline_size = 2
 text = "未解锁：通关主线第 8 关后开放"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="StatusPanel" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 101.0
-offset_right = 361.0
-offset_bottom = 249.0
+offset_top = 122.0
+offset_right = 204.0
+offset_bottom = 275.0
 theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="PanelCaption" type="Label" parent="StatusPanel"]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 14.0
+offset_right = 112.0
+offset_bottom = 34.0
+theme_override_colors/font_color = Color(0.28, 0.50, 0.77, 1)
+theme_override_font_sizes/font_size = 11
+text = "本轮远征"
+
+[node name="TowerBadge" type="TextureRect" parent="StatusPanel"]
+layout_mode = 0
+offset_left = 143.0
+offset_top = 12.0
+offset_right = 179.0
+offset_bottom = 51.0
+texture = ExtResource("7_star")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+modulate = Color(1, 0.82, 0.27, 0.9)
 
 [node name="FloorValue" type="Label" parent="StatusPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 17.0
-offset_right = 325.0
-offset_bottom = 49.0
-theme_override_colors/font_color = Color(0.15, 0.36, 0.68, 1)
-theme_override_font_sizes/font_size = 21
-theme_override_colors/font_outline_color = Color(1, 1, 1, 0.9)
+offset_left = 23.0
+offset_top = 31.0
+offset_right = 136.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.12, 0.34, 0.68, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.92)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
 text = "第 1 层"
-horizontal_alignment = 1
 
 [node name="ThemeValue" type="Label" parent="StatusPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 53.0
-offset_right = 325.0
-offset_bottom = 77.0
-theme_override_colors/font_color = Color(0.18, 0.36, 0.60, 1)
+offset_left = 23.0
+offset_top = 64.0
+offset_right = 166.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(0.16, 0.38, 0.66, 1)
 theme_override_font_sizes/font_size = 14
 text = "风铃原野"
-horizontal_alignment = 1
 
 [node name="WaveValue" type="Label" parent="StatusPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 80.0
-offset_right = 325.0
-offset_bottom = 103.0
-theme_override_colors/font_color = Color(0.23, 0.45, 0.70, 1)
+offset_left = 23.0
+offset_top = 85.0
+offset_right = 166.0
+offset_bottom = 105.0
+theme_override_colors/font_color = Color(0.26, 0.49, 0.74, 1)
 theme_override_font_sizes/font_size = 13
 text = "第 1/5 波"
-horizontal_alignment = 1
+horizontal_alignment = 2
+
+[node name="PathRail" type="Panel" parent="StatusPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 114.0
+offset_right = 174.0
+offset_bottom = 143.0
+theme_override_styles/panel = SubResource("StylePath")
 
 [node name="Nodes" type="HBoxContainer" parent="StatusPanel"]
 layout_mode = 0
-offset_left = 57.0
-offset_top = 111.0
-offset_right = 290.0
-offset_bottom = 137.0
-theme_override_constants/separation = 18
+offset_left = 27.0
+offset_top = 117.0
+offset_right = 165.0
+offset_bottom = 141.0
+theme_override_constants/separation = 8
 
 [node name="Node1" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
 text = "1"
 
 [node name="Node2" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
 text = "2"
 
 [node name="Node3" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
 text = "3"
 
 [node name="Node4" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
 text = "4"
 
 [node name="Node5" type="Label" parent="StatusPanel/Nodes"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
 text = "BOSS"
 
 [node name="StartButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 61.0
-offset_top = 264.0
-offset_right = 314.0
-offset_bottom = 316.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_outline_color = Color(0.28, 0.08, 0.02, 1)
+offset_left = 18.0
+offset_top = 288.0
+offset_right = 202.0
+offset_bottom = 343.0
+theme_override_colors/font_color = Color(0.31, 0.12, 0.02, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.74, 1)
 theme_override_constants/outline_size = 3
-theme_override_styles/normal = SubResource("StylePrimary")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleGoldButton")
 text = "开启远征"
 
-[node name="RecordValue" type="Label" parent="."]
-unique_name_in_owner = true
+[node name="RecordPill" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 22.0
-offset_top = 329.0
-offset_right = 353.0
-offset_bottom = 355.0
-theme_override_colors/font_color = Color(0.17, 0.37, 0.64, 1)
+offset_left = 18.0
+offset_top = 351.0
+offset_right = 202.0
+offset_bottom = 381.0
+theme_override_styles/panel = SubResource("StyleRecord")
+
+[node name="RecordValue" type="Label" parent="RecordPill"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.69, 1)
 theme_override_font_sizes/font_size = 13
-theme_override_colors/font_outline_color = Color(1, 1, 1, 0.9)
-theme_override_constants/outline_size = 2
 text = "最高 0 层  ·  单回合 0"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="RankPanel" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 368.0
+offset_top = 391.0
 offset_right = 361.0
-offset_bottom = 640.0
+offset_bottom = 644.0
 theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="RankCaption" type="Label" parent="RankPanel"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 15.0
+offset_right = 188.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
+theme_override_font_sizes/font_size = 14
+text = "远行者记录"
 
 [node name="ClimbTab" type="Button" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 21.0
-offset_top = 16.0
+offset_left = 20.0
+offset_top = 44.0
 offset_right = 166.0
-offset_bottom = 49.0
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleButton")
+offset_bottom = 80.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBlueButton")
+theme_override_styles/hover = SubResource("StyleBlueButton")
+theme_override_styles/pressed = SubResource("StyleBlueButton")
 toggle_mode = true
 text = "登塔榜"
 
@@ -252,81 +388,83 @@ text = "登塔榜"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 181.0
-offset_top = 16.0
-offset_right = 326.0
-offset_bottom = 49.0
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleButton")
+offset_top = 44.0
+offset_right = 327.0
+offset_bottom = 80.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBlueButton")
+theme_override_styles/hover = SubResource("StyleBlueButton")
+theme_override_styles/pressed = SubResource("StyleBlueButton")
 toggle_mode = true
 text = "爆发榜"
 
 [node name="Rank0" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 67.0
-offset_right = 326.0
-offset_bottom = 91.0
+offset_left = 27.0
+offset_top = 96.0
+offset_right = 320.0
+offset_bottom = 118.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank1" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 95.0
-offset_right = 326.0
-offset_bottom = 119.0
+offset_left = 27.0
+offset_top = 120.0
+offset_right = 320.0
+offset_bottom = 142.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank2" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 123.0
-offset_right = 326.0
-offset_bottom = 147.0
+offset_left = 27.0
+offset_top = 144.0
+offset_right = 320.0
+offset_bottom = 166.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank3" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 151.0
-offset_right = 326.0
-offset_bottom = 175.0
+offset_left = 27.0
+offset_top = 168.0
+offset_right = 320.0
+offset_bottom = 190.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank4" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 179.0
-offset_right = 326.0
-offset_bottom = 203.0
+offset_left = 27.0
+offset_top = 192.0
+offset_right = 320.0
+offset_bottom = 214.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank5" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 207.0
-offset_right = 326.0
-offset_bottom = 231.0
+offset_left = 27.0
+offset_top = 216.0
+offset_right = 320.0
+offset_bottom = 238.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13
 
 [node name="Rank6" type="Label" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 235.0
-offset_right = 326.0
-offset_bottom = 259.0
+offset_left = 27.0
+offset_top = 240.0
+offset_right = 320.0
+offset_bottom = 262.0
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
 theme_override_font_sizes/font_size = 13

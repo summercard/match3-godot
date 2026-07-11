@@ -12,6 +12,9 @@ var _service: MailboxService = null
 var _selected_instance_id := ""
 var _selected_mail_id := ""
 var _sending := false
+var _arrival_played := false
+var _tab_inactive_style: StyleBox
+var _tab_active_style: StyleBox
 
 @onready var _inbox_panel: Control = %InboxPanel
 @onready var _blessing_panel: Control = %BlessingPanel
@@ -26,11 +29,16 @@ var _sending := false
 @onready var _blessing_status: Label = %BlessingStatus
 @onready var _send_button: Button = %SendButton
 @onready var _star: Control = %FlyingStar
+@onready var _blessing_star_trail: Control = %BlessingStarTrail
+@onready var _arrival_star: Control = %ArrivalStar
+@onready var _arrival_trail: Control = %ArrivalTrail
 
 
 func _ready() -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_service = MailboxServiceScript.new(_storage) if _storage != null else null
+	_tab_inactive_style = _inbox_tab.get_theme_stylebox("normal")
+	_tab_active_style = _inbox_tab.get_theme_stylebox("pressed")
 	for button in [_inbox_tab, _blessing_tab, _claim_button, _send_button, %PrevAdventurer, %NextAdventurer, %BackButton]:
 		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 		button.add_child(feedback)
@@ -45,7 +53,12 @@ func _ready() -> void:
 	for index in _mail_rows.size():
 		_mail_rows[index].pressed.connect(_open_mail_index.bind(index))
 	_star.visible = false
+	_blessing_star_trail.visible = false
+	_arrival_star.visible = false
+	_arrival_trail.visible = false
+	_show_inbox()
 	_refresh()
+	call_deferred("_play_new_mail_arrival_if_needed")
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -73,6 +86,7 @@ func _show_inbox() -> void:
 	_blessing_panel.visible = false
 	_inbox_tab.button_pressed = true
 	_blessing_tab.button_pressed = false
+	_update_tab_visuals(true)
 
 
 func _show_blessing() -> void:
@@ -80,6 +94,16 @@ func _show_blessing() -> void:
 	_blessing_panel.visible = true
 	_inbox_tab.button_pressed = false
 	_blessing_tab.button_pressed = true
+	_update_tab_visuals(false)
+
+
+func _update_tab_visuals(inbox_active: bool) -> void:
+	if _tab_inactive_style == null or _tab_active_style == null:
+		return
+	_inbox_tab.add_theme_stylebox_override("normal", _tab_active_style if inbox_active else _tab_inactive_style)
+	_blessing_tab.add_theme_stylebox_override("normal", _tab_inactive_style if inbox_active else _tab_active_style)
+	_inbox_tab.add_theme_color_override("font_color", Color.WHITE if inbox_active else Color(0.14, 0.34, 0.60, 1))
+	_blessing_tab.add_theme_color_override("font_color", Color(0.14, 0.34, 0.60, 1) if inbox_active else Color.WHITE)
 
 
 func _refresh_blessing(owned: Array, state: Dictionary) -> void:
@@ -183,26 +207,78 @@ func _send_blessing() -> void:
 	if not bool(result.get("ok", false)):
 		_blessing_status.text = "暂时无法送出祝福。"
 		return
+	# 新回信在星星起飞时就已经抵达收件箱；无需等待完整仪式动画结束。
+	_refresh_inbox(_service.get_state())
 	_sending = true
 	_send_button.disabled = true
 	_blessing_status.text = "祝福星星正在飞往远方…"
-	_star.position = Vector2(170.0, 344.0)
+	_star.position = Vector2(238.0, 356.0)
+	_star.scale = Vector2(0.56, 0.56)
 	_star.rotation = 0.0
 	_star.modulate = Color(1.0, 0.92, 0.36, 1.0)
 	_star.visible = true
+	_blessing_star_trail.position = Vector2(207.0, 292.0)
+	_blessing_star_trail.scale = Vector2(0.65, 0.65)
+	_blessing_star_trail.modulate = Color(1.0, 0.78, 0.22, 0.0)
+	_blessing_star_trail.visible = true
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(_star, "position", Vector2(303.0, 126.0), 0.78).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(_star, "scale", Vector2(0.42, 0.42), 0.78)
-	tween.tween_property(_star, "rotation", TAU * 0.7, 0.78)
-	tween.tween_property(_star, "modulate:a", 0.0, 0.78)
+	tween.tween_property(_star, "position", Vector2(245.0, -136.0), 1.60).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_star, "scale", Vector2(1.58, 1.58), 0.82).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_star, "rotation", TAU * 2.2, 1.60)
+	tween.tween_property(_star, "modulate:a", 0.0, 0.48).set_delay(1.12)
+	tween.tween_property(_blessing_star_trail, "position", Vector2(214.0, -96.0), 1.52).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_blessing_star_trail, "scale", Vector2(1.40, 1.40), 1.05)
+	tween.tween_property(_blessing_star_trail, "modulate:a", 0.74, 0.22)
+	tween.tween_property(_blessing_star_trail, "modulate:a", 0.0, 0.44).set_delay(1.06)
 	await tween.finished
 	_star.visible = false
+	_blessing_star_trail.visible = false
 	_star.scale = Vector2.ONE
 	_star.rotation = 0.0
 	_sending = false
 	_blessing_status.text = "祝福已飞向远方。信箱收到了新的回应。"
 	_refresh()
+
+
+func _play_new_mail_arrival_if_needed() -> void:
+	if _arrival_played or _service == null or not is_inside_tree():
+		return
+	var unread := int(_service.get_state().get("unread_count", 0))
+	if unread <= 0:
+		return
+	_arrival_played = true
+	await get_tree().create_timer(0.35).timeout
+	if not is_inside_tree():
+		return
+	_arrival_star.position = Vector2(252.0, -94.0)
+	_arrival_star.scale = Vector2(0.34, 0.34)
+	_arrival_star.rotation = -0.35
+	_arrival_star.modulate = Color(1.0, 0.93, 0.42, 1.0)
+	_arrival_star.visible = true
+	_arrival_trail.position = Vector2(214.0, -112.0)
+	_arrival_trail.scale = Vector2(0.46, 0.46)
+	_arrival_trail.modulate = Color(1.0, 0.78, 0.25, 0.0)
+	_arrival_trail.visible = true
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(_arrival_star, "position", Vector2(252.0, 150.0), 1.16).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	tween.tween_property(_arrival_star, "scale", Vector2(1.12, 1.12), 0.92).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_arrival_star, "rotation", TAU * 1.25, 1.16)
+	tween.tween_property(_arrival_trail, "position", Vector2(218.0, 122.0), 1.10).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	tween.tween_property(_arrival_trail, "scale", Vector2(1.08, 1.08), 0.95)
+	tween.tween_property(_arrival_trail, "modulate:a", 0.72, 0.20)
+	tween.tween_property(_arrival_trail, "modulate:a", 0.0, 0.34).set_delay(0.78)
+	await tween.finished
+	var settle := create_tween()
+	settle.set_parallel(true)
+	settle.tween_property(_arrival_star, "scale", Vector2(0.70, 0.70), 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	settle.tween_property(_arrival_star, "modulate:a", 0.0, 0.26)
+	await settle.finished
+	_arrival_star.visible = false
+	_arrival_trail.visible = false
+	_arrival_star.scale = Vector2.ONE
+	_arrival_star.rotation = 0.0
 
 
 func _attachment_label(attachments: Array) -> String:
