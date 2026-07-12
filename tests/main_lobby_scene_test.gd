@@ -59,7 +59,10 @@ func _run() -> void:
 	_expect(mailbox_entry.position.y >= (lobby.get_node("Header/RankScore") as Control).position.y, "mailbox entry should sit below the achievement score")
 	var mailbox_badge := lobby.get_node("%MailboxBadge") as TextureRect
 	_expect(mailbox_badge != null and mailbox_badge.texture != null, "mailbox should expose a star notification badge")
+	_expect(mailbox_badge.size.x <= 20.0 and mailbox_badge.position.x <= 30.0, "mailbox badge should be compact and sit near the envelope corner")
 	_expect(lobby.has_node("%MailboxArrivalStar"), "new blessing arrival should animate in the lobby")
+	var mailbox_burst := lobby.get_node("%MailboxArrivalBurst") as Control
+	_expect(mailbox_burst != null and mailbox_burst.has_method("play"), "mailbox arrival should include a lightweight colored particle burst")
 	_expect((lobby.get_node("%BlessingArrivalMessage") as Label).text == "远方的一个陌生人送来了祝福", "lobby should show the blessing-arrival message")
 	_expect(not lobby.has_node("Header/TowerButton") and not lobby.has_node("Header/MailboxButton"), "tower and mailbox entries should no longer occupy the header")
 	var lobby_font := (lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).get_theme_font("font") as FontVariation

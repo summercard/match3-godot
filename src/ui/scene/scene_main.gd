@@ -74,6 +74,7 @@ var _player: Dictionary = {
 @onready var _rank_score: Label = %RankScore
 @onready var _mailbox_badge: TextureRect = %MailboxBadge
 @onready var _mailbox_arrival_star: TextureRect = %MailboxArrivalStar
+@onready var _mailbox_arrival_burst: Control = %MailboxArrivalBurst
 @onready var _blessing_arrival_message: Label = %BlessingArrivalMessage
 
 func _ready() -> void:
@@ -154,16 +155,17 @@ func _play_mailbox_blessing_arrival_if_needed() -> void:
 	await get_tree().create_timer(0.30).timeout
 	if not is_inside_tree():
 		return
-	var mailbox_button := %MailboxButton as Control
-	var target := mailbox_button.position + mailbox_button.size * 0.33
+	var target_center: Vector2 = _mailbox_badge.get_global_rect().get_center() - get_global_rect().position
+	var star_half_size := _mailbox_arrival_star.size * 0.5
 	_mailbox_arrival_star.position = Vector2(308.0, -42.0)
+	_mailbox_arrival_star.pivot_offset = star_half_size
 	_mailbox_arrival_star.scale = Vector2(0.35, 0.35)
 	_mailbox_arrival_star.rotation = -0.45
 	_mailbox_arrival_star.modulate = Color(1.0, 0.94, 0.42, 1.0)
 	_mailbox_arrival_star.visible = true
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(_mailbox_arrival_star, "position", target, 1.05).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	tween.tween_property(_mailbox_arrival_star, "position", target_center - star_half_size, 1.05).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
 	tween.tween_property(_mailbox_arrival_star, "scale", Vector2(1.08, 1.08), 0.78).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_mailbox_arrival_star, "rotation", TAU * 1.2, 1.05)
 	tween.tween_property(_mailbox_arrival_star, "modulate:a", 0.0, 0.28).set_delay(0.86)
@@ -171,6 +173,11 @@ func _play_mailbox_blessing_arrival_if_needed() -> void:
 	_mailbox_arrival_star.visible = false
 	_mailbox_arrival_star.scale = Vector2.ONE
 	_mailbox_arrival_star.rotation = 0.0
+	_mailbox_arrival_burst.call("play", target_center)
+	_mailbox_badge.pivot_offset = _mailbox_badge.size * 0.5
+	var badge_tween := create_tween()
+	badge_tween.tween_property(_mailbox_badge, "scale", Vector2(1.38, 1.38), 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	badge_tween.tween_property(_mailbox_badge, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_blessing_arrival_message.modulate.a = 0.0
 	_blessing_arrival_message.visible = true
 	var message_tween := create_tween()
