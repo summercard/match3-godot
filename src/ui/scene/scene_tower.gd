@@ -12,12 +12,15 @@ var _storage: Node = null
 var _controller: TowerRunController = null
 var _show_burst := false
 
+@onready var _unlock_pill: Panel = %UnlockPill
 @onready var _unlock_text: Label = %UnlockText
+@onready var _status_panel: Panel = %StatusPanel
 @onready var _floor_value: Label = %FloorValue
 @onready var _wave_value: Label = %WaveValue
 @onready var _theme_value: Label = %ThemeValue
 @onready var _record_value: Label = %RecordValue
-@onready var _start_button: Button = %StartButton
+@onready var _start_button: BaseButton = %StartButton
+@onready var _start_button_text: Label = %StartButtonText
 @onready var _climb_tab: Button = %ClimbTab
 @onready var _burst_tab: Button = %BurstTab
 @onready var _node_labels: Array[Label] = [%Node1, %Node2, %Node3, %Node4, %Node5]
@@ -31,6 +34,8 @@ func _ready() -> void:
 		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 		button.add_child(feedback)
 		feedback.setup(button, CartoonButtonFeedback.Profile.ENTRY if button == _start_button else CartoonButtonFeedback.Profile.NAV)
+		feedback.set_touch_feedback(true)
+		feedback.set_burst_enabled(false)
 	_start_button.pressed.connect(_start_or_continue)
 	_climb_tab.pressed.connect(func(): _show_burst = false; _refresh())
 	_burst_tab.pressed.connect(func(): _show_burst = true; _refresh())
@@ -49,14 +54,16 @@ func _refresh() -> void:
 	var unlocked := _controller.is_unlocked()
 	var state := _controller.get_state()
 	var floor := TowerRulesScript.current_floor_data(state)
-	_unlock_text.text = "已解锁：通关主线第 8 关" if unlocked else "未解锁：通关主线第 8 关后开放"
-	_unlock_text.modulate = Color(0.66, 0.94, 0.65) if unlocked else Color(1.0, 0.70, 0.50)
+	_unlock_pill.visible = not unlocked
+	_unlock_text.text = "未解锁：通关主线第 8 关后开放"
+	_unlock_text.modulate = Color(1.0, 0.70, 0.50)
+	_status_panel.position.y = 138.0 if unlocked else 122.0
 	_floor_value.text = "第 %d 层" % int(state.get("current_floor", 1))
 	_wave_value.text = "第 %d/%d 波" % [int(floor.get("towerWave", 1)), int(floor.get("towerWaveCount", 5))]
 	_theme_value.text = str(floor.get("towerTheme", "共鸣塔"))
 	_record_value.text = "最高 %d 层  ·  单回合 %d" % [int(state.get("highest_floor", 0)), int(state.get("highest_turn_damage", 0))]
 	_start_button.disabled = not unlocked
-	_start_button.text = "继续远征" if bool(state.get("active", false)) else "开启远征"
+	_start_button_text.text = "继续远征" if bool(state.get("active", false)) else "开启远征"
 	for index in _node_labels.size():
 		var label := _node_labels[index]
 		var global_floor := int(floor.get("current_floor", state.get("current_floor", 1))) - int(floor.get("towerWave", 1)) + index + 1

@@ -24,6 +24,20 @@ const CAPTURE_ITEM_PATHS := [
 	"BottomControls/Item2",
 ]
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
+const ELEMENT_ICON_PATHS := {
+	"fire": "res://assets/images/ui/elements/element_fire.png",
+	"water": "res://assets/images/ui/elements/element_water.png",
+	"grass": "res://assets/images/ui/elements/element_grass.png",
+	"thunder": "res://assets/images/ui/elements/element_thunder.png",
+	"earth": "res://assets/images/ui/elements/element_earth.png",
+	"wind": "res://assets/images/ui/elements/element_wind.png",
+	"light": "res://assets/images/ui/elements/element_light.png",
+	"dark": "res://assets/images/ui/elements/element_dark.png",
+	"ice": "res://assets/images/ui/elements/element_water.png",
+	"void": "res://assets/images/ui/elements/element_dark.png",
+	"temporal": "res://assets/images/ui/elements/element_light.png",
+	"star": "res://assets/images/ui/elements/element_light.png",
+}
 const BOSS_STATUS_OFFSET_Y: float = -56.0
 const BATTLE_END_OVERLAY_PATH := NodePath("BattleEndOverlay")
 const BATTLE_END_TITLE_PATH := NodePath("BattleEndOverlay/Banner/Title")
@@ -528,6 +542,11 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_b
 	var hp_label := slot.get_node("HpText") as Label
 	hp_label.text = "%d/%d" % [hp, max_hp]
 	_sync_hp_label_layout(slot, hp_label)
+	var element_icon := slot.get_node_or_null("ElementIcon") as TextureRect
+	if element_icon != null:
+		var element := str(unit.get("boardAffinity", unit.get("element", "fire")))
+		element_icon.texture = _get_texture(str(ELEMENT_ICON_PATHS.get(element, ELEMENT_ICON_PATHS["fire"])))
+		element_icon.visible = element_icon.texture != null
 
 var _portrait_base_rect_cache: Dictionary = {}
 var _status_base_rect_cache: Dictionary = {}
@@ -553,7 +572,7 @@ func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) ->
 
 func _apply_combatant_status_offset(slot: Control, is_boss: bool) -> void:
 	var offset := Vector2(0.0, BOSS_STATUS_OFFSET_Y if is_boss else 0.0)
-	for node_name in ["Name", "HpBar", "HpFrameBase", "HpFrame", "HpText", "Beads", "Orb"]:
+	for node_name in ["Name", "HpBar", "HpFrameBase", "HpFrame", "HpText", "ElementIcon", "Beads", "Orb"]:
 		var node := slot.get_node_or_null(node_name) as Control
 		if node == null:
 			continue

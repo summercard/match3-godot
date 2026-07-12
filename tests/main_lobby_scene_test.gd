@@ -50,10 +50,17 @@ func _run() -> void:
 		"MailboxButton": "mailbox",
 	}
 	_expect((lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).text == "精灵课堂", "lobby ranch entry should be labeled as the spirit classroom")
-	for entry_path in ["PrimaryButtons/TowerButton", "PrimaryButtons/MailboxButton"]:
-		var entry := lobby.get_node(entry_path) as TextureButton
-		var shop_entry := lobby.get_node("PrimaryButtons/ShopButton") as TextureButton
-		_expect(entry != null and entry.texture_normal == shop_entry.texture_normal, "%s should reuse the shop entry button art" % entry_path)
+	var tower_entry := lobby.get_node("PrimaryButtons/TowerButton") as TextureButton
+	var shop_entry := lobby.get_node("PrimaryButtons/ShopButton") as TextureButton
+	_expect(tower_entry != null and tower_entry.texture_normal == shop_entry.texture_normal, "tower should reuse the shop entry button art")
+	var mailbox_entry := lobby.get_node("PrimaryButtons/MailboxButton") as TextureButton
+	_expect(mailbox_entry != null and mailbox_entry.texture_normal.resource_path == "res://assets/images/mailbox_new/mailbox_lobby_envelope_icon_v1.png", "mailbox should use the square envelope icon")
+	_expect(mailbox_entry.position.x <= (lobby.get_node("Header/RankPanel") as Control).position.x + 2.0, "mailbox entry should align to the left edge of the achievement card")
+	_expect(mailbox_entry.position.y >= (lobby.get_node("Header/RankScore") as Control).position.y, "mailbox entry should sit below the achievement score")
+	var mailbox_badge := lobby.get_node("%MailboxBadge") as TextureRect
+	_expect(mailbox_badge != null and mailbox_badge.texture != null, "mailbox should expose a star notification badge")
+	_expect(lobby.has_node("%MailboxArrivalStar"), "new blessing arrival should animate in the lobby")
+	_expect((lobby.get_node("%BlessingArrivalMessage") as Label).text == "远方的一个陌生人送来了祝福", "lobby should show the blessing-arrival message")
 	_expect(not lobby.has_node("Header/TowerButton") and not lobby.has_node("Header/MailboxButton"), "tower and mailbox entries should no longer occupy the header")
 	var lobby_font := (lobby.get_node("PrimaryButtons/RanchButton/Text") as Label).get_theme_font("font") as FontVariation
 	_expect(lobby_font != null and lobby_font.base_font != null, "lobby labels should use the bundled rounded-font profile")
@@ -64,9 +71,9 @@ func _run() -> void:
 		_expect(button != null, "%s should be editable TextureButton" % button_name)
 		_expect(button.has_node("CartoonFeedback"), "%s should expose cartoon feedback" % button_name)
 		var feedback_profile: Dictionary = button.get_node("CartoonFeedback").call("get_feedback_profile")
-		_expect(float(feedback_profile.get("press_scale", 1.0)) < 1.0, "%s should compress on press" % button_name)
-		_expect(float(feedback_profile.get("hover_scale", 1.0)) > 1.0, "%s should lift on hover" % button_name)
-		_expect(bool(feedback_profile.get("burst", false)), "%s should expose a release burst" % button_name)
+		_expect(float(feedback_profile.get("press_scale", 1.0)) > 1.0, "%s should enlarge while pressed for touch feedback" % button_name)
+		_expect(is_equal_approx(float(feedback_profile.get("hover_scale", 1.0)), 1.0), "%s should not change on hover in the mobile lobby" % button_name)
+		_expect(not bool(feedback_profile.get("burst", true)), "%s should not show a desktop-style release burst" % button_name)
 		button.pressed.emit()
 		await create_timer(0.23 if button_name == "StartButton" else 0.17).timeout
 	_expect(emitted_ids == expected_buttons.values(), "all lobby buttons should preserve their navigation ids")

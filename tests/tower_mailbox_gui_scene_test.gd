@@ -33,12 +33,12 @@ func _run() -> void:
 	main.switch_scene("tower")
 	await process_frame
 	tower = main.get_current_scene()
-	_expect(tower != null and not (tower.get_node("%StartButton") as Button).disabled, "tower start should enable after stage 1-8")
+	_expect(tower != null and not (tower.get_node("%StartButton") as BaseButton).disabled, "tower start should enable after stage 1-8")
 	var controller = tower.get("_controller")
 	var started: Dictionary = controller.start_new_run() if controller != null and controller.has_method("start_new_run") else {}
 	_expect(bool(started.get("ok", false)), "tower UI route test should create an active expedition")
 	if bool(started.get("ok", false)):
-		(tower.get_node("%StartButton") as Button).pressed.emit()
+		(tower.get_node("%StartButton") as BaseButton).pressed.emit()
 		for _frame in range(44):
 			await process_frame
 		_expect(main.get_current_scene_name() == "tower_battle", "tower expedition should route to its dedicated battle scene")

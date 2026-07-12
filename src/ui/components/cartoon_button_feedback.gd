@@ -18,6 +18,8 @@ var _rest_self_modulate := Color.WHITE
 var _hovered := false
 var _pressed := false
 var _burst_enabled := true
+var _hover_feedback_enabled := true
+var _press_enlarge_enabled := false
 var _elapsed := 0.0
 var _redraw_accum := 0.0
 var _burst_progress := 1.0
@@ -51,6 +53,14 @@ func set_burst_enabled(enabled: bool) -> void:
 	_burst_enabled = enabled
 	if not _burst_enabled:
 		_burst_progress = 1.0
+	_update_processing()
+
+
+func set_touch_feedback(enabled: bool) -> void:
+	_hover_feedback_enabled = not enabled
+	_press_enlarge_enabled = enabled
+	if enabled:
+		_hovered = false
 	_update_processing()
 
 
@@ -109,6 +119,8 @@ func _draw() -> void:
 
 
 func _on_mouse_entered() -> void:
+	if not _hover_feedback_enabled:
+		return
 	_hovered = true
 	_update_processing()
 	if not _pressed:
@@ -116,6 +128,8 @@ func _on_mouse_entered() -> void:
 
 
 func _on_mouse_exited() -> void:
+	if not _hover_feedback_enabled:
+		return
 	_hovered = false
 	_update_processing()
 	if not _pressed:
@@ -123,10 +137,14 @@ func _on_mouse_exited() -> void:
 
 
 func _on_focus_entered() -> void:
+	if not _hover_feedback_enabled:
+		return
 	_on_mouse_entered()
 
 
 func _on_focus_exited() -> void:
+	if not _hover_feedback_enabled:
+		return
 	_on_mouse_exited()
 
 
@@ -220,6 +238,8 @@ func _target_modulate(scale_factor: float) -> Color:
 
 
 func _press_scale() -> float:
+	if _press_enlarge_enabled:
+		return 1.075
 	match _profile:
 		Profile.PRIMARY:
 			return 0.90
@@ -232,6 +252,8 @@ func _press_scale() -> float:
 
 
 func _hover_scale() -> float:
+	if not _hover_feedback_enabled:
+		return 1.0
 	match _profile:
 		Profile.PRIMARY:
 			return 1.035

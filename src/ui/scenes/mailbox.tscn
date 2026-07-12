@@ -115,6 +115,34 @@ corner_radius_bottom_left = 20
 [sub_resource type="StyleBoxFlat" id="StyleClear"]
 bg_color = Color(1, 1, 1, 0)
 
+[sub_resource type="StyleBoxFlat" id="StyleClaimedButton"]
+bg_color = Color(0.12, 0.58, 0.92, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.92, 0.98, 1, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.05, 0.22, 0.48, 0.30)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleDeleteButton"]
+bg_color = Color(0.93, 0.27, 0.28, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.87, 0.80, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.42, 0.06, 0.08, 0.28)
+shadow_size = 5
+
 [node name="Mailbox" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -327,12 +355,96 @@ offset_right = 351.0
 offset_bottom = 516.0
 theme_override_styles/panel = SubResource("StylePanel")
 
+[node name="MailboxTotals" type="Panel" parent="InboxPanel"]
+layout_mode = 0
+offset_left = 149.0
+offset_top = 155.0
+offset_right = 351.0
+offset_bottom = 246.0
+theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="TotalsCaption" type="Label" parent="InboxPanel/MailboxTotals"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 202.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.17, 0.38, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+text = "祝福星星总量"
+horizontal_alignment = 1
+
+[node name="SentStarCaption" type="Label" parent="InboxPanel/MailboxTotals"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 33.0
+offset_right = 95.0
+offset_bottom = 53.0
+theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
+theme_override_font_sizes/font_size = 11
+text = "送出 ★"
+horizontal_alignment = 1
+
+[node name="SentStarTotal" type="Label" parent="InboxPanel/MailboxTotals"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 13.0
+offset_top = 50.0
+offset_right = 95.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.95, 0.55, 0.08, 1)
+theme_override_font_sizes/font_size = 22
+text = "0"
+horizontal_alignment = 1
+
+[node name="ReceivedStarCaption" type="Label" parent="InboxPanel/MailboxTotals"]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 33.0
+offset_right = 189.0
+offset_bottom = 53.0
+theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
+theme_override_font_sizes/font_size = 11
+text = "收到 ★"
+horizontal_alignment = 1
+
+[node name="ReceivedStarTotal" type="Label" parent="InboxPanel/MailboxTotals"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 107.0
+offset_top = 50.0
+offset_right = 189.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.95, 0.55, 0.08, 1)
+theme_override_font_sizes/font_size = 22
+text = "0"
+horizontal_alignment = 1
+
+[node name="SenderPortraitFrame" type="Panel" parent="InboxPanel/DetailPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 15.0
+offset_top = 12.0
+offset_right = 65.0
+offset_bottom = 62.0
+theme_override_styles/panel = SubResource("StylePortrait")
+
+[node name="SenderPortrait" type="TextureRect" parent="InboxPanel/DetailPanel/SenderPortraitFrame"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 46.0
+offset_bottom = 46.0
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
 [node name="MailSeal" type="TextureRect" parent="InboxPanel/DetailPanel"]
 layout_mode = 0
-offset_left = 72.0
-offset_top = 15.0
-offset_right = 130.0
-offset_bottom = 78.0
+offset_left = 143.0
+offset_top = 16.0
+offset_right = 180.0
+offset_bottom = 56.0
 texture = ExtResource("3_star")
 expand_mode = 1
 stretch_mode = 5
@@ -356,14 +468,30 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_left = 23.0
 offset_top = 207.0
-offset_right = 179.0
+offset_right = 118.0
 offset_bottom = 255.0
 theme_override_colors/font_color = Color(0.31, 0.12, 0.02, 1)
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.74, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleGoldButton")
+theme_override_styles/disabled = SubResource("StyleClaimedButton")
 text = "领取附件"
+
+[node name="DeleteButton" type="Button" parent="InboxPanel/DetailPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 123.0
+offset_top = 207.0
+offset_right = 179.0
+offset_bottom = 255.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.48, 0.06, 0.08, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleDeleteButton")
+text = "删除"
 
 [node name="BlessingPanel" type="Control" parent="."]
 unique_name_in_owner = true
@@ -509,7 +637,6 @@ texture = ExtResource("3_star")
 expand_mode = 1
 stretch_mode = 5
 mouse_filter = 2
-
 [node name="RailStep" type="Label" parent="BlessingPanel/Panel/ActionRail"]
 visible = false
 layout_mode = 0
@@ -585,35 +712,6 @@ offset_left = 238.0
 offset_top = 356.0
 offset_right = 314.0
 offset_bottom = 432.0
-texture = ExtResource("3_star")
-expand_mode = 1
-stretch_mode = 5
-mouse_filter = 2
-
-[node name="ArrivalTrail" type="TextureRect" parent="."]
-unique_name_in_owner = true
-visible = false
-z_index = 29
-layout_mode = 0
-offset_left = 214.0
-offset_top = -112.0
-offset_right = 321.0
-offset_bottom = 38.0
-texture = ExtResource("8_sparkle")
-expand_mode = 1
-stretch_mode = 5
-mouse_filter = 2
-modulate = Color(1, 0.78, 0.25, 0.9)
-
-[node name="ArrivalStar" type="TextureRect" parent="."]
-unique_name_in_owner = true
-visible = false
-z_index = 30
-layout_mode = 0
-offset_left = 252.0
-offset_top = -94.0
-offset_right = 336.0
-offset_bottom = -10.0
 texture = ExtResource("3_star")
 expand_mode = 1
 stretch_mode = 5

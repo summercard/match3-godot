@@ -12,7 +12,6 @@ var _service: MailboxService = null
 var _selected_instance_id := ""
 var _selected_mail_id := ""
 var _sending := false
-var _arrival_played := false
 var _tab_inactive_style: StyleBox
 var _tab_active_style: StyleBox
 
@@ -24,14 +23,17 @@ var _tab_active_style: StyleBox
 @onready var _mail_rows: Array[Button] = [%Mail0, %Mail1, %Mail2, %Mail3]
 @onready var _mail_detail: Label = %MailDetail
 @onready var _claim_button: Button = %ClaimButton
+@onready var _delete_button: Button = %DeleteButton
+@onready var _sender_portrait: TextureRect = %SenderPortrait
+@onready var _sender_portrait_frame: Control = %SenderPortraitFrame
+@onready var _sent_star_total: Label = %SentStarTotal
+@onready var _received_star_total: Label = %ReceivedStarTotal
 @onready var _adventurer_name: Label = %AdventurerName
 @onready var _adventurer_portrait: TextureRect = %AdventurerPortrait
 @onready var _blessing_status: Label = %BlessingStatus
 @onready var _send_button: Button = %SendButton
 @onready var _star: Control = %FlyingStar
 @onready var _blessing_star_trail: Control = %BlessingStarTrail
-@onready var _arrival_star: Control = %ArrivalStar
-@onready var _arrival_trail: Control = %ArrivalTrail
 
 
 func _ready() -> void:
@@ -39,13 +41,14 @@ func _ready() -> void:
 	_service = MailboxServiceScript.new(_storage) if _storage != null else null
 	_tab_inactive_style = _inbox_tab.get_theme_stylebox("normal")
 	_tab_active_style = _inbox_tab.get_theme_stylebox("pressed")
-	for button in [_inbox_tab, _blessing_tab, _claim_button, _send_button, %PrevAdventurer, %NextAdventurer, %BackButton]:
+	for button in [_inbox_tab, _blessing_tab, _claim_button, _delete_button, _send_button, %PrevAdventurer, %NextAdventurer, %BackButton]:
 		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 		button.add_child(feedback)
 		feedback.setup(button, CartoonButtonFeedback.Profile.ENTRY if button == _send_button else CartoonButtonFeedback.Profile.NAV)
 	_inbox_tab.pressed.connect(func(): _show_inbox())
 	_blessing_tab.pressed.connect(func(): _show_blessing())
 	_claim_button.pressed.connect(_claim_selected_mail)
+	_delete_button.pressed.connect(_delete_selected_mail)
 	_send_button.pressed.connect(_send_blessing)
 	%PrevAdventurer.pressed.connect(func(): _cycle_adventurer(-1))
 	%NextAdventurer.pressed.connect(func(): _cycle_adventurer(1))
@@ -54,11 +57,8 @@ func _ready() -> void:
 		_mail_rows[index].pressed.connect(_open_mail_index.bind(index))
 	_star.visible = false
 	_blessing_star_trail.visible = false
-	_arrival_star.visible = false
-	_arrival_trail.visible = false
 	_show_inbox()
 	_refresh()
-	call_deferred("_play_new_mail_arrival_if_needed")
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -135,6 +135,8 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 func _refresh_inbox(state: Dictionary) -> void:
 	var inbox: Array = state.get("inbox", [])
 	var unread := int(state.get("unread_count", 0))
+	_sent_star_total.text = str(int(state.get("sent_blessing_stars", 0)))
+	_received_star_total.text = str(int(state.get("received_blessing_stars", 0)))
 	_unread_badge.visible = unread > 0
 	_unread_badge.text = str(unread)
 	for index in _mail_rows.size():
@@ -160,10 +162,19 @@ func _show_selected_mail(inbox: Array) -> void:
 	if mail.is_empty():
 		_mail_detail.text = "还没有邮件。\n\n选择一只冒险精灵，送出一颗祝福星星吧。"
 		_claim_button.disabled = true
+		_delete_button.disabled = true
+		_sender_portrait_frame.visible = false
 		return
 	_mail_detail.text = "%s\n\n%s\n\n%s" % [str(mail.get("sender_name", "远方的冒险者")), str(mail.get("body", "")), _attachment_label(mail.get("attachments", []))]
 	_claim_button.disabled = mail.get("claimed_at", null) != null
 	_claim_button.text = "已领取" if mail.get("claimed_at", null) != null else "领取附件"
+	var can_delete := mail.get("claimed_at", null) != null or (mail.get("attachments", []) as Array).is_empty()
+	_delete_button.disabled = not can_delete
+	_delete_button.tooltip_text = "请先领取附件" if not can_delete else "删除这封邮件"
+	var sender_monster_id := str(mail.get("sender_monster_id", ""))
+	var portrait_path := MonsterArtDBScript.get_art_path(sender_monster_id, "ranch")
+	_sender_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
+	_sender_portrait_frame.visible = _sender_portrait.texture != null
 
 
 func _open_mail_index(index: int) -> void:
@@ -181,6 +192,17 @@ func _claim_selected_mail() -> void:
 	var result := _service.claim_mail(_selected_mail_id)
 	if bool(result.get("ok", false)):
 		_mail_detail.text += "\n\n附件已收入背包。"
+	_refresh()
+
+
+func _delete_selected_mail() -> void:
+	if _selected_mail_id.is_empty():
+		return
+	var result := _service.delete_mail(_selected_mail_id)
+	if not bool(result.get("ok", false)):
+		_mail_detail.text += "\n\n请先领取附件后再删除。"
+		return
+	_selected_mail_id = ""
 	_refresh()
 
 
@@ -239,46 +261,6 @@ func _send_blessing() -> void:
 	_sending = false
 	_blessing_status.text = "祝福已飞向远方。信箱收到了新的回应。"
 	_refresh()
-
-
-func _play_new_mail_arrival_if_needed() -> void:
-	if _arrival_played or _service == null or not is_inside_tree():
-		return
-	var unread := int(_service.get_state().get("unread_count", 0))
-	if unread <= 0:
-		return
-	_arrival_played = true
-	await get_tree().create_timer(0.35).timeout
-	if not is_inside_tree():
-		return
-	_arrival_star.position = Vector2(252.0, -94.0)
-	_arrival_star.scale = Vector2(0.34, 0.34)
-	_arrival_star.rotation = -0.35
-	_arrival_star.modulate = Color(1.0, 0.93, 0.42, 1.0)
-	_arrival_star.visible = true
-	_arrival_trail.position = Vector2(214.0, -112.0)
-	_arrival_trail.scale = Vector2(0.46, 0.46)
-	_arrival_trail.modulate = Color(1.0, 0.78, 0.25, 0.0)
-	_arrival_trail.visible = true
-	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(_arrival_star, "position", Vector2(252.0, 150.0), 1.16).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
-	tween.tween_property(_arrival_star, "scale", Vector2(1.12, 1.12), 0.92).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(_arrival_star, "rotation", TAU * 1.25, 1.16)
-	tween.tween_property(_arrival_trail, "position", Vector2(218.0, 122.0), 1.10).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
-	tween.tween_property(_arrival_trail, "scale", Vector2(1.08, 1.08), 0.95)
-	tween.tween_property(_arrival_trail, "modulate:a", 0.72, 0.20)
-	tween.tween_property(_arrival_trail, "modulate:a", 0.0, 0.34).set_delay(0.78)
-	await tween.finished
-	var settle := create_tween()
-	settle.set_parallel(true)
-	settle.tween_property(_arrival_star, "scale", Vector2(0.70, 0.70), 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	settle.tween_property(_arrival_star, "modulate:a", 0.0, 0.26)
-	await settle.finished
-	_arrival_star.visible = false
-	_arrival_trail.visible = false
-	_arrival_star.scale = Vector2.ONE
-	_arrival_star.rotation = 0.0
 
 
 func _attachment_label(attachments: Array) -> String:

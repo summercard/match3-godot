@@ -10,6 +10,7 @@ signal button_pressed(btn_id: String)
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
+const MailboxRulesScript := preload("res://src/core/mailbox_rules.gd")
 
 # === 大厅入场动画时间线 ===
 const ENTRY_HEADER_DELAY := 0.00
@@ -19,6 +20,7 @@ const ENTRY_HEADER_DURATION := 0.34
 const ENTRY_PRIMARY_DURATION := 0.30
 const ENTRY_NAV_DURATION := 0.34
 var _entry_played: bool = false
+var _mailbox_arrival_played: bool = false
 const BUTTON_DESCRIPTIONS := {
 	"start": "选择关卡，开始三消冒险战斗！",
 	"team": "编队你的精灵伙伴，打造最强阵容",
@@ -70,7 +72,9 @@ var _player: Dictionary = {
 @onready var _diamond_value: Label = %DiamondValue
 @onready var _stamina_value: Label = %StaminaValue
 @onready var _rank_score: Label = %RankScore
-@onready var _mailbox_badge: Label = %MailboxBadge
+@onready var _mailbox_badge: TextureRect = %MailboxBadge
+@onready var _mailbox_arrival_star: TextureRect = %MailboxArrivalStar
+@onready var _blessing_arrival_message: Label = %BlessingArrivalMessage
 
 func _ready() -> void:
 	instance = self
@@ -95,6 +99,9 @@ func _ready() -> void:
 			plus_button.tooltip_text = BUTTON_DESCRIPTIONS["shop"]
 	_update_player_display()
 	_maybe_play_entry()
+	_mailbox_arrival_star.visible = false
+	_blessing_arrival_message.visible = false
+	call_deferred("_play_mailbox_blessing_arrival_if_needed")
 
 func init(_data: Dictionary = {}) -> void:
 	_load_player_data()
@@ -133,9 +140,45 @@ func _update_player_display() -> void:
 	if _storage != null and _storage.has_method("get_tower_state") and _storage.has_method("is_tower_unlocked") and bool(_storage.call("is_tower_unlocked")):
 		_rank_score.text = "最高 %d 层" % int((_storage.call("get_tower_state") as Dictionary).get("highest_floor", 0))
 	if _storage != null and _storage.has_method("get_mailbox_state"):
-		var unread := int((_storage.call("get_mailbox_state") as Dictionary).get("unread_count", 0))
-		_mailbox_badge.visible = unread > 0
-		_mailbox_badge.text = str(unread)
+		var mailbox_state := _storage.call("get_mailbox_state") as Dictionary
+		_mailbox_badge.visible = MailboxRulesScript.count_unread_blessings(mailbox_state.get("inbox", [])) > 0
+
+
+func _play_mailbox_blessing_arrival_if_needed() -> void:
+	if _mailbox_arrival_played or _storage == null or not _storage.has_method("get_mailbox_state"):
+		return
+	var state := _storage.call("get_mailbox_state") as Dictionary
+	if MailboxRulesScript.count_unread_blessings(state.get("inbox", [])) <= 0:
+		return
+	_mailbox_arrival_played = true
+	await get_tree().create_timer(0.30).timeout
+	if not is_inside_tree():
+		return
+	var mailbox_button := %MailboxButton as Control
+	var target := mailbox_button.position + mailbox_button.size * 0.33
+	_mailbox_arrival_star.position = Vector2(308.0, -42.0)
+	_mailbox_arrival_star.scale = Vector2(0.35, 0.35)
+	_mailbox_arrival_star.rotation = -0.45
+	_mailbox_arrival_star.modulate = Color(1.0, 0.94, 0.42, 1.0)
+	_mailbox_arrival_star.visible = true
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(_mailbox_arrival_star, "position", target, 1.05).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	tween.tween_property(_mailbox_arrival_star, "scale", Vector2(1.08, 1.08), 0.78).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_mailbox_arrival_star, "rotation", TAU * 1.2, 1.05)
+	tween.tween_property(_mailbox_arrival_star, "modulate:a", 0.0, 0.28).set_delay(0.86)
+	await tween.finished
+	_mailbox_arrival_star.visible = false
+	_mailbox_arrival_star.scale = Vector2.ONE
+	_mailbox_arrival_star.rotation = 0.0
+	_blessing_arrival_message.modulate.a = 0.0
+	_blessing_arrival_message.visible = true
+	var message_tween := create_tween()
+	message_tween.tween_property(_blessing_arrival_message, "modulate:a", 1.0, 0.12)
+	message_tween.tween_interval(1.0)
+	message_tween.tween_property(_blessing_arrival_message, "modulate:a", 0.0, 0.16)
+	await message_tween.finished
+	_blessing_arrival_message.visible = false
 
 func _calc_achievement_score() -> int:
 	if _storage == null or not _storage.has_method("load_achievements"):
@@ -215,6 +258,8 @@ func _attach_button_feedback(button: BaseButton, profile: int) -> void:
 	var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 	button.add_child(feedback)
 	feedback.setup(button, profile)
+	feedback.set_touch_feedback(true)
+	feedback.set_burst_enabled(false)
 
 func _feedback_profile(button_id: String) -> int:
 	if button_id == "start":

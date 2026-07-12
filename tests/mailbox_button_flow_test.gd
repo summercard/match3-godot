@@ -29,8 +29,9 @@ func _run() -> void:
 		var prev_adventurer := mailbox.get_node("BlessingPanel/Panel/PrevAdventurer") as Button
 		var send_button := mailbox.get_node("BlessingPanel/Panel/SendButton") as Button
 		var claim_button := mailbox.get_node("InboxPanel/DetailPanel/ClaimButton") as Button
+		var delete_button := mailbox.get_node("InboxPanel/DetailPanel/DeleteButton") as Button
 		var back_button := mailbox.get_node("BackButton") as Button
-		for button in [inbox_tab, blessing_tab, prev_adventurer, next_adventurer, send_button, claim_button, back_button]:
+		for button in [inbox_tab, blessing_tab, prev_adventurer, next_adventurer, send_button, claim_button, delete_button, back_button]:
 			_expect(button.has_node("CartoonFeedback"), "%s should retain press feedback" % button.name)
 		_expect((mailbox.get_node("InboxPanel") as Control).visible, "inbox should be the default tab")
 		blessing_tab.pressed.emit()
@@ -47,6 +48,8 @@ func _run() -> void:
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "send button should consume one daily blessing")
 		_expect(int(state.get("unread_count", 0)) == 1, "send button should create a reply mail")
+		_expect((mailbox.get_node("InboxPanel/MailboxTotals/SentStarTotal") as Label).text == "1", "mailbox should show sent-star total")
+		_expect((mailbox.get_node("InboxPanel/MailboxTotals/ReceivedStarTotal") as Label).text == "1", "mailbox should show received-star total")
 		inbox_tab.pressed.emit()
 		_expect((mailbox.get_node("InboxPanel") as Control).visible, "inbox tab should return to the mail list")
 		var mail_row := mailbox.get_node("InboxPanel/ListPanel/Mail0") as Button
@@ -54,11 +57,19 @@ func _run() -> void:
 		mail_row.pressed.emit()
 		state = storage.get_mailbox_state()
 		_expect(int(state.get("unread_count", 0)) == 0, "opening a mail row should mark it as read")
+		var sender_portrait := mailbox.get_node("InboxPanel/DetailPanel/SenderPortraitFrame/SenderPortrait") as TextureRect
+		_expect(sender_portrait.visible and sender_portrait.texture != null, "blessing mail should show its sender spirit portrait")
 		claim_button.pressed.emit()
 		state = storage.get_mailbox_state()
 		var inbox: Array = state.get("inbox", [])
 		_expect(not inbox.is_empty() and (inbox[0] as Dictionary).get("claimed_at", null) != null, "claim button should persist attachment collection")
 		_expect(claim_button.disabled, "claimed mail should disable its claim button")
+		_expect(claim_button.get_theme_stylebox("disabled") != null, "claimed mail should retain a colored disabled button style")
+		_expect(not delete_button.disabled, "claimed mail should allow safe deletion")
+		_expect(delete_button.get_theme_stylebox("normal") != claim_button.get_theme_stylebox("disabled"), "delete should use the claimed-button shape with a distinct warning color")
+		delete_button.pressed.emit()
+		state = storage.get_mailbox_state()
+		_expect((state.get("inbox", []) as Array).is_empty(), "delete button should remove claimed mail")
 		var back_events: Array = []
 		mailbox.back_pressed.connect(func(): back_events.append(true))
 		back_button.pressed.emit()

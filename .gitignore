@@ -24,6 +24,8 @@ assets/images/concepts/
 tmp_*.gd.uid
 tmp/test-logs/
 tmp/test-saves/
+tmp/node_modules/
+*_test.gd/
 *.pyc
 __pycache__/
 *.bak

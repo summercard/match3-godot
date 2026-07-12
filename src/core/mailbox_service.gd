@@ -48,6 +48,8 @@ func send_blessing() -> Dictionary:
 	incoming["claimed_at"] = null
 	incoming["reward_receipt_id"] = "mail_reward:%s" % str(incoming.get("id", ""))
 	state["daily_send_count"] = int(state.get("daily_send_count", 0)) + 1
+	state["sent_blessing_stars"] = int(state.get("sent_blessing_stars", 0)) + 1
+	state["received_blessing_stars"] = int(state.get("received_blessing_stars", 0)) + 1
 	var history: Array = state.get("sent_history", []).duplicate(true)
 	history.push_front({"adventurer_id": adventurer_id, "sent_at": now})
 	state["sent_history"] = history.slice(0, 20)
@@ -173,6 +175,23 @@ func claim_mail(mail_id: String) -> Dictionary:
 	if not bool(tx.get("ok", false)):
 		_storage.call("cancel_reward_receipt_claim", receipt_id)
 	return tx
+
+
+func delete_mail(mail_id: String) -> Dictionary:
+	var state := get_state()
+	var index := MailboxRulesScript.find_mail_index(state, mail_id)
+	if index < 0:
+		return {"ok": false, "error": "not_found"}
+	var inbox: Array = state.get("inbox", []).duplicate(true)
+	var mail: Dictionary = inbox[index]
+	# Never let deleting a message silently discard an unclaimed reward.
+	if mail.get("claimed_at", null) == null and not (mail.get("attachments", []) as Array).is_empty():
+		return {"ok": false, "error": "unclaimed_attachment"}
+	inbox.remove_at(index)
+	state["inbox"] = inbox
+	if not _save_state(state):
+		return {"ok": false, "error": "save_failed"}
+	return {"ok": true, "mail": mail, "state": get_state()}
 
 
 func _save_state(state: Dictionary) -> bool:

@@ -42,6 +42,7 @@ func _run() -> void:
 		"Combatants/SingleEnemy/HpFrameBase",
 		"Combatants/Players/Player1/HpBar",
 		"Combatants/Players/Player1/HpFrameBase",
+		"Combatants/Players/Player1/ElementIcon",
 		"Combatants/Players/Player1/LeaderBadge",
 		"Combatants/Players/Player2/LeaderBadge",
 		"BottomControls/CaptureToggle/Image",
@@ -110,6 +111,7 @@ func _run() -> void:
 		"element": "grass",
 	}, "green", false)
 	_expect(is_equal_approx((player_slot.get_node("HpFrameBase") as TextureRect).position.y, player_hp_y), "captured boss player hp frame should stay at the same bottom position as ordinary player monsters")
+	_expect((player_slot.get_node("ElementIcon") as TextureRect).texture.resource_path.ends_with("element_grass.png"), "player hp bar should display the spirit element icon")
 	var battle_manager = battle.get("_battle")
 	if battle_manager != null and battle_manager.player_team.size() >= 2:
 		battle_manager.player_team[0]["hp"] = 0
