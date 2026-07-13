@@ -21,6 +21,7 @@ var _tab_active_style: StyleBox
 @onready var _blessing_tab: Button = %BlessingTab
 @onready var _unread_badge: Label = %UnreadBadge
 @onready var _mail_rows: Array[Button] = [%Mail0, %Mail1, %Mail2, %Mail3]
+@onready var _mail_detail_scroll: ScrollContainer = %MailDetailScroll
 @onready var _mail_detail: Label = %MailDetail
 @onready var _claim_button: Button = %ClaimButton
 @onready var _delete_button: Button = %DeleteButton
@@ -160,12 +161,12 @@ func _show_selected_mail(inbox: Array) -> void:
 			mail = raw
 			break
 	if mail.is_empty():
-		_mail_detail.text = "还没有邮件。\n\n选择一只冒险精灵，送出一颗祝福星星吧。"
+		_set_mail_detail("还没有邮件。\n\n选择一只冒险精灵，送出一颗祝福星星吧。")
 		_claim_button.disabled = true
 		_delete_button.disabled = true
 		_sender_portrait_frame.visible = false
 		return
-	_mail_detail.text = "%s\n\n%s\n\n%s" % [str(mail.get("sender_name", "远方的冒险者")), str(mail.get("body", "")), _attachment_label(mail.get("attachments", []))]
+	_set_mail_detail("%s\n\n%s\n\n%s" % [str(mail.get("sender_name", "远方的冒险者")), str(mail.get("body", "")), _attachment_label(mail.get("attachments", []))])
 	_claim_button.disabled = mail.get("claimed_at", null) != null
 	_claim_button.text = "已领取" if mail.get("claimed_at", null) != null else "领取附件"
 	var can_delete := mail.get("claimed_at", null) != null or (mail.get("attachments", []) as Array).is_empty()
@@ -175,6 +176,15 @@ func _show_selected_mail(inbox: Array) -> void:
 	var portrait_path := MonsterArtDBScript.get_art_path(sender_monster_id, "ranch")
 	_sender_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
 	_sender_portrait_frame.visible = _sender_portrait.texture != null
+
+
+func _set_mail_detail(content: String) -> void:
+	_mail_detail.text = content
+	call_deferred("_reset_mail_detail_scroll")
+
+
+func _reset_mail_detail_scroll() -> void:
+	_mail_detail_scroll.scroll_vertical = 0
 
 
 func _open_mail_index(index: int) -> void:
@@ -191,7 +201,7 @@ func _claim_selected_mail() -> void:
 		return
 	var result := _service.claim_mail(_selected_mail_id)
 	if bool(result.get("ok", false)):
-		_mail_detail.text += "\n\n附件已收入背包。"
+		_set_mail_detail(_mail_detail.text + "\n\n附件已收入背包。")
 	_refresh()
 
 
@@ -200,7 +210,7 @@ func _delete_selected_mail() -> void:
 		return
 	var result := _service.delete_mail(_selected_mail_id)
 	if not bool(result.get("ok", false)):
-		_mail_detail.text += "\n\n请先领取附件后再删除。"
+		_set_mail_detail(_mail_detail.text + "\n\n请先领取附件后再删除。")
 		return
 	_selected_mail_id = ""
 	_refresh()

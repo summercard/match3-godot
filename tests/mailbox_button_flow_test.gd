@@ -30,6 +30,7 @@ func _run() -> void:
 		var send_button := mailbox.get_node("BlessingPanel/Panel/SendButton") as Button
 		var claim_button := mailbox.get_node("InboxPanel/DetailPanel/ClaimButton") as Button
 		var delete_button := mailbox.get_node("InboxPanel/DetailPanel/DeleteButton") as Button
+		var detail_scroll := mailbox.get_node("InboxPanel/DetailPanel/MailDetailScroll") as ScrollContainer
 		var back_button := mailbox.get_node("BackButton") as Button
 		for button in [inbox_tab, blessing_tab, prev_adventurer, next_adventurer, send_button, claim_button, delete_button, back_button]:
 			_expect(button.has_node("CartoonFeedback"), "%s should retain press feedback" % button.name)
@@ -59,6 +60,16 @@ func _run() -> void:
 		_expect(int(state.get("unread_count", 0)) == 0, "opening a mail row should mark it as read")
 		var sender_portrait := mailbox.get_node("InboxPanel/DetailPanel/SenderPortraitFrame/SenderPortrait") as TextureRect
 		_expect(sender_portrait.visible and sender_portrait.texture != null, "blessing mail should show its sender spirit portrait")
+		var inbox_with_long_mail: Array = state.get("inbox", [])
+		var long_mail: Dictionary = inbox_with_long_mail[0]
+		long_mail["body"] = "愿这段旅途的祝福陪伴你继续前进。".repeat(24)
+		inbox_with_long_mail[0] = long_mail
+		state["inbox"] = inbox_with_long_mail
+		storage.save_mailbox_state(state)
+		mailbox.call("_refresh")
+		await process_frame
+		await process_frame
+		_expect(detail_scroll.get_v_scroll_bar().max_value > 0.0, "long mail content should be vertically scrollable without covering the action buttons")
 		claim_button.pressed.emit()
 		state = storage.get_mailbox_state()
 		var inbox: Array = state.get("inbox", [])

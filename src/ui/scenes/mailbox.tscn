@@ -451,13 +451,20 @@ stretch_mode = 5
 mouse_filter = 2
 modulate = Color(1, 0.86, 0.33, 0.94)
 
-[node name="MailDetail" type="Label" parent="InboxPanel/DetailPanel"]
+[node name="MailDetailScroll" type="ScrollContainer" parent="InboxPanel/DetailPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 17.0
-offset_top = 73.0
-offset_right = 185.0
-offset_bottom = 210.0
+offset_left = 14.0
+offset_top = 70.0
+offset_right = 188.0
+offset_bottom = 199.0
+horizontal_scroll_mode = 2
+vertical_scroll_mode = 0
+
+[node name="MailDetail" type="Label" parent="InboxPanel/DetailPanel/MailDetailScroll"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(166, 0)
+layout_mode = 2
 theme_override_colors/font_color = Color(0.14, 0.32, 0.54, 1)
 theme_override_font_sizes/font_size = 13
 text = "还没有邮件。"
