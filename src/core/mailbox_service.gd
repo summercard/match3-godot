@@ -48,8 +48,6 @@ func send_blessing() -> Dictionary:
 	incoming["claimed_at"] = null
 	incoming["reward_receipt_id"] = "mail_reward:%s" % str(incoming.get("id", ""))
 	state["daily_send_count"] = int(state.get("daily_send_count", 0)) + 1
-	state["sent_blessing_stars"] = int(state.get("sent_blessing_stars", 0)) + 1
-	state["received_blessing_stars"] = int(state.get("received_blessing_stars", 0)) + 1
 	var history: Array = state.get("sent_history", []).duplicate(true)
 	history.push_front({"adventurer_id": adventurer_id, "sent_at": now})
 	state["sent_history"] = history.slice(0, 20)

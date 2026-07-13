@@ -25,6 +25,9 @@ func _test_ranch_social_exclusivity() -> void:
 	if save_manager == null:
 		return
 	save_manager.clear_all_data()
+	var player: Dictionary = save_manager.get_player()
+	player["level"] = 25
+	save_manager.save_player(player)
 	var owned: Array = save_manager.get_owned_monsters()
 	_expect(owned.size() >= 2, "default save should have two monsters for ranch social exclusivity")
 	if owned.size() < 2:
@@ -118,6 +121,9 @@ func _test_social_ui_reload_switch_and_start() -> void:
 	if save_manager == null:
 		return
 	save_manager.clear_all_data()
+	var player: Dictionary = save_manager.get_player()
+	player["level"] = 25
+	save_manager.save_player(player)
 	var owned: Array = save_manager.get_owned_monsters()
 	_expect(owned.size() >= 2, "default save should have two monsters for social UI reload")
 	if owned.size() < 2:

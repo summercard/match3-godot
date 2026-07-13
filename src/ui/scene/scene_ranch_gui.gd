@@ -440,23 +440,26 @@ func _on_result_shade_input(event: InputEvent) -> void:
 		_on_result_confirm_pressed()
 
 func _switch_to_ranch() -> void:
-	_active_page = "ranch"
-	_dragging_class_list = false
+	if not _can_open_feature("ranch"):
+		_sync_gui()
+		return
+	super._switch_to_ranch()
 	_sync_gui()
 	_play_subpage_entry("ranch")
 
 func _switch_to_classroom() -> void:
-	_active_page = "classroom"
-	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
-		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
-	_update_class_scroll_limit()
+	if not _can_open_feature("classroom"):
+		_sync_gui()
+		return
+	super._switch_to_classroom()
 	_sync_gui()
 	_play_subpage_entry("classroom")
 
 func _switch_to_social() -> void:
-	_active_page = "social"
-	_dragging_class_list = false
-	_update_class_scroll_limit()
+	if not _can_open_feature("social"):
+		_sync_gui()
+		return
+	super._switch_to_social()
 	_sync_gui()
 	_play_subpage_entry("social")
 
@@ -554,6 +557,8 @@ func _sync_ranch_page() -> void:
 	_button_label(focus).text = "取消专注" if not _care_focus_instance_id.is_empty() else "专注培养"
 	_sync_card_strip(RANCH_CARD_PATHS, _list_page * RANCH_CARD_PATHS.size(), "ranch")
 	_sync_page_buttons("Pages/RanchPage/RosterPanel", _list_page, _context_max_page())
+	_sync_feature_button("Pages/RanchPage/BottomButtons/ClassroomButton", "classroom", "课堂")
+	_sync_feature_button("Pages/RanchPage/BottomButtons/SocialButton", "social", "广场")
 
 func _sync_ranch_slots() -> void:
 	for i in SLOT_PATHS.size():
@@ -733,6 +738,7 @@ func _sync_pet_farm_bottom_nav() -> void:
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
 	if nav == null:
 		return
+	var nav_labels := {"ranch": "农场", "classroom": "课堂", "social": "广场"}
 	var active_index := 1
 	if _active_page == "classroom":
 		active_index = 2
@@ -745,7 +751,29 @@ func _sync_pet_farm_bottom_nav() -> void:
 		var selected := button.get_node_or_null("Selected") as TextureRect
 		if selected != null:
 			selected.visible = i == active_index
+		var feature_id := ""
+		if i == 1:
+			feature_id = "ranch"
+		elif i == 2:
+			feature_id = "classroom"
+		elif i == 3:
+			feature_id = "social"
+		var state := _feature_unlock_state(feature_id) if not feature_id.is_empty() else {"unlocked": true}
+		var unlocked := bool(state.get("unlocked", true))
+		button.disabled = not unlocked
+		button.tooltip_text = "" if unlocked else "%s · Lv.%d 解锁" % [str(state.get("label", "")), int(state.get("required_level", 1))]
 		button.modulate = Color.WHITE if i == active_index else Color(0.92, 0.92, 0.92)
+		if not unlocked:
+			button.modulate = Color(0.48, 0.48, 0.52, 0.90)
+			if selected != null:
+				selected.visible = false
+			var label := button.get_node_or_null("Text") as Label
+			if label != null:
+				label.text = "%s %d级" % [str(nav_labels.get(feature_id, "")), int(state.get("required_level", 1))]
+		elif not feature_id.is_empty():
+			var label := button.get_node_or_null("Text") as Label
+			if label != null:
+				label.text = str(nav_labels.get(feature_id, ""))
 
 func _play_toast_feedback() -> void:
 	var toast := get_node_or_null("SharedToast") as Label
@@ -1123,6 +1151,22 @@ func _sync_classroom_page() -> void:
 		_sync_sell_button(panel, instance_id)
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
 	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
+	_sync_feature_button("Pages/ClassroomPage/BottomButtons/RanchButton", "ranch", "农场")
+	_sync_feature_button("Pages/ClassroomPage/BottomButtons/SocialButton", "social", "广场")
+
+
+func _sync_feature_button(path: String, feature_id: String, unlocked_text: String) -> void:
+	var button := get_node_or_null(path) as BaseButton
+	if button == null:
+		return
+	var state := _feature_unlock_state(feature_id)
+	var unlocked := bool(state.get("unlocked", false))
+	button.disabled = not unlocked
+	button.tooltip_text = "" if unlocked else "%s · Lv.%d 解锁" % [str(state.get("label", "")), int(state.get("required_level", 1))]
+	button.modulate = Color.WHITE if unlocked else Color(0.50, 0.50, 0.55, 0.90)
+	var label := button.get_node_or_null("Text") as Label
+	if label != null:
+		label.text = unlocked_text if unlocked else "%s Lv.%d" % [unlocked_text, int(state.get("required_level", 1))]
 
 func _apply_classroom_detail_text_style(panel: Control) -> void:
 	for path in ["Info", "TargetLevel"]:

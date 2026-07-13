@@ -12,6 +12,9 @@ func _run() -> void:
 		_finish()
 		return
 	storage.clear_all_data()
+	var player: Dictionary = storage.get_player()
+	player["level"] = 10
+	storage.save_player(player)
 	var low_wise: Dictionary = storage.add_monster_instance("monster_001", {"level": 1, "nature": "wise", "source": "idle_test"})
 	var high_wise: Dictionary = storage.add_monster_instance("monster_002", {"level": 10, "nature": "wise", "source": "idle_test"})
 	var low_fierce: Dictionary = storage.add_monster_instance("monster_003", {"level": 1, "nature": "fierce", "source": "idle_test"})

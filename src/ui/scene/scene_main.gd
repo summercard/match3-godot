@@ -149,11 +149,14 @@ func _play_mailbox_blessing_arrival_if_needed() -> void:
 	if _mailbox_arrival_played or _storage == null or not _storage.has_method("get_mailbox_state"):
 		return
 	var state := _storage.call("get_mailbox_state") as Dictionary
-	if MailboxRulesScript.count_unread_blessings(state.get("inbox", [])) <= 0:
+	var mail_id := MailboxRulesScript.next_lobby_arrival_blessing_id(state)
+	if mail_id.is_empty():
 		return
 	_mailbox_arrival_played = true
 	await get_tree().create_timer(0.30).timeout
 	if not is_inside_tree():
+		return
+	if not _mark_mailbox_blessing_arrival_shown(mail_id):
 		return
 	var target_center: Vector2 = _mailbox_badge.get_global_rect().get_center() - get_global_rect().position
 	var star_half_size := _mailbox_arrival_star.size * 0.5
@@ -186,6 +189,14 @@ func _play_mailbox_blessing_arrival_if_needed() -> void:
 	message_tween.tween_property(_blessing_arrival_message, "modulate:a", 0.0, 0.16)
 	await message_tween.finished
 	_blessing_arrival_message.visible = false
+
+
+func _mark_mailbox_blessing_arrival_shown(mail_id: String) -> bool:
+	if _storage == null or not _storage.has_method("get_mailbox_state") or not _storage.has_method("save_mailbox_state"):
+		return false
+	var state := _storage.call("get_mailbox_state") as Dictionary
+	var next := MailboxRulesScript.mark_lobby_arrival_shown(state, mail_id)
+	return bool(_storage.call("save_mailbox_state", next))
 
 func _calc_achievement_score() -> int:
 	if _storage == null or not _storage.has_method("load_achievements"):

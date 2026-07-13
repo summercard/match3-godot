@@ -25,6 +25,7 @@ const TowerRulesScript = preload("res://src/core/tower_rules.gd")
 const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const SaveFileStoreScript = preload("res://src/core/save_file_store.gd")
 const BattlePowerRulesScript = preload("res://src/core/battle_power_rules.gd")
+const FeatureUnlockRulesScript = preload("res://src/core/feature_unlock_rules.gd")
 
 # ========== 单例模式 ==========
 static var instance: Node
@@ -57,6 +58,19 @@ const MONSTER_SELL_GEMS_BY_RARITY := {
 }
 const MONSTER_SELL_GOLD_LEVEL_RATE: int = 10
 const MONSTER_SELL_GEM_LEVEL_STEP: int = 5
+const DEFAULT_SETTINGS := {
+	"soundOn": true,
+	"musicOn": true,
+	"vibrationOn": true,
+	"qualityLevel": "high",
+	"performanceMode": "balanced",
+	"capture": {
+		"autoCapture": false,
+		"equippedItem": "",
+		"equippedBattleItems": []
+	},
+	"version": "v0.1.0"
+}
 
 var _config: ConfigFile = null
 var _dirty: bool = false
@@ -221,6 +235,76 @@ func clear_all_data() -> bool:
 	_dirty = true
 	return _save_config()
 
+
+## Rebuild the persisted game state as a deterministic fresh profile.
+## Only the three starter species are owned, so the album can unlock entries
+## exclusively through ownership/capture as the player progresses.
+func reset_to_initial_state() -> bool:
+	_config = ConfigFile.new()
+	_reward_receipts_in_progress.clear()
+	_apply_schema_migrations()
+
+	var now_ms := Time.get_unix_time_from_system() * 1000.0
+	var starter_pool: Array = []
+	for monster_id: String in MonsterPool.DEFAULT_STARTERS:
+		starter_pool.append(MonsterPool.create_instance(monster_id, {
+			"level": MonsterPool.STARTER_INITIAL_LEVEL,
+			"exp": 0,
+			"source": "starter",
+			"capturedAt": now_ms,
+		}))
+	starter_pool = MonsterPool.normalize_pool(starter_pool)
+
+	var starter_ids := MonsterPool.get_owned_species_ids(starter_pool)
+	var starter_pokedex := {}
+	for monster_id: String in starter_ids:
+		var starter := MonsterPool.get_first_instance_by_monster_id(starter_pool, monster_id)
+		starter_pokedex[monster_id] = {
+			"level": int(starter.get("level", 1)),
+			"exp": int(starter.get("exp", 0)),
+			"nature": str(starter.get("nature", ""))
+		}
+
+	var starter_team := {
+		"leader": str(starter_pool[0].get("instanceId", "")) if starter_pool.size() > 0 else null,
+		"member1": str(starter_pool[1].get("instanceId", "")) if starter_pool.size() > 1 else null,
+		"member2": str(starter_pool[2].get("instanceId", "")) if starter_pool.size() > 2 else null,
+	}
+	_set_value("player", "data", {
+		"level": 1,
+		"gold": 0,
+		"gems": 0,
+		"stamina": STAMINA_MAX,
+		"staminaUpdatedAt": now_ms,
+		"exp": 0,
+		"team": starter_ids.duplicate(),
+		"captured": starter_ids.duplicate(),
+		"monster_pool": starter_pool,
+		"monsterPoolVersion": 1,
+		"stageProgress": {"chapter": 1, "stage": 1},
+		"pokedex": starter_pokedex,
+	})
+	_set_value("team", "data", starter_team)
+	_set_value("inventory", "data", {})
+	_set_value("stageProgress", "data", {})
+	_set_value("achievements", "data", {"unlockedIds": [], "unlockedDates": {}, "stats": {}})
+	_set_value("signIn", "data", {"lastSignInDate": null, "consecutiveDays": 0, "totalDays": 0})
+	_set_value("rewards", "data", {"totalGoldEarned": 0, "totalItemsGained": 0, "battleCount": 0, "captureCount": 0})
+	_set_value("settings", "data", DEFAULT_SETTINGS.duplicate(true))
+	_set_value("ranch", "data", {
+		"slots": [
+			{"instance_id": null, "placed_at": null},
+			{"instance_id": null, "placed_at": null},
+			{"instance_id": null, "placed_at": null}
+		],
+		"unlocked_slots": 3,
+		"social_places": [],
+		"care_focus_instance_id": null
+	})
+	_set_value("tutorial", "data", {"completed": false, "currentStep": 0})
+	_dirty = true
+	return _save_config()
+
 # ========== 玩家数据（section: player） ==========
 
 ## 获取玩家数据（带默认值）
@@ -326,6 +410,10 @@ func add_player_exp(amount: int) -> bool:
 		current_level += 1
 	player["level"] = current_level
 	return save_player(player)
+
+
+func get_feature_unlock_state(feature_id: String) -> Dictionary:
+	return FeatureUnlockRulesScript.get_unlock_state(feature_id, int(get_player().get("level", 1)))
 
 ## 增加钻石（gems）
 func add_gems(amount: int) -> bool:
@@ -442,11 +530,28 @@ func add_monster_instance(monster_id: String, options: Dictionary = {}) -> Dicti
 	if not MonsterDb.has_monster(monster_id):
 		return {}
 	var pool := get_monster_pool()
+	var is_new_species := not MonsterPool.get_owned_species_ids(pool).has(monster_id)
 	var instance := MonsterPool.create_instance(monster_id, options)
 	pool.append(instance)
 	var normalized_pool := MonsterPool.normalize_pool(pool)
-	save_monster_pool(normalized_pool)
+	var transaction := run_transaction(func() -> Dictionary:
+		if not save_monster_pool(normalized_pool):
+			return {"ok": false, "error": "monster_save_failed"}
+		if is_new_species and not _award_mailbox_star_for_new_species(monster_id):
+			return {"ok": false, "error": "mailbox_star_save_failed"}
+		return {"ok": true}
+	)
+	if not bool(transaction.get("ok", false)):
+		return {}
 	return MonsterPool.get_instance(normalized_pool, str(instance.get("instanceId", "")))
+
+
+func _award_mailbox_star_for_new_species(monster_id: String) -> bool:
+	var state := get_mailbox_state()
+	var next := MailboxRulesScript.award_new_species_star(state, monster_id)
+	if next == state:
+		return true
+	return save_mailbox_state(next)
 
 func get_monster_instance(instance_id: String) -> Dictionary:
 	var pool := get_monster_pool()
@@ -1400,16 +1505,7 @@ func save_settings(data: Dictionary) -> bool:
 ## 加载设置
 ## JS: loadSettings()
 func load_settings() -> Dictionary:
-	return _get_value("settings", "data", {
-		"soundOn": true,
-		"musicOn": true,
-		"capture": {
-			"autoCapture": false,
-			"equippedItem": "",
-			"equippedBattleItems": []
-		},
-		"version": "v0.1.0"
-	})
+	return _get_value("settings", "data", DEFAULT_SETTINGS.duplicate(true))
 
 func load_capture_settings() -> Dictionary:
 	var settings: Dictionary = load_settings()

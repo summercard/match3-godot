@@ -2,6 +2,7 @@ class_name SceneMailbox
 extends Control
 
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
+const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const CartoonButtonFeedbackScript = preload("res://src/ui/components/cartoon_button_feedback.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 
@@ -21,14 +22,15 @@ var _tab_active_style: StyleBox
 @onready var _blessing_tab: Button = %BlessingTab
 @onready var _unread_badge: Label = %UnreadBadge
 @onready var _mail_rows: Array[Button] = [%Mail0, %Mail1, %Mail2, %Mail3]
+@onready var _mail_row_statuses: Array[Label] = [%Mail0ReadStatus, %Mail1ReadStatus, %Mail2ReadStatus, %Mail3ReadStatus]
 @onready var _mail_detail_scroll: ScrollContainer = %MailDetailScroll
 @onready var _mail_detail: Label = %MailDetail
 @onready var _claim_button: Button = %ClaimButton
 @onready var _delete_button: Button = %DeleteButton
 @onready var _sender_portrait: TextureRect = %SenderPortrait
 @onready var _sender_portrait_frame: Control = %SenderPortraitFrame
-@onready var _sent_star_total: Label = %SentStarTotal
-@onready var _received_star_total: Label = %ReceivedStarTotal
+@onready var _unlocked_species_total: Label = %SentStarTotal
+@onready var _collection_star_total: Label = %ReceivedStarTotal
 @onready var _adventurer_name: Label = %AdventurerName
 @onready var _adventurer_portrait: TextureRect = %AdventurerPortrait
 @onready var _blessing_status: Label = %BlessingStatus
@@ -129,26 +131,30 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 		_adventurer_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
 		_adventurer_portrait.visible = _adventurer_portrait.texture != null
 	var daily_count := int(state.get("daily_send_count", 0))
-	_blessing_status.text = "今日可送出 %d 次祝福" % maxi(0, 3 - daily_count)
+	_blessing_status.text = "图鉴星星：%d" % MailboxRulesScript.collection_star_total(state)
 	_send_button.disabled = current.is_empty() or daily_count >= 3 or _sending
+	_send_button.tooltip_text = "今日已送出上限" if daily_count >= 3 else "今日还可送出 %d 次" % maxi(0, 3 - daily_count)
 
 
 func _refresh_inbox(state: Dictionary) -> void:
 	var inbox: Array = state.get("inbox", [])
 	var unread := int(state.get("unread_count", 0))
-	_sent_star_total.text = str(int(state.get("sent_blessing_stars", 0)))
-	_received_star_total.text = str(int(state.get("received_blessing_stars", 0)))
+	_unlocked_species_total.text = str((state.get("collection_star_species_ids", []) as Array).size())
+	_collection_star_total.text = str(MailboxRulesScript.collection_star_total(state))
 	_unread_badge.visible = unread > 0
 	_unread_badge.text = str(unread)
 	for index in _mail_rows.size():
 		var button := _mail_rows[index]
+		var read_status := _mail_row_statuses[index]
 		if index >= inbox.size():
 			button.visible = false
 			continue
 		button.visible = true
 		var mail: Dictionary = inbox[index]
-		var prefix := "● " if mail.get("read_at", null) == null else ""
-		button.text = "%s%s\n%s" % [prefix, str(mail.get("title", "新邮件")), str(mail.get("sender_name", "远方的冒险者"))]
+		var unread_mail := mail.get("read_at", null) == null
+		read_status.text = "未读" if unread_mail else "已读"
+		read_status.add_theme_color_override("font_color", Color(0.90, 0.36, 0.10, 1.0) if unread_mail else Color(0.33, 0.51, 0.68, 1.0))
+		button.text = "%s\n%s" % [str(mail.get("title", "新邮件")), str(mail.get("sender_name", "远方的冒险者"))]
 	if _selected_mail_id.is_empty() and not inbox.is_empty():
 		_selected_mail_id = str((inbox[0] as Dictionary).get("id", ""))
 	_show_selected_mail(inbox)
@@ -240,10 +246,11 @@ func _send_blessing() -> void:
 		_blessing_status.text = "暂时无法送出祝福。"
 		return
 	# 新回信在星星起飞时就已经抵达收件箱；无需等待完整仪式动画结束。
-	_refresh_inbox(_service.get_state())
+	var latest_state := _service.get_state()
+	_refresh_inbox(latest_state)
+	_blessing_status.text = "图鉴星星：%d" % MailboxRulesScript.collection_star_total(latest_state)
 	_sending = true
 	_send_button.disabled = true
-	_blessing_status.text = "祝福星星正在飞往远方…"
 	_star.position = Vector2(238.0, 356.0)
 	_star.scale = Vector2(0.56, 0.56)
 	_star.rotation = 0.0
@@ -269,7 +276,6 @@ func _send_blessing() -> void:
 	_star.scale = Vector2.ONE
 	_star.rotation = 0.0
 	_sending = false
-	_blessing_status.text = "祝福已飞向远方。信箱收到了新的回应。"
 	_refresh()
 
 

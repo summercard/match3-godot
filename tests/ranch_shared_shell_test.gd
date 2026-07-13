@@ -6,6 +6,12 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	var storage := root.get_node_or_null("/root/SaveManager")
+	if storage != null:
+		storage.clear_all_data()
+		var player: Dictionary = storage.get_player()
+		player["level"] = 25
+		storage.save_player(player)
 	var packed := load("res://src/ui/scenes/ranch_hub.tscn") as PackedScene
 	_expect(packed != null, "ranch hub should load as a formal PackedScene")
 	if packed != null:

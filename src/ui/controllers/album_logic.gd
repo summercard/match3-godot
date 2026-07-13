@@ -19,7 +19,7 @@ const GRID_Y: float = 118.0
 const DETAIL_Y: float = 352.0
 const DETAIL_H: float = 242.0
 const BOTTOM_TAB_Y: float = 609.0
-const DEBUG_UNLOCK_ALL_ALBUM_FOR_QA: bool = true
+const DEBUG_UNLOCK_ALL_ALBUM_FOR_QA: bool = false
 
 const ALBUM_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",

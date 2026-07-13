@@ -32,14 +32,14 @@ func _run() -> void:
 	await _wait_for_portraits(scene)
 	var first_cache: Dictionary = scene.get("_roster_texture_cache")
 	var first_paths := first_cache.keys()
-	_expect(first_cache.size() > 0 and first_cache.size() <= 6, "first page should retain at most six portraits")
+	_expect(first_cache.size() > 0 and first_cache.size() <= 6, "first page should retain at most six portraits (got %d)" % first_cache.size())
 
 	scene.call("_turn_roster_page", 1)
 	scene.call("_sync_pet_roster")
 	await _wait_for_portraits(scene)
 	var second_cache: Dictionary = scene.get("_roster_texture_cache")
 	_expect(int(scene.get("_loaded_roster_page")) == 1, "second page should replace the loaded page")
-	_expect(second_cache.size() > 0 and second_cache.size() <= 6, "second page should retain at most six portraits")
+	_expect(second_cache.size() > 0 and second_cache.size() <= 6, "second page should retain at most six portraits (got %d)" % second_cache.size())
 	for old_path: Variant in first_paths:
 		_expect(not second_cache.has(old_path), "page turn should release first-page portrait references")
 
@@ -48,10 +48,12 @@ func _run() -> void:
 	_finish()
 
 func _wait_for_portraits(scene: Control) -> void:
-	var frames := 0
-	while not (scene.get("_pending_portrait_loads") as Dictionary).is_empty() and frames < 120:
-		await process_frame
-		frames += 1
+	# Threaded resource loading advances on wall-clock time, not merely on the
+	# number of simulated frames. Use a bounded real-time wait so the first page
+	# is not judged before its initial portrait batch has completed.
+	var deadline_ms := Time.get_ticks_msec() + 2000
+	while not (scene.get("_pending_portrait_loads") as Dictionary).is_empty() and Time.get_ticks_msec() < deadline_ms:
+		await create_timer(0.02).timeout
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:

@@ -49,15 +49,20 @@ func _run() -> void:
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "send button should consume one daily blessing")
 		_expect(int(state.get("unread_count", 0)) == 1, "send button should create a reply mail")
-		_expect((mailbox.get_node("InboxPanel/MailboxTotals/SentStarTotal") as Label).text == "1", "mailbox should show sent-star total")
-		_expect((mailbox.get_node("InboxPanel/MailboxTotals/ReceivedStarTotal") as Label).text == "1", "mailbox should show received-star total")
+		_expect((mailbox.get_node("InboxPanel/MailboxTotals/SentStarTotal") as Label).text == "3", "mailbox should show the three initially unlocked species")
+		_expect((mailbox.get_node("InboxPanel/MailboxTotals/ReceivedStarTotal") as Label).text == "3", "sending a blessing should not change collection-star rewards")
+		_expect((mailbox.get_node("BlessingPanel/Panel/ActionRail/RailTitle") as Label).text == "给远方的陌生人\n送出祝福", "blessing page should use the stranger-blessing prompt")
+		_expect((mailbox.get_node("BlessingPanel/Panel/BlessingStatus") as Label).text == "图鉴星星：3", "blessing page should show the collection-star total")
 		inbox_tab.pressed.emit()
 		_expect((mailbox.get_node("InboxPanel") as Control).visible, "inbox tab should return to the mail list")
 		var mail_row := mailbox.get_node("InboxPanel/ListPanel/Mail0") as Button
+		var read_status := mailbox.get_node("InboxPanel/ListPanel/Mail0/Mail0ReadStatus") as Label
 		_expect(mail_row.visible, "new reply should appear in the first mail row")
+		_expect(read_status.text == "未读", "an unread mail row should show its unread marker")
 		mail_row.pressed.emit()
 		state = storage.get_mailbox_state()
 		_expect(int(state.get("unread_count", 0)) == 0, "opening a mail row should mark it as read")
+		_expect(read_status.text == "已读", "opened mail should update to the read marker")
 		var sender_portrait := mailbox.get_node("InboxPanel/DetailPanel/SenderPortraitFrame/SenderPortrait") as TextureRect
 		_expect(sender_portrait.visible and sender_portrait.texture != null, "blessing mail should show its sender spirit portrait")
 		var inbox_with_long_mail: Array = state.get("inbox", [])

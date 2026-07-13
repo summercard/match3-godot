@@ -11,6 +11,14 @@ func _run() -> void:
 	if storage == null:
 		_finish()
 		return
+	var regular_battle := load("res://src/ui/scenes/battle_screen.tscn").instantiate() as Control
+	var tower_battle := load("res://src/ui/scenes/tower_battle.tscn").instantiate() as Control
+	for player_name in ["Player1", "Player2", "Player3"]:
+		var regular_slot := regular_battle.get_node("Combatants/Players/%s" % player_name) as Control
+		var tower_slot := tower_battle.get_node("Combatants/Players/%s" % player_name) as Control
+		_expect(regular_slot.position == tower_slot.position, "tower %s should align with the main-battle player slot" % player_name)
+	regular_battle.free()
+	tower_battle.free()
 	storage.clear_all_data()
 	_expect(storage.save_stage_stars("stage_1_8", 3), "tower QA should unlock the required mainline gate")
 
@@ -42,6 +50,7 @@ func _run() -> void:
 		_expect((mailbox.get_node("BlessingPanel/FlyingStar") as TextureRect).texture != null, "mailbox should use a formal star asset for its blessing flight")
 		_expect(not mailbox.has_node("ArrivalStar") and not mailbox.has_node("ArrivalTrail"), "new-mail arrival animation should no longer play in the mailbox")
 		_expect(mailbox.has_node("BlessingPanel/BlessingStarTrail"), "sending a blessing should have a visible star trail")
+		_expect((mailbox.get_node("BlessingPanel/Panel/ActionRail/RailTitle") as Label).text == "给远方的陌生人\n送出祝福", "blessing prompt should address distant strangers")
 		var action_rail := mailbox.get_node("BlessingPanel/Panel/ActionRail") as Control
 		_expect(action_rail.position.x > 200.0 and action_rail.position.y > 200.0, "mailbox action rail should sit in the lower-right thumb zone")
 		mailbox.call("_show_blessing")
@@ -53,7 +62,7 @@ func _run() -> void:
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "sending a blessing should persist the daily send count")
 		_expect(int(state.get("unread_count", 0)) > 0, "sending a blessing should create a readable reply mail")
-		_expect(int(state.get("sent_blessing_stars", 0)) == 1 and int(state.get("received_blessing_stars", 0)) == 1, "mailbox should retain sent and received star totals")
+		_expect(int(state.get("collection_stars", 0)) == 3, "sending a blessing should not change the three starter collection stars")
 
 	root.remove_child(main)
 	main.free()

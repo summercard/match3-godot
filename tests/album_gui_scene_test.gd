@@ -30,6 +30,9 @@ func _run() -> void:
 	await process_frame
 	scene.call("init", {})
 	await process_frame
+	var initial_captured: Array = scene.get("_captured_ids")
+	var all_monsters: Array = scene.get("_all_monsters")
+	_assert(initial_captured.size() < all_monsters.size(), "album runtime should not use the QA all-unlocked override")
 
 	_assert(scene.scene_file_path == SCENE_PATH, "album should be a PackedScene GUI")
 	_assert(scene.has_node("AlbumPage/Grid/Card1"), "card nodes should be editable")
@@ -106,11 +109,17 @@ func _run() -> void:
 	await process_frame
 	_assert(str(scene.get("_selected_element")) == "fire", "filter button should update element")
 	_assert(int(scene.get("_album_page")) == 0, "filter should reset page")
+	var filtered: Array = scene.get("_filtered_monsters")
+	_assert(not filtered.is_empty(), "fire filter should expose at least one monster")
+	if not filtered.is_empty():
+		scene.set("_captured_ids", [str((filtered[0] as Dictionary).get("id", ""))])
+		scene.call("_sync_gui")
+		await process_frame
 
 	var card := scene.get_node("AlbumPage/Grid/Card1") as BaseButton
 	card.pressed.emit()
 	await process_frame
-	_assert((scene.get_node("DetailPanel") as Control).visible, "card press should open detail for QA-unlocked album")
+	_assert((scene.get_node("DetailPanel") as Control).visible, "card press should open detail for an owned monster")
 	var selected_before_blocked_press := str(scene.get("_selected_monster_id"))
 	var covered_card := scene.get_node("AlbumPage/Grid/Card2") as BaseButton
 	covered_card.pressed.emit()

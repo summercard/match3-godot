@@ -308,6 +308,19 @@ theme_override_styles/normal = SubResource("StyleMailRow")
 theme_override_styles/hover = SubResource("StyleMailRowHover")
 autowrap_mode = 2
 
+[node name="Mail0ReadStatus" type="Label" parent="InboxPanel/ListPanel/Mail0"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 74.0
+offset_top = 5.0
+offset_right = 115.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(0.90, 0.36, 0.10, 1)
+theme_override_font_sizes/font_size = 10
+mouse_filter = 2
+text = "未读"
+horizontal_alignment = 2
+
 [node name="Mail1" type="Button" parent="InboxPanel/ListPanel"]
 unique_name_in_owner = true
 layout_mode = 0
@@ -320,6 +333,19 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleMailRow")
 theme_override_styles/hover = SubResource("StyleMailRowHover")
 autowrap_mode = 2
+
+[node name="Mail1ReadStatus" type="Label" parent="InboxPanel/ListPanel/Mail1"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 74.0
+offset_top = 5.0
+offset_right = 115.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(0.90, 0.36, 0.10, 1)
+theme_override_font_sizes/font_size = 10
+mouse_filter = 2
+text = "未读"
+horizontal_alignment = 2
 
 [node name="Mail2" type="Button" parent="InboxPanel/ListPanel"]
 unique_name_in_owner = true
@@ -334,6 +360,19 @@ theme_override_styles/normal = SubResource("StyleMailRow")
 theme_override_styles/hover = SubResource("StyleMailRowHover")
 autowrap_mode = 2
 
+[node name="Mail2ReadStatus" type="Label" parent="InboxPanel/ListPanel/Mail2"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 74.0
+offset_top = 5.0
+offset_right = 115.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(0.90, 0.36, 0.10, 1)
+theme_override_font_sizes/font_size = 10
+mouse_filter = 2
+text = "未读"
+horizontal_alignment = 2
+
 [node name="Mail3" type="Button" parent="InboxPanel/ListPanel"]
 unique_name_in_owner = true
 layout_mode = 0
@@ -346,6 +385,19 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleMailRow")
 theme_override_styles/hover = SubResource("StyleMailRowHover")
 autowrap_mode = 2
+
+[node name="Mail3ReadStatus" type="Label" parent="InboxPanel/ListPanel/Mail3"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 74.0
+offset_top = 5.0
+offset_right = 115.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(0.90, 0.36, 0.10, 1)
+theme_override_font_sizes/font_size = 10
+mouse_filter = 2
+text = "未读"
+horizontal_alignment = 2
 
 [node name="DetailPanel" type="Panel" parent="InboxPanel"]
 layout_mode = 0
@@ -370,7 +422,7 @@ offset_right = 202.0
 offset_bottom = 28.0
 theme_override_colors/font_color = Color(0.17, 0.38, 0.66, 1)
 theme_override_font_sizes/font_size = 12
-text = "祝福星星总量"
+text = "图鉴星星总量"
 horizontal_alignment = 1
 
 [node name="SentStarCaption" type="Label" parent="InboxPanel/MailboxTotals"]
@@ -381,7 +433,7 @@ offset_right = 95.0
 offset_bottom = 53.0
 theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
 theme_override_font_sizes/font_size = 11
-text = "送出 ★"
+text = "解锁精灵"
 horizontal_alignment = 1
 
 [node name="SentStarTotal" type="Label" parent="InboxPanel/MailboxTotals"]
@@ -404,7 +456,7 @@ offset_right = 189.0
 offset_bottom = 53.0
 theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
 theme_override_font_sizes/font_size = 11
-text = "收到 ★"
+text = "获得星星"
 horizontal_alignment = 1
 
 [node name="ReceivedStarTotal" type="Label" parent="InboxPanel/MailboxTotals"]
@@ -623,23 +675,23 @@ theme_override_styles/panel = SubResource("StyleRail")
 
 [node name="RailTitle" type="Label" parent="BlessingPanel/Panel/ActionRail"]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 18.0
-offset_right = 115.0
-offset_bottom = 46.0
+offset_left = 10.0
+offset_top = 14.0
+offset_right = 122.0
+offset_bottom = 53.0
 theme_override_colors/font_color = Color(1, 0.96, 0.72, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.17, 0.40, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 16
-text = "右手送祝福"
+theme_override_font_sizes/font_size = 14
+text = "给远方的陌生人\n送出祝福"
 horizontal_alignment = 1
 
 [node name="RailStar" type="TextureRect" parent="BlessingPanel/Panel/ActionRail"]
 layout_mode = 0
 offset_left = 36.0
-offset_top = 47.0
+offset_top = 57.0
 offset_right = 91.0
-offset_bottom = 113.0
+offset_bottom = 123.0
 texture = ExtResource("3_star")
 expand_mode = 1
 stretch_mode = 5
@@ -660,12 +712,12 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 217.0
-offset_top = 345.0
+offset_top = 355.0
 offset_right = 324.0
-offset_bottom = 384.0
+offset_bottom = 389.0
 theme_override_colors/font_color = Color(0.91, 0.97, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "今日可送出 3 次祝福"
+text = "图鉴星星：0"
 autowrap_mode = 2
 horizontal_alignment = 1
 
@@ -673,9 +725,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 215.0
-offset_top = 397.0
+offset_top = 399.0
 offset_right = 326.0
-offset_bottom = 449.0
+offset_bottom = 451.0
 theme_override_colors/font_color = Color(0.31, 0.12, 0.02, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.74, 1)
 theme_override_constants/outline_size = 2

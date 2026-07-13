@@ -11,6 +11,7 @@ const ItemDBScript = preload("res://src/data/item_db.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
 const EvolutionRulesScript = preload("res://src/core/evolution_rules.gd")
 const RanchCareRulesScript = preload("res://src/core/ranch_care_rules.gd")
+const FeatureUnlockRulesScript = preload("res://src/core/feature_unlock_rules.gd")
 const ELEMENT_LABELS := {
 	"fire": "火", "water": "水", "grass": "草",
 	"thunder": "雷", "light": "光", "dark": "暗"
@@ -168,7 +169,7 @@ func init(data: Dictionary = {}) -> void:
 	_game = _root_node("GameManager")
 	_storage = _resolve_storage()
 	var requested_page := str(data.get("page", data.get("tab", "ranch")))
-	_active_page = requested_page if requested_page in ["ranch", "classroom", "social"] else "ranch"
+	_active_page = _normalize_feature_page(requested_page)
 	_load_data()
 	_calc_idle_exp()
 	_init_bubbles()
@@ -177,7 +178,7 @@ func init(data: Dictionary = {}) -> void:
 func initialize(game: Node) -> void:
 	_game = game
 	_storage = _resolve_storage()
-	_active_page = "ranch"
+	_active_page = _normalize_feature_page("ranch")
 	_load_data()
 	_calc_idle_exp()
 	_init_bubbles()
@@ -331,6 +332,8 @@ func _handle_social_tap(pos: Vector2) -> void:
 		_assign_social_instance(_get_instance_id(_captured_monsters[idx]))
 
 func _switch_to_social() -> void:
+	if not _can_open_feature("social"):
+		return
 	_active_page = "social"
 	_dragging_class_list = false
 	_load_data()
@@ -338,6 +341,8 @@ func _switch_to_social() -> void:
 	queue_redraw()
 
 func _switch_to_classroom() -> void:
+	if not _can_open_feature("classroom"):
+		return
 	_active_page = "classroom"
 	_load_data()
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
@@ -346,9 +351,38 @@ func _switch_to_classroom() -> void:
 	queue_redraw()
 
 func _switch_to_ranch() -> void:
+	if not _can_open_feature("ranch"):
+		return
 	_active_page = "ranch"
 	_dragging_class_list = false
 	queue_redraw()
+
+
+func _normalize_feature_page(requested_page: String) -> String:
+	var page := requested_page if requested_page in ["ranch", "classroom", "social"] else "classroom"
+	return page if _is_feature_unlocked(page) else "classroom"
+
+
+func _feature_unlock_state(feature_id: String) -> Dictionary:
+	if _storage != null and _storage.has_method("get_feature_unlock_state"):
+		return _storage.get_feature_unlock_state(feature_id)
+	var level := 1
+	if _storage != null and _storage.has_method("get_player"):
+		level = int(_storage.get_player().get("level", 1))
+	return FeatureUnlockRulesScript.get_unlock_state(feature_id, level)
+
+
+func _is_feature_unlocked(feature_id: String) -> bool:
+	return bool(_feature_unlock_state(feature_id).get("unlocked", false))
+
+
+func _can_open_feature(feature_id: String, show_feedback: bool = true) -> bool:
+	if _is_feature_unlocked(feature_id):
+		return true
+	if show_feedback:
+		var state := _feature_unlock_state(feature_id)
+		_show_status("%s将在玩家达到 Lv.%d 后解锁" % [str(state.get("label", "该功能")), int(state.get("required_level", 1))])
+	return false
 
 func _toggle_care_focus_selected() -> void:
 	var instance_id := _selected_monster_id()

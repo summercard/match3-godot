@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
+const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const MailContentDBScript = preload("res://src/data/mail_content_db.gd")
 
 var _failures: Array[String] = []
@@ -28,13 +29,25 @@ func _test_blessing_and_claim(storage: Node) -> void:
 		return
 	var instance_id := str((owned[0] as Dictionary).get("instanceId", ""))
 	_expect(service.select_adventurer(instance_id), "mailbox should select owned adventurer")
+	var initial_state: Dictionary = service.get_state()
+	_expect(MailboxRulesScript.collection_star_total(initial_state) == 3, "the three starter album entries should grant the initial three mailbox stars")
+	var new_species: Dictionary = storage.add_monster_instance("monster_005", {"source": "mailbox_star_test"})
+	_expect(not new_species.is_empty(), "capturing a new species should add it to the monster pool")
+	var state: Dictionary = service.get_state()
+	_expect(MailboxRulesScript.collection_star_total(state) == 4, "unlocking a new species should award exactly one mailbox star")
+	storage.add_monster_instance("monster_005", {"source": "mailbox_star_duplicate_test"})
+	state = service.get_state()
+	_expect(MailboxRulesScript.collection_star_total(state) == 4, "duplicate instances of an unlocked species must not award another star")
 	var sent := service.send_blessing()
 	_expect(bool(sent.get("ok", false)), "blessing should send and create simulated inbound mail")
-	var state: Dictionary = service.get_state()
+	state = service.get_state()
 	_expect(int(state.get("daily_send_count", 0)) == 1, "sending blessing should consume daily count")
 	_expect(int(state.get("unread_count", 0)) == 1, "simulated blessing should create unread mail")
-	_expect(int(state.get("sent_blessing_stars", 0)) == 1, "sending blessing should accumulate sent stars")
-	_expect(int(state.get("received_blessing_stars", 0)) == 1, "simulated reply should accumulate received stars")
+	_expect(MailboxRulesScript.collection_star_total(state) == 4, "sending or receiving a blessing must not change collection-star rewards")
+	var arrival_mail_id := MailboxRulesScript.next_lobby_arrival_blessing_id(state)
+	_expect(arrival_mail_id == str(sent.get("mail", {}).get("id", "")), "a new blessing should be eligible for one lobby arrival")
+	state = MailboxRulesScript.mark_lobby_arrival_shown(state, arrival_mail_id)
+	_expect(MailboxRulesScript.next_lobby_arrival_blessing_id(state).is_empty(), "the same blessing must not replay its lobby arrival after re-entering")
 	var mail: Dictionary = sent.get("mail", {})
 	_expect(str(mail.get("source", "")) == "stranger_blessing", "mail source should identify simulated stranger")
 	_expect(not str(mail.get("sender_monster_id", "")).is_empty(), "blessing mail should identify its sender spirit portrait")
@@ -46,7 +59,7 @@ func _test_blessing_and_claim(storage: Node) -> void:
 	_expect(not bool(repeat.get("ok", false)) and str(repeat.get("error", "")) == "already_claimed", "mail attachment must not claim twice")
 	_expect(bool(service.delete_mail(str(mail.get("id", ""))).get("ok", false)), "claimed mail should be deletable")
 	state = service.get_state()
-	_expect(int(state.get("received_blessing_stars", 0)) == 1, "deleting mail must retain lifetime received-star statistics")
+	_expect(MailboxRulesScript.collection_star_total(state) == 4, "deleting mail must not change collection-star rewards")
 	state = service.get_state()
 	state["daily_send_count"] = MailContentDBScript.DAILY_SEND_LIMIT
 	storage.save_mailbox_state(state)

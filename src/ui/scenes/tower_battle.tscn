@@ -1,9 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://du66w5ugrwdxj"]
 
-[ext_resource type="PackedScene" path="res://src/ui/scenes/battle_screen.tscn" id="1_base"]
-[ext_resource type="Script" path="res://src/ui/scene/scene_tower_battle.gd" id="2_script"]
-[ext_resource type="Texture2D" path="res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png" id="3_background"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="4_star"]
+[ext_resource type="PackedScene" uid="uid://cr6a6i5kodk7m" path="res://src/ui/scenes/battle_screen.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://bfs7xc01id30u" path="res://src/ui/scene/scene_tower_battle.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://bs3j1ksctpmc4" path="res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png" id="3_background"]
+[ext_resource type="Texture2D" uid="uid://dtrqp0fe8pxpg" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="4_star"]
 
 [sub_resource type="StyleBoxFlat" id="StyleTowerHud"]
 bg_color = Color(0.07, 0.25, 0.52, 0.82)
@@ -16,82 +16,61 @@ corner_radius_top_left = 14
 corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
-shadow_color = Color(0.02, 0.10, 0.27, 0.28)
+shadow_color = Color(0.02, 0.1, 0.27, 0.28)
 shadow_size = 5
 
-[node name="TowerBattle" instance=ExtResource("1_base")]
-editable_children = true
+[node name="TowerBattle" unique_id=830337280 instance=ExtResource("1_base")]
 script = ExtResource("2_script")
 
-[node name="Background" parent="." index="0"]
+[node name="Background" parent="." index="0" unique_id=1814830667]
 texture = ExtResource("3_background")
 
-[node name="TopHud" parent="." index="1"]
+[node name="TopHud" parent="." index="1" unique_id=1268773425]
 offset_bottom = 70.0
 
-[node name="TurnBadge" parent="TopHud" index="0"]
+[node name="TurnBadge" parent="TopHud" index="0" unique_id=708575208]
 offset_left = 10.0
 offset_top = 6.0
 offset_right = 82.0
 offset_bottom = 66.0
 
-[node name="PauseButton" parent="TopHud" index="3"]
+[node name="PauseButton" parent="TopHud" index="1" unique_id=1876612873]
 offset_left = 320.0
 offset_top = 8.0
 offset_right = 364.0
 offset_bottom = 50.0
 
-[node name="Combatants" parent="." index="2"]
+[node name="Combatants" parent="." index="2" unique_id=113229536]
 offset_top = 18.0
 offset_bottom = 318.0
 
-[node name="SingleEnemy" parent="Combatants" index="0"]
+[node name="SingleEnemy" parent="Combatants" index="0" unique_id=1489973222]
 offset_left = 9.0
 offset_top = -12.0
 offset_right = 366.0
 offset_bottom = 209.0
 
-[node name="MultiEnemies" parent="Combatants" index="1"]
+[node name="MultiEnemies" parent="Combatants" index="1" unique_id=233443107]
 offset_top = 52.0
 offset_bottom = 273.0
 
-[node name="Enemy1" parent="Combatants/MultiEnemies" index="0"]
+[node name="Enemy1" parent="Combatants/MultiEnemies" index="0" unique_id=149372447]
 offset_left = 29.0
 offset_top = 58.0
 offset_right = 125.0
 offset_bottom = 160.0
 
-[node name="Enemy2" parent="Combatants/MultiEnemies" index="1"]
-offset_left = 139.5
+[node name="Enemy2" parent="Combatants/MultiEnemies" index="1" unique_id=1757924947]
 offset_top = 42.0
-offset_right = 235.5
 offset_bottom = 144.0
 
-[node name="Enemy3" parent="Combatants/MultiEnemies" index="2"]
+[node name="Enemy3" parent="Combatants/MultiEnemies" index="2" unique_id=1497443033]
 offset_left = 250.0
 offset_top = 58.0
 offset_right = 346.0
 offset_bottom = 160.0
 
-[node name="Player1" parent="Combatants/Players" index="0"]
-offset_left = 15.0
-offset_top = 238.0
-offset_right = 121.0
-offset_bottom = 304.0
-
-[node name="Player2" parent="Combatants/Players" index="1"]
-offset_left = 134.0
-offset_top = 214.0
-offset_right = 240.0
-offset_bottom = 280.0
-
-[node name="Player3" parent="Combatants/Players" index="2"]
-offset_left = 253.0
-offset_top = 238.0
-offset_right = 359.0
-offset_bottom = 304.0
-
-[node name="TowerHud" type="Panel" parent="." index="5"]
+[node name="TowerHud" type="Panel" parent="." index="5" unique_id=223918736]
 z_index = 4
 layout_mode = 0
 offset_left = 86.0
@@ -101,19 +80,19 @@ offset_bottom = 58.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleTowerHud")
 
-[node name="Crest" type="TextureRect" parent="TowerHud"]
+[node name="Crest" type="TextureRect" parent="TowerHud" index="0" unique_id=1008107505]
+modulate = Color(1, 0.86, 0.32, 1)
 layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
 offset_right = 42.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("4_star")
 expand_mode = 1
 stretch_mode = 5
-mouse_filter = 2
-modulate = Color(1, 0.86, 0.32, 1)
 
-[node name="Title" type="Label" parent="TowerHud"]
+[node name="Title" type="Label" parent="TowerHud" index="1" unique_id=43349765]
 layout_mode = 0
 offset_left = 46.0
 offset_top = 5.0
@@ -126,7 +105,7 @@ theme_override_font_sizes/font_size = 13
 text = "共鸣远征  ·  01F"
 horizontal_alignment = 1
 
-[node name="Progress" type="Label" parent="TowerHud"]
+[node name="Progress" type="Label" parent="TowerHud" index="2" unique_id=250037370]
 layout_mode = 0
 offset_left = 46.0
 offset_top = 25.0

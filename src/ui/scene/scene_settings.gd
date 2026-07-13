@@ -256,12 +256,14 @@ func _do_reset_data() -> void:
 	confirm_dialog = false
 	_sync_authored_controls()
 	var storage := _get_storage()
-	if storage and storage.has_method("clear_all_data"):
+	if storage and storage.has_method("reset_to_initial_state"):
+		storage.reset_to_initial_state()
+	elif storage and storage.has_method("clear_all_data"):
 		storage.clear_all_data()
-	if storage and storage.has_method("reset_tutorial_progress"):
-		storage.reset_tutorial_progress()
-	elif storage and storage.has_method("save_tutorial_progress"):
-		storage.save_tutorial_progress(0)
+		if storage.has_method("reset_tutorial_progress"):
+			storage.reset_tutorial_progress()
+		elif storage.has_method("save_tutorial_progress"):
+			storage.save_tutorial_progress(0)
 	_show_reset_success()
 
 

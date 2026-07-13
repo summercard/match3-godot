@@ -93,19 +93,19 @@ text = "100/100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ElementIcon" type="TextureRect" parent="."]
+[node name="ElementIcon" type="TextureRect" parent="." unique_id=1693950304]
 unique_name_in_owner = true
 z_index = 4
 layout_mode = 0
-offset_left = 11.0
-offset_top = 50.0
-offset_right = 29.0
-offset_bottom = 65.0
+offset_left = 20.0
+offset_top = 51.0
+offset_right = 34.0
+offset_bottom = 64.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LeaderBadge" type="TextureRect" parent="."]
+[node name="LeaderBadge" type="TextureRect" parent="." unique_id=111626335]
 visible = false
 z_index = 5
 layout_mode = 0
