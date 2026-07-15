@@ -45,7 +45,6 @@ const BUTTON_IDS := {
 	"AchievementButton": "achievement",
 	"SettingsButton": "settings",
 	"SigninButton": "signin",
-	"TestToolButton": "test_tool",
 	"TowerButton": "tower",
 	"MailboxButton": "mailbox"
 }
@@ -137,9 +136,8 @@ func _update_player_display() -> void:
 	_gold_value.text = _format_number(int(_player.get("gold", 0)))
 	_diamond_value.text = _format_number(int(_player.get("gems", 0)))
 	_stamina_value.text = "%d/5" % int(_player.get("stamina", 5))
-	_rank_score.text = _format_number(int(_player.get("achievement_score", 0)))
-	if _storage != null and _storage.has_method("get_tower_state") and _storage.has_method("is_tower_unlocked") and bool(_storage.call("is_tower_unlocked")):
-		_rank_score.text = "最高 %d 层" % int((_storage.call("get_tower_state") as Dictionary).get("highest_floor", 0))
+	if _rank_score != null:
+		_rank_score.text = ""
 	if _storage != null and _storage.has_method("get_mailbox_state"):
 		var mailbox_state := _storage.call("get_mailbox_state") as Dictionary
 		_mailbox_badge.visible = MailboxRulesScript.count_unread_blessings(mailbox_state.get("inbox", [])) > 0

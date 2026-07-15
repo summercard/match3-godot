@@ -29,6 +29,7 @@ var combo: int = 0                # 当前连锁数
 var total_damage_dealt: Dictionary = {}  # 按属性统计伤害
 var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: charge }
 var leader_charge_points: Dictionary = {}
+var leader_burst_queue: Array[String] = []
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
 var battle_id: String = ""
@@ -143,6 +144,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	highest_player_turn_damage = 0
 	skill_charges = {}
 	leader_charge_points = {}
+	leader_burst_queue.clear()
 
 	player_level = p_level
 	enemy_level = e_level
@@ -212,6 +214,7 @@ func get_tower_continuation() -> Dictionary:
 		"party_snapshot": player_team.map(func(m): return m.duplicate(true) if m != null else null),
 		"skill_charges": skill_charges.duplicate(true),
 		"leader_charge_points": leader_charge_points.duplicate(true),
+		"leader_burst_queue": leader_burst_queue.duplicate(),
 		"player_guards": player_guards.duplicate(true),
 		"player_absorb_shields": player_absorb_shields.duplicate(true),
 		"highest_turn_damage": highest_player_turn_damage,
@@ -233,6 +236,11 @@ func restore_tower_continuation(continuation: Dictionary) -> void:
 		player_team[player_idx] = unit
 	skill_charges = (continuation.get("skill_charges", {}) as Dictionary).duplicate(true)
 	leader_charge_points = (continuation.get("leader_charge_points", {}) as Dictionary).duplicate(true)
+	leader_burst_queue.clear()
+	for raw_id in continuation.get("leader_burst_queue", []):
+		var monster_id := str(raw_id)
+		if not monster_id.is_empty() and not leader_burst_queue.has(monster_id):
+			leader_burst_queue.append(monster_id)
 	player_guards = (continuation.get("player_guards", {}) as Dictionary).duplicate(true)
 	player_absorb_shields = (continuation.get("player_absorb_shields", {}) as Dictionary).duplicate(true)
 	highest_player_turn_damage = maxi(highest_player_turn_damage, int(continuation.get("highest_turn_damage", 0)))
@@ -398,7 +406,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		var gem_count = gem_counts.get(board_affinity, 0)
 		if gem_count == 0:
 			continue
-		_add_leader_charge(monster, 1, leader_charge_events)
+		_add_leader_charge(monster, 1, leader_charge_events, combo_count)
 
 		var element_mult = 1.0
 		var target = _get_weakest_enemy()
@@ -493,20 +501,27 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 
 
 func consume_ready_leader_burst() -> Dictionary:
-	if not _all_leader_charges_ready() or _get_weakest_enemy() == null:
+	if _get_weakest_enemy() == null:
 		return {}
-	var leader_skill_log := _execute_leader_burst()
-	if leader_skill_log.is_empty():
-		return {}
-	_reset_leader_charges()
-	var result := {
-		"leader_skill_log": leader_skill_log
-	}
-	var phase_to_trigger = _phase_handler.check_phase_transition()
-	if not phase_to_trigger.is_empty():
-		result["phase_transition"] = phase_to_trigger
-	_refresh_capture_windows()
-	return result
+	_enqueue_ready_leader_bursts()
+	while not leader_burst_queue.is_empty():
+		var leader_id: String = str(leader_burst_queue.pop_front())
+		var leader := _get_player_monster(leader_id)
+		if not _is_leader_burst_eligible(leader):
+			continue
+		var leader_skill_log := _execute_leader_burst_for(leader)
+		if leader_skill_log.is_empty():
+			continue
+		leader_charge_points[leader_id] = 0
+		var result := {
+			"leader_skill_log": leader_skill_log
+		}
+		var phase_to_trigger = _phase_handler.check_phase_transition()
+		if not phase_to_trigger.is_empty():
+			result["phase_transition"] = phase_to_trigger
+		_refresh_capture_windows()
+		return result
+	return {}
 
 
 func use_active_skill(monster_id: String) -> Dictionary:
@@ -689,16 +704,21 @@ func use_active_skill(monster_id: String) -> Dictionary:
 
 
 func is_leader_burst_ready() -> bool:
-	return _all_leader_charges_ready() and _get_weakest_enemy() != null
+	_enqueue_ready_leader_bursts()
+	return not leader_burst_queue.is_empty() and _get_weakest_enemy() != null
 
 
 func get_ready_leader_burst_preview() -> Dictionary:
 	if not is_leader_burst_ready():
 		return {}
-	var leader_idx := _active_leader_index()
-	if leader_idx < 0:
+	_enqueue_ready_leader_bursts()
+	if leader_burst_queue.is_empty():
 		return {}
-	var leader: Dictionary = player_team[leader_idx]
+	var leader_id := str(leader_burst_queue[0])
+	var leader: Dictionary = _get_player_monster(leader_id)
+	if not _is_leader_burst_eligible(leader):
+		return {}
+	var leader_idx := _player_index_by_id(leader_id)
 	var skill_data := _leader_skill_data_for(leader)
 	if skill_data.is_empty():
 		return {}
@@ -714,7 +734,7 @@ func get_ready_leader_burst_preview() -> Dictionary:
 	}
 
 
-func _add_leader_charge(monster: Dictionary, amount: int, events: Array) -> void:
+func _add_leader_charge(monster: Dictionary, amount: int, events: Array, cascade_index: int = 0) -> void:
 	var monster_id := str(monster.get("id", ""))
 	if monster_id.is_empty() or amount <= 0:
 		return
@@ -730,8 +750,11 @@ func _add_leader_charge(monster: Dictionary, amount: int, events: Array) -> void
 		"amount": amount,
 		"value": next,
 		"max": LEADER_CHARGE_MAX,
-		"filled": next >= LEADER_CHARGE_MAX
+		"filled": next >= LEADER_CHARGE_MAX,
+		"cascade_index": cascade_index,
 	})
+	if prev < LEADER_CHARGE_MAX and next >= LEADER_CHARGE_MAX:
+		_enqueue_leader_burst(monster_id)
 
 
 func _all_leader_charges_ready() -> bool:
@@ -746,6 +769,45 @@ func _all_leader_charges_ready() -> bool:
 		if int(leader_charge_points.get(monster_id, 0)) < LEADER_CHARGE_MAX:
 			return false
 	return alive_count > 0
+
+
+func _enqueue_ready_leader_bursts() -> void:
+	for monster in player_team:
+		if monster == null:
+			continue
+		var unit: Dictionary = monster
+		var monster_id := str(unit.get("id", ""))
+		if _is_leader_burst_eligible(unit) and int(leader_charge_points.get(monster_id, 0)) >= LEADER_CHARGE_MAX:
+			_enqueue_leader_burst(monster_id)
+	_prune_leader_burst_queue()
+
+
+func _enqueue_leader_burst(monster_id: String) -> void:
+	if monster_id.is_empty() or leader_burst_queue.has(monster_id):
+		return
+	var monster := _get_player_monster(monster_id)
+	if _is_leader_burst_eligible(monster):
+		leader_burst_queue.append(monster_id)
+
+
+func _prune_leader_burst_queue() -> void:
+	var filtered: Array[String] = []
+	for monster_id in leader_burst_queue:
+		if filtered.has(monster_id):
+			continue
+		var monster := _get_player_monster(monster_id)
+		if _is_leader_burst_eligible(monster):
+			filtered.append(monster_id)
+	leader_burst_queue = filtered
+
+
+func _is_leader_burst_eligible(monster: Dictionary) -> bool:
+	if monster.is_empty() or int(monster.get("hp", 0)) <= 0:
+		return false
+	var monster_id := str(monster.get("id", ""))
+	if monster_id.is_empty() or int(leader_charge_points.get(monster_id, 0)) < LEADER_CHARGE_MAX:
+		return false
+	return not _leader_skill_data_for(monster).is_empty()
 
 
 func _active_leader_index() -> int:
@@ -786,20 +848,12 @@ func _active_leader_skill_info() -> Variant:
 	}
 
 
-func _reset_leader_charges() -> void:
-	for monster in player_team:
-		if monster == null:
-			continue
-		var monster_id := str(monster.get("id", ""))
-		if not monster_id.is_empty():
-			leader_charge_points[monster_id] = 0
-
-
-func _execute_leader_burst() -> Dictionary:
-	var leader_idx := _active_leader_index()
+func _execute_leader_burst_for(leader: Dictionary) -> Dictionary:
+	if leader.is_empty():
+		return {}
+	var leader_idx := _player_index_by_id(str(leader.get("id", "")))
 	if leader_idx < 0:
 		return {}
-	var leader: Dictionary = player_team[leader_idx]
 	var skill_data := _leader_skill_data_for(leader)
 	var log: Dictionary = _leader_skill_executor.execute_burst(leader, skill_data)
 	if log.is_empty():
@@ -1447,6 +1501,7 @@ func get_status() -> Dictionary:
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"skill_charges": skill_charges.duplicate(),
 		"leader_charge_points": leader_charge_points.duplicate(),
+		"leader_burst_queue": leader_burst_queue.duplicate(),
 		"leader_charge_max": LEADER_CHARGE_MAX,
 		"battle_over": battle_over,
 		"battle_result": battle_result,

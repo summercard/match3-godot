@@ -4,6 +4,18 @@ extends RefCounted
 const GrowthRulesScript = preload("res://src/core/growth_rules.gd")
 const DEFAULT_STARTERS: Array[String] = ["monster_002", "monster_093", "monster_053"]
 const STARTER_INITIAL_LEVEL: int = 6
+## A fresh profile must be reproducible and offer three distinct social styles.
+## These apply only when constructing the default starter party; captured pets
+## continue to receive their own nature through the normal creation path.
+const STARTER_NATURE_BY_MONSTER_ID := {
+	"monster_002": "cautious",
+	"monster_093": "brave",
+	"monster_053": "gentle",
+}
+
+
+static func starter_nature(monster_id: String) -> String:
+	return str(STARTER_NATURE_BY_MONSTER_ID.get(monster_id, ""))
 
 static func generate_instance_id() -> String:
 	return "m_%d_%04x%04x" % [Time.get_ticks_msec(), randi() & 0xffff, randi() & 0xffff]

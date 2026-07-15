@@ -45,7 +45,6 @@ func _run() -> void:
 		"AchievementButton": "achievement",
 		"SettingsButton": "settings",
 		"SigninButton": "signin",
-		"TestToolButton": "test_tool",
 		"TowerButton": "tower",
 		"MailboxButton": "mailbox",
 	}
@@ -55,8 +54,7 @@ func _run() -> void:
 	_expect(tower_entry != null and tower_entry.texture_normal == shop_entry.texture_normal, "tower should reuse the shop entry button art")
 	var mailbox_entry := lobby.get_node("PrimaryButtons/MailboxButton") as TextureButton
 	_expect(mailbox_entry != null and mailbox_entry.texture_normal.resource_path == "res://assets/images/mailbox_new/mailbox_lobby_envelope_icon_v1.png", "mailbox should use the square envelope icon")
-	_expect(mailbox_entry.position.x <= (lobby.get_node("Header/RankPanel") as Control).position.x + 2.0, "mailbox entry should align to the left edge of the achievement card")
-	_expect(mailbox_entry.position.y >= (lobby.get_node("Header/RankScore") as Control).position.y, "mailbox entry should sit below the achievement score")
+	_expect(mailbox_entry.position.x <= 20.0 and mailbox_entry.position.y <= 110.0, "mailbox entry should sit near the upper-left status area")
 	var mailbox_badge := lobby.get_node("%MailboxBadge") as TextureRect
 	_expect(mailbox_badge != null and mailbox_badge.texture != null, "mailbox should expose a star notification badge")
 	_expect(mailbox_badge.size.x <= 20.0 and mailbox_badge.position.x <= 30.0, "mailbox badge should be compact and sit near the envelope corner")
@@ -94,10 +92,11 @@ func _run() -> void:
 	_expect(exp_bar.size.y >= 15.0, "owner level experience bar should be tall enough to read")
 	_expect(absf((level_badge.position.y + level_badge.size.y * 0.5) - (exp_bar.position.y + exp_bar.size.y * 0.5)) <= 2.0, "owner level badge and experience bar should align on the same center line")
 	_expect((lobby.get_node("%StaminaValue") as Label).text == "3/5", "top resource row should show stamina as current over max")
-	_expect((lobby.get_node("%RankScore") as Label).text == "250", "third header row should show achievement score")
+	_expect(not (lobby.get_node("Header/RankPanel") as Control).visible, "achievement score header panel should be hidden")
+	_expect((lobby.get_node("%RankScore") as Label).text.is_empty(), "hidden achievement score should not receive a runtime value")
 	_expect((lobby.get_node("Header/GoldCapsule") as Control).position.y == (lobby.get_node("Header/DiamondCapsule") as Control).position.y and (lobby.get_node("Header/DiamondCapsule") as Control).position.y == (lobby.get_node("Header/StaminaCapsule") as Control).position.y, "gold, diamond and stamina should share the first row")
 	_expect((lobby.get_node("Header/PlayerStatus") as Control).position.y > (lobby.get_node("Header/GoldCapsule") as Control).position.y, "owner level should sit on the second row")
-	_expect((lobby.get_node("Header/RankPanel") as Control).position.y > (lobby.get_node("Header/PlayerStatus") as Control).position.y, "achievement score should sit on the third row")
+	_expect(not (lobby.get_node("%TestToolButton") as Control).visible, "test tool should not have a visible lobby entry")
 	var start_label := lobby.get_node("PrimaryButtons/StartButton/Text") as Label
 	var nav_label := lobby.get_node("BottomNav/AlbumButton/Text") as Label
 	_expect(start_label.get_theme_font("font") != null, "start text should use the shared cartoon font")

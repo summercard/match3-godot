@@ -79,7 +79,16 @@ func _run() -> void:
 		_expect(scene.has_node(path), "editable map node should exist: %s" % path)
 
 	_expect(not scene.has_node("RewardPanel"), "old reward panel should be removed from the map")
+	_expect(not scene.has_node("Header/TopScrim"), "chapter header should not add a redundant dark overlay")
 	_expect((scene.get_node("Header/Bar") as TextureRect).texture.resource_path.ends_with("ui_shop_title_plaque_image2.png"), "top chapter info bar should reuse the shop title plaque art")
+	var header_bar := scene.get_node("Header/Bar") as TextureRect
+	_expect(absf(_global_center_x(header_bar) - 187.5) <= 0.1, "top chapter info bar should be centered on the map viewport")
+	_expect((scene.get_node("Header") as Control).z_index >= 2048, "chapter header should render above map boss portraits")
+	_expect((scene.get_node("BottomNav") as Control).z_index >= 2048, "bottom navigation should render above map boss portraits")
+	_expect((scene.get_node("PopupLayer") as Control).z_index > (scene.get_node("Header") as Control).z_index, "popup layer should remain above the raised chapter header")
+	_expect((scene.get_node("TransitionCloudLayer") as Control).z_index > (scene.get_node("PopupLayer") as Control).z_index, "chapter transition clouds should remain the topmost map layer")
+	var chapter_9_boss_art := scene.get_node("MapScroll/ChapterMaps/Chapter09StarlitTemple/BossStage/BossArt") as Control
+	_expect(_global_canvas_z(scene.get_node("Header") as Control) > _global_canvas_z(chapter_9_boss_art), "chapter header global draw order should stay above the visible boss art")
 	_expect((scene.get_node("Header/BackButton/Frame") as TextureRect).texture.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "top back button should reuse the shared round previous button art")
 	var chapter_badge := scene.get_node_or_null("Header/Badge") as TextureRect
 	if chapter_badge != null:
@@ -266,6 +275,22 @@ func _on_stage_selected(stage_id: String, _stage_data: Dictionary, _chapter_inde
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _global_canvas_z(node: CanvasItem) -> int:
+	var total := 0
+	var current: Node = node
+	while current != null:
+		if current is CanvasItem:
+			var item := current as CanvasItem
+			total += item.z_index
+			if not item.z_as_relative:
+				break
+		current = current.get_parent()
+	return total
+
+func _global_center_x(control: Control) -> float:
+	var rect := control.get_global_rect()
+	return rect.position.x + rect.size.x * 0.5
 
 func _wait_frames(count: int) -> void:
 	for _i in range(count):

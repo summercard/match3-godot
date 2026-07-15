@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_light_leader_burst_converts_gems()
 	_test_wind_leader_burst_weakens_two_turns()
 	_test_dark_leader_burst_lifesteals()
+	_test_independent_charges_release_in_queue_order()
 	_test_dead_member_does_not_block_ready()
 	_test_dead_leader_promotes_next_leader_skill()
 	_test_dead_same_name_member_does_not_attack_after_match()
@@ -28,8 +29,9 @@ func _test_fire_leader_burst_damage() -> void:
 	_expect(str(burst.get("element", "")) == "fire", "fire leader should produce fire burst")
 	_expect(int(burst.get("remaining_damage", 0)) > 0, "fire burst should deal damage")
 	_expect(int(battle.enemies[0].get("hp", 0)) < before_hp, "fire burst should reduce enemy hp")
-	for m: Dictionary in battle.player_team:
-		_expect(int(battle.leader_charge_points.get(m.get("id", ""), -1)) == 0, "leader charges should reset after burst")
+	_expect(int(battle.leader_charge_points.get(battle.player_team[0].get("id", ""), -1)) == 0, "only the releasing leader charge should reset after burst")
+	for index in range(1, battle.player_team.size()):
+		_expect(int(battle.leader_charge_points.get(battle.player_team[index].get("id", ""), 0)) == BattleManager.LEADER_CHARGE_MAX, "other full leaders should keep their charges after an earlier burst")
 	battle.queue_free()
 
 
@@ -85,6 +87,24 @@ func _test_dark_leader_burst_lifesteals() -> void:
 	_expect(str(burst.get("element", "")) == "dark", "dark leader should produce dark burst")
 	_expect(lifesteals, "dark burst should heal from dealt damage")
 	_expect(int(battle.player_team[1].get("hp", 0)) > before_hp, "dark lifesteal should heal the lowest ally")
+	battle.queue_free()
+
+
+func _test_independent_charges_release_in_queue_order() -> void:
+	var battle := _make_battle("monster_095")
+	var first_id := str(battle.player_team[0].get("id", ""))
+	var second_id := str(battle.player_team[1].get("id", ""))
+	battle.leader_charge_points[first_id] = BattleManager.LEADER_CHARGE_MAX
+	battle.leader_charge_points[second_id] = BattleManager.LEADER_CHARGE_MAX
+	var first_preview := battle.get_ready_leader_burst_preview()
+	_expect(str(first_preview.get("leader_id", "")) == first_id, "the first filled leader should occupy the queue head")
+	var first_burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
+	_expect(str(first_burst.get("leader_id", "")) == first_id, "the queue should release the first filled leader first")
+	_expect(int(battle.leader_charge_points.get(first_id, -1)) == 0, "the released leader should reset only its own charge")
+	_expect(int(battle.leader_charge_points.get(second_id, 0)) == BattleManager.LEADER_CHARGE_MAX, "the next queued leader should retain its full charge")
+	_expect(battle.is_leader_burst_ready(), "a second full leader should remain ready after the first release")
+	var second_burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
+	_expect(str(second_burst.get("leader_id", "")) == second_id, "the queue should release the next filled leader without refilling")
 	battle.queue_free()
 
 

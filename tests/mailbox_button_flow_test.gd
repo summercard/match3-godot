@@ -48,7 +48,19 @@ func _run() -> void:
 			await process_frame
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "send button should consume one daily blessing")
-		_expect(int(state.get("unread_count", 0)) == 1, "send button should create a reply mail")
+		_expect(int(state.get("unread_count", 0)) == 0, "send button should queue, not immediately create, a reply mail")
+		var pending: Array = state.get("pending_blessings", []).duplicate(true)
+		_expect(pending.size() == 1, "send button should create one pending reply")
+		if not pending.is_empty():
+			var due_mail: Dictionary = pending[0]
+			due_mail["deliver_at"] = int(Time.get_unix_time_from_system()) - 1
+			pending[0] = due_mail
+			state["pending_blessings"] = pending
+			storage.save_mailbox_state(state)
+			mailbox.call("_refresh")
+			await process_frame
+		state = storage.get_mailbox_state()
+		_expect(int(state.get("unread_count", 0)) == 1, "a due reply should appear as unread after refresh")
 		_expect((mailbox.get_node("InboxPanel/MailboxTotals/SentStarTotal") as Label).text == "3", "mailbox should show the three initially unlocked species")
 		_expect((mailbox.get_node("InboxPanel/MailboxTotals/ReceivedStarTotal") as Label).text == "3", "sending a blessing should not change collection-star rewards")
 		_expect((mailbox.get_node("BlessingPanel/Panel/ActionRail/RailTitle") as Label).text == "给远方的陌生人\n送出祝福", "blessing page should use the stranger-blessing prompt")

@@ -122,6 +122,25 @@ func _run() -> void:
 	_expect(boss_battle.current_phase == 2, "executing a boss phase should update battle status")
 	boss_battle.free()
 
+	var first_match_battle := BattleManagerScript.new()
+	first_match_battle.init(["monster_001"], ["monster_014"], 5, 3, {
+		"id": "first_match_regression",
+		"enemies": ["monster_014"],
+		"enemyLevel": 3,
+		"disableRandomElite": true,
+	}, "first_match_regression")
+	var first_match_unit: Dictionary = first_match_battle.player_team[0]
+	var first_match_affinity := str(first_match_battle.call("_board_affinity", first_match_unit))
+	var enemy_hp_before := int(first_match_battle.enemies[0].get("hp", 0))
+	var first_match_result: Dictionary = first_match_battle.process_match_result({first_match_affinity: 3}, 1)
+	_expect(not (first_match_result.get("damage_log", []) as Array).is_empty(), "the first valid match must emit player damage")
+	_expect(int(first_match_battle.enemies[0].get("hp", 0)) < enemy_hp_before, "the first valid match must damage its target")
+	var charge_events: Array = first_match_result.get("leader_charge_events", [])
+	_expect(not charge_events.is_empty(), "the first valid match must emit a leader-charge event")
+	if not charge_events.is_empty():
+		_expect(int((charge_events[0] as Dictionary).get("cascade_index", 0)) == 1, "leader-charge event should identify its cascade")
+	first_match_battle.free()
+
 	_finish()
 
 func _fill_board(board, gem_type: String) -> void:

@@ -26,6 +26,10 @@ func _run() -> void:
 	_expect(frame.visible == authored_visible, "PowerPanel/Frame visibility should be owned by battle_prepare.tscn")
 	_expect(frame.position == authored_position, "PowerPanel/Frame position should be owned by battle_prepare.tscn")
 	_expect(frame.size == authored_size, "PowerPanel/Frame size should be owned by battle_prepare.tscn")
+	var reward_preview := prepare.get_node_or_null("RewardPreview") as Control
+	_expect(reward_preview != null and not reward_preview.visible, "battle preparation must not reveal settlement rewards")
+	var start_frame := prepare.get_node("StartButton/Frame") as TextureRect
+	_expect(start_frame.texture != null and start_frame.texture.resource_path == "res://assets/images/ui/buttons/main_ui_start_adventure_v3.png", "battle preparation should use the lobby primary-action art")
 	prepare.queue_free()
 	await process_frame
 	_finish()

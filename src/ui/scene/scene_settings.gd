@@ -11,10 +11,10 @@ const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const BACK_RECT := Rect2(10.0, 10.0, 58.0, 58.0)
 const HEADER_RECT := Rect2(88.0, 17.0, 232.0, 52.0)
-const MAIN_PANEL_RECT := Rect2(14.0, 86.0, 347.0, 386.0)
-const ABOUT_PANEL_RECT := Rect2(18.0, 486.0, 339.0, 58.0)
-const RESET_RECT := Rect2(34.0, 565.0, 138.0, 46.0)
-const DEFAULT_RECT := Rect2(203.0, 565.0, 138.0, 46.0)
+const MAIN_PANEL_RECT := Rect2(14.0, 86.0, 347.0, 176.0)
+const ABOUT_PANEL_RECT := Rect2(18.0, 276.0, 339.0, 58.0)
+const RESET_RECT := Rect2(34.0, 355.0, 138.0, 46.0)
+const DEFAULT_RECT := Rect2(203.0, 355.0, 138.0, 46.0)
 const ROW_X := 30.0
 const ROW_W := 315.0
 const ROW_H := 54.0
@@ -56,40 +56,6 @@ const SETTINGS_ROWS := [
 		"type": "toggle",
 		"key": "musicOn",
 		"default": true,
-	},
-	{
-		"id": "vibration",
-		"label": "震动反馈",
-		"desc": "技能、胜利与按钮触感",
-		"type": "toggle",
-		"key": "vibrationOn",
-		"default": true,
-	},
-	{
-		"id": "quality",
-		"label": "画质等级",
-		"desc": "界面特效与资源清晰度",
-		"type": "segment",
-		"key": "qualityLevel",
-		"default": "high",
-		"options": [
-			{"label": "流畅", "value": "low"},
-			{"label": "标准", "value": "medium"},
-			{"label": "精细", "value": "high"},
-		],
-	},
-	{
-		"id": "performance",
-		"label": "战斗表现",
-		"desc": "动画、粒子和屏幕反馈",
-		"type": "segment",
-		"key": "performanceMode",
-		"default": "balanced",
-		"options": [
-			{"label": "轻量", "value": "lite"},
-			{"label": "均衡", "value": "balanced"},
-			{"label": "华丽", "value": "rich"},
-		],
 	},
 ]
 const C := {
@@ -289,13 +255,6 @@ func _connect_authored_hit_areas() -> void:
 		"HitAreas/BackButton",
 		"HitAreas/Rows/SoundRow",
 		"HitAreas/Rows/MusicRow",
-		"HitAreas/Rows/VibrationRow",
-		"HitAreas/Rows/QualityLow",
-		"HitAreas/Rows/QualityMedium",
-		"HitAreas/Rows/QualityHigh",
-		"HitAreas/Rows/PerformanceLite",
-		"HitAreas/Rows/PerformanceBalanced",
-		"HitAreas/Rows/PerformanceRich",
 		"HitAreas/Actions/ResetButton",
 		"HitAreas/Actions/DefaultButton",
 		"HitAreas/ConfirmDialog/YesButton",
@@ -463,10 +422,10 @@ func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
 
 func _draw_about_panel() -> void:
 	_draw_texture_fit(_tex("row"), ABOUT_PANEL_RECT, 0.94)
-	_draw_texture_contain(_tex("gear"), Rect2(30.0, 497.0, 34.0, 34.0), 0.92)
-	_draw_text_left("当前版本", Vector2(76.0, 511.0), C["white"], 15.0, true, 88.0)
-	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 532.0), C["muted"], 12.0, false, 90.0)
-	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 522.0), C["dim"], 11.0, false, 168.0)
+	_draw_texture_contain(_tex("gear"), Rect2(30.0, 287.0, 34.0, 34.0), 0.92)
+	_draw_text_left("当前版本", Vector2(76.0, 301.0), C["white"], 15.0, true, 88.0)
+	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 322.0), C["muted"], 12.0, false, 90.0)
+	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 312.0), C["dim"], 11.0, false, 168.0)
 
 func _draw_bottom_buttons() -> void:
 	_draw_texture_fit(_tex("button_disabled"), RESET_RECT)

@@ -43,10 +43,11 @@ const ATTACK_IMPACT_DELAY := 0.24
 const ATTACK_RECOVERY_DELAY := 0.16
 const MATCH_CHAIN_TAIL_WAIT_MAX := 0.72
 const LEADER_BURST_SCALE_IN_DURATION := 1.00
-const LEADER_BURST_BANNER_DURATION := 1.00
+const LEADER_BURST_BANNER_DURATION := 0.50
 const LEADER_BURST_SCALE_OUT_DURATION := 0.50
-const LEADER_BURST_EFFECT_HOLD := 2.00
-const LEADER_BURST_RESTORE_DURATION := 0.50
+const LEADER_BURST_EFFECT_HOLD := 1.50
+const LEADER_BURST_RESTORE_DURATION := 0.01
+const LEADER_BURST_TAIL_WAIT_MAX := 6.00
 const LEADER_BURST_SHOWCASE_BASE_SIZE := 76.0
 const LEADER_BURST_SHOWCASE_SCALE := 1.5
 const LEADER_BURST_BANNER_TEXT_SIZE := 40.0
@@ -193,6 +194,8 @@ const ITEM_USE_EFFECT_LIMIT: int = 24
 var _leader_skill_fx: Array[Dictionary] = []
 const LEADER_SKILL_FX_LIMIT: int = 12
 var _leader_burst_showcase: Dictionary = {}
+var _leader_burst_playback_active := false
+var _leader_burst_playback_requested := false
 
 ## Boss技能视觉
 var _boss_skill_visuals: Dictionary = {}
@@ -553,6 +556,8 @@ func get_leader_burst_showcase_test_profile() -> Dictionary:
 		"banner": LEADER_BURST_BANNER_DURATION,
 		"banner_text_size": LEADER_BURST_BANNER_TEXT_SIZE,
 		"text_rendering": "crisp_outline",
+		"playback_mode": "non_blocking_combo",
+		"dark_overlay_enabled": false,
 		"scale_out": LEADER_BURST_SCALE_OUT_DURATION,
 		"effect_hold": LEADER_BURST_EFFECT_HOLD,
 		"restore": LEADER_BURST_RESTORE_DURATION
@@ -600,6 +605,8 @@ func init(data: Dictionary = {}) -> void:
 	_tide_rise_anims = []
 	_leader_skill_fx = []
 	_leader_burst_showcase = {}
+	_leader_burst_playback_active = false
+	_leader_burst_playback_requested = false
 	_special_elim_phases = []
 	_special_elim_timer = 0.0
 	_rainbow_flash = 0.0
@@ -1261,7 +1268,8 @@ func _process_matches() -> void:
 	
 	if not match_context.get("has_matches", false):
 		await _wait_for_player_resolution_tail()
-		await _play_ready_leader_burst_after_combo()
+		_queue_ready_leader_burst_playback()
+		await _wait_for_leader_burst_playback_tail()
 		if _check_battle_end():
 			return
 		_start_enemy_turn()
@@ -1370,6 +1378,7 @@ func _process_matches() -> void:
 			await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
 
 	_handle_leader_charge_events(result.get("leader_charge_events", []))
+	_queue_ready_leader_burst_playback()
 	
 	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
 	var all_special_gems: Array = removal_result.get("special_gems", explosion_gems + bomb_gems + rainbow_gems)
@@ -1442,36 +1451,65 @@ func _wait_for_player_resolution_tail() -> void:
 		waited += 0.03
 
 func _play_ready_leader_burst_after_combo() -> void:
-	if _battle == null or not _battle.has_method("consume_ready_leader_burst"):
+	_queue_ready_leader_burst_playback()
+	await _wait_for_leader_burst_playback_tail()
+
+
+func _queue_ready_leader_burst_playback() -> void:
+	if _battle == null or not _battle.has_method("consume_ready_leader_burst") or not _battle.has_method("is_leader_burst_ready"):
 		return
-	if _battle.has_method("is_leader_burst_ready") and not bool(_battle.call("is_leader_burst_ready")):
+	if not bool(_battle.call("is_leader_burst_ready")):
 		return
-	var preview: Dictionary = {}
-	if _battle.has_method("get_ready_leader_burst_preview"):
-		preview = _battle.call("get_ready_leader_burst_preview")
-	if not preview.is_empty():
-		_start_leader_burst_showcase(preview)
-		_state = BattleState.MATCHING
-		_sfx("powerup_burst_soft")
-		await _advance_leader_burst_showcase_phase("scale_in", LEADER_BURST_SCALE_IN_DURATION)
-		await _advance_leader_burst_showcase_phase("banner", LEADER_BURST_BANNER_DURATION)
-		await _advance_leader_burst_showcase_phase("scale_out", LEADER_BURST_SCALE_OUT_DURATION)
-	var result: Dictionary = _battle.consume_ready_leader_burst()
-	var leader_skill_log: Dictionary = result.get("leader_skill_log", {})
-	if leader_skill_log.is_empty():
+	_leader_burst_playback_requested = true
+	if _leader_burst_playback_active:
+		return
+	_leader_burst_playback_active = true
+	call_deferred("_run_leader_burst_playback")
+
+
+func _run_leader_burst_playback() -> void:
+	if _battle == null or not _battle.has_method("consume_ready_leader_burst") or not _battle.has_method("is_leader_burst_ready"):
+		_leader_burst_playback_active = false
+		return
+	while bool(_battle.call("is_leader_burst_ready")):
+		_leader_burst_playback_requested = false
+		var preview: Dictionary = {}
+		if _battle.has_method("get_ready_leader_burst_preview"):
+			preview = _battle.call("get_ready_leader_burst_preview")
+		if not preview.is_empty():
+			_start_leader_burst_showcase(preview)
+			_sfx("powerup_burst_soft")
+			await _advance_leader_burst_showcase_phase("scale_in", LEADER_BURST_SCALE_IN_DURATION)
+			await _advance_leader_burst_showcase_phase("banner", LEADER_BURST_BANNER_DURATION)
+			await _advance_leader_burst_showcase_phase("scale_out", LEADER_BURST_SCALE_OUT_DURATION)
+		var result: Dictionary = _battle.consume_ready_leader_burst()
+		var leader_skill_log: Dictionary = result.get("leader_skill_log", {})
+		if leader_skill_log.is_empty():
+			_clear_leader_burst_showcase()
+			break
+		if preview.is_empty():
+			await get_tree().create_timer(0.18).timeout
+		else:
+			_set_leader_burst_showcase_phase("effect")
+		await _play_leader_skill_log(leader_skill_log)
+		await get_tree().create_timer(LEADER_BURST_EFFECT_HOLD).timeout
+		if not _leader_burst_showcase.is_empty():
+			await _advance_leader_burst_showcase_phase("restore", LEADER_BURST_RESTORE_DURATION)
 		_clear_leader_burst_showcase()
-		return
-	_state = BattleState.MATCHING
-	if preview.is_empty():
-		await get_tree().create_timer(0.18).timeout
-	else:
-		_set_leader_burst_showcase_phase("effect")
-	await _play_leader_skill_log(leader_skill_log)
-	await get_tree().create_timer(LEADER_BURST_EFFECT_HOLD).timeout
-	if not _leader_burst_showcase.is_empty():
-		await _advance_leader_burst_showcase_phase("restore", LEADER_BURST_RESTORE_DURATION)
-	_clear_leader_burst_showcase()
-	await _handle_phase_transition_result(result.get("phase_transition", {}))
+		await _handle_phase_transition_result(result.get("phase_transition", {}))
+		if _battle.battle_over:
+			_leader_burst_playback_active = false
+			return
+	_leader_burst_playback_active = false
+	if _leader_burst_playback_requested:
+		_queue_ready_leader_burst_playback()
+
+
+func _wait_for_leader_burst_playback_tail() -> void:
+	var waited := 0.0
+	while _leader_burst_playback_active and waited < LEADER_BURST_TAIL_WAIT_MAX:
+		await get_tree().create_timer(0.03).timeout
+		waited += 0.03
 
 
 func _start_leader_burst_showcase(preview: Dictionary) -> void:
@@ -2314,13 +2352,6 @@ func _start_attack_cue(attacker_is_enemy: bool, attacker_idx: int, target_is_ene
 		"duration": 0.32,
 		"maxDuration": 0.32,
 	})
-	if not attacker_is_enemy:
-		_player_lunge_anims.append({
-			"playerIndex": attacker_idx,
-			"timer": ATTACK_CUE_DURATION,
-			"duration": ATTACK_CUE_DURATION,
-			"maxDuration": ATTACK_CUE_DURATION
-		})
 
 func _play_attack_observation(attacker_is_enemy: bool, attacker_idx: int, target_is_enemy: bool, target_idx: int, element: String, label: String, charged: bool = false) -> void:
 	_start_attack_cue(attacker_is_enemy, attacker_idx, target_is_enemy, target_idx, element, label, charged)
@@ -2628,20 +2659,13 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 	if target_idx >= 0:
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.4, "maxTimer": 0.4})
 
-	# ★ 主人定 2026-06-10：我方宠物弹动 + 同属性弹道
+	# 普攻仅保留同属性弹道；角色本体保持站位，避免与消除节奏抢镜。
 	if info_type != "active_skill":  # 主动技能已经有弹道，只补常规攻击
 		var attacker_idx: int = int(damage_info.get("attacker_index", damage_info.get("attackerIndex", -1)))
 		if attacker_idx < 0:
 			attacker_idx = _find_player_index(str(damage_info.get("attacker_id", damage_info.get("attackerId", ""))), attacker_name)
 		if attacker_idx >= 0:
-			# 1) 玩家宠物往前弹一下回位（0.3s）
-			_player_lunge_anims.append({
-				"playerIndex": attacker_idx,
-				"timer": 0.0,
-				"duration": 0.3,
-				"maxDuration": 0.3,
-			})
-			# 2) 同属性弹道 飞向目标
+			# 同属性弹道飞向目标。
 			if target_idx >= 0:
 				var element: String = str(damage_info.get("element", "fire"))
 				_bullet_anims.append({
@@ -3354,13 +3378,6 @@ func _draw_leader_burst_showcase(canvas: CanvasItem = self) -> void:
 	var timer := float(_leader_burst_showcase.get("timer", 0.0))
 	var phase := str(_leader_burst_showcase.get("phase", "scale_in"))
 	var alpha := clampf(timer / 0.18, 0.0, 1.0)
-	var dark_alpha := 0.16 * alpha
-	if phase == "restore":
-		var restore_p := clampf(timer / maxf(0.01, LEADER_BURST_RESTORE_DURATION), 0.0, 1.0)
-		dark_alpha = 0.16 * (1.0 - restore_p)
-	elif phase == "effect":
-		dark_alpha = 0.10
-	canvas.draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.05, 0.04, 0.04, dark_alpha), true)
 	if phase == "banner":
 		_draw_leader_burst_banner(canvas, timer)
 	if phase == "effect" or phase == "restore":

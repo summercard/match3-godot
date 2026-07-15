@@ -17,7 +17,7 @@ func _run() -> void:
 		"ContentPanels/MainPanel",
 		"HitAreas/BackButton",
 		"HitAreas/Rows/SoundRow",
-		"HitAreas/Rows/QualityHigh",
+		"HitAreas/Rows/MusicRow",
 		"HitAreas/Actions/ResetButton",
 		"HitAreas/ConfirmDialog/YesButton",
 	])

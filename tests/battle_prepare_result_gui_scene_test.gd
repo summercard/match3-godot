@@ -29,7 +29,6 @@ func _run() -> void:
 		"TeamPanel/Cards/TeamCard1/Portrait",
 		"PowerPanel/PlayerPower",
 		"MechanicPanel/Line1",
-		"RewardPreview/Slots/RewardSlot3/Icon",
 		"StartButton/Frame",
 		"AlertPopup",
 	]:
@@ -60,7 +59,6 @@ func _run() -> void:
 		"TeamPanel/Cards/TeamCard1/Name",
 		"TeamPanel/Cards/TeamCard1/Level",
 		"TeamPanel/Cards/TeamCard1/Power",
-		"RewardPreview/Title",
 	]:
 		_expect((prepare.get_node(plain_label_path) as Label).get_line_height() > 0, "%s should keep readable current typography" % plain_label_path)
 	var enemy_panel := prepare.get_node("EnemyPanel") as Control
@@ -69,7 +67,7 @@ func _run() -> void:
 	var reward_panel := prepare.get_node("RewardPreview") as Control
 	_expect(enemy_panel.position.y + enemy_panel.size.y < power_panel.position.y, "enemy and power sections should have a visible gap")
 	_expect(power_panel.position.y + power_panel.size.y < team_panel.position.y, "power and team sections should have a visible gap")
-	_expect(team_panel.position.y + team_panel.size.y < reward_panel.position.y, "team and reward sections should have a visible gap")
+	_expect(not reward_panel.visible, "battle preparation should not show reward information before battle")
 	for team_card_path in ["TeamPanel/Cards/TeamCard1", "TeamPanel/Cards/TeamCard2", "TeamPanel/Cards/TeamCard3"]:
 		var team_card := prepare.get_node(team_card_path) as Control
 		var element_badge := team_card.get_node("ElementBadge") as TextureRect
@@ -79,30 +77,17 @@ func _run() -> void:
 		_expect(is_equal_approx(element_badge.position.y, -2.0), "%s should align its element badge near the top edge" % team_card_path)
 		_expect(card_panel.texture.resource_path.ends_with("panel_base2.png"), "%s should reuse the first team card panel" % team_card_path)
 		_expect(not team_card.has_node("Frame"), "%s should not keep the old team card frame" % team_card_path)
-	for reward_slot_path in ["RewardPreview/Slots/RewardSlot1", "RewardPreview/Slots/RewardSlot2", "RewardPreview/Slots/RewardSlot3"]:
-		var reward_label := prepare.get_node(reward_slot_path + "/Label") as Label
-		var reward_icon := prepare.get_node(reward_slot_path + "/Icon") as TextureRect
-		_expect(not reward_label.visible and reward_label.text.is_empty(), "%s should hide reward text and quantity" % reward_slot_path)
-		_expect(reward_icon.size == Vector2(26.0, 26.0), "%s icon should use the compact reward size" % reward_slot_path)
 	var prepare_shade := prepare.get_node("Shade") as TextureRect
 	_expect(prepare_shade.texture.resource_path.ends_with("ui/backgrounds/black.png"), "battle prepare should use black.png between the background and UI")
 	_expect(is_equal_approx(prepare_shade.modulate.a, 0.5), "battle prepare black overlay should be 50 percent transparent")
-	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "first-clear diamond preview should use the diamond icon")
 	prepare.init({"stageId": "stage_1_2"})
-	_expect(prepare.has_node("RewardPreview/Slots/RewardSlot4"), "battle prepare should support a fourth reward preview slot")
-	var reward_slots := prepare.get_node("RewardPreview/Slots") as Control
-	var first_reward_slot := prepare.get_node("RewardPreview/Slots/RewardSlot1") as Control
-	var last_reward_slot := prepare.get_node("RewardPreview/Slots/RewardSlot4") as Control
-	_expect(reward_slots.visible and first_reward_slot.visible and last_reward_slot.visible, "stage rewards should expose all four current reward slots")
-	_expect((first_reward_slot.get_node("Icon") as TextureRect).texture != null and (last_reward_slot.get_node("Icon") as TextureRect).texture != null, "visible reward slots should render their reward icons")
-	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("main_icon_diamond_gem_v3.png"), "stage with guaranteed item should still preview first-clear diamonds by icon")
-	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot4/Icon") as TextureRect).texture.resource_path.ends_with("items_new_icon_capture_ball.png"), "stage guaranteed item should show its real item icon")
-	_expect(not (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).visible and (prepare.get_node("RewardPreview/Slots/RewardSlot4/Label") as Label).text.is_empty(), "stage guaranteed item should not show reward text")
+	_expect(not reward_panel.visible, "changing stages must not reveal a reward preview")
 	save_manager.save_stage_stars("stage_1_2", 3)
 	prepare.init({"stageId": "stage_1_2"})
-	_expect((prepare.get_node("RewardPreview/Slots/RewardSlot3/Icon") as TextureRect).texture.resource_path.ends_with("items_new_icon_capture_ball.png"), "cleared stage should replace first-clear diamonds with the guaranteed item icon")
-	_expect(not (prepare.get_node("RewardPreview/Slots/RewardSlot4") as Control).visible, "cleared stage with three reward types should hide unused fourth preview slot")
-	(prepare.get_node("StartButton") as TextureButton).pressed.emit()
+	_expect(not reward_panel.visible, "cleared stages must not reveal a reward preview")
+	var start_button := prepare.get_node("StartButton") as TextureButton
+	_expect(start_button.position.y < 590.0 and start_button.size.x > 281.0, "primary battle button should move upward and grow after removing rewards")
+	start_button.pressed.emit()
 	_expect(_started_stage_id == "stage_1_2", "editable start button should preserve battle start behavior")
 	prepare.init({"stageId": "stage_2_12"})
 	_expect((prepare.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle prepare should use map2 war background")

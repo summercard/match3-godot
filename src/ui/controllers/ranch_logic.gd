@@ -150,6 +150,7 @@ var _last_drag_x: float = 0.0
 var _last_drag_y: float = 0.0
 var _status_text: String = ""
 var _status_timer: float = 0.0
+var _collect_feedback_timer: float = 0.0
 var _social_result_popup: Dictionary = {}
 
 class BubbleData:
@@ -188,6 +189,8 @@ func _process(delta: float) -> void:
 	_time += delta
 	if _status_timer > 0.0:
 		_status_timer = maxf(0.0, _status_timer - delta)
+	if _collect_feedback_timer > 0.0:
+		_collect_feedback_timer = maxf(0.0, _collect_feedback_timer - delta)
 	_update_bubbles(delta)
 	queue_redraw()
 
@@ -273,8 +276,12 @@ func _handle_ranch_tap(pos: Vector2) -> void:
 		return
 	for i in range(SLOT_RECTS.size()):
 		if SLOT_RECTS[i].has_point(pos):
-			_select_slot(i)
-			_collect_slot(i)
+			var slot: Dictionary = _slots_data[i] if i < _slots_data.size() else {}
+			var instance_id := str(slot.get("instance_id", ""))
+			if not instance_id.is_empty() and int(_idle_exp_map.get(instance_id, 0)) > 0:
+				_collect_slot(i)
+			else:
+				_select_slot(i)
 			return
 	var picker_idx := _picker_index_at(pos)
 	if picker_idx >= 0 and picker_idx < _captured_monsters.size():
@@ -709,6 +716,7 @@ func _collect_slot(slot_index: int) -> void:
 	_save_ranch_state()
 	_refresh_ranch_view()
 	exp_collected.emit(added)
+	_play_collect_feedback(slot_index)
 	_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
 
 func _on_collect_pressed() -> void:
@@ -745,6 +753,8 @@ func _on_collect_pressed() -> void:
 	_refresh_ranch_view()
 	if total_collected > 0:
 		exp_collected.emit(added)
+		for slot: Dictionary in collectable_slots:
+			_play_collect_feedback(_slots_data.find(slot))
 		_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
 	else:
 		_show_status("暂无可收获收益")
@@ -826,6 +836,13 @@ func _show_status(text: String) -> void:
 	_status_text = text
 	_status_timer = 2.2
 
+
+func _play_collect_feedback(slot_index: int) -> void:
+	_collect_feedback_timer = 0.78
+	if slot_index >= 0:
+		_add_bubble(slot_index)
+		_add_bubble(slot_index)
+
 func _draw() -> void:
 	_draw_background()
 	_draw_header()
@@ -865,7 +882,12 @@ func _draw_status_text() -> void:
 		return
 	var alpha := minf(1.0, _status_timer)
 	var y := 268.0 if _active_page == "classroom" else 92.0
-	_draw_text(_status_text, DESIGN_W / 2.0, y, Color(1.0, 0.88, 0.36, alpha), 18.0, 260.0)
+	var size := 18.0
+	if _active_page == "ranch" and _collect_feedback_timer > 0.0:
+		var t := 1.0 - _collect_feedback_timer / 0.78
+		y -= sin(t * PI) * 18.0
+		size = 18.0 + sin(t * PI) * 4.0
+	_draw_text(_status_text, DESIGN_W / 2.0, y, Color(1.0, 0.88, 0.36, alpha), size, 260.0)
 
 func _draw_code_button(rect: Rect2, text: String, enabled: bool) -> void:
 	if enabled:

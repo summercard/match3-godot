@@ -9,7 +9,7 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 signal back_pressed
 
 var _storage: Node = null
-var _service: MailboxService = null
+var _service = null
 var _selected_instance_id := ""
 var _selected_mail_id := ""
 var _sending := false
@@ -72,7 +72,7 @@ func init(_data: Dictionary = {}) -> void:
 func _refresh() -> void:
 	if _service == null or not is_node_ready():
 		return
-	var state := _service.get_state()
+	var state: Dictionary = _service.get_state()
 	var owned: Array = _storage.call("get_owned_monsters") if _storage != null and _storage.has_method("get_owned_monsters") else []
 	if _selected_instance_id.is_empty():
 		_selected_instance_id = str(state.get("selected_adventurer_id", ""))
@@ -205,7 +205,7 @@ func _open_mail_index(index: int) -> void:
 func _claim_selected_mail() -> void:
 	if _selected_mail_id.is_empty():
 		return
-	var result := _service.claim_mail(_selected_mail_id)
+	var result: Dictionary = _service.claim_mail(_selected_mail_id)
 	if bool(result.get("ok", false)):
 		_set_mail_detail(_mail_detail.text + "\n\n附件已收入背包。")
 	_refresh()
@@ -214,7 +214,7 @@ func _claim_selected_mail() -> void:
 func _delete_selected_mail() -> void:
 	if _selected_mail_id.is_empty():
 		return
-	var result := _service.delete_mail(_selected_mail_id)
+	var result: Dictionary = _service.delete_mail(_selected_mail_id)
 	if not bool(result.get("ok", false)):
 		_set_mail_detail(_mail_detail.text + "\n\n请先领取附件后再删除。")
 		return
@@ -241,14 +241,15 @@ func _send_blessing() -> void:
 	if _sending or _selected_instance_id.is_empty():
 		return
 	_service.select_adventurer(_selected_instance_id)
-	var result := _service.send_blessing()
+	var result: Dictionary = _service.send_blessing()
 	if not bool(result.get("ok", false)):
 		_blessing_status.text = "暂时无法送出祝福。"
 		return
-	# 新回信在星星起飞时就已经抵达收件箱；无需等待完整仪式动画结束。
-	var latest_state := _service.get_state()
+	# 回信已排入稳定投递批次；星星表现只确认祝福送出，不提前制造未读邮件。
+	var latest_state: Dictionary = _service.get_state()
 	_refresh_inbox(latest_state)
-	_blessing_status.text = "图鉴星星：%d" % MailboxRulesScript.collection_star_total(latest_state)
+	var deliver_at := int(result.get("deliver_at", 0))
+	_blessing_status.text = "祝福已送出，回信将在下一批旅途中抵达。" if deliver_at > 0 else "祝福已送出。"
 	_sending = true
 	_send_button.disabled = true
 	_star.position = Vector2(238.0, 356.0)

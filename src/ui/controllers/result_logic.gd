@@ -479,20 +479,12 @@ func _calc_rewards() -> void:
 	_rewards["item_name"] = ""
 	_rewards["item_count"] = 0
 	var first_item: Dictionary = RewardRulesScript.get_first_guaranteed_item(stage_rewards)
-	if _is_win and not first_item.is_empty():
+	if _is_win and bool(_rewards.get("first_clear", false)) and not first_item.is_empty():
 		var item_id := str(first_item.get("id", ""))
 		var item_def := ItemDBScript.get_item(item_id)
 		_rewards["item"] = item_id
 		_rewards["item_name"] = str(item_def.get("name", item_id))
 		_rewards["item_count"] = maxi(1, int(first_item.get("count", 1)))
-	elif _is_win and randf() < 0.3:
-		if _storage and _storage.has_method("roll_drop"):
-			var item_id: String = _storage.roll_drop()
-			if not item_id.is_empty():
-				var item_def := ItemDBScript.get_item(item_id)
-				_rewards["item"] = item_id
-				_rewards["item_name"] = str(item_def.get("name", item_id))
-				_rewards["item_count"] = 1
 
 func _setup_buttons() -> void:
 	if _is_win and _battle_result.has("stageId"):

@@ -31,15 +31,15 @@ layout_mode = 0
 offset_left = 14.0
 offset_top = 86.0
 offset_right = 361.0
-offset_bottom = 472.0
+offset_bottom = 262.0
 mouse_filter = 2
 
 [node name="AboutPanel" type="Control" parent="ContentPanels"]
 layout_mode = 0
 offset_left = 18.0
-offset_top = 486.0
+offset_top = 276.0
 offset_right = 357.0
-offset_bottom = 544.0
+offset_bottom = 334.0
 mouse_filter = 2
 
 [node name="HitAreas" type="Control" parent="."]
@@ -78,62 +78,6 @@ offset_right = 345.0
 offset_bottom = 247.0
 flat = true
 
-[node name="VibrationRow" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 256.0
-offset_right = 345.0
-offset_bottom = 310.0
-flat = true
-
-[node name="QualityLow" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 204.0
-offset_top = 332.0
-offset_right = 247.0
-offset_bottom = 360.0
-flat = true
-
-[node name="QualityMedium" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 247.0
-offset_top = 332.0
-offset_right = 290.0
-offset_bottom = 360.0
-flat = true
-
-[node name="QualityHigh" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 290.0
-offset_top = 332.0
-offset_right = 332.0
-offset_bottom = 360.0
-flat = true
-
-[node name="PerformanceLite" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 204.0
-offset_top = 395.0
-offset_right = 247.0
-offset_bottom = 423.0
-flat = true
-
-[node name="PerformanceBalanced" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 247.0
-offset_top = 395.0
-offset_right = 290.0
-offset_bottom = 423.0
-flat = true
-
-[node name="PerformanceRich" type="Button" parent="HitAreas/Rows"]
-layout_mode = 0
-offset_left = 290.0
-offset_top = 395.0
-offset_right = 332.0
-offset_bottom = 423.0
-flat = true
-
 [node name="Actions" type="Control" parent="HitAreas"]
 layout_mode = 0
 offset_right = 375.0
@@ -143,17 +87,17 @@ mouse_filter = 2
 [node name="ResetButton" type="Button" parent="HitAreas/Actions"]
 layout_mode = 0
 offset_left = 34.0
-offset_top = 565.0
+offset_top = 355.0
 offset_right = 172.0
-offset_bottom = 611.0
+offset_bottom = 401.0
 flat = true
 
 [node name="DefaultButton" type="Button" parent="HitAreas/Actions"]
 layout_mode = 0
 offset_left = 203.0
-offset_top = 565.0
+offset_top = 355.0
 offset_right = 341.0
-offset_bottom = 611.0
+offset_bottom = 401.0
 flat = true
 
 [node name="ConfirmDialog" type="Control" parent="HitAreas"]

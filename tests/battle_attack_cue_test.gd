@@ -14,7 +14,7 @@ func _run() -> void:
 	var cues: Array = scene.get("_attack_cues")
 	var lunges: Array = scene.get("_player_lunge_anims")
 	_expect(cues.size() == 1, "player attack should create one observation cue")
-	_expect(lunges.size() == 1, "player attack should create a lunge cue")
+	_expect(lunges.is_empty(), "player attack should keep the combatant in place")
 	if cues.size() > 0:
 		var cue: Dictionary = cues[0]
 		_expect(not bool(cue.get("attacker_is_enemy", true)), "player cue attacker should be allied")
@@ -26,7 +26,7 @@ func _run() -> void:
 	cues = scene.get("_attack_cues")
 	lunges = scene.get("_player_lunge_anims")
 	_expect(cues.size() == 2, "enemy attack should create an observation cue")
-	_expect(lunges.size() == 1, "enemy attack should not create allied lunge")
+	_expect(lunges.is_empty(), "enemy attack should not create an allied lunge")
 	if cues.size() > 1:
 		var enemy_cue: Dictionary = cues[1]
 		_expect(bool(enemy_cue.get("attacker_is_enemy", false)), "enemy cue attacker should be enemy")

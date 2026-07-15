@@ -61,7 +61,8 @@ func _run() -> void:
 			await process_frame
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "sending a blessing should persist the daily send count")
-		_expect(int(state.get("unread_count", 0)) > 0, "sending a blessing should create a readable reply mail")
+		_expect(int(state.get("unread_count", 0)) == 0, "a sent blessing should not appear before its delivery window")
+		_expect((state.get("pending_blessings", []) as Array).size() == 1, "sending a blessing should create one scheduled reply")
 		_expect(int(state.get("collection_stars", 0)) == 3, "sending a blessing should not change the three starter collection stars")
 
 	root.remove_child(main)

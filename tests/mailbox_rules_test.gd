@@ -39,16 +39,28 @@ func _test_blessing_and_claim(storage: Node) -> void:
 	state = service.get_state()
 	_expect(MailboxRulesScript.collection_star_total(state) == 4, "duplicate instances of an unlocked species must not award another star")
 	var sent := service.send_blessing()
-	_expect(bool(sent.get("ok", false)), "blessing should send and create simulated inbound mail")
+	_expect(bool(sent.get("ok", false)), "blessing should queue a simulated inbound mail")
 	state = service.get_state()
 	_expect(int(state.get("daily_send_count", 0)) == 1, "sending blessing should consume daily count")
-	_expect(int(state.get("unread_count", 0)) == 1, "simulated blessing should create unread mail")
+	_expect(int(state.get("unread_count", 0)) == 0, "a queued blessing must not become unread before its delivery batch")
+	_expect((state.get("pending_blessings", []) as Array).size() == 1, "sending blessing should persist one pending reply")
 	_expect(MailboxRulesScript.collection_star_total(state) == 4, "sending or receiving a blessing must not change collection-star rewards")
+	var queued_mail: Dictionary = sent.get("pending_mail", {})
+	_expect(int(queued_mail.get("deliver_at", 0)) > int(Time.get_unix_time_from_system()), "queued blessing should use a future delivery timestamp")
+	var pending: Array = state.get("pending_blessings", []).duplicate(true)
+	if not pending.is_empty():
+		var due_mail: Dictionary = pending[0]
+		due_mail["deliver_at"] = int(Time.get_unix_time_from_system()) - 1
+		pending[0] = due_mail
+		state["pending_blessings"] = pending
+		storage.save_mailbox_state(state)
+	state = service.get_state()
+	_expect(int(state.get("unread_count", 0)) == 1, "due pending blessing should materialize as unread mail")
 	var arrival_mail_id := MailboxRulesScript.next_lobby_arrival_blessing_id(state)
-	_expect(arrival_mail_id == str(sent.get("mail", {}).get("id", "")), "a new blessing should be eligible for one lobby arrival")
+	_expect(arrival_mail_id == str(queued_mail.get("id", "")), "a delivered blessing should be eligible for one lobby arrival")
 	state = MailboxRulesScript.mark_lobby_arrival_shown(state, arrival_mail_id)
 	_expect(MailboxRulesScript.next_lobby_arrival_blessing_id(state).is_empty(), "the same blessing must not replay its lobby arrival after re-entering")
-	var mail: Dictionary = sent.get("mail", {})
+	var mail: Dictionary = (state.get("inbox", []) as Array)[0] if not (state.get("inbox", []) as Array).is_empty() else {}
 	_expect(str(mail.get("source", "")) == "stranger_blessing", "mail source should identify simulated stranger")
 	_expect(not str(mail.get("sender_monster_id", "")).is_empty(), "blessing mail should identify its sender spirit portrait")
 	var blocked_delete := service.delete_mail(str(mail.get("id", "")))

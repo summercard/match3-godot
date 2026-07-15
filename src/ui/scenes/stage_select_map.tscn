@@ -95,6 +95,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="BottomNav" type="Control" parent="." unique_id=11177729]
+z_index = 2048
 anchors_preset = 0
 offset_left = 10.0
 offset_top = 573.0
@@ -226,18 +227,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Header" type="Control" parent="." unique_id=2083169124]
+z_index = 2048
 anchors_preset = 0
-offset_left = 1.0
+offset_left = 0.0
 offset_top = 1.0
-offset_right = 376.0
-offset_bottom = 99.0
-
-[node name="TopScrim" type="ColorRect" parent="Header" unique_id=367042694]
-layout_mode = 0
 offset_right = 375.0
-offset_bottom = 96.0
-mouse_filter = 2
-color = Color(0.02, 0.08, 0.14, 0.14)
+offset_bottom = 99.0
 
 [node name="BackButton" type="TextureButton" parent="Header" unique_id=14658475]
 layout_mode = 0
@@ -271,9 +266,9 @@ stretch_mode = 5
 
 [node name="Bar" type="TextureRect" parent="Header" unique_id=1696465741]
 layout_mode = 0
-offset_left = 64.0
+offset_left = 33.5
 offset_top = 11.0
-offset_right = 372.0
+offset_right = 341.5
 offset_bottom = 76.0
 mouse_filter = 2
 texture = ExtResource("3_header")
@@ -284,8 +279,8 @@ stretch_mode = 5
 visible = false
 modulate = Color(1, 1, 1, 0.82)
 layout_mode = 0
-offset_left = 218.0
-offset_right = 338.0
+offset_left = 187.5
+offset_right = 307.5
 offset_bottom = 54.0
 mouse_filter = 2
 expand_mode = 1
@@ -293,9 +288,9 @@ stretch_mode = 5
 
 [node name="ChapterTitle" type="Label" parent="Header" unique_id=701966155]
 layout_mode = 0
-offset_left = 120.0
+offset_left = 89.5
 offset_top = 19.0
-offset_right = 190.0
+offset_right = 159.5
 offset_bottom = 43.0
 theme_override_colors/font_color = Color(0.3, 0.95, 0.34, 1)
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
@@ -305,9 +300,9 @@ horizontal_alignment = 1
 
 [node name="ChapterName" type="Label" parent="Header" unique_id=1383989028]
 layout_mode = 0
-offset_left = 196.0
+offset_left = 165.5
 offset_top = 16.0
-offset_right = 346.0
+offset_right = 315.5
 offset_bottom = 50.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
@@ -318,9 +313,9 @@ vertical_alignment = 1
 
 [node name="StarIcon" type="TextureRect" parent="Header" unique_id=1370045107]
 layout_mode = 0
-offset_left = 123.0
+offset_left = 92.5
 offset_top = 42.0
-offset_right = 148.0
+offset_right = 117.5
 offset_bottom = 67.0
 mouse_filter = 2
 texture = ExtResource("10_star")
@@ -328,9 +323,9 @@ expand_mode = 1
 
 [node name="StarValue" type="Label" parent="Header" unique_id=530526879]
 layout_mode = 0
-offset_left = 153.0
+offset_left = 122.5
 offset_top = 43.0
-offset_right = 222.0
+offset_right = 191.5
 offset_bottom = 68.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.36, 0.12, 0.02, 0.95)
@@ -341,9 +336,9 @@ vertical_alignment = 1
 
 [node name="Dots" type="Control" parent="Header" unique_id=2064253588]
 anchors_preset = 0
-offset_left = 138.0
+offset_left = 107.5
 offset_top = 81.0
-offset_right = 303.0
+offset_right = 272.5
 offset_bottom = 87.0
 
 [node name="Dot1" type="ColorRect" parent="Header/Dots" unique_id=1673885191]
@@ -672,6 +667,7 @@ stretch_mode = 5
 
 [node name="PopupLayer" type="Control" parent="." unique_id=978015749]
 visible = false
+z_index = 3072
 anchors_preset = 0
 offset_right = 375.0
 offset_bottom = 667.0

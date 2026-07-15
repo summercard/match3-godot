@@ -44,7 +44,7 @@ const RANCH_IDLE_MAX_MS: float = 8.0 * 60.0 * 60.0 * 1000.0
 const STAMINA_MAX: int = 5
 const STAMINA_RECOVERY_MS: float = 6.0 * 60.0 * 60.0 * 1000.0
 const SWEEP_STAMINA_COST: int = 1
-const SAVE_SCHEMA_VERSION: int = 2
+const SAVE_SCHEMA_VERSION: int = 3
 const META_SECTION: String = "meta"
 const SCHEMA_VERSION_KEY: String = "schema_version"
 const MONSTER_SELL_GOLD_BY_RARITY := {
@@ -250,6 +250,7 @@ func reset_to_initial_state() -> bool:
 		starter_pool.append(MonsterPool.create_instance(monster_id, {
 			"level": MonsterPool.STARTER_INITIAL_LEVEL,
 			"exp": 0,
+			"nature": MonsterPool.starter_nature(monster_id),
 			"source": "starter",
 			"capturedAt": now_ms,
 		}))
@@ -1329,6 +1330,8 @@ func get_mailbox_state() -> Dictionary:
 	var today_key := Time.get_date_string_from_system(false)
 	var raw: Variant = _get_value("mailbox", "data", MailboxRulesScript.default_state())
 	var normalized := MailboxRulesScript.normalize_state(raw, today_key)
+	var delivery := MailboxRulesScript.materialize_due_blessings(normalized, Time.get_unix_time_from_system())
+	normalized = delivery.get("state", normalized) as Dictionary
 	if raw != normalized:
 		_set_value("mailbox", "data", normalized)
 		_save_config()

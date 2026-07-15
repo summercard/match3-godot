@@ -44,17 +44,15 @@ func _run() -> void:
 	var lobby: Control = load("res://src/ui/scenes/main_lobby.tscn").instantiate()
 	root.add_child(lobby)
 	await process_frame
-	_expect(lobby.has_node("%TestToolButton"), "lobby should expose the test tool button")
+	_expect(lobby.has_node("%TestToolButton"), "test tool node may remain for editor compatibility")
 	var emitted: Array[String] = []
 	lobby.button_pressed.connect(func(button_id: String): emitted.append(button_id))
 	var test_button := lobby.get_node("%TestToolButton") as TextureButton
-	_expect(test_button != null, "test tool entry should be a TextureButton")
+	_expect(test_button != null and not test_button.visible, "test tool should not be a visible lobby entry")
 	if test_button != null:
-		_expect(test_button.position.x >= 270.0 and test_button.position.y <= 180.0, "test tool entry should sit in the lobby upper-right")
-		_expect(test_button.size.x <= 95.0 and test_button.size.y <= 34.0, "test tool entry should be compact")
 		test_button.pressed.emit()
 		await create_timer(0.17).timeout
-		_expect(emitted.has("test_tool"), "test tool entry should emit the test_tool navigation id")
+		_expect(not emitted.has("test_tool"), "hidden test tool must not retain a lobby navigation route")
 
 	TestSceneCleanup.queue_free_root(self)
 	await process_frame

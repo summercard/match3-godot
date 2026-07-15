@@ -33,6 +33,8 @@ const CLOUD_TRANSITION_OPEN_DURATION: float = 0.66
 const CLOUD_TRANSITION_MAP_OUT_SCALE: Vector2 = Vector2(1.105, 1.105)
 const CLOUD_TRANSITION_MAP_IN_SCALE: Vector2 = Vector2(1.12, 1.12)
 const CLOUD_TRANSITION_LAYER_Z_INDEX: int = 4096
+const MAP_SHELL_UI_Z_INDEX: int = 2048
+const MAP_POPUP_LAYER_Z_INDEX: int = 3072
 const CLOUD_TRANSITION_MIST_CLOSED_ALPHA: float = 1.0
 const TRANSITION_LEFT_CLOSED_X := [-285.0, -365.0, -310.0, -255.0, -315.0, -260.0, -155.0, -245.0, -170.0, -145.0]
 const TRANSITION_RIGHT_CLOSED_X := [-110.0, -145.0, -95.0, -20.0, -75.0, -55.0, -10.0, 45.0, 65.0, 30.0]
@@ -132,10 +134,23 @@ func _create_ui() -> void:
 	_sweep_anim_title_label = get_node("PopupLayer/SweepResult/TitleLabel") as Label
 	_sweep_anim_gold_label = get_node("PopupLayer/SweepResult/GoldLabel") as Label
 	_sweep_anim_exp_label = get_node("PopupLayer/SweepResult/ExpLabel") as Label
+	_enforce_shell_z_order()
 	_setup_chapter_lock_hint()
 	var vertical_bar := _map_scroll.get_v_scroll_bar()
 	if vertical_bar != null and not vertical_bar.value_changed.is_connected(_on_map_scroll_changed):
 		vertical_bar.value_changed.connect(_on_map_scroll_changed)
+
+
+func _enforce_shell_z_order() -> void:
+	for path in ["Header", "BottomNav"]:
+		var shell := get_node_or_null(path) as Control
+		if shell != null:
+			shell.z_index = MAP_SHELL_UI_Z_INDEX
+	var popup_layer := get_node_or_null("PopupLayer") as Control
+	if popup_layer != null:
+		popup_layer.z_index = MAP_POPUP_LAYER_Z_INDEX
+	if _transition_cloud_layer != null:
+		_transition_cloud_layer.z_index = CLOUD_TRANSITION_LAYER_Z_INDEX
 
 func _connect_shell_actions() -> void:
 	_connect_button(_back_btn, _on_back_btn_pressed)

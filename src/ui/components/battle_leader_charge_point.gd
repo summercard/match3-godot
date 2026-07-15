@@ -20,6 +20,9 @@ extends Control
 		queue_redraw()
 
 var _pulse: float = 0.0
+var _progress_tween: Tween = null
+var _bead_tweens: Dictionary = {}
+var _announced_fill_points: int = 0
 
 const COLORS := {
 	"fire": Color(1.0, 0.34, 0.12, 1.0),
@@ -49,6 +52,55 @@ func _process(delta: float) -> void:
 	if progress > 0.0:
 		_sync_scene_beads()
 		queue_redraw()
+
+
+func animate_to(next_progress: float) -> void:
+	var target := clampf(next_progress, 0.0, 1.0)
+	var target_points := _filled_point_count(target)
+	if target <= progress:
+		progress = target
+		_announced_fill_points = target_points
+		scale = Vector2.ONE
+		return
+	if _progress_tween != null and _progress_tween.is_valid():
+		_progress_tween.kill()
+	scale = Vector2.ONE
+	_animate_new_fill_points(target_points)
+	_progress_tween = create_tween()
+	_progress_tween.tween_property(self, "progress", target, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _filled_point_count(value: float) -> int:
+	return clampi(int(floor(clampf(value, 0.0, 1.0) * float(point_count) + 0.001)), 0, point_count)
+
+
+func _animate_new_fill_points(target_points: int) -> void:
+	if target_points <= _announced_fill_points:
+		return
+	var beads := _get_scene_beads()
+	for i in range(_announced_fill_points, mini(target_points, beads.size())):
+		_pulse_bead(beads[i])
+	_announced_fill_points = target_points
+
+
+func _pulse_bead(bead: Control) -> void:
+	if bead == null:
+		return
+	var key := bead.get_instance_id()
+	var previous: Tween = _bead_tweens.get(key, null)
+	if previous != null and previous.is_valid():
+		previous.kill()
+	bead.pivot_offset = bead.size * 0.5
+	bead.scale = Vector2.ONE
+	var tween := create_tween()
+	_bead_tweens[key] = tween
+	tween.tween_property(bead, "scale", Vector2(1.85, 1.85), 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(bead, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(bead):
+			bead.scale = Vector2.ONE
+		_bead_tweens.erase(key)
+	)
 
 
 func _draw() -> void:

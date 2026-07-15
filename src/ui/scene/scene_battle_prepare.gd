@@ -13,13 +13,13 @@ const TEAM_CARD_PATHS := [
 	"TeamPanel/Cards/TeamCard2",
 	"TeamPanel/Cards/TeamCard3",
 ]
+# Kept only for compatibility with editor/test callers of the retired preview helpers.
 const REWARD_SLOT_PATHS := [
 	"RewardPreview/Slots/RewardSlot1",
 	"RewardPreview/Slots/RewardSlot2",
 	"RewardPreview/Slots/RewardSlot3",
 	"RewardPreview/Slots/RewardSlot4",
 ]
-
 # === 入场动画时间线 ===
 const ENTRY_HEADER_DELAY := 0.00
 const ENTRY_RESOURCE_DELAY := 0.10
@@ -127,7 +127,6 @@ func _sync_gui() -> void:
 	_sync_team_cards()
 	_sync_mechanic_hint()
 	_sync_synergy()
-	_sync_rewards()
 	_sync_start_button()
 	_sync_alert()
 	_maybe_play_entry()

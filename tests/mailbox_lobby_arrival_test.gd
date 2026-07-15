@@ -25,12 +25,20 @@ func _run() -> void:
 	_expect(service.select_adventurer(str((owned[0] as Dictionary).get("instanceId", ""))), "an adventurer should be selectable for blessing delivery")
 	var sent := service.send_blessing()
 	_expect(bool(sent.get("ok", false)), "a simulated blessing should be available for the lobby arrival")
-	var mail: Dictionary = sent.get("mail", {})
+	var mail: Dictionary = sent.get("pending_mail", {})
 	var mail_id := str(mail.get("id", ""))
 	var second_sent := service.send_blessing()
 	_expect(bool(second_sent.get("ok", false)), "a second blessing should join the same unread arrival batch")
-	var second_mail: Dictionary = second_sent.get("mail", {})
+	var second_mail: Dictionary = second_sent.get("pending_mail", {})
 	var second_mail_id := str(second_mail.get("id", ""))
+	var queued_state: Dictionary = storage.get_mailbox_state()
+	var pending: Array = queued_state.get("pending_blessings", []).duplicate(true)
+	for index in range(pending.size()):
+		var pending_mail: Dictionary = pending[index]
+		pending_mail["deliver_at"] = int(Time.get_unix_time_from_system()) - 1
+		pending[index] = pending_mail
+	queued_state["pending_blessings"] = pending
+	storage.save_mailbox_state(queued_state)
 
 	var main := load("res://main.tscn").instantiate() as Control
 	root.add_child(main)
@@ -40,7 +48,7 @@ func _run() -> void:
 	var state: Dictionary = storage.get_mailbox_state()
 	var shown_ids: Array = state.get("lobby_arrival_shown_blessing_ids", [])
 	_expect(shown_ids.has(mail_id), "first lobby entry should persist the delivered blessing arrival")
-	_expect(shown_ids.has(second_mail_id), "first lobby entry should consume the entire unread blessing batch")
+	_expect(not shown_ids.has(second_mail_id), "lobby should present one arrival at a time instead of overlapping effects")
 
 	main.switch_scene("mailbox")
 	await process_frame
@@ -57,7 +65,7 @@ func _run() -> void:
 	for shown_id in shown_ids:
 		if str(shown_id) == second_mail_id:
 			second_appearances += 1
-	_expect(second_appearances == 1, "re-entering the lobby must not replay another mail from the same arrival batch")
+	_expect(second_appearances == 0, "a second arrival must not overlap the one already presented in this lobby session")
 
 	root.remove_child(main)
 	main.free()

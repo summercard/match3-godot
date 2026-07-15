@@ -507,7 +507,11 @@ func _sync_leader_charge_point(slot: Control, unit: Dictionary) -> void:
 	var monster_id := str(unit.get("id", ""))
 	var value := int(charges.get(monster_id, 0))
 	point.visible = int(unit.get("hp", 0)) > 0
-	point.set("progress", clampf(float(value) / float(max_charge), 0.0, 1.0))
+	var progress := clampf(float(value) / float(max_charge), 0.0, 1.0)
+	if point.has_method("animate_to"):
+		point.call("animate_to", progress)
+	else:
+		point.set("progress", progress)
 	point.set("element", str(unit.get("boardAffinity", unit.get("element", "fire"))))
 
 func _set_stage_enemy(slot: Control, unit: Dictionary) -> void:

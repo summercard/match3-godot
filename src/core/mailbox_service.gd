@@ -5,10 +5,11 @@ const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const BlessingProviderScript = preload("res://src/core/blessing_provider.gd")
 
 var _storage: Node
-var _provider: BlessingProvider
+var _provider: RefCounted
+var _now_unix_override: float = -1.0
 
 
-func _init(storage: Node, provider: BlessingProvider = null) -> void:
+func _init(storage: Node, provider: RefCounted = null) -> void:
 	_storage = storage
 	_provider = provider if provider != null else BlessingProviderScript.new()
 
@@ -17,6 +18,15 @@ func get_state() -> Dictionary:
 	if _storage == null or not _storage.has_method("get_mailbox_state"):
 		return MailboxRulesScript.default_state()
 	return _storage.call("get_mailbox_state") as Dictionary
+
+
+## Test-only clock seam. Production always reads the system clock.
+func set_now_unix_for_test(now_unix: float) -> void:
+	_now_unix_override = now_unix
+
+
+func _now_unix() -> float:
+	return _now_unix_override if _now_unix_override >= 0.0 else Time.get_unix_time_from_system()
 
 
 func select_adventurer(instance_id: String) -> bool:
@@ -39,22 +49,28 @@ func send_blessing() -> Dictionary:
 	var adventurer: Dictionary = _storage.call("get_monster_instance", adventurer_id)
 	if adventurer.is_empty():
 		return {"ok": false, "error": "no_adventurer"}
-	var now := Time.get_unix_time_from_system()
-	var seed := int(now) + int(state.get("daily_send_count", 0)) * 97 + adventurer_id.hash()
-	var incoming := _provider.build_simulated_blessing(seed, adventurer)
-	incoming["id"] = "blessing:%d:%d" % [int(now * 1000.0), int(state.get("daily_send_count", 0))]
+	var now := _now_unix()
+	var send_index := int(state.get("daily_send_count", 0))
+	var day_key := MailboxRulesScript.day_key_for_unix(now)
+	var seed := posmod(("blessing:%s:%s:%d" % [day_key, adventurer_id, send_index]).hash(), 2147483647)
+	var incoming: Dictionary = _provider.build_simulated_blessing(seed, adventurer)
+	incoming["id"] = "blessing:%s:%d:%s" % [day_key, send_index, adventurer_id]
 	incoming["created_at"] = now
 	incoming["read_at"] = null
 	incoming["claimed_at"] = null
 	incoming["reward_receipt_id"] = "mail_reward:%s" % str(incoming.get("id", ""))
-	state["daily_send_count"] = int(state.get("daily_send_count", 0)) + 1
+	state["daily_send_count"] = send_index + 1
 	var history: Array = state.get("sent_history", []).duplicate(true)
 	history.push_front({"adventurer_id": adventurer_id, "sent_at": now})
 	state["sent_history"] = history.slice(0, 20)
-	state = MailboxRulesScript.append_mail(state, incoming)
+	var queued := MailboxRulesScript.queue_blessing_for_delivery(state, incoming, now)
+	if not bool(queued.get("ok", false)):
+		return {"ok": false, "error": str(queued.get("error", "delivery_schedule_unavailable"))}
+	state = queued.get("state", state) as Dictionary
+	incoming["deliver_at"] = int(queued.get("deliver_at", 0))
 	if not _save_state(state):
 		return {"ok": false, "error": "save_failed"}
-	return {"ok": true, "mail": incoming, "state": state}
+	return {"ok": true, "pending_mail": incoming, "deliver_at": incoming["deliver_at"], "state": state}
 
 
 func create_tower_reward_mail(season_id: String, floor: int, reward: Dictionary) -> Dictionary:
