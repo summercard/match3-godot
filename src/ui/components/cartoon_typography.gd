@@ -29,8 +29,24 @@ static func _build_lobby_font() -> Font:
 static func _apply_node(node: Node, font: Font, profile: String) -> void:
 	if node is Label:
 		_style_label(node as Label, font, profile)
+	elif node is Button:
+		_style_button(node as Button, font)
 	for child in node.get_children():
 		_apply_node(child, font, profile)
+
+
+static func fit_label(label: Label, preferred_size: int = 0, minimum_size: int = 6, horizontal_padding: float = 4.0) -> void:
+	if label == null:
+		return
+	var font := label.get_theme_font("font")
+	var fitted := preferred_size if preferred_size > 0 else maxi(label.get_theme_font_size("font_size"), 1)
+	var available_width := maxf(1.0, label.size.x - horizontal_padding)
+	var display_text := TranslationServer.translate(label.text).replace("\n", " ")
+	while fitted > minimum_size and font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
+		fitted -= 1
+	label.add_theme_font_size_override("font_size", fitted)
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
 
 
 static func _style_label(label: Label, font: Font, profile: String) -> void:
@@ -47,44 +63,83 @@ static func _style_label(label: Label, font: Font, profile: String) -> void:
 	var localized_text := TranslationServer.translate(label.text)
 	if not _requires_single_line(label) and label.size.y >= float(target_size) * 1.8 and (localized_text.contains("\n") or font.get_string_size(localized_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, target_size).x > label.size.x):
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.clip_text = false
+		label.clip_text = true
 	elif _requires_single_line(label):
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		label.clip_text = true
 
 
+static func _style_button(button: Button, font: Font) -> void:
+	button.add_theme_font_override("font", font)
+	var fitted := maxi(button.get_theme_font_size("font_size"), 1)
+	var display_text := TranslationServer.translate(button.text).replace("\n", " ")
+	var available_width := maxf(1.0, button.size.x - 16.0)
+	while fitted > 6 and font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
+		fitted -= 1
+	button.add_theme_font_size_override("font_size", fitted)
+	button.clip_text = true
+
+
 static func _fit_font_size(label: Label, font: Font, preferred_size: int) -> int:
 	var available_width := maxf(1.0, label.size.x - 4.0)
-	var localized_text := TranslationServer.translate(label.text).replace("\n", " ")
+	var raw_text := TranslationServer.translate(label.text)
+	var localized_text := raw_text.replace("\n", " ")
 	if localized_text.is_empty() or available_width <= 4.0:
 		return preferred_size
 	var fitted := preferred_size
 	var minimum_size := 6 if _requires_single_line(label) else 8
-	while fitted > minimum_size and font.get_string_size(localized_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
+	var can_wrap := not _requires_single_line(label) and label.size.y >= float(preferred_size) * 1.8
+	while fitted > minimum_size:
+		var fits := false
+		if can_wrap:
+			var wrapped_size := font.get_multiline_string_size(raw_text, HORIZONTAL_ALIGNMENT_LEFT, available_width, fitted)
+			fits = wrapped_size.x <= available_width and wrapped_size.y <= maxf(1.0, label.size.y - 2.0)
+		else:
+			fits = font.get_string_size(localized_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x <= available_width
+		if fits:
+			break
 		fitted -= 1
 	return fitted
 
 
 static func _requires_single_line(label: Label) -> bool:
 	var path := str(label.get_path())
+	if label.text.contains("\n"):
+		return false
+	if _is_button_label(label):
+		return true
 	if path.find("PrimaryButtons/") != -1 and label.name == "Text":
 		return true
 	return (path.find("TeamPanel/Cards/TeamCard") != -1 or path.find("EnemyPanel/Cards/EnemyCard") != -1) and label.name == "Name"
 
 
+static func _is_button_label(label: Label) -> bool:
+	var ancestor: Node = label.get_parent()
+	for _depth in 4:
+		if ancestor == null:
+			break
+		if ancestor is BaseButton:
+			return true
+		ancestor = ancestor.get_parent()
+	return false
+
+
 static func _target_font_size(label: Label, profile: String) -> int:
 	var current_size := maxi(label.get_theme_font_size("font_size"), 1)
+	var path := str(label.get_path())
+	var node_name := String(label.name)
+	if profile == "lobby":
+		if path.find("PrimaryButtons/StartButton/Text") != -1:
+			return 34
+		if path.find("PrimaryButtons/") != -1 and node_name == "Text":
+			return 18
+		if path.find("BottomNav/") != -1 and node_name == "Text":
+			return 15
+	if _is_button_label(label):
+		return current_size
 	if profile != "lobby":
 		return max(current_size, 10)
 
-	var path := str(label.get_path())
-	var node_name := String(label.name)
-	if path.find("PrimaryButtons/StartButton/Text") != -1:
-		return 34
-	if path.find("PrimaryButtons/") != -1 and node_name == "Text":
-		return 18
-	if path.find("BottomNav/") != -1 and node_name == "Text":
-		return 15
 	match node_name:
 		"OwnerLevelTitle":
 			return 14

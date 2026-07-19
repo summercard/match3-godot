@@ -325,7 +325,8 @@ func _update_header() -> void:
 	var theme_color: Color = CHAPTER_THEME_TINTS.get(_current_chapter_element(), Color(0.30, 0.95, 0.34))
 	_chapter_title.text = TranslationServer.translate("第%d章") % (_current_chapter_index + 1)
 	_chapter_title.add_theme_color_override("font_color", theme_color)
-	_chapter_name_label.text = str(chapter.get("name", ""))
+	_chapter_name_label.text = TranslationServer.translate(str(chapter.get("name", "")))
+	CartoonTypography.fit_label(_chapter_name_label, 14, 7)
 	_star_label.text = "%d/%d" % [chapter_stars, total_stars]
 	var badge_number := get_node_or_null("Header/Badge/Number") as Label
 	if badge_number != null:

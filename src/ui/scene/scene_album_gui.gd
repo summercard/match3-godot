@@ -284,7 +284,8 @@ func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	number.visible = false
 	number.text = "%03d" % [index + 1]
 	var name_label := card.get_node("Name") as Label
-	name_label.text = str(monster.get("name", "???")) if unlocked else "???"
+	name_label.text = TranslationServer.translate(str(monster.get("name", "???"))) if unlocked else "???"
+	CartoonTypography.fit_label(name_label, 15, 6)
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.visible = true
 	portrait.texture = _monster_texture(id, "album")
@@ -320,7 +321,9 @@ func _sync_detail() -> void:
 	var instances := _get_instances_for_species(id)
 	var owned_count := instances.size()
 	(get_node("DetailPanel/ElementIcon") as TextureRect).texture = _element_texture(element)
-	_label("DetailPanel/Name").text = "%s  %s" % [id.replace("monster_", ""), str(monster.get("name", "???"))]
+	var detail_name := _label("DetailPanel/Name")
+	detail_name.text = "%s  %s" % [id.replace("monster_", ""), TranslationServer.translate(str(monster.get("name", "???")))]
+	CartoonTypography.fit_label(detail_name, 24, 9)
 	_label("DetailPanel/Nature").text = _detail_nature_text(id)
 	_label("DetailPanel/Owned").text = "未收录" if owned_count <= 0 else "已收录"
 	(get_node("DetailPanel/PortraitStage/Portrait") as TextureRect).texture = _monster_texture(id, "album")
@@ -358,9 +361,9 @@ func _sync_detail_stats(monster: Dictionary) -> void:
 func _sync_detail_skill(monster: Dictionary) -> void:
 	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
 	(get_node("DetailPanel/SkillPanel/Icon") as TextureRect).texture = _element_texture(str(monster.get("element", "")))
-	_label("DetailPanel/SkillPanel/Name").text = str(skill.get("name", "未知技能"))
+	_label("DetailPanel/SkillPanel/Name").text = TranslationServer.translate(str(skill.get("name", "未知技能")))
 	var skill_type := str(skill.get("type", "strike"))
-	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
+	var type_label := TranslationServer.translate(str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type)))
 	_label("DetailPanel/SkillPanel/Desc").text = TranslationServer.translate("%s · 倍率 %.1fx") % [type_label, float(skill.get("multiplier", 1.0))]
 
 func _sync_detail_evolution(monster: Dictionary) -> void:
@@ -413,7 +416,7 @@ func _sync_bond_page() -> void:
 		var group: Dictionary = progress[i]
 		var owned := int(group.get("owned", 0))
 		var total := maxi(1, int(group.get("total", 1)))
-		(row.get_node("Name") as Label).text = str(group.get("name", ""))
+		(row.get_node("Name") as Label).text = TranslationServer.translate(str(group.get("name", "")))
 		(row.get_node("Theme") as Label).text = str(group.get("theme", ""))
 		(row.get_node("Progress") as Label).text = "%d/%d" % [owned, total]
 		var bar_bg := row.get_node("BarBg") as Control
@@ -421,7 +424,7 @@ func _sync_bond_page() -> void:
 
 func _sync_collection_page() -> void:
 	var role_target: Dictionary = EcologyBondRulesScript.get_role_collection_target(_all_monsters, _captured_ids)
-	_label("CollectionPage/RoleTarget/Name").text = str(role_target.get("name", "角色目标"))
+	_label("CollectionPage/RoleTarget/Name").text = TranslationServer.translate(str(role_target.get("name", "角色目标")))
 	_label("CollectionPage/RoleTarget/Progress").text = "%d/%d" % [int(role_target.get("owned", 0)), int(role_target.get("total", 1))]
 	_label("CollectionPage/RoleTarget/Suggestion").text = str(role_target.get("suggestion", ""))
 	var targets: Array = EcologyBondRulesScript.get_ecology_targets(_all_monsters, _captured_ids)
@@ -431,7 +434,7 @@ func _sync_collection_page() -> void:
 		if not row.visible:
 			continue
 		var target: Dictionary = targets[i]
-		(row.get_node("Name") as Label).text = str(target.get("name", ""))
+		(row.get_node("Name") as Label).text = TranslationServer.translate(str(target.get("name", "")))
 		(row.get_node("Status") as Label).text = str(target.get("statusLabel", ""))
 		(row.get_node("Theme") as Label).text = str(target.get("theme", ""))
 		(row.get_node("Suggestion") as Label).text = str(target.get("suggestion", ""))

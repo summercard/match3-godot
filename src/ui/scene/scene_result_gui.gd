@@ -175,7 +175,7 @@ func _fit_capture_label(label: Label, preferred_size: int, minimum_size: int) ->
 		return
 	var font := label.get_theme_font("font")
 	var available_width := maxf(1.0, label.size.x - 8.0)
-	var display_text := label.text.replace("\n", " ")
+	var display_text := TranslationServer.translate(label.text).replace("\n", " ")
 	var fitted := preferred_size
 	while fitted > minimum_size and font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
 		fitted -= 1

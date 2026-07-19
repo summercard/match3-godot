@@ -511,11 +511,11 @@ func _category_icon(category: String) -> String:
 
 
 func _ach_name(ach: Dictionary) -> String:
-	return str(ACH_TEXT.get(str(ach.get("id", "")), {}).get("name", ach.get("name", "成就")))
+	return TranslationServer.translate(str(ACH_TEXT.get(str(ach.get("id", "")), {}).get("name", ach.get("name", "成就"))))
 
 
 func _ach_desc(ach: Dictionary) -> String:
-	return str(ACH_TEXT.get(str(ach.get("id", "")), {}).get("desc", ach.get("desc", "")))
+	return TranslationServer.translate(str(ACH_TEXT.get(str(ach.get("id", "")), {}).get("desc", ach.get("desc", ""))))
 
 
 func _load_player_data() -> Dictionary:

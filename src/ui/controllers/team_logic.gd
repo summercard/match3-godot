@@ -700,7 +700,7 @@ func _draw_rounded_rect(x: float, y: float, w: float, h: float, r: float, color:
 
 func _draw_button(rect: Rect2, text: String, asset_key: String) -> void:
 	_draw_texture_fit(_tex(asset_key), rect)
-	_draw_text(PROJECT_ROUND_FONT, text, rect.position.x + rect.size.x / 2.0, rect.position.y + rect.size.y / 2.0 + 7.0, C["white"], 18.0)
+	_draw_text_in_rect(PROJECT_ROUND_FONT, text, rect.grow(-8.0), C["white"], 18.0, 6.0)
 
 func _draw_team_summary(font: Font) -> void:
 	var power := _calc_team_power()
@@ -720,7 +720,7 @@ func _draw_team_summary(font: Font) -> void:
 			if LeaderSkillDBScript:
 				var skill = LeaderSkillDBScript.get_leader_skill(skill_id)
 				if skill:
-					skill_text = "%s：%s" % [skill.get("name", "队长技"), skill.get("desc", "")]
+					skill_text = "%s：%s" % [TranslationServer.translate(str(skill.get("name", "队长技"))), TranslationServer.translate(str(skill.get("desc", "")))]
 					skill_color = C["gold"]
 					var visual: Dictionary = skill.get("visual", {})
 					skill_element = str(visual.get("element", md.get("element", "")))
@@ -736,8 +736,8 @@ func _draw_bond_summary(font: Font) -> void:
 	var color := Color(0.08, 0.24, 0.16, 0.88) if active else Color(0.08, 0.11, 0.20, 0.88)
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, color)
 	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, C["gold"] if active else Color(0.22, 0.36, 0.62, 0.82), 1.0)
-	var title := str(bond.get("name", "羁绊"))
-	var summary := str(bond.get("summary", "选择精灵查看羁绊方向。"))
+	var title := TranslationServer.translate(str(bond.get("name", "羁绊")))
+	var summary := TranslationServer.translate(str(bond.get("summary", "选择精灵查看羁绊方向。")))
 	_draw_text_in_rect(font, TranslationServer.translate("分支：%s") % title, Rect2(rect.position.x + 8.0, rect.position.y + 1.0, 104.0, 19.0), C["gold"] if active else C["text_secondary"], 11.0, 10.0)
 	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 1.0, 231.0, 19.0), C["text_primary"] if active else C["text_muted"], 10.0, 9.0)
 
@@ -826,8 +826,8 @@ func _draw_slot(font: Font, slot: Dictionary, t: float) -> void:
 			_draw_monster_portrait(monster_id, Rect2(cx - face_size / 2.0, new_y + 22.0, face_size, face_size))
 
 			var lvl: int = _get_real_level(monster_id)
-			var unit_line := "%s  Lv.%d" % [md.get("name", "未知"), lvl]
-			_draw_text(font, unit_line, cx, new_y + (99.0 if key == "leader" else 100.0), C["text_primary"], 11.0)
+			var unit_line := "%s  Lv.%d" % [TranslationServer.translate(str(md.get("name", "未知"))), lvl]
+			_draw_text_in_rect(font, unit_line, Rect2(new_x + 5.0, new_y + 87.0, new_w - 10.0, 18.0), C["text_primary"], 11.0, 6.0)
 			var catchup_state := _get_catchup_state(monster_id)
 			if bool(catchup_state.get("enabled", false)):
 				_draw_rounded_rect(cx - 35.0, new_y + 75.0, 70.0, 15.0, 6.0, Color(0.10, 0.45, 0.35, 0.86))
@@ -890,10 +890,8 @@ func _draw_monster_list(font: Font, t: float) -> void:
 		_draw_roster_footer_patch(card_tex, Rect2(card_x, card_y, LIST_ITEM_W, LIST_ITEM_H))
 
 		# 名字
-		var name: String = md.get("name", "?")
-		if name.length() > 5:
-			name = name.substr(0, 5)
-		_draw_text(font, name, card_x + LIST_ITEM_W / 2.0, card_y + 58.0, C["text_primary"], 11.0)
+		var name := TranslationServer.translate(str(md.get("name", "?")))
+		_draw_text_in_rect(font, name, Rect2(card_x + 3.0, card_y + 45.0, LIST_ITEM_W - 6.0, 18.0), C["text_primary"], 11.0, 6.0)
 
 		# 等级
 		var lvl: int = _get_real_level(instance_id)

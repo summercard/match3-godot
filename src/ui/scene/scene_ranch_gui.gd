@@ -77,8 +77,8 @@ const RANCH_SLOT_EMPTY_OUTLINE_SIZE := 4
 const RANCH_SLOT_EMPTY_SELECTED_OUTLINE_SIZE := 6
 const RANCH_SLOT_EMPTY_SELECTED_TEXT_COLOR := Color(1.0, 0.42, 0.04)
 const CLASSROOM_INFO_FONT_SIZE := 11
-const CLASSROOM_STATS_FONT_SIZE := 12
-const CLASSROOM_LEADER_SKILL_FONT_SIZE := 11
+const CLASSROOM_STATS_FONT_SIZE := 8
+const CLASSROOM_LEADER_SKILL_FONT_SIZE := 7
 const CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE := 11
 const CLASSROOM_REQUIREMENT_FONT_SIZE := 9
 const CLASSROOM_EVOLVE_BUTTON_FONT_SIZE := 13
@@ -735,7 +735,9 @@ func _sync_top_resource_bar() -> void:
 	for i in 3:
 		var panel := bar.get_child(i) as Panel
 		if panel != null:
-			_set_text(panel.get_node("Value") as Label, values[i])
+			var value_label := panel.get_node("Value") as Label
+			_set_text(value_label, values[i])
+			CartoonTypography.fit_label(value_label, value_label.get_theme_font_size("font_size"), 6, 6.0)
 
 func _sync_pet_farm_bottom_nav() -> void:
 	var nav := get_node_or_null("PetFarmBottomNav") as Control
@@ -763,6 +765,7 @@ func _sync_pet_farm_bottom_nav() -> void:
 			feature_id = "social"
 		var state := _feature_unlock_state(feature_id) if not feature_id.is_empty() else {"unlocked": true}
 		var unlocked := bool(state.get("unlocked", true))
+		var label := button.get_node_or_null("Text") as Label
 		button.disabled = not unlocked
 		button.tooltip_text = "" if unlocked else TranslationServer.translate("%s · Lv.%d 解锁") % [TranslationServer.translate(str(state.get("label", ""))), int(state.get("required_level", 1))]
 		button.modulate = Color.WHITE if i == active_index else Color(0.92, 0.92, 0.92)
@@ -770,13 +773,13 @@ func _sync_pet_farm_bottom_nav() -> void:
 			button.modulate = Color(0.48, 0.48, 0.52, 0.90)
 			if selected != null:
 				selected.visible = false
-			var label := button.get_node_or_null("Text") as Label
 			if label != null:
 				label.text = TranslationServer.translate("%s %d级") % [TranslationServer.translate(str(nav_labels.get(feature_id, ""))), int(state.get("required_level", 1))]
 		elif not feature_id.is_empty():
-			var label := button.get_node_or_null("Text") as Label
 			if label != null:
 				label.text = str(nav_labels.get(feature_id, ""))
+		if label != null:
+			CartoonTypography.fit_label(label, 11, 6, 4.0)
 
 func _play_toast_feedback() -> void:
 	var toast := get_node_or_null("SharedToast") as Label
@@ -1096,6 +1099,7 @@ func _sync_classroom_page() -> void:
 		upgrade.disabled = true
 		sell.disabled = true
 		(panel.get_node("Stats") as Label).text = ""
+		(panel.get_node("Stats") as Label).visible = false
 		(panel.get_node("AttributeLabels") as Label).text = ""
 		(panel.get_node("AttributeValues") as Label).text = ""
 		(panel.get_node("AttributeStats") as Label).text = ""
@@ -1110,7 +1114,7 @@ func _sync_classroom_page() -> void:
 		var info := _get_evolution_info_for_instance(instance_id)
 		var target_id := str(info.get("target_id", ""))
 		var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
-		var target_name := str(target.get("name", "最终形态")) if not target.is_empty() else "最终形态"
+		var target_name := TranslationServer.translate(str(target.get("name", "最终形态"))) if not target.is_empty() else TranslationServer.translate("最终形态")
 		var level := int(instance.get("level", 1))
 		var required_level := int(info.get("required_level", 1))
 		var item_count := int(info.get("item_count", 0))
@@ -1122,15 +1126,21 @@ func _sync_classroom_page() -> void:
 		portrait.texture = _portrait_texture(instance_id)
 		target_portrait.texture = _monster_portrait_texture(target_id)
 		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
-		(panel.get_node("Name") as Label).text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", monster_id))]
+		var classroom_name := panel.get_node("Name") as Label
+		classroom_name.text = "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", monster_id)))]
+		CartoonTypography.fit_label(classroom_name, 17, 7)
 		(panel.get_node("Info") as Label).text = _classroom_info_text(instance, monster)
 		(panel.get_node("TargetName") as Label).visible = false
 		(panel.get_node("TargetLevel") as Label).visible = false
 		(panel.get_node("Arrow") as Label).visible = false
-		(panel.get_node("Stats") as Label).text = _classroom_stats_text(instance, monster, stats)
+		var compact_stats := panel.get_node("Stats") as Label
+		compact_stats.visible = true
+		compact_stats.text = _classroom_stats_text(instance, monster, stats)
 		(panel.get_node("AttributeLabels") as Label).text = _classroom_attribute_labels_text()
 		(panel.get_node("AttributeValues") as Label).text = _classroom_attribute_values_text(instance, monster, stats)
 		(panel.get_node("AttributeStats") as Label).text = _classroom_attribute_stats_text(instance, stats)
+		for legacy_path in ["AttributeLabels", "AttributeValues", "AttributeStats"]:
+			(panel.get_node(legacy_path) as Label).visible = false
 		(panel.get_node("LeaderSkill") as Label).text = _classroom_leader_skill_text(monster)
 		var current_exp := int(instance.get("exp", 0))
 		var needed_exp := GrowthRulesScript.get_exp_for_level(level)
@@ -1141,10 +1151,10 @@ func _sync_classroom_page() -> void:
 		_sync_exp_progress(panel.get_node("PoolBar") as ProgressBar, pool_exp, pool_capacity)
 		(panel.get_node("PoolText") as Label).text = TranslationServer.translate("总经验槽 %s / %s") % [_format_resource_number(pool_exp), _format_resource_number(pool_capacity)]
 		(panel.get_node("LevelRequirement") as Label).text = TranslationServer.translate("等级 %d/%d") % [level, required_level]
-		(panel.get_node("StoneRequirement") as Label).text = str(info.get("item_name", "进化石"))
+		(panel.get_node("StoneRequirement") as Label).text = TranslationServer.translate(str(info.get("item_name", "进化石")))
 		(panel.get_node("StoneCount") as Label).text = "%d/1" % item_count
-		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
-		(panel.get_node("Upgrade") as Label).text = str(info.get("play_upgrade_text", "玩法: 无"))
+		(panel.get_node("Condition") as Label).text = TranslationServer.translate(str(info.get("condition_text", "无法进化")))
+		(panel.get_node("Upgrade") as Label).text = TranslationServer.translate(str(info.get("play_upgrade_text", "玩法: 无")))
 		# Even an unavailable evolution stays tappable so players receive the
 		# exact missing-level or missing-item feedback.
 		evolve.disabled = false
@@ -1152,6 +1162,10 @@ func _sync_classroom_page() -> void:
 		upgrade.disabled = false
 		_set_action_frame(upgrade, pool_exp > 0 and level < StatCalculator.MAX_LEVEL)
 		_sync_sell_button(panel, instance_id)
+	for button_path in ["UpgradeButton/Text", "EvolveButton/Text", "SellButton/Text"]:
+		CartoonTypography.fit_label(panel.get_node(button_path) as Label, CLASSROOM_EVOLVE_BUTTON_FONT_SIZE, 6)
+	CartoonTypography.fit_label(panel.get_node("RequirementsTitle") as Label, CLASSROOM_REQUIREMENT_TITLE_FONT_SIZE, 6)
+	CartoonTypography.fit_label(panel.get_node("PoolText") as Label, CLASSROOM_REQUIREMENT_FONT_SIZE, 6)
 	_sync_card_strip(CLASS_CARD_PATHS, _class_page * CLASS_CARD_PATHS.size(), "classroom")
 	_sync_page_buttons("Pages/ClassroomPage/RosterPanel", _class_page, _context_max_page())
 	_sync_feature_button("Pages/ClassroomPage/BottomButtons/RanchButton", "ranch", "农场")
@@ -1170,6 +1184,7 @@ func _sync_feature_button(path: String, feature_id: String, unlocked_text: Strin
 	var label := button.get_node_or_null("Text") as Label
 	if label != null:
 		label.text = unlocked_text if unlocked else "%s Lv.%d" % [unlocked_text, int(state.get("required_level", 1))]
+		CartoonTypography.fit_label(label, label.get_theme_font_size("font_size"), 6, 4.0)
 
 func _apply_classroom_detail_text_style(panel: Control) -> void:
 	for path in ["Info", "TargetLevel"]:
@@ -1182,8 +1197,9 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 	var stats := panel.get_node_or_null("Stats") as Label
 	if stats != null:
 		stats.add_theme_font_size_override("font_size", CLASSROOM_STATS_FONT_SIZE)
-		stats.clip_text = false
-		stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		stats.add_theme_constant_override("line_spacing", -1)
+		stats.clip_text = true
+		stats.autowrap_mode = TextServer.AUTOWRAP_OFF
 	for path in ["AttributeLabels", "AttributeValues", "AttributeStats"]:
 		var attribute_label := panel.get_node_or_null(path) as Label
 		if attribute_label != null:
@@ -1194,8 +1210,9 @@ func _apply_classroom_detail_text_style(panel: Control) -> void:
 	var leader_skill := panel.get_node_or_null("LeaderSkill") as Label
 	if leader_skill != null:
 		leader_skill.add_theme_font_size_override("font_size", CLASSROOM_LEADER_SKILL_FONT_SIZE)
+		leader_skill.add_theme_constant_override("line_spacing", 0)
 		leader_skill.add_theme_constant_override("outline_size", 0)
-		leader_skill.clip_text = false
+		leader_skill.clip_text = true
 		leader_skill.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var title := panel.get_node_or_null("RequirementsTitle") as Label
 	if title != null:
@@ -1250,15 +1267,15 @@ func _fresh_instance(instance_id: String) -> Dictionary:
 	return _get_instance(instance_id)
 
 func _classroom_info_text(instance: Dictionary, monster: Dictionary) -> String:
-	return "Lv.%d · %s · %s" % [int(instance.get("level", 1)), TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))), TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))))]
+	return "Lv.%d · %d★" % [int(instance.get("level", 1)), int(monster.get("rarity", 1))]
 
 func _classroom_stats_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
 	var power := _classroom_power(stats)
-	return TranslationServer.translate("等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d") % [int(instance.get("level", 1)), TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))))), TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))), TranslationServer.translate(_gender_label(instance)), "★".repeat(rarity), TranslationServer.translate("是" if bool(instance.get("isElite", false)) else "否"), int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
+	return TranslationServer.translate("Lv.%d · %s\n性格 %s · 性别 %s\n%d★ · 精英 %s\nHP %d · ATK %d\nDEF %d · SPD %d\n战力 %d") % [int(instance.get("level", 1)), TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))))), _get_nature_name(str(instance.get("nature", ""))), _gender_label(instance), rarity, TranslationServer.translate("是" if bool(instance.get("isElite", false)) else "否"), int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
 
 func _classroom_attribute_labels_text() -> String:
-	return "等级\n属性\n性格\n性别\n稀有度\n精英"
+	return TranslationServer.translate("等级\n属性\n性格\n性别\n稀有度\n精英")
 
 func _classroom_attribute_values_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
@@ -1278,7 +1295,7 @@ func _classroom_attribute_stats_text(instance: Dictionary, stats: Dictionary) ->
 		int(stats.get("def", 0)),
 		int(stats.get("spd", 0)),
 		_classroom_power(stats),
-		"是" if int(instance.get("level", 1)) >= StatCalculator.MAX_LEVEL else "否",
+		TranslationServer.translate("是" if int(instance.get("level", 1)) >= StatCalculator.MAX_LEVEL else "否"),
 	]
 
 func _classroom_leader_skill_text(monster: Dictionary) -> String:
@@ -1288,11 +1305,13 @@ func _classroom_leader_skill_text(monster: Dictionary) -> String:
 	var skill := LeaderSkillDb.get_leader_skill(skill_id)
 	if skill.is_empty():
 		return "队长技能：未知"
-	var desc := str(skill.get("desc", ""))
-	var skill_name := str(skill.get("name", "未知"))
+	var desc := TranslationServer.translate(str(skill.get("desc", "")))
+	var skill_name := TranslationServer.translate(str(skill.get("name", "未知")))
 	if desc.is_empty():
 		return TranslationServer.translate("队长技能：%s") % skill_name
-	return TranslationServer.translate("队长技能：%s - %s") % [skill_name, desc]
+	# This panel is already the leader-skill section. A dedicated name line
+	# keeps longer Latin descriptions readable without colliding with stats.
+	return "%s\n%s" % [skill_name, desc]
 
 func _classroom_power(stats: Dictionary) -> int:
 	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
@@ -1311,7 +1330,7 @@ func _show_sell_confirm_dialog(quote: Dictionary) -> void:
 	if popup == null:
 		_show_status("出售确认界面不可用")
 		return
-	(popup.get_node("Panel/Name") as Label).text = str(quote.get("name", "该精灵"))
+	(popup.get_node("Panel/Name") as Label).text = TranslationServer.translate(str(quote.get("name", "该精灵")))
 	(popup.get_node("Panel/Detail") as Label).text = TranslationServer.translate("星级 %s · Lv.%d") % ["★".repeat(int(quote.get("rarity", 1))), int(quote.get("level", 1))]
 	(popup.get_node("Panel/Reward") as Label).text = TranslationServer.translate("可获得 %s") % _sell_reward_text(quote)
 	popup.visible = true
@@ -1486,7 +1505,7 @@ func _sync_social_place() -> void:
 	var heart_bubble := panel.get_node_or_null("HeartBubble") as TextureRect
 	if heart_bubble != null:
 		heart_bubble.visible = false
-	(panel.get_node("Title") as Label).text = str(config.get("name", "社交场所"))
+	(panel.get_node("Title") as Label).text = TranslationServer.translate(str(config.get("name", "社交场所")))
 	(panel.get_node("Duration") as Label).text = TranslationServer.translate("用时%s") % SocialRulesScript.duration_label_for_place(place)
 	var switch_button := panel.get_node("SwitchButton") as TextureButton
 	switch_button.disabled = place.get("started_at", null) != null
@@ -1596,7 +1615,8 @@ func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary)
 	name_label.visible = true
 	detail_label.visible = true
 	portrait.texture = _portrait_texture(instance_id)
-	name_label.text = "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))]
+	name_label.text = "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", "")))]
+	CartoonTypography.fit_label(name_label, 17, 7)
 	detail_label.text = "%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))]
 
 func _apply_social_observation_text_style() -> void:
@@ -1644,7 +1664,9 @@ func _sync_card(card: TextureButton, instance_id: String, selected: bool, contex
 	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
 	var instance := _get_instance(instance_id)
 	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
-	_set_text(card.get_node("Name") as Label, "%s%s" % [_elite_prefix(instance), str(monster.get("name", ""))])
+	var card_name := card.get_node("Name") as Label
+	_set_text(card_name, "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", "")))])
+	CartoonTypography.fit_label(card_name, 12, 6)
 	_set_text(card.get_node("Level") as Label, "Lv.%d" % _get_monster_level(instance_id))
 	_sync_owned_no_label(card, instance_id)
 	var detail_label := card.get_node("Detail") as Label

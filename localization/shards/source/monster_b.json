@@ -686,7 +686,7 @@
       "locations": [
         "src/core/ecology_bond_rules.gd:289",
         "src/ui/controllers/album_logic.gd:345",
-        "src/ui/scene/scene_album_gui.gd:384",
+        "src/ui/scene/scene_album_gui.gd:387",
         "src/ui/scenes/album.tscn:3966"
       ]
     },
@@ -1219,7 +1219,7 @@
       "locations": [
         "src/core/ecology_bond_rules.gd:333",
         "src/ui/controllers/album_logic.gd:344",
-        "src/ui/scene/scene_album_gui.gd:383"
+        "src/ui/scene/scene_album_gui.gd:386"
       ]
     },
     "角色齐备": {

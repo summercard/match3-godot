@@ -690,7 +690,9 @@ func _sync_item_confirm_popup() -> void:
 	var def: Dictionary = ItemDB.get_item(item_id)
 	_texture("ItemConfirmLayer/Panel/IconFrame/Icon").texture = _get_texture(_item_icon_asset_path(item_id))
 	_label("ItemConfirmLayer/Panel/Title").text = "使用道具"
-	_label("ItemConfirmLayer/Panel/Name").text = str(def.get("name", "道具"))
+	var item_name := _label("ItemConfirmLayer/Panel/Name")
+	item_name.text = TranslationServer.translate(str(def.get("name", "道具")))
+	CartoonTypography.fit_label(item_name, 22, 8)
 	_label("ItemConfirmLayer/Panel/Desc").text = str(def.get("desc", ""))
 	_label("ItemConfirmLayer/Panel/Count").text = TranslationServer.translate("拥有: %d") % int(item.get("count", 0))
 	_label("ItemConfirmLayer/Panel/CancelButton/Text").text = "取消"

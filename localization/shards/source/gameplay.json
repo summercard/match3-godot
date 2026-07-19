@@ -748,7 +748,7 @@
         "src/data/item_db.gd:344",
         "src/data/item_db.gd:345",
         "src/ui/controllers/inventory_logic.gd:83",
-        "src/ui/scene/scene_ranch_gui.gd:1332",
+        "src/ui/scene/scene_ranch_gui.gd:1338",
         "src/ui/scenes/inventory.tscn:342"
       ]
     },
@@ -1962,9 +1962,9 @@
         "src/ui/controllers/ranch_logic.gd:1089",
         "src/ui/controllers/ranch_logic.gd:1158",
         "src/ui/controllers/ranch_logic.gd:501",
-        "src/ui/scene/scene_ranch_gui.gd:1489",
-        "src/ui/scene/scene_ranch_gui.gd:1504",
-        "src/ui/scene/scene_ranch_gui.gd:1707"
+        "src/ui/scene/scene_ranch_gui.gd:1495",
+        "src/ui/scene/scene_ranch_gui.gd:1510",
+        "src/ui/scene/scene_ranch_gui.gd:1716"
       ]
     },
     "社交广场": {

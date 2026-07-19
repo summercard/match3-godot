@@ -41,7 +41,9 @@ func _refresh() -> void:
 			continue
 		var kind := str(card.get("kind", "resonance"))
 		button.get_node("Kind").text = _kind_label(kind)
-		button.get_node("Name").text = str(card.get("name", "共鸣卡"))
+		var card_name := button.get_node("Name") as Label
+		card_name.text = TranslationServer.translate(str(card.get("name", "共鸣卡")))
+		CartoonTypography.fit_label(card_name, 14, 7)
 		button.get_node("Desc").text = str(card.get("desc", ""))
 
 

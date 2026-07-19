@@ -218,7 +218,7 @@ func _on_tap(point: Vector2) -> void:
 	if ach.get("unlocked", false) and not ach.get("claimed", false) and _get_claim_rect(card_rect).has_point(point):
 		_claim_achievement(ach)
 	elif ach.get("unlocked", false):
-		_show_toast(TranslationServer.translate("%s 已完成") % ach.get("name", "成就"))
+		_show_toast(TranslationServer.translate("%s 已完成") % TranslationServer.translate(str(ach.get("name", "成就"))))
 	else:
 		_show_toast(TranslationServer.translate("目标进度 %d/%d") % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
 

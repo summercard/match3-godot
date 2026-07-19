@@ -821,10 +821,10 @@ func _draw_battle_info(font: Font, y: float) -> void:
 	var alive: Array = enemies.filter(func(e): return e and e.get("hp", 0) > 0)
 	
 	if not defeated.is_empty():
-		var names := " / ".join(defeated.map(func(e): return e.get("name", e.get("emoji", ""))))
+		var names := " / ".join(defeated.map(func(e): return TranslationServer.translate(str(e.get("name", e.get("emoji", ""))))))
 		_draw_centered_text(font, TranslationServer.translate("击败：%s") % names, DESIGN_W / 2.0, y + 58.0, C["danger_light"], 11.0)
 	elif not alive.is_empty():
-		var names := " / ".join(alive.map(func(e): return e.get("name", e.get("emoji", ""))))
+		var names := " / ".join(alive.map(func(e): return TranslationServer.translate(str(e.get("name", e.get("emoji", ""))))))
 		_draw_centered_text(font, TranslationServer.translate("仍在场：%s") % names, DESIGN_W / 2.0, y + 58.0, Color(0.5, 0.7, 1.0), 11.0)
 
 func _draw_capture_section(font: Font, y: float) -> void:
@@ -844,10 +844,10 @@ func _draw_capture_section(font: Font, y: float) -> void:
 		var target_tags: Array = _capture_result.get("target_tags", [])
 		if target_tags.is_empty():
 			target_tags = CaptureSystemScript.get_target_value_tags(_capture_target)
-		var tag_text := " / ".join(target_tags.slice(0, 3))
-		lines.append(TranslationServer.translate("目标: %s  %s") % [_capture_target.get("name", ""), tag_text])
+		var tag_text := " / ".join(target_tags.slice(0, 3).map(func(tag): return TranslationServer.translate(str(tag))))
+		lines.append(TranslationServer.translate("目标: %s  %s") % [TranslationServer.translate(str(_capture_target.get("name", ""))), tag_text])
 	if not _capture_item_used.is_empty():
-		lines.append(TranslationServer.translate("消耗: %s") % _capture_item_used.get("name", ""))
+		lines.append(TranslationServer.translate("消耗: %s") % TranslationServer.translate(str(_capture_item_used.get("name", ""))))
 	var reason := str(_capture_result.get("reason", ""))
 	var advice := str(_capture_result.get("advice", ""))
 	if reason.is_empty() and not _capture_window.is_empty():

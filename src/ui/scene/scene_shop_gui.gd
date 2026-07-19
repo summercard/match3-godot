@@ -333,7 +333,9 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 	var can_afford := _can_afford(item_id)
 	var sold_out := _get_daily_remaining(item_id) <= 0
 	(card.get_node("Icon") as TextureRect).texture = _get_item_texture(item_id)
-	(card.get_node("Name") as Label).text = str(item.get("name", ""))
+	var item_name := card.get_node("Name") as Label
+	item_name.text = TranslationServer.translate(str(item.get("name", "")))
+	CartoonTypography.fit_label(item_name, 15, 7)
 	(card.get_node("Limit") as Label).text = _get_limit_text(shop_item)
 	(card.get_node("Price/Icon") as TextureRect).texture = _tex(currency_key)
 	(card.get_node("Price/Text") as Label).text = str(shop_item.get("price", 0))
@@ -370,7 +372,9 @@ func _sync_popup() -> void:
 	var total := int(popup.get("price", 0)) * _popup_quantity
 	var can_afford := _can_afford(item_id, _popup_quantity)
 	(get_node("PopupOverlay/Panel/Icon") as TextureRect).texture = _get_item_texture(item_id)
-	_label("PopupOverlay/Panel/Name").text = str(data.get("name", ""))
+	var popup_name := _label("PopupOverlay/Panel/Name")
+	popup_name.text = TranslationServer.translate(str(data.get("name", "")))
+	CartoonTypography.fit_label(popup_name, 22, 8)
 	_label("PopupOverlay/Panel/Owned").text = TranslationServer.translate("拥有: %d") % _get_item_count(item_id)
 	_label("PopupOverlay/Panel/EffectText").text = _shop_effect_text(data)
 	_label("PopupOverlay/Panel/UsageText").text = _shop_usage_text(data)

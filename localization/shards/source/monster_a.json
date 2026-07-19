@@ -886,7 +886,7 @@
       "locations": [
         "src/core/evolution_rules.gd:6",
         "src/data/monster_db.gd:938",
-        "src/ui/scene/scene_battle.gd:2538"
+        "src/ui/scene/scene_battle.gd:2570"
       ]
     },
     "守护手": {
@@ -1304,7 +1304,7 @@
         "src/core/evolution_rules.gd:146",
         "src/ui/scene/scene_battle.gd:1035",
         "src/ui/scene/scene_battle.gd:1060",
-        "src/ui/scene/scene_battle.gd:2832",
+        "src/ui/scene/scene_battle.gd:2856",
         "src/ui/scenes/album.tscn:3957",
         "src/ui/scenes/album.tscn:4006"
       ]
@@ -1754,7 +1754,7 @@
       "locations": [
         "src/core/ecology_bond_rules.gd:332",
         "src/ui/controllers/team_logic.gd:829",
-        "src/ui/scene/scene_ranch_gui.gd:1292",
+        "src/ui/scene/scene_ranch_gui.gd:1298",
         "src/ui/scene/scene_result_gui.gd:200",
         "src/ui/scene/scene_result_gui.gd:233"
       ]

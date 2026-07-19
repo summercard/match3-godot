@@ -170,7 +170,7 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 			"type": status_type,
 			"enemy_index": target_idx,
 			"enemy_name": weakest_enemy.get("name", ""),
-			"message": "%s! → %s" % [label, weakest_enemy.get("name", "")]
+			"message": "%s! → %s" % [TranslationServer.translate(label), TranslationServer.translate(str(weakest_enemy.get("name", "")))]
 		})
 
 
@@ -211,21 +211,21 @@ func begin_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
 				"damage": dot_damage,
-				"message": TranslationServer.translate("%s %s 受到 %d %s！") % [label, enemy.get("name", ""), dot_damage, dot_label]
+				"message": TranslationServer.translate("%s %s 受到 %d %s！") % [TranslationServer.translate(label), TranslationServer.translate(str(enemy.get("name", ""))), dot_damage, TranslationServer.translate(dot_label)]
 			})
 		elif effect.get("type") == "freeze":
 			logs.append({
 				"type": "freeze",
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
-				"message": TranslationServer.translate("❄️%s 冰冻中，ATK降低30%%！") % enemy.get("name", "")
+				"message": TranslationServer.translate("❄️%s 冰冻中，ATK降低30%%！") % TranslationServer.translate(str(enemy.get("name", "")))
 			})
 		elif effect.get("type") == "stun":
 			logs.append({
 				"type": "stun",
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
-				"message": TranslationServer.translate("⚡%s 眩晕中！") % enemy.get("name", "")
+				"message": TranslationServer.translate("⚡%s 眩晕中！") % TranslationServer.translate(str(enemy.get("name", "")))
 			})
 
 	return logs
@@ -264,7 +264,7 @@ func end_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 			"type": status_type + "_end",
 			"enemy_index": i,
 			"enemy_name": enemy.get("name", ""),
-			"message": TranslationServer.translate("%s 的%s效果消失了") % [enemy.get("name", ""), label]
+			"message": TranslationServer.translate("%s 的%s效果消失了") % [TranslationServer.translate(str(enemy.get("name", ""))), TranslationServer.translate(label)]
 		})
 	return logs
 

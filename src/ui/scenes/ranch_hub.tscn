@@ -1791,7 +1791,7 @@ layout_mode = 0
 offset_left = 176.0
 offset_top = 46.0
 offset_right = 337.0
-offset_bottom = 140.0
+offset_bottom = 136.0
 theme_override_colors/font_color = Color(0.49, 0.31, 0.13, 1)
 theme_override_font_sizes/font_size = 12
 text = "HP 100   ATK 32   DEF 25"
@@ -1847,7 +1847,7 @@ SPD：21
 [node name="LeaderSkill" type="Label" parent="Pages/ClassroomPage/DetailPanel" unique_id=1385256555]
 layout_mode = 0
 offset_left = 178.0
-offset_top = 146.0
+offset_top = 140.0
 offset_right = 337.0
 offset_bottom = 209.0
 theme_override_colors/font_color = Color(0.42, 0.21, 0.05, 1)

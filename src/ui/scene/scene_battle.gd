@@ -639,7 +639,7 @@ func init(data: Dictionary = {}) -> void:
 	
 	_init_battle()
 	_state = BattleState.IDLE
-	_show_message(TranslationServer.translate("%s 开始！") % _stage_data.get("name", "战斗"))
+	_show_message(TranslationServer.translate("%s 开始！") % TranslationServer.translate(str(_stage_data.get("name", "战斗"))))
 
 ## ============================================
 # 初始化战斗
@@ -719,7 +719,7 @@ func _init_battle() -> void:
 		_battle.skill_ready.connect(_on_skill_ready)
 
 	var battle_hint := str(_stage_data.get("battleHint", ""))
-	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
+	_show_message(TranslationServer.translate(battle_hint if not battle_hint.is_empty() else str(_stage_data.get("name", "战斗开始！"))))
 	if _tower_mode:
 		_auto_capture_enabled = false
 		_hotbar_items = []
@@ -1029,10 +1029,10 @@ func _try_use_skill_at_position(pos: Vector2) -> bool:
 		var cost: int = int(skill.get("cost", 999))
 		var charge: int = int(_battle.skill_charges.get(monster_id, 0))
 		if monster.get("hp", 0) <= 0:
-			_show_message(TranslationServer.translate("%s 已无法行动") % monster.get("name", "伙伴"))
+			_show_message(TranslationServer.translate("%s 已无法行动") % TranslationServer.translate(str(monster.get("name", "伙伴"))))
 			return true
 		if charge < cost:
-			_show_message(TranslationServer.translate("%s 充能 %d/%d") % [skill.get("name", "技能"), charge, cost])
+			_show_message(TranslationServer.translate("%s 充能 %d/%d") % [TranslationServer.translate(str(skill.get("name", "技能"))), charge, cost])
 			return true
 		var result: Dictionary = _battle.use_active_skill(monster_id)
 		_apply_skill_result_visuals(result)
@@ -1445,7 +1445,7 @@ func _process_matches() -> void:
 	if not phase_transition.is_empty() and _battle != null:
 		var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
 		if not new_enemies.is_empty():
-			var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
+			var boss_name: String = TranslationServer.translate(str(new_enemies[0].get("name", "BOSS"))) if new_enemies[0] != null else "BOSS"
 			_show_message(TranslationServer.translate("%s 进入激战状态！") % boss_name)
 			_phase_transition_state = {
 				"phase": phase_transition.get("phase", 1),
@@ -1590,7 +1590,7 @@ func _handle_phase_transition_result(phase_transition: Dictionary) -> void:
 	var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
 	if new_enemies.is_empty():
 		return
-	var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
+	var boss_name: String = TranslationServer.translate(str(new_enemies[0].get("name", "BOSS"))) if new_enemies[0] != null else "BOSS"
 	_show_message(TranslationServer.translate("%s 进入激战状态！") % boss_name)
 	_phase_transition_state = {
 		"phase": phase_transition.get("phase", 1),
@@ -2852,8 +2852,8 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 
 func _on_skill_ready(monster: Dictionary) -> void:
 	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
-	var monster_name: String = monster.get("name", "伙伴")
-	var skill_name: String = monster.get("skill", {}).get("name", "技能")
+	var monster_name := TranslationServer.translate(str(monster.get("name", "伙伴")))
+	var skill_name := TranslationServer.translate(str(monster.get("skill", {}).get("name", "技能")))
 	_show_message(TranslationServer.translate("%s 的 %s 充能完毕！") % [monster_name, skill_name])
 
 	# 找到对应的玩家卡片位置
@@ -2892,7 +2892,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 	var vis: Dictionary = _boss_skill_visuals[idx]
 	var event_type: String = event.get("type", "")
 	var enemy: Dictionary = event.get("enemy", {})
-	var enemy_name: String = enemy.get("name", "???")
+	var enemy_name := TranslationServer.translate(str(enemy.get("name", "???")))
 	match event_type:
 		"charge_start":
 			vis["charge_timer"] = 999.0
@@ -3948,7 +3948,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 			_show_message("自动捕捉已开启，请选择捕捉球")
 		elif _auto_capture_enabled:
 			var item_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
-			_show_message(TranslationServer.translate("自动捕捉：开启，使用%s") % item_def.get("name", "捕捉球"))
+			_show_message(TranslationServer.translate("自动捕捉：开启，使用%s") % TranslationServer.translate(str(item_def.get("name", "捕捉球"))))
 		else:
 			_show_message("自动捕捉：关闭")
 		queue_redraw()
@@ -3977,7 +3977,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 			_try_use_item_at_slot(i)
 			return true
 		_selected_hotbar_slot = i
-		_show_message(TranslationServer.translate("选中 %s x%d") % [def.get("name", "?"), item["count"]])
+		_show_message(TranslationServer.translate("选中 %s x%d") % [TranslationServer.translate(str(def.get("name", "?"))), item["count"]])
 		return true
 	return false
 
@@ -4074,7 +4074,7 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		_selected_hotbar_slot = slot_idx
 		_save_capture_preferences()
 		var bonus: float = float(def.get("effect", {}).get("captureBonus", 0.0))
-		_show_message(TranslationServer.translate("已选择 %s +%.0f%%") % [def.get("name", "捕获球"), bonus * 100.0])
+		_show_message(TranslationServer.translate("已选择 %s +%.0f%%") % [TranslationServer.translate(str(def.get("name", "捕获球"))), bonus * 100.0])
 		queue_redraw()
 		return true
 	elif item_type == "battle":
@@ -4104,14 +4104,14 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		elif effect.has("convertType"):
 			used = _use_hotbar_gem_type_shift(def, effect)
 		else:
-			_show_message(TranslationServer.translate("%s 暂时无法使用") % def.get("name", "道具"))
+			_show_message(TranslationServer.translate("%s 暂时无法使用") % TranslationServer.translate(str(def.get("name", "道具"))))
 			return true
 		if used:
 			_consume_hotbar_item(item_id, slot_idx)
 			call_deferred("_check_battle_end")
 		return true
 	else:
-		_show_message(TranslationServer.translate("%s 不能在战斗中使用") % def.get("name", "道具"))
+		_show_message(TranslationServer.translate("%s 不能在战斗中使用") % TranslationServer.translate(str(def.get("name", "道具"))))
 		return true
 
 func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
@@ -4155,7 +4155,7 @@ func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
 	if healed <= 0:
 		_show_message("队伍生命已满")
 		return false
-	_show_message(TranslationServer.translate("使用 %s，恢复 %d HP") % [def.get("name", "HP药水"), healed])
+	_show_message(TranslationServer.translate("使用 %s，恢复 %d HP") % [TranslationServer.translate(str(def.get("name", "HP药水"))), healed])
 	_sfx("battle_heal_leaf_bubble")
 	return true
 
@@ -4183,7 +4183,7 @@ func _use_hotbar_guard(def: Dictionary, effect: Dictionary) -> bool:
 		_show_message("没有可守护的队员")
 		return false
 	_battle.set("player_guards", guards)
-	_show_message(TranslationServer.translate("使用 %s，全队获得护盾") % def.get("name", "护符"))
+	_show_message(TranslationServer.translate("使用 %s，全队获得护盾") % TranslationServer.translate(str(def.get("name", "护符"))))
 	_sfx("battle_shield_soft_bloom")
 	return true
 
@@ -4223,7 +4223,7 @@ func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
 		_apply_gravity()
 	_board_shake_timer = maxf(_board_shake_timer, 0.22)
 	_sfx("powerup_burst_soft")
-	_show_message(TranslationServer.translate("使用 %s，处理 %d 块岩石") % [def.get("name", "破岩锤"), touched])
+	_show_message(TranslationServer.translate("使用 %s，处理 %d 块岩石") % [TranslationServer.translate(str(def.get("name", "破岩锤"))), touched])
 	queue_redraw()
 	return true
 
@@ -4258,7 +4258,7 @@ func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
 	if touched <= 0:
 		_show_message("当前没有锁链宝石")
 		return false
-	_show_message(TranslationServer.translate("使用 %s，解除 %d 处锁链") % [def.get("name", "钥匙"), maxi(touched, unlocked)])
+	_show_message(TranslationServer.translate("使用 %s，解除 %d 处锁链") % [TranslationServer.translate(str(def.get("name", "钥匙"))), maxi(touched, unlocked)])
 	queue_redraw()
 	return true
 
@@ -4284,7 +4284,7 @@ func _use_hotbar_clear_poison(def: Dictionary, effect: Dictionary) -> bool:
 	if cleared <= 0:
 		_show_message("当前没有毒雾")
 		return false
-	_show_message(TranslationServer.translate("使用 %s，清除 %d 格毒雾") % [def.get("name", "净雾露"), cleared])
+	_show_message(TranslationServer.translate("使用 %s，清除 %d 格毒雾") % [TranslationServer.translate(str(def.get("name", "净雾露"))), cleared])
 	queue_redraw()
 	return true
 
@@ -4315,7 +4315,7 @@ func _use_hotbar_charge(def: Dictionary, effect: Dictionary) -> bool:
 		_show_message("技能能量已满")
 		return false
 	_battle.set("skill_charges", charges)
-	_show_message(TranslationServer.translate("使用 %s，补充 %d 点能量") % [def.get("name", "水晶"), total_gain])
+	_show_message(TranslationServer.translate("使用 %s，补充 %d 点能量") % [TranslationServer.translate(str(def.get("name", "水晶"))), total_gain])
 	queue_redraw()
 	return true
 
@@ -4330,7 +4330,7 @@ func _use_hotbar_board_reset(def: Dictionary, effect: Dictionary) -> bool:
 	var center_y := float(_board.offset_y) + float(_board.rows) * float(_board.cell_size) * 0.5
 	_spawn_item_use_effect("board_reset", Vector2(center_x, center_y), C["gold"], 0.95, {"cols": _board.cols, "rows": _board.rows})
 	_floating_texts.append({"text": "棋盘重置！", "x": center_x, "y": center_y, "color": C["gold"], "size": 18.0, "timer": 0.0, "duration": 1.0})
-	_show_message(TranslationServer.translate("使用 %s，整盘宝石已重置") % def.get("name", "棋盘重置"))
+	_show_message(TranslationServer.translate("使用 %s，整盘宝石已重置") % TranslationServer.translate(str(def.get("name", "棋盘重置"))))
 	_sfx("battle_heal_leaf_bubble")
 	queue_redraw()
 	return true
@@ -4357,7 +4357,7 @@ func _use_hotbar_absorb_shield(def: Dictionary, effect: Dictionary) -> bool:
 		_show_message("没有可守护的队员")
 		return false
 	_battle.set("player_absorb_shields", shields)
-	_show_message(TranslationServer.translate("使用 %s，全队获得一次性护盾") % def.get("name", "强能护盾"))
+	_show_message(TranslationServer.translate("使用 %s，全队获得一次性护盾") % TranslationServer.translate(str(def.get("name", "强能护盾"))))
 	_sfx("battle_shield_soft_bloom")
 	queue_redraw()
 	return true

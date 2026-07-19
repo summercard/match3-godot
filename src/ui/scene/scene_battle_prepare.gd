@@ -121,7 +121,9 @@ func _sync_gui() -> void:
 	_sync_background()
 	_sync_top_resource_bar()
 	_label("Header/Title").text = "战斗准备"
-	_label("Header/StageName").text = str(_stage_data.get("name", _stage_id))
+	var stage_name := _label("Header/StageName")
+	stage_name.text = TranslationServer.translate(str(_stage_data.get("name", _stage_id)))
+	CartoonTypography.fit_label(stage_name, 14, 7)
 	_sync_enemy_cards()
 	_sync_power_panel()
 	_sync_team_cards()

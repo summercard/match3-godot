@@ -1019,7 +1019,7 @@ func _draw_classroom_detail() -> void:
 	var info := _get_evolution_info_for_instance(instance_id)
 	var target_id := str(info.get("target_id", ""))
 	var target := MonsterDb.get_monster(target_id) if not target_id.is_empty() else {}
-	var target_name := str(target.get("name", "无")) if not target.is_empty() else "无"
+	var target_name := TranslationServer.translate(str(target.get("name", "无"))) if not target.is_empty() else TranslationServer.translate("无")
 	_draw_monster_portrait(instance_id, Rect2(28.0, 112.0, 91.0, 85.0))
 	_draw_text(str(monster.get("name", monster_id)), 222.0, 130.0, C["text"], 16.0, 130.0)
 	_draw_text(_owned_no_label(instance_id), 302.0, 130.0, Color(0.43, 0.24, 0.07), 10.0, 58.0)
@@ -1380,11 +1380,11 @@ func _get_nature_name(nature_id: String) -> String:
 	if nature_id.is_empty():
 		return "无性格"
 	var nature := NatureDB.get_nature(nature_id)
-	return str(nature.get("name", nature_id)) if not nature.is_empty() else nature_id
+	return TranslationServer.translate(str(nature.get("name", nature_id))) if not nature.is_empty() else TranslationServer.translate(nature_id)
 
 func _gender_label(instance: Dictionary) -> String:
 	var gender := SocialRulesScript.gender_for_instance(instance)
-	return str(SocialRulesScript.GENDER_LABELS.get(gender, gender))
+	return TranslationServer.translate(str(SocialRulesScript.GENDER_LABELS.get(gender, gender)))
 
 func _draw_owned_no_badge(instance_id: String, rect: Rect2, width: float = 38.0) -> void:
 	var label := _owned_no_label(instance_id)
@@ -1420,12 +1420,12 @@ func _elite_prefix(instance: Dictionary) -> String:
 	if instance.is_empty():
 		return ""
 	if bool(instance.get("isElite", false)):
-		return "★精英 "
+		return TranslationServer.translate("★精英 ")
 	var monster_id := str(instance.get("monsterId", ""))
 	if monster_id.is_empty():
 		return ""
 	if bool(MonsterDb.MONSTER_DB.get(monster_id, {}).get("isElite", false)):
-		return "★精英 "
+		return TranslationServer.translate("★精英 ")
 	return ""
 
 func _current_social_place() -> Dictionary:

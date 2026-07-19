@@ -271,7 +271,9 @@ func _sync_detail() -> void:
 	var battle_equipped := item_type == "battle" and item_id in _equipped_battle_items
 	(get_node("DetailPanel/Content/IconFrame/Icon") as TextureRect).texture = _get_item_texture(item_id)
 	_label("DetailPanel/Content/IconFrame/Rarity").text = _rarity_label(int(item_data.get("rarity", 1)))
-	_label("DetailPanel/Content/Name").text = str(item_data.get("name", ""))
+	var item_name := _label("DetailPanel/Content/Name")
+	item_name.text = TranslationServer.translate(str(item_data.get("name", "")))
+	CartoonTypography.fit_label(item_name, 18, 8)
 	_label("DetailPanel/Content/Desc").text = _wrap_text(str(item_data.get("desc", "")), 15)
 	_label("DetailPanel/Content/Count").text = TranslationServer.translate("拥有: %d") % int(_selected_item.get("count", 0))
 	_label("DetailPanel/Content/Type").text = _type_label(item_type)

@@ -937,7 +937,7 @@ func _update_header() -> void:
 	var current_num: int = _current_chapter_index + 1
 	
 	_chapter_title.text = TranslationServer.translate("第%d章") % current_num
-	_chapter_name_label.text = chapter.get("name", "")
+	_chapter_name_label.text = TranslationServer.translate(str(chapter.get("name", "")))
 	
 	var chapter_stars: int = _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
@@ -1081,7 +1081,7 @@ func _draw_chapter_header() -> void:
 		_draw_texture_contain(_get_texture("res://assets/images/ui/buttons/stage_icon_next_arrow.png"), Rect2(HEADER_NEXT_RECT.position.x + 6.0, HEADER_NEXT_RECT.position.y + 6.0, 22, 22))
 	
 	_draw_text_in_rect(TranslationServer.translate("第%d章") % current_num, HEADER_CHAPTER_TEXT_RECT, theme_color, 15, true)
-	_draw_text_in_rect(chapter.get("name", ""), HEADER_NAME_TEXT_RECT, Color.WHITE, 15, true)
+	_draw_text_in_rect(TranslationServer.translate(str(chapter.get("name", ""))), HEADER_NAME_TEXT_RECT, Color.WHITE, 15, true)
 	
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
