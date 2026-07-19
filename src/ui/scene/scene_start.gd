@@ -13,6 +13,19 @@ const FADE_SPEED := 1.8
 const PULSE_SPEED := 1.7
 const MONSTER_BOB_HEIGHT := 3.0
 const GEM_BOB_HEIGHT := 3.5
+const WELCOME_ART_LOCALES: PackedStringArray = [
+	"zh_CN",
+	"zh_TW",
+	"en",
+	"ja",
+	"ko",
+	"fr",
+	"de",
+	"es_419",
+]
+const TITLE_TEXTURE_PATTERN := "res://assets/images/ui/icons/localized/start_title_logo_%s.png"
+const BUTTON_NORMAL_TEXTURE_PATTERN := "res://assets/images/ui/buttons/localized/start_ui_btn_start_normal_%s.png"
+const BUTTON_PRESSED_TEXTURE_PATTERN := "res://assets/images/ui/buttons/localized/start_ui_btn_start_pressed_%s.png"
 
 const MONSTER_PHASES := {
 	"FireMonster": -0.5,
@@ -29,6 +42,7 @@ const GEM_PHASES := {
 }
 
 @onready var _content: Control = %Content
+@onready var _logo: TextureRect = $Content/Logo
 @onready var _start_glow: TextureRect = %StartGlow
 @onready var _start_button: TextureButton = %StartButton
 @onready var _hint_group: Control = %HintGroup
@@ -57,7 +71,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_content.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	_start_button.pressed.connect(_on_start_button_pressed)
-	_start_button.tooltip_text = "开始冒险"
+	_apply_localized_welcome_art()
+	var localization := get_node_or_null("/root/Localization")
+	if localization != null and localization.has_signal("locale_changed"):
+		localization.locale_changed.connect(_on_locale_changed)
 	_start_glow.pivot_offset = _start_glow.size * 0.5
 	_attach_button_feedback(_start_button, CartoonButtonFeedback.Profile.PRIMARY)
 	for node in _monster_nodes:
@@ -69,6 +86,29 @@ func _ready() -> void:
 
 func init(_data: Dictionary = {}) -> void:
 	pass
+
+func _apply_localized_welcome_art() -> void:
+	var locale := "zh_CN"
+	var localization := get_node_or_null("/root/Localization")
+	if localization != null and localization.has_method("get_active_locale"):
+		locale = str(localization.call("get_active_locale"))
+	if locale not in WELCOME_ART_LOCALES:
+		locale = "zh_CN"
+
+	var title_texture := load(TITLE_TEXTURE_PATTERN % locale) as Texture2D
+	var normal_texture := load(BUTTON_NORMAL_TEXTURE_PATTERN % locale) as Texture2D
+	var pressed_texture := load(BUTTON_PRESSED_TEXTURE_PATTERN % locale) as Texture2D
+	if title_texture != null:
+		_logo.texture = title_texture
+	if normal_texture != null:
+		_start_glow.texture = normal_texture
+		_start_button.texture_normal = normal_texture
+	if pressed_texture != null:
+		_start_button.texture_pressed = pressed_texture
+	_start_button.tooltip_text = tr("开始冒险")
+
+func _on_locale_changed(_locale: String, _preference: String) -> void:
+	_apply_localized_welcome_art()
 
 func _process(delta: float) -> void:
 	_elapsed += delta
