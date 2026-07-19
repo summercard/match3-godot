@@ -65,6 +65,52 @@ static func process_fountain_turn(board) -> Dictionary:
 		"extinguished": _with_positions(board, result.get("extinguished", []))
 	}
 
+
+static func fountain_attack_sources(board, removed_gems: Array) -> Array:
+	var sources: Array = []
+	var seen: Dictionary = {}
+	if board == null:
+		return sources
+	for gem in removed_gems:
+		if not gem is Dictionary or str((gem as Dictionary).get("type", "")) != "water":
+			continue
+		var row := int((gem as Dictionary).get("row", -1))
+		var col := int((gem as Dictionary).get("col", -1))
+		for offset in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
+			var fountain_row := row + int(offset[0])
+			var fountain_col := col + int(offset[1])
+			if not board.is_fountain(fountain_row, fountain_col):
+				continue
+			var key := "%d:%d" % [fountain_row, fountain_col]
+			if seen.has(key):
+				continue
+			seen[key] = true
+			sources.append(_position_entry(board, {"row": fountain_row, "col": fountain_col}))
+	return sources
+
+
+static func process_destroyed_rock_backlash(battle, obstacle_damage: Array, damage_ratio: float = 0.10) -> Dictionary:
+	var destroyed_sources: Array = []
+	for hit in obstacle_damage:
+		if hit is Dictionary and bool((hit as Dictionary).get("destroyed", false)):
+			destroyed_sources.append((hit as Dictionary).duplicate(true))
+	var hits: Array = []
+	if battle == null or destroyed_sources.is_empty():
+		return {"destroyed_sources": destroyed_sources, "hits": hits, "total_damage": 0}
+	var total_damage := 0
+	for source_index in range(destroyed_sources.size()):
+		for team_index in range(battle.player_team.size()):
+			var member = battle.player_team[team_index]
+			if member == null or int(member.get("hp", 0)) <= 0 or str(member.get("element", "")) == "earth":
+				continue
+			var before := int(member.get("hp", 0))
+			var requested := maxi(1, int(floor(float(member.get("maxHP", 1)) * clampf(damage_ratio, 0.0, 1.0))))
+			member["hp"] = maxi(0, before - requested)
+			var actual := before - int(member.get("hp", 0))
+			total_damage += actual
+			hits.append({"source_index": source_index, "team_index": team_index, "damage": actual, "target_died": int(member.get("hp", 0)) <= 0})
+	return {"destroyed_sources": destroyed_sources, "hits": hits, "total_damage": total_damage}
+
 static func process_tide_turn(board) -> Dictionary:
 	if board == null or not has_tide(board):
 		return {"old_level": 0, "new_level": 0, "risen_rows": [], "ebbed_rows": [], "flooded": [], "phase": "none"}

@@ -89,6 +89,9 @@ func _connect_gui_actions() -> void:
 	_connect_button("DetailPanel/UseButton", _on_use_pressed)
 	_connect_button("BottomNav/HomeButton", _on_back_pressed)
 	_connect_button("BottomNav/ShopButton", _on_shop_pressed)
+	_connect_button("BottomNav/BattleButton", _go_to_scene.bind("stage_select", {}))
+	_connect_button("BottomNav/ClassroomButton", _go_to_scene.bind("ranch", {"page": "classroom"}))
+	_connect_button("BottomNav/HotelButton", _go_to_scene.bind("team", {}))
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -100,6 +103,11 @@ func _on_back_pressed() -> void:
 
 func _on_shop_pressed() -> void:
 	shop_pressed.emit()
+
+func _go_to_scene(scene_name: String, data: Dictionary = {}) -> void:
+	var manager := get_node_or_null("/root/SceneManager")
+	if manager != null and manager.has_method("switch_scene"):
+		manager.switch_scene(scene_name, data, "quick")
 
 func _on_tab_pressed(tab_id: String) -> void:
 	_active_tab = tab_id
@@ -178,6 +186,9 @@ func _sync_static_labels() -> void:
 		"DetailPanel/UseButton/Text": "使用",
 		"BottomNav/HomeButton/Text": "主页",
 		"BottomNav/ShopButton/Text": "商店",
+		"BottomNav/BattleButton/Text": "战场",
+		"BottomNav/ClassroomButton/Text": "课堂",
+		"BottomNav/HotelButton/Text": "旅馆",
 	}
 	for path in labels.keys():
 		if has_node(path):
@@ -333,6 +344,9 @@ func _attach_inventory_feedback() -> void:
 		"DetailPanel/UseButton",
 		"BottomNav/HomeButton",
 		"BottomNav/ShopButton",
+		"BottomNav/BattleButton",
+		"BottomNav/ClassroomButton",
+		"BottomNav/HotelButton",
 	]
 	for path in SLOT_PATHS:
 		paths.append(path)

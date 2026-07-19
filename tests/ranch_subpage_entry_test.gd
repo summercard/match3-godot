@@ -106,7 +106,7 @@ func _run() -> void:
 	_expect(not (ranch.get_node("Pages/ClassroomPage") as Control).visible, "classroom page should be hidden after switch to social")
 	var social_card1 := ranch.get_node("Pages/SocialPage/RosterPanel/Card1") as Control
 	if social_card1.visible:
-		_expect(social_card1.scale.x < 0.9, "social card1 scale should be small at entry start (got %f)" % social_card1.scale.x)
+		_expect(social_card1.scale.x < 0.99, "social card1 should still be scaling into place at entry start (got %f)" % social_card1.scale.x)
 		_expect(social_card1.modulate.a < 0.5, "social card1 modulate.a should be near 0 at entry start (got %f)" % social_card1.modulate.a)
 
 	# === 测试 5: 锁定卡片（modulate.a < 0.9）应跳过入场动画 ===

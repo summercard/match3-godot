@@ -20,7 +20,7 @@ func _run() -> void:
 	regular_battle.free()
 	tower_battle.free()
 	storage.clear_all_data()
-	_expect(storage.save_stage_stars("stage_1_8", 3), "tower QA should unlock the required mainline gate")
+	_expect(storage.save_stage_stars("stage_5_12", 3), "tower QA should unlock the 1.3.2 mainline gate")
 
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
@@ -56,13 +56,16 @@ func _run() -> void:
 		mailbox.call("_show_blessing")
 		var portrait := mailbox.get_node("BlessingPanel/Panel/AdventurerFrame/AdventurerPortrait") as TextureRect
 		_expect(portrait.visible and portrait.texture != null, "blessing page should visibly show the selected adventurer")
+		var before_send: Dictionary = storage.get_mailbox_state()
+		var pending_before := (before_send.get("pending_blessings", []) as Array).size()
+		var unread_before := int(before_send.get("unread_count", 0))
 		mailbox.call("_send_blessing")
 		for _frame in range(60):
 			await process_frame
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "sending a blessing should persist the daily send count")
-		_expect(int(state.get("unread_count", 0)) == 0, "a sent blessing should not appear before its delivery window")
-		_expect((state.get("pending_blessings", []) as Array).size() == 1, "sending a blessing should create one scheduled reply")
+		_expect(int(state.get("unread_count", 0)) == unread_before, "sending a blessing should not create a new unread reply")
+		_expect((state.get("pending_blessings", []) as Array).size() == pending_before, "sending a blessing should remain independent from daily inbound mail")
 		_expect(int(state.get("collection_stars", 0)) == 3, "sending a blessing should not change the three starter collection stars")
 
 	root.remove_child(main)

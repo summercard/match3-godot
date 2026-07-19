@@ -1,724 +1,259 @@
 class_name SocialRules
 extends RefCounted
 
-const DURATION_MS: float = 1.0 * 60.0 * 60.0 * 1000.0
-
-const GENDER_LABELS := {
-	"male": "雄性",
-	"female": "雌性",
-	"neutral": "无性别"
-}
-
+## 1.3.2 社交只负责性格学习。旧存档中的关系字段会被 MonsterPool 保留，
+## 但不会再参与开始条件、概率或结算。
+const DURATION_MS := 60.0 * 60.0 * 1000.0
+const PERSONALITY_CAPACITY := 3
 const PLACE_ORDER := ["meadow_yard", "sunny_yard", "quiet_pond"]
+const GENDER_LABELS := {"male": "雄性", "female": "雌性", "neutral": "无性别"}
 
 const PLACE_CONFIGS := {
 	"meadow_yard": {
-		"id": "meadow_yard",
-		"name": "草坪庭院",
-		"short": "草坪",
-			"summary": "均衡社交，适合第一次熟悉彼此。",
-			"durationHours": 1.0,
-			"preferredElements": ["grass", "light", "earth"],
-		"preferredStyles": ["caring", "curious"],
-		"eventTheme": "陪伴"
+		"id": "meadow_yard", "name": "草坪庭院", "short": "草坪",
+		"summary": "草、光、土属性和温和、智慧性格更容易互相学习。",
+		"durationHours": 1.0, "preferredElements": ["grass", "light", "earth"],
+		"preferredStyles": ["gentle", "wise"], "baseTraitChance": 0.42,
+		"elementBonus": 0.12, "personalityBonus": 0.08, "chanceCap": 0.82,
 	},
 	"sunny_yard": {
-		"id": "sunny_yard",
-		"name": "暖阳广场",
-		"short": "暖阳",
-			"summary": "更容易激发活跃、勇敢或爆发型精灵。",
-			"durationHours": 2.0,
-			"preferredElements": ["fire", "thunder", "wind"],
-		"preferredStyles": ["bold", "lively"],
-		"eventTheme": "活力"
+		"id": "sunny_yard", "name": "暖阳广场", "short": "暖阳",
+		"summary": "火、雷、风属性和勇敢、暴躁、敏捷性格更容易互相学习。",
+		"durationHours": 1.0, "preferredElements": ["fire", "thunder", "wind"],
+		"preferredStyles": ["brave", "fierce", "agile"], "baseTraitChance": 0.32,
+		"elementBonus": 0.18, "personalityBonus": 0.14, "chanceCap": 0.88,
 	},
 	"quiet_pond": {
-		"id": "quiet_pond",
-		"name": "静水池",
-		"short": "静水",
-			"summary": "更适合稳重、安静或治愈型精灵沉淀关系。",
-			"durationHours": 6.0,
-			"preferredElements": ["water", "ice", "void"],
-		"preferredStyles": ["steady", "quiet", "caring"],
-		"eventTheme": "安定"
-	}
+		"id": "quiet_pond", "name": "静水池", "short": "静水",
+		"summary": "水、冰、虚空属性和冷静、谨慎、温和性格更容易互相学习。",
+		"durationHours": 1.0, "preferredElements": ["water", "ice", "void"],
+		"preferredStyles": ["calm", "cautious", "gentle"], "baseTraitChance": 0.38,
+		"elementBonus": 0.15, "personalityBonus": 0.11, "chanceCap": 0.86,
+	},
 }
 
-const RELATION_LEVELS := [
-	{"level": 1, "name": "初识", "minCount": 1, "minBest": 0},
-	{"level": 2, "name": "熟悉", "minCount": 2, "minBest": 60},
-	{"level": 3, "name": "亲近", "minCount": 4, "minBest": 74},
-	{"level": 4, "name": "羁绊", "minCount": 7, "minBest": 86},
-]
-
-const EVENT_CATALOG := [
-	{
-		"id": "meadow_first_sniff",
-		"placeIds": ["meadow_yard"],
-		"minRelation": 1,
-		"minScore": 0,
-		"requiredTags": [],
-		"name": "草叶试探",
-		"theme": "陪伴",
-		"flavor": "两只精灵绕着草坪慢慢走了一圈，最后在同一块树荫下停住。",
-		"outcome": "双方留下初次气味记忆，下次同场所社交更容易读出偏好。",
-		"hook": "relation_memory"
-	},
-	{
-		"id": "meadow_same_element_hum",
-		"placeIds": ["meadow_yard"],
-		"minRelation": 1,
-		"minScore": 64,
-		"requiredTags": ["同属性共鸣"],
-		"name": "同频低鸣",
-		"theme": "生态",
-		"flavor": "它们在草坪中央发出相近频率的低鸣，周围能量像浅浅的环纹一样扩散。",
-		"outcome": "同属性搭档记录增强，后续适合接生态分支和进化启发。",
-		"hook": "ecology_bond"
-	},
-	{
-		"id": "meadow_caring_share",
-		"placeIds": ["meadow_yard"],
-		"minRelation": 2,
-		"minScore": 68,
-		"requiredTags": ["场所契合"],
-		"name": "树荫分享",
-		"theme": "陪伴",
-		"flavor": "一只精灵把更舒服的位置让出来，另一只没有退开，而是贴近了一点。",
-		"outcome": "关系进入稳定陪伴方向，适合作为长期社交搭档。",
-		"hook": "companion_growth"
-	},
-	{
-		"id": "sunny_bold_chase",
-		"placeIds": ["sunny_yard"],
-		"minRelation": 1,
-		"minScore": 60,
-		"requiredTags": ["场所契合"],
-		"name": "追光竞跑",
-		"theme": "活力",
-		"flavor": "它们追着阳光边界来回奔跑，谁也没有真正认输。",
-		"outcome": "活跃搭档记录增强，后续适合接破招节奏或行动型羁绊。",
-		"hook": "tempo_hint"
-	},
-	{
-		"id": "sunny_fire_spark",
-		"placeIds": ["sunny_yard"],
-		"minRelation": 1,
-		"minScore": 72,
-		"requiredTags": ["同属性共鸣"],
-		"name": "火花练习",
-		"theme": "活力",
-		"flavor": "短促的火花在它们之间跳动，像一次没有危险的技能排练。",
-		"outcome": "同属性社交事件被记录，后续可用于进化启发文本。",
-		"hook": "evolution_insight"
-	},
-	{
-		"id": "sunny_complement_guard",
-		"placeIds": ["sunny_yard"],
-		"minRelation": 2,
-		"minScore": 70,
-		"requiredTags": ["性格互补"],
-		"name": "冲刺与等候",
-		"theme": "默契",
-		"flavor": "一只先冲出去，另一只在终点安静等待；第二轮时，它们自然交换了位置。",
-		"outcome": "性格互补关系升温，适合接队伍里的分工羁绊。",
-		"hook": "role_bond"
-	},
-	{
-		"id": "pond_quiet_reflection",
-		"placeIds": ["quiet_pond"],
-		"minRelation": 1,
-		"minScore": 0,
-		"requiredTags": [],
-		"name": "水面倒影",
-		"theme": "安定",
-		"flavor": "两只精灵看着水面上的倒影，很久都没有打扰彼此。",
-		"outcome": "安静陪伴被记录，适合稳重或恢复型精灵继续培养关系。",
-		"hook": "calm_memory"
-	},
-	{
-		"id": "pond_steady_care",
-		"placeIds": ["quiet_pond"],
-		"minRelation": 2,
-		"minScore": 66,
-		"requiredTags": ["场所契合"],
-		"name": "池边守候",
-		"theme": "安定",
-		"flavor": "其中一只精灵伏在池边休息，另一只守在旁边，偶尔拨开靠近的浮叶。",
-		"outcome": "守候型关系增强，后续适合接守护、回复或陪伴成长。",
-		"hook": "ward_bond"
-	},
-	{
-		"id": "pond_complement_ripple",
-		"placeIds": ["quiet_pond"],
-		"minRelation": 2,
-		"minScore": 70,
-		"requiredTags": ["属性互补"],
-		"name": "交错涟漪",
-		"theme": "生态",
-		"flavor": "两种不同能量落进水面，涟漪没有互相抵消，反而编成了新的纹路。",
-		"outcome": "属性互补事件被记录，适合后续扩展跨生态社交路线。",
-		"hook": "cross_ecology"
-	},
-	{
-		"id": "any_relation_close",
-		"placeIds": [],
-		"minRelation": 3,
-		"minScore": 74,
-		"requiredTags": ["关系升温"],
-		"name": "不用招呼",
-		"theme": "亲近",
-		"flavor": "它们没有特别的动作，却已经知道对方下一步会去哪里。",
-		"outcome": "亲近关系确认，后续同伴分支和关系详情会优先展示这段记录。",
-		"hook": "relationship_detail"
-	},
-	{
-		"id": "any_counter_tension",
-		"placeIds": [],
-		"minRelation": 1,
-		"minScore": 40,
-		"requiredTags": ["属性相克"],
-		"name": "本能对峙",
-		"theme": "紧张",
-		"flavor": "它们的本能互相警报，但理智按住了爪子。这不是战争，只是距离。",
-		"outcome": "属性相克关系被记录，后续侵蚀事件触发概率提高。",
-		"hook": "counter_tension"
-	},
-	{
-		"id": "meadow_counter_storm",
-		"placeIds": ["meadow_yard"],
-		"minRelation": 2,
-		"minScore": 60,
-		"requiredTags": ["属性相克"],
-		"name": "风暴前夕",
-		"theme": "警告",
-		"flavor": "草叶在两只精灵的对峙间被压成了弧线。空气中有什么正在积累。",
-		"outcome": "警告：属性相克关系升温，侵蚀吞噬风险提升。",
-		"hook": "counter_escalation"
-	},
-	{
-		"id": "any_bond_echo",
-		"placeIds": [],
-		"minRelation": 4,
-		"minScore": 86,
-		"requiredTags": [],
-		"name": "羁绊回声",
-		"theme": "羁绊",
-		"flavor": "短暂的沉默后，两只精灵同时回头，像是听见了只有彼此能懂的声音。",
-		"outcome": "羁绊级关系被记录，后续可以接入稀有事件、分支进化或捕捉稳定度。",
-		"hook": "bond_branch"
-	}
-]
 
 static func normalize_place(place: Variant) -> Dictionary:
 	if not place is Dictionary:
 		return _empty_place()
-	var data: Dictionary = place
+	var data := place as Dictionary
 	var place_id := str(data.get("place_id", data.get("placeId", "meadow_yard")))
 	if not PLACE_CONFIGS.has(place_id):
 		place_id = "meadow_yard"
 	return {
 		"place_id": place_id,
-			"slot_a": _nullable_id(data.get("slot_a", data.get("slotA", null))),
-			"slot_b": _nullable_id(data.get("slot_b", data.get("slotB", null))),
-			"started_at": _normalize_timestamp_ms(data.get("started_at", data.get("startedAt", null))),
-		"last_result": data.get("last_result", data.get("lastResult", {})) if data.get("last_result", data.get("lastResult", {})) is Dictionary else {}
+		"slot_a": _nullable_id(data.get("slot_a", data.get("slotA", null))),
+		"slot_b": _nullable_id(data.get("slot_b", data.get("slotB", null))),
+		"started_at": _normalize_timestamp_ms(data.get("started_at", data.get("startedAt", null))),
+		"interaction_count": maxi(0, int(data.get("interaction_count", data.get("interactionCount", 0)))),
+		"last_result": (data.get("last_result", data.get("lastResult", {})) as Dictionary).duplicate(true) if data.get("last_result", data.get("lastResult", {})) is Dictionary else {},
 	}
+
 
 static func normalize_places(places: Array, count: int = 1) -> Array:
 	var result: Array = []
-	for raw_place in places:
-		result.append(normalize_place(raw_place))
+	for place in places:
+		result.append(normalize_place(place))
 	while result.size() < count:
 		result.append(_empty_place())
 	return result.slice(0, count)
 
+
 static func can_start(place: Dictionary) -> bool:
 	return not str(place.get("slot_a", "")).is_empty() and not str(place.get("slot_b", "")).is_empty() and place.get("started_at", null) == null
+
 
 static func is_ready(place: Dictionary, now_ms: float = -1.0) -> bool:
 	var started_at = place.get("started_at", null)
 	if started_at == null:
 		return false
 	var now := Time.get_unix_time_from_system() * 1000.0 if now_ms < 0.0 else now_ms
-	return now - float(started_at) >= duration_ms_for_place(place)
+	return now - float(started_at) >= DURATION_MS
+
 
 static func progress(place: Dictionary, now_ms: float = -1.0) -> float:
 	var started_at = place.get("started_at", null)
 	if started_at == null:
 		return 0.0
 	var now := Time.get_unix_time_from_system() * 1000.0 if now_ms < 0.0 else now_ms
-	return clampf((now - float(started_at)) / duration_ms_for_place(place), 0.0, 1.0)
+	return clampf((now - float(started_at)) / DURATION_MS, 0.0, 1.0)
 
-static func duration_ms_for_place(place: Dictionary) -> float:
-	var place_config := place_config_for(place)
-	return float(place_config.get("durationHours", 1.0)) * 60.0 * 60.0 * 1000.0
 
-static func duration_label_for_place(place: Dictionary) -> String:
-	var hours := float(place_config_for(place).get("durationHours", 1.0))
-	if is_equal_approx(hours, round(hours)):
-		return "%d小时" % int(round(hours))
-	return "%.1f小时" % hours
+static func duration_ms_for_place(_place: Dictionary) -> float:
+	return DURATION_MS
+
+
+static func duration_label_for_place(_place: Dictionary) -> String:
+	return "1小时"
+
 
 static func preview(instance_a: Dictionary, instance_b: Dictionary, place: Dictionary = {}) -> Dictionary:
 	return _build_result(instance_a, instance_b, place, false)
 
+
 static func resolve(instance_a: Dictionary, instance_b: Dictionary, place: Dictionary = {}) -> Dictionary:
 	return _build_result(instance_a, instance_b, place, true)
 
+
 static func get_place_config(place_id: String) -> Dictionary:
-	return PLACE_CONFIGS.get(place_id, PLACE_CONFIGS["meadow_yard"]).duplicate(true)
+	return (PLACE_CONFIGS.get(place_id, PLACE_CONFIGS["meadow_yard"]) as Dictionary).duplicate(true)
+
 
 static func place_config_for(place: Dictionary) -> Dictionary:
 	return get_place_config(str(place.get("place_id", "meadow_yard")))
 
+
 static func next_place_id(current_id: String) -> String:
-	var idx := PLACE_ORDER.find(current_id)
-	if idx < 0:
-		return PLACE_ORDER[0]
-	return PLACE_ORDER[(idx + 1) % PLACE_ORDER.size()]
+	var index := PLACE_ORDER.find(current_id)
+	return PLACE_ORDER[0] if index < 0 else PLACE_ORDER[(index + 1) % PLACE_ORDER.size()]
+
 
 static func get_event_catalog(place_id: String = "") -> Array:
-	var result: Array = []
-	for event: Dictionary in EVENT_CATALOG:
-		var place_ids: Array = event.get("placeIds", [])
-		if place_id.is_empty() or place_ids.is_empty() or place_ids.has(place_id):
-			result.append(event.duplicate(true))
-	return result
+	var configs: Array = []
+	for id in PLACE_ORDER:
+		if place_id.is_empty() or id == place_id:
+			var config := get_place_config(id)
+			configs.append({"id": id, "name": config.get("name", "社交场所"), "summary": config.get("summary", ""), "duration": "1小时"})
+	return configs
+
 
 static func build_relationship_detail(instance_a: Dictionary, instance_b: Dictionary, place: Dictionary = {}) -> Dictionary:
 	if instance_a.is_empty() or instance_b.is_empty():
 		return {}
-	var preview_result := preview(instance_a, instance_b, place)
-	var partner_id := str(instance_b.get("instanceId", ""))
-	var memory: Dictionary = instance_a.get("bondMemory", {})
-	var partners: Dictionary = memory.get("partners", {})
-	var partner_memory: Dictionary = partners.get(partner_id, {})
-	var has_history := not partner_memory.is_empty()
-	var current_label := str(partner_memory.get("relationLabel", "未相识"))
-	var current_level := int(partner_memory.get("relationLevel", 0))
-	var count := int(partner_memory.get("count", 0))
-	var best_score := int(partner_memory.get("bestScore", 0))
-	var next_event: Dictionary = preview_result.get("event", {})
+	var result := preview(instance_a, instance_b, place)
 	return {
-		"hasHistory": has_history,
-		"currentLevel": current_level,
-		"currentLabel": current_label,
-		"count": count,
-		"bestScore": best_score,
-		"lastLabel": str(partner_memory.get("lastLabel", "")),
-		"lastTags": partner_memory.get("lastTags", []).duplicate(true) if partner_memory.get("lastTags", []) is Array else [],
-		"lastPlaceName": str(partner_memory.get("placeName", "")),
-		"lastEventName": str(partner_memory.get("lastEventName", "")),
-		"lastEventFlavor": str(partner_memory.get("lastEventFlavor", "")),
-		"lastEventOutcome": str(partner_memory.get("lastEventOutcome", "")),
-		"lastEventHook": str(partner_memory.get("lastEventHook", "")),
-		"nextScore": int(preview_result.get("score", 0)),
-		"nextLabel": str(preview_result.get("relation_label", "初识")),
-		"nextEventName": str(next_event.get("name", "")),
-		"nextEventFlavor": str(next_event.get("flavor", "")),
-		"nextEventHook": str(next_event.get("hook", "")),
+		"successPercent": int(result.get("success_percent", 0)),
+		"ruleText": str(result.get("rule_text", "")),
+		"changes": result.get("changes", []).duplicate(true),
 	}
+
 
 static func gender_for_instance(instance: Dictionary) -> String:
-	var gender := str(instance.get("gender", ""))
-	if GENDER_LABELS.has(gender):
-		return gender
-	return derive_gender(str(instance.get("instanceId", "")), str(instance.get("monsterId", "")))
+	return str(instance.get("gender", "neutral"))
+
 
 static func derive_gender(instance_id: String, monster_id: String) -> String:
-	var seed := "%s:%s" % [monster_id, instance_id]
-	var score := 0
-	for i in range(seed.length()):
-		score += seed.unicode_at(i) * (i + 3)
-	var roll := score % 10
-	if roll <= 3:
-		return "male"
-	if roll <= 7:
-		return "female"
-	return "neutral"
+	var roll := posmod(("%s:%s" % [monster_id, instance_id]).hash(), 10)
+	return "male" if roll <= 3 else ("female" if roll <= 7 else "neutral")
+
+
+static func personality_traits(instance: Dictionary) -> Array[String]:
+	var result: Array[String] = []
+	var primary := str(instance.get("nature", ""))
+	if not primary.is_empty():
+		result.append(primary)
+	for raw_trait in instance.get("learnedNatures", instance.get("learned_natures", [])):
+		var nature_id := str(raw_trait)
+		if NatureDB.has_nature(nature_id) and not result.has(nature_id):
+			result.append(nature_id)
+	return result.slice(0, PERSONALITY_CAPACITY)
+
 
 static func _build_result(instance_a: Dictionary, instance_b: Dictionary, place: Dictionary, final_result: bool) -> Dictionary:
-	var monster_a := MonsterDb.get_monster(str(instance_a.get("monsterId", "")))
-	var monster_b := MonsterDb.get_monster(str(instance_b.get("monsterId", "")))
-	var element_a := str(monster_a.get("element", ""))
-	var element_b := str(monster_b.get("element", ""))
-	var nature_a := str(instance_a.get("nature", ""))
-	var nature_b := str(instance_b.get("nature", ""))
-	var gender_a := gender_for_instance(instance_a)
-	var gender_b := gender_for_instance(instance_b)
-	var place_config := place_config_for(place)
-	var place_id := str(place_config.get("id", "meadow_yard"))
-	var style_a := _social_style(instance_a)
-	var style_b := _social_style(instance_b)
-
-	var score := 40
-	var tags: Array = []
-	if gender_a != "neutral" and gender_b != "neutral" and gender_a != gender_b:
-		score += 16
-		tags.append("异性互补")
-	elif gender_a == gender_b:
-		score += 8
-		tags.append("同伴默契")
+	var config := place_config_for(place)
+	var traits_a := personality_traits(instance_a)
+	var traits_b := personality_traits(instance_b)
+	var chance := _trait_chance(config, instance_a, instance_b, traits_a, traits_b)
+	var candidates_a := traits_b.filter(func(candidate_nature): return not traits_a.has(str(candidate_nature)))
+	var candidates_b := traits_a.filter(func(candidate_nature): return not traits_b.has(str(candidate_nature)))
+	var can_a := traits_a.size() < PERSONALITY_CAPACITY and not candidates_a.is_empty()
+	var can_b := traits_b.size() < PERSONALITY_CAPACITY and not candidates_b.is_empty()
+	var pair_key := _pair_key(instance_a, instance_b)
+	var interaction := int(place.get("interaction_count", 0))
+	# Godot's String.hash() keeps neighbouring decimal suffixes too correlated for
+	# a repeated one-hour activity. Mix the interaction counter explicitly so a
+	# stable pair does not get trapped in a long run of identical outcomes.
+	var place_seed := _stable_seed("%s:%s" % [pair_key, str(config.get("id", "meadow_yard"))])
+	var seed := posmod(place_seed + interaction * 1103515245 + 12345, 2147483647)
+	var receiver_a := can_a and (not can_b or posmod(seed / 3, 2) == 0)
+	# A golden-ratio rotation gives each pair/venue a reproducible low-discrepancy
+	# sequence. It avoids the correlated decimal suffixes produced by repeatedly
+	# hashing neighbouring interaction numbers while still preventing rerolls.
+	var roll_phase := float(_stable_seed("%s:%s:trait" % [pair_key, str(config.get("id", "meadow_yard"))])) / 2147483647.0
+	var roll := fposmod(roll_phase + float(interaction) * 0.6180339887498949, 1.0)
+	var next_a := traits_a.duplicate()
+	var next_b := traits_b.duplicate()
+	var changes: Array[String] = []
+	var learned: Array = []
+	var success := (can_a or can_b) and roll < chance if final_result else false
+	if success:
+		var candidates: Array = candidates_a if receiver_a else candidates_b
+		var learned_nature := str(candidates[posmod(seed, candidates.size())])
+		var receiver_name := _instance_name(instance_a if receiver_a else instance_b)
+		var receiver_id := str((instance_a if receiver_a else instance_b).get("instanceId", ""))
+		if receiver_a:
+			next_a.append(learned_nature)
+		else:
+			next_b.append(learned_nature)
+		changes.append("%s 学会了%s" % [receiver_name, _nature_name(learned_nature)])
+		learned.append({"instance_id": receiver_id, "nature": learned_nature})
+	elif final_result:
+		changes.append("本次交流没有产生性格变化" if can_a or can_b else "双方没有可学习的新性格")
 	else:
-		score += 10
-		tags.append("安静陪伴")
-
-	if _is_element_counter(element_a, element_b):
-		score += 8
-		tags.append("属性相克")
-	elif element_a == element_b and not element_a.is_empty():
-		score += 18
-		tags.append("同属性共鸣")
-	elif _is_element_complement(element_a, element_b):
-		score += 14
-		tags.append("属性互补")
-	else:
-		score += 6
-		tags.append("生态交流")
-
-	if nature_a == nature_b and not nature_a.is_empty():
-		score += 12
-		tags.append("性格合拍")
-	elif _is_nature_complement(nature_a, nature_b):
-		score += 10
-		tags.append("性格互补")
-	else:
-		score += 4
-		tags.append("互相熟悉")
-
-	var place_bonus := _place_match_bonus(place_config, element_a, element_b, style_a, style_b)
-	if place_bonus >= 14:
-		tags.append("场所契合")
-	elif place_bonus >= 7:
-		tags.append("场所适应")
-	score += place_bonus
-
-	var relation := _relation_state(instance_a, instance_b, score)
-	var relation_level := int(relation.get("level", 1))
-	if relation_level >= 3:
-		score += 4
-		tags.append("关系升温")
-
-	score = clampi(score, 0, 100)
-	var exp_each := 25 + int(score * 0.9)
-	var gold := 12 + int(score * 0.45)
-	var item_id := _select_item(element_a, element_b, nature_a, nature_b, score)
-	var item_count := 1 if score >= 66 else 0
-	var label := "深度交流" if score >= 82 else ("良好社交" if score >= 66 else "轻松相处")
-	var items: Array = []
-	if item_count > 0:
-		items.append({"id": item_id, "count": item_count})
-	var event := _select_event(place_config, relation, score, tags)
-	var major_outcome := _select_major_outcome(instance_a, instance_b, place_config, relation, score, tags)
+		changes.append("完成交流后，将按此概率学习对方未拥有的性格")
+	var percent := int(round(chance * 100.0))
+	var label := "性格学习成功" if success else ("学习结果待定" if not final_result else "性格保持不变")
 	return {
-		"score": score,
-		"label": label,
-		"tags": tags,
-		"majorOutcome": major_outcome,
-		"place_id": place_id,
-			"place_name": str(place_config.get("name", "草坪庭院")),
-			"place_summary": str(place_config.get("summary", "")),
-			"duration_ms": duration_ms_for_place(place),
-			"duration_label": duration_label_for_place(place),
-		"relation_level": relation_level,
-		"relation_label": str(relation.get("name", "初识")),
-		"relation_count": int(relation.get("count", 1)),
-		"event": event,
-		"gender_pair": "%s / %s" % [GENDER_LABELS.get(gender_a, gender_a), GENDER_LABELS.get(gender_b, gender_b)],
-		"element_pair": "%s / %s" % [element_a, element_b],
-		"nature_pair": "%s / %s" % [_nature_name(nature_a), _nature_name(nature_b)],
-		"exp_each": exp_each,
-		"gold": gold,
-		"items": items,
-		"summary": "%s·%s：%s，%s。" % [str(place_config.get("short", "场所")), label, "、".join(tags), str(event.get("summary", "关系产生了变化"))],
-		"final": final_result
+		"version": "1.3.2", "direction": "trait_change" if success else "no_change",
+		"direction_label": label, "label": label, "success_chance": chance,
+		"success_percent": percent, "success_roll": roll, "rule_text": str(config.get("summary", "")),
+		"interactions": interaction + (1 if final_result else 0), "changes": changes,
+		"learned_natures": learned,
+		"updated_a": {"instanceId": instance_a.get("instanceId", ""), "personalityTraits": next_a, "nature": next_a[0] if not next_a.is_empty() else ""},
+		"updated_b": {"instanceId": instance_b.get("instanceId", ""), "personalityTraits": next_b, "nature": next_b[0] if not next_b.is_empty() else ""},
+		"place_id": config.get("id", "meadow_yard"), "place_name": config.get("name", "社交场所"),
+		"place_summary": config.get("summary", ""), "duration_ms": DURATION_MS, "duration_label": "1小时",
+		"summary": "%s：成功率 %d%%；%s。" % [str(config.get("name", "社交场所")), percent, "。".join(changes)],
+		"preview": not final_result, "final": final_result,
 	}
+
+
+static func _trait_chance(config: Dictionary, instance_a: Dictionary, instance_b: Dictionary, traits_a: Array[String], traits_b: Array[String]) -> float:
+	var preferred_elements: Array = config.get("preferredElements", [])
+	var preferred_styles: Array = config.get("preferredStyles", [])
+	var element_matches := 0
+	for instance in [instance_a, instance_b]:
+		var monster := MonsterDb.get_monster(str(instance.get("monsterId", "")))
+		if preferred_elements.has(str(monster.get("element", ""))):
+			element_matches += 1
+	var style_matches := 0
+	for traits in [traits_a, traits_b]:
+		for known_nature in traits:
+			if preferred_styles.has(str(known_nature)):
+				style_matches += 1
+				break
+	return clampf(float(config.get("baseTraitChance", 0.35)) + element_matches * float(config.get("elementBonus", 0.12)) + style_matches * float(config.get("personalityBonus", 0.10)), 0.05, float(config.get("chanceCap", 0.85)))
+
 
 static func _empty_place() -> Dictionary:
-	return {"place_id": "meadow_yard", "slot_a": null, "slot_b": null, "started_at": null, "last_result": {}}
+	return {"place_id": "meadow_yard", "slot_a": null, "slot_b": null, "started_at": null, "interaction_count": 0, "last_result": {}}
+
 
 static func _nullable_id(value: Variant) -> Variant:
-	if value == null:
+	if value == null or str(value).is_empty():
 		return null
-	var text := str(value)
-	return null if text.is_empty() else text
+	return str(value)
+
 
 static func _normalize_timestamp_ms(value: Variant) -> Variant:
-	if value == null:
+	if value == null or float(value) <= 0.0:
 		return null
-	var timestamp := float(value)
-	if timestamp <= 0.0:
-		return null
-	if timestamp < 100000000000.0:
-		return timestamp * 1000.0
-	return timestamp
+	return float(value) * 1000.0 if float(value) < 100000000000.0 else float(value)
 
-static func _is_element_counter(a: String, b: String) -> bool:
-	# 属性相克表（A counter B）
-	var counter_map := {
-		"fire": ["grass"],
-		"water": ["fire"],
-		"grass": ["earth", "ice"],
-		"earth": ["thunder"],
-		"thunder": ["wind"],
-		"wind": ["earth"],
-		"light": ["dark"],
-		"dark": ["light"],
-		"void": ["star"],
-		"star": ["void"],
-		"ice": ["grass"],
-		"temporal": ["void"],
-		"chaos": [],
-	}
-	var a_counters: Array = counter_map.get(a, [])
-	var b_counters: Array = counter_map.get(b, [])
-	return a_counters.has(b) or b_counters.has(a)
 
-static func _is_element_complement(a: String, b: String) -> bool:
-	var pair := [a, b]
-	return (
-		(pair.has("fire") and pair.has("water"))
-		or (pair.has("grass") and pair.has("earth"))
-		or (pair.has("thunder") and pair.has("wind"))
-		or (pair.has("light") and pair.has("dark"))
-		or (pair.has("void") and pair.has("star"))
-	)
+static func _stable_seed(value: String) -> int:
+	return posmod(value.hash(), 2147483647)
 
-static func _is_nature_complement(a: String, b: String) -> bool:
-	var pair := [a, b]
-	return (
-		(pair.has("brave") and pair.has("cautious"))
-		or (pair.has("agile") and pair.has("calm"))
-		or (pair.has("wise") and pair.has("gentle"))
-		or (pair.has("fierce") and pair.has("calm"))
-	)
 
-static func _select_item(element_a: String, element_b: String, nature_a: String, nature_b: String, score: int) -> String:
-	if score >= 82 and element_a == element_b:
-		var stone_map := {
-			"fire": "evolution_stone_fire",
-			"water": "evolution_stone_water",
-			"grass": "evolution_stone_grass",
-			"thunder": "evolution_stone_thunder",
-			"light": "evolution_stone_light",
-			"earth": "evolution_stone_earth",
-			"wind": "evolution_stone_wind",
-			"dark": "evolution_stone_dark"
-		}
-		return str(stone_map.get(element_a, "exp_potion"))
-	if nature_a == "wise" or nature_b == "wise":
-		return "exp_crystal" if score >= 82 else "exp_potion"
-	return "capture_ball_plus" if score >= 82 else "capture_ball"
+static func _pair_key(a: Dictionary, b: Dictionary) -> String:
+	var ids := [str(a.get("instanceId", "a")), str(b.get("instanceId", "b"))]
+	ids.sort()
+	return "%s::%s" % ids
+
+
+static func _instance_name(instance: Dictionary) -> String:
+	return str(instance.get("name", MonsterDb.get_monster(str(instance.get("monsterId", ""))).get("name", "精灵")))
+
 
 static func _nature_name(nature_id: String) -> String:
-	var nature := NatureDB.get_nature(nature_id)
-	return str(nature.get("name", nature_id)) if not nature.is_empty() else nature_id
-
-static func _social_style(instance: Dictionary) -> String:
-	var profile: Dictionary = instance.get("socialProfile", {})
-	return str(profile.get("style", "curious"))
-
-static func _place_match_bonus(place_config: Dictionary, element_a: String, element_b: String, style_a: String, style_b: String) -> int:
-	var bonus := 0
-	var preferred_elements: Array = place_config.get("preferredElements", [])
-	var preferred_styles: Array = place_config.get("preferredStyles", [])
-	if preferred_elements.has(element_a):
-		bonus += 7
-	if preferred_elements.has(element_b):
-		bonus += 7
-	if preferred_styles.has(style_a):
-		bonus += 5
-	if preferred_styles.has(style_b):
-		bonus += 5
-	return mini(20, bonus)
-
-static func _relation_state(instance_a: Dictionary, instance_b: Dictionary, score: int) -> Dictionary:
-	var partner_id := str(instance_b.get("instanceId", ""))
-	var memory: Dictionary = instance_a.get("bondMemory", {})
-	var partners: Dictionary = memory.get("partners", {})
-	var partner_memory: Dictionary = partners.get(partner_id, {})
-	var next_count := int(partner_memory.get("count", 0)) + 1
-	var best_score := maxi(int(partner_memory.get("bestScore", 0)), score)
-	var result: Dictionary = RELATION_LEVELS[0].duplicate(true)
-	for raw_level: Dictionary in RELATION_LEVELS:
-		if next_count >= int(raw_level.get("minCount", 1)) and best_score >= int(raw_level.get("minBest", 0)):
-			result = raw_level.duplicate(true)
-	result["count"] = next_count
-	result["bestScore"] = best_score
-	return result
-
-static func _select_event(place_config: Dictionary, relation: Dictionary, score: int, tags: Array) -> Dictionary:
-	var place_id := str(place_config.get("id", "meadow_yard"))
-	var level := int(relation.get("level", 1))
-	var theme := str(place_config.get("eventTheme", "陪伴"))
-	var focus := "、".join(tags.slice(0, mini(2, tags.size())))
-	if focus.is_empty():
-		focus = theme
-	var selected: Dictionary = {}
-	var selected_score := -1
-	for event: Dictionary in EVENT_CATALOG:
-		var place_ids: Array = event.get("placeIds", [])
-		if not place_ids.is_empty() and not place_ids.has(place_id):
-			continue
-		if level < int(event.get("minRelation", 1)):
-			continue
-		if score < int(event.get("minScore", 0)):
-			continue
-		var required_tags: Array = event.get("requiredTags", [])
-		if not _has_all_tags(tags, required_tags):
-			continue
-		var rank := int(event.get("minRelation", 1)) * 100 + int(event.get("minScore", 0)) + required_tags.size() * 12
-		if place_ids.has(place_id):
-			rank += 8
-		if rank > selected_score:
-			selected_score = rank
-			selected = event
-	if selected.is_empty():
-		selected = EVENT_CATALOG[0]
-	var result := selected.duplicate(true)
-	result["summary"] = "%s事件触发：%s，关系进入%s。" % [str(result.get("theme", theme)), focus, str(relation.get("name", "初识"))]
-	result["impact"] = str(result.get("outcome", "关系记忆被记录，后续系统会读取这段经历。"))
-	return result
-
-static func _select_major_outcome(instance_a: Dictionary, instance_b: Dictionary, place_config: Dictionary, relation: Dictionary, score: int, tags: Array) -> Dictionary:
-	var gender_a := gender_for_instance(instance_a)
-	var gender_b := gender_for_instance(instance_b)
-	var element_a := str(MonsterDb.get_monster(str(instance_a.get("monsterId", ""))).get("element", ""))
-	var element_b := str(MonsterDb.get_monster(str(instance_b.get("monsterId", ""))).get("element", ""))
-	var relation_level := int(relation.get("level", 1))
-	if _can_birth(gender_a, gender_b, relation_level, score):
-		var child_count := 2 if score >= 96 or (relation_level >= 4 and tags.has("同属性共鸣")) else 1
-		return {
-			"type": "birth",
-			"name": "复合新生",
-			"rarity": "rare",
-			"summary": "双方关系稳定并产生复合幼体。",
-			"childCount": child_count,
-			"childPlans": _build_birth_child_plans(instance_a, instance_b, element_a, element_b, relation, score, child_count),
-			"risk": "none"
-		}
-	var erosion := _erosion_candidate(instance_a, instance_b, element_a, element_b, score)
-	if not erosion.is_empty():
-		return erosion
-	return {
-		"type": "none",
-		"name": "常规社交",
-		"summary": "本次只产生普通关系、事件和资源结果。"
-	}
-
-static func _can_birth(gender_a: String, gender_b: String, relation_level: int, score: int) -> bool:
-	if gender_a == "neutral" or gender_b == "neutral" or gender_a == gender_b:
-		return false
-	return relation_level >= 3 and score >= 86
-
-static func _build_birth_child_plans(instance_a: Dictionary, instance_b: Dictionary, element_a: String, element_b: String, relation: Dictionary, score: int, child_count: int) -> Array:
-	var result: Array = []
-	for i in range(child_count):
-		var monster_id := _pick_birth_species(instance_a, instance_b, element_a, element_b, i)
-		var template := MonsterDb.get_monster(monster_id)
-		var nature := _pick_birth_nature(instance_a, instance_b, i)
-		result.append({
-			"monsterId": monster_id,
-			"name": "%s·复合幼体" % str(template.get("name", monster_id)),
-			"level": 1,
-			"nature": nature,
-			"gender": derive_gender("birth_%s_%s_%d" % [str(instance_a.get("instanceId", "")), str(instance_b.get("instanceId", "")), i], monster_id),
-			"source": "social_birth",
-			"lineage": {
-				"type": "hybrid_birth",
-				"parents": [str(instance_a.get("instanceId", "")), str(instance_b.get("instanceId", ""))],
-				"parentSpecies": [str(instance_a.get("monsterId", "")), str(instance_b.get("monsterId", ""))],
-				"elements": [element_a, element_b],
-				"score": score,
-				"relationLabel": str(relation.get("name", "初识"))
-			},
-			"mutationTraits": _birth_mutation_traits(element_a, element_b)
-		})
-	return result
-
-static func _pick_birth_species(instance_a: Dictionary, instance_b: Dictionary, element_a: String, element_b: String, index: int) -> String:
-	var parent_species := [str(instance_a.get("monsterId", "")), str(instance_b.get("monsterId", ""))]
-	var candidates: Array = []
-	for monster: Dictionary in MonsterDb.get_all():
-		var monster_id := str(monster.get("id", ""))
-		if not monster_id.begins_with("monster_") or bool(monster.get("isBoss", false)):
-			continue
-		var element := str(monster.get("element", ""))
-		if element == element_a or element == element_b:
-			candidates.append(monster_id)
-	if candidates.is_empty():
-		candidates = parent_species
-	var seed := "%s:%s:%d" % [parent_species[0], parent_species[1], index]
-	return str(candidates[_stable_index(seed, candidates.size())])
-
-static func _pick_birth_nature(instance_a: Dictionary, instance_b: Dictionary, index: int) -> String:
-	var natures := [str(instance_a.get("nature", "brave")), str(instance_b.get("nature", "cautious")), "chaos"]
-	return str(natures[_stable_index("%s:%s:nature:%d" % [str(instance_a.get("instanceId", "")), str(instance_b.get("instanceId", "")), index], natures.size())])
-
-static func _birth_mutation_traits(element_a: String, element_b: String) -> Array:
-	var traits := ["hybrid_birth", "inherit_%s" % element_a]
-	if element_b != element_a:
-		traits.append("inherit_%s" % element_b)
-	else:
-		traits.append("pureline_%s" % element_a)
-	return traits
-
-static func _erosion_candidate(instance_a: Dictionary, instance_b: Dictionary, element_a: String, element_b: String, score: int) -> Dictionary:
-	var danger_a := _erosion_power(instance_a, element_a, element_b)
-	var danger_b := _erosion_power(instance_b, element_b, element_a)
-	if maxi(danger_a, danger_b) <= 0 or score > 64:
-		return {}
-	var aggressor := instance_a
-	var victim := instance_b
-	var aggressor_element := element_a
-	if danger_b > danger_a:
-		aggressor = instance_b
-		victim = instance_a
-		aggressor_element = element_b
-	return {
-		"type": "erosion",
-		"name": "侵蚀风险",
-		"rarity": "danger",
-		"summary": "危险属性或性格压过社交边界；默认保护会阻止自动吞噬。",
-		"aggressorInstanceId": str(aggressor.get("instanceId", "")),
-		"victimInstanceId": str(victim.get("instanceId", "")),
-		"aggressorName": str(MonsterDb.get_monster(str(aggressor.get("monsterId", ""))).get("name", "侵蚀者")),
-		"victimName": str(MonsterDb.get_monster(str(victim.get("monsterId", ""))).get("name", "被吞噬者")),
-		"expGain": 180 + score * 2,
-		"negativeEffect": {
-			"id": "erosion_hunger",
-			"name": "侵蚀饥渴",
-			"summary": "吞噬带来快速成长，但留下不稳定的侵蚀负担。",
-			"severity": 1,
-			"element": aggressor_element
-		},
-		"risk": "lose_partner",
-		"protectedByDefault": true,
-		"requiresConfirmation": true
-	}
-
-static func _erosion_power(instance: Dictionary, element_a: String, element_b: String) -> int:
-	var power := 0
-	if element_a in ["dark", "void", "chaos"]:
-		power += 2
-	if _is_element_counter(element_a, element_b):
-		power += 2
-	var nature := str(instance.get("nature", ""))
-	if nature in ["fierce", "chaos"]:
-		power += 1
-	return power
-
-static func _stable_index(seed: String, size: int) -> int:
-	if size <= 0:
-		return 0
-	var score := 0
-	for i in range(seed.length()):
-		score += seed.unicode_at(i) * (i + 7)
-	return score % size
-
-static func _has_all_tags(tags: Array, required_tags: Array) -> bool:
-	for tag in required_tags:
-		if not tags.has(str(tag)):
-			return false
-	return true
+	return str(NatureDB.get_nature(nature_id).get("name", nature_id))

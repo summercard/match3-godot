@@ -34,6 +34,7 @@ static func create_instance(monster_id: String, options: Dictionary = {}) -> Dic
 		"level": int(options.get("level", 1)),
 		"exp": int(options.get("exp", 0)),
 		"nature": str(options.get("nature", NatureDB.random_nature())),
+		"learnedNatures": options.get("learnedNatures", options.get("learned_natures", [])),
 		"gender": str(options.get("gender", "")),
 		"socialProfile": options.get("socialProfile", {}),
 		"bondTraits": options.get("bondTraits", []),
@@ -67,6 +68,11 @@ static func normalize_instance(value: Variant) -> Dictionary:
 	if not ["male", "female", "neutral"].has(gender):
 		gender = _derive_gender(instance_id, monster_id)
 	var nature_id := str(data.get("nature", NatureDB.random_nature()))
+	var learned_natures: Array[String] = []
+	for raw_nature in data.get("learnedNatures", data.get("learned_natures", data.get("personalityTraits", []))):
+		var learned_nature := str(raw_nature)
+		if learned_nature != nature_id and NatureDB.has_nature(learned_nature) and not learned_natures.has(learned_nature) and learned_natures.size() < 2:
+			learned_natures.append(learned_nature)
 	var social_profile := _normalize_social_profile(data.get("socialProfile", data.get("social_profile", {})), monster_id, nature_id, gender)
 	var bond_traits := _normalize_bond_traits(data.get("bondTraits", data.get("bond_traits", [])), monster_id, nature_id, gender)
 	var bond_memory := _normalize_bond_memory(data.get("bondMemory", data.get("bond_memory", {})))
@@ -85,6 +91,7 @@ static func normalize_instance(value: Variant) -> Dictionary:
 		"level": maxi(1, int(data.get("level", 1))),
 		"exp": maxi(0, int(data.get("exp", 0))),
 		"nature": nature_id,
+		"learnedNatures": learned_natures,
 		"gender": gender,
 		"socialProfile": social_profile,
 		"bondTraits": bond_traits,
@@ -115,18 +122,9 @@ static func _derive_gender(instance_id: String, monster_id: String) -> String:
 	return "neutral"
 
 static func _normalize_social_profile(value: Variant, monster_id: String, nature_id: String, gender: String) -> Dictionary:
-	var source: Dictionary = value if value is Dictionary else {}
-	var style := str(source.get("style", ""))
-	if style.is_empty():
-		style = _derive_social_style(nature_id, gender)
-	return {
-		"style": style,
-		"socialExp": maxi(0, int(source.get("socialExp", source.get("social_exp", 0)))),
-		"bondExp": maxi(0, int(source.get("bondExp", source.get("bond_exp", 0)))),
-		"lastPartnerId": str(source.get("lastPartnerId", source.get("last_partner_id", ""))),
-		"lastSocialTags": _normalize_string_array(source.get("lastSocialTags", source.get("last_social_tags", []))),
-		"preferredPlace": str(source.get("preferredPlace", source.get("preferred_place", _derive_preferred_place(monster_id))))
-	}
+	# 1.3.2 no longer creates or updates relationship progression. Preserve a
+	# legacy payload verbatim so old saves remain readable, but keep new data empty.
+	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
 
 static func _normalize_bond_traits(value: Variant, monster_id: String, nature_id: String, gender: String) -> Array:
 	var traits := _normalize_string_array(value)
@@ -135,12 +133,7 @@ static func _normalize_bond_traits(value: Variant, monster_id: String, nature_id
 	return traits
 
 static func _normalize_bond_memory(value: Variant) -> Dictionary:
-	var source: Dictionary = value if value is Dictionary else {}
-	var partners: Dictionary = source.get("partners", {}) if source.get("partners", {}) is Dictionary else {}
-	return {
-		"partners": partners.duplicate(true),
-		"branches": _normalize_string_array(source.get("branches", []))
-	}
+	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
 
 static func _normalize_string_array(value: Variant) -> Array:
 	var result: Array = []

@@ -17,7 +17,7 @@ func _run() -> void:
 		_finish()
 		return
 	storage.clear_all_data()
-	storage.save_stage_stars("stage_1_8", 1)
+	storage.save_stage_stars("stage_5_12", 1)
 	var controller := TowerRunControllerScript.new(storage)
 	var started := controller.start_new_run()
 	_expect(bool(started.get("ok", false)), "tower battle flow should start run")
@@ -35,6 +35,9 @@ func _run() -> void:
 	await process_frame
 	var battle_scene: Control = main.get_current_scene()
 	_expect(main.get_current_scene_name() == "battle", "tower should enter shared battle scene")
+	for enemy_group_path in ["Combatants/SingleEnemy", "Combatants/MultiEnemies"]:
+		var enemy_group := battle_scene.get_node(enemy_group_path) as Control
+		_expect(enemy_group.has_meta("v132_base_y") and is_equal_approx(enemy_group.position.y, float(enemy_group.get_meta("v132_base_y")) - 10.0), "tower %s should move its complete enemy HUD up ten pixels" % enemy_group_path)
 	_expect((battle_scene.get_node("Background") as TextureRect).texture.resource_path == "res://assets/images/tower_new/battle/tower_crystal_garden_battle_v1.png", "tower battle should use its dedicated crystal garden background")
 	var initial_enemies: Array = battle_scene.get("_battle").get("enemies")
 	for raw_enemy in initial_enemies:

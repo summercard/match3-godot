@@ -73,9 +73,9 @@ func _run() -> void:
 	(scene.get_node("BottomNav/InventoryButton") as TextureButton).pressed.emit()
 	await process_frame
 	_assert(_inventory_pressed, "shop inventory navigation should emit a route signal")
-	_assert(not (scene.get_node("BottomNav/BattleButton") as Control).visible, "shop bottom nav battle slot should be empty")
-	_assert(not (scene.get_node("BottomNav/ShopButton") as Control).visible, "shop bottom nav shop slot should be empty")
-	_assert(not (scene.get_node("BottomNav/MenuButton") as Control).visible, "shop bottom nav menu slot should be empty")
+	_assert((scene.get_node("BottomNav/BattleButton") as Control).visible, "shop bottom nav should expose the battle map")
+	_assert((scene.get_node("BottomNav/ShopButton") as Control).visible and (scene.get_node("BottomNav/ShopButton/Text") as Label).text == "课堂", "shop bottom nav should expose classroom")
+	_assert((scene.get_node("BottomNav/MenuButton") as Control).visible and (scene.get_node("BottomNav/MenuButton/Text") as Label).text == "旅馆", "shop bottom nav should expose hotel/team")
 	_assert((scene.get_node("BottomNav/Frame") as TextureRect).texture.resource_path.ends_with("assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png"), "shop bottom nav should reuse main lobby art")
 	_assert(scene.has_node("PopupOverlay/Panel/ConfirmButton"), "popup should be editable")
 	_assert(scene.has_node("Toast/Tail"), "purchase toast should have an editable speech-bubble tail")
@@ -98,6 +98,9 @@ func _run() -> void:
 	await process_frame
 	_assert((scene.get_node("PopupOverlay") as Control).visible, "card tap should open popup")
 	_assert(str((scene.get_node("PopupOverlay/Panel/Quantity") as Label).text) == "1", "popup quantity should start at one")
+	_assert(str((scene.get_node("PopupOverlay/Panel/EffectText") as Label).text).contains("+20%"), "capture-ball popup should show its actual success-rate bonus")
+	_assert(str((scene.get_node("PopupOverlay/Panel/UsageText") as Label).text).contains("自动捕捉球"), "capture item popup should explain where it is activated")
+	_assert((scene.get_node("PopupOverlay/Panel") as Control).size.y >= 345.0, "popup should reserve enough vertical space for effect and usage")
 
 	var plus_ten := scene.get_node("PopupOverlay/Panel/PlusTenButton") as BaseButton
 	plus_ten.pressed.emit()
@@ -121,10 +124,10 @@ func _run() -> void:
 	scene.call("_confirm_purchase", "capture_ball", 10)
 	_assert(int(fake_storage.inventory.get("capture_ball", 0)) == 10, "purchase should grant items up to the daily limit")
 	_assert(int(fake_storage.purchases.get("capture_ball", 0)) == 10, "purchase should persist today's purchase count")
-	_assert(int(fake_storage.player.get("gold", 0)) == 4000, "purchase should deduct the configured gold price")
+	_assert(int(fake_storage.player.get("gold", 0)) == 2000, "purchase should deduct the 1.3.2 configured gold price")
 	scene.call("_confirm_purchase", "capture_ball", 1)
 	_assert(int(fake_storage.inventory.get("capture_ball", 0)) == 10, "purchase beyond the daily limit should be rejected")
-	_assert(int(fake_storage.player.get("gold", 0)) == 4000, "rejected purchase should not deduct currency")
+	_assert(int(fake_storage.player.get("gold", 0)) == 2000, "rejected purchase should not deduct currency")
 	_assert(str(scene.call("_get_limit_text", scene.get("shop_list")[0])) == "每日限购 0/10", "limit label should show today's remaining quantity")
 
 	scene.call("_show_toast", "获得 经验药水 x1", "success")

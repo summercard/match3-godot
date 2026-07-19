@@ -7,6 +7,7 @@ signal back_pressed()
 signal sign_in_complete(reward: Dictionary)
 
 const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const SignInRewardDBScript := preload("res://src/data/sign_in_reward_db.gd")
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
@@ -44,6 +45,7 @@ const SIGN_ASSETS := {
 	"water": "res://assets/images/ui/gems/items_new_icon_evolution_stone_water.png",
 	"fire": "res://assets/images/ui/gems/items_new_icon_evolution_stone_fire.png",
 	"potion": "res://assets/images/ui/icons/items_new_icon_hp_potion.png",
+	"monster_049": "res://assets/images/monsters/monster/monster_049.png",
 	"chest_large": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"chest_7": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"chest_14": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
@@ -51,15 +53,7 @@ const SIGN_ASSETS := {
 	"chest_28": "res://assets/images/ui/icons/items_new_icon_gold_chest.png",
 	"diamond": "res://assets/images/ui/gems/main_icon_diamond_gem_v3.png",
 }
-const REWARD_SCHEDULE := [
-	{"day": 1, "icon": "gold", "amount": "x500"},
-	{"day": 2, "icon": "exp", "amount": "x200"},
-	{"day": 3, "icon": "water", "amount": "x50"},
-	{"day": 4, "icon": "fire", "amount": "x2"},
-	{"day": 5, "icon": "potion", "amount": "x1"},
-	{"day": 6, "icon": "water", "amount": "x100"},
-	{"day": 7, "icon": "chest_large", "amount": "x1"},
-]
+const REWARD_SCHEDULE := SignInRewardDBScript.REWARD_SCHEDULE
 
 const MILESTONES := [
 	{"day": 7, "icon": "chest_7"},
@@ -171,8 +165,7 @@ func _play_sign_in_effect(reward: Dictionary) -> void:
 			"size": 3.0 + randf() * 5.0,
 			"color": [C["gold"], C["green"], C["blue"], Color(1.0, 0.36, 0.66)][randi() % 4],
 		})
-	_floating_rewards.append({"text": "+%d 金币" % int(reward.get("gold", 0)), "x": 125.0, "y": 586.0, "vy": -1.35, "life": 1.5, "color": C["gold"]})
-	_floating_rewards.append({"text": "+%d EXP" % int(reward.get("exp", 0)), "x": 210.0, "y": 586.0, "vy": -1.18, "life": 1.5, "color": C["green"]})
+	_floating_rewards.append({"text": str(reward.get("summary", "奖励已发放")), "x": 187.5, "y": 586.0, "vy": -1.25, "life": 1.5, "color": C["gold"]})
 	_animation_complete = true
 
 func _connect_authored_hit_areas() -> void:
@@ -224,7 +217,8 @@ func _on_tap(point: Vector2) -> void:
 
 func get_today_reward() -> Dictionary:
 	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
-	return _storage.get_sign_in_reward(consecutive) if _storage and _storage.has_method("get_sign_in_reward") else {"gold": 50, "exp": 30}
+	var reward_day := consecutive + 1 if _can_sign_in else maxi(1, consecutive)
+	return _storage.get_sign_in_reward(reward_day) if _storage and _storage.has_method("get_sign_in_reward") else SignInRewardDBScript.get_reward(reward_day)
 
 
 func _process(dt: float) -> void:

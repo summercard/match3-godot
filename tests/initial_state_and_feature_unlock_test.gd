@@ -41,8 +41,9 @@ func _run() -> void:
 	var starter_a: Dictionary = MonsterPool.get_first_instance_by_monster_id(storage.get_monster_pool(), str(starters[0]))
 	var starter_b: Dictionary = MonsterPool.get_first_instance_by_monster_id(storage.get_monster_pool(), str(starters[1]))
 	var first_social: Dictionary = SocialRulesScript.preview(starter_a, starter_b, {"place_id": "meadow_yard"})
-	_expect(not (first_social.get("event", {}) as Dictionary).is_empty(), "two starters should produce a visible first social event")
-	_expect(not str(first_social.get("relation_label", "")).is_empty(), "first starter social should expose a relationship result")
+	_expect(int(first_social.get("success_percent", 0)) > 0, "two starters should expose a visible personality-learning probability")
+	_expect(str(first_social.get("duration_label", "")) == "1小时", "starter social preview should use the 1.3.2 one-hour duration")
+	_expect(not first_social.has("event") and not first_social.has("relation_label"), "starter social preview should not restore removed relationship systems")
 	var acquired: Dictionary = storage.add_monster_instance("monster_001", {"source": "test_capture"})
 	_expect(not acquired.is_empty() and storage.get_owned_species_ids().has("monster_001"), "a captured species should unlock in the album")
 

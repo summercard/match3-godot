@@ -16,7 +16,7 @@ const ITEMS_DB: Dictionary = {
 		"emoji": "🔴",
 		"rarity": 1,
 		"effect": {
-			"captureBonus": 0.15  # 收服概率增加15%
+			"captureBonus": 0.20  # 1.3.2：收服概率增加20%
 		}
 	},
 	"capture_ball_plus": {
@@ -38,7 +38,7 @@ const ITEMS_DB: Dictionary = {
 		"emoji": "◎",
 		"rarity": 3,
 		"effect": {
-			"captureBonus": 0.45
+			"captureBonus": 0.70
 		}
 	},
 
@@ -70,23 +70,23 @@ const ITEMS_DB: Dictionary = {
 	"gold_bag": {
 		"id": "gold_bag",
 		"name": "金币袋",
-		"desc": "使用后获得50金币",
+		"desc": "使用后获得500金币",
 		"type": "gold",
 		"emoji": "💰",
 		"rarity": 1,
 		"effect": {
-			"goldGain": 50
+			"goldGain": 500
 		}
 	},
 	"gold_chest": {
 		"id": "gold_chest",
 		"name": "金币箱",
-		"desc": "使用后获得200金币",
+		"desc": "使用后获得2000金币",
 		"type": "gold",
 		"emoji": "📦",
 		"rarity": 2,
 		"effect": {
-			"goldGain": 200
+			"goldGain": 2000
 		}
 	},
 
@@ -94,12 +94,13 @@ const ITEMS_DB: Dictionary = {
 	"hp_potion": {
 		"id": "hp_potion",
 		"name": "HP药水",
-		"desc": "战斗中使用，恢复队伍50%最大生命值",
+		"desc": "战斗中使用，恢复生命比例最低队员35%最大生命值",
 		"type": "battle",
 		"emoji": "🧪",
 		"rarity": 1,
 		"effect": {
-			"healRatio": 0.5
+			"healRatio": 0.35,
+			"healTarget": "lowest_hp_ratio"
 		}
 	},
 	"hp_potion_large": {
@@ -325,21 +326,20 @@ const DROP_TABLE: Array = [
 
 # 商店商品列表
 const SHOP_ITEMS: Array = [
-	{"id": "capture_ball", "price": 100, "currency": "gold", "label": "金币"},
-	{"id": "capture_ball_plus", "price": 250, "currency": "gold", "label": "金币"},
-	{"id": "capture_ball_elite", "price": 18, "currency": "gems", "label": "宝石"},
+	{"id": "capture_ball", "price": 300, "currency": "gold", "label": "金币"},
+	{"id": "capture_ball_plus", "price": 1000, "currency": "gold", "label": "金币"},
+	{"id": "capture_ball_elite", "price": 100, "currency": "gems", "label": "宝石"},
 	{"id": "exp_potion", "price": 80, "currency": "gold", "label": "金币"},
 	{"id": "exp_crystal", "price": 200, "currency": "gold", "label": "金币"},
 	{"id": "hp_potion", "price": 150, "currency": "gold", "label": "金币"},
-	{"id": "hp_potion_large", "price": 320, "currency": "gold", "label": "金币"},
+	{"id": "hp_potion_large", "price": 1500, "currency": "gold", "label": "金币"},
 	{"id": "guard_charm", "price": 280, "currency": "gold", "label": "金币"},
-	{"id": "rock_hammer", "price": 220, "currency": "gold", "label": "金币"},
+	{"id": "rock_hammer", "price": 660, "currency": "gold", "label": "金币"},
 	{"id": "rock_hammer_plus", "price": 30, "currency": "gems", "label": "宝石"},
-	{"id": "unlock_key", "price": 240, "currency": "gold", "label": "金币"},
 	{"id": "mist_cleanser", "price": 260, "currency": "gold", "label": "金币"},
 	{"id": "focus_crystal", "price": 22, "currency": "gems", "label": "宝石"},
 	{"id": "board_reset", "price": 280, "currency": "gold", "label": "金币"},
-	{"id": "absorb_shield", "price": 22, "currency": "gems", "label": "宝石"},
+	{"id": "absorb_shield", "price": 800, "currency": "gold", "label": "金币"},
 	{"id": "gem_type_shift", "price": 28, "currency": "gems", "label": "宝石"},
 	{"id": "gold_bag", "price": 10, "currency": "gems", "label": "宝石"},
 	{"id": "gold_chest", "price": 35, "currency": "gems", "label": "宝石"},

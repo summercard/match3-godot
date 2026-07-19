@@ -27,6 +27,7 @@ const TAB_PATHS := ["Tabs/Gems", "Tabs/Coins", "Tabs/Hearts", "Tabs/Boosters"]
 var _shop_page := 0
 var _toast_timer := 0.0
 var _toast_tween: Tween = null
+var _page_animating := false
 
 func _ready() -> void:
 	if _bg_texture:
@@ -93,6 +94,9 @@ func _connect_gui_actions() -> void:
 	_connect_button("PopupOverlay/Panel/ConfirmButton", _on_popup_confirm_pressed)
 	_connect_button("BottomNav/HomeButton", _go_main)
 	_connect_button("BottomNav/InventoryButton", _go_inventory)
+	_connect_button("BottomNav/BattleButton", _go_to_scene.bind("stage_select", {}))
+	_connect_button("BottomNav/ShopButton", _go_to_scene.bind("ranch", {"page": "classroom"}))
+	_connect_button("BottomNav/MenuButton", _go_to_scene.bind("team", {}))
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
@@ -118,12 +122,45 @@ func _on_card_pressed(visible_index: int) -> void:
 	_show_purchase_popup(shop_item)
 
 func _on_previous_page_pressed() -> void:
-	_shop_page = maxi(0, _shop_page - 1)
-	_sync_gui()
+	_change_shop_page(-1)
 
 func _on_next_page_pressed() -> void:
-	_shop_page = mini(_max_shop_page(), _shop_page + 1)
+	_change_shop_page(1)
+
+func _change_shop_page(direction: int) -> void:
+	if _page_animating:
+		return
+	var next_page := clampi(_shop_page + direction, 0, _max_shop_page())
+	if next_page == _shop_page:
+		return
+	_page_animating = true
+	var controls := get_node("ProductGrid/PageControls") as Control
+	controls.mouse_filter = Control.MOUSE_FILTER_STOP
+	for i in CARD_PATHS.size():
+		var card := get_node_or_null(CARD_PATHS[i]) as Control
+		if card == null or not card.visible:
+			continue
+		var exit_tween := create_tween()
+		exit_tween.tween_interval(0.018 * float(i))
+		exit_tween.tween_property(card, "position:x", card.position.x - 14.0 * float(direction), 0.11)
+		exit_tween.parallel().tween_property(card, "modulate:a", 0.0, 0.11)
+	await get_tree().create_timer(0.19).timeout
+	_shop_page = next_page
 	_sync_gui()
+	for i in CARD_PATHS.size():
+		var card := get_node_or_null(CARD_PATHS[i]) as Control
+		if card == null or not card.visible:
+			continue
+		var final_x := card.position.x + 14.0 * float(direction)
+		card.position.x = final_x - 14.0 * float(direction)
+		card.modulate.a = 0.0
+		var enter_tween := create_tween()
+		enter_tween.tween_interval(0.018 * float(i))
+		enter_tween.tween_property(card, "position:x", final_x, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		enter_tween.parallel().tween_property(card, "modulate:a", 1.0, 0.11)
+	await get_tree().create_timer(0.24).timeout
+	controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_page_animating = false
 
 func _on_popup_minus_pressed() -> void:
 	_popup_quantity = maxi(1, _popup_quantity - 1)
@@ -238,6 +275,9 @@ func _sync_static_labels() -> void:
 	var labels := {
 		"BottomNav/HomeButton/Text": "主页",
 		"BottomNav/InventoryButton/Text": "背包",
+		"BottomNav/BattleButton/Text": "战场",
+		"BottomNav/ShopButton/Text": "课堂",
+		"BottomNav/MenuButton/Text": "旅馆",
 		"PopupOverlay/Panel/Title": "购买确认",
 		"PopupOverlay/Panel/CloseButton/Text": "×",
 		"PopupOverlay/Panel/CancelButton/Text": "取消",
@@ -298,7 +338,7 @@ func _sync_card(card: TextureButton, shop_item: Dictionary) -> void:
 	(card.get_node("Price/Icon") as TextureRect).texture = _tex(currency_key)
 	(card.get_node("Price/Text") as Label).text = str(shop_item.get("price", 0))
 	if card.has_node("BestRibbon"):
-		(card.get_node("BestRibbon") as Control).visible = item_id in ["gold_chest", "capture_ball_elite", "focus_crystal", "evolution_stone_light", "evolution_stone_dark"]
+		(card.get_node("BestRibbon") as Control).visible = false
 		if card.has_node("BestRibbon/Text"):
 			(card.get_node("BestRibbon/Text") as Label).text = "超值"
 	card.disabled = sold_out
@@ -332,6 +372,8 @@ func _sync_popup() -> void:
 	(get_node("PopupOverlay/Panel/Icon") as TextureRect).texture = _get_item_texture(item_id)
 	_label("PopupOverlay/Panel/Name").text = str(data.get("name", ""))
 	_label("PopupOverlay/Panel/Owned").text = "拥有: %d" % _get_item_count(item_id)
+	_label("PopupOverlay/Panel/EffectText").text = _shop_effect_text(data)
+	_label("PopupOverlay/Panel/UsageText").text = _shop_usage_text(data)
 	_label("PopupOverlay/Panel/Quantity").text = str(_popup_quantity)
 	(get_node("PopupOverlay/Panel/TotalPrice/Icon") as TextureRect).texture = _tex(currency_key)
 	_label("PopupOverlay/Panel/TotalPrice/Text").text = str(total)
@@ -340,6 +382,51 @@ func _sync_popup() -> void:
 	confirm.modulate.a = 1.0 if can_afford else 0.62
 	(get_node("PopupOverlay/Panel/PlusButton") as BaseButton).disabled = _popup_quantity >= _popup_max_quantity()
 	(get_node("PopupOverlay/Panel/PlusTenButton") as BaseButton).disabled = _popup_quantity >= _popup_max_quantity()
+
+func _shop_effect_text(data: Dictionary) -> String:
+	var effect: Dictionary = data.get("effect", {})
+	if effect.has("captureBonus"):
+		return "收服成功率 +%d%%。" % int(round(float(effect.get("captureBonus", 0.0)) * 100.0))
+	if effect.has("expGain"):
+		return "共享经验槽立即增加 %d 点经验。" % int(effect.get("expGain", 0))
+	if effect.has("goldGain"):
+		return "立即获得 %d 金币。" % int(effect.get("goldGain", 0))
+	if effect.has("healRatio"):
+		var ratio := int(round(float(effect.get("healRatio", 0.0)) * 100.0))
+		return ("恢复生命比例最低队员 %d%% 最大生命值。" if str(effect.get("healTarget", "")) == "lowest_hp_ratio" else "全队恢复 %d%% 最大生命值。") % ratio
+	if effect.has("guardReduction"):
+		return "全队接下来 %d 次受击减伤 %d%%。" % [int(effect.get("guardTurns", 0)), int(round(float(effect.get("guardReduction", 0.0)) * 100.0))]
+	if bool(effect.get("clearAllObstacles", false)):
+		return "击碎当前棋盘上的全部岩石障碍。"
+	if effect.has("obstacleDamage"):
+		return "击碎 %d 个岩石障碍。" % int(effect.get("targetCount", 1))
+	if effect.has("unlockDamage"):
+		return "解除最多 %d 个锁链宝石。" % int(effect.get("targetCount", 0))
+	if effect.has("clearPoisonCount"):
+		return "清除最多 %d 个毒雾格子。" % int(effect.get("clearPoisonCount", 0))
+	if effect.has("chargeGain"):
+		return "所有存活队员获得 %d 点技能充能。" % int(effect.get("chargeGain", 0))
+	if bool(effect.get("resetBoard", false)):
+		return "重新生成整盘宝石。"
+	if bool(effect.get("absorbShield", false)):
+		return "全队抵消下一次受到的伤害。"
+	if bool(effect.get("convertType", false)):
+		return "将棋盘上一种属性的宝石全部转换为另一种属性。"
+	var description := str(data.get("desc", "")).strip_edges()
+	return description if not description.is_empty() else "购买后可在对应功能中生效。"
+
+func _shop_usage_text(data: Dictionary) -> String:
+	match str(data.get("type", "")):
+		"capture":
+			return "在背包设为自动捕捉球；战斗胜利且有合法目标时判定并消耗。"
+		"battle":
+			return "战斗中打开道具栏，选择目标后使用。"
+		"exp", "gold":
+			return "前往背包选择该道具，确认后立即使用。"
+		"evolution":
+			return "精灵达到进化条件时，在队伍详情中自动计入材料。"
+		_:
+			return "购买后前往背包查看并使用。"
 
 func _attach_shop_feedback() -> void:
 	var primary_paths := {
@@ -363,6 +450,9 @@ func _attach_shop_feedback() -> void:
 		"PopupOverlay/Panel/ConfirmButton",
 		"BottomNav/HomeButton",
 		"BottomNav/InventoryButton",
+		"BottomNav/BattleButton",
+		"BottomNav/ShopButton",
+		"BottomNav/MenuButton",
 	]
 	for path in CARD_PATHS:
 		feedback_paths.append(path)
@@ -436,17 +526,18 @@ func _play_enter_animation() -> void:
 		pc_tween.tween_property(page_ctrl, "modulate:a", 1.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		pc_tween.parallel().tween_property(page_ctrl, "scale", Vector2(1.05, 1.05), 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		pc_tween.tween_property(page_ctrl, "scale", Vector2.ONE, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	# 6) BottomNav HomeButton：上滑 + 淡入
-	var home_btn := get_node_or_null("BottomNav/HomeButton") as Control
-	if home_btn != null and home_btn.visible:
-		var orig_home_y := home_btn.position.y
-		home_btn.position.y = orig_home_y + 10.0
-		home_btn.modulate.a = 0.0
-		home_btn.pivot_offset = home_btn.size * 0.5
-		var home_tween := create_tween()
-		home_tween.tween_interval(0.30)
-		home_tween.tween_property(home_btn, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		home_tween.parallel().tween_property(home_btn, "position:y", orig_home_y, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# 6) BottomNav 五个入口依次上滑，保持共同的导航语言。
+	for i in ["HomeButton", "InventoryButton", "BattleButton", "ShopButton", "MenuButton"].size():
+		var nav_btn := get_node_or_null("BottomNav/%s" % ["HomeButton", "InventoryButton", "BattleButton", "ShopButton", "MenuButton"][i]) as Control
+		if nav_btn == null or not nav_btn.visible:
+			continue
+		var orig_nav_y := nav_btn.position.y
+		nav_btn.position.y = orig_nav_y + 10.0
+		nav_btn.modulate.a = 0.0
+		var nav_tween := create_tween()
+		nav_tween.tween_interval(0.28 + 0.035 * float(i))
+		nav_tween.tween_property(nav_btn, "modulate:a", 1.0, 0.16)
+		nav_tween.parallel().tween_property(nav_btn, "position:y", orig_nav_y, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _play_tab_switch_motion() -> void:
 	for i in CARD_PATHS.size():
@@ -486,6 +577,11 @@ func _go_main() -> void:
 
 func _go_inventory() -> void:
 	inventory_pressed.emit()
+
+func _go_to_scene(scene_name: String, data: Dictionary = {}) -> void:
+	var manager := get_node_or_null("/root/SceneManager")
+	if manager != null and manager.has_method("switch_scene"):
+		manager.switch_scene(scene_name, data, "quick")
 
 func _popup_max_quantity() -> int:
 	if popup.is_empty():

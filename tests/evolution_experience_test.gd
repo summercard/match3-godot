@@ -28,6 +28,10 @@ func _run() -> void:
 		"evolutionInsight": {"label": "测试启发", "score": 80, "tags": ["默契"]}
 	})
 	var starter_instance_id := str(starter.get("instanceId", ""))
+	var player: Dictionary = save_manager.get_player()
+	player["gold"] = 3000
+	save_manager.save_player(player)
+	save_manager.add_item("evolution_stone_grass", 1)
 	var before: Dictionary = save_manager.get_monster_instance(starter_instance_id)
 	var insight: Dictionary = before.get("evolutionInsight", {})
 	_expect(not target_id.is_empty(), "current starter should provide an evolution target")
@@ -44,6 +48,8 @@ func _run() -> void:
 	_expect(after.get("evolutionInsight", {}).is_empty(), "evolution should consume insight")
 	_expect(int(after.get("evolutionCount", 0)) == 1, "evolution should increment count")
 	_expect((after.get("evolutionHistory", []) as Array).size() == 1, "evolution should record history")
+	_expect(int(save_manager.get_player().get("gold", -1)) == 0, "first evolution should consume 3000 gold")
+	_expect(save_manager.get_item_count("evolution_stone_grass") == 0, "first evolution should consume one current-element stone")
 
 	_finish()
 

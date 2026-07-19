@@ -39,6 +39,8 @@ var battle_mode: String = "main"
 var tower_buffs: Array = []
 var current_player_turn_damage: int = 0
 var highest_player_turn_damage: int = 0
+var board = null
+var battle_start_team_snapshot: Array = []
 
 # BOSS多阶段
 var current_phase: int = 1
@@ -61,6 +63,11 @@ var synergy_info: Array = []
 var player_guards: Dictionary = {}      # { monsterId: { reduction, turns } }
 var player_absorb_shields: Dictionary = {}      # { monsterId: { turns: int } }
 var enemy_tempo_mods: Dictionary = {}   # { enemyIndex: { reduction, turns } }
+var leader_regeneration: Dictionary = {} # { monsterId: { ratio, turns } }
+var leader_reflects: Dictionary = {}     # { monsterId: { ratio, turns } }
+var leader_damage_reductions: Dictionary = {} # { monsterId: reduction }，本局永久，叠加上限80%
+var enemy_damage_vulnerabilities: Dictionary = {} # { enemyIndex: { multiplier, turns } }
+var enemy_confusions: Dictionary = {}    # { enemyIndex: { chance, turns } }
 var _next_enemy_attack_index: int = 0
 var capture_windows: Dictionary = {}    # { enemyIndex: current tamingWindow }
 var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reached this battle }
@@ -80,7 +87,7 @@ var stage_id: String = ""
 var player_level: int = 1
 var enemy_level: int = 1
 
-const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
+const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.10
 const LEADER_CHARGE_MAX: int = 5
 
 # ========== 单例模式 ==========
@@ -123,15 +130,16 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 		var phase1: Dictionary = stage_phases[0] if stage_phases.size() > 0 else {}
 		if not phase1.is_empty():
 			var hp_mult: float = phase1.get("hpMultiplier", 1.0)
-			var elite_chance: float = _random_elite_chance(stage_data, phase1)
-			enemies = phase1.get("enemies", []).map(func(id):
-				return _build_enemy_unit(str(id), e_level, hp_mult, elite_chance)
-			)
+			var phase_enemy_ids: Array = phase1.get("enemies", [])
+			var elite_index := _ensure_encounter_elite_index(phase_enemy_ids, stage_data, phase1)
+			enemies = []
+			for index in range(phase_enemy_ids.size()):
+				enemies.append(_build_enemy_unit(str(phase_enemy_ids[index]), e_level, hp_mult, index == elite_index))
 	else:
-		var elite_chance: float = _random_elite_chance(stage_data)
-		enemies = enemy_monster_ids.map(func(id):
-			return _build_enemy_unit(str(id), e_level, 1.0, elite_chance)
-		)
+		var elite_index := _ensure_encounter_elite_index(enemy_monster_ids, stage_data)
+		enemies = []
+		for index in range(enemy_monster_ids.size()):
+			enemies.append(_build_enemy_unit(str(enemy_monster_ids[index]), e_level, 1.0, index == elite_index))
 
 	turn = 0
 	combo = 0
@@ -184,10 +192,16 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	player_guards = {}
 	player_absorb_shields = {}
 	enemy_tempo_mods = {}
+	leader_regeneration = {}
+	leader_reflects = {}
+	leader_damage_reductions = {}
+	enemy_damage_vulnerabilities = {}
+	enemy_confusions = {}
 	_next_enemy_attack_index = 0
 	capture_windows = {}
 	capture_window_best = {}
 	_calc_and_apply_element_synergy()
+	battle_start_team_snapshot = player_team.map(func(m): return m.duplicate(true) if m != null else null)
 
 	_status_effect.init_effects(enemies.size())
 	_refresh_capture_windows()
@@ -258,7 +272,7 @@ func begin_tower_wave(next_stage: Dictionary) -> void:
 	phase_transition_triggered = {}
 	var enemy_ids: Array = stage_data.get("enemies", [])
 	enemies = enemy_ids.map(func(enemy_id):
-		return _build_enemy_unit(str(enemy_id), enemy_level, 1.0, 0.0)
+		return _build_enemy_unit(str(enemy_id), enemy_level, 1.0, false)
 	)
 	max_turns = _stage_max_turns(stage_data)
 	turn_count = 0
@@ -266,6 +280,7 @@ func begin_tower_wave(next_stage: Dictionary) -> void:
 	current_player_turn_damage = 0
 	battle_over = false
 	battle_result = ""
+	battle_start_team_snapshot = player_team.map(func(m): return m.duplicate(true) if m != null else null)
 	_next_enemy_attack_index = 0
 	capture_windows = {}
 	capture_window_best = {}
@@ -282,8 +297,8 @@ func _generate_battle_id() -> String:
 	return "%d-%s" % [int(Time.get_unix_time_from_system()), random_suffix]
 
 
-func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, random_elite_chance: float = 0.0) -> Dictionary:
-	var is_elite := _should_spawn_elite(enemy_id, random_elite_chance)
+func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, force_elite: bool = false) -> Dictionary:
+	var is_elite := force_elite
 	var tier := StatCalculator.EnemyTier.ELITE if is_elite else StatCalculator.EnemyTier.NORMAL
 	var monster := StatCalculator.calc_enemy(enemy_id, level, tier)
 	if monster.is_empty():
@@ -303,13 +318,22 @@ func _build_enemy_unit(enemy_id: String, level: int, hp_mult: float = 1.0, rando
 	return monster
 
 
-func _should_spawn_elite(enemy_id: String, random_elite_chance: float) -> bool:
-	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
-	if data.is_empty():
-		return false
-	if bool(data.get("isBoss", false)):
-		return false
-	return randf() < clampf(random_elite_chance, 0.0, 1.0)
+func _ensure_encounter_elite_index(enemy_ids: Array, stage: Variant, phase: Dictionary = {}) -> int:
+	if stage is Dictionary and (stage as Dictionary).has("_encounterEliteIndex"):
+		return int((stage as Dictionary).get("_encounterEliteIndex", -1))
+	var elite_index := -1
+	var chance := _random_elite_chance(stage, phase)
+	if chance > 0.0 and randf() < chance:
+		var eligible: Array[int] = []
+		for index in range(enemy_ids.size()):
+			var data: Dictionary = MonsterDb.MONSTER_DB.get(str(enemy_ids[index]), {})
+			if not data.is_empty() and not bool(data.get("isBoss", false)) and not bool(data.get("isElite", false)):
+				eligible.append(index)
+		if not eligible.is_empty():
+			elite_index = eligible[randi() % eligible.size()]
+	if stage is Dictionary:
+		(stage as Dictionary)["_encounterEliteIndex"] = elite_index
+	return elite_index
 
 
 func _random_elite_chance(stage: Variant, phase: Dictionary = {}) -> float:
@@ -412,6 +436,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		var target = _get_weakest_enemy()
 		if target == null:
 			continue
+		var target_idx := enemies.find(target)
 
 		element_mult = MonsterDb.get_element_multiplier(element, target.get("element", ""))
 
@@ -430,6 +455,7 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 			synergy_atk_mult
 		)
 		total_damage = _apply_tower_player_damage(total_damage)
+		total_damage = _apply_enemy_vulnerability_damage(total_damage, target_idx)
 
 		var mon_id = monster.get("id", "")
 		var skill_cost: int = int(monster.get("skill", {}).get("cost", 999))
@@ -438,8 +464,6 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		skill_charges[mon_id] = next_charge
 		if prev_charge < skill_cost and next_charge >= skill_cost:
 			skill_ready.emit(monster)
-
-		var target_idx = enemies.find(target)
 
 		# 护盾减伤（委托给 EnemySkillSystem）
 		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, total_damage)
@@ -582,6 +606,7 @@ func use_active_skill(monster_id: String) -> Dictionary:
 			)
 			effect_damage = maxi(1, int(round(effect_damage * effect_mult)))
 			effect_damage = _apply_tower_player_damage(effect_damage)
+			effect_damage = _apply_enemy_vulnerability_damage(effect_damage, target_idx)
 			var effect_remaining := effect_damage
 			var effect_absorbed := 0
 			if _enemy_skill_system != null and target_idx >= 0:
@@ -1003,6 +1028,7 @@ func get_best_capture_candidate() -> Dictionary:
 	_refresh_capture_windows()
 	var best_idx := -1
 	var best_window: Dictionary = {}
+	var best_is_elite := false
 	for idx in range(enemies.size()):
 		var enemy: Dictionary = enemies[idx]
 		if enemy == null or enemy.is_empty() or not enemy.has("id"):
@@ -1012,9 +1038,11 @@ func get_best_capture_candidate() -> Dictionary:
 		var window: Dictionary = capture_window_best.get(idx, capture_windows.get(idx, {}))
 		if window.is_empty():
 			continue
-		if best_window.is_empty() or float(window.get("score", 0.0)) > float(best_window.get("score", 0.0)):
+		var is_elite := bool(enemy.get("isElite", false))
+		if best_window.is_empty() or (is_elite and not best_is_elite) or (is_elite == best_is_elite and float(window.get("score", 0.0)) > float(best_window.get("score", 0.0))):
 			best_window = window
 			best_idx = idx
+			best_is_elite = is_elite
 	if best_idx < 0:
 		return {}
 	return {
@@ -1069,6 +1097,92 @@ func _advance_enemy_attack_index(current_idx: int) -> void:
 
 # ========== 敌方行动 ==========
 
+func _try_enemy_confused_attack(enemy_index: int, source: Dictionary, damage_multiplier: float, attack_multiplier: float) -> Dictionary:
+	if not enemy_confusions.has(enemy_index):
+		return {}
+	var state: Dictionary = enemy_confusions[enemy_index]
+	state["turns"] = int(state.get("turns", 1)) - 1
+	if int(state.get("turns", 0)) <= 0:
+		enemy_confusions.erase(enemy_index)
+	else:
+		enemy_confusions[enemy_index] = state
+	var candidates: Array = []
+	for index in range(enemies.size()):
+		if index != enemy_index and enemies[index] != null and int(enemies[index].get("hp", 0)) > 0:
+			candidates.append(index)
+	if candidates.is_empty() or randf() >= clampf(float(state.get("chance", 0.0)), 0.0, 1.0):
+		return {}
+	var target_index := int(candidates.pick_random())
+	var target: Dictionary = enemies[target_index]
+	var damage := _damage_calc.calc_enemy_damage(
+		source.get("atk", 10), source.get("element", ""), target.get("def", 0), target.get("element", ""),
+		attack_multiplier, 1.0, 1.0
+	)
+	damage = maxi(1, int(float(damage) * damage_multiplier * _tower_enemy_damage_multiplier()))
+	var shield_absorbed := 0
+	if _enemy_skill_system != null:
+		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_index, damage)
+		shield_absorbed = int(shield_result.get("absorbed", 0))
+		damage = int(shield_result.get("remaining", damage))
+	damage = mini(maxi(0, int(target.get("hp", 0))), maxi(0, damage))
+	target["hp"] = maxi(0, int(target.get("hp", 0)) - damage)
+	_update_capture_window(target_index)
+	return {
+		"type": "enemy_friendly_fire", "is_friendly_fire": true,
+		"attacker": str(source.get("name", "")), "attacker_emoji": str(source.get("emoji", "")), "enemy_index": enemy_index,
+		"target": str(target.get("name", "")), "target_index": target_index, "target_emoji": str(target.get("emoji", "")),
+		"damage": damage, "element": str(source.get("element", "")), "shield_absorbed": shield_absorbed,
+		"target_died": int(target.get("hp", 0)) <= 0,
+	}
+
+
+func _apply_leader_reflect_damage(target: Dictionary, enemy_index: int, actual_damage: int) -> int:
+	var target_id := str(target.get("id", ""))
+	if actual_damage <= 0 or target_id.is_empty() or not leader_reflects.has(target_id):
+		return 0
+	if enemy_index < 0 or enemy_index >= enemies.size() or enemies[enemy_index] == null:
+		return 0
+	var ratio := maxf(0.0, float((leader_reflects[target_id] as Dictionary).get("ratio", 0.0)))
+	var source: Dictionary = enemies[enemy_index]
+	var reflected := mini(maxi(0, int(source.get("hp", 0))), maxi(0, int(floor(float(actual_damage) * ratio))))
+	source["hp"] = maxi(0, int(source.get("hp", 0)) - reflected)
+	_update_capture_window(enemy_index)
+	return reflected
+
+
+func _finish_leader_enemy_action(enemy_index: int) -> Array:
+	var events: Array = []
+	if enemy_damage_vulnerabilities.has(enemy_index):
+		var vulnerability: Dictionary = enemy_damage_vulnerabilities[enemy_index]
+		vulnerability["turns"] = int(vulnerability.get("turns", 1)) - 1
+		if int(vulnerability.get("turns", 0)) <= 0:
+			enemy_damage_vulnerabilities.erase(enemy_index)
+		else:
+			enemy_damage_vulnerabilities[enemy_index] = vulnerability
+	for target_id in leader_reflects.keys():
+		var reflect: Dictionary = leader_reflects[target_id]
+		reflect["turns"] = int(reflect.get("turns", 1)) - 1
+		if int(reflect.get("turns", 0)) <= 0 or _get_player_monster(str(target_id)).is_empty() or int(_get_player_monster(str(target_id)).get("hp", 0)) <= 0:
+			leader_reflects.erase(target_id)
+		else:
+			leader_reflects[target_id] = reflect
+	for target_id in leader_regeneration.keys():
+		var regen: Dictionary = leader_regeneration[target_id]
+		var ally := _get_player_monster(str(target_id))
+		if not ally.is_empty() and int(ally.get("hp", 0)) > 0:
+			var before := int(ally.get("hp", 0))
+			var amount := maxi(1, int(floor(float(ally.get("maxHP", 1)) * maxf(0.0, float(regen.get("ratio", 0.0))))))
+			ally["hp"] = mini(int(ally.get("maxHP", before)), before + amount)
+			var actual := int(ally.get("hp", 0)) - before
+			if actual > 0:
+				events.append({"type": "leader_regen", "damage": 0, "heal_amount": actual, "target": str(ally.get("name", "")), "target_id": str(target_id), "target_index": _player_index_by_id(str(target_id)), "turns_left": maxi(0, int(regen.get("turns", 1)) - 1)})
+		regen["turns"] = int(regen.get("turns", 1)) - 1
+		if int(regen.get("turns", 0)) <= 0 or ally.is_empty() or int(ally.get("hp", 0)) <= 0:
+			leader_regeneration.erase(target_id)
+		else:
+			leader_regeneration[target_id] = regen
+	return events
+
 func enemy_action() -> Dictionary:
 	if battle_over:
 		return {}
@@ -1118,6 +1232,7 @@ func enemy_action() -> Dictionary:
 				"is_stunned": true
 			})
 			_advance_enemy_attack_index(i)
+			actions.append_array(_finish_leader_enemy_action(i))
 			continue
 
 		# 检查敌人是否有技能
@@ -1157,6 +1272,18 @@ func enemy_action() -> Dictionary:
 				"is_charging": true
 			})
 			_advance_enemy_attack_index(i)
+			actions.append_array(_finish_leader_enemy_action(i))
+			continue
+
+		# 冰冻ATK降低（委托给 BattleStatusEffect）
+		var freeze_mult = _status_effect.get_freeze_atk_multiplier(i)
+		var tempo_mod := _consume_enemy_tempo_multiplier(i)
+		var tempo_mult := float(tempo_mod.get("multiplier", 1.0))
+		var confused_action := _try_enemy_confused_attack(i, enemy, damage_multiplier, freeze_mult * tempo_mult)
+		if not confused_action.is_empty():
+			actions.append(confused_action)
+			_advance_enemy_attack_index(i)
+			actions.append_array(_finish_leader_enemy_action(i))
 			continue
 
 		# 普通攻击
@@ -1164,11 +1291,6 @@ func enemy_action() -> Dictionary:
 		var target_idx := _player_index_by_id(str(target.get("id", "")))
 		if target_idx < 0:
 			target_idx = player_team.find(target)
-
-		# 冰冻ATK降低（委托给 BattleStatusEffect）
-		var freeze_mult = _status_effect.get_freeze_atk_multiplier(i)
-		var tempo_mod := _consume_enemy_tempo_multiplier(i)
-		var tempo_mult := float(tempo_mod.get("multiplier", 1.0))
 
 		# 队长DEF加成
 		var leader_def_boost = LeaderSkillDb.get_leader_def_boost(leader_skill_data)
@@ -1189,6 +1311,8 @@ func enemy_action() -> Dictionary:
 		)
 
 		damage = int(damage * damage_multiplier * _tower_enemy_damage_multiplier())
+		var permanent_reduction := clampf(float(leader_damage_reductions.get(str(target.get("id", "")), 0.0)), 0.0, 0.8)
+		damage = maxi(1, int(floor(float(damage) * (1.0 - permanent_reduction))))
 		var guard_result := _apply_guard_to_damage(target, damage)
 		damage = int(guard_result.get("damage", damage))
 		var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
@@ -1197,8 +1321,10 @@ func enemy_action() -> Dictionary:
 		if shield_absorbed:
 			damage = 0
 
-		target["hp"] = target.get("hp", 0) - damage
+		var hp_before := int(target.get("hp", 0))
+		target["hp"] = hp_before - damage
 		_refresh_capture_windows()
+		var reflected_damage := _apply_leader_reflect_damage(target, i, hp_before - maxi(0, int(target.get("hp", 0))))
 
 		var attack_action := {
 			"attacker": enemy.get("name", ""),
@@ -1218,6 +1344,8 @@ func enemy_action() -> Dictionary:
 			"weaken_reduction": tempo_mod.get("reduction", 0.0),
 			"guard_absorbed": guard_absorbed,
 			"shield_absorbed": shield_absorbed,
+			"permanent_reduction": permanent_reduction,
+			"reflect_damage": reflected_damage,
 			"enemy_index": i
 		}
 		actions.append(attack_action)
@@ -1226,6 +1354,7 @@ func enemy_action() -> Dictionary:
 			var after_attack_events: Array = _enemy_skill_system.on_enemy_after_attack(i, target_idx, damage)
 			_apply_enemy_skill_events(i, enemy, after_attack_events, actions)
 		_advance_enemy_attack_index(i)
+		actions.append_array(_finish_leader_enemy_action(i))
 
 	# 所有敌人完成行动或跳过行动后，再统一消费一次状态持续回合。
 	status_logs.append_array(_status_effect.end_enemy_turn_for(enemies, active_enemy_indices))
@@ -1406,6 +1535,110 @@ func _apply_tower_player_damage(amount: int) -> int:
 		if raw_buff is Dictionary:
 			multiplier += float((raw_buff as Dictionary).get("damage_bonus", 0.0))
 	return maxi(1, int(round(float(amount) * multiplier)))
+
+
+func _apply_enemy_vulnerability_damage(amount: int, enemy_index: int) -> int:
+	if not enemy_damage_vulnerabilities.has(enemy_index):
+		return amount
+	var state: Dictionary = enemy_damage_vulnerabilities[enemy_index]
+	return maxi(1, int(floor(float(amount) * maxf(1.0, float(state.get("multiplier", 1.0))))))
+
+
+func apply_direct_enemy_damage(enemy_index: int, amount: int, pierce: bool = false, source_id: String = "") -> Dictionary:
+	if enemy_index < 0 or enemy_index >= enemies.size():
+		return {}
+	var target = enemies[enemy_index]
+	if target == null or int(target.get("hp", 0)) <= 0:
+		return {}
+	var final_amount := _apply_tower_player_damage(maxi(0, amount))
+	final_amount = _apply_enemy_vulnerability_damage(final_amount, enemy_index)
+	var remaining := final_amount
+	var absorbed := 0
+	if _enemy_skill_system != null and not pierce:
+		var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(enemy_index, final_amount)
+		absorbed = int(shield_result.get("absorbed", 0))
+		remaining = int(shield_result.get("remaining", final_amount))
+	remaining = mini(maxi(0, int(target.get("hp", 0))), maxi(0, remaining))
+	target["hp"] = maxi(0, int(target.get("hp", 0)) - remaining)
+	_update_capture_window(enemy_index)
+	if remaining > 0:
+		_record_player_turn_damage(remaining)
+		if not source_id.is_empty():
+			total_damage_dealt[source_id] = int(total_damage_dealt.get(source_id, 0)) + remaining
+	return {
+		"damage": final_amount,
+		"remaining": remaining,
+		"shield_absorbed": absorbed,
+		"target_died": int(target.get("hp", 0)) <= 0,
+	}
+
+
+func resolve_fountain_attacks(sources: Array) -> Array:
+	var logs: Array = []
+	if sources.is_empty() or player_team.is_empty() or player_team[0] == null or int(player_team[0].get("hp", 0)) <= 0:
+		return logs
+	var leader: Dictionary = player_team[0]
+	for source in sources:
+		var living: Array = []
+		for index in range(enemies.size()):
+			if enemies[index] != null and int(enemies[index].get("hp", 0)) > 0:
+				living.append(index)
+		if living.is_empty():
+			break
+		var target_index := int(living.pick_random())
+		var target: Dictionary = enemies[target_index]
+		var damage_result := apply_direct_enemy_damage(target_index, maxi(1, int(leader.get("atk", 1))), false, str(leader.get("id", "")))
+		logs.append({
+			"type": "fountain_attack", "element": "water", "source": (source as Dictionary).duplicate(true) if source is Dictionary else {},
+			"target": str(target.get("name", "")), "target_index": target_index,
+			"damage": int(damage_result.get("remaining", 0)), "raw_damage": int(damage_result.get("damage", 0)),
+			"target_died": bool(damage_result.get("target_died", false)),
+		})
+	return logs
+
+
+func apply_leader_regeneration(target_id: String, ratio: float, turns: int) -> void:
+	if target_id.is_empty():
+		return
+	leader_regeneration[target_id] = {
+		"ratio": maxf(float((leader_regeneration.get(target_id, {}) as Dictionary).get("ratio", 0.0)), maxf(0.0, ratio)),
+		"turns": maxi(int((leader_regeneration.get(target_id, {}) as Dictionary).get("turns", 0)), maxi(1, turns)),
+	}
+
+
+func apply_leader_reflect(target_id: String, ratio: float, turns: int) -> void:
+	if target_id.is_empty():
+		return
+	leader_reflects[target_id] = {
+		"ratio": maxf(float((leader_reflects.get(target_id, {}) as Dictionary).get("ratio", 0.0)), maxf(0.0, ratio)),
+		"turns": maxi(int((leader_reflects.get(target_id, {}) as Dictionary).get("turns", 0)), maxi(1, turns)),
+	}
+
+
+func add_leader_damage_reduction(target_id: String, reduction: float) -> float:
+	var next := clampf(float(leader_damage_reductions.get(target_id, 0.0)) + maxf(0.0, reduction), 0.0, 0.8)
+	leader_damage_reductions[target_id] = next
+	return next
+
+
+func apply_enemy_vulnerability(enemy_index: int, multiplier: float, turns: int) -> void:
+	if enemy_index < 0 or enemy_index >= enemies.size():
+		return
+	var current: Dictionary = enemy_damage_vulnerabilities.get(enemy_index, {})
+	enemy_damage_vulnerabilities[enemy_index] = {
+		"multiplier": maxf(float(current.get("multiplier", 1.0)), maxf(1.0, multiplier)),
+		"turns": maxi(int(current.get("turns", 0)), maxi(1, turns)),
+	}
+
+
+func apply_enemy_confusion(enemy_index: int, chance: float, turns: int) -> void:
+	if enemy_index < 0 or enemy_index >= enemies.size():
+		return
+	var current: Dictionary = enemy_confusions.get(enemy_index, {})
+	enemy_confusions[enemy_index] = {
+		"chance": maxf(float(current.get("chance", 0.0)), clampf(chance, 0.0, 1.0)),
+		"turns": maxi(int(current.get("turns", 0)), maxi(1, turns)),
+	}
 
 
 func _tower_enemy_damage_multiplier() -> float:
@@ -1739,7 +1972,7 @@ func get_battle_result() -> Dictionary:
 		"rewardReceiptId": reward_receipt_id,
 		"turn_count": turn_count,
 		"max_turns": max_turns,
-		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
+		"player_team": battle_start_team_snapshot.duplicate(true),
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"total_damage_dealt": total_damage_dealt.duplicate(),
 		"totalDamageDealt": total_damage_dealt.duplicate(),
@@ -1751,7 +1984,7 @@ func get_battle_result() -> Dictionary:
 		"stageId": stage_id,
 		"turnCount": turn_count,
 		"maxTurns": max_turns,
-		"playerTeam": player_team.map(func(m): return m.duplicate(true) if m != null else null),
+		"playerTeam": battle_start_team_snapshot.duplicate(true),
 		"capture_windows": capture_windows.duplicate(true),
 		"capture_window_best": capture_window_best.duplicate(true),
 		"best_capture_window": get_best_capture_candidate().get("window", {}),

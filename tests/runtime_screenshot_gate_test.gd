@@ -46,6 +46,18 @@ const CASES := [
 		"settle": 12,
 	},
 	{
+		"id": "album_ecology_detail",
+		"scene": "album",
+		"expected": "res://src/ui/scenes/album.tscn",
+		"settle": 12,
+	},
+	{
+		"id": "shop_capture_popup",
+		"scene": "shop",
+		"expected": "res://src/ui/scenes/shop.tscn",
+		"settle": 14,
+	},
+	{
 		"id": "inventory_empty",
 		"scene": "inventory",
 		"expected": "res://src/ui/scenes/inventory.tscn",
@@ -175,6 +187,24 @@ func _apply_case_state(case_id: String, scene: Control) -> void:
 			if scene.has_method("_sync_gui"):
 				scene.call("_sync_gui")
 			_expect((scene.get_node("DetailPanel") as Control).visible, "album selected case should show the detail panel")
+		"album_ecology_detail":
+			scene.set("_captured_ids", ["monster_001"])
+			scene.set("_selected_tab", "album")
+			scene.set("_selected_element", "all")
+			if scene.has_method("_apply_filter"):
+				scene.call("_apply_filter")
+			scene.set("_selected_monster_id", "monster_001")
+			scene.set("_detail_info_tab", "ecology")
+			if scene.has_method("_sync_gui"):
+				scene.call("_sync_gui")
+			_expect((scene.get_node("DetailPanel/EcologyPanel") as Control).visible, "album ecology case should show the readable ecology page")
+		"shop_capture_popup":
+			(scene.get_node("Tabs/Coins") as BaseButton).pressed.emit()
+			await process_frame
+			(scene.get_node("ProductGrid/Cards/Card1") as BaseButton).pressed.emit()
+			await process_frame
+			_expect((scene.get_node("PopupOverlay") as Control).visible, "shop capture case should open the effect-and-usage popup")
+			_expect((scene.get_node("PopupOverlay/Panel/EffectText") as Label).text.contains("+20%"), "shop capture popup should render the actual rate bonus")
 		"settings_confirm_popup":
 			scene.set("confirm_dialog", true)
 			if scene.has_method("_sync_authored_controls"):
@@ -205,7 +235,9 @@ func _apply_case_state(case_id: String, scene: Control) -> void:
 func _assert_meaningful_image(image: Image, case_id: String) -> void:
 	var width := image.get_width()
 	var height := image.get_height()
-	_expect(width >= CAPTURE_SIZE.x and height >= CAPTURE_SIZE.y, "%s screenshot should use runtime viewport size" % case_id)
+	# Cocoa/Metal may trim one logical pixel per window edge while the project
+	# viewport remains 375x667. Only allow that compositor-sized tolerance.
+	_expect(width >= CAPTURE_SIZE.x - 2 and height >= CAPTURE_SIZE.y - 2, "%s screenshot should preserve the runtime viewport within the two-pixel window-border tolerance" % case_id)
 	var step_x := maxi(1, int(width / 16))
 	var step_y := maxi(1, int(height / 20))
 	var samples := 0

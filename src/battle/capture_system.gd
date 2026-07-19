@@ -14,13 +14,13 @@ const MonsterDbScript = preload("res://src/data/monster_db.gd")
 
 # ========== 稀有度基础收服率 ==========
 ## 稀有度 → 基础收服率（来自 balance-design.md §2.3，BD-P5 调优后）
-## ★1=80%, ★2=45%, ★3=25%, ★4=15%, ★5=8%
+## 1.3.2：★1=72%, ★2=38%, ★3=20%, ★4=11%, ★5=5.5%
 static var BASE_CAPTURE_RATE: Dictionary = {
-	1: 0.80,
-	2: 0.45,
-	3: 0.25,
-	4: 0.15,
-	5: 0.08
+	1: 0.72,
+	2: 0.38,
+	3: 0.20,
+	4: 0.11,
+	5: 0.055
 }
 
 # ========== 新手收服保护机制 ==========
@@ -127,7 +127,7 @@ static func calc_taming_window(remaining_hp: float, max_hp: float, options: Dict
 ## 计算收服概率（与 balance-design.md §2.3 对齐）
 ##
 ## 收服概率 = baseCaptureRate × (1 - currentHP/maxHP) × levelBonus
-## levelBonus = 1 + (playerLevel - enemyLevel) × 0.05  (上限 1.5x)
+## levelFactor = clamp(1 - (enemyLevel - playerLevel) × 0.06, 0.15, 1.35)
 ##
 ## @param remaining_hp - 精灵剩余血量
 ## @param max_hp - 精灵最大血量
@@ -147,14 +147,16 @@ static func calc_capture_probability(remaining_hp: float, max_hp: float, player_
 	if max_hp > 0:
 		hp_factor = 1.0 - maxi(0.0, remaining_hp) / max_hp
 
-	# 等级差加成（上限1.5x）
-	var level_bonus = mini(1.5, 1.0 + (player_level - enemy_level) * 0.05)
+	# 高等级目标显著更难，但保留 15% 的等级因子下限。
+	var enemy_level_lead := enemy_level - player_level
+	var level_bonus := clampf(1.0 - enemy_level_lead * 0.06, 0.15, 1.35)
 
 	var probability = base_rate * hp_factor * level_bonus
 
 	var taming_window: Dictionary = options.get("taming_window", {})
 	if not taming_window.is_empty():
 		probability += float(taming_window.get("bonus", 0.0))
+	probability += float(options.get("item_bonus", 0.0))
 
 	# 新手收服保护加成（BD-P5）
 	var stage_id = options.get("stage_id", "")
@@ -164,8 +166,10 @@ static func calc_capture_probability(remaining_hp: float, max_hp: float, player_
 		if rookie_bonus > 0.0:
 			probability = mini(1.0, probability + rookie_bonus)
 
-	# 最终概率限制在 3% - 100%（新手保底可达100%）
-	return clampf(probability, 0.03, 1.0)
+	# 精英对包含窗口与捕获球在内的最终概率整体乘 0.9。
+	if bool(options.get("is_elite", false)):
+		probability *= 0.9
+	return clampf(probability, 0.02, 1.0)
 
 
 ## 执行收服判定
@@ -274,6 +278,8 @@ static func get_target_value_tags(monster: Dictionary) -> Array[String]:
 		affinity = str(monster.get("element", ""))
 	if not affinity.is_empty():
 		tags.append("%s能量" % _element_label(affinity))
+	if bool(monster.get("isElite", false)):
+		tags.append("精英稀有")
 	var skill: Dictionary = monster.get("skill", {})
 	var role := _skill_role_label(skill)
 	if not role.is_empty():

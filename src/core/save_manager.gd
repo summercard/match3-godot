@@ -9,7 +9,7 @@ extends Node
 ## - 经验公式：每级所需 = 80 + level * 10，总经验需计算到 level-1
 ## - 扫荡奖励 = 关卡基础奖励 × 星级倍率 × 0.8
 ## - 牧场挂机经验速率 = 3 + level * 0.5 每5分钟，累计最多8小时
-## - 签到连续天数超过7天额外奖励 +20金币 +10经验
+## - 1.3.2 签到按共享 7 天奖励表循环
 
 const ItemDB = preload("res://src/data/item_db.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
@@ -26,6 +26,7 @@ const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const SaveFileStoreScript = preload("res://src/core/save_file_store.gd")
 const BattlePowerRulesScript = preload("res://src/core/battle_power_rules.gd")
 const FeatureUnlockRulesScript = preload("res://src/core/feature_unlock_rules.gd")
+const SignInRewardDBScript = preload("res://src/data/sign_in_reward_db.gd")
 
 # ========== 单例模式 ==========
 static var instance: Node
@@ -760,8 +761,21 @@ func evolve_instance(instance_id: String) -> Dictionary:
 		return {"ok": false, "reason": "not_found"}
 	var instance: Dictionary = pool[idx]
 	var before := instance.duplicate(true)
-	var result := MonsterPool.evolve_instance(instance)
-	if bool(result.get("ok", false)):
+	var template := MonsterDb.get_monster(str(instance.get("monsterId", "")))
+	var cost := EvolutionRulesScript.get_evolution_cost(template)
+	if int(get_player().get("gold", 0)) < int(cost.get("gold", 0)):
+		return {"ok": false, "reason": "gold", "cost": cost}
+	if get_item_count(str(cost.get("item_id", ""))) < int(cost.get("item_count", 0)):
+		return {"ok": false, "reason": "item", "cost": cost}
+	var result: Dictionary = {}
+	var tx := run_transaction(func() -> Dictionary:
+		result = MonsterPool.evolve_instance(instance)
+		if not bool(result.get("ok", false)):
+			return result
+		if not spend_gold(int(cost.get("gold", 0))):
+			return {"ok": false, "reason": "gold"}
+		if not use_item(str(cost.get("item_id", "")), int(cost.get("item_count", 0))):
+			return {"ok": false, "reason": "item"}
 		var report := EvolutionRulesScript.build_report(before, instance)
 		var history: Array = instance.get("evolutionHistory", [])
 		history.append(EvolutionRulesScript.make_history_entry(report))
@@ -769,9 +783,13 @@ func evolve_instance(instance_id: String) -> Dictionary:
 		instance["evolutionInsight"] = {}
 		instance["evolutionCount"] = int(instance.get("evolutionCount", 0)) + 1
 		result["evolutionReport"] = report
-	pool[idx] = instance
-	save_monster_pool(pool)
-	return result
+		result["cost"] = cost.duplicate(true)
+		pool[idx] = instance
+		if not save_monster_pool(pool):
+			return {"ok": false, "reason": "save"}
+		return result
+	)
+	return tx
 
 func get_team_instances() -> Array:
 	var team := load_team()
@@ -1330,7 +1348,10 @@ func get_mailbox_state() -> Dictionary:
 	var today_key := Time.get_date_string_from_system(false)
 	var raw: Variant = _get_value("mailbox", "data", MailboxRulesScript.default_state())
 	var normalized := MailboxRulesScript.normalize_state(raw, today_key)
-	var delivery := MailboxRulesScript.materialize_due_blessings(normalized, Time.get_unix_time_from_system())
+	var now := Time.get_unix_time_from_system()
+	var daily := MailboxRulesScript.ensure_daily_blessings(normalized, now)
+	normalized = daily.get("state", normalized) as Dictionary
+	var delivery := MailboxRulesScript.materialize_due_blessings(normalized, now)
 	normalized = delivery.get("state", normalized) as Dictionary
 	if raw != normalized:
 		_set_value("mailbox", "data", normalized)
@@ -1449,30 +1470,25 @@ func do_sign_in() -> Dictionary:
 
 		# 发放奖励
 		reward = get_sign_in_reward(data["consecutiveDays"])
-		add_gold(reward["gold"])
-		add_player_exp(reward["exp"])
+		if int(reward.get("gold", 0)) > 0 and not add_gold(int(reward.get("gold", 0))):
+			return {"ok": false, "error": "gold_reward_failed"}
+		if int(reward.get("exp", 0)) > 0 and not add_player_exp(int(reward.get("exp", 0))):
+			return {"ok": false, "error": "exp_reward_failed"}
+		for item: Dictionary in reward.get("items", []):
+			if not add_item(str(item.get("id", "")), int(item.get("count", 1))):
+				return {"ok": false, "error": "item_reward_failed"}
+		for monster: Dictionary in reward.get("monsters", []):
+			for _copy in range(maxi(1, int(monster.get("count", 1)))):
+				if add_monster_instance(str(monster.get("monsterId", "")), {"level": int(monster.get("level", 1)), "source": "sign_in"}).is_empty():
+					return {"ok": false, "error": "monster_reward_failed"}
 		return {"ok": true, "reward": reward.duplicate(true)}
 	)
 	return tx.get("reward", {}) if bool(tx.get("ok", false)) else {}
 
 ## 获取签到奖励（根据连续签到天数）
 ## JS: getSignInReward(consecutiveDays)
-## 连续天数超过7天额外奖励 +20金币 +10经验
 func get_sign_in_reward(consecutive_days: int) -> Dictionary:
-	var base_gold: int = 50
-	var base_exp: int = 30
-
-	# 连续7天重置循环，但给予额外奖励
-	if consecutive_days > 7:
-		return {
-			"gold": base_gold + consecutive_days * 5 + 20,
-			"exp": base_exp + consecutive_days * 2 + 10
-		}
-
-	return {
-		"gold": base_gold + consecutive_days * 5,
-		"exp": base_exp + consecutive_days * 2
-	}
+	return SignInRewardDBScript.get_reward(consecutive_days)
 
 ## 获取当前日期字符串
 ## JS: _getDateString(date)
@@ -1858,123 +1874,24 @@ func collect_social(place_index: int) -> Dictionary:
 	if a.is_empty() or b.is_empty():
 		return {"ok": false, "reason": "monster_not_found"}
 	var result := SocialRulesScript.resolve(a, b, place)
-	var exp_each := int(result.get("exp_each", 0))
-	if exp_each > 0:
-		var shared_result := add_shared_monster_exp(exp_each * 2)
-		result["shared_exp_added"] = int(shared_result.get("added", 0))
-		result["shared_exp_overflow"] = int(shared_result.get("overflow", 0))
-	_apply_social_memory(a_id, b_id, result)
-	_apply_social_evolution_insight(a_id, result)
-	_apply_social_memory(b_id, a_id, result)
-	_apply_social_evolution_insight(b_id, result)
-	var gold := int(result.get("gold", 0))
-	if gold > 0:
-		add_gold(gold)
-	for item: Dictionary in result.get("items", []):
-		add_item(str(item.get("id", "")), int(item.get("count", 1)))
-	var applied_major := _apply_social_major_outcome(result)
-	if not applied_major.is_empty():
-		result["majorOutcome"] = applied_major
-		if str(applied_major.get("type", "none")) == "erosion" and bool(applied_major.get("victimRemoved", false)):
-			var victim_id := str(applied_major.get("victimInstanceId", ""))
-			if str(place.get("slot_a", "")) == victim_id:
-				place["slot_a"] = null
-			if str(place.get("slot_b", "")) == victim_id:
-				place["slot_b"] = null
+	for learned: Dictionary in result.get("learned_natures", []):
+		var instance_id := str(learned.get("instance_id", ""))
+		var learned_nature := str(learned.get("nature", ""))
+		var learner := get_monster_instance(instance_id)
+		if learner.is_empty() or not NatureDB.has_nature(learned_nature):
+			continue
+		var known := SocialRulesScript.personality_traits(learner)
+		if not known.has(learned_nature) and known.size() < SocialRulesScript.PERSONALITY_CAPACITY:
+			var extras: Array = learner.get("learnedNatures", []).duplicate()
+			extras.append(learned_nature)
+			update_monster_instance(instance_id, {"learnedNatures": extras})
 	place["started_at"] = null
+	place["interaction_count"] = int(result.get("interactions", int(place.get("interaction_count", 0)) + 1))
 	place["last_result"] = result
 	places[place_index] = place
 	ranch["social_places"] = places
 	set_ranch_state(ranch)
 	return {"ok": true, "result": result}
-
-func _apply_social_major_outcome(social_result: Dictionary) -> Dictionary:
-	var major: Dictionary = social_result.get("majorOutcome", {})
-	match str(major.get("type", "none")):
-		"birth":
-			return _apply_social_birth(major)
-		"erosion":
-			return _apply_social_erosion(major)
-		_:
-			return major
-
-func _apply_social_birth(major: Dictionary) -> Dictionary:
-	var applied := major.duplicate(true)
-	var created: Array = []
-	for raw_plan in major.get("childPlans", []):
-		if not raw_plan is Dictionary:
-			continue
-		var plan: Dictionary = raw_plan
-		var monster_id := str(plan.get("monsterId", ""))
-		if monster_id.is_empty() or not MonsterDb.has_monster(monster_id):
-			continue
-		var child := add_monster_instance(monster_id, {
-			"name": str(plan.get("name", "")),
-			"level": 1,
-			"exp": 0,
-			"nature": str(plan.get("nature", "brave")),
-			"gender": str(plan.get("gender", "")),
-			"source": "social_birth",
-			"lineage": plan.get("lineage", {}),
-			"mutationTraits": plan.get("mutationTraits", [])
-		})
-		if not child.is_empty():
-			created.append(child)
-	applied["createdInstances"] = created
-	applied["applied"] = not created.is_empty()
-	return applied
-
-func _apply_social_erosion(major: Dictionary) -> Dictionary:
-	var applied := major.duplicate(true)
-	applied["summary"] = "检测到侵蚀风险；默认保护已阻止自动吞噬。"
-	applied["protected"] = true
-	applied["requiresConfirmation"] = true
-	applied["victimRemoved"] = false
-	applied["applied"] = false
-	return applied
-
-func _apply_social_evolution_insight(instance_id: String, social_result: Dictionary) -> void:
-	var instance := get_monster_instance(instance_id)
-	if instance.is_empty():
-		return
-	var insight := EvolutionRulesScript.make_social_insight(instance, social_result)
-	if insight.is_empty():
-		return
-	update_monster_instance(instance_id, {"evolutionInsight": insight})
-
-func _apply_social_memory(instance_id: String, partner_id: String, social_result: Dictionary) -> void:
-	var instance := get_monster_instance(instance_id)
-	if instance.is_empty():
-		return
-	var profile: Dictionary = instance.get("socialProfile", {})
-	profile["socialExp"] = int(profile.get("socialExp", 0)) + int(social_result.get("score", 0))
-	profile["bondExp"] = int(profile.get("bondExp", 0)) + int(round(float(social_result.get("score", 0)) * 0.5))
-	profile["lastPartnerId"] = partner_id
-	profile["lastSocialTags"] = social_result.get("tags", []).duplicate(true)
-	var memory: Dictionary = instance.get("bondMemory", {})
-	var partners: Dictionary = memory.get("partners", {})
-	var partner_memory: Dictionary = partners.get(partner_id, {})
-	partner_memory["count"] = int(partner_memory.get("count", 0)) + 1
-	partner_memory["bestScore"] = maxi(int(partner_memory.get("bestScore", 0)), int(social_result.get("score", 0)))
-	partner_memory["lastLabel"] = str(social_result.get("label", "社交"))
-	partner_memory["lastTags"] = social_result.get("tags", []).duplicate(true)
-	partner_memory["relationLevel"] = int(social_result.get("relation_level", 1))
-	partner_memory["relationLabel"] = str(social_result.get("relation_label", "初识"))
-	partner_memory["placeId"] = str(social_result.get("place_id", "meadow_yard"))
-	partner_memory["placeName"] = str(social_result.get("place_name", "草坪庭院"))
-	var event: Dictionary = social_result.get("event", {})
-	partner_memory["lastEventId"] = str(event.get("id", ""))
-	partner_memory["lastEventName"] = str(event.get("name", ""))
-	partner_memory["lastEventSummary"] = str(event.get("summary", ""))
-	partner_memory["lastEventFlavor"] = str(event.get("flavor", ""))
-	partner_memory["lastEventOutcome"] = str(event.get("outcome", event.get("impact", "")))
-	partner_memory["lastEventHook"] = str(event.get("hook", ""))
-	partners[partner_id] = partner_memory
-	memory["partners"] = partners
-	update_monster_instance(instance_id, {
-		"socialProfile": profile,
-		"bondMemory": memory
-	})
 
 # ========== 新手引导（section: tutorial） ==========
 ## 引导进度数据结构: { completed: bool, currentStep: int }

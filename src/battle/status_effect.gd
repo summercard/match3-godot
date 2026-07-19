@@ -95,19 +95,22 @@ func get_freeze_atk_multiplier(enemy_index: int) -> float:
 	return 1.0 - reduction
 
 
-func apply_status(enemy_index: int, status_type: String, source_atk: int, enemy_name: String = "") -> Dictionary:
+func apply_status(enemy_index: int, status_type: String, source_atk: int, enemy_name: String = "", options: Dictionary = {}) -> Dictionary:
 	if enemy_index < 0 or enemy_index >= _effects.size():
 		return {}
 	if not STATUS_DEFS.has(status_type):
 		return {}
 	var def: Dictionary = STATUS_DEFS[status_type]
-	var duration: int = int(def.get("duration", 1))
+	var duration: int = int(options.get("duration", def.get("duration", 1)))
 	var element: String = str(def.get("element", ""))
 	_effects[enemy_index] = {
 		"type": status_type,
 		"source_atk": source_atk,
 		"turns_left": duration,
-		"element": element
+		"element": element,
+		"dot_mult": float(options.get("dot_mult", def.get("dot_mult", 0.0))),
+		"increment_per_turn": float(options.get("increment_per_turn", 0.0)),
+		"tick_count": 0,
 	}
 	var label: String = str(def.get("label", status_type))
 	var log := {
@@ -194,9 +197,13 @@ func begin_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 		var def: Dictionary = STATUS_DEFS.get(effect.get("type", ""), {})
 
 		if effect.get("type") == "burn" or effect.get("type") == "poison":
-			var dot_mult: float = def.get("dot_mult", 0.15)
+			var base_dot_mult := float(effect.get("dot_mult", def.get("dot_mult", 0.15)))
+			var increment := float(effect.get("increment_per_turn", 0.0))
+			var tick_count := maxi(0, int(effect.get("tick_count", 0)))
+			var dot_mult := base_dot_mult + increment * float(tick_count)
 			var dot_damage: int = maxi(1, int(effect.get("source_atk", 10) * dot_mult))
 			enemy["hp"] -= dot_damage
+			effect["tick_count"] = tick_count + 1
 			var dot_label: String = def.get("dot_label", "伤害")
 			var label: String = def.get("label", "")
 			logs.append({
@@ -242,7 +249,10 @@ func end_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 		if enemy.is_empty() or int(enemy.get("hp", 0)) <= 0:
 			_effects[i] = null
 			continue
-		var turns_left := int(effect.get("turns_left", 1)) - 1
+		var configured_turns := int(effect.get("turns_left", 1))
+		if configured_turns < 0:
+			continue
+		var turns_left := configured_turns - 1
 		effect["turns_left"] = turns_left
 		if turns_left > 0:
 			continue

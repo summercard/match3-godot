@@ -27,6 +27,8 @@
 [ext_resource type="Texture2D" uid="uid://cv0ofg1ufmmdq" path="res://assets/images/ui/buttons/shop_ui_shop_tab_normal_image2_clean.png" id="30_tab_normal_image2"]
 [ext_resource type="Texture2D" uid="uid://c5cgebmxk6kau" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="31_title_image2"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="32_home_image2"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_classroom.png" id="33_nav_classroom"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_level_shield_v3.png" id="34_nav_hotel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selected_nav"]
 bg_color = Color(1, 0.77, 0.2, 0.54)
@@ -1939,7 +1941,6 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="BattleButton" type="TextureButton" parent="BottomNav" unique_id=1773260718]
-visible = false
 layout_mode = 0
 offset_left = 154.0
 offset_top = 3.0
@@ -1981,7 +1982,6 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="ShopButton" type="TextureButton" parent="BottomNav" unique_id=1839254078]
-visible = false
 layout_mode = 0
 offset_left = 222.0
 offset_top = 3.0
@@ -1991,6 +1991,7 @@ mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
 [node name="Selected" type="Panel" parent="BottomNav/ShopButton" unique_id=1187841196]
+visible = false
 layout_mode = 0
 offset_left = 3.0
 offset_top = 1.0
@@ -2005,7 +2006,7 @@ offset_left = 17.0
 offset_right = 50.0
 offset_bottom = 33.0
 mouse_filter = 2
-texture = ExtResource("19_nav_shop")
+texture = ExtResource("33_nav_classroom")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2022,7 +2023,6 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="MenuButton" type="TextureButton" parent="BottomNav" unique_id=551261030]
-visible = false
 layout_mode = 0
 offset_left = 290.0
 offset_top = 3.0
@@ -2047,7 +2047,7 @@ offset_left = 17.0
 offset_right = 50.0
 offset_bottom = 33.0
 mouse_filter = 2
-texture = ExtResource("20_nav_menu")
+texture = ExtResource("34_nav_hotel")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2081,15 +2081,15 @@ color = Color(0, 0, 0, 0.45)
 [node name="Panel" type="Control" parent="PopupOverlay" unique_id=2091487278]
 anchors_preset = 0
 offset_left = 34.0
-offset_top = 278.0
+offset_top = 148.0
 offset_right = 341.0
-offset_bottom = 548.0
+offset_bottom = 533.0
 mouse_filter = 2
 
 [node name="Frame" type="Panel" parent="PopupOverlay/Panel" unique_id=667947878]
 layout_mode = 0
 offset_right = 307.0
-offset_bottom = 270.0
+offset_bottom = 385.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_popup")
 
@@ -2132,9 +2132,9 @@ clip_text = true
 [node name="Icon" type="TextureRect" parent="PopupOverlay/Panel" unique_id=333013203]
 layout_mode = 0
 offset_left = 31.0
-offset_top = 76.0
+offset_top = 62.0
 offset_right = 101.0
-offset_bottom = 142.0
+offset_bottom = 128.0
 mouse_filter = 2
 texture = ExtResource("14_item_placeholder")
 expand_mode = 1
@@ -2143,9 +2143,9 @@ stretch_mode = 5
 [node name="Name" type="Label" parent="PopupOverlay/Panel" unique_id=99859280]
 layout_mode = 0
 offset_left = 118.0
-offset_top = 78.0
+offset_top = 64.0
 offset_right = 268.0
-offset_bottom = 102.0
+offset_bottom = 88.0
 theme_override_colors/font_color = Color(0.43, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.72)
 theme_override_constants/shadow_offset_x = 1
@@ -2158,21 +2158,65 @@ clip_text = true
 [node name="Owned" type="Label" parent="PopupOverlay/Panel" unique_id=1013463974]
 layout_mode = 0
 offset_left = 118.0
-offset_top = 105.0
+offset_top = 91.0
 offset_right = 268.0
-offset_bottom = 128.0
+offset_bottom = 114.0
 theme_override_colors/font_color = Color(0.55, 0.32, 0.12, 1)
 theme_override_font_sizes/font_size = 12
 text = "拥有: 0"
 vertical_alignment = 1
 clip_text = true
 
+[node name="EffectTitle" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 137.0
+offset_right = 79.0
+offset_bottom = 160.0
+theme_override_colors/font_color = Color(0.43, 0.2, 0.06, 1)
+theme_override_font_sizes/font_size = 13
+text = "效果："
+vertical_alignment = 1
+
+[node name="EffectText" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 137.0
+offset_right = 285.0
+offset_bottom = 183.0
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
+theme_override_font_sizes/font_size = 13
+text = "商品的实际生效数值"
+autowrap_mode = 2
+
+[node name="UsageTitle" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 190.0
+offset_right = 79.0
+offset_bottom = 213.0
+theme_override_colors/font_color = Color(0.43, 0.2, 0.06, 1)
+theme_override_font_sizes/font_size = 13
+text = "用法："
+vertical_alignment = 1
+
+[node name="UsageText" type="Label" parent="PopupOverlay/Panel"]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 190.0
+offset_right = 285.0
+offset_bottom = 231.0
+theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
+theme_override_font_sizes/font_size = 13
+text = "在对应界面使用"
+autowrap_mode = 2
+
 [node name="MinusButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=338333843]
 layout_mode = 0
 offset_left = 38.0
-offset_top = 145.0
+offset_top = 247.0
 offset_right = 80.0
-offset_bottom = 179.0
+offset_bottom = 281.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
@@ -2201,9 +2245,9 @@ clip_text = true
 [node name="PlusButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=2020851323]
 layout_mode = 0
 offset_left = 212.0
-offset_top = 145.0
+offset_top = 247.0
 offset_right = 252.0
-offset_bottom = 179.0
+offset_bottom = 281.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
@@ -2232,9 +2276,9 @@ clip_text = true
 [node name="PlusTenButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1275356368]
 layout_mode = 0
 offset_left = 254.0
-offset_top = 145.0
+offset_top = 247.0
 offset_right = 294.0
-offset_bottom = 179.0
+offset_bottom = 281.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
@@ -2263,18 +2307,18 @@ clip_text = true
 [node name="QuantityBox" type="Panel" parent="PopupOverlay/Panel" unique_id=96464166]
 layout_mode = 0
 offset_left = 87.0
-offset_top = 145.0
+offset_top = 247.0
 offset_right = 203.0
-offset_bottom = 179.0
+offset_bottom = 281.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_quantity")
 
 [node name="Quantity" type="Label" parent="PopupOverlay/Panel" unique_id=91482269]
 layout_mode = 0
 offset_left = 87.0
-offset_top = 148.0
+offset_top = 250.0
 offset_right = 203.0
-offset_bottom = 173.0
+offset_bottom = 275.0
 theme_override_colors/font_color = Color(0.43, 0.2, 0.06, 1)
 theme_override_font_sizes/font_size = 18
 text = "1"
@@ -2285,9 +2329,9 @@ clip_text = true
 [node name="TotalPrice" type="Control" parent="PopupOverlay/Panel" unique_id=1055440654]
 anchors_preset = 0
 offset_left = 88.0
-offset_top = 186.0
+offset_top = 293.0
 offset_right = 212.0
-offset_bottom = 215.0
+offset_bottom = 322.0
 mouse_filter = 2
 
 [node name="Frame" type="Panel" parent="PopupOverlay/Panel/TotalPrice" unique_id=321813694]
@@ -2327,9 +2371,9 @@ clip_text = true
 [node name="CancelButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1888611154]
 layout_mode = 0
 offset_left = 18.0
-offset_top = 211.0
+offset_top = 329.0
 offset_right = 142.0
-offset_bottom = 247.0
+offset_bottom = 365.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 
@@ -2358,9 +2402,9 @@ clip_text = true
 [node name="ConfirmButton" type="TextureButton" parent="PopupOverlay/Panel" unique_id=1743538917]
 layout_mode = 0
 offset_left = 158.0
-offset_top = 211.0
+offset_top = 329.0
 offset_right = 284.0
-offset_bottom = 247.0
+offset_bottom = 365.0
 mouse_default_cursor_shape = 2
 ignore_texture_size = true
 

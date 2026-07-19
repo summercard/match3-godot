@@ -7,7 +7,7 @@ const MonsterPoolScript = preload("res://src/core/monster_pool.gd")
 const DELIVERY_WINDOW_START_SEC := 9 * 60 * 60
 const DELIVERY_WINDOW_DURATION_SEC := 12 * 60 * 60
 const DELIVERY_BATCH_MIN := 1
-const DELIVERY_BATCH_MAX := 6
+const DELIVERY_BATCH_MAX := 3
 
 
 static func default_state() -> Dictionary:
@@ -21,6 +21,7 @@ static func default_state() -> Dictionary:
 		# delivery. Pending mail has already rolled its attachment package.
 		"delivery_schedule": {},
 		"pending_blessings": [],
+		"daily_generated_keys": [],
 		"unread_count": 0,
 		# The three starter species unlock as the initial album entries. Every
 		# subsequently unlocked species contributes exactly one collection star.
@@ -46,6 +47,8 @@ static func normalize_state(raw: Variant, today_key: String = "") -> Dictionary:
 		state["delivery_schedule"] = {}
 	if not state.get("pending_blessings", []) is Array:
 		state["pending_blessings"] = []
+	if not state.get("daily_generated_keys", []) is Array:
+		state["daily_generated_keys"] = []
 	if not state.get("lobby_arrival_shown_blessing_ids", []) is Array:
 		state["lobby_arrival_shown_blessing_ids"] = []
 	if not today_key.is_empty() and str(state.get("daily_reset_key", "")) != today_key:
@@ -87,6 +90,12 @@ static func normalize_state(raw: Variant, today_key: String = "") -> Dictionary:
 		pending.append(pending_mail)
 	pending.sort_custom(func(a: Dictionary, b: Dictionary): return int(a.get("deliver_at", 0)) < int(b.get("deliver_at", 0)))
 	state["pending_blessings"] = pending
+	var generated_keys: Array[String] = []
+	for raw_key in state.get("daily_generated_keys", []):
+		var generated_key := str(raw_key)
+		if not generated_key.is_empty() and not generated_keys.has(generated_key):
+			generated_keys.append(generated_key)
+	state["daily_generated_keys"] = generated_keys.slice(maxi(0, generated_keys.size() - 14), generated_keys.size())
 	var shown_arrival_ids: Array[String] = []
 	for raw_id in state.get("lobby_arrival_shown_blessing_ids", []):
 		var mail_id := str(raw_id)
@@ -102,11 +111,16 @@ static func can_send(state: Dictionary) -> bool:
 
 
 static func day_key_for_unix(now_unix: float) -> String:
-	return str(int(floor(now_unix / 86400.0)))
+	return str(int(floor((now_unix + _local_utc_offset_seconds()) / 86400.0)))
 
 
 static func _day_start_unix(now_unix: float) -> int:
-	return int(floor(now_unix / 86400.0) * 86400.0)
+	var offset := _local_utc_offset_seconds()
+	return int(floor((now_unix + offset) / 86400.0) * 86400.0 - offset)
+
+
+static func _local_utc_offset_seconds() -> int:
+	return int(Time.get_time_zone_from_system().get("bias", 0)) * 60
 
 
 static func _stable_seed(value: String) -> int:
@@ -125,6 +139,44 @@ static func delivery_batches_for_day(day_start_unix: int) -> Array[int]:
 		batches.append(timestamp)
 	batches.sort()
 	return batches
+
+
+## 为本地自然日生成一次稳定的 1—3 封来信。生成与玩家寄信完全无关；
+## 邮件内容和附件在排队时已经确定，重复加载不会重抽。
+static func ensure_daily_blessings(state: Dictionary, now_unix: float) -> Dictionary:
+	var next := normalize_state(state)
+	var day_key := day_key_for_unix(now_unix)
+	var generated: Array = next.get("daily_generated_keys", []).duplicate()
+	if generated.has(day_key):
+		return {"state": next, "changed": false}
+	var day_start := _day_start_unix(now_unix)
+	var batches := delivery_batches_for_day(day_start)
+	var schedule: Dictionary = next.get("delivery_schedule", {}).duplicate(true)
+	schedule[day_key] = batches.duplicate()
+	var pending: Array = next.get("pending_blessings", []).duplicate(true)
+	for index in range(batches.size()):
+		var seed := _stable_seed("daily_blessing:%s:%d" % [day_key, index])
+		var template := MailContentDBScript.get_blessing_template(seed)
+		var mail_id := "daily_blessing:%s:%d" % [day_key, index]
+		pending.append({
+			"id": mail_id,
+			"source": "stranger_blessing",
+			"sender_name": str(template.get("sender", "远方的冒险者")),
+			"sender_monster_id": str(template.get("sender_monster_id", "")),
+			"title": str(template.get("title", "一份温暖的祝福")),
+			"body": str(template.get("body", "远方的冒险者托精灵捎来祝福。")),
+			"attachments": MailContentDBScript.get_blessing_attachments(seed * 17 + 31),
+			"created_at": int(batches[index]),
+			"read_at": null,
+			"claimed_at": null,
+			"reward_receipt_id": "mail_reward:%s" % mail_id,
+			"deliver_at": int(batches[index]),
+		})
+	generated.append(day_key)
+	next["delivery_schedule"] = schedule
+	next["pending_blessings"] = pending
+	next["daily_generated_keys"] = generated
+	return {"state": normalize_state(next), "changed": true}
 
 
 static func queue_blessing_for_delivery(state: Dictionary, mail: Dictionary, now_unix: float) -> Dictionary:

@@ -43,24 +43,38 @@ func _run() -> void:
 			_expect(str(mailbox.get("_selected_instance_id")) != first_id, "next adventurer button should change the selected adventurer")
 			prev_adventurer.pressed.emit()
 			_expect(str(mailbox.get("_selected_instance_id")) == first_id, "previous adventurer button should restore the prior adventurer")
+		var before_send: Dictionary = storage.get_mailbox_state()
+		var pending_before := (before_send.get("pending_blessings", []) as Array).size()
+		var unread_before := int(before_send.get("unread_count", 0))
 		send_button.pressed.emit()
 		for _frame in range(60):
 			await process_frame
 		var state: Dictionary = storage.get_mailbox_state()
 		_expect(int(state.get("daily_send_count", 0)) == 1, "send button should consume one daily blessing")
-		_expect(int(state.get("unread_count", 0)) == 0, "send button should queue, not immediately create, a reply mail")
+		_expect(int(state.get("unread_count", 0)) == unread_before, "send button should not create an unread reply mail")
 		var pending: Array = state.get("pending_blessings", []).duplicate(true)
-		_expect(pending.size() == 1, "send button should create one pending reply")
-		if not pending.is_empty():
-			var due_mail: Dictionary = pending[0]
-			due_mail["deliver_at"] = int(Time.get_unix_time_from_system()) - 1
-			pending[0] = due_mail
-			state["pending_blessings"] = pending
-			storage.save_mailbox_state(state)
-			mailbox.call("_refresh")
-			await process_frame
+		_expect(pending.size() == pending_before, "send button should remain independent from the daily inbound schedule")
+		# 1.3.2 keeps already-queued legacy mail deliverable once after migration.
+		pending.append({
+			"id": "legacy_reply:mailbox_button_flow",
+			"source": "stranger_blessing",
+			"sender_name": "远方的冒险者",
+			"sender_monster_id": "monster_049",
+			"title": "迁移前排队的祝福",
+			"body": "这封信在旧版本中已经排队，升级后仍应按时抵达。",
+			"attachments": [{"kind": "gold", "amount": 1}],
+			"created_at": int(Time.get_unix_time_from_system()) - 2,
+			"deliver_at": int(Time.get_unix_time_from_system()) - 1,
+			"read_at": null,
+			"claimed_at": null,
+			"reward_receipt_id": "mail_reward:legacy_reply:mailbox_button_flow",
+		})
+		state["pending_blessings"] = pending
+		storage.save_mailbox_state(state)
+		mailbox.call("_refresh")
+		await process_frame
 		state = storage.get_mailbox_state()
-		_expect(int(state.get("unread_count", 0)) == 1, "a due reply should appear as unread after refresh")
+		_expect(int(state.get("unread_count", 0)) == unread_before + 1, "a due legacy reply should appear once as unread after refresh")
 		_expect((mailbox.get_node("InboxPanel/MailboxTotals/SentStarTotal") as Label).text == "3", "mailbox should show the three initially unlocked species")
 		_expect((mailbox.get_node("InboxPanel/MailboxTotals/ReceivedStarTotal") as Label).text == "3", "sending a blessing should not change collection-star rewards")
 		_expect((mailbox.get_node("BlessingPanel/Panel/ActionRail/RailTitle") as Label).text == "给远方的陌生人\n送出祝福", "blessing page should use the stranger-blessing prompt")

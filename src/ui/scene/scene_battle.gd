@@ -692,6 +692,7 @@ func _init_battle() -> void:
 		_battle.queue_free()
 	_battle = BattleManager.new()
 	add_child(_battle)
+	_battle.board = _board
 	if not player_team_units.is_empty() and _battle.has_method("init_with_player_team"):
 		_battle.init_with_player_team(player_team_units, enemy_ids, player_level, enemy_level, _stage_data, _stage_id)
 	else:
@@ -724,6 +725,8 @@ func _init_battle() -> void:
 	else:
 		_load_capture_preferences()
 		_load_hotbar_items()
+	if _stage_data.has("fountains"):
+		_process_fountain_turn()
 
 ## ============================================
 # 输入处理
@@ -1332,6 +1335,22 @@ func _process_matches() -> void:
 	var removal_result: Dictionary = BattleMatchRulesScript.apply_removals(_board, match_context)
 	var gem_counts: Dictionary = removal_result.get("gem_counts", {})
 	_handle_obstacle_damage_fx(removal_result.get("obstacle_damage", []))
+	var rock_backlash := BattleHazardRulesScript.process_destroyed_rock_backlash(_battle, removal_result.get("obstacle_damage", []))
+	if not rock_backlash.get("destroyed_sources", []).is_empty():
+		for hit: Dictionary in rock_backlash.get("hits", []):
+			var team_index := int(hit.get("team_index", -1))
+			if team_index < 0:
+				continue
+			var target_center := _combatant_effect_center(false, team_index)
+			_spawn_item_use_effect("rock_fall", target_center, OBSTACLE_COLORS.rock, 0.38, {"source_index": int(hit.get("source_index", 0))})
+		await get_tree().create_timer(0.38).timeout
+		for hit: Dictionary in rock_backlash.get("hits", []):
+			var team_index := int(hit.get("team_index", -1))
+			if team_index < 0:
+				continue
+			var target_center := _combatant_effect_center(false, team_index)
+			_hit_flashes.append({"isEnemy": false, "monsterIndex": team_index, "timer": 0.45, "maxTimer": 0.45})
+			_floating_texts.append({"text": "落石 -%d" % int(hit.get("damage", 0)), "x": target_center.x, "y": target_center.y - 8.0, "color": OBSTACLE_COLORS.rock, "size": 17.0, "timer": 0.0, "duration": 0.82, "critical": true})
 	_process_vine_resolution(removal_result.get("affected_gems", []))
 	
 	# ===== 第7步：伤害处理 =====
@@ -1376,6 +1395,20 @@ func _process_matches() -> void:
 			_trigger_attack_shake()
 		if attacker_idx >= 0 and target_idx >= 0:
 			await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
+
+	var fountain_sources := BattleHazardRulesScript.fountain_attack_sources(_board, removal_result.get("affected_gems", []))
+	for fountain_log: Dictionary in _battle.resolve_fountain_attacks(fountain_sources):
+		var source: Dictionary = fountain_log.get("source", {})
+		var target_idx := int(fountain_log.get("target_index", -1))
+		if target_idx < 0:
+			continue
+		var source_center := Vector2(float(source.get("x", _board_center().x)), float(source.get("y", _board_center().y)))
+		var target_center := _combatant_effect_center(true, target_idx)
+		_fountain_erupt_anims.append({"row": int(source.get("row", 0)), "col": int(source.get("col", 0)), "x": source_center.x, "y": source_center.y, "timer": 0.0})
+		_leader_skill_fx.append({"kind": "beam", "element": "water", "tone": "chain", "from": source_center, "to": target_center, "timer": 0.56, "maxTimer": 0.56})
+		await get_tree().create_timer(0.10).timeout
+		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.45, "maxTimer": 0.45})
+		_floating_texts.append(_damage_floating_entry(int(fountain_log.get("damage", 0)), target_center.x, target_center.y - 10.0, false, false, 18.0, 0.85, true, "water"))
 
 	_handle_leader_charge_events(result.get("leader_charge_events", []))
 	_queue_ready_leader_burst_playback()
@@ -1747,6 +1780,22 @@ func _start_enemy_turn() -> void:
 		_fall_messages.append({"text": "%s 被状态效果击杀！" % name, "timer": 1.5})
 	
 	for action: Dictionary in result.get("actions", []):
+		if str(action.get("type", "")) == "leader_regen":
+			var regen_idx := int(action.get("target_index", -1))
+			if regen_idx >= 0:
+				var regen_center := _combatant_effect_center(false, regen_idx)
+				_leader_skill_fx.append({"kind": "ally_burst", "element": "grass", "tone": "heal", "center": regen_center, "timer": 0.58, "maxTimer": 0.58})
+				_floating_texts.append({"text": "+%d 回春" % int(action.get("heal_amount", 0)), "x": regen_center.x, "y": regen_center.y - 8.0, "color": C["heal_green"], "size": 17.0, "timer": 0.0, "duration": 0.8, "critical": true})
+			continue
+		if bool(action.get("is_friendly_fire", false)):
+			var source_idx := int(action.get("enemy_index", -1))
+			var foe_idx := int(action.get("target_index", -1))
+			if source_idx >= 0 and foe_idx >= 0:
+				await _play_attack_observation(true, source_idx, true, foe_idx, str(action.get("element", "dark")), "%s 误伤 → %s" % [action.get("attacker", "敌人"), action.get("target", "敌人")], false)
+				var foe_center := _combatant_effect_center(true, foe_idx)
+				_hit_flashes.append({"isEnemy": true, "monsterIndex": foe_idx, "timer": 0.5, "maxTimer": 0.5})
+				_floating_texts.append({"text": "误伤 -%d" % int(action.get("damage", 0)), "x": foe_center.x, "y": foe_center.y - 12.0, "color": C["danger"], "size": 18.0, "timer": 0.0, "duration": 0.9, "critical": true})
+			continue
 		# 蓄力回合：只显示蓄力提示，不显示伤害
 		if action.get("is_charging", false):
 			_show_message("%s 正在蓄力..." % action.get("attacker", ""))
@@ -1821,6 +1870,10 @@ func _start_enemy_turn() -> void:
 				})
 			if action.get("is_weakened", false):
 				_show_message("%s 被束缚，伤害降低" % action.get("attacker", "敌人"))
+			if int(action.get("reflect_damage", 0)) > 0 and enemy_idx >= 0:
+				var enemy_center := _combatant_effect_center(true, enemy_idx)
+				_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.45, "maxTimer": 0.45})
+				_floating_texts.append({"text": "反伤 -%d" % int(action.get("reflect_damage", 0)), "x": enemy_center.x, "y": enemy_center.y - 12.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
 			if enemy_idx >= 0 and target_idx >= 0:
 				await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
 	
@@ -2102,19 +2155,6 @@ func _trigger_inline_capture() -> void:
 		var player: Dictionary = _storage.load_player()
 		consecutive_fails = player.get("captureFails", 0)
 	
-	# 计算收服概率
-	var prob: float = CaptureSystem.calc_capture_probability(
-		target_enemy.get("hp", 0), target_enemy.get("maxHP", 1),
-		_battle.player_level if _battle else 1,
-		_battle.enemy_level if _battle else 1,
-		enemy_rarity,
-		{
-			"stage_id": _stage_id,
-			"consecutive_fails": consecutive_fails,
-			"taming_window": target_window
-		}
-	)
-	
 	# 消耗玩家预选的捕获道具；没有可用捕捉球时不进行空手判定
 	var item_use: Dictionary = _consume_selected_capture_item()
 	if not bool(item_use.get("ok", false)):
@@ -2129,7 +2169,19 @@ func _trigger_inline_capture() -> void:
 		_show_message(_capture_result_text.get("title", "未捕捉"))
 		return
 	var bonus: float = float(item_use.get("bonus", 0.0))
-	prob = minf(0.95, prob + bonus)
+	var prob: float = CaptureSystem.calc_capture_probability(
+		target_enemy.get("hp", 0), target_enemy.get("maxHP", 1),
+		_battle.player_level if _battle else 1,
+		_battle.enemy_level if _battle else 1,
+		enemy_rarity,
+		{
+			"stage_id": _stage_id,
+			"consecutive_fails": consecutive_fails,
+			"taming_window": target_window,
+			"item_bonus": bonus,
+			"is_elite": bool(target_enemy.get("isElite", false))
+		}
+	)
 	
 	# 执行收服判定
 	_capture_success = CaptureSystem.attempt_capture(prob)
@@ -2436,7 +2488,12 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 	var target_idx := int(log.get("target_index", -1))
 	var effects: Array = log.get("effects", [])
 	var has_damage := int(log.get("remaining_damage", log.get("damage", 0))) > 0
-	if has_damage and target_idx >= 0:
+	var has_multi_damage := false
+	for raw_effect in effects:
+		if raw_effect is Dictionary and raw_effect.has("hits"):
+			has_multi_damage = true
+			break
+	if has_damage and target_idx >= 0 and not has_multi_damage:
 		var target_center := _combatant_effect_center(true, target_idx)
 		_leader_skill_fx.append({
 			"kind": "beam",
@@ -2494,15 +2551,17 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 					"maxTimer": 0.76
 				})
 				_floating_texts.append({"text": "护盾+%d" % int(target_info.get("amount", effect.get("amount", 0))), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 18.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
-		elif kind == "convert_gems":
-			var converted := _convert_random_gems_to(str(effect.get("target_element", "light")), int(effect.get("count", 2)))
+		elif kind in ["convert_gems", "convert_element_gems_by_ratio", "convert_adjacent_gems_from_random_source"]:
+			var converted: Array = effect.get("cells", [])
+			if kind == "convert_gems" and not effect.has("cells"):
+				converted = _convert_random_gems_to(str(effect.get("target_element", "light")), int(effect.get("count", 2)))
 			if not converted.is_empty():
 				_sfx("powerup_created_star")
 				_spawn_item_use_effect("gem_shift", board_center, color, 0.72, {"source": "mixed", "target": str(effect.get("target_element", "light")), "affected": converted.size()})
 				for cell: Dictionary in converted:
 					var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
 					_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", "light")), "tone": tone, "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
-				_floating_texts.append({"text": "星星 x%d" % converted.size(), "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+				_floating_texts.append({"text": "%s x%d" % [str(effect.get("label", "宝石转化")), converted.size()], "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind == "status" or kind == "weaken":
 			var e_idx := int(effect.get("target_index", target_idx))
 			if e_idx < 0:
@@ -2511,6 +2570,57 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 			_leader_skill_fx.append({"kind": "mark", "element": element, "tone": tone, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
 			var label := str(effect.get("status", "DOWN")).to_upper() if kind == "status" else "DOWN"
 			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+		elif effect.has("hits"):
+			var cleared_cells: Array = effect.get("cells", [])
+			for cell: Dictionary in cleared_cells:
+				var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
+				_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.48, "maxTimer": 0.48})
+			_sfx_attack_by_element(element)
+			for hit: Dictionary in effect.get("hits", []):
+				var hit_index := int(hit.get("target_index", -1))
+				if hit_index < 0:
+					continue
+				var hit_center := _combatant_effect_center(true, hit_index)
+				_leader_skill_fx.append({"kind": "beam", "element": element, "tone": tone, "from": board_center, "to": hit_center, "timer": 0.34, "maxTimer": 0.34})
+				_hit_flashes.append({"isEnemy": true, "monsterIndex": hit_index, "timer": 0.30, "maxTimer": 0.30})
+				_floating_texts.append(_damage_floating_entry(int(hit.get("amount", 0)), hit_center.x, hit_center.y - 14.0, false, false, 17.0, LEADER_BURST_EFFECT_HOLD, true, element))
+				await get_tree().create_timer(0.055).timeout
+		elif kind in ["remove_random_element_gems", "shuffle_board"]:
+			_sfx("powerup_created_star")
+			_leader_skill_fx.append({"kind": "crest", "element": element, "tone": tone, "center": board_center, "timer": 0.58, "maxTimer": 0.58})
+			for cell: Dictionary in effect.get("cells", []):
+				var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
+				_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.46, "maxTimer": 0.46})
+			_floating_texts.append({"text": str(effect.get("label", "棋盘变化")), "x": board_center.x, "y": board_center.y - 20.0, "color": color, "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+		elif kind in ["randomize_enemy_element", "enemy_damage_vulnerability", "confuse_enemy_attack"]:
+			for target_info: Dictionary in effect.get("targets", []):
+				var enemy_index := int(target_info.get("target_index", -1))
+				if enemy_index < 0:
+					continue
+				var enemy_center := _combatant_effect_center(true, enemy_index)
+				_leader_skill_fx.append({"kind": "mark", "element": str(target_info.get("new_element", element)), "tone": tone, "center": enemy_center, "timer": 0.72, "maxTimer": 0.72})
+				_floating_texts.append({"text": str(effect.get("label", "状态变化")), "x": enemy_center.x, "y": enemy_center.y + 12.0, "color": color, "size": 14.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+		elif kind in ["heal_over_time", "grant_ally_charge", "reflect_damage"]:
+			_sfx("battle_heal_leaf_bubble" if kind == "heal_over_time" else "battle_shield_soft_bloom")
+			for target_info: Dictionary in effect.get("targets", []):
+				var ally_index := int(target_info.get("target_index", -1))
+				if ally_index < 0:
+					continue
+				var ally_center := _combatant_effect_center(false, ally_index)
+				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": ally_center, "timer": 0.70, "maxTimer": 0.70})
+				var target_label := "回春 %d回合" % int(effect.get("turns", 3))
+				if kind == "grant_ally_charge":
+					target_label = "充能 +%d" % int(target_info.get("amount", effect.get("charge_amount", 1)))
+				elif kind == "reflect_damage":
+					target_label = "反伤 %d回合" % int(effect.get("turns", 2))
+				_floating_texts.append({"text": target_label, "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"] if kind == "heal_over_time" else C["shield"], "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+		elif kind in ["self_atk_boost", "self_damage_reduction"]:
+			var self_index := int(effect.get("target_index", -1))
+			if self_index >= 0:
+				var self_center := _combatant_effect_center(false, self_index)
+				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": self_center, "timer": 0.70, "maxTimer": 0.70})
+				var self_label := "攻击 +%d" % int(effect.get("amount", 0)) if kind == "self_atk_boost" else "减伤 %d%%" % int(round(float(effect.get("total_reduction", 0.0)) * 100.0))
+				_floating_texts.append({"text": self_label, "x": self_center.x, "y": self_center.y - 8.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 	await get_tree().create_timer(0.28).timeout
 
 func _board_center() -> Vector2:
@@ -3981,7 +4091,23 @@ func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
 		return false
 	var heal_ratio := float(effect.get("healRatio", 0.5))
 	var healed := 0
-	for i in range(_battle.player_team.size()):
+	var target_indices: Array = []
+	if str(effect.get("healTarget", "all")) == "lowest_hp_ratio":
+		var best_idx := -1
+		var best_ratio := INF
+		for i in range(_battle.player_team.size()):
+			var candidate: Dictionary = _battle.player_team[i]
+			if candidate == null or candidate.is_empty() or int(candidate.get("hp", 0)) <= 0:
+				continue
+			var ratio := float(candidate.get("hp", 0)) / maxf(1.0, float(candidate.get("maxHP", 1)))
+			if ratio < best_ratio:
+				best_ratio = ratio
+				best_idx = i
+		if best_idx >= 0:
+			target_indices.append(best_idx)
+	else:
+		target_indices.assign(range(_battle.player_team.size()))
+	for i: int in target_indices:
 		var monster: Dictionary = _battle.player_team[i]
 		if monster == null or monster.is_empty() or int(monster.get("hp", 0)) <= 0:
 			continue
@@ -4065,12 +4191,12 @@ func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
 	if touched <= 0:
 		_show_message("当前没有岩石障碍")
 		return false
-		if destroyed > 0:
-			_apply_gravity()
-		_board_shake_timer = maxf(_board_shake_timer, 0.22)
-		_sfx("powerup_burst_soft")
-		_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
-		queue_redraw()
+	if destroyed > 0:
+		_apply_gravity()
+	_board_shake_timer = maxf(_board_shake_timer, 0.22)
+	_sfx("powerup_burst_soft")
+	_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
+	queue_redraw()
 	return true
 
 func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
@@ -4760,6 +4886,14 @@ func _draw_item_use_effects() -> void:
 		match str(fx.get("kind", "")):
 			"hammer":
 				_draw_item_fx_hammer(fx, center, color, progress, alpha)
+			"rock_fall":
+				var rock_tex: Texture2D = _get_texture("res://assets/images/ui/gems/obstacles_obstacle_rock_full.png")
+				var fall_progress := progress * progress
+				var rock_center := Vector2(center.x, center.y - 72.0 + 72.0 * fall_progress)
+				if rock_tex != null:
+					_draw_texture_fit(rock_tex, Rect2(rock_center - Vector2(18.0, 18.0), Vector2(36.0, 36.0)), alpha)
+				else:
+					draw_circle(rock_center, 15.0, Color(color.r, color.g, color.b, alpha))
 			"heal":
 				_draw_item_fx_heal(center, color, progress, alpha)
 			"guard":
@@ -6007,6 +6141,8 @@ func _process_fountain_turn() -> void:
 	if not soaked.is_empty() or not extinguished.is_empty():
 		_show_message("喷泉喷发，水流封住了周围宝石")
 		_request_battle_fx({"type": "fountain_erupt", "erupted": erupted, "soaked": soaked, "extinguished": extinguished})
+	if _board != null and not _board.has_valid_moves():
+		_board.shuffle()
 
 func _process_tide_turn() -> void:
 	var result: Dictionary = BattleHazardRulesScript.process_tide_turn(_board)

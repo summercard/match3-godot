@@ -5,6 +5,8 @@
 class_name LeaderSkillDb
 extends RefCounted
 
+const LeaderSkillV132DbScript = preload("res://src/data/leader_skill_v132_db.gd")
+
 # 队长技能数据库（17个技能）
 # ★3(稀有)及以上的精灵才拥有队长技能
 # 队长 = 队伍第1个槽位（index 0），被动效果持续整场战斗
@@ -1294,7 +1296,7 @@ const DEFAULT_BURST_EFFECTS: Dictionary = {
 static func get_leader_skill(skill_id: String) -> Dictionary:
 	var normalized_id := normalize_skill_id(skill_id)
 	if FORMAL_LEADER_SKILLS.has(normalized_id):
-		return FORMAL_LEADER_SKILLS[normalized_id].duplicate(true)
+		return LeaderSkillV132DbScript.apply(normalized_id, FORMAL_LEADER_SKILLS[normalized_id].duplicate(true))
 	if LEADER_SKILLS.has(normalized_id):
 		var skill: Dictionary = LEADER_SKILLS[normalized_id].duplicate(true)
 		if str(skill.get("type", "")) == "atk_boost":

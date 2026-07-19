@@ -187,7 +187,7 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_outline_color = Color(0.04, 0.19, 0.42, 0.95)
 theme_override_constants/outline_size = 2
-text = "未解锁：通关主线第 8 关后开放"
+text = "未解锁：击败第 5 章最终 Boss 后开放"
 horizontal_alignment = 1
 vertical_alignment = 1
 

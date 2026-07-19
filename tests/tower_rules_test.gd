@@ -88,9 +88,9 @@ func _test_save_manager_integration() -> void:
 	if storage == null:
 		return
 	storage.clear_all_data()
-	_expect(not storage.is_tower_unlocked(), "tower should be locked before stage 1-8")
-	_expect(storage.save_stage_stars("stage_1_8", 1), "stage 1-8 progress should save")
-	_expect(storage.is_tower_unlocked(), "tower should unlock after stage 1-8")
+	_expect(not storage.is_tower_unlocked(), "tower should be locked before the chapter-five final boss")
+	_expect(storage.save_stage_stars("stage_5_12", 1), "chapter-five final boss progress should save")
+	_expect(storage.is_tower_unlocked(), "tower should unlock after stage_5_12")
 	var controller := TowerRunControllerScript.new(storage)
 	var started := controller.start_new_run()
 	_expect(bool(started.get("ok", false)), "tower should start with default team after unlock")

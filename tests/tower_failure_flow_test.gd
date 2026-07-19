@@ -20,7 +20,7 @@ func _run() -> void:
 		_finish()
 		return
 	storage.clear_all_data()
-	storage.save_stage_stars("stage_1_8", 1)
+	storage.save_stage_stars("stage_5_12", 1)
 	var controller := TowerRunControllerScript.new(storage)
 	var started := controller.start_new_run()
 	_expect(bool(started.get("ok", false)), "tower failure flow should start a run")

@@ -245,11 +245,10 @@ func _send_blessing() -> void:
 	if not bool(result.get("ok", false)):
 		_blessing_status.text = "暂时无法送出祝福。"
 		return
-	# 回信已排入稳定投递批次；星星表现只确认祝福送出，不提前制造未读邮件。
+	# 1.3.2：主动祝福只记录寄送历史，不再制造回信或奖励。
 	var latest_state: Dictionary = _service.get_state()
 	_refresh_inbox(latest_state)
-	var deliver_at := int(result.get("deliver_at", 0))
-	_blessing_status.text = "祝福已送出，回信将在下一批旅途中抵达。" if deliver_at > 0 else "祝福已送出。"
+	_blessing_status.text = "祝福已送出。陌生来信会在每日 09:00—21:00 独立抵达。"
 	_sending = true
 	_send_button.disabled = true
 	_star.position = Vector2(238.0, 356.0)

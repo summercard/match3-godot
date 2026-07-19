@@ -112,12 +112,8 @@ static func _draw_gem_cell(scene, board, state: Dictionary, row: int, col: int, 
 	if is_selected:
 		var t_sel: float = fmod(idle_time, 1.0)
 		pulse_opacity = 0.95 + 0.05 * (sin(t_sel * TAU) + 1.0) / 2.0
-	else:
-		var t_unsel: float = fmod(idle_time, 2.0) / 2.0
-		var sine_unsel: float = sin(t_unsel * TAU + row * 0.5 + col * 0.3)
-		pulse_opacity = 0.85 + 0.15 * (sine_unsel + 1.0) / 2.0
-	var idle_scale: float = 1.0 + 0.02 * sin(idle_time * TAU / 2.0 + row * 0.5 + col * 0.3)
-	scene._draw_gem_animated(cx, cy, gem_type, gem_color, idle_scale, pulse_opacity)
+	# 普通宝石保持静态，避免整盘每帧重复缩放和透明度变化；只给选中格反馈。
+	scene._draw_gem_animated(cx, cy, gem_type, gem_color, 1.0, pulse_opacity)
 
 static func _draw_gem_move_anims(scene, state: Dictionary) -> void:
 	var move_anims: Array = state.get("gem_move_anims", state.get("ice_slide_anims", []))

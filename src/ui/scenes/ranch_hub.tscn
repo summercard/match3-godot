@@ -140,8 +140,9 @@ offset_bottom = 667.0
 
 [node name="Slots" type="Control" parent="Pages/RanchPage" unique_id=2070619186]
 anchors_preset = 0
+offset_top = 10.0
 offset_right = 375.0
-offset_bottom = 438.0
+offset_bottom = 448.0
 
 [node name="Slot1" type="TextureButton" parent="Pages/RanchPage/Slots" unique_id=1706141859]
 layout_mode = 0

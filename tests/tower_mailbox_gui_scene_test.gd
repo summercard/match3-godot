@@ -29,11 +29,11 @@ func _run() -> void:
 	var tower: Control = main.get_current_scene()
 	_expect(tower != null and tower.has_method("_start_or_continue"), "tower scene should expose expedition action")
 	if storage != null:
-		_expect(storage.save_stage_stars("stage_1_8", 1), "tower UI test should unlock tower")
+		_expect(storage.save_stage_stars("stage_5_12", 1), "tower UI test should unlock tower")
 	main.switch_scene("tower")
 	await process_frame
 	tower = main.get_current_scene()
-	_expect(tower != null and not (tower.get_node("%StartButton") as BaseButton).disabled, "tower start should enable after stage 1-8")
+	_expect(tower != null and not (tower.get_node("%StartButton") as BaseButton).disabled, "tower start should enable after stage 5-12")
 	var controller = tower.get("_controller")
 	var started: Dictionary = controller.start_new_run() if controller != null and controller.has_method("start_new_run") else {}
 	_expect(bool(started.get("ok", false)), "tower UI route test should create an active expedition")

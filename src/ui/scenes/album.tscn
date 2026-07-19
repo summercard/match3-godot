@@ -3942,6 +3942,30 @@ horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true
 
+[node name="InfoTabs" type="Control" parent="DetailPanel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 181.0
+offset_right = 321.0
+offset_bottom = 204.0
+
+[node name="SkillTab" type="Button" parent="DetailPanel/InfoTabs"]
+layout_mode = 0
+offset_right = 148.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 14
+text = "技能"
+flat = true
+
+[node name="EcologyTab" type="Button" parent="DetailPanel/InfoTabs"]
+layout_mode = 0
+offset_left = 155.0
+offset_right = 303.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 14
+text = "生态"
+flat = true
+
 [node name="SkillPanel" type="Control" parent="DetailPanel" unique_id=1412370694]
 anchors_preset = 0
 offset_left = 18.0
@@ -3978,7 +4002,7 @@ theme_override_colors/font_color = Color(0.38, 0.2, 0.06, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 text = "技能"
 vertical_alignment = 1
 clip_text = true
@@ -3993,7 +4017,7 @@ theme_override_colors/font_color = Color(0.5, 0.31, 0.13, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "技能描述"
 vertical_alignment = 1
 clip_text = true
@@ -4086,9 +4110,23 @@ theme_override_colors/font_shadow_color = Color(1, 0.95, 0.78, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 12
-text = "栖息  未知"
+text = "生态摘要"
 vertical_alignment = 1
 clip_text = true
+
+[node name="EcologyPanel" type="RichTextLabel" parent="DetailPanel"]
+visible = false
+layout_mode = 0
+offset_left = 23.0
+offset_top = 211.0
+offset_right = 316.0
+offset_bottom = 370.0
+theme_override_colors/default_color = Color(0.38, 0.2, 0.06, 1)
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+text = "生态资料"
 
 [node name="CloseButton" type="TextureButton" parent="DetailPanel" unique_id=1440138589]
 layout_mode = 0

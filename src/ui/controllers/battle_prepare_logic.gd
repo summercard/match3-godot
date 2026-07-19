@@ -186,6 +186,7 @@ func init(data: Dictionary = {}) -> void:
 			_stage_data = _stage_data.duplicate(true)
 	if data.has("chapterIndex") and not _stage_data.has("chapterIndex"):
 		_stage_data["chapterIndex"] = data.get("chapterIndex")
+	_roll_encounter_elite_snapshot()
 	
 	# 加载玩家队伍
 	_load_player_team()
@@ -240,8 +241,9 @@ func _load_enemy_team() -> void:
 	# ★ 主人定：关卡没设 enemyLevel 时兑底 3，记录 isFallback 供 UI 提示
 	var is_fallback: bool = not _stage_data.has("enemyLevel") or int(_stage_data.get("enemyLevel", 0)) <= 0
 	var enemy_level: int = 3 if is_fallback else int(_stage_data.get("enemyLevel", 3))
-	for enemy_id: String in enemy_ids:
-		var preview_elite := _should_preview_elite(enemy_id)
+	for enemy_index in range(enemy_ids.size()):
+		var enemy_id := str(enemy_ids[enemy_index])
+		var preview_elite := _should_preview_elite(enemy_id, enemy_index)
 		var tier := StatCalculator.EnemyTier.ELITE if preview_elite else StatCalculator.EnemyTier.NORMAL
 		var enemy: Dictionary = StatCalculator.calc_enemy(enemy_id, enemy_level, tier)
 		if not enemy.is_empty():
@@ -266,14 +268,32 @@ func _get_preview_enemy_ids(stage_data: Dictionary) -> Array:
 			return phase_enemies
 	return MonsterPool.DEFAULT_STARTERS.duplicate()
 
-func _should_preview_elite(enemy_id: String) -> bool:
+func _should_preview_elite(enemy_id: String, enemy_index: int = -1) -> bool:
 	var data: Dictionary = MonsterDb.MONSTER_DB.get(enemy_id, {})
 	if data.is_empty() or bool(data.get("isBoss", false)):
 		return false
 	if bool(data.get("isElite", false)):
 		return true
+	return enemy_index >= 0 and enemy_index == int(_stage_data.get("_encounterEliteIndex", -1))
+
+
+func _roll_encounter_elite_snapshot() -> void:
+	if _stage_data.has("_encounterEliteIndex"):
+		return
+	_stage_data["_encounterEliteIndex"] = -1
+	if str(_stage_data.get("type", "normal")) == "boss" or str(_stage_data.get("mode", "main")) == "tower":
+		return
 	var chance := _preview_random_elite_chance(_stage_data)
-	return chance >= 1.0
+	if chance <= 0.0 or randf() >= chance:
+		return
+	var eligible: Array[int] = []
+	var enemy_ids := _get_preview_enemy_ids(_stage_data)
+	for index in range(enemy_ids.size()):
+		var template: Dictionary = MonsterDb.MONSTER_DB.get(str(enemy_ids[index]), {})
+		if not template.is_empty() and not bool(template.get("isBoss", false)) and not bool(template.get("isElite", false)):
+			eligible.append(index)
+	if not eligible.is_empty():
+		_stage_data["_encounterEliteIndex"] = eligible[randi() % eligible.size()]
 
 func _preview_random_elite_chance(stage_data: Dictionary) -> float:
 	if bool(stage_data.get("disableRandomElite", false)):
@@ -282,7 +302,7 @@ func _preview_random_elite_chance(stage_data: Dictionary) -> float:
 		return clampf(float(stage_data.get("randomEliteChance", 0.0)), 0.0, 1.0)
 	if stage_data.has("eliteChance"):
 		return clampf(float(stage_data.get("eliteChance", 0.0)), 0.0, 1.0)
-	return 0.0
+	return BattleManager.DEFAULT_RANDOM_ELITE_CHANCE
 
 func _get_team_total_power(team: Array) -> int:
 	var total := 0

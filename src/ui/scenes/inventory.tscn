@@ -22,6 +22,9 @@
 [ext_resource type="Texture2D" uid="uid://05wjpw7dhrsh" path="res://assets/images/ui/icons/main_ui_bottom_nav_panel_v3.png" id="21_bottom_nav"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_home.png" id="22_nav_home"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_shop.png" id="23_nav_shop"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_battle.png" id="24_nav_battle"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/common_nav_icon_nav_classroom.png" id="25_nav_classroom"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/icons/main_icon_level_shield_v3.png" id="26_nav_hotel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selected_nav"]
 bg_color = Color(1, 0.77, 0.2, 0.54)
@@ -1886,3 +1889,93 @@ text = "商店"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+
+[node name="BattleButton" type="TextureButton" parent="BottomNav"]
+layout_mode = 0
+offset_left = 154.0
+offset_top = 3.0
+offset_right = 222.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Icon" type="TextureRect" parent="BottomNav/BattleButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("24_nav_battle")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/BattleButton"]
+layout_mode = 0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "战场"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ClassroomButton" type="TextureButton" parent="BottomNav"]
+layout_mode = 0
+offset_left = 222.0
+offset_top = 3.0
+offset_right = 290.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Icon" type="TextureRect" parent="BottomNav/ClassroomButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("25_nav_classroom")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/ClassroomButton"]
+layout_mode = 0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "课堂"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HotelButton" type="TextureButton" parent="BottomNav"]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 3.0
+offset_right = 358.0
+offset_bottom = 69.0
+mouse_default_cursor_shape = 2
+ignore_texture_size = true
+
+[node name="Icon" type="TextureRect" parent="BottomNav/HotelButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_right = 50.0
+offset_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource("26_nav_hotel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="BottomNav/HotelButton"]
+layout_mode = 0
+offset_top = 33.0
+offset_right = 68.0
+offset_bottom = 59.0
+theme_override_colors/font_color = Color(0.36, 0.18, 0.05, 1)
+theme_override_font_sizes/font_size = 12
+text = "旅馆"
+horizontal_alignment = 1
+vertical_alignment = 1

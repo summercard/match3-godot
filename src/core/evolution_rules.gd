@@ -8,6 +8,17 @@ const ROLE_LABELS := {
 }
 
 
+static func get_evolution_cost(monster: Dictionary) -> Dictionary:
+	var evolution: Dictionary = monster.get("evolution", {})
+	var second_evolution := int(evolution.get("level", 1)) >= 30
+	var element := str(monster.get("element", "fire"))
+	return {
+		"gold": 10000 if second_evolution else 3000,
+		"item_id": "evolution_stone_%s" % element,
+		"item_count": 2 if second_evolution else 1
+	}
+
+
 static func build_preview(instance: Dictionary) -> Dictionary:
 	if instance.is_empty():
 		return {}

@@ -864,7 +864,7 @@ static func _build_chapter_stages(chapter: Dictionary) -> Array:
 		stage["rewards"] = _merge_rewards(stage.get("rewards", {}), _normal_rewards(chapter_num, stage_no), chapter_num, stage_no, false)
 		stage["designGoal"] = _normal_design_goal(chapter_num, stage_no)
 		stage["prepareHint"] = _normal_prepare_hint(chapter_num, stage_no)
-		stage["battleHint"] = _normal_battle_hint(chapter_num, stage_no)
+		stage["battleHint"] = _normal_battle_hint(chapter_num, stage_no) if chapter_num == 2 else ""
 		if stage_no > normal_seeds.size():
 			stage["targetLesson"] = _normal_target_lesson(stage_no)
 		elif not stage.has("targetLesson"):
@@ -906,7 +906,7 @@ static func _build_boss_stage(chapter: Dictionary, boss_seed: Dictionary, enemy_
 	boss["rewards"] = _merge_rewards(boss.get("rewards", {}), _boss_rewards(chapter_num), chapter_num, BOSS_STAGE_NO, true)
 	boss["designGoal"] = "Chapter %d boss: test the full chapter mechanic with a two-phase pressure spike." % chapter_num
 	boss["prepareHint"] = "Read the boss intent, keep guard/control skills ready, and save burst for the phase change."
-	boss["battleHint"] = "Stabilize before half HP, then spend charged skills to break the second phase quickly."
+	boss["battleHint"] = "喷泉旁实际消除水宝石可触发水击；雨区只允许水宝石参与交换与匹配。" if chapter_num == 2 else ""
 	boss["targetLesson"] = "boss_break"
 	_clear_generated_pressure(boss)
 	_apply_stage_pressure(boss, chapter_num, BOSS_STAGE_NO, true)
@@ -922,22 +922,23 @@ static func _chapter_number(chapter: Dictionary) -> int:
 static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
 	# ★ 主人定 2026-06-10：ch1 起步 Lv5，每章 +5 递增，每章内 9 关平拹 5 级
 	var chapter_base := 5 + (chapter_num - 1) * 5
-	return chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
+	var base_level := chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
+	return base_level if chapter_num == 1 and stage_no == 1 else base_level + 6
 
 static func _boss_enemy_level(chapter_num: int) -> int:
 	# ★ 主人定 2026-06-28：ch1 Boss = Lv10，每章 Boss +5
-	return 10 + (chapter_num - 1) * 5
+	return 16 + (chapter_num - 1) * 5
 
 static func _normal_max_turns(chapter_num: int, stage_no: int) -> int:
 	# 普通关仍保持短节奏；中后期机制关给少量读盘/清障空间。
-	return 16 + int(floor(float(chapter_num - 1) * 0.6)) + int(floor(float(stage_no - 1) / 4.0))
+	return 22 + int(floor(float(chapter_num - 1) * 0.6)) + int(floor(float(stage_no - 1) / 4.0))
 
 static func _boss_max_turns(chapter_num: int) -> int:
 	# Boss 不削血量，用回合预算承载两阶段厚度；后期额外给认真玩家试错空间。
 	var late_extra := maxi(0, chapter_num - 6) * 12
 	if chapter_num >= 10:
 		late_extra += 12
-	return 42 + (chapter_num - 1) * 9 + late_extra
+	return 48 + (chapter_num - 1) * 9 + late_extra
 
 static func _chapter_reward_multiplier(chapter_num: int) -> float:
 	# Ch1-Ch2 保持新手节奏；从 Ch3 起逐章抬高成长，避免中后期只靠重复扫荡补等级。
@@ -1035,11 +1036,9 @@ static func _normal_prepare_hint(chapter_num: int, stage_no: int) -> String:
 	return "Pre-boss stage: preserve HP and enter the next fight with a clear skill plan."
 
 static func _normal_battle_hint(chapter_num: int, stage_no: int) -> String:
-	if stage_no <= 3:
-		return "Prioritize clean 3-matches and charge the team evenly."
-	if stage_no <= 8:
-		return "Clear pressure tiles when they block cascades; attack when the lane opens."
-	return "Control the strongest enemy before it attacks, then burst the weakest target."
+	if chapter_num == 2 and stage_no >= 2:
+		return "喷泉旁实际消除水宝石可触发水击；雨区只允许水宝石参与交换与匹配。"
+	return ""
 
 static func _clear_generated_pressure(stage: Dictionary) -> void:
 	stage.erase("obstacles")
@@ -1104,7 +1103,7 @@ static func _fountain_rule(stage_no: int, is_boss: bool) -> Dictionary:
 		"eruptionCount": 1,
 		"range": "orthogonal_1",
 		"soakTurns": 1,
-		"fireVanishes": true
+		"fireVanishes": false
 	}
 
 static func _vine_pattern(stage_no: int, is_boss: bool) -> Array:

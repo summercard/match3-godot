@@ -82,7 +82,7 @@ var fountain_rule: Dictionary = {
 	"eruptionCount": 1,
 	"range": "orthogonal_1",
 	"soakTurns": 1,
-	"fireVanishes": true
+	"fireVanishes": false
 }
 
 ## 毒雾数据：poisonFog[row][col] = null 或 { active: true, turnsSinceSpread: 0 }
@@ -256,9 +256,17 @@ func is_tide_restricted(row: int, col: int) -> bool:
 	return str(grid[row][col]) != "water"
 
 func is_gem_playable(row: int, col: int) -> bool:
-	if is_locked(row, col) or is_soaked(row, col):
+	if is_locked(row, col):
+		return false
+	# 喷泉雨区只限制非水宝石；被浸湿的水宝石仍可交换与消除。
+	if is_soaked(row, col) and str(grid[row][col]) != "water":
 		return false
 	return not is_tide_restricted(row, col)
+
+
+func _is_match_chain_cell(row: int, col: int) -> bool:
+	# 雨区保护格不被移除，但不能截断同色连线的扫描。
+	return not is_blocked_cell(row, col) and not is_locked(row, col) and not is_tide_restricted(row, col)
 
 ## 检查某个格子是否有毒雾
 func is_poison_fog(row: int, col: int) -> bool:
@@ -444,7 +452,7 @@ func process_fountain_eruption() -> Dictionary:
 		if is_blocked_cell(row, col) or is_empty(row, col):
 			continue
 		var gem_type := str(grid[row][col])
-		if gem_type == "fire" and bool(fountain_rule.get("fireVanishes", true)):
+		if gem_type == "fire" and bool(fountain_rule.get("fireVanishes", false)):
 			grid[row][col] = ""
 			locked_gems[row][col] = null
 			soaked_gems[row][col] = null
@@ -816,20 +824,24 @@ func find_matches() -> Dictionary:
 		var c: int = 0
 		while c < cols - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or not is_gem_playable(r, c):
+			if gem_type == "" or gem_type == null or not _is_match_chain_cell(r, c):
 				c += 1
 				continue
-			if not is_blocked_cell(r, c + 1) and not is_blocked_cell(r, c + 2) and is_gem_playable(r, c + 1) and is_gem_playable(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
+			if _is_match_chain_cell(r, c + 1) and _is_match_chain_cell(r, c + 2) and grid[r][c + 1] == gem_type and grid[r][c + 2] == gem_type:
 				var end: int = c + 2
-				while end + 1 < cols and not is_blocked_cell(r, end + 1) and is_gem_playable(r, end + 1) and grid[r][end + 1] == gem_type:
+				while end + 1 < cols and _is_match_chain_cell(r, end + 1) and grid[r][end + 1] == gem_type:
 					end += 1
 				var length: int = end - c + 1
 				var cells: Array = []
 				for i: int in range(c, end + 1):
 					cells.append({ "row": r, "col": i })
-				h_groups.append({ "type": gem_type, "cells": cells, "length": length })
+				var has_protected := false
+				for cell: Dictionary in cells:
+					has_protected = has_protected or (is_soaked(int(cell["row"]), int(cell["col"])) and not is_gem_playable(int(cell["row"]), int(cell["col"])))
+				h_groups.append({ "type": gem_type, "cells": cells, "length": length, "has_protected": has_protected })
 				for i: int in range(c, end + 1):
-					_add_to_set(matches_keys, "%d,%d" % [r, i])
+					if is_gem_playable(r, i):
+						_add_to_set(matches_keys, "%d,%d" % [r, i])
 				c = end + 1
 			else:
 				c += 1
@@ -840,34 +852,38 @@ func find_matches() -> Dictionary:
 		var r: int = 0
 		while r < rows - 2:
 			var gem_type: String = grid[r][c]
-			if gem_type == "" or gem_type == null or is_blocked_cell(r, c) or not is_gem_playable(r, c):
+			if gem_type == "" or gem_type == null or not _is_match_chain_cell(r, c):
 				r += 1
 				continue
-			if not is_blocked_cell(r + 1, c) and not is_blocked_cell(r + 2, c) and is_gem_playable(r + 1, c) and is_gem_playable(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
+			if _is_match_chain_cell(r + 1, c) and _is_match_chain_cell(r + 2, c) and grid[r + 1][c] == gem_type and grid[r + 2][c] == gem_type:
 				var end: int = r + 2
-				while end + 1 < rows and not is_blocked_cell(end + 1, c) and is_gem_playable(end + 1, c) and grid[end + 1][c] == gem_type:
+				while end + 1 < rows and _is_match_chain_cell(end + 1, c) and grid[end + 1][c] == gem_type:
 					end += 1
 				var length: int = end - r + 1
 				var cells: Array = []
 				for i: int in range(r, end + 1):
 					cells.append({ "row": i, "col": c })
-				v_groups.append({ "type": gem_type, "cells": cells, "length": length })
+				var has_protected := false
+				for cell: Dictionary in cells:
+					has_protected = has_protected or (is_soaked(int(cell["row"]), int(cell["col"])) and not is_gem_playable(int(cell["row"]), int(cell["col"])))
+				v_groups.append({ "type": gem_type, "cells": cells, "length": length, "has_protected": has_protected })
 				for i: int in range(r, end + 1):
-					_add_to_set(matches_keys, "%d,%d" % [i, c])
+					if is_gem_playable(i, c):
+						_add_to_set(matches_keys, "%d,%d" % [i, c])
 				r = end + 1
 			else:
 				r += 1
 	
 	# ===== 第三阶段：分类 —— 5连→彩虹，4连→强化 =====
 	for g: Dictionary in h_groups:
-		if g["length"] >= 5:
+		if not bool(g.get("has_protected", false)) and g["length"] >= 5:
 			rainbow_matches.append({
 				"type": g["type"],
 				"direction": "horizontal",
 				"length": g["length"],
 				"matchCells": g["cells"]
 			})
-		elif g["length"] >= 4:
+		elif not bool(g.get("has_protected", false)) and g["length"] >= 4:
 			var mid_col: int = (g["cells"][0]["col"] + g["cells"][g["cells"].size() - 1]["col"]) / 2
 			enhanced_matches.append({
 				"row": g["cells"][0]["row"],
@@ -879,14 +895,14 @@ func find_matches() -> Dictionary:
 			})
 	
 	for g: Dictionary in v_groups:
-		if g["length"] >= 5:
+		if not bool(g.get("has_protected", false)) and g["length"] >= 5:
 			rainbow_matches.append({
 				"type": g["type"],
 				"direction": "vertical",
 				"length": g["length"],
 				"matchCells": g["cells"]
 			})
-		elif g["length"] >= 4:
+		elif not bool(g.get("has_protected", false)) and g["length"] >= 4:
 			var mid_row: int = (g["cells"][0]["row"] + g["cells"][g["cells"].size() - 1]["row"]) / 2
 			enhanced_matches.append({
 				"row": mid_row,
@@ -901,10 +917,10 @@ func find_matches() -> Dictionary:
 	var h3: Array = []
 	var v3: Array = []
 	for g: Dictionary in h_groups:
-		if g["length"] == 3:
+		if g["length"] == 3 and not bool(g.get("has_protected", false)):
 			h3.append(g)
 	for g: Dictionary in v_groups:
-		if g["length"] == 3:
+		if g["length"] == 3 and not bool(g.get("has_protected", false)):
 			v3.append(g)
 	
 	for hg: Dictionary in h3:

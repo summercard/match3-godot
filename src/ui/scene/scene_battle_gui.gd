@@ -421,6 +421,8 @@ func _sync_top_hud() -> void:
 func _sync_enemy_slots() -> void:
 	var enemy_count: int = mini(_battle.enemies.size(), 3)
 	var stage_slot := _control("Combatants/SingleEnemy")
+	_apply_tower_enemy_offset(stage_slot)
+	_apply_tower_enemy_offset(_control("Combatants/MultiEnemies"))
 	var featured_single := enemy_count == 1 and BattleCombatantRendererScript.uses_featured_single_layout(_battle.enemies[0])
 	stage_slot.visible = featured_single
 	_control("Combatants/MultiEnemies").visible = enemy_count > 1 or (enemy_count == 1 and not featured_single)
@@ -447,6 +449,14 @@ func _sync_enemy_slots() -> void:
 			_apply_hit_feedback(slot, true, enemy_index)
 			_apply_defeat_feedback(slot, true, enemy_index)
 			_apply_elastic_feedback(slot, true, enemy_index)
+
+
+func _apply_tower_enemy_offset(control: Control) -> void:
+	if control == null:
+		return
+	if not control.has_meta("v132_base_y"):
+		control.set_meta("v132_base_y", control.position.y)
+	control.position.y = float(control.get_meta("v132_base_y")) - (10.0 if _tower_mode else 0.0)
 
 func _sync_player_slots() -> void:
 	var player_count: int = mini(_battle.player_team.size(), 3)

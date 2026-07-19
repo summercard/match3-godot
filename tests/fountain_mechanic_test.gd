@@ -13,8 +13,9 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_stage_pressure_assignment()
-	_test_fountain_soaks_and_extinguishes()
-	_test_soaked_gem_blocks_swap_and_match()
+	_test_fountain_creates_rain_without_extinguishing()
+	_test_rain_only_protects_non_water_gems()
+	_test_fountain_attack_sources_are_unique()
 	_test_fountain_blocks_gravity()
 	_finish()
 
@@ -38,7 +39,7 @@ func _test_stage_pressure_assignment() -> void:
 	_expect(str(boss_ch2.get("fountainRule", {}).get("range", "")) == "orthogonal_1", "chapter 2 boss should use the normal four-direction fountain range")
 
 
-func _test_fountain_soaks_and_extinguishes() -> void:
+func _test_fountain_creates_rain_without_extinguishing() -> void:
 	var board = BoardScript.new(5, 5)
 	board.set_fountains([{"row": 2, "col": 2}], {"eruptionCount": 1, "range": "orthogonal_1"})
 	board.init_board()
@@ -49,22 +50,43 @@ func _test_fountain_soaks_and_extinguishes() -> void:
 	board.grid[3][2] = "thunder"
 	var result: Dictionary = HazardRulesScript.process_fountain_turn(board)
 	_expect(result.get("erupted", []).size() == 1, "one fountain should erupt")
-	_expect(result.get("extinguished", []).size() == 1, "adjacent fire gem should be extinguished")
-	_expect(board.grid[2][1] == "", "extinguished fire should leave an empty cell")
-	_expect(result.get("soaked", []).size() == 3, "non-fire adjacent gems should become soaked")
+	_expect(result.get("extinguished", []).is_empty(), "1.3.2 rain should not extinguish adjacent fire")
+	_expect(board.grid[2][1] == "fire", "rain should preserve the adjacent fire gem")
+	_expect(result.get("soaked", []).size() == 4, "all four adjacent gems should enter the rain area")
 	_expect(board.is_soaked(2, 3), "water gem next to fountain should be soaked")
-	_expect(board.grid[0][1] != "", "fountain eruption should not refill or apply gravity immediately")
+	_expect(board.grid[0][1] != "", "fountain eruption should not create an empty cell or apply gravity")
 
 
-func _test_soaked_gem_blocks_swap_and_match() -> void:
+func _test_rain_only_protects_non_water_gems() -> void:
 	var board = BoardScript.new(5, 5)
 	_fill_checker(board)
 	board.grid[1][0] = "water"
 	board.grid[1][1] = "water"
 	board.grid[1][2] = "water"
 	board.soaked_gems[1][1] = {"turns": 1}
-	_expect(board.find_matches().get("gems", []).is_empty(), "soaked gems should not participate in matches")
-	_expect(not board.swap(1, 1, 1, 2), "soaked gems should not be swappable")
+	var water_match: Array = board.find_matches().get("gems", [])
+	_expect(water_match.size() == 3, "water gems should still match inside rain")
+	_expect(board.is_gem_playable(1, 1), "water gems should still be swappable inside rain")
+	board.grid[1][0] = "grass"
+	board.grid[1][1] = "grass"
+	board.grid[1][2] = "grass"
+	var protected_match: Array = board.find_matches().get("gems", [])
+	_expect(protected_match.size() == 2, "a protected non-water gem should survive while the same-color chain resolves around it")
+	_expect(not board.is_gem_playable(1, 1), "a soaked non-water gem should not be swappable")
+	_expect(not protected_match.any(func(cell): return int(cell.get("row", -1)) == 1 and int(cell.get("col", -1)) == 1), "protected non-water gem must not be removed")
+
+
+func _test_fountain_attack_sources_are_unique() -> void:
+	var board = BoardScript.new(5, 5)
+	board.set_fountains([{"row": 2, "col": 2}, {"row": 2, "col": 4}], {})
+	board.init_board()
+	var sources := HazardRulesScript.fountain_attack_sources(board, [
+		{"row": 2, "col": 3, "type": "water"},
+		{"row": 1, "col": 2, "type": "water"},
+		{"row": 2, "col": 3, "type": "water"},
+		{"row": 3, "col": 4, "type": "grass"},
+	])
+	_expect(sources.size() == 2, "each adjacent fountain should trigger at most once per completed player action")
 
 
 func _test_fountain_blocks_gravity() -> void:

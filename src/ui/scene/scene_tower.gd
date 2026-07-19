@@ -55,7 +55,7 @@ func _refresh() -> void:
 	var state := _controller.get_state()
 	var floor := TowerRulesScript.current_floor_data(state)
 	_unlock_pill.visible = not unlocked
-	_unlock_text.text = "未解锁：通关主线第 8 关后开放"
+	_unlock_text.text = TowerDB.unlock_hint()
 	_unlock_text.modulate = Color(1.0, 0.70, 0.50)
 	_status_panel.position.y = 138.0 if unlocked else 122.0
 	_floor_value.text = "第 %d 层" % int(state.get("current_floor", 1))

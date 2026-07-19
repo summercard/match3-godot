@@ -17,26 +17,25 @@ func _run() -> void:
 		return
 	storage.clear_all_data()
 	var service := MailboxServiceScript.new(storage)
-	var owned: Array = storage.get_owned_monsters()
-	_expect(not owned.is_empty(), "default save should contain an adventurer")
-	if owned.is_empty():
-		_finish()
-		return
-	_expect(service.select_adventurer(str((owned[0] as Dictionary).get("instanceId", ""))), "an adventurer should be selectable for blessing delivery")
-	var sent := service.send_blessing()
-	_expect(bool(sent.get("ok", false)), "a simulated blessing should be available for the lobby arrival")
-	var mail: Dictionary = sent.get("pending_mail", {})
-	var mail_id := str(mail.get("id", ""))
-	var second_sent := service.send_blessing()
-	_expect(bool(second_sent.get("ok", false)), "a second blessing should join the same unread arrival batch")
-	var second_mail: Dictionary = second_sent.get("pending_mail", {})
-	var second_mail_id := str(second_mail.get("id", ""))
 	var queued_state: Dictionary = storage.get_mailbox_state()
 	var pending: Array = queued_state.get("pending_blessings", []).duplicate(true)
-	for index in range(pending.size()):
-		var pending_mail: Dictionary = pending[index]
-		pending_mail["deliver_at"] = int(Time.get_unix_time_from_system()) - 1
-		pending[index] = pending_mail
+	var mail_id := "legacy_lobby_arrival:first"
+	var second_mail_id := "legacy_lobby_arrival:second"
+	for index in range(2):
+		pending.append({
+			"id": mail_id if index == 0 else second_mail_id,
+			"source": "stranger_blessing",
+			"sender_name": "远方的冒险者",
+			"sender_monster_id": "monster_049",
+			"title": "迁移前排队的祝福",
+			"body": "旧存档中已经排队的来信仍会抵达。",
+			"attachments": [],
+			"created_at": int(Time.get_unix_time_from_system()) - 2,
+			"deliver_at": int(Time.get_unix_time_from_system()) - 1,
+			"read_at": null,
+			"claimed_at": null,
+			"reward_receipt_id": "mail_reward:%s" % (mail_id if index == 0 else second_mail_id),
+		})
 	queued_state["pending_blessings"] = pending
 	storage.save_mailbox_state(queued_state)
 
@@ -48,7 +47,7 @@ func _run() -> void:
 	var state: Dictionary = storage.get_mailbox_state()
 	var shown_ids: Array = state.get("lobby_arrival_shown_blessing_ids", [])
 	_expect(shown_ids.has(mail_id), "first lobby entry should persist the delivered blessing arrival")
-	_expect(not shown_ids.has(second_mail_id), "lobby should present one arrival at a time instead of overlapping effects")
+	_expect(shown_ids.has(second_mail_id), "one lobby effect should mark the entire delivered batch so effects cannot overlap")
 
 	main.switch_scene("mailbox")
 	await process_frame
@@ -65,7 +64,7 @@ func _run() -> void:
 	for shown_id in shown_ids:
 		if str(shown_id) == second_mail_id:
 			second_appearances += 1
-	_expect(second_appearances == 0, "a second arrival must not overlap the one already presented in this lobby session")
+	_expect(second_appearances == 1, "the second mail in the delivered batch must also remain marked without replay")
 
 	root.remove_child(main)
 	main.free()

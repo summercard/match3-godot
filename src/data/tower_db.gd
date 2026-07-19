@@ -5,7 +5,8 @@ extends RefCounted
 
 const MAX_FLOOR := 99
 const STAGE_SIZE := 5
-const UNLOCK_STAGE_ID := "stage_1_8"
+const UNLOCK_STAGE_ID := "stage_5_12"
+const UNLOCK_HINT := "未解锁：击败第 5 章最终 Boss 后开放"
 const START_ENEMY_LEVEL := 50
 
 const NORMAL_ENEMY_SETS := [
@@ -60,6 +61,10 @@ static func is_valid_floor(floor: int) -> bool:
 	return floor >= 1 and floor <= MAX_FLOOR
 
 
+static func unlock_hint() -> String:
+	return UNLOCK_HINT
+
+
 static func is_boss_floor(floor: int) -> bool:
 	return is_valid_floor(floor) and (floor % STAGE_SIZE == 0 or floor == MAX_FLOOR)
 
@@ -102,7 +107,7 @@ static func get_floor(floor: int) -> Dictionary:
 		"isBoss": boss,
 		"enemies": enemy_ids,
 		"enemyLevel": enemy_level,
-		"maxTurns": 28 + int(floor / 10) * 2 + (10 if boss else 0),
+		"maxTurns": 34 + int(floor / 10) * 2 + (10 if boss else 0),
 		"disableCapture": true,
 		"disableRandomElite": true,
 		"rewards": {},

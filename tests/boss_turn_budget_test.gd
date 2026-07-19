@@ -44,8 +44,8 @@ func _test_turn_budget_curve(db: StageDB) -> void:
 	_expect(int(normal_1_1.get("maxTurns", 0)) >= 16, "stage_1_1 should have a normal-stage turn budget")
 	_expect(int(normal_1_11.get("maxTurns", 0)) > int(normal_1_1.get("maxTurns", 0)), "late normal stages in a chapter should allow a little more room")
 	_expect(int(normal_11_11.get("maxTurns", 0)) > int(normal_1_11.get("maxTurns", 0)), "late chapters should allow more normal-stage mechanism room")
-	_expect(int(boss_1.get("maxTurns", 0)) == 42, "chapter 1 boss should keep a real challenge window, not the old fixed 20")
-	_expect(int(boss_6.get("maxTurns", 0)) == 87, "chapter 6 boss should use the base boss curve")
+	_expect(int(boss_1.get("maxTurns", 0)) == 48, "chapter 1 boss should include the 1.3.2 six-turn increase")
+	_expect(int(boss_6.get("maxTurns", 0)) == 93, "chapter 6 boss should include the 1.3.2 six-turn increase")
 	_expect(int(boss_10.get("maxTurns", 0)) >= 180, "late bosses should give engaged players enough turns without lowering boss HP")
 	_expect(int(boss_11.get("maxTurns", 0)) > int(boss_10.get("maxTurns", 0)), "final chapter boss should have the largest turn budget")
 

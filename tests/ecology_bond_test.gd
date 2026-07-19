@@ -41,22 +41,22 @@ func _test_starter_bond() -> void:
 func _test_bond_branches() -> void:
 	var starter_ids: Array = MonsterPoolScript.DEFAULT_STARTERS
 	var team := [
-		_make_unit(str(starter_ids[0]), {"socialExp": 70}, ["social_bold"]),
-		_make_unit(str(starter_ids[1]), {"socialExp": 55}, ["social_bold"]),
-		_make_unit(str(starter_ids[2]), {"socialExp": 20}, ["social_steady"])
+		_make_unit(str(starter_ids[0])),
+		_make_unit(str(starter_ids[1])),
+		_make_unit(str(starter_ids[2]))
 	]
+	# Legacy relationship fields stay load-compatible, but 1.3.2 must not use
+	# them to create current team branches.
+	team[0]["socialProfile"] = {"socialExp": 999}
+	team[1]["socialProfile"] = {"socialExp": 999}
+	team[0]["bondTraits"] = ["social_bold"]
+	team[1]["bondTraits"] = ["social_bold"]
 	var branches: Array = EcologyBondRulesScript.calc_team_bond_branches(team)
 	_expect(not branches.is_empty(), "team should produce bond branches")
-	var has_companion := false
-	var has_trait := false
 	for branch: Dictionary in branches:
-		if str(branch.get("id", "")) == "branch_companion":
-			has_companion = true
-		if str(branch.get("id", "")).begins_with("branch_trait_"):
-			has_trait = true
+		_expect(str(branch.get("id", "")) != "branch_companion", "legacy social exp should not activate a companion branch")
+		_expect(not str(branch.get("id", "")).begins_with("branch_trait_"), "legacy social traits should not activate a trait branch")
 		_expect(not branch.has("statBonus"), "first bond branch version should not expose stat bonus")
-	_expect(has_companion, "social exp should activate companion branch")
-	_expect(has_trait, "shared social style should activate trait branch")
 
 
 func _test_ecology_progress() -> void:
@@ -91,11 +91,9 @@ func _test_ecology_targets_without_rewards() -> void:
 	_expect(not role_target.has("reward"), "role target should not expose reward")
 
 
-func _make_unit(monster_id: String, social_profile: Dictionary, bond_traits: Array) -> Dictionary:
+func _make_unit(monster_id: String) -> Dictionary:
 	var unit: Dictionary = MonsterDBScript.get_monster(monster_id).duplicate(true)
 	unit["monsterId"] = monster_id
-	unit["socialProfile"] = social_profile
-	unit["bondTraits"] = bond_traits
 	return unit
 
 

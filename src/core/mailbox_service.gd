@@ -51,26 +51,13 @@ func send_blessing() -> Dictionary:
 		return {"ok": false, "error": "no_adventurer"}
 	var now := _now_unix()
 	var send_index := int(state.get("daily_send_count", 0))
-	var day_key := MailboxRulesScript.day_key_for_unix(now)
-	var seed := posmod(("blessing:%s:%s:%d" % [day_key, adventurer_id, send_index]).hash(), 2147483647)
-	var incoming: Dictionary = _provider.build_simulated_blessing(seed, adventurer)
-	incoming["id"] = "blessing:%s:%d:%s" % [day_key, send_index, adventurer_id]
-	incoming["created_at"] = now
-	incoming["read_at"] = null
-	incoming["claimed_at"] = null
-	incoming["reward_receipt_id"] = "mail_reward:%s" % str(incoming.get("id", ""))
 	state["daily_send_count"] = send_index + 1
 	var history: Array = state.get("sent_history", []).duplicate(true)
 	history.push_front({"adventurer_id": adventurer_id, "sent_at": now})
 	state["sent_history"] = history.slice(0, 20)
-	var queued := MailboxRulesScript.queue_blessing_for_delivery(state, incoming, now)
-	if not bool(queued.get("ok", false)):
-		return {"ok": false, "error": str(queued.get("error", "delivery_schedule_unavailable"))}
-	state = queued.get("state", state) as Dictionary
-	incoming["deliver_at"] = int(queued.get("deliver_at", 0))
 	if not _save_state(state):
 		return {"ok": false, "error": "save_failed"}
-	return {"ok": true, "pending_mail": incoming, "deliver_at": incoming["deliver_at"], "state": state}
+	return {"ok": true, "state": state}
 
 
 func create_tower_reward_mail(season_id: String, floor: int, reward: Dictionary) -> Dictionary:

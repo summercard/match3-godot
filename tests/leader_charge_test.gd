@@ -55,10 +55,10 @@ func _test_light_leader_burst_converts_gems() -> void:
 	var burst := _charge_and_consume(battle, _all_gems())
 	var converts := false
 	for effect: Dictionary in burst.get("effects", []):
-		if str(effect.get("kind", "")) == "convert_gems" and int(effect.get("count", 0)) == 2 and str(effect.get("target_element", "")) == "light":
+		if str(effect.get("kind", "")) == "convert_gems" and int(effect.get("requested_count", 0)) == 8 and str(effect.get("target_element", "")) == "light" and int(effect.get("edge_layers", 0)) == 2:
 			converts = true
 	_expect(str(burst.get("element", "")) == "light", "light leader should produce light burst")
-	_expect(converts, "light burst should request converting 2 other gems into light gems")
+	_expect(converts, "monster_035 should convert eight outer-two-ring gems into light gems")
 	battle.queue_free()
 
 

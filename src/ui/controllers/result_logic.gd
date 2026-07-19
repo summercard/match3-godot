@@ -334,6 +334,12 @@ func _process_capture() -> void:
 	var enemies: Array = _battle_result.get("enemies", [])
 	var target_enemy: Dictionary = {}
 	for enemy: Dictionary in enemies:
+		if enemy and bool(enemy.get("isElite", false)) and CaptureSystemScript.can_capture(enemy):
+			target_enemy = enemy
+			break
+	for enemy: Dictionary in enemies:
+		if not target_enemy.is_empty():
+			break
 		if enemy and enemy.get("hp", 0) > 0 and CaptureSystemScript.can_capture(enemy):
 			target_enemy = enemy
 			break
@@ -369,8 +375,12 @@ func _process_capture() -> void:
 		player = _storage.load_player()
 	var consecutive_fails: int = player.get("captureFails", 0)
 	_capture_window = CaptureSystemScript.calc_taming_window(target_enemy.get("hp", 0), target_enemy.get("maxHP", 1))
-	var prob: float = _calc_capture_probability(target_enemy.get("hp", 0), target_enemy.get("maxHP", 1), _battle_result.get("playerLevel", 1), _battle_result.get("enemyLevel", 1), enemy_rarity, consecutive_fails)
-	prob = minf(0.95, prob + float(item_use.get("bonus", 0.0)))
+	var prob: float = _calc_capture_probability(
+		target_enemy.get("hp", 0), target_enemy.get("maxHP", 1),
+		_battle_result.get("playerLevel", 1), _battle_result.get("enemyLevel", 1),
+		enemy_rarity, consecutive_fails, float(item_use.get("bonus", 0.0)),
+		bool(target_enemy.get("isElite", false))
+	)
 	_captured = randf() < prob
 	_capture_result = _get_capture_result_text(prob, _captured)
 	if _storage and _storage.has_method("load_player") and _storage.has_method("save_player"):
@@ -379,7 +389,7 @@ func _process_capture() -> void:
 		_storage.save_player(player_data)
 	_play_capture_effect()
 
-func _calc_capture_probability(hp: float, max_hp: float, player_level: int, enemy_level: int, rarity: int, consecutive_fails: int) -> float:
+func _calc_capture_probability(hp: float, max_hp: float, player_level: int, enemy_level: int, rarity: int, consecutive_fails: int, item_bonus: float = 0.0, is_elite: bool = false) -> float:
 	var stage_id := str(_battle_result.get("stageId", _battle_result.get("stage_id", "")))
 	var taming_window: Dictionary = _capture_window
 	if taming_window.is_empty():
@@ -387,7 +397,9 @@ func _calc_capture_probability(hp: float, max_hp: float, player_level: int, enem
 	return CaptureSystemScript.calc_capture_probability(hp, max_hp, player_level, enemy_level, rarity, {
 		"stage_id": stage_id,
 		"consecutive_fails": consecutive_fails,
-		"taming_window": taming_window
+		"taming_window": taming_window,
+		"item_bonus": item_bonus,
+		"is_elite": is_elite
 	})
 
 func _load_capture_preferences() -> Dictionary:

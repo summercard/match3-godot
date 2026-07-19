@@ -49,6 +49,7 @@ const STAT_LABELS := ["生命", "攻击", "防御", "速度"]
 
 var _album_page := 0
 var _locked_silhouette_material: ShaderMaterial = null
+var _detail_info_tab := "skill"
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -95,6 +96,8 @@ func _connect_gui_actions() -> void:
 	_connect_button("AlbumPage/PageControls/PreviousButton", _on_previous_page_pressed)
 	_connect_button("AlbumPage/PageControls/NextButton", _on_next_page_pressed)
 	_connect_button("DetailPanel/CloseButton", _on_detail_close_pressed)
+	_connect_button("DetailPanel/InfoTabs/SkillTab", _on_detail_info_tab_pressed.bind("skill"))
+	_connect_button("DetailPanel/InfoTabs/EcologyTab", _on_detail_info_tab_pressed.bind("ecology"))
 	for i in TAB_PATHS.size():
 		_connect_button(TAB_PATHS[i], _on_tab_pressed.bind(TAB_IDS[i]))
 	_connect_button("LobbyBottomNav/HomeButton", _go_to_scene.bind("main"))
@@ -170,6 +173,11 @@ func _page_for_monster(monster_id: String) -> int:
 func _on_detail_close_pressed() -> void:
 	_selected_monster_id = ""
 	_sync_gui()
+
+
+func _on_detail_info_tab_pressed(tab_id: String) -> void:
+	_detail_info_tab = tab_id if tab_id in ["skill", "ecology"] else "skill"
+	_sync_detail()
 
 func _on_tab_pressed(tab_id: String) -> void:
 	_selected_tab = tab_id
@@ -321,6 +329,7 @@ func _sync_detail() -> void:
 	_sync_detail_skill(monster)
 	_sync_detail_evolution(monster)
 	_sync_detail_ecology(monster)
+	_sync_detail_info_tab()
 
 func _detail_nature_text(monster_id: String) -> String:
 	return "个体性格随机" if not monster_id.is_empty() else ""
@@ -352,7 +361,7 @@ func _sync_detail_skill(monster: Dictionary) -> void:
 	_label("DetailPanel/SkillPanel/Name").text = str(skill.get("name", "未知技能"))
 	var skill_type := str(skill.get("type", "strike"))
 	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
-	_label("DetailPanel/SkillPanel/Desc").text = "能量 %d  %s %.1fx" % [int(skill.get("cost", 0)), type_label, float(skill.get("multiplier", 1.0))]
+	_label("DetailPanel/SkillPanel/Desc").text = "%s · 倍率 %.1fx" % [type_label, float(skill.get("multiplier", 1.0))]
 
 func _sync_detail_evolution(monster: Dictionary) -> void:
 	var id := str(monster.get("id", ""))
@@ -371,6 +380,23 @@ func _sync_detail_ecology(monster: Dictionary) -> void:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
 	var ecology: Dictionary = identity.get("ecology", {})
 	_label("DetailPanel/Ecology").text = "%s · %s" % [str(identity.get("roleLabel", "角色")), str(ecology.get("name", "生态"))]
+	var ecology_panel := get_node("DetailPanel/EcologyPanel") as RichTextLabel
+	ecology_panel.text = "[b]起源[/b]  %s\n[b]栖息地[/b]  %s\n[b]习性[/b]  %s\n[b]相处提示[/b]  %s" % [
+		str(ecology.get("origin", "尚待记录")), str(ecology.get("habitat", "尚待记录")),
+		str(ecology.get("niche", "尚待记录")), str(ecology.get("adventurerTip", "尚待记录"))
+	]
+
+
+func _sync_detail_info_tab() -> void:
+	var ecology_selected := _detail_info_tab == "ecology"
+	_node("DetailPanel/SkillPanel").visible = not ecology_selected
+	_node("DetailPanel/EvolutionStrip").visible = not ecology_selected
+	_label("DetailPanel/Ecology").visible = not ecology_selected
+	_node("DetailPanel/EcologyPanel").visible = ecology_selected
+	var skill_tab := get_node("DetailPanel/InfoTabs/SkillTab") as Button
+	var ecology_tab := get_node("DetailPanel/InfoTabs/EcologyTab") as Button
+	skill_tab.modulate = Color.WHITE if not ecology_selected else Color(0.65, 0.55, 0.42)
+	ecology_tab.modulate = Color.WHITE if ecology_selected else Color(0.65, 0.55, 0.42)
 
 func _sync_bond_page() -> void:
 	var progress: Array = EcologyBondRulesScript.get_ecology_progress(_all_monsters, _captured_ids)

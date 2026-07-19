@@ -388,7 +388,7 @@ func _draw_detail_skill(monster: Dictionary) -> void:
 	_draw_text(skill.get("name", "未知技能"), 94.0, DETAIL_Y + 187.0, C["text"], 11.0, 76.0)
 	var skill_type := str(skill.get("type", "strike"))
 	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
-	_draw_text("能量 %d  %s %.1fx" % [skill.get("cost", 0), type_label, skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 8.5, 76.0)
+	_draw_text("%s %.1fx" % [type_label, skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 9.0, 76.0)
 
 func _draw_detail_evolution(monster: Dictionary) -> void:
 	_draw_texture_fit(_tex(ALBUM_ASSETS["evolution_strip"]), Rect2(154.0, DETAIL_Y + 164.0, 188.0, 60.0))

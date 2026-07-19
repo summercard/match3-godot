@@ -175,7 +175,7 @@ func _test_remaining_formal_skills() -> void:
 		_expect(skill.has("visual"), "%s boss leader skill should have visual metadata" % boss_id)
 	_expect(is_equal_approx(LeaderSkillDb.get_leader_atk_boost(LeaderSkillDb.get_leader_skill("LS_MONSTER_069"), "water"), 1.25), "monster_069 should normalize frost damage to water +25%")
 	_expect(LeaderSkillDb.get_leader_combo_start(LeaderSkillDb.get_leader_skill("LS_MONSTER_083")) == 2, "monster_083 should grant opening combo +2")
-	_expect(is_equal_approx(LeaderSkillDb.get_leader_atk_boost(LeaderSkillDb.get_leader_skill("LS_MONSTER_086"), "dark"), 1.25), "monster_086 should normalize void damage to dark +25%")
+	_expect(is_equal_approx(LeaderSkillDb.get_leader_atk_boost(LeaderSkillDb.get_leader_skill("LS_MONSTER_086"), "dark"), 1.0), "monster_086 should remove its old void-damage passive")
 	_expect(is_equal_approx(LeaderSkillDb.get_leader_atk_boost(LeaderSkillDb.get_leader_skill("LS_MONSTER_103"), "fire"), 1.25), "monster_103 should grant fire damage +25%")
 	_expect(is_equal_approx(LeaderSkillDb.get_leader_hp_boost(LeaderSkillDb.get_leader_skill("LS_BOSS_001")), 1.25), "boss 001 should grant HP+25%")
 	_expect(is_equal_approx(LeaderSkillDb.get_leader_def_boost(LeaderSkillDb.get_leader_skill("LS_BOSS_002")), 0.82), "boss 002 should reduce damage by 18%")
@@ -188,8 +188,7 @@ func _test_boss_leader_skill_conversions() -> void:
 		"LS_BOSS_003": "light",
 		"LS_BOSS_004": "earth",
 		"LS_BOSS_006": "water",
-		"LS_BOSS_007": "dark",
-		"LS_BOSS_008": "fire"
+		"LS_BOSS_007": "dark"
 	}
 	for skill_id in expected_conversions:
 		var skill := LeaderSkillDb.get_leader_skill(skill_id)
@@ -204,6 +203,10 @@ func _test_boss_leader_skill_conversions() -> void:
 		var effects: Array = skill.get("burstEffects", [])
 		var effect: Dictionary = effects[0] if not effects.is_empty() else {}
 		_expect(str(effect.get("kind", "")) == "guard", "%s should stay as the shared guard boss skill" % guarded_skill_id)
+	var boss_008_effects: Array = LeaderSkillDb.get_leader_skill("LS_BOSS_008").get("burstEffects", [])
+	var boss_008: Dictionary = boss_008_effects[0] if not boss_008_effects.is_empty() else {}
+	_expect(str(boss_008.get("kind", "")) == "clear_element_gems_damage_highest_hp", "LS_BOSS_008 should clear fire gems and hit the highest-HP enemy")
+	_expect(str(boss_008.get("target_element", "")) == "fire" and is_equal_approx(float(boss_008.get("ratio", 0.0)), 0.2), "LS_BOSS_008 should deal ATK x20% per cleared fire gem")
 
 
 func _test_starter_line_custom_leader_skills() -> void:
@@ -260,11 +263,12 @@ func _test_water_freeze() -> void:
 func _test_dark_pierce() -> void:
 	var battle := _ready_battle("monster_084")
 	var burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
-	var pierced := false
+	var regenerates := false
 	for effect: Dictionary in burst.get("effects", []):
-		if str(effect.get("kind", "")) == "damage" and bool(effect.get("pierce", false)):
-			pierced = true
-	_expect(pierced, "void burst should deal piercing dark damage")
+		if str(effect.get("kind", "")) == "heal_over_time" and int(effect.get("turns", 0)) == 3 and is_equal_approx(float(effect.get("ratio", 0.0)), 0.2):
+			regenerates = true
+	_expect(regenerates, "monster_084 should grant three enemy actions of 20% self regeneration")
+	_expect(int(burst.get("damage", 0)) == 0, "monster_084 should no longer deal piercing dark damage")
 	_free_battle(battle)
 
 
@@ -283,14 +287,10 @@ func _test_grass_heal() -> void:
 
 
 func _test_light_convert() -> void:
-	var battle := _ready_battle("monster_035")
-	var burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
-	var converts := false
-	for effect: Dictionary in burst.get("effects", []):
-		if str(effect.get("kind", "")) == "convert_gems" and int(effect.get("count", 0)) == 2 and str(effect.get("target_element", "")) == "light":
-			converts = true
-	_expect(converts, "light burst should request two light gem conversions")
-	_free_battle(battle)
+	var effects: Array = LeaderSkillDb.get_leader_skill("LS_MONSTER_035").get("burstEffects", [])
+	var effect: Dictionary = effects[0] if not effects.is_empty() else {}
+	_expect(str(effect.get("kind", "")) == "convert_gems", "monster_035 should convert edge gems")
+	_expect(int(effect.get("count", 0)) == 8 and int(effect.get("edge_layers", 0)) == 2 and str(effect.get("target_element", "")) == "light", "monster_035 should convert eight non-light gems from the outer two rings")
 
 
 func _test_wind_weaken() -> void:

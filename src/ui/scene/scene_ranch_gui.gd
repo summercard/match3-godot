@@ -102,6 +102,9 @@ const HUB_RESOURCE_DURATION := 0.22
 const HUB_NAV_START := 0.18
 const HUB_NAV_STAGGER := 0.04
 const HUB_NAV_DURATION := 0.18
+const HARVEST_POP_DURATION := 0.10
+const HARVEST_FLOAT_DURATION := 0.34
+const HARVEST_FEEDBACK_DURATION := HARVEST_POP_DURATION + HARVEST_FLOAT_DURATION
 
 var _dynamic_gui_tick: float = 0.0
 var _status_gui_tick: float = 0.0
@@ -667,10 +670,10 @@ func _show_slot_harvest_float(slot_index: int, amount: int) -> void:
 	page.add_child(label)
 	var tween := create_tween()
 	_harvest_float_tweens.append(tween)
-	tween.tween_property(label, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "position", start_pos + Vector2(0.0, -12.0), 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(label, "position", start_pos + Vector2(0.0, -44.0), 1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_property(label, "scale", Vector2.ONE, HARVEST_POP_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "position", start_pos + Vector2(0.0, -12.0), HARVEST_POP_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "position", start_pos + Vector2(0.0, -44.0), HARVEST_FLOAT_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, HARVEST_FLOAT_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	tween.tween_callback(_cleanup_harvest_float.bind(label, tween))
 
 func _cleanup_harvest_float(label: Label, tween: Tween) -> void:
@@ -1493,15 +1496,12 @@ func _sync_social_place() -> void:
 	_sync_social_slot(panel.get_node("SlotB") as TextureButton, "slot_b", place)
 	(panel.get_node("Preview") as Label).text = _social_preview_text(place)
 	var detail := _social_relationship_detail(place)
-	var relation_text := "放入两只精灵后显示关系预览"
+	var relation_text := "放入两只精灵后显示学习概率"
 	if not detail.is_empty():
-		relation_text = "当前 %s · %d次 · 最高%d" % [str(detail.get("currentLabel", "未相识")), int(detail.get("count", 0)), int(detail.get("bestScore", 0))]
-		if not bool(detail.get("hasHistory", false)):
-			relation_text = "当前 未相识 · 预计%s · %d分" % [str(detail.get("nextLabel", "初识")), int(detail.get("nextScore", 0))]
+		relation_text = "性格学习概率 %d%%" % int(detail.get("successPercent", 0))
 	(panel.get_node("Relationship/Text") as Label).text = relation_text
 	var bond_panel := _node("Pages/SocialPage/BondPanel")
-	var relation_level := maxi(1, int(detail.get("currentLevel", 0)))
-	(bond_panel.get_node("BondTitle") as Label).text = "%s · 羁绊 Lv.%d" % [str(config.get("name", "社交场所")), relation_level]
+	(bond_panel.get_node("BondTitle") as Label).text = "%s · 1小时性格交流" % str(config.get("name", "社交场所"))
 	(bond_panel.get_node("ProgressText") as Label).text = relation_text
 	(bond_panel.get_node("Summary") as Label).text = _social_preview_text(place)
 	var progress_fill := bond_panel.get_node("ProgressFill") as Panel
@@ -1516,7 +1516,7 @@ func _social_bond_progress(place: Dictionary, detail: Dictionary) -> float:
 		return clampf(SocialRulesScript.progress(place), 0.06, 1.0)
 	if detail.is_empty():
 		return 0.0
-	return clampf(float(detail.get("bestScore", detail.get("nextScore", 0))) / 100.0, 0.08, 1.0)
+	return clampf(float(detail.get("successPercent", 0)) / 100.0, 0.08, 1.0)
 
 func _sync_social_heart_fx(place: Dictionary) -> void:
 	var should_run := place.get("started_at", null) != null
@@ -1699,22 +1699,13 @@ func _sync_result_popup() -> void:
 	if not popup.visible:
 		return
 	var result := _social_result_popup
-	var major: Dictionary = result.get("majorOutcome", {})
-	var tags: Array = result.get("tags", [])
 	var accent := TEXT_GOLD
-	if str(major.get("type", "none")) == "erosion":
-		accent = Color(1.0, 0.34, 0.30)
-	elif str(major.get("type", "none")) == "birth":
-		accent = Color(0.65, 1.0, 0.68)
-	elif tags.has("属性相克"):
-		accent = Color(1.0, 0.68, 0.18)
 	var title := popup.get_node("Panel/Title") as Label
 	title.text = _social_result_title(result)
 	title.modulate = accent
-	(popup.get_node("Panel/Score") as Label).text = "相性 %d · %s · 经验槽+%d · +%d金币" % [int(result.get("score", 0)), str(result.get("relation_label", "初识")), int(result.get("shared_exp_added", int(result.get("exp_each", 0)) * 2)), int(result.get("gold", 0))]
-	var event: Dictionary = result.get("event", {})
-	(popup.get_node("Panel/Event") as Label).text = str(event.get("name", "社交事件"))
-	(popup.get_node("Panel/Flavor") as Label).text = str(event.get("flavor", "关系发生了变化。"))
+	(popup.get_node("Panel/Score") as Label).text = "本次性格学习概率 %d%%" % int(result.get("success_percent", 0))
+	(popup.get_node("Panel/Event") as Label).text = str(result.get("place_name", "社交场所"))
+	(popup.get_node("Panel/Flavor") as Label).text = str(result.get("rule_text", ""))
 	var lines := _social_result_major_lines(result)
 	for i in 3:
 		var line := popup.get_node("Panel/Line%d" % (i + 1)) as Label

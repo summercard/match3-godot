@@ -20,7 +20,7 @@ func _run() -> void:
 		_expect(str(stages[i].get("id", "")) == "stage_1_%d" % (i + 1), "chapter 1 normal stage id should be sequential")
 		_expect(str(stages[i].get("type", "")) == "normal", "chapter 1 stages 1-11 should be normal")
 		_expect(not str(stages[i].get("prepareHint", "")).is_empty(), "normal stage should have prepare hint")
-		_expect(not str(stages[i].get("battleHint", "")).is_empty(), "normal stage should have battle hint")
+		_expect(str(stages[i].get("battleHint", "")).is_empty(), "ordinary stages should omit generic battle hints in 1.3.2")
 		_expect(not str(stages[i].get("designGoal", "")).is_empty(), "normal stage should have design goal")
 
 	var capture_stage: Dictionary = stage_db.get_stage("stage_1_2")
@@ -33,7 +33,7 @@ func _run() -> void:
 	_expect(boss_stage.get("targetLesson", "") == "boss_break", "stage_1_12 should expose boss lesson")
 	_expect(boss_stage.get("phases", []).size() == 2, "stage_1_12 should keep two-phase boss structure")
 	_expect(not str(boss_stage.get("prepareHint", "")).is_empty(), "boss prepare hint should teach counterplay")
-	_expect(not str(boss_stage.get("battleHint", "")).is_empty(), "boss battle hint should teach counterplay")
+	_expect(str(boss_stage.get("battleHint", "")).is_empty(), "non-fountain bosses should omit generic battle hints in 1.3.2")
 	var boss_items: Array = boss_stage.get("rewards", {}).get("guaranteedItems", [])
 	_expect(boss_items.size() == 1 and str(boss_items[0].get("id", "")) == "capture_ball_plus", "stage_1_12 should reward advanced capture ball")
 

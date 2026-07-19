@@ -33,6 +33,7 @@ func _run() -> void:
 
 	save_manager.update_monster_instance(instance_id, {"level": required_level})
 	save_manager.add_item("evolution_stone_grass", 1)
+	save_manager.add_gold(3000)
 	ranch.call("_load_data")
 	ranch.set("_class_selected_instance_id", instance_id)
 	ranch.call("_sync_gui")
@@ -40,6 +41,7 @@ func _run() -> void:
 	var evolved: Dictionary = save_manager.get_monster_instance(instance_id)
 	_expect(str(evolved.get("monsterId", "")) == target_id, "classroom evolution should use the current monster evolution target")
 	_expect(save_manager.get_item_count("evolution_stone_grass") == 0, "successful evolution should consume one current element stone")
+	_expect(int(save_manager.get_player().get("gold", -1)) == 0, "successful first-stage evolution should consume 3000 gold")
 	_expect(str(ranch.get("_status_text")).begins_with("进化成功"), "successful evolution should show confirmation feedback")
 	_expect(int(evolved.get("evolutionCount", 0)) == 1, "successful evolution should record its growth history")
 

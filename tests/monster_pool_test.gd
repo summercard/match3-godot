@@ -31,9 +31,9 @@ func _run() -> void:
 	_expect(str(first.get("instanceId", "")) != str(second.get("instanceId", "")), "same monster species should create distinct instances")
 	_expect(int(first.get("ownedNo", 0)) > 0, "newly added monster should return an owned number")
 	_expect(int(first.get("ownedNo", 0)) != int(second.get("ownedNo", 0)), "newly added monsters should receive distinct owned numbers")
-	_expect(first.get("socialProfile", {}).has("style"), "monster instance should expose social profile")
+	_expect((first.get("socialProfile", {}) as Dictionary).is_empty(), "new monster instances should not create removed social progression data")
 	_expect((first.get("bondTraits", []) as Array).size() >= 3, "monster instance should expose bond traits")
-	_expect(first.get("bondMemory", {}).has("partners"), "monster instance should expose bond memory")
+	_expect((first.get("bondMemory", {}) as Dictionary).is_empty(), "new monster instances should not create removed relationship memories")
 	_expect(save_manager.get_instances_by_monster_id("monster_001").size() >= 2, "monster_001 should allow multiple owned instances")
 
 	save_manager.save_team({"leader": first["instanceId"], "member1": second["instanceId"], "member2": null})
@@ -52,7 +52,7 @@ func _run() -> void:
 	_expect(view.get("ownedNoLabel", "") == MonsterService.format_owned_no(int(first.get("ownedNo", 0))), "MonsterService should format owned number")
 	_expect(view.get("stats", {}).has("atk"), "MonsterService should include calculated stats")
 	_expect(view.get("art", {}).has("battle"), "MonsterService should include art bundle")
-	_expect(view.get("socialProfile", {}).has("style"), "MonsterService should include social profile")
+	_expect((view.get("socialProfile", {}) as Dictionary).is_empty(), "MonsterService should preserve the simplified empty social profile")
 	_expect((view.get("bondTraits", []) as Array).size() >= 3, "MonsterService should include bond traits")
 	_expect(view.get("identity", {}).has("ecology"), "MonsterService should include ecology identity")
 
@@ -74,6 +74,7 @@ func _run() -> void:
 
 	var evolving: Dictionary = save_manager.add_monster_instance("monster_005", {"level": 16, "nature": "brave", "source": "test"})
 	save_manager.add_item("evolution_stone_wind", 1)
+	save_manager.add_gold(3000)
 	ranch_scene._active_page = "classroom"
 	ranch_scene._class_selected_instance_id = evolving["instanceId"]
 	ranch_scene._selected_slot = 0
@@ -82,6 +83,7 @@ func _run() -> void:
 	_expect(evolved.get("monsterId", "") == "monster_006", "classroom evolve should update monsterId and keep instanceId")
 	_expect(evolved.get("ownedNo", 0) == evolving.get("ownedNo", 0), "classroom evolve should keep owned number")
 	_expect(save_manager.get_item_count("evolution_stone_wind") == 0, "classroom evolve should consume evolution item")
+	_expect(int(save_manager.get_player().get("gold", -1)) == 0, "first-stage classroom evolution should consume 3000 gold")
 	ranch_scene.queue_free()
 
 	_finish()

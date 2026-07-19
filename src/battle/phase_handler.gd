@@ -21,7 +21,7 @@ var _current_phase: int = 1
 var _phase_configs: Array = []
 var _triggered_phases: Dictionary = {}  # { phaseNum: true }
 
-const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.08
+const DEFAULT_RANDOM_ELITE_CHANCE: float = 0.10
 const PHASE_TWO_VISUAL_SCALE_MULT: float = 1.5
 
 

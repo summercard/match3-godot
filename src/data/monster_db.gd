@@ -444,14 +444,15 @@ const MONSTER_DB: Dictionary = {
 		"baseHP": 195, "baseATK": 14, "baseDEF": 31, "baseSPD": 11,
 		"skill": {"name": "信使龟冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_053",
-		"evolution": {"level": 16, "target": "monster_055"}
+		"evolution": {"level": 16, "target": "monster_054"}
 	},
 	"monster_054": {
 		"id": "monster_054", "name": "破浪鬼", "element": "water",
 		"rarity": 1, "emoji": "",
 		"baseHP": 156, "baseATK": 19, "baseDEF": 13, "baseSPD": 16,
 		"skill": {"name": "破浪鬼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
-		"leaderSkill": "LS_MONSTER_054"
+		"leaderSkill": "LS_MONSTER_054",
+		"evolution": {"level": 30, "target": "monster_055"}
 	},
 	"monster_055": {
 		"id": "monster_055", "name": "超速闪电龟", "element": "thunder",

@@ -144,6 +144,7 @@ var _class_scroll_y: float = 0.0
 var _class_max_scroll_y: float = 0.0
 var _class_page: int = 0
 var _class_max_page: int = 0
+var _class_team_signature: String = ""
 var _dragging_class_list: bool = false
 var _class_selected_instance_id: String = ""
 var _last_drag_x: float = 0.0
@@ -351,6 +352,7 @@ func _switch_to_classroom() -> void:
 	if not _can_open_feature("classroom"):
 		return
 	_active_page = "classroom"
+	_class_page = 0
 	_load_data()
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
@@ -459,7 +461,7 @@ func _try_social_action() -> void:
 			var collect_result: Dictionary = _storage.collect_social(0)
 			if bool(collect_result.get("ok", false)):
 				var result: Dictionary = collect_result.get("result", {})
-				_show_status("%s 经验槽+%d +%d金币" % [result.get("label", "社交完成"), int(result.get("shared_exp_added", int(result.get("exp_each", 0)) * 2)), int(result.get("gold", 0))])
+				_show_status("%s：%s" % [result.get("label", "社交完成"), "、".join(result.get("changes", []))])
 				_social_result_popup = result.duplicate(true)
 				_load_data()
 				queue_redraw()
@@ -475,7 +477,7 @@ func _try_social_action() -> void:
 	if _storage != null and _storage.has_method("start_social"):
 		var result: Dictionary = _storage.start_social(0)
 		if bool(result.get("ok", false)):
-			_show_status("社交开始")
+			_show_status("性格交流开始，1小时后可结算")
 			_load_data()
 			queue_redraw()
 			return
@@ -549,6 +551,39 @@ func _refresh_captured_snapshot() -> void:
 		]
 	_rebuild_instance_index()
 
+
+func _classroom_team_signature() -> String:
+	if _storage == null or not _storage.has_method("load_team"):
+		return ""
+	var team: Dictionary = _storage.load_team()
+	var refs: Array[String] = []
+	for slot: String in ["leader", "member1", "member2"]:
+		refs.append(str(team.get(slot, "")))
+	return "|".join(refs)
+
+
+func _order_classroom_roster_by_team() -> void:
+	if _storage == null or not _storage.has_method("load_team"):
+		return
+	var team: Dictionary = _storage.load_team()
+	var ordered: Array = []
+	var included: Dictionary = {}
+	for slot: String in ["leader", "member1", "member2"]:
+		var instance_id := str(team.get(slot, ""))
+		if instance_id.is_empty() or included.has(instance_id):
+			continue
+		for monster: Dictionary in _captured_monsters:
+			if _get_instance_id(monster) == instance_id:
+				ordered.append(monster)
+				included[instance_id] = true
+				break
+	for monster: Dictionary in _captured_monsters:
+		var instance_id := _get_instance_id(monster)
+		if not included.has(instance_id):
+			ordered.append(monster)
+	_captured_monsters = ordered
+	_rebuild_instance_index()
+
 func _load_data() -> void:
 	_care_state_map.clear()
 	_slots_data = []
@@ -576,6 +611,12 @@ func _load_data() -> void:
 		]
 
 	_refresh_captured_snapshot()
+	if _active_page == "classroom":
+		var team_signature := _classroom_team_signature()
+		if team_signature != _class_team_signature:
+			_class_page = 0
+			_class_team_signature = team_signature
+		_order_classroom_roster_by_team()
 	if _class_selected_instance_id.is_empty() and not _captured_monsters.is_empty():
 		_class_selected_instance_id = _get_instance_id(_captured_monsters[0])
 	if _social_places.is_empty():
@@ -773,20 +814,15 @@ func _on_evolve_pressed() -> void:
 	if not bool(info.get("item_ok", false)):
 		_show_status("%s 不足" % str(info.get("item_name", "进化道具")))
 		return
+	if not bool(info.get("gold_ok", false)):
+		_show_status("金币不足，需要 %d" % int(info.get("required_gold", 0)))
+		return
 	var instance_id := str(info.get("instance_id", ""))
-	var required_item := str(info.get("required_item", ""))
 	if _storage == null or not _storage.has_method("evolve_instance"):
 		_show_status("进化系统不可用")
 		return
-	var item_consumed := false
-	if _storage != null and _storage.has_method("use_item") and not _storage.use_item(required_item, 1):
-		_show_status("%s 不足" % str(info.get("item_name", "进化道具")))
-		return
-	item_consumed = _storage.has_method("use_item")
 	var result: Dictionary = _storage.evolve_instance(instance_id)
 	if not bool(result.get("ok", false)):
-		if item_consumed and _storage.has_method("add_item"):
-			_storage.add_item(required_item, 1)
 		_show_status("进化失败：%s" % str(result.get("reason", "unknown")))
 		return
 	if _storage.has_method("add_achievement_progress"):
@@ -1100,41 +1136,20 @@ func _draw_social_relationship_detail(place: Dictionary) -> void:
 	var detail := _social_relationship_detail(place)
 	_draw_texture_three_slice(_tex(RANCH_ASSETS["relationship"]), SOCIAL_RELATION_RECT, 110.0, 110.0)
 	if detail.is_empty():
-		_draw_text("放入两只精灵后显示关系预览", SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 17.0, C["text_muted"], 10.0, SOCIAL_RELATION_RECT.size.x - 12.0)
+		_draw_text("放入两只精灵后显示学习概率", SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 17.0, C["text_muted"], 10.0, SOCIAL_RELATION_RECT.size.x - 12.0)
 		return
-	var title := "当前 %s · %d次 · 最高%d" % [
-		str(detail.get("currentLabel", "未相识")),
-		int(detail.get("count", 0)),
-		int(detail.get("bestScore", 0))
-	]
-	if not bool(detail.get("hasHistory", false)):
-		title = "当前 未相识 · 预计%s · %d分" % [str(detail.get("nextLabel", "初识")), int(detail.get("nextScore", 0))]
+	var title := "性格学习概率 %d%%" % int(detail.get("successPercent", 0))
 	_draw_text(title, SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 17.0, C["gold"], 10.0, SOCIAL_RELATION_RECT.size.x - 14.0)
 
 func _draw_social_result_popup() -> void:
 	var result := _social_result_popup
-	var major: Dictionary = result.get("majorOutcome", {})
-	var major_type := str(major.get("type", "none"))
-	var tags: Array = result.get("tags", [])
 	draw_rect(_scale_rect(Rect2(0, 0, DESIGN_W, DESIGN_H)), Color(0.0, 0.0, 0.0, 0.58))
 	var accent := C["gold"]
-	if major_type == "erosion":
-		accent = Color(1.0, 0.34, 0.30)
-	elif major_type == "birth":
-		accent = Color(0.65, 1.0, 0.68)
-	elif tags.has("属性相克"):
-		accent = Color(1.0, 0.68, 0.18)
 	_draw_texture_contain(_tex(RANCH_ASSETS["social_result"]), SOCIAL_RESULT_POPUP_RECT)
 	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 178.0, accent, 20.0, 260.0)
-	_draw_text("相性 %d · %s · +%dEXP · +%d金币" % [
-		int(result.get("score", 0)),
-		str(result.get("relation_label", "初识")),
-		int(result.get("exp_each", 0)),
-		int(result.get("gold", 0))
-	], DESIGN_W / 2.0, 206.0, C["text"], 10.0, 285.0)
-	var event: Dictionary = result.get("event", {})
-	_draw_text(str(event.get("name", "社交事件")), DESIGN_W / 2.0, 241.0, Color(0.76, 0.95, 1.0), 15.0, 260.0)
-	_draw_text(str(event.get("flavor", "关系发生了变化。")), DESIGN_W / 2.0, 266.0, C["text_muted"], 10.2, 276.0)
+	_draw_text("本次学习概率 %d%%" % int(result.get("success_percent", 0)), DESIGN_W / 2.0, 206.0, C["text"], 10.0, 285.0)
+	_draw_text(str(result.get("place_name", "社交场所")), DESIGN_W / 2.0, 241.0, Color(0.76, 0.95, 1.0), 15.0, 260.0)
+	_draw_text(str(result.get("rule_text", "")), DESIGN_W / 2.0, 266.0, C["text_muted"], 10.2, 276.0)
 	var lines := _social_result_major_lines(result)
 	var y := 323.0
 	for line in lines:
@@ -1143,54 +1158,14 @@ func _draw_social_result_popup() -> void:
 	_draw_code_button(SOCIAL_RESULT_CLOSE_RECT, "确认", true)
 
 func _social_result_title(result: Dictionary) -> String:
-	var major: Dictionary = result.get("majorOutcome", {})
-	match str(major.get("type", "none")):
-		"birth":
-			return "复合新生"
-		"erosion":
-			return "侵蚀警报"
-		_:
-			return str(result.get("label", "社交完成"))
+	return str(result.get("label", "性格交流完成"))
 
 func _social_result_major_lines(result: Dictionary) -> Array:
-	var major: Dictionary = result.get("majorOutcome", {})
-	match str(major.get("type", "none")):
-		"birth":
-			var created: Array = major.get("createdInstances", [])
-			var names: Array = []
-			for child in created:
-				if child is Dictionary:
-					var child_data: Dictionary = child
-					names.append(str(child_data.get("name", "复合幼体")))
-			if names.is_empty():
-				return ["产生了复合幼体计划，等待写入精灵池。"]
-			return [
-				"诞生 %d 只 Lv.1 复合幼体" % names.size(),
-				"新成员：%s" % "、".join(names.slice(0, 2)),
-				"已记录父母血缘与复合特质"
-			]
-		"erosion":
-			if bool(major.get("protected", false)):
-				return [
-					"%s 出现侵蚀冲动" % str(major.get("aggressorName", "侵蚀者")),
-					"%s 已受保护，未从精灵池删除" % str(major.get("victimName", "伙伴")),
-					"高风险确认流程尚未开启"
-				]
-			var effect: Dictionary = major.get("negativeEffect", {})
-			return [
-				"%s 吞噬了 %s" % [str(major.get("aggressorName", "侵蚀者")), str(major.get("victimName", "伙伴"))],
-				"获得额外 +%dEXP" % int(major.get("expGain", 0)),
-				"负面状态：%s" % str(effect.get("name", "侵蚀负担"))
-			]
-		_:
-			var tags: Array = result.get("tags", [])
-			var lines: Array = [
-				str(result.get("summary", "这次社交被记录到关系记忆。"))
-			]
-			if tags.has("属性相克"):
-				lines.append("⚠ 属性相克 · 侵蚀风险提高")
-			lines.append("标签：%s" % "、".join(tags))
-			return lines
+	var lines: Array = []
+	for change in result.get("changes", []):
+		lines.append(str(change))
+	lines.append("本次没有金币、经验、亲密度或繁育结果")
+	return lines
 
 func _draw_picker_card(monster_id: String, rect: Rect2, in_use: bool) -> void:
 	var highlighted := in_use or monster_id == _selected_monster_id()
@@ -1332,23 +1307,30 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 	var evolution: Dictionary = monster.get("evolution", {})
 	var target_id := str(evolution.get("target", ""))
 	var required_level := int(evolution.get("level", 1))
-	var required_item := str(evolution.get("item", _get_default_evolution_item(monster_id)))
+	var cost := EvolutionRulesScript.get_evolution_cost(monster)
+	var required_item := str(cost.get("item_id", evolution.get("item", _get_default_evolution_item(monster_id))))
+	var required_item_count := int(cost.get("item_count", 1))
+	var required_gold := int(cost.get("gold", 0))
 	var item_count: int = _storage.get_item_count(required_item) if _storage != null and _storage.has_method("get_item_count") else 0
+	var player_gold := int(_storage.load_player().get("gold", 0)) if _storage != null and _storage.has_method("load_player") else 0
 	var item_data: Dictionary = ItemDBScript.get_item(required_item)
 	var item_name := str(item_data.get("name", "进化道具"))
 	var level := int(instance.get("level", 1))
 	var has_evolution := not target_id.is_empty() and MonsterDb.has_monster(target_id)
 	var preview := EvolutionRulesScript.build_preview(instance)
 	var level_ok := level >= required_level
-	var item_ok: bool = item_count > 0
+	var item_ok: bool = item_count >= required_item_count
+	var gold_ok := player_gold >= required_gold
 	var condition := "无法进化"
 	if has_evolution:
-		condition = "Lv.%d / %s x1" % [required_level, item_name]
+		condition = "Lv.%d / %s x%d / %d金币" % [required_level, item_name, required_item_count, required_gold]
 		if level_ok and not item_ok:
-			condition = "%s不足(%d)" % [item_name, item_count]
+			condition = "%s不足(%d/%d)" % [item_name, item_count, required_item_count]
+		elif level_ok and item_ok and not gold_ok:
+			condition = "金币不足(%d/%d)" % [player_gold, required_gold]
 		elif not level_ok and item_ok:
 			condition = "等级不足(%d/%d)" % [level, required_level]
-		elif level_ok and item_ok:
+		elif level_ok and item_ok and gold_ok:
 			condition = "条件满足"
 	return {
 		"instance_id": instance_id,
@@ -1358,10 +1340,14 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 		"required_item": required_item,
 		"item_name": item_name,
 		"item_count": item_count,
+		"required_item_count": required_item_count,
+		"required_gold": required_gold,
+		"player_gold": player_gold,
 		"has_evolution": has_evolution,
 		"level_ok": level_ok,
 		"item_ok": item_ok,
-		"can_evolve": has_evolution and level_ok and item_ok,
+		"gold_ok": gold_ok,
+		"can_evolve": has_evolution and level_ok and item_ok and gold_ok,
 		"condition_text": condition,
 		"stat_summary": str(preview.get("stat_summary", "")),
 		"play_upgrade_text": "玩法: %s" % str(preview.get("play_upgrade", "稳定成长")) if has_evolution else "玩法: 已稳定",
@@ -1456,9 +1442,6 @@ func _social_preview_text(place: Dictionary) -> String:
 	if a_id.is_empty() or b_id.is_empty():
 		var last: Dictionary = place.get("last_result", {})
 		if not last.is_empty():
-			var last_major: Dictionary = last.get("majorOutcome", {})
-			if str(last_major.get("type", "none")) != "none":
-				return "%s：%s" % [str(last_major.get("name", "上次结果")), str(last_major.get("summary", ""))]
 			return str(last.get("summary", "上次社交完成"))
 		return "放入两只精灵后开始社交"
 	var a := _get_instance(a_id)
@@ -1466,11 +1449,7 @@ func _social_preview_text(place: Dictionary) -> String:
 	if a.is_empty() or b.is_empty():
 		return "社交对象异常"
 	var preview := SocialRulesScript.preview(a, b, place)
-	var major: Dictionary = preview.get("majorOutcome", {})
-	var major_text := ""
-	if str(major.get("type", "none")) != "none":
-		major_text = " · " + str(major.get("name", "特殊结果"))
-	return "%s %d分  关系:%s%s" % [preview.get("label", "社交"), int(preview.get("score", 0)), preview.get("relation_label", "初识"), major_text]
+	return "学习概率 %d%% · %s" % [int(preview.get("success_percent", 0)), str(preview.get("rule_text", ""))]
 
 func _social_event_text(place: Dictionary) -> String:
 	var a_id := str(place.get("slot_a", ""))
@@ -1478,39 +1457,16 @@ func _social_event_text(place: Dictionary) -> String:
 	if a_id.is_empty() or b_id.is_empty():
 		var last: Dictionary = place.get("last_result", {})
 		if not last.is_empty():
-			var last_major: Dictionary = last.get("majorOutcome", {})
-			if str(last_major.get("type", "none")) != "none":
-				return "%s：%s" % [str(last_major.get("name", "特殊结果")), str(last_major.get("rarity", "rare"))]
-			var event: Dictionary = last.get("event", {})
-			return "%s：%s" % [str(event.get("name", "上次事件")), str(last.get("relation_label", "关系"))]
-		return "选择两只精灵后预览事件"
+			return str(last.get("label", "上次性格学习已结算"))
+		return "选择两只精灵后预览学习结果"
 	var a := _get_instance(a_id)
 	var b := _get_instance(b_id)
 	if a.is_empty() or b.is_empty():
 		return ""
-	var preview := SocialRulesScript.preview(a, b, place)
-	var major: Dictionary = preview.get("majorOutcome", {})
-	if str(major.get("type", "none")) != "none":
-		return "%s：%s" % [str(major.get("name", "特殊结果")), str(major.get("summary", ""))]
-	var event: Dictionary = preview.get("event", {})
-	return "%s：%s / %s" % [str(event.get("name", "社交事件")), str(event.get("theme", "陪伴")), str(event.get("hook", "memory"))]
+	return "完成 1 小时交流后结算一次性格学习"
 
-func _social_event_flavor_text(place: Dictionary) -> String:
-	var a_id := str(place.get("slot_a", ""))
-	var b_id := str(place.get("slot_b", ""))
-	var event: Dictionary = {}
-	if a_id.is_empty() or b_id.is_empty():
-		var last: Dictionary = place.get("last_result", {})
-		event = last.get("event", {})
-	else:
-		var a := _get_instance(a_id)
-		var b := _get_instance(b_id)
-		if not a.is_empty() and not b.is_empty():
-			event = SocialRulesScript.preview(a, b, place).get("event", {})
-	var flavor := str(event.get("flavor", ""))
-	if flavor.is_empty():
-		return "事件内容会记录到关系记忆里。"
-	return flavor
+func _social_event_flavor_text(_place: Dictionary) -> String:
+	return "场所只影响学习概率，不产生资源、关系或数量型结果。"
 
 func _social_relationship_detail(place: Dictionary) -> Dictionary:
 	var a_id := str(place.get("slot_a", ""))

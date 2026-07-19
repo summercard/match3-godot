@@ -2,6 +2,7 @@ class_name EcologyBondRules
 extends RefCounted
 
 const MonsterDBScript = preload("res://src/data/monster_db.gd")
+const MonsterEcologyDBScript = preload("res://src/data/monster_ecology_db.gd")
 
 const ROLE_LABELS := {
 	"strike": "输出手",
@@ -32,6 +33,10 @@ static func get_monster_identity(monster: Dictionary) -> Dictionary:
 	var role := str(skill.get("type", "strike"))
 	var element := str(monster.get("element", "fire"))
 	var ecology: Dictionary = ECOLOGY_BY_ELEMENT.get(element, ECOLOGY_BY_ELEMENT["fire"]).duplicate(true)
+	var species_ecology := MonsterEcologyDBScript.get_ecology(monster)
+	if not species_ecology.is_empty():
+		for key in species_ecology:
+			ecology[key] = species_ecology[key]
 	var role_label := str(ROLE_LABELS.get(role, role))
 	return {
 		"role": role,
@@ -98,8 +103,6 @@ static func calc_team_bond_branches(units: Array) -> Array:
 	var roles: Dictionary = {}
 	var ecology_counts: Dictionary = {}
 	var ecology_names: Dictionary = {}
-	var social_exp_total := 0
-	var shared_traits: Dictionary = {}
 	var valid_count := 0
 	for unit: Dictionary in units:
 		if unit.is_empty():
@@ -115,13 +118,6 @@ static func calc_team_bond_branches(units: Array) -> Array:
 		var ecology_id := str(ecology.get("id", ""))
 		ecology_counts[ecology_id] = ecology_counts.get(ecology_id, 0) + 1
 		ecology_names[ecology_id] = ecology.get("name", ecology_id)
-		var profile: Dictionary = unit.get("socialProfile", {})
-		social_exp_total += int(profile.get("socialExp", 0))
-		for bond_trait in unit.get("bondTraits", []):
-			var trait_id := str(bond_trait)
-			if trait_id.is_empty():
-				continue
-			shared_traits[trait_id] = int(shared_traits.get(trait_id, 0)) + 1
 
 	var branches: Array = []
 	if roles.get("strike", 0) >= 1 and roles.get("ward", 0) >= 1 and roles.get("tempo", 0) >= 1:
@@ -159,37 +155,13 @@ static func calc_team_bond_branches(units: Array) -> Array:
 				"effectPreview": "后续可接章节机制抗性、生态目标或场地互动。",
 				"tags": ["同生态", "章节方向"]
 			})
-	if social_exp_total >= 120:
-		branches.append({
-			"id": "branch_companion",
-			"name": "同伴分支",
-			"level": 2 if social_exp_total >= 240 else 1,
-			"status": "active",
-			"summary": "队伍成员已有社交记忆，适合继续走牧场陪伴与进化启发路线。",
-			"playStyle": "长期陪伴",
-			"effectPreview": "后续可接社交场所、羁绊事件或进化分支。",
-			"tags": ["社交记忆", "牧场联动"]
-		})
-	for trait_id in shared_traits.keys():
-		if int(shared_traits[trait_id]) >= 2 and str(trait_id).begins_with("social_"):
-			branches.append({
-				"id": "branch_trait_%s" % trait_id,
-				"name": "性格默契分支",
-				"level": 1,
-				"status": "active",
-				"summary": "队伍中有相近社交风格的成员，适合触发更稳定的社交反馈。",
-				"playStyle": "默契成长",
-				"effectPreview": "后续可接社交成功率、事件文本或关系成长。",
-				"tags": ["社交风格", "性格联动"]
-			})
-			break
 	if branches.is_empty() and valid_count > 0:
 		branches.append({
 			"id": "branch_hint",
 			"name": "未成型",
 			"level": 0,
 			"status": "hint",
-			"summary": "补入守护、控场、同生态或有社交记忆的成员来形成分支。",
+			"summary": "补入守护、控场或同生态成员来形成分支。",
 			"playStyle": "待定",
 			"effectPreview": "当前只提示方向，不触发分支。",
 			"tags": ["提示"]
