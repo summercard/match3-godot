@@ -50,7 +50,7 @@ func _refresh() -> void:
 	if not is_node_ready():
 		return
 	_reason_label.text = "三只精灵先去休息一下" if _result == "lose" else "本波回合已经用完啦"
-	_checkpoint_label.text = "会从第 %d 层安全点重新出发" % _checkpoint_floor
+	_checkpoint_label.text = TranslationServer.translate("会从第 %d 层安全点重新出发") % _checkpoint_floor
 	var delivered := bool(_consolation.get("delivered", false))
 	_reward_cards.visible = delivered
 	if delivered:

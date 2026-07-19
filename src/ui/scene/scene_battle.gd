@@ -31,7 +31,7 @@ const TowerRulesScript = preload("res://src/core/tower_rules.gd")
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
 const TowerCardOverlayScene = preload("res://src/ui/scenes/tower_card_overlay.tscn")
 const TowerFailureOverlayScene = preload("res://src/ui/scenes/tower_failure_overlay.tscn")
-const FX_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const FX_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 ## 设计尺寸
 const DESIGN_W := 375.0
@@ -106,6 +106,7 @@ var _effective_damage_font: Font = null
 
 ## 消息
 var _message_text: String = ""
+var _message_style_source: String = ""
 var _message_timer: float = 0.0
 var _message_duration: float = 1.5
 
@@ -638,7 +639,7 @@ func init(data: Dictionary = {}) -> void:
 	
 	_init_battle()
 	_state = BattleState.IDLE
-	_show_message("%s 开始！" % _stage_data.get("name", "战斗"))
+	_show_message(TranslationServer.translate("%s 开始！") % _stage_data.get("name", "战斗"))
 
 ## ============================================
 # 初始化战斗
@@ -1028,10 +1029,10 @@ func _try_use_skill_at_position(pos: Vector2) -> bool:
 		var cost: int = int(skill.get("cost", 999))
 		var charge: int = int(_battle.skill_charges.get(monster_id, 0))
 		if monster.get("hp", 0) <= 0:
-			_show_message("%s 已无法行动" % monster.get("name", "伙伴"))
+			_show_message(TranslationServer.translate("%s 已无法行动") % monster.get("name", "伙伴"))
 			return true
 		if charge < cost:
-			_show_message("%s 充能 %d/%d" % [skill.get("name", "技能"), charge, cost])
+			_show_message(TranslationServer.translate("%s 充能 %d/%d") % [skill.get("name", "技能"), charge, cost])
 			return true
 		var result: Dictionary = _battle.use_active_skill(monster_id)
 		_apply_skill_result_visuals(result)
@@ -1045,7 +1046,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	if result.is_empty() or not result.get("success", false):
 		var reason: String = result.get("reason", "")
 		if reason == "not_ready":
-			_show_message("技能充能 %d/%d" % [result.get("charge", 0), result.get("cost", 0)])
+			_show_message(TranslationServer.translate("技能充能 %d/%d") % [result.get("charge", 0), result.get("cost", 0)])
 		else:
 			_show_message("技能暂时无法释放")
 		return
@@ -1065,8 +1066,8 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		target_idx = _find_enemy_index(result.get("target", ""))
 	var skill_element := str(result.get("element", "fire"))
 	if attacker_idx >= 0 and target_idx >= 0:
-		_start_attack_cue(false, attacker_idx, true, target_idx, skill_element, "%s 释放 %s → %s" % [attacker, skill_name, result.get("target", "敌人")], true)
-	_show_message("%s 释放 %s！" % [attacker, skill_name])
+		_start_attack_cue(false, attacker_idx, true, target_idx, skill_element, TranslationServer.translate("%s 释放 %s → %s") % [attacker, skill_name, result.get("target", "敌人")], true)
+	_show_message(TranslationServer.translate("%s 释放 %s！") % [attacker, skill_name])
 	_screen_flash_timer = 0.18
 	_trigger_attack_shake()
 	var popup_x: float = DESIGN_W / 2.0
@@ -1083,7 +1084,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			_show_message("属性克制！伤害提升", EFFECTIVE_MESSAGE_DURATION)
 	if shield_absorbed > 0:
 		_floating_texts.append({
-			"text": "盾-%d" % shield_absorbed,
+			"text": TranslationServer.translate("盾-%d") % shield_absorbed,
 			"x": popup_x,
 			"y": popup_y + 16.0,
 			"color": C["shield"],
@@ -1100,7 +1101,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 		if kind == "heal" or kind == "guard":
 			var player_idx := _find_player_index(str(effect.get("target_id", "")), str(effect.get("target", "")))
 			var card_rect := _get_player_card_rect(player_idx) if player_idx >= 0 else Rect2(DESIGN_W / 2.0 - 55.0, 187.0, 110.0, 58.0)
-			var text := "+%d" % int(effect.get("amount", 0)) if kind == "heal" else "护-%d%%" % int(round(float(effect.get("reduction", 0.0)) * 100.0))
+			var text := "+%d" % int(effect.get("amount", 0)) if kind == "heal" else TranslationServer.translate("护-%d%%") % int(round(float(effect.get("reduction", 0.0)) * 100.0))
 			_floating_texts.append({
 				"text": text,
 				"x": card_rect.position.x + card_rect.size.x / 2.0,
@@ -1114,7 +1115,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			var weaken_idx := int(effect.get("target_index", target_idx))
 			var wx := 25.0 + weaken_idx * 120.0 + 55.0 if weaken_idx >= 0 else popup_x
 			_floating_texts.append({
-				"text": "缚-%d%%" % int(round(float(effect.get("reduction", 0.0)) * 100.0)),
+				"text": TranslationServer.translate("缚-%d%%") % int(round(float(effect.get("reduction", 0.0)) * 100.0)),
 				"x": wx,
 				"y": 100.0,
 				"color": GEM_COLORS["grass"],
@@ -1123,7 +1124,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 				"duration": 0.9
 			})
 	if result.get("targetDied", false):
-		_fall_messages.append({"text": "%s 倒下了！" % result.get("target", "敌人"), "timer": 1.5})
+		_fall_messages.append({"text": TranslationServer.translate("%s 倒下了！") % result.get("target", "敌人"), "timer": 1.5})
 	if result.get("battleEnded", false):
 		_check_battle_end()
 
@@ -1350,7 +1351,7 @@ func _process_matches() -> void:
 				continue
 			var target_center := _combatant_effect_center(false, team_index)
 			_hit_flashes.append({"isEnemy": false, "monsterIndex": team_index, "timer": 0.45, "maxTimer": 0.45})
-			_floating_texts.append({"text": "落石 -%d" % int(hit.get("damage", 0)), "x": target_center.x, "y": target_center.y - 8.0, "color": OBSTACLE_COLORS.rock, "size": 17.0, "timer": 0.0, "duration": 0.82, "critical": true})
+			_floating_texts.append({"text": TranslationServer.translate("落石 -%d") % int(hit.get("damage", 0)), "x": target_center.x, "y": target_center.y - 8.0, "color": OBSTACLE_COLORS.rock, "size": 17.0, "timer": 0.0, "duration": 0.82, "critical": true})
 	_process_vine_resolution(removal_result.get("affected_gems", []))
 	
 	# ===== 第7步：伤害处理 =====
@@ -1387,7 +1388,7 @@ func _process_matches() -> void:
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.4, "maxTimer": 0.4})
 				_trigger_attack_shake()
 			if log_died:
-				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
+				_fall_messages.append({"text": TranslationServer.translate("💢 %s 倒下了！") % log_target, "timer": 1.5})
 		else:
 			# 找不到目标敌人在敌方列表，显示到中央
 			_floating_texts.append(_damage_floating_entry(log_damage, DESIGN_W / 2.0, 95.0, log_effective, log_weak, 18.0, 0.8, log_effective, log_element))
@@ -1445,7 +1446,7 @@ func _process_matches() -> void:
 		var new_enemies: Array = _battle.execute_phase_transition(phase_transition)
 		if not new_enemies.is_empty():
 			var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
-			_show_message("%s 进入激战状态！" % boss_name)
+			_show_message(TranslationServer.translate("%s 进入激战状态！") % boss_name)
 			_phase_transition_state = {
 				"phase": phase_transition.get("phase", 1),
 				"enemies": new_enemies,
@@ -1590,7 +1591,7 @@ func _handle_phase_transition_result(phase_transition: Dictionary) -> void:
 	if new_enemies.is_empty():
 		return
 	var boss_name: String = new_enemies[0].get("name", "BOSS") if new_enemies[0] != null else "BOSS"
-	_show_message("%s 杩涘叆婵€鎴樼姸鎬侊紒" % boss_name)
+	_show_message(TranslationServer.translate("%s 进入激战状态！") % boss_name)
 	_phase_transition_state = {
 		"phase": phase_transition.get("phase", 1),
 		"enemies": new_enemies,
@@ -1672,7 +1673,7 @@ func _trigger_special_elim(phase: Dictionary) -> void:
 				var cy: float = float(_board.offset_y + bomb["row"] * cell_size + cell_size / 2.0)
 				var shape: String = bomb.get("shape", "?")
 				_floating_texts.append({"text": "轰!", "x": cx, "y": cy - 10.0, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 0.8, "critical": true})
-				_show_message("%s形范围弹跳！" % shape)
+				_show_message(TranslationServer.translate("%s形范围弹跳！") % shape)
 		
 		"rainbow":
 			# 彩虹消除：延迟 200ms 后播放，全屏闪光 0.4s
@@ -1765,10 +1766,10 @@ func _start_enemy_turn() -> void:
 			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.4, "maxTimer": 0.4})
 		
 		elif log_type == "stun":
-			_show_message("%s 眩晕了，无法行动！" % enemy_name)
+			_show_message(TranslationServer.translate("%s 眩晕了，无法行动！") % enemy_name)
 		
 		elif log_type == "freeze":
-			_show_message("%s 冰冻中，ATK降低30%%！" % enemy_name)
+			_show_message(TranslationServer.translate("%s 冰冻中，ATK降低30%%！") % enemy_name)
 		
 		elif log_type.ends_with("_end"):
 			_show_message(log.get("message", ""))
@@ -1777,7 +1778,7 @@ func _start_enemy_turn() -> void:
 	for kill in result.get("dot_kills", []):
 		var idx: int = kill.get("enemy_index", -1)
 		var name: String = kill.get("enemy_name", "???")
-		_fall_messages.append({"text": "%s 被状态效果击杀！" % name, "timer": 1.5})
+		_fall_messages.append({"text": TranslationServer.translate("%s 被状态效果击杀！") % name, "timer": 1.5})
 	
 	for action: Dictionary in result.get("actions", []):
 		if str(action.get("type", "")) == "leader_regen":
@@ -1785,20 +1786,20 @@ func _start_enemy_turn() -> void:
 			if regen_idx >= 0:
 				var regen_center := _combatant_effect_center(false, regen_idx)
 				_leader_skill_fx.append({"kind": "ally_burst", "element": "grass", "tone": "heal", "center": regen_center, "timer": 0.58, "maxTimer": 0.58})
-				_floating_texts.append({"text": "+%d 回春" % int(action.get("heal_amount", 0)), "x": regen_center.x, "y": regen_center.y - 8.0, "color": C["heal_green"], "size": 17.0, "timer": 0.0, "duration": 0.8, "critical": true})
+				_floating_texts.append({"text": TranslationServer.translate("+%d 回春") % int(action.get("heal_amount", 0)), "x": regen_center.x, "y": regen_center.y - 8.0, "color": C["heal_green"], "size": 17.0, "timer": 0.0, "duration": 0.8, "critical": true})
 			continue
 		if bool(action.get("is_friendly_fire", false)):
 			var source_idx := int(action.get("enemy_index", -1))
 			var foe_idx := int(action.get("target_index", -1))
 			if source_idx >= 0 and foe_idx >= 0:
-				await _play_attack_observation(true, source_idx, true, foe_idx, str(action.get("element", "dark")), "%s 误伤 → %s" % [action.get("attacker", "敌人"), action.get("target", "敌人")], false)
+				await _play_attack_observation(true, source_idx, true, foe_idx, str(action.get("element", "dark")), TranslationServer.translate("%s 误伤 → %s") % [action.get("attacker", "敌人"), action.get("target", "敌人")], false)
 				var foe_center := _combatant_effect_center(true, foe_idx)
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": foe_idx, "timer": 0.5, "maxTimer": 0.5})
-				_floating_texts.append({"text": "误伤 -%d" % int(action.get("damage", 0)), "x": foe_center.x, "y": foe_center.y - 12.0, "color": C["danger"], "size": 18.0, "timer": 0.0, "duration": 0.9, "critical": true})
+				_floating_texts.append({"text": TranslationServer.translate("误伤 -%d") % int(action.get("damage", 0)), "x": foe_center.x, "y": foe_center.y - 12.0, "color": C["danger"], "size": 18.0, "timer": 0.0, "duration": 0.9, "critical": true})
 			continue
 		# 蓄力回合：只显示蓄力提示，不显示伤害
 		if action.get("is_charging", false):
-			_show_message("%s 正在蓄力..." % action.get("attacker", ""))
+			_show_message(TranslationServer.translate("%s 正在蓄力...") % action.get("attacker", ""))
 			var attacker_idx := _find_enemy_index(action.get("attacker", ""))
 			if attacker_idx >= 0:
 				if not _boss_skill_visuals.has(attacker_idx):
@@ -1825,32 +1826,24 @@ func _start_enemy_turn() -> void:
 				_sfx_attack_by_element(action_element)
 				var attack_label := "%s → %s" % [action.get("attacker", "敌人"), action.get("target", "伙伴")]
 				if action.get("is_charged", false):
-					attack_label = "%s 蓄力攻击 → %s" % [action.get("attacker", "敌人"), action.get("target", "伙伴")]
+					attack_label = TranslationServer.translate("%s 蓄力攻击 → %s") % [action.get("attacker", "敌人"), action.get("target", "伙伴")]
 				await _play_attack_observation(true, enemy_idx, false, target_idx, action_element, attack_label, action.get("is_charged", false))
 			if target_idx >= 0:
-				popup_x = 15.0 + target_idx * 120.0 + 55.0
-				popup_y = 218.0
+				var target_center := _combatant_effect_center(false, target_idx)
+				popup_x = target_center.x
+				popup_y = target_center.y - 12.0
 				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
 			_trigger_player_damage_edge_flash()
 			# 敌人攻击音（按敌人元素）
 			_sfx("battle_player_hit_cushion")
 			# 伤害数字加入队列（依次弹出，延迟编排）
-			var entry: Dictionary = {
-				"text": "-%d" % action.get("damage", 0),
-				"x": popup_x,
-				"y": popup_y,
-				"color": dmg_color,
-				"size": dmg_size,
-				"delay": _damage_popup_queue.size() * 0.1,
-				"elapsed": 0.0,
-				"duration": 0.8,
-				"critical": action.get("is_charged", false)
-			}
+			var entry := _enemy_damage_popup_entry(action, popup_x, popup_y, dmg_size, dmg_color, _damage_popup_queue.size() * 0.1)
 			if _damage_popup_queue.size() < 5:
 				_damage_popup_queue.append(entry)
+			_show_enemy_element_feedback(action, popup_x, popup_y)
 			if int(action.get("guard_absorbed", 0)) > 0:
 				_floating_texts.append({
-					"text": "护-%d" % int(action.get("guard_absorbed", 0)),
+					"text": TranslationServer.translate("护-%d") % int(action.get("guard_absorbed", 0)),
 					"x": popup_x,
 					"y": popup_y + 16.0,
 					"color": C["shield"],
@@ -1869,11 +1862,11 @@ func _start_enemy_turn() -> void:
 					"duration": 0.9
 				})
 			if action.get("is_weakened", false):
-				_show_message("%s 被束缚，伤害降低" % action.get("attacker", "敌人"))
+				_show_message(TranslationServer.translate("%s 被束缚，伤害降低") % action.get("attacker", "敌人"))
 			if int(action.get("reflect_damage", 0)) > 0 and enemy_idx >= 0:
 				var enemy_center := _combatant_effect_center(true, enemy_idx)
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.45, "maxTimer": 0.45})
-				_floating_texts.append({"text": "反伤 -%d" % int(action.get("reflect_damage", 0)), "x": enemy_center.x, "y": enemy_center.y - 12.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
+				_floating_texts.append({"text": TranslationServer.translate("反伤 -%d") % int(action.get("reflect_damage", 0)), "x": enemy_center.x, "y": enemy_center.y - 12.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": 0.85, "critical": true})
 			if enemy_idx >= 0 and target_idx >= 0:
 				await get_tree().create_timer(ATTACK_RECOVERY_DELAY).timeout
 	
@@ -1960,7 +1953,7 @@ func _advance_tower_after_battle() -> void:
 		_show_message("Boss 突破！阶段补给已寄往信箱，选择一张共鸣卡", 2.4)
 		_show_tower_card_choice(progress.get("cards", []))
 		return
-	_show_message("第 %d 层完成，下一波来袭！" % int(_tower_state.get("highest_floor", 0)), 1.4)
+	_show_message(TranslationServer.translate("第 %d 层完成，下一波来袭！") % int(_tower_state.get("highest_floor", 0)), 1.4)
 	await get_tree().create_timer(0.42).timeout
 	_start_tower_wave_from_state()
 
@@ -1979,7 +1972,7 @@ func _start_tower_wave_from_state() -> void:
 	_battle.begin_tower_wave(next_stage)
 	_state = BattleState.IDLE
 	_tower_transitioning = false
-	_show_message("%s · 第 %d/%d 波" % [str(next_stage.get("towerTheme", "共鸣塔")), int(next_stage.get("towerWave", 1)), int(next_stage.get("towerWaveCount", 5))])
+	_show_message(TranslationServer.translate("%s · 第 %d/%d 波") % [TranslationServer.translate(str(next_stage.get("towerTheme", "共鸣塔"))), int(next_stage.get("towerWave", 1)), int(next_stage.get("towerWaveCount", 5))])
 
 
 func _show_tower_card_choice(cards: Array) -> void:
@@ -2233,7 +2226,7 @@ func _trigger_inline_capture_miss() -> void:
 	_capture_item_used = {}
 	_capture_window = {}
 	_capture_result_text = {
-		"title": "MISS",
+		"title": "落空",
 		"desc": "战斗失败，无法收服。"
 	}
 
@@ -2280,13 +2273,14 @@ func _consume_selected_capture_item() -> Dictionary:
 ## ============================================
 
 func _show_message(text: String, duration: float = 1.5) -> void:
-	_message_text = _clean_battle_fx_text(text)
+	_message_style_source = _clean_battle_fx_text(text)
+	_message_text = TranslationServer.translate(_message_style_source)
 	_message_duration = maxf(0.1, duration)
 	_message_timer = _message_duration
 
 func _damage_floating_entry(damage: int, x: float, y: float, is_effective: bool, is_weak: bool, normal_size: float = 18.0, normal_duration: float = 0.9, force_critical: bool = false, element: String = "") -> Dictionary:
 	return {
-		"text": "克制！-%d" % damage if is_effective else "-%d" % damage,
+		"text": TranslationServer.translate("克制！-%d") % damage if is_effective else "-%d" % damage,
 		"x": x,
 		"y": y,
 		"color": _effective_damage_color(element) if is_effective else (C["text_muted"] if is_weak else C["gold"]),
@@ -2299,6 +2293,46 @@ func _damage_floating_entry(damage: int, x: float, y: float, is_effective: bool,
 		"bold": is_effective,
 		"element": element
 	}
+
+func _enemy_damage_popup_entry(action: Dictionary, x: float, y: float, normal_size: float, normal_color: Color, delay: float = 0.0) -> Dictionary:
+	var is_effective := bool(action.get("isEffective", action.get("is_effective", false)))
+	var is_weak := bool(action.get("isWeak", action.get("is_weak", false)))
+	var is_charged := bool(action.get("is_charged", false))
+	var entry := _damage_floating_entry(int(action.get("damage", 0)), x, y, is_effective, is_weak, normal_size, 0.8, is_charged, str(action.get("element", "")))
+	if not is_effective and not is_weak:
+		entry["color"] = normal_color
+	entry.erase("timer")
+	entry["delay"] = delay
+	entry["elapsed"] = 0.0
+	return entry
+
+func _enemy_element_feedback_text(action: Dictionary) -> String:
+	if bool(action.get("isEffective", action.get("is_effective", false))):
+		return "效果拔群"
+	if bool(action.get("isWeak", action.get("is_weak", false))):
+		return "效果不佳"
+	return ""
+
+func _show_enemy_element_feedback(action: Dictionary, x: float, y: float) -> void:
+	var feedback_text := _enemy_element_feedback_text(action)
+	if feedback_text.is_empty():
+		return
+	var is_effective := bool(action.get("isEffective", action.get("is_effective", false)))
+	var color := _effective_damage_color(str(action.get("element", ""))) if is_effective else C["text_muted"]
+	_show_message(feedback_text, EFFECTIVE_MESSAGE_DURATION if is_effective else 1.5)
+	_floating_texts.append({
+		"text": TranslationServer.translate(feedback_text),
+		"x": x,
+		"y": y + 18.0,
+		"color": color,
+		"size": 16.0 if is_effective else 13.0,
+		"timer": 0.0,
+		"duration": EFFECTIVE_DAMAGE_POPUP_DURATION if is_effective else 0.9,
+		"critical": is_effective,
+		"single_layer": true,
+		"bold": is_effective,
+		"element": str(action.get("element", "")),
+	})
 
 func _effective_damage_color(element: String) -> Color:
 	if GEM_COLORS.has(element):
@@ -2443,7 +2477,7 @@ func _handle_leader_charge_events(events: Array) -> void:
 			"maxTimer": 0.45
 		})
 		_floating_texts.append({
-			"text": "MAX",
+			"text": "已满",
 			"x": center.x,
 			"y": center.y + 30.0,
 			"color": _leader_fx_color(element),
@@ -2463,7 +2497,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 	var board_center := _board_center()
 	_trigger_element_glow(element, Color(color.r, color.g, color.b, 0.18))
 	_trigger_element_ripple(element, color)
-	_show_message("LEADER BURST")
+	_show_message("队长爆发")
 	_sfx("powerup_burst_soft")
 	_leader_skill_fx.append({
 		"kind": "crest",
@@ -2533,7 +2567,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				_floating_texts.append({"text": "+%d" % int(effect.get("amount", 0)), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"], "size": 20.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 			else:
 				_sfx("battle_shield_soft_bloom")
-				_floating_texts.append({"text": "GUARD", "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+				_floating_texts.append({"text": "守护", "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind == "team_shield":
 			_sfx("battle_shield_soft_bloom")
 			var targets: Array = effect.get("targets", [])
@@ -2550,7 +2584,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 					"timer": 0.76,
 					"maxTimer": 0.76
 				})
-				_floating_texts.append({"text": "护盾+%d" % int(target_info.get("amount", effect.get("amount", 0))), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 18.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
+				_floating_texts.append({"text": TranslationServer.translate("护盾+%d") % int(target_info.get("amount", effect.get("amount", 0))), "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["shield"], "size": 18.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind in ["convert_gems", "convert_element_gems_by_ratio", "convert_adjacent_gems_from_random_source"]:
 			var converted: Array = effect.get("cells", [])
 			if kind == "convert_gems" and not effect.has("cells"):
@@ -2568,7 +2602,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				continue
 			var e_center := _combatant_effect_center(true, e_idx)
 			_leader_skill_fx.append({"kind": "mark", "element": element, "tone": tone, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
-			var label := str(effect.get("status", "DOWN")).to_upper() if kind == "status" else "DOWN"
+			var label := str(effect.get("status", "倒下")).to_upper() if kind == "status" else "倒下"
 			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif effect.has("hits"):
 			var cleared_cells: Array = effect.get("cells", [])
@@ -2608,18 +2642,18 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 					continue
 				var ally_center := _combatant_effect_center(false, ally_index)
 				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": ally_center, "timer": 0.70, "maxTimer": 0.70})
-				var target_label := "回春 %d回合" % int(effect.get("turns", 3))
+				var target_label := TranslationServer.translate("回春 %d回合") % int(effect.get("turns", 3))
 				if kind == "grant_ally_charge":
-					target_label = "充能 +%d" % int(target_info.get("amount", effect.get("charge_amount", 1)))
+					target_label = TranslationServer.translate("充能 +%d") % int(target_info.get("amount", effect.get("charge_amount", 1)))
 				elif kind == "reflect_damage":
-					target_label = "反伤 %d回合" % int(effect.get("turns", 2))
+					target_label = TranslationServer.translate("反伤 %d回合") % int(effect.get("turns", 2))
 				_floating_texts.append({"text": target_label, "x": ally_center.x, "y": ally_center.y - 8.0, "color": C["heal_green"] if kind == "heal_over_time" else C["shield"], "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind in ["self_atk_boost", "self_damage_reduction"]:
 			var self_index := int(effect.get("target_index", -1))
 			if self_index >= 0:
 				var self_center := _combatant_effect_center(false, self_index)
 				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": self_center, "timer": 0.70, "maxTimer": 0.70})
-				var self_label := "攻击 +%d" % int(effect.get("amount", 0)) if kind == "self_atk_boost" else "减伤 %d%%" % int(round(float(effect.get("total_reduction", 0.0)) * 100.0))
+				var self_label := TranslationServer.translate("攻击 +%d") % int(effect.get("amount", 0)) if kind == "self_atk_boost" else TranslationServer.translate("减伤 %d%%") % int(round(float(effect.get("total_reduction", 0.0)) * 100.0))
 				_floating_texts.append({"text": self_label, "x": self_center.x, "y": self_center.y - 8.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 	await get_tree().create_timer(0.28).timeout
 
@@ -2756,7 +2790,7 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 	var shield_absorbed: int = damage_info.get("shieldAbsorbed", damage_info.get("shield_absorbed", 0))
 	if shield_absorbed > 0:
 		_floating_texts.append({
-			"text": "盾-%d" % shield_absorbed,
+			"text": TranslationServer.translate("盾-%d") % shield_absorbed,
 			"x": popup_x,
 			"y": popup_y + 18.0,
 			"color": C["shield"],
@@ -2806,29 +2840,21 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 	var popup_x: float = 80.0
 	var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
 	if target_idx >= 0:
-		popup_x = 15.0 + target_idx * 120.0 + 55.0
-		popup_y = 218.0
+		var target_center := _combatant_effect_center(false, target_idx)
+		popup_x = target_center.x
+		popup_y = target_center.y - 12.0
 		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.5, "maxTimer": 0.5})
 	_trigger_player_damage_edge_flash()
 
 	if _damage_popup_queue.size() < 5:
-		_damage_popup_queue.append({
-			"text": "-%d" % damage,
-			"x": popup_x,
-			"y": popup_y,
-			"color": dmg_color,
-			"size": dmg_size,
-			"delay": _damage_popup_queue.size() * 0.1,
-			"elapsed": 0.0,
-			"duration": 0.8,
-			"critical": is_charged
-		})
+		_damage_popup_queue.append(_enemy_damage_popup_entry(action_info, popup_x, popup_y, dmg_size, dmg_color, _damage_popup_queue.size() * 0.1))
+	_show_enemy_element_feedback(action_info, popup_x, popup_y)
 
 func _on_skill_ready(monster: Dictionary) -> void:
 	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
 	var monster_name: String = monster.get("name", "伙伴")
 	var skill_name: String = monster.get("skill", {}).get("name", "技能")
-	_show_message("%s 的 %s 充能完毕！" % [monster_name, skill_name])
+	_show_message(TranslationServer.translate("%s 的 %s 充能完毕！") % [monster_name, skill_name])
 
 	# 找到对应的玩家卡片位置
 	var team: Array = _battle.player_team if _battle != null else []
@@ -2871,18 +2897,18 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 		"charge_start":
 			vis["charge_timer"] = 999.0
 			vis["heal_floats"] = []  # 蓄力时清空治疗浮动记录
-			_show_message("%s 正在蓄力..." % enemy_name)
+			_show_message(TranslationServer.translate("%s 正在蓄力...") % enemy_name)
 		"charge_release":
 			vis["charge_timer"] = 0.0
 			var dmg_mult: float = event.get("damage_multiplier", 2.0)
-			_show_message("%s 蓄力攻击！×%.1f" % [enemy_name, dmg_mult])
+			_show_message(TranslationServer.translate("%s 蓄力攻击！×%.1f") % [enemy_name, dmg_mult])
 			_trigger_attack_shake()
 			_trigger_player_damage_edge_flash()
 			_screen_flash_timer = 0.3
 		"shield_appear":
 			vis["shield_hp"] = float(event.get("shield_hp", 0))
 			vis["shield_max_hp"] = float(event.get("shield_max_hp", 0))
-			_show_message("%s 生成了护盾！" % enemy_name)
+			_show_message(TranslationServer.translate("%s 生成了护盾！") % enemy_name)
 		"heal":
 			var heal_amount: int = event.get("heal_amount", 0)
 			var ex: float = 15.0 + idx * 120.0 + 55.0
@@ -2897,7 +2923,7 @@ func _on_enemy_skill_action(event: Dictionary) -> void:
 				"duration": 1.0,
 				"critical": true
 			})
-			_show_message("%s 回复了 %d HP！" % [enemy_name, heal_amount])
+			_show_message(TranslationServer.translate("%s 回复了 %d HP！") % [enemy_name, heal_amount])
 
 func _sync_boss_skill_visuals() -> void:
 	if _battle == null:
@@ -3296,7 +3322,7 @@ func _draw_title_bar() -> void:
 		var status: Dictionary = _battle.get_status()
 		if status.get("is_boss_battle", false):
 			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
-			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
+			_draw_text_with_shadow(TranslationServer.translate("阶段 %d/%d") % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
 
 func _draw_pause_button_backplate(rect: Rect2) -> void:
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(1.0, 0.93, 0.69, 0.96))
@@ -3400,7 +3426,8 @@ func _draw_selection() -> void:
 
 func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 	for ft in _floating_texts:
-		var text: String = _clean_battle_fx_text(str(ft.get("text", "")))
+		var source_text: String = _clean_battle_fx_text(str(ft.get("text", "")))
+		var text: String = TranslationServer.translate(source_text)
 		if text.is_empty():
 			continue
 		var x: float = ft.get("x", 0.0)
@@ -3420,13 +3447,14 @@ func _draw_floating_texts(canvas: CanvasItem = self) -> void:
 			continue
 		var fade: float = clampf(1.0 - maxf(0.0, progress - 0.68) / 0.32, 0.0, 1.0)
 		color.a *= fade
-		var style := "gold" if ft.get("critical", false) else _fx_text_style(text, color)
+		var style := "gold" if ft.get("critical", false) else _fx_text_style(source_text, color)
 		if _is_digit_fx_text(text):
 			_draw_digit_fx_text(canvas, text, x + wobble_x, float_y, size * pop, fade, style)
 		else:
 			_draw_fx_text(canvas, text, x + wobble_x, float_y, color, size * pop, 170.0, style)
 
 func _draw_single_layer_floating_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float) -> void:
+	text = TranslationServer.translate(text)
 	var max_width := 170.0
 	var font := _get_effective_damage_font()
 	var safe_text := BattleUIFeedbackScript.fit_text(font, text, max_width, size)
@@ -3521,9 +3549,9 @@ func _draw_leader_burst_showcase(canvas: CanvasItem = self) -> void:
 
 
 func _draw_leader_burst_banner(canvas: CanvasItem, timer: float) -> void:
-	var skill_name := str(_leader_burst_showcase.get("skill_name", "LEADER BURST"))
+	var skill_name := str(_leader_burst_showcase.get("skill_name", "队长爆发"))
 	if skill_name.is_empty():
-		skill_name = "LEADER BURST"
+		skill_name = "队长爆发"
 	var p := clampf(timer / maxf(0.01, LEADER_BURST_BANNER_DURATION), 0.0, 1.0)
 	var banner_w := 330.0
 	var center_x := DESIGN_W * 0.5
@@ -3627,8 +3655,8 @@ func _draw_bottom_bar() -> void:
 	elif _state != BattleState.IDLE:
 		status_text = "处理中..."
 	
-	_draw_text_with_shadow("回合 %d/%d" % [turn_count, max_turns], 232.0, bottom_y + 14.0, C["text_secondary"], 9.5, true)
-	_draw_text_with_shadow("连锁 %dx" % combo_count, 292.0, bottom_y + 14.0, C["gold"], 10.5, true)
+	_draw_text_with_shadow(TranslationServer.translate("回合 %d/%d") % [turn_count, max_turns], 232.0, bottom_y + 14.0, C["text_secondary"], 9.5, true)
+	_draw_text_with_shadow(TranslationServer.translate("连锁 %dx") % combo_count, 292.0, bottom_y + 14.0, C["gold"], 10.5, true)
 	_draw_text_with_shadow(status_text, 334.0, bottom_y + 14.0, state_color, 9.0, true)
 	_draw_capture_window_hint(bottom_y)
 	_draw_capture_toggle(bottom_y)
@@ -3660,7 +3688,7 @@ func _draw_capture_window_hint(base_y: float) -> void:
 		color = C["shield"]
 	elif state == "overpowered":
 		color = C["danger"]
-	_draw_text_with_shadow("捕捉 %s %d%%" % [label, stability], 277.0, base_y + 33.0, color, 8.8, true)
+	_draw_text_with_shadow(TranslationServer.translate("捕捉 %s %d%%") % [label, stability], 277.0, base_y + 33.0, color, 8.8, true)
 
 func _draw_capture_toggle(base_y: float) -> void:
 	var rect := _get_capture_toggle_rect(base_y)
@@ -3920,7 +3948,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 			_show_message("自动捕捉已开启，请选择捕捉球")
 		elif _auto_capture_enabled:
 			var item_def: Dictionary = ItemDB.get_item(_equipped_capture_item_id)
-			_show_message("自动捕捉：开启，使用%s" % item_def.get("name", "捕捉球"))
+			_show_message(TranslationServer.translate("自动捕捉：开启，使用%s") % item_def.get("name", "捕捉球"))
 		else:
 			_show_message("自动捕捉：关闭")
 		queue_redraw()
@@ -3949,7 +3977,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 			_try_use_item_at_slot(i)
 			return true
 		_selected_hotbar_slot = i
-		_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
+		_show_message(TranslationServer.translate("选中 %s x%d") % [def.get("name", "?"), item["count"]])
 		return true
 	return false
 
@@ -3970,7 +3998,7 @@ func _try_tap_capture_item_slots(x: float, y: float, bottom_y: float) -> bool:
 		_equipped_capture_item_id = item_id
 		_save_capture_preferences()
 		var bonus := float(def.get("effect", {}).get("captureBonus", 0.0))
-		_show_message("已激活 %s +%.0f%%" % [str(def.get("name", "捕获球")), bonus * 100.0])
+		_show_message(TranslationServer.translate("已激活 %s +%.0f%%") % [TranslationServer.translate(str(def.get("name", "捕获球"))), bonus * 100.0])
 		queue_redraw()
 		if has_method("_sync_gui"):
 			call("_sync_gui")
@@ -3983,7 +4011,7 @@ func _open_hotbar_item_confirm(slot_idx: int) -> void:
 	_pending_hotbar_slot = slot_idx
 	var item: Dictionary = _hotbar_items[slot_idx]
 	var def: Dictionary = ItemDB.get_item(str(item.get("id", "")))
-	_show_message("是否使用 %s？" % str(def.get("name", "道具")))
+	_show_message(TranslationServer.translate("是否使用 %s？") % TranslationServer.translate(str(def.get("name", "道具"))))
 	if has_method("_sync_gui"):
 		call("_sync_gui")
 	queue_redraw()
@@ -4046,7 +4074,7 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		_selected_hotbar_slot = slot_idx
 		_save_capture_preferences()
 		var bonus: float = float(def.get("effect", {}).get("captureBonus", 0.0))
-		_show_message("已选择 %s +%.0f%%" % [def.get("name", "捕获球"), bonus * 100.0])
+		_show_message(TranslationServer.translate("已选择 %s +%.0f%%") % [def.get("name", "捕获球"), bonus * 100.0])
 		queue_redraw()
 		return true
 	elif item_type == "battle":
@@ -4076,14 +4104,14 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		elif effect.has("convertType"):
 			used = _use_hotbar_gem_type_shift(def, effect)
 		else:
-			_show_message("%s 暂时无法使用" % def.get("name", "道具"))
+			_show_message(TranslationServer.translate("%s 暂时无法使用") % def.get("name", "道具"))
 			return true
 		if used:
 			_consume_hotbar_item(item_id, slot_idx)
 			call_deferred("_check_battle_end")
 		return true
 	else:
-		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
+		_show_message(TranslationServer.translate("%s 不能在战斗中使用") % def.get("name", "道具"))
 		return true
 
 func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
@@ -4127,7 +4155,7 @@ func _use_hotbar_heal(def: Dictionary, effect: Dictionary) -> bool:
 	if healed <= 0:
 		_show_message("队伍生命已满")
 		return false
-	_show_message("使用 %s，恢复 %d HP" % [def.get("name", "HP药水"), healed])
+	_show_message(TranslationServer.translate("使用 %s，恢复 %d HP") % [def.get("name", "HP药水"), healed])
 	_sfx("battle_heal_leaf_bubble")
 	return true
 
@@ -4150,12 +4178,12 @@ func _use_hotbar_guard(def: Dictionary, effect: Dictionary) -> bool:
 		applied += 1
 		var card := _get_player_card_rect(i)
 		_spawn_item_use_effect("guard", card.get_center(), C["shield"], 0.90, {"scale": 1.08})
-		_floating_texts.append({"text": "护-%d%%" % int(round(reduction * 100.0)), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["shield"], "size": 14.0, "timer": 0.0, "duration": 0.9})
+		_floating_texts.append({"text": TranslationServer.translate("护-%d%%") % int(round(reduction * 100.0)), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["shield"], "size": 14.0, "timer": 0.0, "duration": 0.9})
 	if applied <= 0:
 		_show_message("没有可守护的队员")
 		return false
 	_battle.set("player_guards", guards)
-	_show_message("使用 %s，全队获得护盾" % def.get("name", "护符"))
+	_show_message(TranslationServer.translate("使用 %s，全队获得护盾") % def.get("name", "护符"))
 	_sfx("battle_shield_soft_bloom")
 	return true
 
@@ -4195,7 +4223,7 @@ func _use_hotbar_obstacle_damage(def: Dictionary, effect: Dictionary) -> bool:
 		_apply_gravity()
 	_board_shake_timer = maxf(_board_shake_timer, 0.22)
 	_sfx("powerup_burst_soft")
-	_show_message("使用 %s，处理 %d 块岩石" % [def.get("name", "破岩锤"), touched])
+	_show_message(TranslationServer.translate("使用 %s，处理 %d 块岩石") % [def.get("name", "破岩锤"), touched])
 	queue_redraw()
 	return true
 
@@ -4230,7 +4258,7 @@ func _use_hotbar_unlock(def: Dictionary, effect: Dictionary) -> bool:
 	if touched <= 0:
 		_show_message("当前没有锁链宝石")
 		return false
-	_show_message("使用 %s，解除 %d 处锁链" % [def.get("name", "钥匙"), maxi(touched, unlocked)])
+	_show_message(TranslationServer.translate("使用 %s，解除 %d 处锁链") % [def.get("name", "钥匙"), maxi(touched, unlocked)])
 	queue_redraw()
 	return true
 
@@ -4256,7 +4284,7 @@ func _use_hotbar_clear_poison(def: Dictionary, effect: Dictionary) -> bool:
 	if cleared <= 0:
 		_show_message("当前没有毒雾")
 		return false
-	_show_message("使用 %s，清除 %d 格毒雾" % [def.get("name", "净雾露"), cleared])
+	_show_message(TranslationServer.translate("使用 %s，清除 %d 格毒雾") % [def.get("name", "净雾露"), cleared])
 	queue_redraw()
 	return true
 
@@ -4282,12 +4310,12 @@ func _use_hotbar_charge(def: Dictionary, effect: Dictionary) -> bool:
 		total_gain += after - before
 		var card := _get_player_card_rect(i)
 		_spawn_item_use_effect("charge", card.get_center(), C["gold"], 0.88, {"scale": 1.0})
-		_floating_texts.append({"text": "+%d 能量" % (after - before), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.85})
+		_floating_texts.append({"text": TranslationServer.translate("+%d 能量") % (after - before), "x": card.get_center().x, "y": card.position.y + 10.0, "color": C["gold"], "size": 13.0, "timer": 0.0, "duration": 0.85})
 	if total_gain <= 0:
 		_show_message("技能能量已满")
 		return false
 	_battle.set("skill_charges", charges)
-	_show_message("使用 %s，补充 %d 点能量" % [def.get("name", "水晶"), total_gain])
+	_show_message(TranslationServer.translate("使用 %s，补充 %d 点能量") % [def.get("name", "水晶"), total_gain])
 	queue_redraw()
 	return true
 
@@ -4302,7 +4330,7 @@ func _use_hotbar_board_reset(def: Dictionary, effect: Dictionary) -> bool:
 	var center_y := float(_board.offset_y) + float(_board.rows) * float(_board.cell_size) * 0.5
 	_spawn_item_use_effect("board_reset", Vector2(center_x, center_y), C["gold"], 0.95, {"cols": _board.cols, "rows": _board.rows})
 	_floating_texts.append({"text": "棋盘重置！", "x": center_x, "y": center_y, "color": C["gold"], "size": 18.0, "timer": 0.0, "duration": 1.0})
-	_show_message("使用 %s，整盘宝石已重置" % def.get("name", "棋盘重置"))
+	_show_message(TranslationServer.translate("使用 %s，整盘宝石已重置") % def.get("name", "棋盘重置"))
 	_sfx("battle_heal_leaf_bubble")
 	queue_redraw()
 	return true
@@ -4329,7 +4357,7 @@ func _use_hotbar_absorb_shield(def: Dictionary, effect: Dictionary) -> bool:
 		_show_message("没有可守护的队员")
 		return false
 	_battle.set("player_absorb_shields", shields)
-	_show_message("使用 %s，全队获得一次性护盾" % def.get("name", "强能护盾"))
+	_show_message(TranslationServer.translate("使用 %s，全队获得一次性护盾") % def.get("name", "强能护盾"))
 	_sfx("battle_shield_soft_bloom")
 	queue_redraw()
 	return true
@@ -4397,8 +4425,9 @@ func _draw_message(canvas: CanvasItem = self) -> void:
 	
 	var alpha: float = mini(1.0, _message_timer)
 	var progress: float = clampf(1.0 - _message_timer / maxf(0.1, _message_duration), 0.0, 1.0)
-	var is_turn_message := _is_turn_message(_message_text)
-	var is_major_message := is_turn_message or _is_major_battle_message(_message_text)
+	var style_source := _message_style_source if not _message_style_source.is_empty() else _message_text
+	var is_turn_message := _is_turn_message(style_source)
+	var is_major_message := is_turn_message or _is_major_battle_message(style_source)
 	var pop: float = 1.0 + sin(clampf(progress / 0.24, 0.0, 1.0) * PI) * (0.16 if is_major_message else 0.08)
 	var toast_y: float = float(_board.offset_y) + 28.0 if _board != null else 328.0
 	if is_turn_message:
@@ -4410,8 +4439,8 @@ func _draw_message(canvas: CanvasItem = self) -> void:
 	var toast_w := clampf(text_w + (76.0 if is_turn_message else 56.0), 186.0, 288.0) * pop
 	var toast_h := (44.0 if is_turn_message else (36.0 if is_major_message else 31.0)) * pop
 
-	var msg_style := _message_fx_style(_message_text)
-	var msg_color := _message_fx_color(_message_text, alpha)
+	var msg_style := _message_fx_style(style_source)
+	var msg_color := _message_fx_color(style_source, alpha)
 	if is_major_message:
 		canvas.draw_arc(Vector2(DESIGN_W / 2.0, toast_y + 1.0), (92.0 if is_turn_message else 74.0) * pop, -0.08 * PI, 1.08 * PI, 46, Color(msg_color.r, msg_color.g, msg_color.b, 0.22 * alpha), 2.6, true)
 		canvas.draw_circle(Vector2(DESIGN_W / 2.0 - toast_w * 0.42, toast_y - toast_h * 0.18), 2.4 * pop, Color(1.0, 1.0, 0.78, 0.55 * alpha))
@@ -5397,6 +5426,7 @@ func _draw_rounded_rect_outline_on(canvas: CanvasItem, x: float, y: float, w: fl
 	_draw_stroke_rect_on(canvas, x, y, w, h, line_width, color)
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, center: bool = false) -> void:
+	text = TranslationServer.translate(text)
 	var font: Font = FX_ROUND_FONT
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER if center else HORIZONTAL_ALIGNMENT_LEFT
 	if center:
@@ -5579,6 +5609,7 @@ func _draw_text_with_shadow_on(canvas: CanvasItem, text: String, x: float, y: fl
 	BattleUIFeedbackScript.draw_text_with_shadow(canvas, text, x, y, color, size, 200.0, HORIZONTAL_ALIGNMENT_CENTER, bold)
 
 func _draw_hp_text_in_bar(text: String, rect: Rect2, color: Color) -> void:
+	text = TranslationServer.translate(text)
 	var font := FX_ROUND_FONT
 	var size: int = int(round(clampf(rect.size.y * 0.36, 3.4, 5.0)))
 	var max_width: float = maxf(12.0, rect.size.x - 12.0)
@@ -5593,6 +5624,7 @@ func _draw_hp_text_in_bar(text: String, rect: Rect2, color: Color) -> void:
 func _draw_battle_end_text_on(canvas: CanvasItem, text: String, center: Vector2, color: Color, size: float, max_width: float) -> void:
 	if text.is_empty():
 		return
+	text = TranslationServer.translate(text)
 	var safe_text := BattleUIFeedbackScript.fit_text(FX_ROUND_FONT, text, max_width, size)
 	var left := center.x - max_width / 2.0
 	var baseline_y := center.y + (FX_ROUND_FONT.get_ascent(size) - FX_ROUND_FONT.get_descent(size)) * 0.5
@@ -5609,6 +5641,7 @@ func _get_combo_count_font() -> Font:
 func _draw_fx_text(canvas: CanvasItem, text: String, x: float, y: float, color: Color, size: float, max_width: float = 190.0, style: String = "normal") -> void:
 	if text.is_empty():
 		return
+	text = TranslationServer.translate(text)
 	var safe_text := BattleUIFeedbackScript.fit_text(FX_ROUND_FONT, text, max_width, size)
 	var left := x - max_width / 2.0
 	var palette := _fx_text_palette(style, color)
@@ -5633,7 +5666,7 @@ func _draw_combo_art_text(canvas: CanvasItem, combo: int, cx: float, cy: float, 
 		var word_w := word_h * (tex_size.x / maxf(1.0, tex_size.y))
 		_draw_texture_fit_on(canvas, combo_tex, Rect2(cx - 112.0 * scale, cy - 42.0 * scale, word_w, word_h), opacity)
 	else:
-		_draw_fx_text(canvas, "COMBO", cx - 24.0 * scale, cy + 1.0 * scale, Color(1.0, 0.72, 0.22, opacity), 27.0 * scale, 172.0 * scale, "combo_number")
+		_draw_fx_text(canvas, "连击", cx - 24.0 * scale, cy + 1.0 * scale, Color(1.0, 0.72, 0.22, opacity), 27.0 * scale, 172.0 * scale, "combo_number")
 	_draw_combo_count_text(canvas, "X%d" % combo, cx + 112.0 * scale, cy + 7.0 * scale, 58.0 * scale)
 	var accent := Color(1.0, 0.98, 0.62, 0.54 * opacity)
 	canvas.draw_line(Vector2(cx - 96.0 * scale, cy + 20.0 * scale), Vector2(cx + 158.0 * scale, cy + 10.0 * scale), accent, 2.2 * scale)
@@ -6101,7 +6134,7 @@ func _process_vine_resolution(removed_gems: Array) -> void:
 		return
 	for tile in burned:
 		_vine_burn_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0})
-		_floating_texts.append({"text": "BURN", "x": tile["x"], "y": tile["y"] - 12.0, "color": Color(1.0, 0.48, 0.12), "size": 12.0, "timer": 0.0, "duration": 0.72, "critical": true})
+		_floating_texts.append({"text": "灼烧", "x": tile["x"], "y": tile["y"] - 12.0, "color": Color(1.0, 0.48, 0.12), "size": 12.0, "timer": 0.0, "duration": 0.72, "critical": true})
 	for tile in backlash:
 		_vine_backlash_anims.append({"row": tile["row"], "col": tile["col"], "x": tile["x"], "y": tile["y"], "timer": 0.0})
 	if not backlash.is_empty():
@@ -6118,10 +6151,10 @@ func _process_vine_resolution(removed_gems: Array) -> void:
 			})
 		if int(result.get("total_damage", 0)) > 0:
 			_trigger_player_damage_edge_flash()
-		_show_message("Vines backlash, spirits take damage")
+		_show_message("藤蔓反噬，精灵受到伤害")
 		_request_battle_fx({"type": "vine_backlash", "backlash": backlash, "hits": result.get("hits", []), "total_damage": result.get("total_damage", 0)})
 	elif not burned.is_empty():
-		_show_message("Fire burned the vines")
+		_show_message("火焰烧尽了藤蔓")
 		_request_battle_fx({"type": "vine_burn", "burned": burned})
 
 func _process_fountain_turn() -> void:
@@ -6176,7 +6209,7 @@ func _process_poison_fog_turn() -> void:
 		for t in new_tiles:
 			_poison_fog_spread_anims.append({"row": t["row"], "col": t["col"], "x": t["x"], "y": t["y"], "timer": 0.0})
 		_request_battle_fx({"type": "poison_spread", "tiles": new_tiles})
-		_show_message("毒雾轻轻扩散！+%d格" % new_tiles.size())
+		_show_message(TranslationServer.translate("毒雾轻轻扩散！+%d格") % new_tiles.size())
 
 	var total_fog_damage: int = result.get("total_damage", 0)
 	if total_fog_damage <= 0:
@@ -6193,7 +6226,7 @@ func _process_poison_fog_turn() -> void:
 			"duration": 0.8
 		})
 	_request_battle_fx({"type": "poison_damage", "hits": result.get("hits", []), "total_damage": total_fog_damage})
-	_show_message("毒雾侵蚀！%d格 × 3%% = %d" % [result.get("fog_count", 0), total_fog_damage])
+	_show_message(TranslationServer.translate("毒雾侵蚀！%d格 × 3%% = %d") % [result.get("fog_count", 0), total_fog_damage])
 
 ## ============================================
 # 消除时的毒雾清除 & 锁定宝石解锁
@@ -6226,7 +6259,7 @@ func _check_unlock_results(matches: Array, extra_gems: Array = []) -> void:
 			_unlock_animations.append({"row": ur["row"], "col": ur["col"], "timer": 0.0, "maxTimer": 0.6, "phase": "shatter"})
 			_floating_texts.append({"text": "解锁", "x": ur["x"], "y": ur["y"] - 15.0, "color": C["gold"], "size": 14.0, "timer": 0.0, "duration": 0.8, "critical": true})
 		else:
-			_floating_texts.append({"text": "破链×%d" % ur.get("remainingHP", 1), "x": ur["x"], "y": ur["y"] - 10.0, "color": C["text_muted"], "size": 11.0, "timer": 0.0, "duration": 0.8})
+			_floating_texts.append({"text": TranslationServer.translate("破链×%d") % ur.get("remainingHP", 1), "x": ur["x"], "y": ur["y"] - 10.0, "color": C["text_muted"], "size": 11.0, "timer": 0.0, "duration": 0.8})
 	
 	if unlock_results.any(func(ur): return ur.get("fullyUnlocked", false)):
 		_request_battle_fx({"type": "unlock", "results": unlock_results})

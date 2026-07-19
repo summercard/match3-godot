@@ -11,7 +11,7 @@
 class_name SceneBattlePrepare
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const ChapterMechanicRulesScript = preload("res://src/data/chapter_mechanic_rules.gd")
@@ -382,7 +382,7 @@ func _calc_synergy_preview() -> Array:
 			"element": affinity,
 			"boardAffinity": affinity,
 			"count": count,
-			"label": "×%d %s共鸣 %s" % [count, elem_name, pct_label],
+			"label": TranslationServer.translate("×%d %s共鸣 %s") % [count, elem_name, pct_label],
 			"color": elem_color
 		})
 	
@@ -587,13 +587,13 @@ func _render_power_comparison() -> void:
 	
 	# 我方战力
 	var player_color: Color = C["text_muted"] if is_team_empty else (C["success"] if is_player_stronger else C["danger"])
-	_draw_text_with_shadow("我方 %d" % player_power, DESIGN_W / 2.0 - 85.0, y + 43.0, player_color, FONT_SIZES["number"], true, 120.0)
+	_draw_text_with_shadow(TranslationServer.translate("我方 %d") % player_power, DESIGN_W / 2.0 - 85.0, y + 43.0, player_color, FONT_SIZES["number"], true, 120.0)
 	
 	# VS
 	_draw_text_with_shadow("VS", DESIGN_W / 2.0, y + 43.0, C["white"], FONT_SIZES["small"], true, 42.0)
 	
 	# 敌方战力
-	_draw_text_with_shadow("敌方 %d" % enemy_power, DESIGN_W / 2.0 + 85.0, y + 43.0, C["danger"], FONT_SIZES["number"], true, 120.0)
+	_draw_text_with_shadow(TranslationServer.translate("敌方 %d") % enemy_power, DESIGN_W / 2.0 + 85.0, y + 43.0, C["danger"], FONT_SIZES["number"], true, 120.0)
 	
 	# 差距提示
 	if not is_team_empty:
@@ -602,10 +602,10 @@ func _render_power_comparison() -> void:
 		var diff_color: Color
 		
 		if diff > 0:
-			diff_text = "领先 %d" % diff
+			diff_text = TranslationServer.translate("领先 %d") % diff
 			diff_color = C["success"]
 		elif diff < 0:
-			diff_text = "落后 %d" % (-diff)
+			diff_text = TranslationServer.translate("落后 %d") % (-diff)
 			diff_color = C["danger"]
 		else:
 			diff_text = "势均力敌"
@@ -789,6 +789,7 @@ func _draw_line(x1: float, y1: float, x2: float, y2: float, color: Color) -> voi
 	draw_rect(Rect2(x1, y1, x2 - x1, 1.0), color)
 
 func _draw_text_with_shadow(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 200.0) -> void:
+	text = TranslationServer.translate(text)
 	var shadow_color := Color(0.0, 0.0, 0.0, 0.55)
 	draw_string(PROJECT_ROUND_FONT, Vector2(x - width / 2.0 + 1, y + 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, shadow_color)
 	draw_string(PROJECT_ROUND_FONT, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size, color)

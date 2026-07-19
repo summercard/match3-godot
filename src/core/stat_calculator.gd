@@ -19,6 +19,8 @@ const ELITE_BASE_STAT_MULT: float = 1.10
 const ELITE_ENEMY_HP_MULT: float = 2.0
 const ELITE_ENEMY_ATK_MULT: float = 1.5
 const ELITE_VISUAL_SCALE_MULT: float = 1.2
+const STAGE_ENEMY_HP_MULT: float = 1.15
+const STAGE_ENEMY_ATK_MULT: float = 0.85
 
 enum EnemyTier { NORMAL, ELITE }
 
@@ -115,6 +117,7 @@ static func calc_enemy(monster_id: String, level: int, tier: int = EnemyTier.NOR
 		_apply_elite_enemy_modifier(stats)
 	if bool(stats.get("isBoss", false)):
 		_apply_enemy_boss_modifier(stats)
+	_apply_stage_enemy_modifier(stats)
 	return stats
 
 ## 普通敌人比关卡标注等级高 3 级；Boss 保持原关卡等级。
@@ -173,6 +176,17 @@ static func _apply_enemy_boss_modifier(stats: Dictionary) -> void:
 	_scale_stat(stats, "def", float(multiplier.get("def", multiplier.get("all", 1.0))))
 	_scale_stat(stats, "spd", float(multiplier.get("spd", multiplier.get("all", 1.0))))
 	stats["enemyBossMultiplier"] = multiplier.duplicate(true)
+
+## 只作用于关卡/战斗中的敌方实例，不写回物种基础数据，也不影响持有精灵。
+static func _apply_stage_enemy_modifier(stats: Dictionary) -> void:
+	if stats.is_empty():
+		return
+	_scale_stats(stats, ["hp", "maxHP"], STAGE_ENEMY_HP_MULT)
+	_scale_stats(stats, ["atk"], STAGE_ENEMY_ATK_MULT)
+	stats["enemyStageMultiplier"] = {
+		"hp": STAGE_ENEMY_HP_MULT,
+		"atk": STAGE_ENEMY_ATK_MULT,
+	}
 
 static func _scale_stat(stats: Dictionary, key: String, multiplier: float) -> void:
 	if multiplier <= 0.0 or not stats.has(key):

@@ -1,0 +1,2956 @@
+{
+  "shard": "meta_ui",
+  "message_count": 509,
+  "messages": {
+    "\n\n请先领取附件后再删除。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:256"
+      ]
+    },
+    "\n\n附件已收入背包。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:247"
+      ]
+    },
+    "%d 星收益 80%% · 消耗体力 1（%d/5）": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:897"
+      ]
+    },
+    "%d 星通关已解锁，扫荡获得对应奖励的 80%%": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1229"
+      ]
+    },
+    "%d天": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:444"
+      ]
+    },
+    "%s %d级": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:775"
+      ]
+    },
+    "%s · 1小时性格交流": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1504"
+      ]
+    },
+    "%s · Lv.%d 解锁": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1168",
+        "src/ui/scene/scene_ranch_gui.gd:767"
+      ]
+    },
+    "%s · 倍率 %.1fx": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:364"
+      ]
+    },
+    "%s 不足": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:815"
+      ]
+    },
+    "%s 已完成": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:221",
+        "src/ui/scene/scene_achievement_gui.gd:209"
+      ]
+    },
+    "%s不足(%d/%d)": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1335"
+      ]
+    },
+    "+%d 经验": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:894",
+        "src/ui/controllers/stage_select_logic.gd:928"
+      ]
+    },
+    "+%d 金币": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:891",
+        "src/ui/controllers/stage_select_logic.gd:926"
+      ]
+    },
+    "+%d 金币    +%d 经验": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1228"
+      ]
+    },
+    "+0 经验": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:445"
+      ]
+    },
+    "+0 金币": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:502"
+      ]
+    },
+    "+120 金币": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:439"
+      ]
+    },
+    "+吸血": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:205"
+      ]
+    },
+    "+恢复": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:192"
+      ]
+    },
+    "-伤害": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:219"
+      ]
+    },
+    "-暗伤": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:204"
+      ]
+    },
+    "-火伤": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:219"
+      ]
+    },
+    "-雷伤": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:210"
+      ]
+    },
+    "001 精灵": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3558"
+      ]
+    },
+    "3 星扫荡收益 80%": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:451"
+      ]
+    },
+    "HP：%d\nATK：%d\nDEF：%d\nSPD：%d\n战力：%d\n满级：%s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1275"
+      ]
+    },
+    "Lv.%d / %s x%d / %d金币": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1333"
+      ]
+    },
+    "Lv.3 · 勇敢 · 火": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1785"
+      ]
+    },
+    "Lv.3 · 火": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2391",
+        "src/ui/scenes/ranch_hub.tscn:3691"
+      ]
+    },
+    "Lv.4 · 水": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2498",
+        "src/ui/scenes/ranch_hub.tscn:3797"
+      ]
+    },
+    "Lv.5 · 草": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2605",
+        "src/ui/scenes/ranch_hub.tscn:2748",
+        "src/ui/scenes/ranch_hub.tscn:2855",
+        "src/ui/scenes/ranch_hub.tscn:2962",
+        "src/ui/scenes/ranch_hub.tscn:3903",
+        "src/ui/scenes/ranch_hub.tscn:4045",
+        "src/ui/scenes/ranch_hub.tscn:4151",
+        "src/ui/scenes/ranch_hub.tscn:4257"
+      ]
+    },
+    "[b]起源[/b]  %s\n[b]栖息地[/b]  %s\n[b]习性[/b]  %s\n[b]相处提示[/b]  %s": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:387"
+      ]
+    },
+    "① 选精灵  ② 点星星\n③ 让祝福飞向远方": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:806"
+      ]
+    },
+    "上一章": {
+      "locations": [
+        "src/ui/scenes/stage_select_map.tscn:141"
+      ]
+    },
+    "上次性格学习已结算": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1467"
+      ]
+    },
+    "上次社交完成": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1452"
+      ]
+    },
+    "下一章": {
+      "locations": [
+        "src/ui/scenes/stage_select_map.tscn:225"
+      ]
+    },
+    "不足": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:539"
+      ]
+    },
+    "专注 ": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:956"
+      ]
+    },
+    "专注 00:32": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:231"
+      ]
+    },
+    "专注培养": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:984",
+        "src/ui/scene/scene_ranch_gui.gd:560",
+        "src/ui/scenes/ranch_hub.tscn:1654"
+      ]
+    },
+    "专注培养已设定%s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:414"
+      ]
+    },
+    "专注培养设置失败": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:409"
+      ]
+    },
+    "两只精灵在草坪上建立了默契。": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:4463"
+      ]
+    },
+    "个体性格随机": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:349",
+        "src/ui/scene/scene_album_gui.gd:335"
+      ]
+    },
+    "主人等级": {
+      "locations": [
+        "src/ui/scenes/main_lobby.tscn:98"
+      ]
+    },
+    "主页": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:49",
+        "src/ui/scene/scene_album_gui.gd:209",
+        "src/ui/scene/scene_inventory_gui.gd:187",
+        "src/ui/scene/scene_shop_gui.gd:276",
+        "src/ui/scene/scene_team_gui.gd:75",
+        "src/ui/scenes/album.tscn:5429",
+        "src/ui/scenes/inventory.tscn:1844",
+        "src/ui/scenes/ranch_hub.tscn:4829",
+        "src/ui/scenes/team.tscn:1440"
+      ]
+    },
+    "交流活动": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1131",
+        "src/ui/scene/scene_ranch_gui.gd:541",
+        "src/ui/scenes/ranch_hub.tscn:4325"
+      ]
+    },
+    "今日": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:401"
+      ]
+    },
+    "今日奖励": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:372"
+      ]
+    },
+    "今日已签到": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:449"
+      ]
+    },
+    "今日已送出上限": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:147"
+      ]
+    },
+    "今日最多还能购买 %d 个": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:326",
+        "src/ui/controllers/shop_logic.gd:385"
+      ]
+    },
+    "今日购买次数已用完": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:323",
+        "src/ui/controllers/shop_logic.gd:387"
+      ]
+    },
+    "今日还可送出 %d 次": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:147",
+        "src/ui/scene/scene_mailbox.gd:148"
+      ]
+    },
+    "今日还可送出 1 次": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:845"
+      ]
+    },
+    "传说": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:489"
+      ]
+    },
+    "体力  %d/5": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:222",
+        "src/ui/scene/scene_ranch_gui.gd:733"
+      ]
+    },
+    "体力  5/5": {
+      "locations": [
+        "src/ui/scenes/album.tscn:313",
+        "src/ui/scenes/ranch_hub.tscn:4753"
+      ]
+    },
+    "体力不足：每次扫荡消耗 1 点，6 小时恢复 1 点": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:864"
+      ]
+    },
+    "保存队伍": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:666"
+      ]
+    },
+    "偏好设置": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:467"
+      ]
+    },
+    "先点上方槽位，可指定替换位置。": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:967"
+      ]
+    },
+    "先看缺口和组队方向，奖励口后续再接。": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:452"
+      ]
+    },
+    "先选择牧场中的精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:399"
+      ]
+    },
+    "全部": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:82",
+        "src/ui/controllers/album_logic.gd:78",
+        "src/ui/controllers/inventory_logic.gd:80",
+        "src/ui/controllers/team_logic.gd:777",
+        "src/ui/scene/scene_achievement_gui.gd:42",
+        "src/ui/scenes/album.tscn:471",
+        "src/ui/scenes/inventory.tscn:249"
+      ]
+    },
+    "全队恢复 %d%% 最大生命值。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:396"
+      ]
+    },
+    "全队抵消下一次受到的伤害。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:412"
+      ]
+    },
+    "全队接下来 %d 次受击减伤 %d%%。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:398"
+      ]
+    },
+    "共享经验 ×%d": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:389"
+      ]
+    },
+    "共享经验槽为空": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:849"
+      ]
+    },
+    "共享经验槽立即增加 %d 点经验。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:391"
+      ]
+    },
+    "关卡猎手": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:61"
+      ]
+    },
+    "关闭": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:410",
+        "src/ui/scenes/album.tscn:4156"
+      ]
+    },
+    "其他道具": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:80",
+        "src/ui/scenes/shop.tscn:489"
+      ]
+    },
+    "冒险成就": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:338"
+      ]
+    },
+    "冒险者小帅": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:119",
+        "src/ui/scene/scene_main.gd:130",
+        "src/ui/scene/scene_main.gd:56"
+      ]
+    },
+    "农场": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1157",
+        "src/ui/scene/scene_ranch_gui.gd:744",
+        "src/ui/scene/scene_team_gui.gd:76",
+        "src/ui/scenes/ranch_hub.tscn:4872",
+        "src/ui/scenes/team.tscn:1481"
+      ]
+    },
+    "农场挂机中，先从农场取下": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1641"
+      ]
+    },
+    "冰啾兽": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2351"
+      ]
+    },
+    "冰甲龙": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2526"
+      ]
+    },
+    "减伤": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:200"
+      ]
+    },
+    "出售": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1103",
+        "src/ui/scene/scene_ranch_gui.gd:1307",
+        "src/ui/scenes/ranch_hub.tscn:2228"
+      ]
+    },
+    "出售后不可恢复": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3170"
+      ]
+    },
+    "出售失败": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:396"
+      ]
+    },
+    "出售成功：%s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:405"
+      ]
+    },
+    "出售确认界面不可用": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1312"
+      ]
+    },
+    "出售系统不可用": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:371",
+        "src/ui/scene/scene_ranch_gui.gd:390"
+      ]
+    },
+    "击碎 %d 个岩石障碍。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:402"
+      ]
+    },
+    "击碎当前棋盘上的全部岩石障碍。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:400"
+      ]
+    },
+    "分支：%s": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:741"
+      ]
+    },
+    "切换到%s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:501"
+      ]
+    },
+    "初战启程": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:56"
+      ]
+    },
+    "删除": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:636"
+      ]
+    },
+    "删除这封邮件": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:204"
+      ]
+    },
+    "前往第%d章": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:351"
+      ]
+    },
+    "前往背包选择该道具，确认后立即使用。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:425"
+      ]
+    },
+    "前置关卡": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1185"
+      ]
+    },
+    "升级失败": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:851"
+      ]
+    },
+    "升级成功  Lv.%d!": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1384"
+      ]
+    },
+    "升级成功！": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2262"
+      ]
+    },
+    "升级成功：Lv.%d": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:854"
+      ]
+    },
+    "卸下": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:289"
+      ]
+    },
+    "去战斗或商店获取吧": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:405",
+        "src/ui/scene/scene_inventory_gui.gd:184",
+        "src/ui/scenes/inventory.tscn:1344"
+      ]
+    },
+    "友好交流 88分  关系:默契": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3493"
+      ]
+    },
+    "取消专注": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:984",
+        "src/ui/scene/scene_ranch_gui.gd:560"
+      ]
+    },
+    "可获得 %s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1316"
+      ]
+    },
+    "可获得 +280金币": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3158"
+      ]
+    },
+    "史诗": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:487"
+      ]
+    },
+    "右位": {
+      "locations": [
+        "src/ui/scene/scene_team_gui.gd:57",
+        "src/ui/scenes/team.tscn:678"
+      ]
+    },
+    "否": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1258",
+        "src/ui/scene/scene_ranch_gui.gd:1271",
+        "src/ui/scene/scene_ranch_gui.gd:1281"
+      ]
+    },
+    "商品": {
+      "locations": [
+        "src/ui/scenes/shop.tscn:2154"
+      ]
+    },
+    "商品的实际生效数值": {
+      "locations": [
+        "src/ui/scenes/shop.tscn:2189"
+      ]
+    },
+    "商品货币配置错误": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:341"
+      ]
+    },
+    "商店": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:466",
+        "src/ui/scene/scene_inventory_gui.gd:188",
+        "src/ui/scene/scene_shop_gui.gd:292",
+        "src/ui/scene/scene_shop_gui.gd:294",
+        "src/ui/scene/scene_team_gui.gd:78",
+        "src/ui/scenes/inventory.tscn:1888",
+        "src/ui/scenes/main_lobby.tscn:486",
+        "src/ui/scenes/shop.tscn:306",
+        "src/ui/scenes/team.tscn:1562"
+      ]
+    },
+    "图鉴": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:416",
+        "src/ui/scene/scene_achievement_gui.gd:50",
+        "src/ui/scene/scene_album_gui.gd:202",
+        "src/ui/scene/scene_album_gui.gd:210",
+        "src/ui/scenes/album.tscn:5292",
+        "src/ui/scenes/album.tscn:5472",
+        "src/ui/scenes/main_lobby.tscn:635"
+      ]
+    },
+    "图鉴星星总量": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:508"
+      ]
+    },
+    "图鉴星星：%d": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:144"
+      ]
+    },
+    "图鉴星星：0": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:818"
+      ]
+    },
+    "在对应界面使用": {
+      "locations": [
+        "src/ui/scenes/shop.tscn:2211"
+      ]
+    },
+    "在背包设为自动捕捉球；战斗胜利且有合法目标时判定并消耗。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:421"
+      ]
+    },
+    "场所切换失败": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:493"
+      ]
+    },
+    "场所只影响学习概率，不产生资源、关系或数量型结果。": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1476"
+      ]
+    },
+    "均衡": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:47"
+      ]
+    },
+    "培养与进化": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1069",
+        "src/ui/scene/scene_ranch_gui.gd:540",
+        "src/ui/scenes/ranch_hub.tscn:3030"
+      ]
+    },
+    "大厅、战斗与结算音乐": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:60"
+      ]
+    },
+    "天": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:371"
+      ]
+    },
+    "奖励已发放": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:168",
+        "src/ui/scenes/stage_select_map.tscn:1039"
+      ]
+    },
+    "妙蛙草": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3225"
+      ]
+    },
+    "存档暂不可用，请稍后重试": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:319"
+      ]
+    },
+    "学习概率 %d%% · %s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1459"
+      ]
+    },
+    "完成 1 小时交流后结算一次性格学习": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1473"
+      ]
+    },
+    "完成第一场战斗": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:56"
+      ]
+    },
+    "完成进度": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:301"
+      ]
+    },
+    "宝石不足": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:338",
+        "src/ui/controllers/shop_logic.gd:391"
+      ]
+    },
+    "将棋盘上一种属性的宝石全部转换为另一种属性。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:414"
+      ]
+    },
+    "小火龙": {
+      "locations": [
+        "src/ui/scenes/album.tscn:956",
+        "src/ui/scenes/mailbox.tscn:725",
+        "src/ui/scenes/ranch_hub.tscn:1056",
+        "src/ui/scenes/ranch_hub.tscn:1773",
+        "src/ui/scenes/ranch_hub.tscn:2378",
+        "src/ui/scenes/ranch_hub.tscn:3406",
+        "src/ui/scenes/ranch_hub.tscn:3678"
+      ]
+    },
+    "尚待记录": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:388",
+        "src/ui/scene/scene_album_gui.gd:389",
+        "src/ui/scene/scene_album_gui.gd:390",
+        "src/ui/scene/scene_album_gui.gd:391"
+      ]
+    },
+    "属性筛选": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:779"
+      ]
+    },
+    "属性筛选可切换元素。": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:968"
+      ]
+    },
+    "岩壁": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:51"
+      ]
+    },
+    "左位": {
+      "locations": [
+        "src/ui/scene/scene_team_gui.gd:55",
+        "src/ui/scenes/team.tscn:495"
+      ]
+    },
+    "已到达最终章": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:352"
+      ]
+    },
+    "已卸下 %s": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:312"
+      ]
+    },
+    "已取消专注培养": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:405"
+      ]
+    },
+    "已完成 %d/%d  已领取 %d": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:339"
+      ]
+    },
+    "已收录": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:327",
+        "src/ui/scene/scene_album_gui.gd:325"
+      ]
+    },
+    "已收集": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3588"
+      ]
+    },
+    "已激活": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:285",
+        "src/ui/scene/scene_inventory_gui.gd:286"
+      ]
+    },
+    "已装备": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:466",
+        "src/ui/controllers/inventory_logic.gd:468",
+        "src/ui/scene/scene_inventory_gui.gd:278",
+        "src/ui/scene/scene_inventory_gui.gd:282",
+        "src/ui/scene/scene_inventory_gui.gd:288"
+      ]
+    },
+    "已装备 %s": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:317",
+        "src/ui/controllers/inventory_logic.gd:341"
+      ]
+    },
+    "已装备为捕捉球": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:258"
+      ]
+    },
+    "已读": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:176"
+      ]
+    },
+    "已领取": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:201"
+      ]
+    },
+    "广场": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1158",
+        "src/ui/scene/scene_ranch_gui.gd:564",
+        "src/ui/scene/scene_ranch_gui.gd:744",
+        "src/ui/scenes/ranch_hub.tscn:4960"
+      ]
+    },
+    "开 始 冒 险": {
+      "locations": [
+        "src/ui/scenes/start_screen.tscn:211"
+      ]
+    },
+    "开始": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1441",
+        "src/ui/scenes/ranch_hub.tscn:4375"
+      ]
+    },
+    "当前 默契 · 1次 · 最高88": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3513"
+      ]
+    },
+    "当前属性没有精灵": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:912"
+      ]
+    },
+    "当前已在宠物农场": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:712"
+      ]
+    },
+    "当前形态无法进化": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:809"
+      ]
+    },
+    "当前版本": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:531"
+      ]
+    },
+    "当前经验 %d / %d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1138",
+        "src/ui/scene/scene_ranch_gui.gd:1400",
+        "src/ui/scene/scene_ranch_gui.gd:1445",
+        "src/ui/scene/scene_ranch_gui.gd:1451"
+      ]
+    },
+    "当前经验 0 / 100": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1876"
+      ]
+    },
+    "微风卷起花瓣，它们并肩跑过草坡。": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:4450"
+      ]
+    },
+    "性格": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3573"
+      ]
+    },
+    "性格交流完成": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1168"
+      ]
+    },
+    "性格交流开始，1小时后可结算": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:480"
+      ]
+    },
+    "性格学习概率 %d%%": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1148",
+        "src/ui/scene/scene_ranch_gui.gd:1501"
+      ]
+    },
+    "总价:": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:607"
+      ]
+    },
+    "总经验槽 %s / %s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1142",
+        "src/ui/scene/scene_ranch_gui.gd:1402",
+        "src/ui/scene/scene_ranch_gui.gd:1441"
+      ]
+    },
+    "总经验槽 0 / 1,500": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2122"
+      ]
+    },
+    "恢复生命比例最低队员 %d%% 最大生命值。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:396"
+      ]
+    },
+    "恢复默认": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:539"
+      ]
+    },
+    "成员1": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:405"
+      ]
+    },
+    "成员2": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:406"
+      ]
+    },
+    "成就": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:221",
+        "src/ui/controllers/achievement_logic.gd:289",
+        "src/ui/scene/scene_achievement_gui.gd:51",
+        "src/ui/scene/scene_achievement_gui.gd:514",
+        "src/ui/scenes/main_lobby.tscn:695"
+      ]
+    },
+    "成就分数": {
+      "locations": [
+        "src/ui/scenes/main_lobby.tscn:346"
+      ]
+    },
+    "成就殿堂": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:328"
+      ]
+    },
+    "成就点数": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:299"
+      ]
+    },
+    "战力": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:29",
+        "src/ui/scene/scene_team_gui.gd:45"
+      ]
+    },
+    "战场": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:189",
+        "src/ui/scene/scene_shop_gui.gd:278",
+        "src/ui/scene/scene_team_gui.gd:77",
+        "src/ui/scenes/inventory.tscn:1919",
+        "src/ui/scenes/team.tscn:1521"
+      ]
+    },
+    "战场道具": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:79",
+        "src/ui/scenes/shop.tscn:445"
+      ]
+    },
+    "战斗中打开道具栏，选择目标后使用。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:423"
+      ]
+    },
+    "战斗捕捉球: %s": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:466"
+      ]
+    },
+    "战斗槽 %s": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:288"
+      ]
+    },
+    "战斗道具": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:297",
+        "src/ui/scene/scene_inventory_gui.gd:324",
+        "src/ui/scenes/inventory.tscn:1636"
+      ]
+    },
+    "战斗道具请在战斗中使用": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:271"
+      ]
+    },
+    "所有": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:77",
+        "src/ui/scenes/shop.tscn:357"
+      ]
+    },
+    "所有存档和养成进度会被清除": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:547"
+      ]
+    },
+    "所有存活队员获得 %d 点技能充能。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:408"
+      ]
+    },
+    "扩充你的精灵图鉴": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:64"
+      ]
+    },
+    "扫荡": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1235",
+        "src/ui/scene/scene_stage_select_gui.gd:1079",
+        "src/ui/scenes/stage_map_node.tscn:106",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1071",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1207",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1343",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1479",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1615",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1751",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:392",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:527",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:663",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:799",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:935",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1005",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1130",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1255",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1380",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1505",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1630",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:380",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:505",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:630",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:755",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:880",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1006",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1131",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1256",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:381",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:506",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:631",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:756",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:881",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1117",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1240",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1363",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1486",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1609",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:379",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:502",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:625",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:748",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:871",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:994",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:1064",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:1189",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:1314",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:1439",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:189",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:314",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:439",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:564",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:689",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:814",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:939",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:1082",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:1209",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:1336",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:1463",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:193",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:320",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:447",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:574",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:701",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:828",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:955",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:1082",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:1209",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:1336",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:1463",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:193",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:320",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:447",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:574",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:701",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:828",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:955",
+        "src/ui/scenes/stage_select_map.tscn:858"
+      ]
+    },
+    "扫荡完成！": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:495",
+        "src/ui/controllers/stage_select_logic.gd:924",
+        "src/ui/scenes/stage_select_map.tscn:985"
+      ]
+    },
+    "技能描述": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4021"
+      ]
+    },
+    "投入 %d 经验": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:856"
+      ]
+    },
+    "拥有：%d": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:580"
+      ]
+    },
+    "按生态主题查看已收集进度": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4204"
+      ]
+    },
+    "挑战共鸣塔，验证后期精灵培养": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:33"
+      ]
+    },
+    "捕捉球: %s": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:278"
+      ]
+    },
+    "捕捉球可在战斗中选择": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:260"
+      ]
+    },
+    "捕捉道具": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:318"
+      ]
+    },
+    "捕获球 %s": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:285"
+      ]
+    },
+    "捕获道具": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:78",
+        "src/ui/scenes/shop.tscn:401"
+      ]
+    },
+    "换场": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1091",
+        "src/ui/scenes/ranch_hub.tscn:3353"
+      ]
+    },
+    "排序可切换等级、战力、稀有度。": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:969"
+      ]
+    },
+    "收件箱": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:269"
+      ]
+    },
+    "收服 5 只不同精灵": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:63"
+      ]
+    },
+    "收服成功率 +%d%%。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:389"
+      ]
+    },
+    "收服第一只精灵": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:62"
+      ]
+    },
+    "收获": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:983"
+      ]
+    },
+    "收集": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:84",
+        "src/ui/scene/scene_achievement_gui.gd:44"
+      ]
+    },
+    "收集目标": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4704"
+      ]
+    },
+    "收集精灵，完成图鉴与羁绊目标。": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4719"
+      ]
+    },
+    "攻击": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:374",
+        "src/ui/scene/scene_album_gui.gd:48",
+        "src/ui/scenes/album.tscn:3781"
+      ]
+    },
+    "攻击下降": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:196"
+      ]
+    },
+    "放入两只精灵后开始社交": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1453"
+      ]
+    },
+    "放入两只精灵后显示学习概率": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1146",
+        "src/ui/scene/scene_ranch_gui.gd:1499"
+      ]
+    },
+    "放入这里": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:962",
+        "src/ui/scene/scene_ranch_gui.gd:608",
+        "src/ui/scenes/ranch_hub.tscn:260"
+      ]
+    },
+    "放置 ": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1634",
+        "src/ui/controllers/ranch_logic.gd:956"
+      ]
+    },
+    "放置 00:00": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:661",
+        "src/ui/scenes/ranch_hub.tscn:804"
+      ]
+    },
+    "放置 01:04": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:372"
+      ]
+    },
+    "放置 01:36": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:515"
+      ]
+    },
+    "效果：": {
+      "locations": [
+        "src/ui/scenes/shop.tscn:2178"
+      ]
+    },
+    "数值": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:85"
+      ]
+    },
+    "数据已重置": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:438"
+      ]
+    },
+    "新手超值礼包": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:498",
+        "src/ui/scene/scene_shop_gui.gd:315"
+      ]
+    },
+    "新邮件": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:179"
+      ]
+    },
+    "旅馆": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:191",
+        "src/ui/scene/scene_shop_gui.gd:280",
+        "src/ui/scenes/inventory.tscn:1979"
+      ]
+    },
+    "无": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:406",
+        "src/ui/controllers/ranch_logic.gd:1022"
+      ]
+    },
+    "无性格": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1381"
+      ]
+    },
+    "无法出售该精灵": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:376"
+      ]
+    },
+    "无法进化": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1033",
+        "src/ui/controllers/ranch_logic.gd:1331",
+        "src/ui/scene/scene_ranch_gui.gd:1146"
+      ]
+    },
+    "时": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:89"
+      ]
+    },
+    "星": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:90"
+      ]
+    },
+    "星级 %s · Lv.%d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1315"
+      ]
+    },
+    "星级 ★★ · Lv.8": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3146"
+      ]
+    },
+    "是": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1258",
+        "src/ui/scene/scene_ranch_gui.gd:1271",
+        "src/ui/scene/scene_ranch_gui.gd:1281"
+      ]
+    },
+    "普通": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:483",
+        "src/ui/scenes/inventory.tscn:1509"
+      ]
+    },
+    "暂无可收获收益": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:742",
+        "src/ui/controllers/ranch_logic.gd:801",
+        "src/ui/scene/scene_ranch_gui.gd:242"
+      ]
+    },
+    "暂无可派遣精灵": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:132"
+      ]
+    },
+    "暂无可编队精灵": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:912",
+        "src/ui/scenes/team.tscn:923"
+      ]
+    },
+    "暂无成就": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:319",
+        "src/ui/scene/scene_achievement_gui.gd:357"
+      ]
+    },
+    "暂无精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1012",
+        "src/ui/scenes/ranch_hub.tscn:1763"
+      ]
+    },
+    "暂无进化": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4097"
+      ]
+    },
+    "暂时无法送出祝福。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:343"
+      ]
+    },
+    "暗影": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:52"
+      ]
+    },
+    "更多宠物功能正在整理中": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:723"
+      ]
+    },
+    "最终形态": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1113"
+      ]
+    },
+    "最终章": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:356"
+      ]
+    },
+    "月卡": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:560"
+      ]
+    },
+    "未保存的更改将丢失": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:948"
+      ]
+    },
+    "未收录": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:327",
+        "src/ui/scene/scene_album_gui.gd:325"
+      ]
+    },
+    "未激活": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:285"
+      ]
+    },
+    "未知技能": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:391",
+        "src/ui/scene/scene_album_gui.gd:361"
+      ]
+    },
+    "未装备": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:466",
+        "src/ui/scene/scene_inventory_gui.gd:278"
+      ]
+    },
+    "未解锁": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1186"
+      ]
+    },
+    "未设置队长技能": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:713"
+      ]
+    },
+    "未读": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:176",
+        "src/ui/scenes/mailbox.tscn:367",
+        "src/ui/scenes/mailbox.tscn:393",
+        "src/ui/scenes/mailbox.tscn:419",
+        "src/ui/scenes/mailbox.tscn:445"
+      ]
+    },
+    "未达成": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:355",
+        "src/ui/scene/scene_achievement_gui.gd:391"
+      ]
+    },
+    "本月已签到 %d/28 天": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:420"
+      ]
+    },
+    "本月累计签到奖励": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:414"
+      ]
+    },
+    "本次学习概率 %d%%": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1157"
+      ]
+    },
+    "本次性格学习概率 %d%%": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1706"
+      ]
+    },
+    "本次没有金币、经验、亲密度或繁育结果": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1174"
+      ]
+    },
+    "材料": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:82",
+        "src/ui/scenes/inventory.tscn:311"
+      ]
+    },
+    "条件满足": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1341"
+      ]
+    },
+    "查看冒险成就进度": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:32"
+      ]
+    },
+    "查看和管理你的物品": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:30"
+      ]
+    },
+    "查看已收服的精灵图鉴": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:27"
+      ]
+    },
+    "查看远方冒险者的祝福": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:34"
+      ]
+    },
+    "标签：友好交流、同伴默契": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:4476"
+      ]
+    },
+    "每日特惠": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:558"
+      ]
+    },
+    "每日签到": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:352"
+      ]
+    },
+    "每日签到领取奖励": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:28"
+      ]
+    },
+    "每日限购 %d/%d": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:644"
+      ]
+    },
+    "水泡龟": {
+      "locations": [
+        "src/ui/scenes/album.tscn:1652"
+      ]
+    },
+    "水箭龟": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2176"
+      ]
+    },
+    "水龟仔": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2001",
+        "src/ui/scenes/ranch_hub.tscn:1158",
+        "src/ui/scenes/ranch_hub.tscn:2485",
+        "src/ui/scenes/ranch_hub.tscn:3469",
+        "src/ui/scenes/ranch_hub.tscn:3784"
+      ]
+    },
+    "没有附件": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:381"
+      ]
+    },
+    "治疗": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:48"
+      ]
+    },
+    "测试工具": {
+      "locations": [
+        "src/ui/scenes/main_lobby.tscn:562"
+      ]
+    },
+    "测试队长技能表现": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:93"
+      ]
+    },
+    "消除、按钮与奖励反馈": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:52"
+      ]
+    },
+    "深海龟": {
+      "locations": [
+        "src/ui/scenes/album.tscn:1826"
+      ]
+    },
+    "深渊海马王": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2700"
+      ]
+    },
+    "混": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:91"
+      ]
+    },
+    "清除最多 %d 个毒雾格子。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:406"
+      ]
+    },
+    "游戏设置": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:460"
+      ]
+    },
+    "游戏设置和选项": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:35"
+      ]
+    },
+    "游戏语言": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:67"
+      ]
+    },
+    "游戏音效": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:51"
+      ]
+    },
+    "潮汐": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:50"
+      ]
+    },
+    "激活": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:286"
+      ]
+    },
+    "火恐龙": {
+      "locations": [
+        "src/ui/scenes/album.tscn:1130"
+      ]
+    },
+    "火灵虎": {
+      "locations": [
+        "src/ui/scenes/album.tscn:1304"
+      ]
+    },
+    "火焰": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:46"
+      ]
+    },
+    "点亮星星，把祝福送远方": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:856"
+      ]
+    },
+    "点击下方精灵，自动填入空位。": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:966"
+      ]
+    },
+    "点击开始你的冒险之旅": {
+      "locations": [
+        "src/ui/scenes/start_screen.tscn:244"
+      ]
+    },
+    "点击开始冒险，赢取你的第一只精灵": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:651"
+      ]
+    },
+    "烈焰龙": {
+      "locations": [
+        "src/ui/scenes/album.tscn:1478"
+      ]
+    },
+    "牧场": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1070",
+        "src/ui/scenes/ranch_hub.tscn:3062"
+      ]
+    },
+    "玩法: %s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1360"
+      ]
+    },
+    "玩法: 已稳定": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1360"
+      ]
+    },
+    "玩法: 无": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1147"
+      ]
+    },
+    "玩法: 稳定成长": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1913"
+      ]
+    },
+    "玩法升级: 无": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1034"
+      ]
+    },
+    "玩法：%s": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1100"
+      ]
+    },
+    "生命": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:373",
+        "src/ui/scene/scene_album_gui.gd:48",
+        "src/ui/scenes/album.tscn:3718"
+      ]
+    },
+    "生态摘要": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4113"
+      ]
+    },
+    "生态目标": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:451"
+      ]
+    },
+    "生态羁绊": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:432"
+      ]
+    },
+    "生态资料": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4129"
+      ]
+    },
+    "用时%s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1090",
+        "src/ui/scene/scene_ranch_gui.gd:1490"
+      ]
+    },
+    "用时00:30": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3301"
+      ]
+    },
+    "用法：": {
+      "locations": [
+        "src/ui/scenes/shop.tscn:2200"
+      ]
+    },
+    "疾风": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:49"
+      ]
+    },
+    "目标进度 %d/%d": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:223",
+        "src/ui/scene/scene_achievement_gui.gd:212"
+      ]
+    },
+    "相性 88 · 默契 · +36EXP · +120金币": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:4427"
+      ]
+    },
+    "知道了": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:972"
+      ]
+    },
+    "确认出售": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3122",
+        "src/ui/scenes/ranch_hub.tscn:3253"
+      ]
+    },
+    "确认取消": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:955"
+      ]
+    },
+    "确认取消编辑？": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:947"
+      ]
+    },
+    "确认扫荡": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1226",
+        "src/ui/controllers/stage_select_logic.gd:433"
+      ]
+    },
+    "确认扫荡: %s": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:888"
+      ]
+    },
+    "确认购买": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:587",
+        "src/ui/scene/scene_shop_gui.gd:284",
+        "src/ui/scenes/shop.tscn:2428"
+      ]
+    },
+    "确认重置？": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:546"
+      ]
+    },
+    "社交": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1071",
+        "src/ui/scenes/ranch_hub.tscn:3087"
+      ]
+    },
+    "社交完成": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:464",
+        "src/ui/scenes/ranch_hub.tscn:4416"
+      ]
+    },
+    "社交对象异常": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1457"
+      ]
+    },
+    "社交庭院": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:913",
+        "src/ui/controllers/ranch_logic.gd:986",
+        "src/ui/scenes/ranch_hub.tscn:1708"
+      ]
+    },
+    "社交开始失败": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:484"
+      ]
+    },
+    "社交进行中": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:421",
+        "src/ui/controllers/ranch_logic.gd:438"
+      ]
+    },
+    "社交进行中 %d%%": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:472"
+      ]
+    },
+    "社交进行中，不能更换场所": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:489"
+      ]
+    },
+    "社交领取失败": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:469"
+      ]
+    },
+    "祝福已乘着星光启程。\n\n每日独立的陌生来信会在\n合适的时候悄悄抵达邮箱。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:150"
+      ]
+    },
+    "祝福已送出。陌生来信会在每日 09:00—21:00 独立抵达。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:348"
+      ]
+    },
+    "稀有度": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:30",
+        "src/ui/scene/scene_team_gui.gd:46"
+      ]
+    },
+    "稳定成长": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1360"
+      ]
+    },
+    "空位": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:962",
+        "src/ui/scene/scene_ranch_gui.gd:608",
+        "src/ui/scenes/ranch_hub.tscn:401",
+        "src/ui/scenes/ranch_hub.tscn:544",
+        "src/ui/scenes/ranch_hub.tscn:690",
+        "src/ui/scenes/ranch_hub.tscn:833"
+      ]
+    },
+    "立即获得 %d 金币。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:393"
+      ]
+    },
+    "第%d天": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:398"
+      ]
+    },
+    "第%d章": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1083",
+        "src/ui/controllers/stage_select_logic.gd:939",
+        "src/ui/scene/scene_stage_select_gui.gd:326",
+        "src/ui/scene/scene_stage_select_gui.gd:356"
+      ]
+    },
+    "第%d章尚未解锁，请先击败第%d章 Boss": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:352",
+        "src/ui/scene/scene_stage_select_gui.gd:407"
+      ]
+    },
+    "第1章": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:353"
+      ]
+    },
+    "等级": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:28",
+        "src/ui/scene/scene_team_gui.gd:44"
+      ]
+    },
+    "等级\n属性\n性格\n性别\n稀有度\n精英": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1261"
+      ]
+    },
+    "等级 %d/%d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1143"
+      ]
+    },
+    "等级不足(%d/%d)": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1339"
+      ]
+    },
+    "等级不足(3/12)": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1901"
+      ]
+    },
+    "等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1258"
+      ]
+    },
+    "签到": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:53",
+        "src/ui/scenes/main_lobby.tscn:757"
+      ]
+    },
+    "签到成功！奖励已发放": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:461"
+      ]
+    },
+    "精灵图鉴": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:267",
+        "src/ui/scene/scene_album_gui.gd:225",
+        "src/ui/scenes/album.tscn:388"
+      ]
+    },
+    "精灵已达到最高等级": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:850"
+      ]
+    },
+    "精灵带回的远方回音": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:226"
+      ]
+    },
+    "精灵旅馆": {
+      "locations": [
+        "src/ui/scenes/main_lobby.tscn:511"
+      ]
+    },
+    "精灵牧场": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:909"
+      ]
+    },
+    "精灵详情": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1941"
+      ]
+    },
+    "精灵达到进化条件时，在队伍详情中自动计入材料。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:427"
+      ]
+    },
+    "累计完成 10 场战斗": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:57"
+      ]
+    },
+    "累计完成 50 场战斗": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:58"
+      ]
+    },
+    "累计签到 30 天": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:72"
+      ]
+    },
+    "累计获得 10000 金币": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:67"
+      ]
+    },
+    "累计获得 100000 金币": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:68"
+      ]
+    },
+    "累计进化 5 只精灵": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:66"
+      ]
+    },
+    "累计造成 1000 点伤害": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:69"
+      ]
+    },
+    "累计造成 10000 点伤害": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:70"
+      ]
+    },
+    "经验槽 +%d%s": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:248",
+        "src/ui/controllers/ranch_logic.gd:761",
+        "src/ui/controllers/ranch_logic.gd:799"
+      ]
+    },
+    "经验槽 -%d  →  精灵 +%d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1387"
+      ]
+    },
+    "经验槽 -100": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:2277"
+      ]
+    },
+    "经验槽已满": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:761",
+        "src/ui/controllers/ranch_logic.gd:799",
+        "src/ui/scene/scene_ranch_gui.gd:264",
+        "src/ui/scene/scene_ranch_gui.gd:306"
+      ]
+    },
+    "经验槽暂不可用": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:844"
+      ]
+    },
+    "经验注入 +%d": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1384"
+      ]
+    },
+    "经验道具": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:320"
+      ]
+    },
+    "给远方的陌生人\n送出祝福": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:784"
+      ]
+    },
+    "继续编辑": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:958"
+      ]
+    },
+    "编队你的精灵伙伴，打造最强阵容": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:26"
+      ]
+    },
+    "编队说明": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:965"
+      ]
+    },
+    "羁绊": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:417",
+        "src/ui/controllers/team_logic.gd:739",
+        "src/ui/scene/scene_album_gui.gd:203",
+        "src/ui/scene/scene_album_gui.gd:211",
+        "src/ui/scenes/album.tscn:5334",
+        "src/ui/scenes/album.tscn:5516"
+      ]
+    },
+    "羁绊图鉴": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4189"
+      ]
+    },
+    "羁绊目标": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4240",
+        "src/ui/scenes/album.tscn:4317",
+        "src/ui/scenes/album.tscn:4394",
+        "src/ui/scenes/album.tscn:4471",
+        "src/ui/scenes/album.tscn:4548",
+        "src/ui/scenes/album.tscn:4625"
+      ]
+    },
+    "翠精灵": {
+      "locations": [
+        "src/ui/scenes/album.tscn:2875"
+      ]
+    },
+    "背包": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:373",
+        "src/ui/scene/scene_inventory_gui.gd:198",
+        "src/ui/scene/scene_shop_gui.gd:277",
+        "src/ui/scenes/inventory.tscn:211",
+        "src/ui/scenes/main_lobby.tscn:665",
+        "src/ui/scenes/shop.tscn:1938"
+      ]
+    },
+    "背景音乐": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:59"
+      ]
+    },
+    "胜利号角": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:59"
+      ]
+    },
+    "自动匹配手机系统语言": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:68"
+      ]
+    },
+    "至少保留 1 只精灵": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:398"
+      ]
+    },
+    "花叶兽": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3400"
+      ]
+    },
+    "草苗儿": {
+      "locations": [
+        "src/ui/scenes/album.tscn:3050",
+        "src/ui/scenes/ranch_hub.tscn:1260",
+        "src/ui/scenes/ranch_hub.tscn:1362",
+        "src/ui/scenes/ranch_hub.tscn:1464",
+        "src/ui/scenes/ranch_hub.tscn:1566",
+        "src/ui/scenes/ranch_hub.tscn:2592",
+        "src/ui/scenes/ranch_hub.tscn:2735",
+        "src/ui/scenes/ranch_hub.tscn:2842",
+        "src/ui/scenes/ranch_hub.tscn:2949",
+        "src/ui/scenes/ranch_hub.tscn:3890",
+        "src/ui/scenes/ranch_hub.tscn:4032",
+        "src/ui/scenes/ranch_hub.tscn:4138",
+        "src/ui/scenes/ranch_hub.tscn:4244"
+      ]
+    },
+    "获得 %d 金币": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:253"
+      ]
+    },
+    "获得 %s x%d": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:400"
+      ]
+    },
+    "获得星星": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:542"
+      ]
+    },
+    "菜单": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:213",
+        "src/ui/scene/scene_team_gui.gd:79",
+        "src/ui/scenes/album.tscn:5593",
+        "src/ui/scenes/ranch_hub.tscn:5005",
+        "src/ui/scenes/team.tscn:1603"
+      ]
+    },
+    "虚": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:88"
+      ]
+    },
+    "补齐生态与角色身份，解锁更明确的组队方向。": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:433"
+      ]
+    },
+    "装备": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:468",
+        "src/ui/scene/scene_inventory_gui.gd:282",
+        "src/ui/scene/scene_inventory_gui.gd:289"
+      ]
+    },
+    "角色目标": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:464",
+        "src/ui/scene/scene_album_gui.gd:424",
+        "src/ui/scenes/album.tscn:4749"
+      ]
+    },
+    "解锁精灵": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:519"
+      ]
+    },
+    "解除最多 %d 个锁链宝石。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:404"
+      ]
+    },
+    "让祝福乘着星光启程": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:680"
+      ]
+    },
+    "设置": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:52",
+        "src/ui/scenes/main_lobby.tscn:726"
+      ]
+    },
+    "设置会自动保存，返回大厅后立即生效": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:533"
+      ]
+    },
+    "该精灵": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1314"
+      ]
+    },
+    "该精灵当前无法参加社交": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:445"
+      ]
+    },
+    "该精灵正在农场挂机，请先从农场取下": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:441"
+      ]
+    },
+    "该精灵正在社交，请先结束社交": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:713"
+      ]
+    },
+    "该道具暂时无法使用": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:275"
+      ]
+    },
+    "请先收获当前槽位的牧场经验": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:721"
+      ]
+    },
+    "请先收获该精灵的牧场经验": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:704"
+      ]
+    },
+    "请先领取附件": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:204"
+      ]
+    },
+    "请选择已放置的精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:806"
+      ]
+    },
+    "请选择精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:841"
+      ]
+    },
+    "请选择要出售的精灵": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:368"
+      ]
+    },
+    "课堂": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1132",
+        "src/ui/scene/scene_inventory_gui.gd:190",
+        "src/ui/scene/scene_ranch_gui.gd:563",
+        "src/ui/scene/scene_ranch_gui.gd:744",
+        "src/ui/scene/scene_shop_gui.gd:279",
+        "src/ui/scenes/inventory.tscn:1949",
+        "src/ui/scenes/ranch_hub.tscn:4916"
+      ]
+    },
+    "财富": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:45"
+      ]
+    },
+    "购买": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:539"
+      ]
+    },
+    "购买保存失败，请重试": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:393"
+      ]
+    },
+    "购买后前往背包查看并使用。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:429"
+      ]
+    },
+    "购买后可在对应功能中生效。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:416"
+      ]
+    },
+    "购买确认": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:574",
+        "src/ui/scene/scene_shop_gui.gd:281",
+        "src/ui/scenes/shop.tscn:2107"
+      ]
+    },
+    "购买道具和装备": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:29"
+      ]
+    },
+    "超值": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:343",
+        "src/ui/scenes/shop.tscn:1087",
+        "src/ui/scenes/shop.tscn:1221",
+        "src/ui/scenes/shop.tscn:1355",
+        "src/ui/scenes/shop.tscn:1488",
+        "src/ui/scenes/shop.tscn:1622",
+        "src/ui/scenes/shop.tscn:1756",
+        "src/ui/scenes/shop.tscn:688",
+        "src/ui/scenes/shop.tscn:821",
+        "src/ui/scenes/shop.tscn:954"
+      ]
+    },
+    "还没有道具": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:404",
+        "src/ui/scene/scene_inventory_gui.gd:183",
+        "src/ui/scenes/inventory.tscn:1328"
+      ]
+    },
+    "还没有邮件。": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:605"
+      ]
+    },
+    "还没有邮件。\n\n选择一只冒险精灵，送出一颗祝福星星吧。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:194"
+      ]
+    },
+    "进入关卡": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:1080",
+        "src/ui/scenes/stage_select_map.tscn:901"
+      ]
+    },
+    "进入精灵课堂，培养并进化精灵": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:31"
+      ]
+    },
+    "进化": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1013",
+        "src/ui/controllers/ranch_logic.gd:1035",
+        "src/ui/scenes/ranch_hub.tscn:2101"
+      ]
+    },
+    "进化之光": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:65"
+      ]
+    },
+    "进化失败：%s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:826"
+      ]
+    },
+    "进化形态": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1954"
+      ]
+    },
+    "进化成功：%s %s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:834"
+      ]
+    },
+    "进化材料": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:326"
+      ]
+    },
+    "进化目标：%s": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1032"
+      ]
+    },
+    "进化目标：火恐龙": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1889"
+      ]
+    },
+    "进化石": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1144"
+      ]
+    },
+    "进化石请在精灵进化中使用": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:273"
+      ]
+    },
+    "进化系统不可用": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:822"
+      ]
+    },
+    "进化路线": {
+      "locations": [
+        "src/ui/scenes/album.tscn:4051"
+      ]
+    },
+    "进化道具": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1324",
+        "src/ui/controllers/ranch_logic.gd:815"
+      ]
+    },
+    "进化预览": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:398"
+      ]
+    },
+    "远方来信": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:341"
+      ]
+    },
+    "远方的一个陌生人送来了祝福": {
+      "locations": [
+        "src/ui/scenes/main_lobby.tscn:459"
+      ]
+    },
+    "远行信箱": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:213",
+        "src/ui/scenes/main_lobby.tscn:412"
+      ]
+    },
+    "连续": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:86",
+        "src/ui/scene/scene_achievement_gui.gd:46"
+      ]
+    },
+    "连续签到": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:369"
+      ]
+    },
+    "连续签到 7 天": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:71"
+      ]
+    },
+    "追逐花瓣": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:4439"
+      ]
+    },
+    "送出后，星光会穿过云层。\n\n陌生旅人的祝福每天都会\n在不同时间抵达邮箱。": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:150",
+        "src/ui/scenes/mailbox.tscn:763"
+      ]
+    },
+    "送出祝福": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:314",
+        "src/ui/scenes/mailbox.tscn:834"
+      ]
+    },
+    "选择一个道具查看详情": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:452",
+        "src/ui/scene/scene_inventory_gui.gd:185",
+        "src/ui/scenes/inventory.tscn:1450"
+      ]
+    },
+    "选择上方按钮释放技能表现": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:151"
+      ]
+    },
+    "选择两只精灵后预览学习结果": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1468"
+      ]
+    },
+    "选择关卡操作": {
+      "locations": [
+        "src/ui/scenes/stage_select_map.tscn:762"
+      ]
+    },
+    "选择关卡，开始三消冒险战斗！": {
+      "locations": [
+        "src/ui/scene/scene_main.gd:25"
+      ]
+    },
+    "选择冒险精灵": {
+      "locations": [
+        "src/ui/scenes/mailbox.tscn:669"
+      ]
+    },
+    "选择操作：%s": {
+      "locations": [
+        "src/ui/scene/scene_stage_select_gui.gd:1078"
+      ]
+    },
+    "选择空位后从列表放入精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:738",
+        "src/ui/scene/scene_ranch_gui.gd:238"
+      ]
+    },
+    "选择精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1106",
+        "src/ui/controllers/team_logic.gd:847",
+        "src/ui/scene/scene_team_gui.gd:606",
+        "src/ui/scenes/team.tscn:898"
+      ]
+    },
+    "选择精灵加入队伍": {
+      "locations": [
+        "src/ui/scene/scene_team_gui.gd:607",
+        "src/ui/scenes/team.tscn:911"
+      ]
+    },
+    "选择精灵查看羁绊方向。": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:740"
+      ]
+    },
+    "选择语言": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:558"
+      ]
+    },
+    "通关 10 个关卡": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:61"
+      ]
+    },
+    "通关%s解锁": {
+      "locations": [
+        "src/ui/controllers/stage_select_logic.gd:1186"
+      ]
+    },
+    "通关前置关卡解锁": {
+      "locations": [
+        "src/ui/scenes/stage_map_boss_node.tscn:87"
+      ]
+    },
+    "通过第一关": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:60"
+      ]
+    },
+    "速度": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:376",
+        "src/ui/scene/scene_album_gui.gd:48",
+        "src/ui/scenes/album.tscn:3907"
+      ]
+    },
+    "重新生成整盘宝石。": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:410"
+      ]
+    },
+    "重置数据": {
+      "locations": [
+        "src/ui/scene/scene_settings.gd:537"
+      ]
+    },
+    "金币  %s": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:220",
+        "src/ui/scene/scene_ranch_gui.gd:731"
+      ]
+    },
+    "金币  0": {
+      "locations": [
+        "src/ui/scenes/album.tscn:227",
+        "src/ui/scenes/ranch_hub.tscn:4675"
+      ]
+    },
+    "金币 ×%d": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:388"
+      ]
+    },
+    "金币不足": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:334",
+        "src/ui/controllers/shop_logic.gd:389"
+      ]
+    },
+    "金币不足(%d/%d)": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1337"
+      ]
+    },
+    "金币不足，需要 %d": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:818"
+      ]
+    },
+    "金币材料": {
+      "locations": [
+        "src/ui/scene/scene_inventory_gui.gd:322"
+      ]
+    },
+    "钻石  %s": {
+      "locations": [
+        "src/ui/scene/scene_album_gui.gd:221",
+        "src/ui/scene/scene_ranch_gui.gd:732"
+      ]
+    },
+    "钻石  0": {
+      "locations": [
+        "src/ui/scenes/album.tscn:270",
+        "src/ui/scenes/ranch_hub.tscn:4714"
+      ]
+    },
+    "锋芒初露": {
+      "locations": [
+        "src/ui/scene/scene_achievement_gui.gd:69"
+      ]
+    },
+    "队伍战力": {
+      "locations": [
+        "src/ui/scene/scene_team_gui.gd:598",
+        "src/ui/scenes/team.tscn:701"
+      ]
+    },
+    "队伍编成": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:642"
+      ]
+    },
+    "队长": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:404",
+        "src/ui/scene/scene_team_gui.gd:56",
+        "src/ui/scenes/team.tscn:579"
+      ]
+    },
+    "队长技": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:723"
+      ]
+    },
+    "队长技能表现测试": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:127"
+      ]
+    },
+    "队长技能：%s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1294"
+      ]
+    },
+    "队长技能：%s - %s": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1295"
+      ]
+    },
+    "队长技能：均衡号令 - 全队HP+6%，草属性伤害+8%": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:1856"
+      ]
+    },
+    "队长技能：无": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1287"
+      ]
+    },
+    "队长技能：未知": {
+      "locations": [
+        "src/ui/scene/scene_ranch_gui.gd:1290"
+      ]
+    },
+    "防御": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:375",
+        "src/ui/scene/scene_album_gui.gd:48",
+        "src/ui/scenes/album.tscn:3844"
+      ]
+    },
+    "附件：": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:391"
+      ]
+    },
+    "限时特惠，助力冒险": {
+      "locations": [
+        "src/ui/scene/scene_shop_gui.gd:316"
+      ]
+    },
+    "限时特惠，助力冒险！": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:499"
+      ]
+    },
+    "限时礼包": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:559"
+      ]
+    },
+    "雄 勇敢": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3418"
+      ]
+    },
+    "雌 温和": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3481"
+      ]
+    },
+    "雷链": {
+      "locations": [
+        "src/ui/scene/scene_leader_skill_test.gd:53"
+      ]
+    },
+    "需要 Lv.%d": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:812"
+      ]
+    },
+    "需要放入两只精灵": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:475"
+      ]
+    },
+    "青草庭院": {
+      "locations": [
+        "src/ui/scenes/ranch_hub.tscn:3288"
+      ]
+    },
+    "领取": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:351",
+        "src/ui/controllers/ranch_logic.gd:1438",
+        "src/ui/scene/scene_achievement_gui.gd:387"
+      ]
+    },
+    "领取奖励": {
+      "locations": [
+        "src/ui/scene/scene_sign_in.gd:449"
+      ]
+    },
+    "领取成功 +%d 金币": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:247"
+      ]
+    },
+    "领取附件": {
+      "locations": [
+        "src/ui/scene/scene_mailbox.gd:201",
+        "src/ui/scenes/mailbox.tscn:622"
+      ]
+    },
+    "（已达上限）": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:761",
+        "src/ui/controllers/ranch_logic.gd:799"
+      ]
+    }
+  }
+}

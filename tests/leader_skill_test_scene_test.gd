@@ -60,6 +60,7 @@ func _run() -> void:
 	if _failures.is_empty():
 		print("[LeaderSkillTestScene] OK")
 		quit(0)
+		return
 	for failure in _failures:
 		push_error("[LeaderSkillTestScene] " + failure)
 	quit(1)

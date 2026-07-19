@@ -323,7 +323,7 @@ func _update_header() -> void:
 	var chapter_stars := _get_chapter_stars(chapter)
 	var total_stars: int = maxi((chapter.get("stages", []).size() as int) * 3, 1)
 	var theme_color: Color = CHAPTER_THEME_TINTS.get(_current_chapter_element(), Color(0.30, 0.95, 0.34))
-	_chapter_title.text = "第%d章" % (_current_chapter_index + 1)
+	_chapter_title.text = TranslationServer.translate("第%d章") % (_current_chapter_index + 1)
 	_chapter_title.add_theme_color_override("font_color", theme_color)
 	_chapter_name_label.text = str(chapter.get("name", ""))
 	_star_label.text = "%d/%d" % [chapter_stars, total_stars]
@@ -348,12 +348,12 @@ func _update_chapter_buttons() -> void:
 		var next_unlocked := has_next and _is_chapter_unlocked(next_chapter_index)
 		_bottom_next_map_btn.disabled = not has_next
 		_bottom_next_map_btn.modulate = Color.WHITE if next_unlocked else Color(0.62, 0.66, 0.72, 0.82)
-		_bottom_next_map_btn.tooltip_text = "前往第%d章" % (next_chapter_index + 1) if next_unlocked else (
-			"第%d章尚未解锁，请先击败第%d章 Boss" % [next_chapter_index + 1, next_chapter_index] if has_next else "已到达最终章"
+		_bottom_next_map_btn.tooltip_text = TranslationServer.translate("前往第%d章") % (next_chapter_index + 1) if next_unlocked else (
+			TranslationServer.translate("第%d章尚未解锁，请先击败第%d章 Boss") % [next_chapter_index + 1, next_chapter_index] if has_next else "已到达最终章"
 		)
 		var next_text := _bottom_next_map_btn.get_node_or_null("Text") as Label
 		if next_text != null:
-			next_text.text = "第%d章" % (next_chapter_index + 1) if has_next else "最终章"
+			next_text.text = TranslationServer.translate("第%d章") % (next_chapter_index + 1) if has_next else "最终章"
 			next_text.add_theme_color_override("font_color", Color.WHITE if next_unlocked else Color(0.78, 0.82, 0.88))
 		var next_arrow := _bottom_next_map_btn.get_node_or_null("Arrow") as TextureRect
 		if next_arrow != null:
@@ -404,7 +404,7 @@ func _show_chapter_locked_hint(chapter_index: int) -> void:
 	_setup_chapter_lock_hint()
 	if _chapter_lock_hint_tween != null and _chapter_lock_hint_tween.is_valid():
 		_chapter_lock_hint_tween.kill()
-	_chapter_lock_hint.text = "第%d章尚未解锁，请先击败第%d章 Boss" % [chapter_index + 1, chapter_index]
+	_chapter_lock_hint.text = TranslationServer.translate("第%d章尚未解锁，请先击败第%d章 Boss") % [chapter_index + 1, chapter_index]
 	_chapter_lock_hint.visible = true
 	_chapter_lock_hint.modulate.a = 0.0
 	_chapter_lock_hint.scale = Vector2(0.92, 0.92)
@@ -1075,7 +1075,7 @@ func _set_transition_buttons_disabled(disabled: bool) -> void:
 
 func _show_sweep_dialog(stage_id: String, stage_name: String) -> void:
 	super._show_sweep_dialog(stage_id, stage_name)
-	_sweep_title_label.text = "选择操作：%s" % stage_name
+	_sweep_title_label.text = TranslationServer.translate("选择操作：%s") % stage_name
 	(_sweep_confirm_btn.get_node("Text") as Label).text = "扫荡"
 	(_sweep_cancel_btn.get_node("Text") as Label).text = "进入关卡"
 	_sync_popup_visibility()

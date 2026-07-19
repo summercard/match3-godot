@@ -1,7 +1,7 @@
 class_name CartoonTypography
 extends RefCounted
 
-const ROUND_FONT := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const ROUND_FONT := preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 
 static func apply(root: Node, profile: String = "") -> void:
@@ -36,6 +36,7 @@ static func _apply_node(node: Node, font: Font, profile: String) -> void:
 static func _style_label(label: Label, font: Font, profile: String) -> void:
 	label.add_theme_font_override("font", font)
 	var target_size := _target_font_size(label, profile)
+	target_size = _fit_font_size(label, font, target_size)
 	label.add_theme_font_size_override("font_size", target_size)
 	var outline := _target_outline_size(label, profile)
 	label.add_theme_constant_override("outline_size", outline)
@@ -43,12 +44,38 @@ static func _style_label(label: Label, font: Font, profile: String) -> void:
 		label.add_theme_color_override("font_outline_color", Color(0.30, 0.13, 0.04, 0.82))
 	if profile == "lobby" and _is_bottom_nav_label(label):
 		label.add_theme_color_override("font_outline_color", Color(1.0, 0.93, 0.68, 0.70))
+	var localized_text := TranslationServer.translate(label.text)
+	if not _requires_single_line(label) and label.size.y >= float(target_size) * 1.8 and (localized_text.contains("\n") or font.get_string_size(localized_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, target_size).x > label.size.x):
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = false
+	elif _requires_single_line(label):
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		label.clip_text = true
+
+
+static func _fit_font_size(label: Label, font: Font, preferred_size: int) -> int:
+	var available_width := maxf(1.0, label.size.x - 4.0)
+	var localized_text := TranslationServer.translate(label.text).replace("\n", " ")
+	if localized_text.is_empty() or available_width <= 4.0:
+		return preferred_size
+	var fitted := preferred_size
+	var minimum_size := 6 if _requires_single_line(label) else 8
+	while fitted > minimum_size and font.get_string_size(localized_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
+		fitted -= 1
+	return fitted
+
+
+static func _requires_single_line(label: Label) -> bool:
+	var path := str(label.get_path())
+	if path.find("PrimaryButtons/") != -1 and label.name == "Text":
+		return true
+	return (path.find("TeamPanel/Cards/TeamCard") != -1 or path.find("EnemyPanel/Cards/EnemyCard") != -1) and label.name == "Name"
 
 
 static func _target_font_size(label: Label, profile: String) -> int:
 	var current_size := maxi(label.get_theme_font_size("font_size"), 1)
 	if profile != "lobby":
-		return max(current_size, 14)
+		return max(current_size, 10)
 
 	var path := str(label.get_path())
 	var node_name := String(label.name)

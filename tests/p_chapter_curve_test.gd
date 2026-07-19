@@ -1,7 +1,7 @@
 extends SceneTree
 
 # P4-chapter-curve-test
-# 验证 1.3.2 最终关卡等级梯度：ch1 教学加成 +3，ch2 起章节加成 +6
+# 验证难度调整后的关卡等级梯度：ch1 教学加成 +1，ch2 起章节加成 +3
 # Boss 关卡是 stage_X_12（Boss_STAGE_NO=12）
 # 跑：godot --headless --path . --script res://tests/p_chapter_curve_test.gd
 
@@ -72,21 +72,21 @@ func _init() -> void:
 		print("  ✗ 撞顶了！实际按 Lv%d 算" % StatCalculator.MAX_LEVEL)
 
 	# 4) 验收第一章最终曲线
-	print("\n[验收] 1.3.2 最终值: ch1 头=5, ch1 Boss=13")
+	print("\n[验收] 难度调整值: ch1 头=5, ch1 Boss=11")
 	print("-".repeat(75))
 	var ch1_head = db.get_stage("stage_1_1")
 	var ch1_boss = db.get_stage("stage_1_%d" % BOSS_STAGE_NO)
 	var head_lv = int(ch1_head.get("enemyLevel", 0)) if not ch1_head.is_empty() else 0
 	var boss_lv2 = int(ch1_boss.get("enemyLevel", 0)) if not ch1_boss.is_empty() else 0
 	var pass1 = (head_lv == 5)
-	var pass2 = (boss_lv2 == 13)
+	var pass2 = (boss_lv2 == 11)
 	print("  ch1 头 (stage_1_1) Lv = %d (期望 5) %s" % [head_lv, "✓" if pass1 else "✗"])
-	print("  ch1 Boss (stage_1_12) Lv = %d (期望 13) %s" % [boss_lv2, "✓" if pass2 else "✗"])
+	print("  ch1 Boss (stage_1_12) Lv = %d (期望 11) %s" % [boss_lv2, "✓" if pass2 else "✗"])
 
-	# 5) ch2 起 Boss 使用 +6 章节加成，此后章节基准逐章 +5
-	print("\n[ch2 起验证] ch2 Boss=21，之后逐章 +5")
+	# 5) ch2 起 Boss 使用 +3 章节加成，此后章节基准逐章 +5
+	print("\n[ch2 起验证] ch2 Boss=18，之后逐章 +5")
 	print("-".repeat(75))
-	var expected = 21
+	var expected = 18
 	var all_pass = true
 	for ch in range(2, 11):
 		var b = db.get_stage("stage_%d_%d" % [ch, BOSS_STAGE_NO])
@@ -101,7 +101,7 @@ func _init() -> void:
 
 	print("\n" + "=".repeat(75))
 	if pass1 and pass2 and all_pass:
-		print("✓ 全部通过！ch1 头 Lv5 / ch1 Boss Lv13 / ch2 起 +6 章节加成已生效")
+		print("✓ 全部通过！ch1 头 Lv5 / ch1 Boss Lv11 / ch2 起 +3 章节加成已生效")
 	else:
 		print("✗ 有问题")
 	print("=".repeat(75))

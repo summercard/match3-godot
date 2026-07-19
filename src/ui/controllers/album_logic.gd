@@ -3,7 +3,7 @@
 class_name SceneAlbum
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const SocialRulesScript = preload("res://src/core/social_rules.gd")
@@ -322,7 +322,7 @@ func _draw_detail_panel() -> void:
 	var instances := _get_instances_for_species(id)
 	var owned_count := instances.size()
 	_draw_texture_fit(_tex(ELEMENT_ICON_ASSETS.get(element, "")), Rect2(25.0, DETAIL_Y + 16.0, 26.0, 26.0))
-	_draw_text("%s  %s" % [id.replace("monster_", ""), monster.get("name", "???")], 108.0, DETAIL_Y + 36.0, C["text"], 17.0, 140.0)
+	_draw_text("%s  %s" % [id.replace("monster_", ""), TranslationServer.translate(str(monster.get("name", "???")))], 108.0, DETAIL_Y + 36.0, C["text"], 17.0, 140.0)
 	_draw_stars(int(monster.get("rarity", 1)), 28.0, DETAIL_Y + 48.0, 16.0, true)
 	var own_text := "未收录" if owned_count <= 0 else "已收录"
 	_draw_text(own_text, 259.0, DETAIL_Y + 37.0, C["gold"] if owned_count > 0 else C["text_muted"], 10.0, 128.0)
@@ -340,7 +340,10 @@ func _draw_detail_ecology(monster: Dictionary) -> void:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
 	var ecology: Dictionary = identity.get("ecology", {})
 	_draw_rounded_rect(154.0, DETAIL_Y + 150.0, 188.0, 14.0, 5.0, Color(0.05, 0.10, 0.18, 0.78))
-	_draw_text("%s · %s" % [identity.get("roleLabel", "角色"), ecology.get("name", "生态")], 248.0, DETAIL_Y + 161.0, C["gold"], 8.8, 176.0)
+	_draw_text("%s · %s" % [
+		TranslationServer.translate(str(identity.get("roleLabel", "角色"))),
+		TranslationServer.translate(str(ecology.get("name", "生态"))),
+	], 248.0, DETAIL_Y + 161.0, C["gold"], 8.8, 176.0)
 
 func _draw_detail_nature(monster_id: String) -> void:
 	_draw_text("个体性格随机", 108.0, DETAIL_Y + 52.0, C["text_muted"], 11.0, 120.0)
@@ -388,7 +391,7 @@ func _draw_detail_skill(monster: Dictionary) -> void:
 	_draw_text(skill.get("name", "未知技能"), 94.0, DETAIL_Y + 187.0, C["text"], 11.0, 76.0)
 	var skill_type := str(skill.get("type", "strike"))
 	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
-	_draw_text("%s %.1fx" % [type_label, skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 9.0, 76.0)
+	_draw_text("%s %.1fx" % [TranslationServer.translate(type_label), skill.get("multiplier", 1.0)], 96.0, DETAIL_Y + 205.0, C["text_muted"], 9.0, 76.0)
 
 func _draw_detail_evolution(monster: Dictionary) -> void:
 	_draw_texture_fit(_tex(ALBUM_ASSETS["evolution_strip"]), Rect2(154.0, DETAIL_Y + 164.0, 188.0, 60.0))
@@ -539,6 +542,7 @@ func _draw_stars(rarity: int, x: float, y: float, size: float, lit: bool) -> voi
 		_draw_texture_fit(tex, Rect2(x + float(i) * (size + 1.0), y, size, size))
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, max_w: float = 200.0) -> void:
+	text = TranslationServer.translate(text)
 	var font := PROJECT_ROUND_FONT
 	var left := x - max_w / 2.0
 	draw_string(font, Vector2(left + 1.0, y + 1.5), text, HORIZONTAL_ALIGNMENT_CENTER, max_w, size, Color(0, 0, 0, 0.58))

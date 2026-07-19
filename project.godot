@@ -19,6 +19,8 @@ run/max_fps=60
 
 SceneManager="*res://src/core/scene_manager.gd"
 SaveManager="*res://src/core/save_manager.gd"
+Localization="*res://src/core/localization_manager.gd"
+FontRegistry="*res://src/core/font_registry.gd"
 GameManager="*res://src/core/game_manager.gd"
 AudioManager="*res://src/core/audio_manager.gd"
 

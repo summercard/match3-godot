@@ -1,0 +1,2995 @@
+{
+  "shard": "battle_ui",
+  "message_count": 526,
+  "messages": {
+    "\n窗口: %s（稳定度 %d%%）": {
+      "locations": [
+        "src/battle/capture_system.gd:192"
+      ]
+    },
+    " 压制效果提高了稳定度。": {
+      "locations": [
+        "src/battle/capture_system.gd:107"
+      ]
+    },
+    "%s  ·  第 %d/%d 波": {
+      "locations": [
+        "src/ui/scene/scene_tower_battle.gd:28"
+      ]
+    },
+    "%s %s 受到 %d %s！": {
+      "locations": [
+        "src/battle/status_effect.gd:214"
+      ]
+    },
+    "%s · 第 %d/%d 波": {
+      "locations": [
+        "src/data/tower_db.gd:114",
+        "src/ui/scene/scene_battle.gd:1983"
+      ]
+    },
+    "%s 不能在战斗中使用": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4090"
+      ]
+    },
+    "%s 倒下了！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1127"
+      ]
+    },
+    "%s 充能 %d/%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1035"
+      ]
+    },
+    "%s 冰冻中，ATK降低30%%！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1772"
+      ]
+    },
+    "%s 回复了 %d HP！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2902"
+      ]
+    },
+    "%s 已无法行动": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1032"
+      ]
+    },
+    "%s 开始！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:642"
+      ]
+    },
+    "%s 暂时无法使用": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4083"
+      ]
+    },
+    "%s 正在蓄力...": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1802",
+        "src/ui/scene/scene_battle.gd:2876"
+      ]
+    },
+    "%s 生成了护盾！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2887"
+      ]
+    },
+    "%s 的 %s 充能完毕！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2833"
+      ]
+    },
+    "%s 的%s效果消失了": {
+      "locations": [
+        "src/battle/status_effect.gd:267"
+      ]
+    },
+    "%s 眩晕了，无法行动！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1769"
+      ]
+    },
+    "%s 蓄力攻击 → %s": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1829"
+      ]
+    },
+    "%s 蓄力攻击！×%.1f": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2880"
+      ]
+    },
+    "%s 被束缚，伤害降低": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1873"
+      ]
+    },
+    "%s 被状态效果击杀！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1781"
+      ]
+    },
+    "%s 误伤 → %s": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1795"
+      ]
+    },
+    "%s 进入激战状态！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1449",
+        "src/ui/scene/scene_battle.gd:1594"
+      ]
+    },
+    "%s 释放 %s → %s": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1069"
+      ]
+    },
+    "%s 释放 %s！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1070"
+      ]
+    },
+    "%s×%d %s共鸣 %s": {
+      "locations": [
+        "src/battle/battle_manager.gd:396"
+      ]
+    },
+    "%s形范围弹跳！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1676"
+      ]
+    },
+    "%s数量不足，自动捕捉已跳过。": {
+      "locations": [
+        "src/battle/capture_system.gd:233"
+      ]
+    },
+    "%s系": {
+      "locations": [
+        "src/ui/controllers/team_logic.gd:782",
+        "src/ui/scene/scene_battle_prepare.gd:268"
+      ]
+    },
+    "%s能量": {
+      "locations": [
+        "src/battle/capture_system.gd:280"
+      ]
+    },
+    "+%d 回春": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1789"
+      ]
+    },
+    "+%d 能量": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4289"
+      ]
+    },
+    "5  满": {
+      "locations": [
+        "src/ui/scenes/battle_prepare.tscn:345"
+      ]
+    },
+    "BOSS": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1448",
+        "src/ui/scene/scene_battle.gd:1593",
+        "src/ui/scene/scene_battle.gd:4648",
+        "src/ui/scene/scene_battle_prepare.gd:282",
+        "src/ui/scene/scene_tower.gd:95",
+        "src/ui/scenes/stage_map_boss_node.tscn:42",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_01_breeze_plain.tscn:1797",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_02_waterfall_kingdom.tscn:1663",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_03_feather_forest.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_04_passion_desert.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_05_southern_sea.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_06_ice_kingdom.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_07_spirit_void.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_barbecue_rock.tscn:1664",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_08_temporal_rift.tscn:1642",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_09_starlit_temple.tscn:1481",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_10_chaos_domain.tscn:1505",
+        "src/ui/scenes/stage_select/chapter_maps/chapter_11_radiant_temple.tscn:1505",
+        "src/ui/scenes/tower.tscn:319"
+      ]
+    },
+    "Boss 突破 · 选择一张共鸣卡": {
+      "locations": [
+        "src/ui/scenes/tower_card_overlay.tscn:93"
+      ]
+    },
+    "Boss 突破！阶段补给已寄往信箱，选择一张共鸣卡": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1961"
+      ]
+    },
+    "Boss 默认不可捕捉；仅特殊关卡会明确开放。": {
+      "locations": [
+        "src/battle/capture_system.gd:248"
+      ]
+    },
+    "EXP": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:693",
+        "src/ui/controllers/ranch_logic.gd:1579"
+      ]
+    },
+    "HP药水": {
+      "locations": [
+        "src/data/item_db.gd:96",
+        "src/ui/scene/scene_battle.gd:4134"
+      ]
+    },
+    "×%d %s共鸣 %s": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:385"
+      ]
+    },
+    "★精英": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:57"
+      ]
+    },
+    "★精英 ": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1423",
+        "src/ui/controllers/ranch_logic.gd:1428",
+        "src/ui/scene/scene_battle_gui.gd:549",
+        "src/ui/scene/scene_battle_prepare.gd:250"
+      ]
+    },
+    "☠️中毒": {
+      "locations": [
+        "src/battle/status_effect.gd:36"
+      ]
+    },
+    "⚡%s 眩晕中！": {
+      "locations": [
+        "src/battle/status_effect.gd:228"
+      ]
+    },
+    "⚡眩晕": {
+      "locations": [
+        "src/battle/status_effect.gd:42"
+      ]
+    },
+    "✨ 收服成功！": {
+      "locations": [
+        "src/battle/capture_system.gd:199"
+      ]
+    },
+    "❄️%s 冰冻中，ATK降低30%%！": {
+      "locations": [
+        "src/battle/status_effect.gd:221"
+      ]
+    },
+    "❄️冰冻": {
+      "locations": [
+        "src/battle/status_effect.gd:30"
+      ]
+    },
+    "三只精灵先去休息一下": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:52",
+        "src/ui/scenes/tower_failure_overlay.tscn:91"
+      ]
+    },
+    "下一关": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:972",
+        "src/ui/scene/scene_result_gui.gd:559",
+        "src/ui/scenes/battle_result.tscn:1016"
+      ]
+    },
+    "下一步": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:372"
+      ]
+    },
+    "下次尽量在最佳窗口使用更高阶捕捉球。": {
+      "locations": [
+        "src/battle/capture_system.gd:327"
+      ]
+    },
+    "不稳": {
+      "locations": [
+        "src/battle/capture_system.gd:99"
+      ]
+    },
+    "中毒!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1716"
+      ]
+    },
+    "中毒伤害": {
+      "locations": [
+        "src/battle/status_effect.gd:37"
+      ]
+    },
+    "亮!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1699"
+      ]
+    },
+    "仍在场：%s": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:828"
+      ]
+    },
+    "伊蕾": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:5"
+      ]
+    },
+    "优先用爆发破盾": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:48"
+      ]
+    },
+    "伙伴": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:343",
+        "src/ui/scene/scene_battle.gd:1032",
+        "src/ui/scene/scene_battle.gd:1061",
+        "src/ui/scene/scene_battle.gd:1365",
+        "src/ui/scene/scene_battle.gd:1827",
+        "src/ui/scene/scene_battle.gd:1829",
+        "src/ui/scene/scene_battle.gd:2831"
+      ]
+    },
+    "会从第 %d 层安全点重新出发": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:53"
+      ]
+    },
+    "会从第 1 层安全点重新出发": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:104"
+      ]
+    },
+    "会提高捕捉窗口稳定度。": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:82"
+      ]
+    },
+    "伤害": {
+      "locations": [
+        "src/battle/status_effect.gd:207"
+      ]
+    },
+    "伤害提高 34%，但立刻失去 12% 当前生命。": {
+      "locations": [
+        "src/data/tower_db.gd:54"
+      ]
+    },
+    "你的": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5828"
+      ]
+    },
+    "你的回合": {
+      "locations": [
+        "src/ui/components/battle_flow_controller.gd:10",
+        "src/ui/scene/scene_battle.gd:1894",
+        "src/ui/scene/scene_battle.gd:5810"
+      ]
+    },
+    "使用": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:468",
+        "src/ui/scene/scene_battle_gui.gd:697",
+        "src/ui/scene/scene_inventory_gui.gd:186",
+        "src/ui/scene/scene_inventory_gui.gd:282",
+        "src/ui/scene/scene_inventory_gui.gd:292",
+        "src/ui/scenes/battle_screen.tscn:684",
+        "src/ui/scenes/inventory.tscn:1613"
+      ]
+    },
+    "使用 %s，全队获得一次性护盾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4336"
+      ]
+    },
+    "使用 %s，全队获得护盾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4162"
+      ]
+    },
+    "使用 %s，处理 %d 块岩石": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4202"
+      ]
+    },
+    "使用 %s，恢复 %d HP": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4134"
+      ]
+    },
+    "使用 %s，整盘宝石已重置": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4309"
+      ]
+    },
+    "使用 %s，清除 %d 格毒雾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4263"
+      ]
+    },
+    "使用 %s，补充 %d 点能量": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4294"
+      ]
+    },
+    "使用 %s，解除 %d 处锁链": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4237"
+      ]
+    },
+    "使用 属性易形：%s → %s（%d 个宝石）": {
+      "locations": [
+        "src/ui/scene/scene_battle_gui.gd:810"
+      ]
+    },
+    "使用道具": {
+      "locations": [
+        "src/ui/scene/scene_battle_gui.gd:692",
+        "src/ui/scenes/battle_screen.tscn:552"
+      ]
+    },
+    "侵蚀": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5829"
+      ]
+    },
+    "倒下": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2573"
+      ]
+    },
+    "元素剥离": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:283"
+      ]
+    },
+    "元素吞噬": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:313"
+      ]
+    },
+    "元素滋养": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:225"
+      ]
+    },
+    "元素转化": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:239"
+      ]
+    },
+    "充能 +%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2615"
+      ]
+    },
+    "充能完毕": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5814"
+      ]
+    },
+    "先把血量压到 35%% 以下，或用束缚/压制打开窗口。": {
+      "locations": [
+        "src/battle/capture_system.gd:322"
+      ]
+    },
+    "先整理队伍，下一次突破还有新惊喜": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:64"
+      ]
+    },
+    "先熟悉战斗画面": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:66"
+      ]
+    },
+    "先生成护盾再行动": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:46"
+      ]
+    },
+    "先看战斗布局": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:300"
+      ]
+    },
+    "先集火压低血量": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:58"
+      ]
+    },
+    "光": {
+      "locations": [
+        "src/battle/capture_system.gd:348",
+        "src/ui/controllers/album_logic.gd:83",
+        "src/ui/controllers/battle_prepare_logic.gd:141",
+        "src/ui/controllers/ranch_logic.gd:17",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_battle.gd:374",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:229",
+        "src/ui/scenes/battle_screen.tscn:1073",
+        "src/ui/scenes/battle_screen.tscn:1281"
+      ]
+    },
+    "光耀裁决": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:300",
+        "src/data/leader_skill_v132_db.gd:19",
+        "src/data/leader_skill_v132_db.gd:20",
+        "src/data/leader_skill_v132_db.gd:21"
+      ]
+    },
+    "克制！-%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2291"
+      ]
+    },
+    "全盘洗牌": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:268"
+      ]
+    },
+    "全队立刻回复 32% 最大生命。": {
+      "locations": [
+        "src/data/tower_db.gd:29"
+      ]
+    },
+    "全队立刻回复生命。": {
+      "locations": [
+        "src/ui/scenes/tower_card_overlay.tscn:196"
+      ]
+    },
+    "共享经验": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:214"
+      ]
+    },
+    "共享经验槽": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:916",
+        "src/ui/scene/scene_result_gui.gd:507",
+        "src/ui/scenes/battle_result.tscn:742",
+        "src/ui/scenes/ranch_hub.tscn:1992"
+      ]
+    },
+    "共鸣卡": {
+      "locations": [
+        "src/ui/components/tower_card_overlay.gd:44"
+      ]
+    },
+    "共鸣塔": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1983",
+        "src/ui/scene/scene_tower.gd:82",
+        "src/ui/scene/scene_tower_battle.gd:26",
+        "src/ui/scenes/main_lobby.tscn:386",
+        "src/ui/scenes/tower.tscn:154"
+      ]
+    },
+    "共鸣塔 %d 层": {
+      "locations": [
+        "src/data/tower_db.gd:99"
+      ]
+    },
+    "共鸣塔 99 层完成！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2068"
+      ]
+    },
+    "共鸣塔状态不可用": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1921"
+      ]
+    },
+    "共鸣塔进度保存失败": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1947"
+      ]
+    },
+    "共鸣增益": {
+      "locations": [
+        "src/ui/components/tower_card_overlay.gd:64",
+        "src/ui/scenes/tower_card_overlay.tscn:131"
+      ]
+    },
+    "共鸣远征  ·  %02dF": {
+      "locations": [
+        "src/ui/scene/scene_tower_battle.gd:27"
+      ]
+    },
+    "共鸣远征  ·  01F": {
+      "locations": [
+        "src/ui/scenes/tower_battle.tscn:105"
+      ]
+    },
+    "关": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3678",
+        "src/ui/scene/scene_battle_gui.gd:636",
+        "src/ui/scenes/battle_screen.tscn:261"
+      ]
+    },
+    "关卡机制": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:662",
+        "src/ui/scenes/battle_prepare.tscn:1234"
+      ]
+    },
+    "再削弱一点，进入开启或最佳窗口后再抓。": {
+      "locations": [
+        "src/battle/capture_system.gd:324"
+      ]
+    },
+    "再去挑战更强关卡。": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:88"
+      ]
+    },
+    "冒险者": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:141",
+        "src/ui/scenes/main_lobby.tscn:110"
+      ]
+    },
+    "冰": {
+      "locations": [
+        "src/battle/capture_system.gd:352",
+        "src/ui/controllers/album_logic.gd:87",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_battle.gd:1713",
+        "src/ui/scene/scene_battle.gd:5735",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:231"
+      ]
+    },
+    "冰冻": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5833"
+      ]
+    },
+    "冰冻!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1716"
+      ]
+    },
+    "冰面打滑！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1201"
+      ]
+    },
+    "净雾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4257"
+      ]
+    },
+    "净雾露": {
+      "locations": [
+        "src/data/item_db.gd:168",
+        "src/ui/scene/scene_battle.gd:4263"
+      ]
+    },
+    "准备好后开始冒险": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:90"
+      ]
+    },
+    "准备束缚或守护": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:67"
+      ]
+    },
+    "减伤 %d%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2624"
+      ]
+    },
+    "凛风": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:8"
+      ]
+    },
+    "击败敌人": {
+      "locations": [
+        "src/battle/battle_objective_evaluator.gd:12",
+        "src/battle/battle_objective_evaluator.gd:82",
+        "src/data/chapter_mechanic_rules.gd:157",
+        "src/ui/scenes/battle_screen.tscn:138"
+      ]
+    },
+    "击败野生精灵": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:75"
+      ]
+    },
+    "击败：%s": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:825"
+      ]
+    },
+    "创造捕捉窗口": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:81"
+      ]
+    },
+    "势均力敌": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:611",
+        "src/ui/scene/scene_battle_prepare.gd:292",
+        "src/ui/scenes/battle_prepare.tscn:823"
+      ]
+    },
+    "十字": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5817",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "十字爆炸": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5920"
+      ]
+    },
+    "十字爆裂": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5920"
+      ]
+    },
+    "十字爆裂！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1659"
+      ]
+    },
+    "升级": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:947",
+        "src/ui/scenes/battle_result.tscn:952",
+        "src/ui/scenes/ranch_hub.tscn:2175"
+      ]
+    },
+    "单回合 %d": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:151"
+      ]
+    },
+    "卡牌仅在本次共鸣塔远征中生效": {
+      "locations": [
+        "src/ui/scenes/tower_card_overlay.tscn:105"
+      ]
+    },
+    "即将回复生命": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:56"
+      ]
+    },
+    "即将造成 %.1fx 伤害": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:36"
+      ]
+    },
+    "压制": {
+      "locations": [
+        "src/battle/capture_system.gd:110"
+      ]
+    },
+    "去队伍界面查看它的能量亲和与技能定位。": {
+      "locations": [
+        "src/battle/capture_system.gd:318"
+      ]
+    },
+    "反伤 %d回合": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2617"
+      ]
+    },
+    "反伤 -%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1877"
+      ]
+    },
+    "取消": {
+      "locations": [
+        "src/ui/controllers/shop_logic.gd:584",
+        "src/ui/controllers/stage_select_logic.gd:1236",
+        "src/ui/controllers/stage_select_logic.gd:474",
+        "src/ui/controllers/team_logic.gd:665",
+        "src/ui/scene/scene_battle_gui.gd:696",
+        "src/ui/scene/scene_settings.gd:551",
+        "src/ui/scene/scene_shop_gui.gd:283",
+        "src/ui/scenes/battle_screen.tscn:1345",
+        "src/ui/scenes/battle_screen.tscn:650",
+        "src/ui/scenes/ranch_hub.tscn:3212",
+        "src/ui/scenes/shop.tscn:2397"
+      ]
+    },
+    "可用": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:687"
+      ]
+    },
+    "可直接返回关卡选择；背包、金币与精灵不会重复增加。": {
+      "locations": [
+        "src/battle/capture_system.gd:252"
+      ]
+    },
+    "叶": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:372"
+      ]
+    },
+    "喷泉喷发，水流封住了周围宝石": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6151"
+      ]
+    },
+    "回到大厅": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:1478"
+      ]
+    },
+    "回合": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3287",
+        "src/ui/scenes/battle_screen.tscn:74"
+      ]
+    },
+    "回合 %d / %d": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:817",
+        "src/ui/scene/scene_result_gui.gd:426"
+      ]
+    },
+    "回合 %d/%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3634"
+      ]
+    },
+    "回合 0 / 20": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:489"
+      ]
+    },
+    "回复": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5831"
+      ]
+    },
+    "回春 %d回合": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2613"
+      ]
+    },
+    "回精灵课堂升级": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:1008",
+        "src/ui/scene/scene_result_gui.gd:565"
+      ]
+    },
+    "回血": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:55"
+      ]
+    },
+    "土": {
+      "locations": [
+        "src/battle/capture_system.gd:350",
+        "src/ui/controllers/album_logic.gd:84",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:227"
+      ]
+    },
+    "在精灵编队中放入至少 1 只精灵，": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:88"
+      ]
+    },
+    "在背包装备捕捉球，或在战斗底部道具栏选择本场使用的捕捉球。": {
+      "locations": [
+        "src/battle/capture_system.gd:231"
+      ]
+    },
+    "地脉护体": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:358",
+        "src/data/leader_skill_v132_db.gd:50",
+        "src/data/leader_skill_v132_db.gd:51",
+        "src/data/leader_skill_v132_db.gd:52"
+      ]
+    },
+    "塔内补给": {
+      "locations": [
+        "src/ui/components/tower_card_overlay.gd:62",
+        "src/ui/scenes/tower_card_overlay.tscn:173"
+      ]
+    },
+    "处理中...": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3632"
+      ]
+    },
+    "失败": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4583",
+        "src/ui/scene/scene_battle_gui.gd:834"
+      ]
+    },
+    "奖励已领取": {
+      "locations": [
+        "src/battle/capture_system.gd:250"
+      ]
+    },
+    "守护技": {
+      "locations": [
+        "src/battle/capture_system.gd:335"
+      ]
+    },
+    "守护祷言": {
+      "locations": [
+        "src/data/tower_db.gd:43"
+      ]
+    },
+    "安全点恢复失败": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1933"
+      ]
+    },
+    "宝石解锁": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5926"
+      ]
+    },
+    "宝石解锁！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6242"
+      ]
+    },
+    "宝石转化": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2566"
+      ]
+    },
+    "属性克制": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5815",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "属性克制！伤害提升": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1084",
+        "src/ui/scene/scene_battle.gd:1379",
+        "src/ui/scene/scene_battle.gd:2516",
+        "src/ui/scene/scene_battle.gd:2755"
+      ]
+    },
+    "属性协同": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:684"
+      ]
+    },
+    "属性协同：无（队伍属性分散）": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:681",
+        "src/ui/scene/scene_battle_prepare.gd:313",
+        "src/ui/scenes/battle_prepare.tscn:1292"
+      ]
+    },
+    "属性无明显克制关系": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:343"
+      ]
+    },
+    "属性轮转": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:377"
+      ]
+    },
+    "属性：": {
+      "locations": [
+        "src/ui/scene/scene_result_gui.gd:164"
+      ]
+    },
+    "属性：未知": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:327"
+      ]
+    },
+    "已满": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2448"
+      ]
+    },
+    "已激活 %s +%.0f%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3977"
+      ]
+    },
+    "已选择 %s +%.0f%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4053"
+      ]
+    },
+    "开": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3678",
+        "src/ui/scene/scene_battle_gui.gd:636"
+      ]
+    },
+    "开启": {
+      "locations": [
+        "src/battle/capture_system.gd:93"
+      ]
+    },
+    "开启自动捕捉并选择可用捕捉球后，胜利结算会自动尝试。": {
+      "locations": [
+        "src/battle/capture_system.gd:225"
+      ]
+    },
+    "开启远征": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:85",
+        "src/ui/scenes/tower.tscn:356"
+      ]
+    },
+    "开始冒险": {
+      "locations": [
+        "src/ui/scene/scene_start.gd:60",
+        "src/ui/scene/scene_tutorial.gd:372",
+        "src/ui/scenes/main_lobby.tscn:588"
+      ]
+    },
+    "开始战斗": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:736",
+        "src/ui/scenes/battle_prepare.tscn:1626"
+      ]
+    },
+    "弹!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1699"
+      ]
+    },
+    "强攻共鸣": {
+      "locations": [
+        "src/data/tower_db.gd:38",
+        "src/ui/scenes/tower_card_overlay.tscn:142"
+      ]
+    },
+    "强能护盾": {
+      "locations": [
+        "src/data/item_db.gd:201",
+        "src/ui/scene/scene_battle.gd:4336"
+      ]
+    },
+    "当前无法使用道具": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4058",
+        "src/ui/scene/scene_battle_gui.gd:793"
+      ]
+    },
+    "当前没有岩石障碍": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4196"
+      ]
+    },
+    "当前没有毒雾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4261"
+      ]
+    },
+    "当前没有锁链宝石": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4235"
+      ]
+    },
+    "当前选择的道具不是捕捉球，本场不进行捕捉判定。": {
+      "locations": [
+        "src/battle/capture_system.gd:236"
+      ]
+    },
+    "彩虹消除": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5922"
+      ]
+    },
+    "性格：": {
+      "locations": [
+        "src/ui/scene/scene_result_gui.gd:161"
+      ]
+    },
+    "性格：未知": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:313"
+      ]
+    },
+    "总槽 %d\n获得 +%d": {
+      "locations": [
+        "src/ui/scene/scene_result_gui.gd:480"
+      ]
+    },
+    "恢复": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5831"
+      ]
+    },
+    "成功!": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:202"
+      ]
+    },
+    "我方 %d": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:590"
+      ]
+    },
+    "我方 0": {
+      "locations": [
+        "src/ui/scenes/battle_prepare.tscn:793"
+      ]
+    },
+    "我方精灵": {
+      "locations": [
+        "src/ui/scenes/battle/player_slot.tscn:46"
+      ]
+    },
+    "我方队伍": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:541",
+        "src/ui/scene/scene_battle_prepare.gd:159",
+        "src/ui/scenes/battle_prepare.tscn:856"
+      ]
+    },
+    "战力 %d": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:256"
+      ]
+    },
+    "战力对比": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:586",
+        "src/ui/scenes/battle_prepare.tscn:778"
+      ]
+    },
+    "战斗": {
+      "locations": [
+        "src/ui/controllers/achievement_logic.gd:83",
+        "src/ui/scene/scene_achievement_gui.gd:43",
+        "src/ui/scene/scene_battle.gd:642"
+      ]
+    },
+    "战斗准备": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:535",
+        "src/ui/scene/scene_battle_prepare.gd:123",
+        "src/ui/scenes/battle_prepare.tscn:149"
+      ]
+    },
+    "战斗失败": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:764",
+        "src/ui/scene/scene_result_gui.gd:415"
+      ]
+    },
+    "战斗失败，无法收服。": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2238"
+      ]
+    },
+    "战斗开始！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:722"
+      ]
+    },
+    "战斗结束": {
+      "locations": [
+        "src/ui/components/battle_flow_controller.gd:9",
+        "src/ui/scene/scene_battle.gd:1891"
+      ]
+    },
+    "战斗胜利": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:764",
+        "src/ui/scene/scene_result_gui.gd:415",
+        "src/ui/scenes/battle_result.tscn:117"
+      ]
+    },
+    "所有精灵获得 2 点技能充能。": {
+      "locations": [
+        "src/data/tower_db.gd:34"
+      ]
+    },
+    "技能:%s": {
+      "locations": [
+        "src/battle/capture_system.gd:339"
+      ]
+    },
+    "技能会带来输出、守护或控场。": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:76"
+      ]
+    },
+    "技能充能 %d/%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1049"
+      ]
+    },
+    "技能暂时无法释放": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1051"
+      ]
+    },
+    "技能能量已满": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4291"
+      ]
+    },
+    "把可爱的萌灵收为伙伴。": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:64"
+      ]
+    },
+    "把棋盘上哪一种宝石改成其他属性？": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:882"
+      ]
+    },
+    "把目标压到低血或先压制它，": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:82"
+      ]
+    },
+    "护": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "护-%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1854"
+      ]
+    },
+    "护-%d%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1104",
+        "src/ui/scene/scene_battle.gd:4157"
+      ]
+    },
+    "护盾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5833"
+      ]
+    },
+    "护盾 %d": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:298"
+      ]
+    },
+    "护盾+%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2555"
+      ]
+    },
+    "护盾已就绪": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4331"
+      ]
+    },
+    "护符": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4162"
+      ]
+    },
+    "拖动宝石": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:69"
+      ]
+    },
+    "拖动宝石、击败精灵，": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:64"
+      ]
+    },
+    "拖动宝石，使 3 个相同宝石连成一线吧！": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:70"
+      ]
+    },
+    "拥有: %d": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:462",
+        "src/ui/scene/scene_battle_gui.gd:695",
+        "src/ui/scene/scene_inventory_gui.gd:276",
+        "src/ui/scene/scene_shop_gui.gd:374"
+      ]
+    },
+    "拥有: 0": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:617",
+        "src/ui/scenes/inventory.tscn:1568",
+        "src/ui/scenes/shop.tscn:2166"
+      ]
+    },
+    "持续治疗": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:212"
+      ]
+    },
+    "捕捉": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5821"
+      ]
+    },
+    "捕捉 %s %d%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3667"
+      ]
+    },
+    "捕捉球": {
+      "locations": [
+        "src/battle/capture_system.gd:222",
+        "src/ui/controllers/result_logic.gd:369",
+        "src/ui/controllers/result_logic.gd:422",
+        "src/ui/controllers/result_logic.gd:431",
+        "src/ui/scene/scene_battle.gd:2166",
+        "src/ui/scene/scene_battle.gd:2264",
+        "src/ui/scene/scene_battle.gd:2277",
+        "src/ui/scene/scene_battle.gd:3927"
+      ]
+    },
+    "捕捉窗口已开启，目标被成功稳住。": {
+      "locations": [
+        "src/battle/capture_system.gd:303"
+      ]
+    },
+    "捕获": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:702",
+        "src/ui/scenes/battle_result.tscn:188"
+      ]
+    },
+    "捕获球": {
+      "locations": [
+        "src/data/item_db.gd:13",
+        "src/ui/controllers/result_logic.gd:428",
+        "src/ui/scene/scene_battle.gd:2273",
+        "src/ui/scene/scene_battle.gd:3977",
+        "src/ui/scene/scene_battle.gd:4053"
+      ]
+    },
+    "捕获球 +1": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:315"
+      ]
+    },
+    "控场技": {
+      "locations": [
+        "src/battle/capture_system.gd:337"
+      ]
+    },
+    "收下鼓励，再战": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:253"
+      ]
+    },
+    "收服": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:315"
+      ]
+    },
+    "收服判定中...": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4598",
+        "src/ui/scene/scene_battle_gui.gd:839"
+      ]
+    },
+    "收服失败（概率: %d%%）%s\n%s": {
+      "locations": [
+        "src/battle/capture_system.gd:209"
+      ]
+    },
+    "收服成功": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:790"
+      ]
+    },
+    "收服成功（概率: %d%%）%s\n%s": {
+      "locations": [
+        "src/battle/capture_system.gd:200"
+      ]
+    },
+    "收服！": {
+      "locations": [
+        "src/battle/capture_effect.gd:74"
+      ]
+    },
+    "攻击 +%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2624"
+      ]
+    },
+    "攻击后蓄力": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:64"
+      ]
+    },
+    "攻击后进入蓄力": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:65"
+      ]
+    },
+    "攻击敌方血条": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:311"
+      ]
+    },
+    "攻击随机队友": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:73"
+      ]
+    },
+    "效果不佳": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5829"
+      ]
+    },
+    "效果不佳...": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1381"
+      ]
+    },
+    "效果拔群": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5816",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "敌人": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:22",
+        "src/ui/components/battle_combatant_renderer.gd:30",
+        "src/ui/controllers/battle_prepare_logic.gd:643",
+        "src/ui/scene/scene_battle.gd:1069",
+        "src/ui/scene/scene_battle.gd:1127",
+        "src/ui/scene/scene_battle.gd:1795",
+        "src/ui/scene/scene_battle.gd:1827",
+        "src/ui/scene/scene_battle.gd:1829",
+        "src/ui/scene/scene_battle.gd:1873"
+      ]
+    },
+    "敌人已全部击败": {
+      "locations": [
+        "src/battle/battle_objective_evaluator.gd:86"
+      ]
+    },
+    "敌方 %d": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:596"
+      ]
+    },
+    "敌方 0": {
+      "locations": [
+        "src/ui/scenes/battle_prepare.tscn:808"
+      ]
+    },
+    "敌方信息": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:619",
+        "src/ui/scene/scene_battle_prepare.gd:144",
+        "src/ui/scenes/battle_prepare.tscn:396"
+      ]
+    },
+    "敌方回合": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1734",
+        "src/ui/scene/scene_battle.gd:3630",
+        "src/ui/scene/scene_battle.gd:5810"
+      ]
+    },
+    "敌方战力": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:269",
+        "src/ui/scenes/battle_prepare.tscn:457"
+      ]
+    },
+    "敌方精灵": {
+      "locations": [
+        "src/ui/scenes/battle/enemy_slot.tscn:33",
+        "src/ui/scenes/battle/enemy_stage_slot.tscn:34"
+      ]
+    },
+    "教程": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:334"
+      ]
+    },
+    "散开": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5831",
+        "src/ui/scene/scene_battle.gd:6226"
+      ]
+    },
+    "新手训练": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:204",
+        "src/ui/scenes/battle_prepare.tscn:164"
+      ]
+    },
+    "新精灵": {
+      "locations": [
+        "src/ui/scene/scene_result_gui.gd:189",
+        "src/ui/scenes/battle_result.tscn:276"
+      ]
+    },
+    "旅行精灵送来一份鼓励": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:58",
+        "src/ui/scenes/tower_failure_overlay.tscn:117"
+      ]
+    },
+    "旅行者": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:23",
+        "src/core/tower_rank_provider.gd:43",
+        "src/ui/scene/scene_tower.gd:152"
+      ]
+    },
+    "无捕捉目标": {
+      "locations": [
+        "src/battle/capture_system.gd:242"
+      ]
+    },
+    "无效": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5829"
+      ]
+    },
+    "无效交换": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1188"
+      ]
+    },
+    "无法": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5829"
+      ]
+    },
+    "无法交换": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1163"
+      ]
+    },
+    "时隙熔脉": {
+      "locations": [
+        "src/data/tower_db.gd:22"
+      ]
+    },
+    "易伤": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:424"
+      ]
+    },
+    "星级：%d星  等级：Lv.%d": {
+      "locations": [
+        "src/ui/scene/scene_result_gui.gd:195"
+      ]
+    },
+    "星级：1星  等级：Lv.1": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:290"
+      ]
+    },
+    "星辉引导": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:399",
+        "src/data/leader_skill_db.gd:1003",
+        "src/data/leader_skill_db.gd:1008",
+        "src/data/leader_skill_db.gd:985",
+        "src/data/leader_skill_db.gd:990",
+        "src/data/leader_skill_db.gd:994",
+        "src/data/leader_skill_db.gd:999",
+        "src/data/leader_skill_v132_db.gd:44",
+        "src/data/leader_skill_v132_db.gd:45",
+        "src/data/leader_skill_v132_db.gd:46"
+      ]
+    },
+    "星辉神殿": {
+      "locations": [
+        "src/data/tower_db.gd:22"
+      ]
+    },
+    "是否使用 %s？": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3990"
+      ]
+    },
+    "是否继续本局游戏？": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:1406"
+      ]
+    },
+    "晕": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1713"
+      ]
+    },
+    "普攻": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:72",
+        "src/ui/components/battle_combatant_renderer.gd:152",
+        "src/ui/components/battle_combatant_renderer.gd:253"
+      ]
+    },
+    "晶": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3378"
+      ]
+    },
+    "暗": {
+      "locations": [
+        "src/battle/capture_system.gd:349",
+        "src/ui/controllers/album_logic.gd:86",
+        "src/ui/controllers/ranch_logic.gd:17",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:230"
+      ]
+    },
+    "更高伤害，也承担风险。": {
+      "locations": [
+        "src/ui/scenes/tower_card_overlay.tscn:238"
+      ]
+    },
+    "最佳": {
+      "locations": [
+        "src/battle/capture_system.gd:87"
+      ]
+    },
+    "最佳窗口让目标足够稳定。": {
+      "locations": [
+        "src/battle/capture_system.gd:301"
+      ]
+    },
+    "最高 %d 层  ·  单回合 %d": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:83"
+      ]
+    },
+    "最高 0 层  ·  单回合 0": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:379"
+      ]
+    },
+    "未开启": {
+      "locations": [
+        "src/battle/capture_system.gd:74",
+        "src/ui/scene/scene_battle.gd:3655"
+      ]
+    },
+    "未捕捉": {
+      "locations": [
+        "src/battle/capture_system.gd:223",
+        "src/ui/scene/scene_battle.gd:2170",
+        "src/ui/scene/scene_result_gui.gd:439",
+        "src/ui/scenes/capture_result_panel.tscn:55"
+      ]
+    },
+    "未解锁：击败第 5 章最终 Boss 后开放": {
+      "locations": [
+        "src/data/tower_db.gd:9",
+        "src/ui/scenes/tower.tscn:189"
+      ]
+    },
+    "未选择捕捉球，自动捕捉不会空手触发。": {
+      "locations": [
+        "src/battle/capture_system.gd:230"
+      ]
+    },
+    "本回合无法行动": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:25"
+      ]
+    },
+    "本场战斗已经完成结算，不再重复进行捕捉判定。": {
+      "locations": [
+        "src/battle/capture_system.gd:251"
+      ]
+    },
+    "本场没有可记录的捕捉目标。": {
+      "locations": [
+        "src/battle/capture_system.gd:243"
+      ]
+    },
+    "本场没有进行捕捉判定。": {
+      "locations": [
+        "src/battle/capture_system.gd:224"
+      ]
+    },
+    "本次 +%d · 经验槽 %d/%d": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:919",
+        "src/ui/scene/scene_result_gui.gd:512"
+      ]
+    },
+    "本次远征中，我方造成的伤害提高 18%。": {
+      "locations": [
+        "src/data/tower_db.gd:39"
+      ]
+    },
+    "本次远征中，我方造成的伤害提高。": {
+      "locations": [
+        "src/ui/scenes/tower_card_overlay.tscn:154"
+      ]
+    },
+    "本次远征中，敌方造成的伤害降低 14%。": {
+      "locations": [
+        "src/data/tower_db.gd:44"
+      ]
+    },
+    "本次远征中，每次消除额外获得 1 点技能充能。": {
+      "locations": [
+        "src/data/tower_db.gd:49"
+      ]
+    },
+    "本波回合已经用完啦": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:52"
+      ]
+    },
+    "本轮远征": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:210"
+      ]
+    },
+    "架盾": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:45"
+      ]
+    },
+    "棋盘变化": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2596"
+      ]
+    },
+    "棋盘重置": {
+      "locations": [
+        "src/data/item_db.gd:190",
+        "src/ui/scene/scene_battle.gd:4309"
+      ]
+    },
+    "棋盘重置！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4308"
+      ]
+    },
+    "概率偏低，目标仍然不够虚弱。": {
+      "locations": [
+        "src/battle/capture_system.gd:306"
+      ]
+    },
+    "欢迎来到萌灵消消": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:63"
+      ]
+    },
+    "毒": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1713"
+      ]
+    },
+    "毒雾伤害": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5924"
+      ]
+    },
+    "毒雾侵蚀": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5924"
+      ]
+    },
+    "毒雾侵蚀！%d格 × 3%% = %d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6205"
+      ]
+    },
+    "毒雾扩散了": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5923"
+      ]
+    },
+    "毒雾散开了": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5925"
+      ]
+    },
+    "毒雾散开了！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6220"
+      ]
+    },
+    "毒雾被清除了": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5925"
+      ]
+    },
+    "毒雾轻轻扩散": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5923"
+      ]
+    },
+    "毒雾轻轻扩散！+%d格": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6188"
+      ]
+    },
+    "水": {
+      "locations": [
+        "src/battle/capture_system.gd:345",
+        "src/ui/controllers/album_logic.gd:80",
+        "src/ui/controllers/battle_prepare_logic.gd:138",
+        "src/ui/controllers/ranch_logic.gd:16",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_battle.gd:371",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:222",
+        "src/ui/scenes/battle_screen.tscn:1173",
+        "src/ui/scenes/battle_screen.tscn:965"
+      ]
+    },
+    "水晶": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4294"
+      ]
+    },
+    "水晶庭院  ·  第 1/5 波": {
+      "locations": [
+        "src/ui/scenes/tower_battle.tscn:116"
+      ]
+    },
+    "没有可守护的队员": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4159",
+        "src/ui/scene/scene_battle.gd:4333"
+      ]
+    },
+    "流明": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:9"
+      ]
+    },
+    "消耗: %s": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:850",
+        "src/ui/scene/scene_result_gui.gd:456"
+      ]
+    },
+    "消除 3 个": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:306"
+      ]
+    },
+    "消除对应能量会给伙伴充能，": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:76"
+      ]
+    },
+    "混沌阶庭": {
+      "locations": [
+        "src/data/tower_db.gd:22"
+      ]
+    },
+    "清屏": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1689",
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "游戏暂停": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:1393"
+      ]
+    },
+    "潮水上涨，水中只有水元素还能操作": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6176"
+      ]
+    },
+    "潮水退去，底部格子重新露出": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6178"
+      ]
+    },
+    "澎湃回响": {
+      "locations": [
+        "src/data/tower_db.gd:48"
+      ]
+    },
+    "火": {
+      "locations": [
+        "src/battle/capture_system.gd:344",
+        "src/ui/controllers/album_logic.gd:79",
+        "src/ui/controllers/battle_prepare_logic.gd:137",
+        "src/ui/controllers/ranch_logic.gd:16",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_battle.gd:370",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:223",
+        "src/ui/scenes/battle_screen.tscn:1137",
+        "src/ui/scenes/battle_screen.tscn:929"
+      ]
+    },
+    "火焰烧尽了藤蔓": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6133"
+      ]
+    },
+    "火系": {
+      "locations": [
+        "src/ui/scenes/battle_prepare.tscn:431"
+      ]
+    },
+    "灼": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1713"
+      ]
+    },
+    "灼烧": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6113",
+        "src/ui/scene/scene_leader_skill_test.gd:216",
+        "src/ui/scene/scene_leader_skill_test.gd:222"
+      ]
+    },
+    "灼烧!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1716"
+      ]
+    },
+    "灼烧伤害": {
+      "locations": [
+        "src/battle/status_effect.gd:24"
+      ]
+    },
+    "炸弹爆炸": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5921"
+      ]
+    },
+    "点击查看结算": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4595",
+        "src/ui/scene/scene_battle_gui.gd:836"
+      ]
+    },
+    "点击继续": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4624",
+        "src/ui/scenes/battle_screen.tscn:821"
+      ]
+    },
+    "烬羽": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:10"
+      ]
+    },
+    "热砂遗迹": {
+      "locations": [
+        "src/data/tower_db.gd:21"
+      ]
+    },
+    "熄灭": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6149"
+      ]
+    },
+    "爆发榜": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:457"
+      ]
+    },
+    "爆发纪录保存失败": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1928"
+      ]
+    },
+    "爆裂": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1665",
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "状态变化": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2604"
+      ]
+    },
+    "生成了护盾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5824"
+      ]
+    },
+    "生机花苞": {
+      "locations": [
+        "src/data/tower_db.gd:28",
+        "src/ui/scenes/tower_card_overlay.tscn:184"
+      ]
+    },
+    "留意战斗底部的捕捉窗口": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:84"
+      ]
+    },
+    "登塔榜": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:427"
+      ]
+    },
+    "的回合": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5810"
+      ]
+    },
+    "目标": {
+      "locations": [
+        "src/ui/controllers/album_logic.gd:418",
+        "src/ui/scene/scene_album_gui.gd:204",
+        "src/ui/scene/scene_album_gui.gd:212",
+        "src/ui/scene/scene_tutorial.gd:306",
+        "src/ui/scenes/album.tscn:4815",
+        "src/ui/scenes/album.tscn:4906",
+        "src/ui/scenes/album.tscn:4997",
+        "src/ui/scenes/album.tscn:5088",
+        "src/ui/scenes/album.tscn:5179",
+        "src/ui/scenes/album.tscn:5376",
+        "src/ui/scenes/album.tscn:5560"
+      ]
+    },
+    "目标: %s  %s": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:848",
+        "src/ui/scene/scene_result_gui.gd:454"
+      ]
+    },
+    "目标不可捕捉": {
+      "locations": [
+        "src/battle/capture_system.gd:246"
+      ]
+    },
+    "目标已被击倒，仍可尝试捕捉，但稳定度下降。": {
+      "locations": [
+        "src/battle/capture_system.gd:84"
+      ]
+    },
+    "目标已被削弱，可以尝试捕捉。": {
+      "locations": [
+        "src/battle/capture_system.gd:96"
+      ]
+    },
+    "目标开始动摇，但窗口还不稳定。": {
+      "locations": [
+        "src/battle/capture_system.gd:102"
+      ]
+    },
+    "目标状态稳定，先削弱或压制它。": {
+      "locations": [
+        "src/battle/capture_system.gd:77"
+      ]
+    },
+    "目标被压制，捕捉窗口开始松动。": {
+      "locations": [
+        "src/battle/capture_system.gd:113"
+      ]
+    },
+    "目标过载，稳定度下降后挣脱。": {
+      "locations": [
+        "src/battle/capture_system.gd:312"
+      ]
+    },
+    "目标非常虚弱，是理想捕捉窗口。": {
+      "locations": [
+        "src/battle/capture_system.gd:90"
+      ]
+    },
+    "盾-%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1087",
+        "src/ui/scene/scene_battle.gd:2761"
+      ]
+    },
+    "盾-吸收": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1864"
+      ]
+    },
+    "看图鉴": {
+      "locations": [
+        "src/ui/scenes/battle_result.tscn:391"
+      ]
+    },
+    "眩晕": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:24",
+        "src/ui/scene/scene_leader_skill_test.gd:211"
+      ]
+    },
+    "眩晕!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1716"
+      ]
+    },
+    "破岩": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4189",
+        "src/ui/scene/scene_battle.gd:4690"
+      ]
+    },
+    "破岩锤": {
+      "locations": [
+        "src/data/item_db.gd:131",
+        "src/ui/scene/scene_battle.gd:4202"
+      ]
+    },
+    "破招: 束缚或守护": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:38"
+      ]
+    },
+    "破链": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4226",
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "破链×%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6238"
+      ]
+    },
+    "破雾": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5896",
+        "src/ui/scene/scene_battle.gd:6216"
+      ]
+    },
+    "确认": {
+      "locations": [
+        "src/ui/controllers/ranch_logic.gd:1165",
+        "src/ui/controllers/stage_select_logic.gd:463",
+        "src/ui/scene/scene_settings.gd:549",
+        "src/ui/scenes/battle_result.tscn:362",
+        "src/ui/scenes/battle_screen.tscn:1313",
+        "src/ui/scenes/ranch_hub.tscn:4516"
+      ]
+    },
+    "确认使用该道具": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:604"
+      ]
+    },
+    "示例：横向拖动水宝石": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:72"
+      ]
+    },
+    "稀有": {
+      "locations": [
+        "src/battle/capture_system.gd:290",
+        "src/ui/controllers/inventory_logic.gd:485"
+      ]
+    },
+    "窗口: %s %d%%": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:854",
+        "src/ui/scene/scene_result_gui.gd:459"
+      ]
+    },
+    "窗口不稳，目标挣脱了。": {
+      "locations": [
+        "src/battle/capture_system.gd:310"
+      ]
+    },
+    "窗口已开，但这次判定没有成功。": {
+      "locations": [
+        "src/battle/capture_system.gd:313"
+      ]
+    },
+    "窗口未开启，目标状态还太稳定。": {
+      "locations": [
+        "src/battle/capture_system.gd:308"
+      ]
+    },
+    "第 %d 层": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:80"
+      ]
+    },
+    "第 %d 层 · %d 回合": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:151"
+      ]
+    },
+    "第 %d 层完成，下一波来袭！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1964"
+      ]
+    },
+    "第 %d 层突破 · 选择一张共鸣卡": {
+      "locations": [
+        "src/ui/components/tower_card_overlay.gd:28"
+      ]
+    },
+    "第 %d/%d 波": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:81"
+      ]
+    },
+    "第 1 层": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:235"
+      ]
+    },
+    "第 1/5 波": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:257"
+      ]
+    },
+    "等待操作": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3628"
+      ]
+    },
+    "精灵": {
+      "locations": [
+        "src/core/social_rules.gd:255",
+        "src/ui/controllers/battle_prepare_logic.gd:566",
+        "src/ui/controllers/result_logic.gd:944",
+        "src/ui/scene/scene_battle_gui.gd:551",
+        "src/ui/scene/scene_battle_prepare.gd:252",
+        "src/ui/scenes/battle_prepare.tscn:1051",
+        "src/ui/scenes/battle_prepare.tscn:1160",
+        "src/ui/scenes/battle_prepare.tscn:512",
+        "src/ui/scenes/battle_prepare.tscn:607",
+        "src/ui/scenes/battle_prepare.tscn:702",
+        "src/ui/scenes/battle_prepare.tscn:942"
+      ]
+    },
+    "精英稀有": {
+      "locations": [
+        "src/battle/capture_system.gd:282"
+      ]
+    },
+    "组建你的队伍": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:87"
+      ]
+    },
+    "经验\n%s": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:345"
+      ]
+    },
+    "继续": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:1443"
+      ]
+    },
+    "继续远征": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:85"
+      ]
+    },
+    "缚": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "缚-%d%%": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1118"
+      ]
+    },
+    "羽叶密林": {
+      "locations": [
+        "src/data/tower_db.gd:21"
+      ]
+    },
+    "聚焦星尘": {
+      "locations": [
+        "src/data/tower_db.gd:33"
+      ]
+    },
+    "背包数据暂不可用，本场不消耗道具也不捕捉。": {
+      "locations": [
+        "src/battle/capture_system.gd:239"
+      ]
+    },
+    "胜利": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4583",
+        "src/ui/scene/scene_battle_gui.gd:834",
+        "src/ui/scenes/battle_screen.tscn:739"
+      ]
+    },
+    "自动捕捉已关闭，本场默认不进行捕捉。": {
+      "locations": [
+        "src/battle/capture_system.gd:227"
+      ]
+    },
+    "自动捕捉已开启，请选择捕捉球": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3924"
+      ]
+    },
+    "自动捕捉：关闭": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3929"
+      ]
+    },
+    "自动捕捉：开启，使用%s": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3927"
+      ]
+    },
+    "苔安": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:6"
+      ]
+    },
+    "范围": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5818",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "范围弹跳": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5921"
+      ]
+    },
+    "荆棘反射": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:414",
+        "src/data/leader_skill_v132_db.gd:23",
+        "src/data/leader_skill_v132_db.gd:24"
+      ]
+    },
+    "草": {
+      "locations": [
+        "src/battle/capture_system.gd:346",
+        "src/ui/controllers/album_logic.gd:81",
+        "src/ui/controllers/battle_prepare_logic.gd:139",
+        "src/ui/controllers/ranch_logic.gd:16",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:224",
+        "src/ui/scene/scene_result_gui.gd:225",
+        "src/ui/scenes/battle_screen.tscn:1001",
+        "src/ui/scenes/battle_screen.tscn:1209"
+      ]
+    },
+    "获得奖励": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:868",
+        "src/ui/scenes/battle_result.tscn:528"
+      ]
+    },
+    "落后 %d": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:608",
+        "src/ui/scene/scene_battle_prepare.gd:301"
+      ]
+    },
+    "落石 -%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1354"
+      ]
+    },
+    "落空": {
+      "locations": [
+        "src/battle/capture_effect.gd:88",
+        "src/ui/scene/scene_battle.gd:2237"
+      ]
+    },
+    "蓄力中": {
+      "locations": [
+        "src/ui/components/battle_combatant_renderer.gd:304"
+      ]
+    },
+    "蓄力攻击": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5823"
+      ]
+    },
+    "蓄力释放": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:35"
+      ]
+    },
+    "蓄势强化": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:353"
+      ]
+    },
+    "藤蔓反噬，精灵受到伤害": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:6130"
+      ]
+    },
+    "虚空地窟": {
+      "locations": [
+        "src/data/tower_db.gd:22"
+      ]
+    },
+    "虹光": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5819",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "虹光清屏": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5922"
+      ]
+    },
+    "虹光清屏！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1684"
+      ]
+    },
+    "补给已寄到远行信箱": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:61",
+        "src/ui/scenes/tower_failure_overlay.tscn:227"
+      ]
+    },
+    "装备捕捉球可以提高下次成功率。": {
+      "locations": [
+        "src/battle/capture_system.gd:326"
+      ]
+    },
+    "观察伙伴技能条": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:78"
+      ]
+    },
+    "解锁": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4226",
+        "src/ui/scene/scene_battle.gd:5820",
+        "src/ui/scene/scene_battle.gd:5835",
+        "src/ui/scene/scene_battle.gd:5896",
+        "src/ui/scene/scene_battle.gd:6236"
+      ]
+    },
+    "警告": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:669"
+      ]
+    },
+    "该目标不属于本场可收服对象。": {
+      "locations": [
+        "src/battle/capture_system.gd:247"
+      ]
+    },
+    "该道具需要 GUI 模式": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4348"
+      ]
+    },
+    "误伤 -%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1798"
+      ]
+    },
+    "请先在\"队伍编成\"中": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:758"
+      ]
+    },
+    "请先在“队伍编成”中": {
+      "locations": [
+        "src/ui/scenes/battle_prepare.tscn:1679"
+      ]
+    },
+    "请先编成队伍": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:734",
+        "src/ui/scene/scene_battle_prepare.gd:418"
+      ]
+    },
+    "请先配置队伍": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:295"
+      ]
+    },
+    "请选择捕捉类道具作为自动捕捉消耗品。": {
+      "locations": [
+        "src/battle/capture_system.gd:237"
+      ]
+    },
+    "诺瓦": {
+      "locations": [
+        "src/core/tower_rank_provider.gd:7"
+      ]
+    },
+    "课堂升级精灵": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:976",
+        "src/ui/controllers/result_logic.gd:991",
+        "src/ui/scene/scene_result_gui.gd:560",
+        "src/ui/scenes/battle_result.tscn:1045"
+      ]
+    },
+    "趁机输出或调整棋盘": {
+      "locations": [
+        "src/battle/enemy_intent_rules.gd:27"
+      ]
+    },
+    "跳!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1699"
+      ]
+    },
+    "跳过": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:369"
+      ]
+    },
+    "轰!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1675",
+        "src/ui/scene/scene_battle.gd:5896"
+      ]
+    },
+    "辉光终章": {
+      "locations": [
+        "src/data/tower_db.gd:23"
+      ]
+    },
+    "输出技": {
+      "locations": [
+        "src/battle/capture_system.gd:333"
+      ]
+    },
+    "过载": {
+      "locations": [
+        "src/battle/capture_system.gd:81"
+      ]
+    },
+    "返回": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:967",
+        "src/ui/scene/scene_leader_skill_test.gd:118",
+        "src/ui/scene/scene_result_gui.gd:558",
+        "src/ui/scenes/battle_result.tscn:987",
+        "src/ui/scenes/mailbox.tscn:241",
+        "src/ui/scenes/stage_select_map.tscn:184"
+      ]
+    },
+    "返回主界面后重新进入战斗可刷新背包状态。": {
+      "locations": [
+        "src/battle/capture_system.gd:240"
+      ]
+    },
+    "返回共鸣塔": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:280"
+      ]
+    },
+    "返回关卡": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:989",
+        "src/ui/scene/scene_result_gui.gd:558"
+      ]
+    },
+    "返回庄园": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:1003",
+        "src/ui/scene/scene_result_gui.gd:564"
+      ]
+    },
+    "这一安全点的鼓励已经寄出": {
+      "locations": [
+        "src/ui/components/tower_failure_overlay.gd:63"
+      ]
+    },
+    "这张卡暂时无法选择": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2061"
+      ]
+    },
+    "这次判定成功，目标加入队伍。": {
+      "locations": [
+        "src/battle/capture_system.gd:304"
+      ]
+    },
+    "这里是我方队伍": {
+      "locations": [
+        "src/ui/scene/scene_tutorial.gd:319"
+      ]
+    },
+    "进入战斗": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:418"
+      ]
+    },
+    "进入激战": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5822"
+      ]
+    },
+    "进入激战状态!": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4654"
+      ]
+    },
+    "远征启动失败，请检查队伍。": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:163"
+      ]
+    },
+    "远征失败，请返回共鸣塔后重试": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2021"
+      ]
+    },
+    "远征小憩": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:77"
+      ]
+    },
+    "远行者记录": {
+      "locations": [
+        "src/ui/scenes/tower.tscn:400"
+      ]
+    },
+    "连击": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5645"
+      ]
+    },
+    "连锁 %dx": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3635"
+      ]
+    },
+    "迷乱": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:435"
+      ]
+    },
+    "选中 %s x%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3956"
+      ]
+    },
+    "选择源属性": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:869"
+      ]
+    },
+    "选择目标属性": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:1090"
+      ]
+    },
+    "通关后\n结算": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:365"
+      ]
+    },
+    "通关奖励": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:707",
+        "src/ui/controllers/stage_select_logic.gd:1205",
+        "src/ui/scenes/battle_prepare.tscn:1348"
+      ]
+    },
+    "通过掉落、商店或奖励补充捕捉球后再开启自动捕捉。": {
+      "locations": [
+        "src/battle/capture_system.gd:234"
+      ]
+    },
+    "遇到可捕捉敌人时再开启自动捕捉。": {
+      "locations": [
+        "src/battle/capture_system.gd:244"
+      ]
+    },
+    "道具": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:700",
+        "src/ui/controllers/inventory_logic.gd:312",
+        "src/ui/controllers/inventory_logic.gd:317",
+        "src/ui/controllers/inventory_logic.gd:341",
+        "src/ui/controllers/inventory_logic.gd:81",
+        "src/ui/controllers/result_logic.gd:420",
+        "src/ui/controllers/result_logic.gd:879",
+        "src/ui/scene/scene_battle.gd:2267",
+        "src/ui/scene/scene_battle.gd:3990",
+        "src/ui/scene/scene_battle.gd:4083",
+        "src/ui/scene/scene_battle.gd:4090",
+        "src/ui/scene/scene_battle_gui.gd:693",
+        "src/ui/scene/scene_inventory_gui.gd:328",
+        "src/ui/scene/scene_mailbox.gd:390",
+        "src/ui/scene/scene_result_gui.gd:488",
+        "src/ui/scenes/battle_screen.tscn:592",
+        "src/ui/scenes/inventory.tscn:1525",
+        "src/ui/scenes/inventory.tscn:1540",
+        "src/ui/scenes/inventory.tscn:280"
+      ]
+    },
+    "道具和窗口一起压住了目标。": {
+      "locations": [
+        "src/battle/capture_system.gd:299"
+      ]
+    },
+    "道具数量不足": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4360",
+        "src/ui/scene/scene_battle.gd:4381"
+      ]
+    },
+    "邻接转化": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:261"
+      ]
+    },
+    "配置你的队伍！": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:759",
+        "src/ui/scenes/battle_prepare.tscn:1693"
+      ]
+    },
+    "释放": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:5813",
+        "src/ui/scene/scene_battle.gd:5835"
+      ]
+    },
+    "重新远征": {
+      "locations": [
+        "src/ui/scene/scene_tower.gd:85"
+      ]
+    },
+    "重试": {
+      "locations": [
+        "src/ui/controllers/result_logic.gd:1012",
+        "src/ui/controllers/result_logic.gd:996",
+        "src/ui/scene/scene_result_gui.gd:558",
+        "src/ui/scene/scene_result_gui.gd:560"
+      ]
+    },
+    "金币": {
+      "locations": [
+        "src/data/item_db.gd:329",
+        "src/data/item_db.gd:330",
+        "src/data/item_db.gd:332",
+        "src/data/item_db.gd:333",
+        "src/data/item_db.gd:334",
+        "src/data/item_db.gd:335",
+        "src/data/item_db.gd:336",
+        "src/data/item_db.gd:337",
+        "src/data/item_db.gd:339",
+        "src/data/item_db.gd:341",
+        "src/data/item_db.gd:342",
+        "src/data/item_db.gd:346",
+        "src/data/item_db.gd:347",
+        "src/data/item_db.gd:348",
+        "src/data/item_db.gd:349",
+        "src/data/item_db.gd:350",
+        "src/data/item_db.gd:351",
+        "src/data/item_db.gd:352",
+        "src/data/item_db.gd:353",
+        "src/ui/controllers/battle_prepare_logic.gd:692",
+        "src/ui/scene/scene_ranch_gui.gd:1332"
+      ]
+    },
+    "金币\n%s": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:342"
+      ]
+    },
+    "金币补给": {
+      "locations": [
+        "src/ui/scenes/tower_failure_overlay.tscn:169"
+      ]
+    },
+    "钥匙": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4237"
+      ]
+    },
+    "锁住！消除旁边同色宝石解锁": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1004"
+      ]
+    },
+    "锋芒契约": {
+      "locations": [
+        "src/data/tower_db.gd:53",
+        "src/ui/scenes/tower_card_overlay.tscn:226"
+      ]
+    },
+    "队伍生命已满": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:4132"
+      ]
+    },
+    "队长一击": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:122",
+        "src/data/leader_skill_db.gd:1291"
+      ]
+    },
+    "队长削弱": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:546"
+      ]
+    },
+    "队长守护": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:447"
+      ]
+    },
+    "队长护盾": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:487"
+      ]
+    },
+    "队长汲取": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:166"
+      ]
+    },
+    "队长治愈": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:144"
+      ]
+    },
+    "队长爆发": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:2468",
+        "src/ui/scene/scene_battle.gd:3528",
+        "src/ui/scene/scene_battle.gd:3530"
+      ]
+    },
+    "队长状态": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:531"
+      ]
+    },
+    "队长转化": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:180"
+      ]
+    },
+    "阶段 %d/%d": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:3301",
+        "src/ui/scene/scene_battle_gui.gd:419"
+      ]
+    },
+    "阶段 1/1": {
+      "locations": [
+        "src/ui/scenes/battle_screen.tscn:153"
+      ]
+    },
+    "随机连击": {
+      "locations": [
+        "src/battle/leader_skill_executor.gd:328"
+      ]
+    },
+    "雷": {
+      "locations": [
+        "src/battle/capture_system.gd:347",
+        "src/ui/controllers/album_logic.gd:82",
+        "src/ui/controllers/battle_prepare_logic.gd:140",
+        "src/ui/controllers/ranch_logic.gd:17",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_battle.gd:373",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:226",
+        "src/ui/scenes/battle_screen.tscn:1037",
+        "src/ui/scenes/battle_screen.tscn:1245"
+      ]
+    },
+    "雷鸣孤岛": {
+      "locations": [
+        "src/data/tower_db.gd:21"
+      ]
+    },
+    "需要抓宠时，先打开战斗底部的自动捕捉开关。": {
+      "locations": [
+        "src/battle/capture_system.gd:228"
+      ]
+    },
+    "霜镜高原": {
+      "locations": [
+        "src/data/tower_db.gd:22"
+      ]
+    },
+    "静水回廊": {
+      "locations": [
+        "src/data/tower_db.gd:21"
+      ]
+    },
+    "领先 %d": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:605",
+        "src/ui/scene/scene_battle_prepare.gd:298"
+      ]
+    },
+    "风": {
+      "locations": [
+        "src/battle/capture_system.gd:351",
+        "src/ui/controllers/album_logic.gd:85",
+        "src/ui/controllers/team_logic.gd:278",
+        "src/ui/scene/scene_result_gui.gd:218",
+        "src/ui/scene/scene_result_gui.gd:228"
+      ]
+    },
+    "风铃原野": {
+      "locations": [
+        "src/data/tower_db.gd:21",
+        "src/ui/scenes/tower.tscn:246"
+      ]
+    },
+    "风险契约": {
+      "locations": [
+        "src/ui/components/tower_card_overlay.gd:63",
+        "src/ui/scenes/tower_card_overlay.tscn:215"
+      ]
+    },
+    "首通钻石\n+%d": {
+      "locations": [
+        "src/ui/scene/scene_battle_prepare.gd:348"
+      ]
+    },
+    "（即将跳转...）": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:760"
+      ]
+    },
+    "（已满）": {
+      "locations": [
+        "src/ui/controllers/inventory_logic.gd:248",
+        "src/ui/scene/scene_result_gui.gd:514"
+      ]
+    },
+    "（队伍为空，请在队伍编成中配置）": {
+      "locations": [
+        "src/ui/controllers/battle_prepare_logic.gd:552",
+        "src/ui/scenes/battle_prepare.tscn:870"
+      ]
+    },
+    "💢 %s 倒下了！": {
+      "locations": [
+        "src/ui/scene/scene_battle.gd:1391"
+      ]
+    },
+    "💨 收服失败...": {
+      "locations": [
+        "src/battle/capture_system.gd:208"
+      ]
+    },
+    "🔥灼烧": {
+      "locations": [
+        "src/battle/status_effect.gd:23"
+      ]
+    }
+  }
+}

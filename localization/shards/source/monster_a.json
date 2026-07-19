@@ -1,0 +1,1763 @@
+{
+  "shard": "monster_a",
+  "message_count": 346,
+  "messages": {
+    "%s分支": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:150"
+      ]
+    },
+    "%s生态札记": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:128"
+      ]
+    },
+    "%s羁绊": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:87"
+      ]
+    },
+    "Boss应对": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:132"
+      ]
+    },
+    "下一只: %s（%s），对应%s。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:331"
+      ]
+    },
+    "不高兴": {
+      "locations": [
+        "src/data/monster_db.gd:169"
+      ]
+    },
+    "不高兴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:172"
+      ]
+    },
+    "与%s同行时，留意它会%s；给它保留观察和休息的空间。": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:132"
+      ]
+    },
+    "与同生态成员组队可形成章节应对方向。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:324"
+      ]
+    },
+    "与守护手、控场手组队可组成开拓羁绊。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:319"
+      ]
+    },
+    "与输出手、守护手组队可放大读招收益。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:323"
+      ]
+    },
+    "与输出手、控场手组队可稳住Boss破招回合。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:321"
+      ]
+    },
+    "东峰、晨晶谷与云海上缘处": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:87"
+      ]
+    },
+    "两片雷云碰出的连续电鸣": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:32"
+      ]
+    },
+    "两股熔潮碰撞锻成的斗鱼火魂": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:108"
+      ]
+    },
+    "丰收季椰香聚成的沉稳果灵": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:71"
+      ]
+    },
+    "串联分散电荷并引导雷流避开巢穴": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:32"
+      ]
+    },
+    "主峰、龙窟与巨型断层深处": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:94"
+      ]
+    },
+    "主矿厅、石脊与地下河岸": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:21"
+      ]
+    },
+    "九尾小白": {
+      "locations": [
+        "src/data/monster_db.gd:625"
+      ]
+    },
+    "九尾小白冲击": {
+      "locations": [
+        "src/data/monster_db.gd:628"
+      ]
+    },
+    "九股雪风交织出的尾羽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:82"
+      ]
+    },
+    "争夺水道后守卫鱼卵免遭热流冲散": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:108"
+      ]
+    },
+    "云底滑落的圆润雨珠": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:28"
+      ]
+    },
+    "五彩小可爱": {
+      "locations": [
+        "src/data/monster_db.gd:648"
+      ]
+    },
+    "五彩小可爱冲击": {
+      "locations": [
+        "src/data/monster_db.gd:651"
+      ]
+    },
+    "五色冰光拥抱的绒毛": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:85"
+      ]
+    },
+    "以低鸣驱散侵巢虫群并松落熟果": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:36"
+      ]
+    },
+    "以呼噜震落熟果并给小兽留下越冬储粮": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:90"
+      ]
+    },
+    "会在风暴前传递讯号引导船群避险": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:60"
+      ]
+    },
+    "依星位闪烁并替夜行族群校正迁徙方向": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:86"
+      ]
+    },
+    "保护与捕捉辅助": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:20"
+      ]
+    },
+    "信使龟": {
+      "locations": [
+        "src/data/monster_db.gd:442"
+      ]
+    },
+    "信使龟冲击": {
+      "locations": [
+        "src/data/monster_db.gd:445"
+      ]
+    },
+    "修补破损贝礁并为众多幼鱼提供藏身孔": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:80"
+      ]
+    },
+    "倒木谷、黑林与腐殖层中间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:46"
+      ]
+    },
+    "偏好低血稳定窗口，注意不要直接击倒。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:315"
+      ]
+    },
+    "偏好破障后的开阔棋盘，避免过量伤害。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:314"
+      ]
+    },
+    "偏好稳定战局，适合带守护降低翻车风险。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:312"
+      ]
+    },
+    "偏好被压制或低血窗口，适合控场捕捉。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:310"
+      ]
+    },
+    "储存过量闪电并在晴日缓慢释放": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:33"
+      ]
+    },
+    "储水并用宽叶替幼苗挡住盐雾": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:71"
+      ]
+    },
+    "光宝": {
+      "locations": [
+        "src/data/monster_db.gd:480"
+      ]
+    },
+    "光宝冲击": {
+      "locations": [
+        "src/data/monster_db.gd:483"
+      ]
+    },
+    "光耀圣殿": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:20",
+        "src/data/stage_db.gd:714"
+      ]
+    },
+    "兔八子": {
+      "locations": [
+        "src/data/monster_db.gd:62"
+      ]
+    },
+    "兔八子冲击": {
+      "locations": [
+        "src/data/monster_db.gd:65"
+      ]
+    },
+    "入夜持续发光并替迁徙小兽标出安全岔路": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:39"
+      ]
+    },
+    "冰之国": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:24",
+        "src/data/stage_db.gd:368"
+      ]
+    },
+    "冰光养成的企鹅灵气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:76"
+      ]
+    },
+    "冰冠峰、雪原与极光洞穴": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:114"
+      ]
+    },
+    "冰岛、寒湾与雪坡脚下": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:76"
+      ]
+    },
+    "冰川回声拥立的王冠": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:77"
+      ]
+    },
+    "冰帝企鹅": {
+      "locations": [
+        "src/data/monster_db.gd:579"
+      ]
+    },
+    "冰帝企鹅冲击": {
+      "locations": [
+        "src/data/monster_db.gd:582"
+      ]
+    },
+    "冰帝企鹅王": {
+      "locations": [
+        "src/data/monster_db.gd:587"
+      ]
+    },
+    "冰帝企鹅王冲击": {
+      "locations": [
+        "src/data/monster_db.gd:590"
+      ]
+    },
+    "冰帝小企鹅": {
+      "locations": [
+        "src/data/monster_db.gd:571"
+      ]
+    },
+    "冰帝小企鹅冲击": {
+      "locations": [
+        "src/data/monster_db.gd:574"
+      ]
+    },
+    "冷静": {
+      "locations": [
+        "src/data/nature_db.gd:75"
+      ]
+    },
+    "凤尾花粉随晨风汇聚的仙影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:97"
+      ]
+    },
+    "凤花谷、溪畔与彩叶林": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:97"
+      ]
+    },
+    "击碎硬壳果并让种仁落入软土": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:34"
+      ]
+    },
+    "分割与重连": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:25"
+      ]
+    },
+    "分散骤雨并延缓山洪冲入下游聚落": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:30"
+      ]
+    },
+    "分解软木并让甲虫能进入坚硬树芯": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:45"
+      ]
+    },
+    "刺刺哥哥": {
+      "locations": [
+        "src/data/monster_db.gd:375"
+      ]
+    },
+    "刺刺哥哥冲击": {
+      "locations": [
+        "src/data/monster_db.gd:378"
+      ]
+    },
+    "刺岩滩、灌丛与峡谷石隙间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:48"
+      ]
+    },
+    "刺球怪": {
+      "locations": [
+        "src/data/monster_db.gd:367"
+      ]
+    },
+    "刺球怪冲击": {
+      "locations": [
+        "src/data/monster_db.gd:370"
+      ]
+    },
+    "勇往直前，攻击更强但略显莽撞": {
+      "locations": [
+        "src/data/nature_db.gd:17"
+      ]
+    },
+    "勇敢": {
+      "locations": [
+        "src/data/nature_db.gd:15",
+        "src/ui/scenes/ranch_hub.tscn:2403",
+        "src/ui/scenes/ranch_hub.tscn:3703"
+      ]
+    },
+    "千万旅人谢意汇入的明亮花芯": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:40"
+      ]
+    },
+    "千次落拳震醒的古老菌根": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:35"
+      ]
+    },
+    "南国海": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:19",
+        "src/data/stage_db.gd:309"
+      ]
+    },
+    "南海雷暴压缩的紫白电核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:33"
+      ]
+    },
+    "卵石滩、山沟与浅洞口边缘": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:52"
+      ]
+    },
+    "压制分支": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:137"
+      ]
+    },
+    "压制火力": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:77"
+      ]
+    },
+    "参与当地生态": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:132"
+      ]
+    },
+    "双层贝壳护住的潮声": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:79"
+      ]
+    },
+    "双输出": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:143"
+      ]
+    },
+    "双输出成员形成压制路线，适合快速破盾和压低目标血线。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:140"
+      ]
+    },
+    "双输出队伍，适合快速破盾和压低捕捉目标。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:79"
+      ]
+    },
+    "反复绕路沾满的枝叶与晨露": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:26"
+      ]
+    },
+    "变换反光吸引远方传粉虫前来花田": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:42"
+      ]
+    },
+    "叛逆蝠": {
+      "locations": [
+        "src/data/monster_db.gd:284"
+      ]
+    },
+    "叛逆蝠冲击": {
+      "locations": [
+        "src/data/monster_db.gd:287"
+      ]
+    },
+    "古战场刀盾埋入山岩后生出的守灵": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:110"
+      ]
+    },
+    "古林倾倒后留下的木灵回声": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:46"
+      ]
+    },
+    "古树台、花海与林缘": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:9"
+      ]
+    },
+    "古花原、巨树与圣泉": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:109"
+      ]
+    },
+    "古贝礁孕育的潮汐灵气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:80"
+      ]
+    },
+    "古道口、灯塔与花圃边": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:40"
+      ]
+    },
+    "古酒窖、葡萄谷与幽暗石仓中": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:51"
+      ]
+    },
+    "可进化": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:296"
+      ]
+    },
+    "叶刃": {
+      "locations": [
+        "src/data/monster_db.gd:44"
+      ]
+    },
+    "叶尖、浅塘与檐沟下": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:28"
+      ]
+    },
+    "同生态": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:156"
+      ]
+    },
+    "同生态成员×%d，适合对应章节机制。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:89"
+      ]
+    },
+    "同生态成员×%d，队伍主题更集中，适合对应章节机制。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:153"
+      ]
+    },
+    "后续可接 Boss 破招、捕捉稳定度或回合节奏效果。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:131"
+      ]
+    },
+    "后续可接破盾效率或低血捕捉窗口提示。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:142"
+      ]
+    },
+    "后续可接章节机制抗性、生态目标或场地互动。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:155"
+      ]
+    },
+    "后续章节": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:334"
+      ]
+    },
+    "吞下野火缓慢释放灰烬肥沃新生土壤": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:116"
+      ]
+    },
+    "吞没失控暗能并把危险波动困在封闭区域": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:115"
+      ]
+    },
+    "吞纳浮电并替海鸟清理带电羽毛": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:31"
+      ]
+    },
+    "吞食水底腐屑并替洞鱼引开捕食者": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:44"
+      ]
+    },
+    "吞食细小热藻并为大鱼探测安全水温": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:107"
+      ]
+    },
+    "吞食腐果并限制酸性霉菌向外蔓延": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:23"
+      ]
+    },
+    "启明星": {
+      "locations": [
+        "src/data/monster_db.gd:663"
+      ]
+    },
+    "启明星冲击": {
+      "locations": [
+        "src/data/monster_db.gd:666"
+      ]
+    },
+    "吸纳族群焦躁并驱赶破坏巢穴的兽群": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:24"
+      ]
+    },
+    "吸走沸泉过热能量并维持水温稳定": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:105"
+      ]
+    },
+    "吸附水尘并用花瓣滤净细小砂砾": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:16"
+      ]
+    },
+    "哔哩": {
+      "locations": [
+        "src/data/monster_db.gd:238"
+      ]
+    },
+    "哔哩冲击": {
+      "locations": [
+        "src/data/monster_db.gd:241"
+      ]
+    },
+    "哔哩哔哩": {
+      "locations": [
+        "src/data/monster_db.gd:246"
+      ]
+    },
+    "哔哩哔哩冲击": {
+      "locations": [
+        "src/data/monster_db.gd:249"
+      ]
+    },
+    "哧溜溜溜溜豹": {
+      "locations": [
+        "src/data/monster_db.gd:564"
+      ]
+    },
+    "哧溜溜溜溜豹冲击": {
+      "locations": [
+        "src/data/monster_db.gd:567"
+      ]
+    },
+    "哧溜溜豹": {
+      "locations": [
+        "src/data/monster_db.gd:556"
+      ]
+    },
+    "哧溜溜豹冲击": {
+      "locations": [
+        "src/data/monster_db.gd:559"
+      ]
+    },
+    "哧溜豹": {
+      "locations": [
+        "src/data/monster_db.gd:548"
+      ]
+    },
+    "哧溜豹冲击": {
+      "locations": [
+        "src/data/monster_db.gd:551"
+      ]
+    },
+    "啃除老草并给幼芽腾出生长地": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:12"
+      ]
+    },
+    "啃食衰叶并拖运细小草籽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:6"
+      ]
+    },
+    "啄开堵塞贝壳并放出困住的小虾群": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:62"
+      ]
+    },
+    "啄开薄冰气孔并给水下生物补充空气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:75"
+      ]
+    },
+    "啄食焦藻并保持热水通道持续畅通": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:106"
+      ]
+    },
+    "啪噗": {
+      "locations": [
+        "src/data/monster_db.gd:473"
+      ]
+    },
+    "啪噗冲击": {
+      "locations": [
+        "src/data/monster_db.gd:476"
+      ]
+    },
+    "喷水冲开淤泥并替小鱼拓宽水道": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:17"
+      ]
+    },
+    "嗅出地热裂口并提前警告族群撤离": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:99"
+      ]
+    },
+    "噗尼": {
+      "locations": [
+        "src/data/monster_db.gd:594"
+      ]
+    },
+    "噗尼冲击": {
+      "locations": [
+        "src/data/monster_db.gd:597"
+      ]
+    },
+    "噗尼尼蚌蚌蚌": {
+      "locations": [
+        "src/data/monster_db.gd:610"
+      ]
+    },
+    "噗尼尼蚌蚌蚌冲击": {
+      "locations": [
+        "src/data/monster_db.gd:613"
+      ]
+    },
+    "噗尼蚌蚌": {
+      "locations": [
+        "src/data/monster_db.gd:602"
+      ]
+    },
+    "噗尼蚌蚌冲击": {
+      "locations": [
+        "src/data/monster_db.gd:605"
+      ]
+    },
+    "回音谷、空台与风林": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:38"
+      ]
+    },
+    "土穴、岩沟与暖石坡附近": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:92"
+      ]
+    },
+    "圣殿晨光汇入杯中凝成的白瑞兽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:111"
+      ]
+    },
+    "地脉暖意孵化的一枚粗糙龙卵碎片": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:92"
+      ]
+    },
+    "地龙领主": {
+      "locations": [
+        "src/data/monster_db.gd:717"
+      ]
+    },
+    "地龙领主冲击": {
+      "locations": [
+        "src/data/monster_db.gd:720"
+      ]
+    },
+    "均衡但平庸": {
+      "locations": [
+        "src/data/nature_db.gd:87"
+      ]
+    },
+    "均衡应对": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:130"
+      ]
+    },
+    "塑盘": {
+      "locations": [
+        "src/data/monster_db.gd:941"
+      ]
+    },
+    "塑盘手": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:12"
+      ]
+    },
+    "复合压力": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:28"
+      ]
+    },
+    "外海礁、急湾与风浪航道": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:59"
+      ]
+    },
+    "夜巡绿洲并驱赶偷食水草的沙虫群": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:57"
+      ]
+    },
+    "夜来香": {
+      "locations": [
+        "src/data/monster_db.gd:724"
+      ]
+    },
+    "夜来香冲击": {
+      "locations": [
+        "src/data/monster_db.gd:727"
+      ]
+    },
+    "夜风吻过花苞留下的梦境": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:95"
+      ]
+    },
+    "大喷嘴": {
+      "locations": [
+        "src/data/monster_db.gd:139"
+      ]
+    },
+    "大喷嘴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:142"
+      ]
+    },
+    "大岩球": {
+      "locations": [
+        "src/data/monster_db.gd:405"
+      ]
+    },
+    "大岩球冲击": {
+      "locations": [
+        "src/data/monster_db.gd:408"
+      ]
+    },
+    "大晶瀑、光谷与透明岩桥下": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:66"
+      ]
+    },
+    "大椰果果": {
+      "locations": [
+        "src/data/monster_db.gd:533"
+      ]
+    },
+    "大椰果果冲击": {
+      "locations": [
+        "src/data/monster_db.gd:536"
+      ]
+    },
+    "大潮回声凝成的喷口": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:18"
+      ]
+    },
+    "大瀑、河峡与潮湿石林": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:73"
+      ]
+    },
+    "大眼蜗": {
+      "locations": [
+        "src/data/monster_db.gd:47"
+      ]
+    },
+    "大眼蜗冲击": {
+      "locations": [
+        "src/data/monster_db.gd:50"
+      ]
+    },
+    "大陆岩脊共同铸成的古老领主龙魂": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:94"
+      ]
+    },
+    "大雨滴": {
+      "locations": [
+        "src/data/monster_db.gd:223"
+      ]
+    },
+    "大雨滴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:226"
+      ]
+    },
+    "天树、峭壁与云巢": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:13"
+      ]
+    },
+    "季风吹落的成熟椰果灵气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:70"
+      ]
+    },
+    "守住安静冬眠地并驱离频繁扰巢的兽群": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:91"
+      ]
+    },
+    "守护": {
+      "locations": [
+        "src/core/evolution_rules.gd:6",
+        "src/data/monster_db.gd:938",
+        "src/ui/scene/scene_battle.gd:2538"
+      ]
+    },
+    "守护手": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:9"
+      ]
+    },
+    "守护矿脉入口并给穴居小兽留下通道": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:49"
+      ]
+    },
+    "守护能力升级": {
+      "locations": [
+        "src/core/evolution_rules.gd:163"
+      ]
+    },
+    "宝石潮汐堆起的耀眼辉光核心": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:64"
+      ]
+    },
+    "宝霸": {
+      "locations": [
+        "src/data/monster_db.gd:488"
+      ]
+    },
+    "宝霸冲击": {
+      "locations": [
+        "src/data/monster_db.gd:491"
+      ]
+    },
+    "密林深处、迷谷与断径": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:27"
+      ]
+    },
+    "小凤仙": {
+      "locations": [
+        "src/data/monster_db.gd:740"
+      ]
+    },
+    "小凤仙冲击": {
+      "locations": [
+        "src/data/monster_db.gd:743"
+      ]
+    },
+    "小喷嘴": {
+      "locations": [
+        "src/data/monster_db.gd:131"
+      ]
+    },
+    "小喷嘴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:134"
+      ]
+    },
+    "小地龙": {
+      "locations": [
+        "src/data/monster_db.gd:701"
+      ]
+    },
+    "小地龙冲击": {
+      "locations": [
+        "src/data/monster_db.gd:704"
+      ]
+    },
+    "小岩球": {
+      "locations": [
+        "src/data/monster_db.gd:397"
+      ]
+    },
+    "小岩球冲击": {
+      "locations": [
+        "src/data/monster_db.gd:400"
+      ]
+    },
+    "小拳拳菇": {
+      "locations": [
+        "src/data/monster_db.gd:261"
+      ]
+    },
+    "小拳拳菇冲击": {
+      "locations": [
+        "src/data/monster_db.gd:264"
+      ]
+    },
+    "小木木": {
+      "locations": [
+        "src/data/monster_db.gd:344"
+      ]
+    },
+    "小木木冲击": {
+      "locations": [
+        "src/data/monster_db.gd:347"
+      ]
+    },
+    "小白": {
+      "locations": [
+        "src/data/monster_db.gd:617"
+      ]
+    },
+    "小白冲击": {
+      "locations": [
+        "src/data/monster_db.gd:620"
+      ]
+    },
+    "小雨滴": {
+      "locations": [
+        "src/data/monster_db.gd:215"
+      ]
+    },
+    "小雨滴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:218"
+      ]
+    },
+    "尝试补入守护、控场或同生态成员来触发羁绊。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:97"
+      ]
+    },
+    "山坡滚石裹紧的一枚坚硬土核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:47"
+      ]
+    },
+    "山洪磨圆的巨岩积蓄出的地脉心跳": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:53"
+      ]
+    },
+    "山火巨灵": {
+      "locations": [
+        "src/data/monster_db.gd:900"
+      ]
+    },
+    "山火巨灵冲击": {
+      "locations": [
+        "src/data/monster_db.gd:903"
+      ]
+    },
+    "山腹、石林与地下熔洞外围": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:93"
+      ]
+    },
+    "岔路草坡、雾谷与矮林": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:25"
+      ]
+    },
+    "岩山生态": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:21"
+      ]
+    },
+    "岩浆潮反复锻硬的蟹甲灵气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:101"
+      ]
+    },
+    "岩缝荆棘包裹的尖锐矿物灵核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:48"
+      ]
+    },
+    "峭壁、废塔与逆风口": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:37"
+      ]
+    },
+    "巡守晶河源头并把碎裂晶片搬离水道": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:66"
+      ]
+    },
+    "巡守营地并用余温帮助耐热种子萌芽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:98"
+      ]
+    },
+    "巡查险峭风道并警告靠近的飞兽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:37"
+      ]
+    },
+    "巡视冰原并带领雪狐寻找季节性融水地": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:114"
+      ]
+    },
+    "巡视支流并驱散堵住鱼道的漂木堆积": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:73"
+      ]
+    },
+    "巡视水岸并把甲虫赶离嫩叶": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:55"
+      ]
+    },
+    "巨木桩、石台与菌林": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:35"
+      ]
+    },
+    "巨石王": {
+      "locations": [
+        "src/data/monster_db.gd:860"
+      ]
+    },
+    "巨石王冲击": {
+      "locations": [
+        "src/data/monster_db.gd:863"
+      ]
+    },
+    "巨砾谷、河弯与山脚岩棚": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:53"
+      ]
+    },
+    "已完成": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:240"
+      ]
+    },
+    "带领兽群发现偏僻的新草场": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:27"
+      ]
+    },
+    "带领萤群传播夜花粉并记录季节星轨": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:88"
+      ]
+    },
+    "平原古树冠落下的王冠芽": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:9"
+      ]
+    },
+    "幻羽森林": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:22",
+        "src/core/ecology_bond_rules.gd:23",
+        "src/data/stage_db.gd:166"
+      ]
+    },
+    "幽幽鱼": {
+      "locations": [
+        "src/data/monster_db.gd:337"
+      ]
+    },
+    "幽幽鱼冲击": {
+      "locations": [
+        "src/data/monster_db.gd:340"
+      ]
+    },
+    "幽谷、废巢与月影沼泽间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:24"
+      ]
+    },
+    "延迟与爆发窗口": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:26"
+      ]
+    },
+    "开凿新洞道并引导地下水避开岩层": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:93"
+      ]
+    },
+    "开拓分支": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:126"
+      ]
+    },
+    "开拓羁绊": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:69"
+      ]
+    },
+    "开拓角色组": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:280"
+      ]
+    },
+    "引导兔群修复大片枯萎草场": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:9"
+      ]
+    },
+    "引导蜂蝶采粉避免花丛受损": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:97"
+      ]
+    },
+    "当前只提示方向，不触发分支。": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:166"
+      ]
+    },
+    "当前形态已到达稳定期": {
+      "locations": [
+        "src/core/evolution_rules.gd:34"
+      ]
+    },
+    "彩冰谷、光雪与暖泉旁边": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:85"
+      ]
+    },
+    "彩晶折射出的第一道绚丽光带": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:42"
+      ]
+    },
+    "待定": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:165"
+      ]
+    },
+    "很不高兴": {
+      "locations": [
+        "src/data/monster_db.gd:177"
+      ]
+    },
+    "很不高兴冲击": {
+      "locations": [
+        "src/data/monster_db.gd:180"
+      ]
+    },
+    "微风平原": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:18",
+        "src/data/stage_db.gd:39"
+      ]
+    },
+    "快速压血": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:141"
+      ]
+    },
+    "急流水纹勾出的豹影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:72"
+      ]
+    },
+    "愤怒野猪": {
+      "locations": [
+        "src/data/monster_db.gd:785"
+      ]
+    },
+    "愤怒野猪冲击": {
+      "locations": [
+        "src/data/monster_db.gd:788"
+      ]
+    },
+    "成年地龙": {
+      "locations": [
+        "src/data/monster_db.gd:709"
+      ]
+    },
+    "成年地龙冲击": {
+      "locations": [
+        "src/data/monster_db.gd:712"
+      ]
+    },
+    "成年水晶豹": {
+      "locations": [
+        "src/data/monster_db.gd:503"
+      ]
+    },
+    "成年水晶豹冲击": {
+      "locations": [
+        "src/data/monster_db.gd:506"
+      ]
+    },
+    "我的刀盾": {
+      "locations": [
+        "src/data/monster_db.gd:840"
+      ]
+    },
+    "我的刀盾冲击": {
+      "locations": [
+        "src/data/monster_db.gd:843"
+      ]
+    },
+    "托尼": {
+      "locations": [
+        "src/data/monster_db.gd:314"
+      ]
+    },
+    "托尼冲击": {
+      "locations": [
+        "src/data/monster_db.gd:317"
+      ]
+    },
+    "托尼大师": {
+      "locations": [
+        "src/data/monster_db.gd:330"
+      ]
+    },
+    "托尼大师冲击": {
+      "locations": [
+        "src/data/monster_db.gd:333"
+      ]
+    },
+    "技能": {
+      "locations": [
+        "src/battle/battle_manager.gd:698",
+        "src/battle/battle_manager.gd:699",
+        "src/core/evolution_rules.gd:146",
+        "src/ui/scene/scene_battle.gd:1035",
+        "src/ui/scene/scene_battle.gd:1060",
+        "src/ui/scene/scene_battle.gd:2832",
+        "src/ui/scenes/album.tscn:3957",
+        "src/ui/scenes/album.tscn:4006"
+      ]
+    },
+    "技能大师": {
+      "locations": [
+        "src/data/nature_db.gd:47"
+      ]
+    },
+    "折光温暖浅水并抑制怕光水霉生长": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:63"
+      ]
+    },
+    "折射微光引导雪夜迷途生物回到巢穴": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:83"
+      ]
+    },
+    "拨开积雪寻找冻果并与小兽分享食物": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:84"
+      ]
+    },
+    "拱开硬土寻找块根并留下蓄雨浅坑": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:102"
+      ]
+    },
+    "拳印形菌褶吸收的草木精气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:34"
+      ]
+    },
+    "拳菇王": {
+      "locations": [
+        "src/data/monster_db.gd:269"
+      ]
+    },
+    "拳菇王冲击": {
+      "locations": [
+        "src/data/monster_db.gd:272"
+      ]
+    },
+    "指挥鼠群整理矿砂并支撑空洞岩壁": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:21"
+      ]
+    },
+    "指路星": {
+      "locations": [
+        "src/data/monster_db.gd:655"
+      ]
+    },
+    "指路星冲击": {
+      "locations": [
+        "src/data/monster_db.gd:658"
+      ]
+    },
+    "挖开硬土并埋藏成熟种荚": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:8"
+      ]
+    },
+    "捕食啃根小虫并保护沙生幼苗": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:54"
+      ]
+    },
+    "掘开板结地层并给幼苗留下伸展空隙": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:92"
+      ]
+    },
+    "接力照亮长路并引导夜花依次开放": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:40"
+      ]
+    },
+    "控场": {
+      "locations": [
+        "src/core/evolution_rules.gd:7",
+        "src/data/monster_db.gd:939"
+      ]
+    },
+    "控场与捕捉窗口": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:18"
+      ]
+    },
+    "控场压制升级": {
+      "locations": [
+        "src/core/evolution_rules.gd:165"
+      ]
+    },
+    "控场手": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:10"
+      ]
+    },
+    "提前唤醒晨花并通知昼行生物准备出巢": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:87"
+      ]
+    },
+    "提示": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:167",
+        "src/ui/controllers/battle_prepare_logic.gd:757",
+        "src/ui/scenes/battle_prepare.tscn:1665"
+      ]
+    },
+    "搅动沉水补充氧气并护送鱼群越过暗沟": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:68"
+      ]
+    },
+    "搬动枯干搭成菌床并保存林地湿气": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:46"
+      ]
+    },
+    "搬走松石并替深根植物打通土层": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:19"
+      ]
+    },
+    "搬走滚烫落石并给生物筑起隔热墙": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:101"
+      ]
+    },
+    "搬运落果并把椰种推到潮线外": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:69"
+      ]
+    },
+    "搬运雨水并填满林间干涸的小水洼": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:29"
+      ]
+    },
+    "携带氧气进入密藻并托起沉底鱼卵": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:61"
+      ]
+    },
+    "携花粉越过林冠并预报风向": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:10"
+      ]
+    },
+    "摇滚蝠": {
+      "locations": [
+        "src/data/monster_db.gd:276"
+      ]
+    },
+    "摇滚蝠冲击": {
+      "locations": [
+        "src/data/monster_db.gd:279"
+      ]
+    },
+    "撑起花架并给小鸟提供筑巢处": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:96"
+      ]
+    },
+    "撞倒焦枯树干并阻断地表火线": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:103"
+      ]
+    },
+    "撞开厚壳供兽取食并散播果核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:70"
+      ]
+    },
+    "播撒海量种子并唤醒沉睡根网": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:109"
+      ]
+    },
+    "支撑山体并重排堵塞地下河的巨石": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:112"
+      ]
+    },
+    "收拢碎晶避免鱼群误食并照亮深水通道": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:64"
+      ]
+    },
+    "收纳烈光再化为柔辉照料大片夜开花田": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:111"
+      ]
+    },
+    "收集枯枝败叶并藏起刺鼻菌团": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:22"
+      ]
+    },
+    "敏捷": {
+      "locations": [
+        "src/data/nature_db.gd:35"
+      ]
+    },
+    "整座冬眠谷汇聚的梦境阴影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:91"
+      ]
+    },
+    "整座矿山回响聚成的厚重岩核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:21"
+      ]
+    },
+    "整条晶河折射出的斑斓豹形灵光": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:66"
+      ]
+    },
+    "斗炎鱼": {
+      "locations": [
+        "src/data/monster_db.gd:823"
+      ]
+    },
+    "斗炎鱼冲击": {
+      "locations": [
+        "src/data/monster_db.gd:826"
+      ]
+    },
+    "断山谷、巨岩阵与地底石宫": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:112"
+      ]
+    },
+    "断崖、云杉与峡口": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:11"
+      ]
+    },
+    "无技能": {
+      "locations": [
+        "src/core/evolution_rules.gd:144"
+      ]
+    },
+    "旧矿道、岩仓与石桥下": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:20"
+      ]
+    },
+    "时尚托尼": {
+      "locations": [
+        "src/data/monster_db.gd:322"
+      ]
+    },
+    "时尚托尼冲击": {
+      "locations": [
+        "src/data/monster_db.gd:325"
+      ]
+    },
+    "时序生态": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:26"
+      ]
+    },
+    "易培养": {
+      "locations": [
+        "src/battle/capture_system.gd:288",
+        "src/core/ecology_bond_rules.gd:294"
+      ]
+    },
+    "星耀圣殿": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:27",
+        "src/data/stage_db.gd:574"
+      ]
+    },
+    "星落原、夜林与高空花径间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:88"
+      ]
+    },
+    "星轨生态": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:27"
+      ]
+    },
+    "晨光沉入清泉凝成的亮晶水珠": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:63"
+      ]
+    },
+    "晨露浸透的古老蜗壳": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:6"
+      ]
+    },
+    "普拉哔哩": {
+      "locations": [
+        "src/data/monster_db.gd:254"
+      ]
+    },
+    "普拉哔哩冲击": {
+      "locations": [
+        "src/data/monster_db.gd:257"
+      ]
+    },
+    "晶冰洞、月湖与极光坡边": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:83"
+      ]
+    },
+    "晶廊、舞台与彩花田间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:42"
+      ]
+    },
+    "晶洞、宝滩与光泉交界处": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:64"
+      ]
+    },
+    "晶瀑、亮岩与镜湖浅滩间": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:65"
+      ]
+    },
+    "智慧": {
+      "locations": [
+        "src/data/nature_db.gd:45"
+      ]
+    },
+    "暖岩、营火与红砂路旁": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:98"
+      ]
+    },
+    "暖泉池、浅礁与火山溪边": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:107"
+      ]
+    },
+    "暖流穿过岩浆礁唤醒的鱼影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:106"
+      ]
+    },
+    "暗影生态": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:23"
+      ]
+    },
+    "暗河、深潭与沉木洞附近": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:44"
+      ]
+    },
+    "暮色潜入沙暴留下的幽暗狐影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:57"
+      ]
+    },
+    "暴躁": {
+      "locations": [
+        "src/data/nature_db.gd:65"
+      ]
+    },
+    "暴躁的打击更致命": {
+      "locations": [
+        "src/data/nature_db.gd:67"
+      ]
+    },
+    "暴雨云心滚动的水核": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:30"
+      ]
+    },
+    "暴雨来咯": {
+      "locations": [
+        "src/data/monster_db.gd:231"
+      ]
+    },
+    "暴雨来咯冲击": {
+      "locations": [
+        "src/data/monster_db.gd:234"
+      ]
+    },
+    "暴雨航路激起的蓝色浪痕": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:60"
+      ]
+    },
+    "暴风眼中盘旋不散的羽流": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:11"
+      ]
+    },
+    "更强但蓄力更久": {
+      "locations": [
+        "src/core/evolution_rules.gd:173"
+      ]
+    },
+    "更快启动": {
+      "locations": [
+        "src/core/evolution_rules.gd:171"
+      ]
+    },
+    "月下发酵果香引来的紫色蝎影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:50"
+      ]
+    },
+    "月园、林窗与夜露花径": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:95"
+      ]
+    },
+    "月夜节拍震出的彩色声纹": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:38"
+      ]
+    },
+    "月影树洞积攒的香甜睡意": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:89"
+      ]
+    },
+    "月色凝成的九尾灵光": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:83"
+      ]
+    },
+    "月色沉入暗河唤醒的幽蓝鱼影": {
+      "locations": [
+        "src/data/monster_ecology_db.gd:44"
+      ]
+    },
+    "未成型": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:161",
+        "src/core/ecology_bond_rules.gd:95"
+      ]
+    },
+    "未知": {
+      "locations": [
+        "src/core/ecology_bond_rules.gd:332",
+        "src/ui/controllers/team_logic.gd:829",
+        "src/ui/scene/scene_ranch_gui.gd:1292",
+        "src/ui/scene/scene_result_gui.gd:200",
+        "src/ui/scene/scene_result_gui.gd:233"
+      ]
+    }
+  }
+}

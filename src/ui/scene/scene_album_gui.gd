@@ -217,9 +217,9 @@ func _sync_static_labels() -> void:
 
 func _sync_resource_bar() -> void:
 	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}
-	_label("AlbumResourceBar/GoldCapsule/Value").text = "金币  %s" % _format_resource_number(int(player.get("gold", 0)))
-	_label("AlbumResourceBar/GemCapsule/Value").text = "钻石  %s" % _format_resource_number(int(player.get("gems", 0)))
-	_label("AlbumResourceBar/EnergyCapsule/Value").text = "体力  %d/5" % int(player.get("stamina", 5))
+	_label("AlbumResourceBar/GoldCapsule/Value").text = TranslationServer.translate("金币  %s") % _format_resource_number(int(player.get("gold", 0)))
+	_label("AlbumResourceBar/GemCapsule/Value").text = TranslationServer.translate("钻石  %s") % _format_resource_number(int(player.get("gems", 0)))
+	_label("AlbumResourceBar/EnergyCapsule/Value").text = TranslationServer.translate("体力  %d/5") % int(player.get("stamina", 5))
 
 func _sync_header() -> void:
 	_label("Header/Title").text = "精灵图鉴"
@@ -361,7 +361,7 @@ func _sync_detail_skill(monster: Dictionary) -> void:
 	_label("DetailPanel/SkillPanel/Name").text = str(skill.get("name", "未知技能"))
 	var skill_type := str(skill.get("type", "strike"))
 	var type_label := str(MonsterDb.SKILL_TYPE_LABELS.get(skill_type, skill_type))
-	_label("DetailPanel/SkillPanel/Desc").text = "%s · 倍率 %.1fx" % [type_label, float(skill.get("multiplier", 1.0))]
+	_label("DetailPanel/SkillPanel/Desc").text = TranslationServer.translate("%s · 倍率 %.1fx") % [type_label, float(skill.get("multiplier", 1.0))]
 
 func _sync_detail_evolution(monster: Dictionary) -> void:
 	var id := str(monster.get("id", ""))
@@ -379,11 +379,16 @@ func _sync_detail_evolution(monster: Dictionary) -> void:
 func _sync_detail_ecology(monster: Dictionary) -> void:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)
 	var ecology: Dictionary = identity.get("ecology", {})
-	_label("DetailPanel/Ecology").text = "%s · %s" % [str(identity.get("roleLabel", "角色")), str(ecology.get("name", "生态"))]
+	_label("DetailPanel/Ecology").text = "%s · %s" % [
+		TranslationServer.translate(str(identity.get("roleLabel", "角色"))),
+		TranslationServer.translate(str(ecology.get("name", "生态"))),
+	]
 	var ecology_panel := get_node("DetailPanel/EcologyPanel") as RichTextLabel
-	ecology_panel.text = "[b]起源[/b]  %s\n[b]栖息地[/b]  %s\n[b]习性[/b]  %s\n[b]相处提示[/b]  %s" % [
-		str(ecology.get("origin", "尚待记录")), str(ecology.get("habitat", "尚待记录")),
-		str(ecology.get("niche", "尚待记录")), str(ecology.get("adventurerTip", "尚待记录"))
+	ecology_panel.text = TranslationServer.translate("[b]起源[/b]  %s\n[b]栖息地[/b]  %s\n[b]习性[/b]  %s\n[b]相处提示[/b]  %s") % [
+		TranslationServer.translate(str(ecology.get("origin", "尚待记录"))),
+		TranslationServer.translate(str(ecology.get("habitat", "尚待记录"))),
+		TranslationServer.translate(str(ecology.get("niche", "尚待记录"))),
+		TranslationServer.translate(str(ecology.get("adventurerTip", "尚待记录"))),
 	]
 
 

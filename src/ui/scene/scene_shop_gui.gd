@@ -371,7 +371,7 @@ func _sync_popup() -> void:
 	var can_afford := _can_afford(item_id, _popup_quantity)
 	(get_node("PopupOverlay/Panel/Icon") as TextureRect).texture = _get_item_texture(item_id)
 	_label("PopupOverlay/Panel/Name").text = str(data.get("name", ""))
-	_label("PopupOverlay/Panel/Owned").text = "拥有: %d" % _get_item_count(item_id)
+	_label("PopupOverlay/Panel/Owned").text = TranslationServer.translate("拥有: %d") % _get_item_count(item_id)
 	_label("PopupOverlay/Panel/EffectText").text = _shop_effect_text(data)
 	_label("PopupOverlay/Panel/UsageText").text = _shop_usage_text(data)
 	_label("PopupOverlay/Panel/Quantity").text = str(_popup_quantity)
@@ -386,26 +386,26 @@ func _sync_popup() -> void:
 func _shop_effect_text(data: Dictionary) -> String:
 	var effect: Dictionary = data.get("effect", {})
 	if effect.has("captureBonus"):
-		return "收服成功率 +%d%%。" % int(round(float(effect.get("captureBonus", 0.0)) * 100.0))
+		return TranslationServer.translate("收服成功率 +%d%%。") % int(round(float(effect.get("captureBonus", 0.0)) * 100.0))
 	if effect.has("expGain"):
-		return "共享经验槽立即增加 %d 点经验。" % int(effect.get("expGain", 0))
+		return TranslationServer.translate("共享经验槽立即增加 %d 点经验。") % int(effect.get("expGain", 0))
 	if effect.has("goldGain"):
-		return "立即获得 %d 金币。" % int(effect.get("goldGain", 0))
+		return TranslationServer.translate("立即获得 %d 金币。") % int(effect.get("goldGain", 0))
 	if effect.has("healRatio"):
 		var ratio := int(round(float(effect.get("healRatio", 0.0)) * 100.0))
 		return ("恢复生命比例最低队员 %d%% 最大生命值。" if str(effect.get("healTarget", "")) == "lowest_hp_ratio" else "全队恢复 %d%% 最大生命值。") % ratio
 	if effect.has("guardReduction"):
-		return "全队接下来 %d 次受击减伤 %d%%。" % [int(effect.get("guardTurns", 0)), int(round(float(effect.get("guardReduction", 0.0)) * 100.0))]
+		return TranslationServer.translate("全队接下来 %d 次受击减伤 %d%%。") % [int(effect.get("guardTurns", 0)), int(round(float(effect.get("guardReduction", 0.0)) * 100.0))]
 	if bool(effect.get("clearAllObstacles", false)):
 		return "击碎当前棋盘上的全部岩石障碍。"
 	if effect.has("obstacleDamage"):
-		return "击碎 %d 个岩石障碍。" % int(effect.get("targetCount", 1))
+		return TranslationServer.translate("击碎 %d 个岩石障碍。") % int(effect.get("targetCount", 1))
 	if effect.has("unlockDamage"):
-		return "解除最多 %d 个锁链宝石。" % int(effect.get("targetCount", 0))
+		return TranslationServer.translate("解除最多 %d 个锁链宝石。") % int(effect.get("targetCount", 0))
 	if effect.has("clearPoisonCount"):
-		return "清除最多 %d 个毒雾格子。" % int(effect.get("clearPoisonCount", 0))
+		return TranslationServer.translate("清除最多 %d 个毒雾格子。") % int(effect.get("clearPoisonCount", 0))
 	if effect.has("chargeGain"):
-		return "所有存活队员获得 %d 点技能充能。" % int(effect.get("chargeGain", 0))
+		return TranslationServer.translate("所有存活队员获得 %d 点技能充能。") % int(effect.get("chargeGain", 0))
 	if bool(effect.get("resetBoard", false)):
 		return "重新生成整盘宝石。"
 	if bool(effect.get("absorbShield", false)):

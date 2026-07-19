@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://bewmx8fg4phvd" path="res://src/ui/scenes/battle/player_slot.tscn" id="player_slot"]
 [ext_resource type="Texture2D" uid="uid://bb3x7iav4isqg" path="res://assets/images/ui/panels/inventory_new_ui_inventory_detail_panel.png" id="popup_panel"]
 [ext_resource type="Texture2D" uid="uid://b5fu6nd6om8c2" path="res://assets/images/ui/panels/battle_flow_new_ui_panel_large.png" id="result_panel"]
-[ext_resource type="FontFile" uid="uid://6bc8xraoqdbk" path="res://assets/fonts/jf-openhuninn-2.1.ttf" id="round_font"]
+[ext_resource type="FontFile" uid="uid://bsfpqjrpb8wys" path="res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc" id="round_font"]
 [ext_resource type="Script" uid="uid://722mnjjgdl6u" path="res://src/ui/scene/scene_battle_gui.gd" id="script"]
 [ext_resource type="Texture2D" uid="uid://36w0vwbx7qm7" path="res://assets/images/ui/icons/battle_ui_turn_badge.png" id="turn_badge"]
 [ext_resource type="Texture2D" uid="uid://c8hs21avb7h1g" path="res://assets/images/ui/panels/battle_flow_new_ui_battle_victory_plaque.png" id="victory_banner"]

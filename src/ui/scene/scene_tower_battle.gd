@@ -24,5 +24,5 @@ func _refresh_tower_hud() -> void:
 	var wave := int(_stage_data.get("towerWave", 1))
 	var wave_count := int(_stage_data.get("towerWaveCount", 5))
 	var theme := str(_stage_data.get("towerTheme", "共鸣塔"))
-	_tower_title.text = "共鸣远征  ·  %02dF" % floor
-	_tower_progress.text = "%s  ·  第 %d/%d 波" % [theme, wave, wave_count]
+	_tower_title.text = TranslationServer.translate("共鸣远征  ·  %02dF") % floor
+	_tower_progress.text = TranslationServer.translate("%s  ·  第 %d/%d 波") % [theme, wave, wave_count]

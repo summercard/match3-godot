@@ -249,11 +249,11 @@ func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> voi
 	var is_elite := bool(monster.get("isElite", false))
 	var elite_prefix: String = "★精英 " if is_elite else ""
 	var name_label := card.get_node("Name") as Label
-	name_label.text = "%s%s" % [elite_prefix, str(monster.get("name", "精灵"))]
+	name_label.text = "%s%s" % [TranslationServer.translate(elite_prefix), TranslationServer.translate(str(monster.get("name", "精灵")))]
 	name_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.10, 1.0) if is_elite else (BROWN_TEXT if is_team else BROWN_DARK))
 	(card.get_node("Level") as Label).text = "Lv.%d" % int(monster.get("level", 1))
 	var power := int(monster.get("power", 0))
-	(card.get_node("Power") as Label).text = "战力 %d" % power if is_team else "%d" % power
+	(card.get_node("Power") as Label).text = TranslationServer.translate("战力 %d") % power if is_team else "%d" % power
 	var element := MonsterDBScript.get_board_affinity(monster)
 	var badge := card.get_node("ElementBadge") as TextureRect
 	badge.texture = _element_texture(element)
@@ -265,7 +265,7 @@ func _set_enemy_hero_card(card: Control, enemy: Dictionary) -> void:
 	var element := MonsterDBScript.get_board_affinity(enemy)
 	var element_name: String = MonsterDBScript.BOARD_AFFINITY_NAMES.get(element, _get_element_name(element))
 	(get_node("EnemyPanel/ElementIcon") as TextureRect).texture = _element_texture(element)
-	_label("EnemyPanel/ElementText").text = "%s系" % element_name
+	_label("EnemyPanel/ElementText").text = TranslationServer.translate("%s系") % TranslationServer.translate(element_name)
 	_label("EnemyPanel/PowerCaption").text = "敌方战力"
 	(card.get_node("Power") as Label).text = "%d" % int(enemy.get("power", 0))
 	var stars := card.get_node("Stars") as Label
@@ -279,7 +279,7 @@ func _set_enemy_boss_card(card: Control, enemy: Dictionary) -> void:
 	_apply_portrait_visual_scale(portrait, _monster_visual_scale(enemy))
 	var name_label := card.get_node("Name") as Label
 	name_label.visible = true
-	name_label.text = str(enemy.get("name", "BOSS"))
+	name_label.text = TranslationServer.translate(str(enemy.get("name", "BOSS")))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
@@ -295,10 +295,10 @@ func _sync_power_panel() -> void:
 		text = "请先配置队伍"
 		diff_color = Color(0.55, 0.43, 0.28, 1.0)
 	elif diff > 0:
-		text = "领先 %d" % diff
+		text = TranslationServer.translate("领先 %d") % diff
 		diff_color = GREEN_TEXT
 	elif diff < 0:
-		text = "落后 %d" % -diff
+		text = TranslationServer.translate("落后 %d") % -diff
 		diff_color = RED_TEXT
 	_label("PowerPanel/Diff").text = text
 
@@ -339,13 +339,13 @@ func _build_reward_preview_items() -> Array[Dictionary]:
 	var rewards: Array[Dictionary] = []
 	var gold := int(stage_rewards.get("gold", 0))
 	if gold > 0:
-		rewards.append({"icon": "gold", "label": "金币\n%s" % _compact_number(gold)})
+		rewards.append({"icon": "gold", "label": TranslationServer.translate("金币\n%s") % _compact_number(gold)})
 	var exp := int(stage_rewards.get("exp", 0))
 	if exp > 0:
-		rewards.append({"icon": "exp", "label": "经验\n%s" % _compact_number(exp)})
+		rewards.append({"icon": "exp", "label": TranslationServer.translate("经验\n%s") % _compact_number(exp)})
 	var first_clear_gems := _preview_first_clear_gems()
 	if first_clear_gems > 0:
-		rewards.append({"icon": "diamond", "label": "首通钻石\n+%d" % first_clear_gems})
+		rewards.append({"icon": "diamond", "label": TranslationServer.translate("首通钻石\n+%d") % first_clear_gems})
 	var guaranteed_items: Array = stage_rewards.get("guaranteedItems", [])
 	for item: Dictionary in guaranteed_items:
 		if rewards.size() >= REWARD_SLOT_PATHS.size():

@@ -71,7 +71,7 @@ func setup(parent: Control, is_success: bool, pos: Vector2) -> void:
 func _setup_success() -> void:
 	# 创建 GET! 标签
 	_get_label = Label.new()
-	_get_label.text = "GET!"
+	_get_label.text = "收服！"
 	_get_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_get_label.add_theme_font_size_override("font_size", 48)
 	_get_label.add_theme_color_override("font_color", Color("#ffd700"))
@@ -85,7 +85,7 @@ func _setup_success() -> void:
 func _setup_fail() -> void:
 	# 创建 MISS 标签
 	_miss_label = Label.new()
-	_miss_label.text = "MISS"
+	_miss_label.text = "落空"
 	_miss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_miss_label.add_theme_font_size_override("font_size", 32)
 	_miss_label.add_theme_color_override("font_color", Color("#b4b4b4"))

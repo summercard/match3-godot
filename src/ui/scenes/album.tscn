@@ -17,7 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://c7g0266wyvygp" path="res://assets/images/ui/elements/element_dark.png" id="13_cw21g"]
 [ext_resource type="Texture2D" uid="uid://cnrmvtxqcmf3c" path="res://assets/images/ui/icons/album_icon_lock.png" id="15_7dl6j"]
 [ext_resource type="Texture2D" uid="uid://no5qkdwpa1bp" path="res://assets/images/ui/icons/battle_flow_new_icon_star_silver.png" id="16_qr0pi"]
-[ext_resource type="FontFile" uid="uid://6bc8xraoqdbk" path="res://assets/fonts/jf-openhuninn-2.1.ttf" id="17_card_font"]
+[ext_resource type="FontFile" uid="uid://bsfpqjrpb8wys" path="res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc" id="17_card_font"]
 [ext_resource type="Texture2D" uid="uid://dtrqp0fe8pxpg" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="18_star_gold"]
 [ext_resource type="Texture2D" uid="uid://btakawfbid0eg" path="res://assets/images/ui/generated_panel_parts/panel_base.png" id="19_fxvvh"]
 [ext_resource type="Texture2D" uid="uid://b6t57fnwq57pl" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="22_fxvvh"]

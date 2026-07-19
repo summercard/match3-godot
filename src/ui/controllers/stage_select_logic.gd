@@ -5,7 +5,7 @@
 class_name SceneStageSelect
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
 const DESIGN_H: float = 667.0
@@ -736,7 +736,7 @@ func _highest_unlocked_chapter_index() -> int:
 	return highest
 
 func _show_chapter_locked_hint(chapter_index: int) -> void:
-	push_warning("第%d章尚未解锁：请先击败上一章 Boss" % (chapter_index + 1))
+	push_warning(TranslationServer.translate("第%d章尚未解锁：请先击败上一章 Boss") % (chapter_index + 1))
 
 # ==================== 触摸处理 ====================
 
@@ -885,16 +885,16 @@ func _refresh_sweep_dialog_content() -> void:
 	_sweep_dialog_stars = _storage.get_stage_stars(_sweep_dialog_stage_id) if _storage and _storage.has_method("get_stage_stars") else 0
 	
 	if _sweep_title_label:
-		_sweep_title_label.text = "确认扫荡: %s" % _sweep_dialog_stage_name
+		_sweep_title_label.text = TranslationServer.translate("确认扫荡: %s") % _sweep_dialog_stage_name
 	
 	if _sweep_gold_label:
-		_sweep_gold_label.text = "+%d 金币" % reward.get("gold", 120)
+		_sweep_gold_label.text = TranslationServer.translate("+%d 金币") % reward.get("gold", 120)
 
 	if _sweep_exp_label:
-		_sweep_exp_label.text = "+%d 经验" % reward.get("exp", 0)
+		_sweep_exp_label.text = TranslationServer.translate("+%d 经验") % reward.get("exp", 0)
 
 	if _sweep_rule_label:
-		_sweep_rule_label.text = "%d 星收益 80%% · 消耗体力 1（%d/5）" % [clampi(_sweep_dialog_stars, 1, 3), int(stamina_player.get("stamina", 0))]
+		_sweep_rule_label.text = TranslationServer.translate("%d 星收益 80%% · 消耗体力 1（%d/5）") % [clampi(_sweep_dialog_stars, 1, 3), int(stamina_player.get("stamina", 0))]
 	if _sweep_confirm_btn:
 		_sweep_confirm_btn.disabled = int(stamina_player.get("stamina", 0)) < 1
 
@@ -923,9 +923,9 @@ func _refresh_sweep_anim_overlay() -> void:
 	if _sweep_anim_title_label:
 		_sweep_anim_title_label.text = "扫荡完成！"
 	if _sweep_anim_gold_label:
-		_sweep_anim_gold_label.text = "+%d 金币" % _sweep_anim_gold
+		_sweep_anim_gold_label.text = TranslationServer.translate("+%d 金币") % _sweep_anim_gold
 	if _sweep_anim_exp_label:
-		_sweep_anim_exp_label.text = "+%d 经验" % _sweep_anim_exp if progress > 0.3 else ""
+		_sweep_anim_exp_label.text = TranslationServer.translate("+%d 经验") % _sweep_anim_exp if progress > 0.3 else ""
 
 # ==================== UI 更新 ====================
 
@@ -936,7 +936,7 @@ func _update_header() -> void:
 	var chapter: Dictionary = _chapters[_current_chapter_index]
 	var current_num: int = _current_chapter_index + 1
 	
-	_chapter_title.text = "第%d章" % current_num
+	_chapter_title.text = TranslationServer.translate("第%d章") % current_num
 	_chapter_name_label.text = chapter.get("name", "")
 	
 	var chapter_stars: int = _get_chapter_stars(chapter)
@@ -1080,7 +1080,7 @@ func _draw_chapter_header() -> void:
 		_draw_texture_contain(_get_texture("res://assets/images/ui/buttons/stage_ui_arrow_button.png"), HEADER_NEXT_RECT, 0.82 if _touched_btn == "nextChapter" else 1.0)
 		_draw_texture_contain(_get_texture("res://assets/images/ui/buttons/stage_icon_next_arrow.png"), Rect2(HEADER_NEXT_RECT.position.x + 6.0, HEADER_NEXT_RECT.position.y + 6.0, 22, 22))
 	
-	_draw_text_in_rect("第%d章" % current_num, HEADER_CHAPTER_TEXT_RECT, theme_color, 15, true)
+	_draw_text_in_rect(TranslationServer.translate("第%d章") % current_num, HEADER_CHAPTER_TEXT_RECT, theme_color, 15, true)
 	_draw_text_in_rect(chapter.get("name", ""), HEADER_NAME_TEXT_RECT, Color.WHITE, 15, true)
 	
 	var chapter_stars := _get_chapter_stars(chapter)
@@ -1097,7 +1097,7 @@ func _draw_chapter_mechanic_banner() -> void:
 	var rect := Rect2(18.0, 86.0, DESIGN_W - 36.0, 52.0)
 	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 8.0, Color(0.03, 0.06, 0.12, 0.64))
 	_draw_rounded_rect(rect.position.x, rect.position.y, 7.0, rect.size.y, 4.0, Color(theme_color.r, theme_color.g, theme_color.b, 0.9))
-	_draw_text_in_rect("玩法：%s" % str(mechanic.get("name", "章节机制")), Rect2(rect.position.x + 16.0, rect.position.y + 5.0, rect.size.x - 28.0, 20.0), theme_color, 15, true, 11)
+	_draw_text_in_rect(TranslationServer.translate("玩法：%s") % TranslationServer.translate(str(mechanic.get("name", "章节机制"))), Rect2(rect.position.x + 16.0, rect.position.y + 5.0, rect.size.x - 28.0, 20.0), theme_color, 15, true, 11)
 	_draw_text_in_rect(str(mechanic.get("tagline", "")), Rect2(rect.position.x + 16.0, rect.position.y + 28.0, rect.size.x - 28.0, 18.0), Color(0.88, 0.93, 1.0), 13, false, 10)
 
 func _draw_page_dots(cx: float, cy: float, total: int, current: int) -> void:
@@ -1183,7 +1183,7 @@ func _draw_stage_lock_overlay(card: Dictionary, is_boss: bool) -> void:
 	var cy: float = card.get("cy", 0.0)
 	var required: Dictionary = card.get("unlock_state", {})
 	var required_name := str(required.get("requiredStageName", "前置关卡"))
-	var label := "通关%s解锁" % required_name if not required_name.is_empty() else "未解锁"
+	var label := TranslationServer.translate("通关%s解锁") % required_name if not required_name.is_empty() else "未解锁"
 	var label_y := cy + (64.0 if is_boss else 36.0)
 	var icon_size := Vector2(28.0, 28.0)
 	var icon_y := cy + (-22.0 if is_boss else -14.0)
@@ -1225,8 +1225,8 @@ func _draw_sweep_dialog() -> void:
 	_draw_texture_fit(_get_texture("res://assets/images/ui/panels/battle_prepare_new_ui_power_panel.png"), Rect2(dlg_x, dlg_y, dlg_w, dlg_h), 0.96)
 	_draw_text_center("确认扫荡", DESIGN_W / 2.0, dlg_y + 35, Color.WHITE, 18, true, 180)
 	_draw_text_center(_sweep_dialog_stage_name, DESIGN_W / 2.0, dlg_y + 62, Color(0.8, 0.85, 1.0), 13, false, 200)
-	_draw_text_center("+%d 金币    +%d 经验" % [int(_sweep_dialog_reward.get("gold", 0)), int(_sweep_dialog_reward.get("exp", 0))], DESIGN_W / 2.0, dlg_y + 91, Color(1.0, 0.86, 0.3), 15, true, 230)
-	_draw_text_center("%d 星通关已解锁，扫荡获得对应奖励的 80%%" % clampi(_sweep_dialog_stars, 1, 3), DESIGN_W / 2.0, dlg_y + 116, Color(0.66, 0.78, 1.0), 10, false, 230)
+	_draw_text_center(TranslationServer.translate("+%d 金币    +%d 经验") % [int(_sweep_dialog_reward.get("gold", 0)), int(_sweep_dialog_reward.get("exp", 0))], DESIGN_W / 2.0, dlg_y + 91, Color(1.0, 0.86, 0.3), 15, true, 230)
+	_draw_text_center(TranslationServer.translate("%d 星通关已解锁，扫荡获得对应奖励的 80%%") % clampi(_sweep_dialog_stars, 1, 3), DESIGN_W / 2.0, dlg_y + 116, Color(0.66, 0.78, 1.0), 10, false, 230)
 
 	var confirm_rect := Rect2(dlg_x + 25, dlg_y + 128, 100, 40)
 	var cancel_rect := Rect2(dlg_x + 145, dlg_y + 128, 100, 40)
@@ -1271,11 +1271,13 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1, 1, 1, opacity))
 
 func _draw_text_center(text: String, x: float, y: float, color: Color, font_size: int, bold: bool = false, width: float = 200.0) -> void:
+	text = TranslationServer.translate(text)
 	var pos := Vector2(x - width / 2.0, y)
 	draw_string(PROJECT_ROUND_FONT, pos + Vector2(1, 2), text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, Color(0, 0, 0, 0.55))
 	draw_string(PROJECT_ROUND_FONT, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, color)
 
 func _draw_text_in_rect(text: String, rect: Rect2, color: Color, max_font_size: int, bold: bool = false, min_font_size: int = 10) -> void:
+	text = TranslationServer.translate(text)
 	var font := PROJECT_ROUND_FONT
 	var font_size := max_font_size
 	while font_size > min_font_size:

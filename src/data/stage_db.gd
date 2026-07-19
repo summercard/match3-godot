@@ -841,7 +841,7 @@ static func _build_chapter_stages(chapter: Dictionary) -> Array:
 	if normal_seeds.is_empty():
 		normal_seeds.append({
 			"id": "stage_%d_1" % chapter_num,
-			"name": "Stage %d-01" % chapter_num,
+			"name": TranslationServer.translate("第%d章·%02d") % [chapter_num, 1],
 			"type": "normal",
 			"enemies": [_fallback_enemy_id(chapter_num)],
 			"enemyLevel": _normal_enemy_level(chapter_num, 1),
@@ -857,7 +857,7 @@ static func _build_chapter_stages(chapter: Dictionary) -> Array:
 		stage["type"] = "normal"
 		stage["stageNo"] = stage_no
 		if stage_no > normal_seeds.size():
-			stage["name"] = "Stage %d-%02d" % [chapter_num, stage_no]
+			stage["name"] = TranslationServer.translate("第%d章·%02d") % [chapter_num, stage_no]
 		stage["enemies"] = _enemy_group_for_stage(enemy_pool, stage_no)
 		stage["enemyLevel"] = _normal_enemy_level(chapter_num, stage_no)
 		stage["maxTurns"] = _normal_max_turns(chapter_num, stage_no)
@@ -881,7 +881,7 @@ static func _build_boss_stage(chapter: Dictionary, boss_seed: Dictionary, enemy_
 	var boss := boss_seed.duplicate(true) if not boss_seed.is_empty() else {}
 	var boss_id := _boss_monster_id(chapter_num)
 	boss["id"] = "stage_%d_%d" % [chapter_num, BOSS_STAGE_NO]
-	boss["name"] = "Boss %d-%02d" % [chapter_num, BOSS_STAGE_NO]
+	boss["name"] = TranslationServer.translate("第%d章·首领%02d") % [chapter_num, BOSS_STAGE_NO]
 	boss["type"] = "boss"
 	boss["stageNo"] = BOSS_STAGE_NO
 	boss["enemyLevel"] = _boss_enemy_level(chapter_num)
@@ -904,8 +904,8 @@ static func _build_boss_stage(chapter: Dictionary, boss_seed: Dictionary, enemy_
 		boss["phases"] = phases
 	boss["enemies"] = [boss_id] if MonsterDb.has_monster(boss_id) else _enemy_group_for_stage(enemy_pool, BOSS_STAGE_NO)
 	boss["rewards"] = _merge_rewards(boss.get("rewards", {}), _boss_rewards(chapter_num), chapter_num, BOSS_STAGE_NO, true)
-	boss["designGoal"] = "Chapter %d boss: test the full chapter mechanic with a two-phase pressure spike." % chapter_num
-	boss["prepareHint"] = "Read the boss intent, keep guard/control skills ready, and save burst for the phase change."
+	boss["designGoal"] = TranslationServer.translate("第%d章首领战：在双阶段压力下综合检验本章机制。") % chapter_num
+	boss["prepareHint"] = "观察首领意图，保留守护和控制技能，并将爆发留到阶段转换时。"
 	boss["battleHint"] = "喷泉旁实际消除水宝石可触发水击；雨区只允许水宝石参与交换与匹配。" if chapter_num == 2 else ""
 	boss["targetLesson"] = "boss_break"
 	_clear_generated_pressure(boss)
@@ -920,13 +920,13 @@ static func _chapter_number(chapter: Dictionary) -> int:
 	return 1
 
 static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
-	# 1.3.2 定稿：第一章使用 +3 教学章节加成，第二章起使用 +6。
+	# 难度调整：第一章使用 +1 教学章节加成，第二章起使用 +3。
 	var base_level := 5 + (chapter_num - 1) * 5 + floori(float(stage_no - 1) * 5.0 / 10.0)
-	var chapter_bonus := 3 if chapter_num == 1 else 6
+	var chapter_bonus := 1 if chapter_num == 1 else 3
 	return base_level + (0 if chapter_num == 1 and stage_no == 1 else chapter_bonus)
 
 static func _boss_enemy_level(chapter_num: int) -> int:
-	var chapter_bonus := 3 if chapter_num == 1 else 6
+	var chapter_bonus := 1 if chapter_num == 1 else 3
 	return 10 + (chapter_num - 1) * 5 + chapter_bonus
 
 static func _normal_max_turns(chapter_num: int, stage_no: int) -> int:
@@ -1026,14 +1026,14 @@ static func _normal_target_lesson(stage_no: int) -> String:
 	return "boss_setup"
 
 static func _normal_design_goal(chapter_num: int, stage_no: int) -> String:
-	return "Chapter %d stage %02d: scale enemy count, board pressure, and reward pacing toward the boss." % [chapter_num, stage_no]
+	return TranslationServer.translate("第%d章第%02d关：逐步提高敌人数、棋盘压力和奖励节奏，迎接首领战。") % [chapter_num, stage_no]
 
 static func _normal_prepare_hint(chapter_num: int, stage_no: int) -> String:
 	if stage_no <= 3:
-		return "Use this stage to read enemy intent and build stable matches before spending skills."
+		return "先读懂敌方意图，稳定完成消除，再决定是否使用技能。"
 	if stage_no <= 8:
-		return "Check the board pressure first, then decide whether to clear hazards or focus damage."
-	return "Pre-boss stage: preserve HP and enter the next fight with a clear skill plan."
+		return "先判断棋盘压力，再决定清除障碍还是集中输出。"
+	return "首领战前哨：保留生命值，并带着明确的技能计划进入下一战。"
 
 static func _normal_battle_hint(chapter_num: int, stage_no: int) -> String:
 	if chapter_num == 2 and stage_no >= 2:

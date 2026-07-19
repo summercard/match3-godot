@@ -6,7 +6,7 @@ extends Control
 signal back_pressed()
 signal sign_in_complete(reward: Dictionary)
 
-const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const SignInRewardDBScript := preload("res://src/data/sign_in_reward_db.gd")
 
 const DESIGN_WIDTH := 375.0
@@ -395,7 +395,7 @@ func _draw_week_rewards() -> void:
 		if day > signed_limit + 1 and not today:
 			card_key = "day_card_locked"
 		_draw_nine_patch(card_key, rect)
-		_draw_text("第%d天" % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else Color(0.43, 0.24, 0.07), 15.0, true, rect.size.x - 8.0)
+		_draw_text(TranslationServer.translate("第%d天") % day, rect.get_center().x, rect.position.y + 22.0, Color(1.0, 0.88, 0.62) if today else Color(0.43, 0.24, 0.07), 15.0, true, rect.size.x - 8.0)
 		if today:
 			_draw_nine_patch("today_tag", Rect2(rect.position.x + 5.0, rect.position.y + 28.0, 42.0, 23.0))
 			_draw_text("今日", rect.position.x + 26.0, rect.position.y + 45.0, C["white"], 11.0, true, 34.0)
@@ -417,7 +417,7 @@ func _draw_month_rewards() -> void:
 	if total > 0 and total % 28 == 0:
 		month_count = 28
 	_draw_texture_contain(_tex("chest_large"), Rect2(30.0, 487.0 + panel_offset_y, 76.0, 70.0))
-	_draw_text("本月已签到 %d/28 天" % month_count, 205.0, 505.0 + panel_offset_y, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
+	_draw_text(TranslationServer.translate("本月已签到 %d/28 天") % month_count, 205.0, 505.0 + panel_offset_y, Color(0.43, 0.24, 0.07), 14.0, true, 160.0)
 	var progress_track := Rect2(108.0, 547.0 + panel_offset_y, 230.0, 20.0)
 	_draw_nine_patch("claim_disabled", progress_track)
 	var progress_width := (progress_track.size.x - 6.0) * float(month_count) / 28.0
@@ -441,7 +441,7 @@ func _draw_month_rewards() -> void:
 		_draw_texture_contain(_tex(str(m["icon"])), orig_chest, 1.0 if reached else 0.55)
 		if scale != 1.0:
 			draw_set_transform_matrix(Transform2D.IDENTITY)
-		_draw_text("%d天" % int(m["day"]), x, 579.0 + panel_offset_y, C["green"] if reached else C["muted"], 11.0, true, 42.0)
+		_draw_text(TranslationServer.translate("%d天") % int(m["day"]), x, 579.0 + panel_offset_y, C["green"] if reached else C["muted"], 11.0, true, 42.0)
 
 func _draw_claim_area() -> void:
 	var key := "claim_button" if _can_sign_in else "claim_disabled"
@@ -555,6 +555,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 
 func _draw_text(text: String, x: float, y: float, color: Color, size: float, bold: bool = false, width: float = 180.0) -> void:
+	text = TranslationServer.translate(text)
 	var font := _get_round_font(bold)
 	var fitted_size := size
 	while fitted_size > 9.0 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted_size).x > width:

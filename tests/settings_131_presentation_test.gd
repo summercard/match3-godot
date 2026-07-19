@@ -12,10 +12,11 @@ func _run() -> void:
 	root.add_child(settings)
 	await process_frame
 	var rows: Array = SceneSettingsScript.SETTINGS_ROWS
-	_expect(rows.size() == 2, "settings should expose only sound and music rows")
-	if rows.size() == 2:
+	_expect(rows.size() == 3, "settings should expose sound, music, and language rows")
+	if rows.size() == 3:
 		_expect(str((rows[0] as Dictionary).get("key", "")) == "soundOn", "first row should control sound")
 		_expect(str((rows[1] as Dictionary).get("key", "")) == "musicOn", "second row should control music")
+		_expect(str((rows[2] as Dictionary).get("key", "")) == "language", "third row should control language")
 	for removed_path in [
 		"HitAreas/Rows/VibrationRow",
 		"HitAreas/Rows/QualityLow",
@@ -24,6 +25,13 @@ func _run() -> void:
 		_expect(not settings.has_node(removed_path), "%s should not retain an interactive area" % removed_path)
 	_expect(settings.has_node("HitAreas/Actions/ResetButton"), "reset action must remain available")
 	_expect(settings.has_node("HitAreas/Actions/DefaultButton"), "restore-default action must remain available")
+	_expect(settings.has_node("HitAreas/Rows/LanguageRow"), "language row must remain interactive")
+	_expect(settings.has_node("HitAreas/LanguageDialog/CloseButton"), "language dialog must expose a close action")
+	for option_index in range(9):
+		_expect(
+			settings.has_node("HitAreas/LanguageDialog/Option%d" % option_index),
+			"language option %d must remain interactive" % option_index
+		)
 	settings.queue_free()
 	await process_frame
 	_finish()

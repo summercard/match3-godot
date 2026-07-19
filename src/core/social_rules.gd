@@ -185,7 +185,7 @@ static func _build_result(instance_a: Dictionary, instance_b: Dictionary, place:
 			next_a.append(learned_nature)
 		else:
 			next_b.append(learned_nature)
-		changes.append("%s 学会了%s" % [receiver_name, _nature_name(learned_nature)])
+		changes.append(TranslationServer.translate("%s 学会了%s") % [TranslationServer.translate(receiver_name), TranslationServer.translate(_nature_name(learned_nature))])
 		learned.append({"instance_id": receiver_id, "nature": learned_nature})
 	elif final_result:
 		changes.append("本次交流没有产生性格变化" if can_a or can_b else "双方没有可学习的新性格")
@@ -203,7 +203,7 @@ static func _build_result(instance_a: Dictionary, instance_b: Dictionary, place:
 		"updated_b": {"instanceId": instance_b.get("instanceId", ""), "personalityTraits": next_b, "nature": next_b[0] if not next_b.is_empty() else ""},
 		"place_id": config.get("id", "meadow_yard"), "place_name": config.get("name", "社交场所"),
 		"place_summary": config.get("summary", ""), "duration_ms": DURATION_MS, "duration_label": "1小时",
-		"summary": "%s：成功率 %d%%；%s。" % [str(config.get("name", "社交场所")), percent, "。".join(changes)],
+		"summary": TranslationServer.translate("%s：成功率 %d%%；%s。") % [TranslationServer.translate(str(config.get("name", "社交场所"))), percent, "。".join(changes.map(func(value): return TranslationServer.translate(str(value))))],
 		"preview": not final_result, "final": final_result,
 	}
 

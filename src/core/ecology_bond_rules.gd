@@ -84,9 +84,9 @@ static func calc_team_bonds(monsters: Array) -> Array:
 		if count >= 2:
 			bonds.append({
 				"id": "ecology_%s" % ecology_id,
-				"name": "%s羁绊" % ecology_names.get(ecology_id, ecology_id),
+				"name": TranslationServer.translate("%s羁绊") % ecology_names.get(ecology_id, ecology_id),
 				"level": 1 if count == 2 else 2,
-				"summary": "同生态成员×%d，适合对应章节机制。" % count,
+				"summary": TranslationServer.translate("同生态成员×%d，适合对应章节机制。") % count,
 				"status": "active"
 			})
 	if bonds.is_empty() and monsters.size() > 0:
@@ -147,10 +147,10 @@ static func calc_team_bond_branches(units: Array) -> Array:
 		if count >= 2:
 			branches.append({
 				"id": "branch_ecology_%s" % ecology_id,
-				"name": "%s分支" % ecology_names.get(ecology_id, ecology_id),
+				"name": TranslationServer.translate("%s分支") % ecology_names.get(ecology_id, ecology_id),
 				"level": 2 if count >= 3 else 1,
 				"status": "active",
-				"summary": "同生态成员×%d，队伍主题更集中，适合对应章节机制。" % count,
+				"summary": TranslationServer.translate("同生态成员×%d，队伍主题更集中，适合对应章节机制。") % count,
 				"playStyle": "生态专精",
 				"effectPreview": "后续可接章节机制抗性、生态目标或场地互动。",
 				"tags": ["同生态", "章节方向"]
@@ -237,7 +237,7 @@ static func get_ecology_targets(monsters: Array, captured_ids: Array) -> Array:
 		)
 		group["missing"] = missing
 		group["ratio"] = float(owned) / float(total)
-		group["statusLabel"] = "已完成" if owned >= total else "还差 %d" % (total - owned)
+		group["statusLabel"] = "已完成" if owned >= total else TranslationServer.translate("还差 %d") % (total - owned)
 		group["nextMissing"] = missing[0] if not missing.is_empty() else {}
 		group["suggestion"] = _ecology_target_suggestion(group)
 		result.append(group)
@@ -328,7 +328,7 @@ static func _ecology_target_suggestion(group: Dictionary) -> String:
 	if missing.is_empty():
 		return "该生态已补齐，适合作为队伍主题尝试。"
 	var next: Dictionary = missing[0]
-	return "下一只: %s（%s），对应%s。" % [
+	return TranslationServer.translate("下一只: %s（%s），对应%s。") % [
 		str(next.get("name", "未知")),
 		str(next.get("roleLabel", "角色")),
 		str(group.get("chapter", "后续章节"))

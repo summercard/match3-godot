@@ -76,8 +76,10 @@ function Invoke-GodotTest {
 	# does not exist and direct redirected ProcessStartInfo launches can hang Godot.
 	$oldSavePath = $env:MATCH3_SAVE_PATH
 	$oldSeed = $env:MATCH3_TEST_SEED
+	$oldLocale = $env:MATCH3_TEST_LOCALE
 	$env:MATCH3_SAVE_PATH = $savePath
 	$env:MATCH3_TEST_SEED = "20260622"
+	$env:MATCH3_TEST_LOCALE = "zh_CN"
 	$proc = $null
 	try {
 		$proc = Start-Process -FilePath $Godot `
@@ -90,6 +92,7 @@ function Invoke-GodotTest {
 	} finally {
 		$env:MATCH3_SAVE_PATH = $oldSavePath
 		$env:MATCH3_TEST_SEED = $oldSeed
+		$env:MATCH3_TEST_LOCALE = $oldLocale
 	}
 	$completed = $proc.WaitForExit($Timeout * 1000)
 	if (-not $completed) {

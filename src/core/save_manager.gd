@@ -62,6 +62,7 @@ const MONSTER_SELL_GEM_LEVEL_STEP: int = 5
 const DEFAULT_SETTINGS := {
 	"soundOn": true,
 	"musicOn": true,
+	"language": "auto",
 	"vibrationOn": true,
 	"qualityLevel": "high",
 	"performanceMode": "balanced",
@@ -1513,7 +1514,7 @@ func _get_date_minus_days(days: int) -> String:
 ## 保存设置
 ## JS: saveSettings(data)
 func save_settings(data: Dictionary) -> bool:
-	_set_value("settings", "data", data)
+	_set_value("settings", "data", _merge_dictionary_defaults(data, DEFAULT_SETTINGS))
 	var saved := _save_config()
 	# 通知 AudioManager 同步 soundOn / musicOn
 	var am := get_node_or_null("/root/AudioManager")
@@ -1524,7 +1525,24 @@ func save_settings(data: Dictionary) -> bool:
 ## 加载设置
 ## JS: loadSettings()
 func load_settings() -> Dictionary:
-	return _get_value("settings", "data", DEFAULT_SETTINGS.duplicate(true))
+	var stored = _get_value("settings", "data", {})
+	if not stored is Dictionary:
+		stored = {}
+	return _merge_dictionary_defaults(stored as Dictionary, DEFAULT_SETTINGS)
+
+
+func _merge_dictionary_defaults(values: Dictionary, defaults: Dictionary) -> Dictionary:
+	var merged := values.duplicate(true)
+	for key in defaults:
+		var default_value = defaults[key]
+		if default_value is Dictionary:
+			var current_value = merged.get(key, {})
+			if not current_value is Dictionary:
+				current_value = {}
+			merged[key] = _merge_dictionary_defaults(current_value as Dictionary, default_value as Dictionary)
+		elif not merged.has(key):
+			merged[key] = default_value.duplicate(true) if default_value is Array else default_value
+	return merged
 
 func load_capture_settings() -> Dictionary:
 	var settings: Dictionary = load_settings()

@@ -402,7 +402,7 @@ func _on_sell_dialog_confirmed() -> void:
 	_load_data()
 	_select_classroom_after_removed(instance_id)
 	_sync_gui()
-	_show_status("出售成功：%s" % _sell_reward_text(result))
+	_show_status(TranslationServer.translate("出售成功：%s") % _sell_reward_text(result))
 
 func _on_sell_dialog_cancelled() -> void:
 	_hide_sell_confirm_popup()
@@ -728,9 +728,9 @@ func _sync_top_resource_bar() -> void:
 		return
 	var player: Dictionary = _storage.get_player() if _storage != null and _storage.has_method("get_player") else {}
 	var values := [
-		"金币  %s" % _format_resource_number(int(player.get("gold", 0))),
-		"钻石  %s" % _format_resource_number(int(player.get("gems", 0))),
-		"体力  %d/5" % int(player.get("stamina", 5)),
+		TranslationServer.translate("金币  %s") % _format_resource_number(int(player.get("gold", 0))),
+		TranslationServer.translate("钻石  %s") % _format_resource_number(int(player.get("gems", 0))),
+		TranslationServer.translate("体力  %d/5") % int(player.get("stamina", 5)),
 	]
 	for i in 3:
 		var panel := bar.get_child(i) as Panel
@@ -764,7 +764,7 @@ func _sync_pet_farm_bottom_nav() -> void:
 		var state := _feature_unlock_state(feature_id) if not feature_id.is_empty() else {"unlocked": true}
 		var unlocked := bool(state.get("unlocked", true))
 		button.disabled = not unlocked
-		button.tooltip_text = "" if unlocked else "%s · Lv.%d 解锁" % [str(state.get("label", "")), int(state.get("required_level", 1))]
+		button.tooltip_text = "" if unlocked else TranslationServer.translate("%s · Lv.%d 解锁") % [TranslationServer.translate(str(state.get("label", ""))), int(state.get("required_level", 1))]
 		button.modulate = Color.WHITE if i == active_index else Color(0.92, 0.92, 0.92)
 		if not unlocked:
 			button.modulate = Color(0.48, 0.48, 0.52, 0.90)
@@ -772,7 +772,7 @@ func _sync_pet_farm_bottom_nav() -> void:
 				selected.visible = false
 			var label := button.get_node_or_null("Text") as Label
 			if label != null:
-				label.text = "%s %d级" % [str(nav_labels.get(feature_id, "")), int(state.get("required_level", 1))]
+				label.text = TranslationServer.translate("%s %d级") % [TranslationServer.translate(str(nav_labels.get(feature_id, ""))), int(state.get("required_level", 1))]
 		elif not feature_id.is_empty():
 			var label := button.get_node_or_null("Text") as Label
 			if label != null:
@@ -1135,12 +1135,12 @@ func _sync_classroom_page() -> void:
 		var current_exp := int(instance.get("exp", 0))
 		var needed_exp := GrowthRulesScript.get_exp_for_level(level)
 		_sync_exp_progress(panel.get_node("MonsterExpBar") as ProgressBar, current_exp, needed_exp)
-		(panel.get_node("MonsterExpText") as Label).text = "当前经验 %d / %d" % [current_exp, needed_exp]
+		(panel.get_node("MonsterExpText") as Label).text = TranslationServer.translate("当前经验 %d / %d") % [current_exp, needed_exp]
 		var pool_exp := int(_storage.get_shared_monster_exp()) if _storage != null and _storage.has_method("get_shared_monster_exp") else 0
 		var pool_capacity := int(_storage.get_shared_monster_exp_capacity()) if _storage != null and _storage.has_method("get_shared_monster_exp_capacity") else 1
 		_sync_exp_progress(panel.get_node("PoolBar") as ProgressBar, pool_exp, pool_capacity)
-		(panel.get_node("PoolText") as Label).text = "总经验槽 %s / %s" % [_format_resource_number(pool_exp), _format_resource_number(pool_capacity)]
-		(panel.get_node("LevelRequirement") as Label).text = "等级 %d/%d" % [level, required_level]
+		(panel.get_node("PoolText") as Label).text = TranslationServer.translate("总经验槽 %s / %s") % [_format_resource_number(pool_exp), _format_resource_number(pool_capacity)]
+		(panel.get_node("LevelRequirement") as Label).text = TranslationServer.translate("等级 %d/%d") % [level, required_level]
 		(panel.get_node("StoneRequirement") as Label).text = str(info.get("item_name", "进化石"))
 		(panel.get_node("StoneCount") as Label).text = "%d/1" % item_count
 		(panel.get_node("Condition") as Label).text = str(info.get("condition_text", "无法进化"))
@@ -1165,7 +1165,7 @@ func _sync_feature_button(path: String, feature_id: String, unlocked_text: Strin
 	var state := _feature_unlock_state(feature_id)
 	var unlocked := bool(state.get("unlocked", false))
 	button.disabled = not unlocked
-	button.tooltip_text = "" if unlocked else "%s · Lv.%d 解锁" % [str(state.get("label", "")), int(state.get("required_level", 1))]
+	button.tooltip_text = "" if unlocked else TranslationServer.translate("%s · Lv.%d 解锁") % [TranslationServer.translate(str(state.get("label", ""))), int(state.get("required_level", 1))]
 	button.modulate = Color.WHITE if unlocked else Color(0.50, 0.50, 0.55, 0.90)
 	var label := button.get_node_or_null("Text") as Label
 	if label != null:
@@ -1250,12 +1250,12 @@ func _fresh_instance(instance_id: String) -> Dictionary:
 	return _get_instance(instance_id)
 
 func _classroom_info_text(instance: Dictionary, monster: Dictionary) -> String:
-	return "Lv.%d · %s · %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))]
+	return "Lv.%d · %s · %s" % [int(instance.get("level", 1)), TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))), TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))))]
 
 func _classroom_stats_text(instance: Dictionary, monster: Dictionary, stats: Dictionary) -> String:
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
 	var power := _classroom_power(stats)
-	return "等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d" % [int(instance.get("level", 1)), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))), _get_nature_name(str(instance.get("nature", ""))), _gender_label(instance), "★".repeat(rarity), "是" if bool(instance.get("isElite", false)) else "否", int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
+	return TranslationServer.translate("等级：Lv.%d\n属性：%s\n性格：%s\n性别：%s\n稀有度：%s\n精英：%s\nHP：%d\nATK：%d    DEF：%d\nSPD：%d    战力：%d") % [int(instance.get("level", 1)), TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))))), TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))), TranslationServer.translate(_gender_label(instance)), "★".repeat(rarity), TranslationServer.translate("是" if bool(instance.get("isElite", false)) else "否"), int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0)), int(stats.get("spd", 0)), power]
 
 func _classroom_attribute_labels_text() -> String:
 	return "等级\n属性\n性格\n性别\n稀有度\n精英"
@@ -1264,15 +1264,15 @@ func _classroom_attribute_values_text(instance: Dictionary, monster: Dictionary,
 	var rarity := int(stats.get("rarity", monster.get("rarity", 1)))
 	return "Lv.%d\n%s\n%s\n%s\n%s\n%s" % [
 		int(instance.get("level", 1)),
-		ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))),
-		_get_nature_name(str(instance.get("nature", ""))),
-		_gender_label(instance),
+		TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))))),
+		TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))),
+		TranslationServer.translate(_gender_label(instance)),
 		"★".repeat(rarity),
-		"是" if bool(instance.get("isElite", false)) else "否",
+		TranslationServer.translate("是" if bool(instance.get("isElite", false)) else "否"),
 	]
 
 func _classroom_attribute_stats_text(instance: Dictionary, stats: Dictionary) -> String:
-	return "HP：%d\nATK：%d\nDEF：%d\nSPD：%d\n战力：%d\n满级：%s" % [
+	return TranslationServer.translate("HP：%d\nATK：%d\nDEF：%d\nSPD：%d\n战力：%d\n满级：%s") % [
 		int(stats.get("hp", 0)),
 		int(stats.get("atk", 0)),
 		int(stats.get("def", 0)),
@@ -1291,8 +1291,8 @@ func _classroom_leader_skill_text(monster: Dictionary) -> String:
 	var desc := str(skill.get("desc", ""))
 	var skill_name := str(skill.get("name", "未知"))
 	if desc.is_empty():
-		return "队长技能：%s" % skill_name
-	return "队长技能：%s - %s" % [skill_name, desc]
+		return TranslationServer.translate("队长技能：%s") % skill_name
+	return TranslationServer.translate("队长技能：%s - %s") % [skill_name, desc]
 
 func _classroom_power(stats: Dictionary) -> int:
 	return int(stats.get("hp", 0)) + int(stats.get("atk", 0)) + int(stats.get("def", 0)) + int(stats.get("spd", 0))
@@ -1312,8 +1312,8 @@ func _show_sell_confirm_dialog(quote: Dictionary) -> void:
 		_show_status("出售确认界面不可用")
 		return
 	(popup.get_node("Panel/Name") as Label).text = str(quote.get("name", "该精灵"))
-	(popup.get_node("Panel/Detail") as Label).text = "星级 %s · Lv.%d" % ["★".repeat(int(quote.get("rarity", 1))), int(quote.get("level", 1))]
-	(popup.get_node("Panel/Reward") as Label).text = "可获得 %s" % _sell_reward_text(quote)
+	(popup.get_node("Panel/Detail") as Label).text = TranslationServer.translate("星级 %s · Lv.%d") % ["★".repeat(int(quote.get("rarity", 1))), int(quote.get("level", 1))]
+	(popup.get_node("Panel/Reward") as Label).text = TranslationServer.translate("可获得 %s") % _sell_reward_text(quote)
 	popup.visible = true
 
 func _hide_sell_confirm_popup() -> void:
@@ -1381,10 +1381,10 @@ func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dicti
 	message.pivot_offset = message.size * 0.5
 	message.scale = Vector2(0.60, 0.60)
 	message.modulate.a = 0.0
-	message.text = "升级成功  Lv.%d!" % new_level if leveled_up else "经验注入 +%d" % consumed
+	message.text = TranslationServer.translate("升级成功  Lv.%d!") % new_level if leveled_up else TranslationServer.translate("经验注入 +%d") % consumed
 	transfer.position.y = 226.0
 	transfer.modulate.a = 0.0
-	transfer.text = "经验槽 -%d  →  精灵 +%d" % [consumed, consumed]
+	transfer.text = TranslationServer.translate("经验槽 -%d  →  精灵 +%d") % [consumed, consumed]
 	pool_title.visible = false
 	portrait.pivot_offset = portrait.size * 0.5
 	info.pivot_offset = info.size * 0.5
@@ -1397,9 +1397,9 @@ func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dicti
 
 	monster_bar.max_value = old_needed
 	monster_bar.value = old_exp
-	monster_text.text = "当前经验 %d / %d" % [old_exp, old_needed]
+	monster_text.text = TranslationServer.translate("当前经验 %d / %d") % [old_exp, old_needed]
 	pool_bar.value = pool_before
-	pool_text.text = "总经验槽 %s / %s" % [_format_resource_number(pool_before), _format_resource_number(int(pool_bar.max_value))]
+	pool_text.text = TranslationServer.translate("总经验槽 %s / %s") % [_format_resource_number(pool_before), _format_resource_number(int(pool_bar.max_value))]
 
 	var pool_tween := create_tween()
 	_upgrade_value_tweens.append(pool_tween)
@@ -1438,17 +1438,17 @@ func _play_upgrade_feedback(before: Dictionary, after: Dictionary, result: Dicti
 
 func _set_pool_feedback_value(value: float, bar: ProgressBar, label: Label) -> void:
 	bar.value = value
-	label.text = "总经验槽 %s / %s" % [_format_resource_number(roundi(value)), _format_resource_number(roundi(bar.max_value))]
+	label.text = TranslationServer.translate("总经验槽 %s / %s") % [_format_resource_number(roundi(value)), _format_resource_number(roundi(bar.max_value))]
 
 func _set_monster_feedback_value(value: float, bar: ProgressBar, label: Label, maximum: int) -> void:
 	bar.value = value
-	label.text = "当前经验 %d / %d" % [roundi(value), maximum]
+	label.text = TranslationServer.translate("当前经验 %d / %d") % [roundi(value), maximum]
 
 func _reset_level_exp_bar(bar: ProgressBar, label: Label, value: int, maximum: int, info: Label, stats: Label, instance: Dictionary, monster: Dictionary, current_stats: Dictionary) -> void:
 	bar.max_value = maximum
 	bar.value = value
 	bar.self_modulate = Color(1.28, 1.10, 0.42, 1.0)
-	label.text = "当前经验 %d / %d" % [value, maximum]
+	label.text = TranslationServer.translate("当前经验 %d / %d") % [value, maximum]
 	info.text = _classroom_info_text(instance, monster)
 	stats.text = _classroom_stats_text(instance, monster, current_stats)
 	var flash := create_tween()
@@ -1487,7 +1487,7 @@ func _sync_social_place() -> void:
 	if heart_bubble != null:
 		heart_bubble.visible = false
 	(panel.get_node("Title") as Label).text = str(config.get("name", "社交场所"))
-	(panel.get_node("Duration") as Label).text = "用时%s" % SocialRulesScript.duration_label_for_place(place)
+	(panel.get_node("Duration") as Label).text = TranslationServer.translate("用时%s") % SocialRulesScript.duration_label_for_place(place)
 	var switch_button := panel.get_node("SwitchButton") as TextureButton
 	switch_button.disabled = place.get("started_at", null) != null
 	_set_action_frame(switch_button, not switch_button.disabled)
@@ -1498,10 +1498,10 @@ func _sync_social_place() -> void:
 	var detail := _social_relationship_detail(place)
 	var relation_text := "放入两只精灵后显示学习概率"
 	if not detail.is_empty():
-		relation_text = "性格学习概率 %d%%" % int(detail.get("successPercent", 0))
+		relation_text = TranslationServer.translate("性格学习概率 %d%%") % int(detail.get("successPercent", 0))
 	(panel.get_node("Relationship/Text") as Label).text = relation_text
 	var bond_panel := _node("Pages/SocialPage/BondPanel")
-	(bond_panel.get_node("BondTitle") as Label).text = "%s · 1小时性格交流" % str(config.get("name", "社交场所"))
+	(bond_panel.get_node("BondTitle") as Label).text = TranslationServer.translate("%s · 1小时性格交流") % TranslationServer.translate(str(config.get("name", "社交场所")))
 	(bond_panel.get_node("ProgressText") as Label).text = relation_text
 	(bond_panel.get_node("Summary") as Label).text = _social_preview_text(place)
 	var progress_fill := bond_panel.get_node("ProgressFill") as Panel
@@ -1703,7 +1703,7 @@ func _sync_result_popup() -> void:
 	var title := popup.get_node("Panel/Title") as Label
 	title.text = _social_result_title(result)
 	title.modulate = accent
-	(popup.get_node("Panel/Score") as Label).text = "本次性格学习概率 %d%%" % int(result.get("success_percent", 0))
+	(popup.get_node("Panel/Score") as Label).text = TranslationServer.translate("本次性格学习概率 %d%%") % int(result.get("success_percent", 0))
 	(popup.get_node("Panel/Event") as Label).text = str(result.get("place_name", "社交场所"))
 	(popup.get_node("Panel/Flavor") as Label).text = str(result.get("rule_text", ""))
 	var lines := _social_result_major_lines(result)

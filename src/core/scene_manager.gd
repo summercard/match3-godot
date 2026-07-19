@@ -128,7 +128,7 @@ func _do_switch_scene(scene_name: String, data: Dictionary, mode: String) -> voi
 	if _main_node and _main_node.has_method("switch_scene"):
 		_main_node.switch_scene(scene_name, data, mode)
 	else:
-		push_warning("[SceneManager] 无法切换场景: " + scene_name)
+		push_warning(TranslationServer.translate("[SceneManager] 无法切换场景: ") + scene_name)
 
 ## 兼容微信版/旧移植代码里仍在使用的 change_scene 命名
 func change_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:

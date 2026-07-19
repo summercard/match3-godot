@@ -30,4 +30,4 @@ static func locked_message(feature_id: String, player_level: int) -> String:
 	var state := get_unlock_state(feature_id, player_level)
 	if bool(state.get("unlocked", false)):
 		return ""
-	return "%s将在玩家达到 Lv.%d 后解锁" % [str(state.get("label", "该功能")), int(state.get("required_level", 1))]
+	return TranslationServer.translate("%s将在玩家达到 Lv.%d 后解锁") % [TranslationServer.translate(str(state.get("label", "该功能"))), int(state.get("required_level", 1))]

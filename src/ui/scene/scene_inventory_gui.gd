@@ -273,19 +273,19 @@ func _sync_detail() -> void:
 	_label("DetailPanel/Content/IconFrame/Rarity").text = _rarity_label(int(item_data.get("rarity", 1)))
 	_label("DetailPanel/Content/Name").text = str(item_data.get("name", ""))
 	_label("DetailPanel/Content/Desc").text = _wrap_text(str(item_data.get("desc", "")), 15)
-	_label("DetailPanel/Content/Count").text = "拥有: %d" % int(_selected_item.get("count", 0))
+	_label("DetailPanel/Content/Count").text = TranslationServer.translate("拥有: %d") % int(_selected_item.get("count", 0))
 	_label("DetailPanel/Content/Type").text = _type_label(item_type)
-	_label("DetailPanel/Content/EquipState").text = "捕捉球: %s" % ("已装备" if equipped else "未装备") if item_type == "capture" else ""
+	_label("DetailPanel/Content/EquipState").text = TranslationServer.translate("捕捉球: %s") % TranslationServer.translate("已装备" if equipped else "未装备") if item_type == "capture" else ""
 	var use_button := get_node("DetailPanel/UseButton") as TextureButton
 	use_button.disabled = false
 	use_button.modulate.a = 1.0
 	_label("DetailPanel/UseButton/Text").text = "装备" if item_type == "capture" and not equipped else ("已装备" if item_type == "capture" else "使用")
 
 	if item_type == "capture":
-		_label("DetailPanel/Content/EquipState").text = "捕获球 %s" % ("已激活" if equipped else "未激活")
+		_label("DetailPanel/Content/EquipState").text = TranslationServer.translate("捕获球 %s") % TranslationServer.translate("已激活" if equipped else "未激活")
 		_label("DetailPanel/UseButton/Text").text = "已激活" if equipped else "激活"
 	elif item_type == "battle":
-		_label("DetailPanel/Content/EquipState").text = "战斗槽 %s" % ("已装备" if battle_equipped else "%d/3" % _equipped_battle_items.size())
+		_label("DetailPanel/Content/EquipState").text = TranslationServer.translate("战斗槽 %s") % (TranslationServer.translate("已装备") if battle_equipped else "%d/3" % _equipped_battle_items.size())
 		_label("DetailPanel/UseButton/Text").text = "卸下" if battle_equipped else "装备"
 	else:
 		_label("DetailPanel/Content/EquipState").text = ""

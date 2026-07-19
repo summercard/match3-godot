@@ -5,16 +5,16 @@ extends Control
 
 signal back_pressed()
 
-const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const BACK_RECT := Rect2(10.0, 10.0, 58.0, 58.0)
 const HEADER_RECT := Rect2(88.0, 17.0, 232.0, 52.0)
-const MAIN_PANEL_RECT := Rect2(14.0, 86.0, 347.0, 176.0)
-const ABOUT_PANEL_RECT := Rect2(18.0, 276.0, 339.0, 58.0)
-const RESET_RECT := Rect2(34.0, 355.0, 138.0, 46.0)
-const DEFAULT_RECT := Rect2(203.0, 355.0, 138.0, 46.0)
+const MAIN_PANEL_RECT := Rect2(14.0, 86.0, 347.0, 239.0)
+const ABOUT_PANEL_RECT := Rect2(18.0, 337.0, 339.0, 58.0)
+const RESET_RECT := Rect2(34.0, 415.0, 138.0, 46.0)
+const DEFAULT_RECT := Rect2(203.0, 415.0, 138.0, 46.0)
 const ROW_X := 30.0
 const ROW_W := 315.0
 const ROW_H := 54.0
@@ -23,6 +23,11 @@ const ROW_GAP := 9.0
 const CONFIRM_BOX := Rect2(41.0, 241.0, 293.0, 182.0)
 const CONFIRM_YES := Rect2(64.0, 363.0, 112.0, 42.0)
 const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
+const LANGUAGE_DIALOG_RECT := Rect2(22.0, 154.0, 331.0, 302.0)
+const LANGUAGE_CLOSE_RECT := Rect2(310.0, 166.0, 30.0, 30.0)
+const LANGUAGE_GRID_ORIGIN := Vector2(38.0, 220.0)
+const LANGUAGE_OPTION_SIZE := Vector2(93.0, 58.0)
+const LANGUAGE_OPTION_GAP := Vector2(8.0, 9.0)
 
 const SETTINGS_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
@@ -57,6 +62,14 @@ const SETTINGS_ROWS := [
 		"key": "musicOn",
 		"default": true,
 	},
+	{
+		"id": "language",
+		"label": "游戏语言",
+		"desc": "自动匹配手机系统语言",
+		"type": "language",
+		"key": "language",
+		"default": "auto",
+	},
 ]
 const C := {
 	"white": Color(1.0, 1.0, 1.0),
@@ -73,6 +86,7 @@ const C := {
 var game: Node = null
 var settings_data: Dictionary = {}
 var confirm_dialog := false
+var language_dialog := false
 var reset_success := false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
@@ -98,6 +112,9 @@ func _ready() -> void:
 	_process_enabled = true
 	set_process(true)
 	self.modulate.a = 0.0  # 入场动画起点：透明
+	var localization := _get_autoload("Localization")
+	if localization != null and localization.has_signal("locale_changed") and not localization.locale_changed.is_connected(_on_locale_changed):
+		localization.locale_changed.connect(_on_locale_changed)
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -106,6 +123,7 @@ func init(_data: Dictionary = {}) -> void:
 	_storage = _get_storage()
 	_load_settings()
 	confirm_dialog = false
+	language_dialog = false
 	reset_success = false
 	_sync_authored_controls()
 	queue_redraw()
@@ -155,6 +173,17 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _on_tap(point: Vector2) -> void:
+	if language_dialog:
+		if LANGUAGE_CLOSE_RECT.has_point(point) or not LANGUAGE_DIALOG_RECT.has_point(point):
+			language_dialog = false
+			_sync_authored_controls()
+			queue_redraw()
+			return
+		var option_index := _language_option_index_at(point)
+		if option_index >= 0:
+			_select_language(option_index)
+		return
+
 	if confirm_dialog:
 		if CONFIRM_YES.has_point(point):
 			_do_reset_data()
@@ -186,6 +215,11 @@ func _on_tap(point: Vector2) -> void:
 		if row.get("type", "") == "toggle":
 			_toggle_bool(str(row.get("key", "")))
 			return
+		if row.get("type", "") == "language":
+			language_dialog = true
+			_sync_authored_controls()
+			queue_redraw()
+			return
 		if row.get("type", "") == "segment":
 			var hit := _hit_segment(row, row_rect, point)
 			if hit != "":
@@ -207,6 +241,7 @@ func _restore_defaults() -> void:
 	for row: Dictionary in SETTINGS_ROWS:
 		settings_data[str(row.get("key", ""))] = row.get("default")
 	_save_settings()
+	_apply_language_preference(str(settings_data.get("language", "auto")))
 	reset_success = false
 	queue_redraw()
 
@@ -230,6 +265,7 @@ func _do_reset_data() -> void:
 			storage.reset_tutorial_progress()
 		elif storage.has_method("save_tutorial_progress"):
 			storage.save_tutorial_progress(0)
+	_apply_language_preference("auto")
 	_show_reset_success()
 
 
@@ -255,11 +291,15 @@ func _connect_authored_hit_areas() -> void:
 		"HitAreas/BackButton",
 		"HitAreas/Rows/SoundRow",
 		"HitAreas/Rows/MusicRow",
+		"HitAreas/Rows/LanguageRow",
 		"HitAreas/Actions/ResetButton",
 		"HitAreas/Actions/DefaultButton",
 		"HitAreas/ConfirmDialog/YesButton",
 		"HitAreas/ConfirmDialog/NoButton",
+		"HitAreas/LanguageDialog/CloseButton",
 	]
+	for i in range(9):
+		paths.append("HitAreas/LanguageDialog/Option%d" % i)
 	for path in paths:
 		var control := get_node_or_null(path) as Control
 		if control == null or bool(control.get_meta("_authored_hit_area_bound", false)):
@@ -272,6 +312,9 @@ func _sync_authored_controls() -> void:
 	var confirm := get_node_or_null("HitAreas/ConfirmDialog") as Control
 	if confirm != null:
 		confirm.visible = confirm_dialog
+	var language_picker := get_node_or_null("HitAreas/LanguageDialog") as Control
+	if language_picker != null:
+		language_picker.visible = language_dialog
 	var reset_btn := get_node_or_null("HitAreas/Actions/ResetButton") as BaseButton
 	if reset_btn != null:
 		reset_btn.disabled = reset_success
@@ -293,6 +336,48 @@ func _hit_area_event_to_scene_position(event_position: Vector2, control: Control
 
 func _get_row_rect(index: int) -> Rect2:
 	return Rect2(ROW_X, ROW_START_Y + index * (ROW_H + ROW_GAP), ROW_W, ROW_H)
+
+
+func _language_option_rect(index: int) -> Rect2:
+	var column := index % 3
+	var row := index / 3
+	return Rect2(
+		LANGUAGE_GRID_ORIGIN + Vector2(column, row) * (LANGUAGE_OPTION_SIZE + LANGUAGE_OPTION_GAP),
+		LANGUAGE_OPTION_SIZE
+	)
+
+
+func _language_option_index_at(point: Vector2) -> int:
+	for i in range(9):
+		if _language_option_rect(i).has_point(point):
+			return i
+	return -1
+
+
+func _select_language(index: int) -> void:
+	var localization := _get_autoload("Localization")
+	if localization == null or not localization.has_method("get_language_options"):
+		return
+	var options: Array = localization.call("get_language_options")
+	if index < 0 or index >= options.size():
+		return
+	var value := str((options[index] as Dictionary).get("value", "auto"))
+	settings_data["language"] = value
+	_save_settings()
+	_apply_language_preference(value)
+	language_dialog = false
+	_sync_authored_controls()
+	queue_redraw()
+
+
+func _apply_language_preference(value: String) -> void:
+	var localization := _get_autoload("Localization")
+	if localization != null and localization.has_method("set_language_preference"):
+		localization.call("set_language_preference", value, false)
+
+
+func _on_locale_changed(_locale: String, _preference: String) -> void:
+	queue_redraw()
 
 
 func _hit_segment(row: Dictionary, row_rect: Rect2, point: Vector2) -> String:
@@ -347,6 +432,8 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO)
 	if confirm_dialog:
 		_draw_confirm_dialog()
+	if language_dialog:
+		_draw_language_dialog()
 	if reset_success:
 		_draw_toast("数据已重置")
 
@@ -391,6 +478,8 @@ func _draw_setting_row(index: int, row: Dictionary) -> void:
 	_draw_text_left(str(row.get("desc", "")), Vector2(rect.position.x + 18.0, rect.position.y + 44.0), C["muted"], 10.0, false, 160.0)
 	if row.get("type", "") == "toggle":
 		_draw_toggle(rect, bool(settings_data.get(str(row.get("key", "")), row.get("default", true))))
+	elif row.get("type", "") == "language":
+		_draw_language_value(rect)
 	else:
 		_draw_segments(rect, row)
 
@@ -403,7 +492,7 @@ func _draw_toggle(row_rect: Rect2, is_on: bool) -> void:
 	draw_rect(Rect2(track.position.x + track.size.y * 0.5, track.position.y, track.size.x - track.size.y, track.size.y), color, true)
 	var knob_x := track.position.x + track.size.x - track.size.y * 0.5 if is_on else track.position.x + track.size.y * 0.5
 	draw_circle(Vector2(knob_x, track.position.y + track.size.y * 0.5), 11.0, Color(1.0, 0.95, 0.77))
-	_draw_text("ON" if is_on else "OFF", track.get_center().x, track.position.y + 19.0, C["white"], 10.0, true, 38.0)
+	_draw_text("✓" if is_on else "—", track.get_center().x, track.position.y + 19.0, C["white"], 12.0, true, 38.0)
 
 
 func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
@@ -420,12 +509,28 @@ func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
 		_draw_text(str(option.get("label", "")), rect.get_center().x, rect.position.y + 19.0, C["gold"] if active else C["muted"], 11.0, active, seg_w - 2.0)
 
 
+func _draw_language_value(row_rect: Rect2) -> void:
+	var preference := str(settings_data.get("language", "auto"))
+	var localization := _get_autoload("Localization")
+	var shown_value := preference
+	if localization != null and localization.has_method("get_active_locale") and localization.has_method("get_language_native_name"):
+		var display_locale := str(localization.call("get_active_locale")) if preference == "auto" else preference
+		shown_value = str(localization.call("get_language_native_name", display_locale))
+		if preference == "auto":
+			var auto_label := "Auto" if display_locale in ["en", "fr", "de", "es_419"] else _localized("自动")
+			shown_value = "%s · %s" % [auto_label, shown_value]
+	var rect := Rect2(row_rect.end.x - 129.0, row_rect.position.y + 12.0, 111.0, 31.0)
+	_draw_texture_fit(_tex("tab_active"), rect)
+	_draw_text(shown_value, rect.get_center().x - 5.0, rect.position.y + 21.0, C["gold"], 11.0, true, 88.0, false)
+	_draw_text("›", rect.end.x - 12.0, rect.position.y + 22.0, C["white"], 18.0, true, 16.0)
+
+
 func _draw_about_panel() -> void:
 	_draw_texture_fit(_tex("row"), ABOUT_PANEL_RECT, 0.94)
-	_draw_texture_contain(_tex("gear"), Rect2(30.0, 287.0, 34.0, 34.0), 0.92)
-	_draw_text_left("当前版本", Vector2(76.0, 301.0), C["white"], 15.0, true, 88.0)
-	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 322.0), C["muted"], 12.0, false, 90.0)
-	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 312.0), C["dim"], 11.0, false, 168.0)
+	_draw_texture_contain(_tex("gear"), Rect2(30.0, 349.0, 34.0, 34.0), 0.92)
+	_draw_text_left("当前版本", Vector2(76.0, 362.0), C["muted"], 14.0, true, 88.0)
+	_draw_text_left(str(settings_data.get("version", "v0.1.0")), Vector2(76.0, 382.0), C["dim"], 11.0, false, 90.0)
+	_draw_text_left("设置会自动保存，返回大厅后立即生效", Vector2(170.0, 373.0), C["dim"], 11.0, false, 168.0)
 
 func _draw_bottom_buttons() -> void:
 	_draw_texture_fit(_tex("button_disabled"), RESET_RECT)
@@ -444,6 +549,27 @@ func _draw_confirm_dialog() -> void:
 	_draw_text("确认", CONFIRM_YES.get_center().x, CONFIRM_YES.position.y + 28.0, Color(1.0, 0.36, 0.30), 15.0, true, 82.0)
 	_draw_texture_fit(_tex("button"), CONFIRM_NO)
 	_draw_text("取消", CONFIRM_NO.get_center().x, CONFIRM_NO.position.y + 28.0, C["white"], 15.0, true, 82.0)
+
+
+func _draw_language_dialog() -> void:
+	draw_rect(Rect2(0.0, 0.0, DESIGN_W, DESIGN_H), Color(0.0, 0.0, 0.0, 0.58), true)
+	_draw_texture_fit(_tex("panel"), LANGUAGE_DIALOG_RECT)
+	draw_rect(Rect2(LANGUAGE_DIALOG_RECT.position + Vector2(13.0, 13.0), LANGUAGE_DIALOG_RECT.size - Vector2(26.0, 26.0)), Color(1.0, 0.93, 0.74, 0.96), true)
+	_draw_text("选择语言", LANGUAGE_DIALOG_RECT.get_center().x, LANGUAGE_DIALOG_RECT.position.y + 41.0, C["muted"], 21.0, true, 190.0)
+	_draw_text("×", LANGUAGE_CLOSE_RECT.get_center().x, LANGUAGE_CLOSE_RECT.position.y + 23.0, C["muted"], 21.0, true, 24.0)
+	var localization := _get_autoload("Localization")
+	var options: Array = localization.call("get_language_options") if localization != null and localization.has_method("get_language_options") else []
+	var current := str(settings_data.get("language", "auto"))
+	for i in range(mini(9, options.size())):
+		var option: Dictionary = options[i]
+		var value := str(option.get("value", ""))
+		var active := value == current
+		var rect := _language_option_rect(i)
+		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
+		var native_name := str(option.get("native_name", value))
+		if value == "auto":
+			native_name = _localized(native_name)
+		_draw_text(native_name, rect.get_center().x, rect.position.y + 34.0, C["gold"] if active else C["muted"], 13.0, active, rect.size.x - 10.0, false)
 
 func _draw_toast(text: String) -> void:
 	var rect := Rect2(96.0, 620.0, 183.0, 34.0)
@@ -490,16 +616,30 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, rect, Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 
-func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, bold: bool = false, width: float = 160.0, localize: bool = true) -> void:
 	var font := _get_round_font(bold)
-	var size_i := int(font_size)
-	draw_string(font, Vector2(x - width / 2.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
+	var display_text := _localized(text) if localize else text
+	var size_i := _fit_font_size(font, display_text, width, int(font_size))
+	draw_string(font, Vector2(x - width / 2.0, y), display_text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, color)
 
 
-func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0, localize: bool = true) -> void:
 	var font := _get_round_font(bold)
-	var size_i := int(font_size)
-	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+	var display_text := _localized(text) if localize else text
+	var size_i := _fit_font_size(font, display_text, width, int(font_size))
+	draw_string(font, pos, display_text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+
+
+func _fit_font_size(font: Font, text: String, width: float, preferred_size: int) -> int:
+	var fitted := preferred_size
+	while fitted > 8 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > width:
+		fitted -= 1
+	return fitted
+
+
+func _localized(text: String) -> String:
+	var localization := _get_autoload("Localization")
+	return str(localization.call("text", text)) if localization != null and localization.has_method("text") else text
 
 
 func _get_round_font(bold: bool) -> Font:

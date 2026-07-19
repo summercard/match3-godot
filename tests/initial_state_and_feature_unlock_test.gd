@@ -50,6 +50,12 @@ func _run() -> void:
 	var settings: Dictionary = storage.load_settings()
 	_expect(bool(settings.get("soundOn", false)) and bool(settings.get("musicOn", false)) and bool(settings.get("vibrationOn", false)), "fresh settings should enable audio and vibration")
 	_expect(str(settings.get("qualityLevel", "")) == "high" and str(settings.get("performanceMode", "")) == "balanced", "fresh settings should use the configured defaults")
+	_expect(str(settings.get("language", "")) == "auto", "fresh settings should follow the device language")
+	storage.save_settings({"soundOn": false})
+	var migrated_settings: Dictionary = storage.load_settings()
+	_expect(not bool(migrated_settings.get("soundOn", true)), "existing setting values should be preserved")
+	_expect(str(migrated_settings.get("language", "")) == "auto", "older partial settings should gain the language default")
+	_expect((migrated_settings.get("capture", {}) as Dictionary).has("equippedBattleItems"), "nested setting defaults should be merged for older saves")
 
 	_expect(not bool(storage.get_feature_unlock_state("ranch").get("unlocked", true)), "farm should be locked below level 10")
 	_expect(bool(storage.get_feature_unlock_state("classroom").get("unlocked", false)), "classroom should be available from the start")

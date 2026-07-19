@@ -595,7 +595,7 @@ func _has_empty_slot() -> bool:
 
 
 func _sync_power_panel() -> void:
-	_label("PowerPanel/Title").text = "Team Power"
+	_label("PowerPanel/Title").text = "队伍战力"
 	_label("PowerPanel/Power").text = _format_number(_calc_team_power())
 	var totals := _calc_team_totals()
 	for stat_key in ["hp", "atk", "def", "spd"]:
@@ -603,7 +603,7 @@ func _sync_power_panel() -> void:
 
 
 func _sync_pet_roster() -> void:
-	_label("RosterPanel/Title").text = "Choose Pets"
+	_label("RosterPanel/Title").text = "选择精灵"
 	_label("RosterPanel/Subtitle").text = "选择精灵加入队伍"
 	var visible := _get_display_monsters()
 	var start := _roster_page * GUI_ROSTER_PAGE_SIZE

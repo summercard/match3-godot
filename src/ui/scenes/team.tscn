@@ -698,7 +698,7 @@ offset_right = 128.0
 offset_bottom = 27.0
 theme_override_colors/font_color = Color(0.38, 0.21, 0.07, 1)
 theme_override_font_sizes/font_size = 14
-text = "Team Power"
+text = "队伍战力"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -895,7 +895,7 @@ offset_right = 275.0
 offset_bottom = 36.0
 theme_override_colors/font_color = Color(0.38, 0.21, 0.07, 1)
 theme_override_font_sizes/font_size = 20
-text = "Choose Pets"
+text = "选择精灵"
 horizontal_alignment = 1
 vertical_alignment = 1
 

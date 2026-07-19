@@ -8,6 +8,10 @@ func _init() -> void:
 func _capture() -> void:
 	var scene_name := _read_arg("--scene-name=", "stage_select")
 	var output_path := _read_arg("--output=", DEFAULT_OUTPUT)
+	var locale := _read_arg("--locale=", "")
+	var localization := root.get_node_or_null("Localization")
+	if not locale.is_empty() and localization != null and localization.has_method("set_language_preference"):
+		localization.call("set_language_preference", locale, false)
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

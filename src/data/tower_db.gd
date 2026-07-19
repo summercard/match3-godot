@@ -96,7 +96,7 @@ static func get_floor(floor: int) -> Dictionary:
 	var theme: String = str(STAGE_THEMES[(stage_index - 1) % STAGE_THEMES.size()])
 	return {
 		"id": "tower_floor_%03d" % floor,
-		"name": "共鸣塔 %d 层" % floor,
+		"name": TranslationServer.translate("共鸣塔 %d 层") % floor,
 		"type": "tower_boss" if boss else "tower_normal",
 		"mode": "tower",
 		"towerFloor": floor,
@@ -111,7 +111,7 @@ static func get_floor(floor: int) -> Dictionary:
 		"disableCapture": true,
 		"disableRandomElite": true,
 		"rewards": {},
-		"battleHint": "%s · 第 %d/%d 波" % [theme, wave_in_stage(floor), stage_wave_count(stage_index)],
+		"battleHint": TranslationServer.translate("%s · 第 %d/%d 波") % [theme, wave_in_stage(floor), stage_wave_count(stage_index)],
 	}
 
 

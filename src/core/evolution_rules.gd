@@ -99,7 +99,7 @@ static func insight_label(insight: Dictionary) -> String:
 		return "社交启发: 无"
 	var tags: Array = insight.get("tags", [])
 	var tag_text := "、".join(tags.slice(0, mini(2, tags.size()))) if not tags.is_empty() else str(insight.get("label", "社交启发"))
-	return "社交启发: %s %d分" % [tag_text, int(insight.get("score", 0))]
+	return TranslationServer.translate("社交启发: %s %d分") % [tag_text, int(insight.get("score", 0))]
 
 
 static func _build_report_core(old_monster: Dictionary, new_monster: Dictionary, old_stats: Dictionary, new_stats: Dictionary, insight: Dictionary) -> Dictionary:

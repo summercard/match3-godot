@@ -211,21 +211,21 @@ func begin_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
 				"damage": dot_damage,
-				"message": "%s %s 受到 %d %s！" % [label, enemy.get("name", ""), dot_damage, dot_label]
+				"message": TranslationServer.translate("%s %s 受到 %d %s！") % [label, enemy.get("name", ""), dot_damage, dot_label]
 			})
 		elif effect.get("type") == "freeze":
 			logs.append({
 				"type": "freeze",
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
-				"message": "❄️%s 冰冻中，ATK降低30%%！" % enemy.get("name", "")
+				"message": TranslationServer.translate("❄️%s 冰冻中，ATK降低30%%！") % enemy.get("name", "")
 			})
 		elif effect.get("type") == "stun":
 			logs.append({
 				"type": "stun",
 				"enemy_index": i,
 				"enemy_name": enemy.get("name", ""),
-				"message": "⚡%s 眩晕中！" % enemy.get("name", "")
+				"message": TranslationServer.translate("⚡%s 眩晕中！") % enemy.get("name", "")
 			})
 
 	return logs
@@ -264,7 +264,7 @@ func end_enemy_turn_for(enemies: Array, enemy_indices: Array) -> Array:
 			"type": status_type + "_end",
 			"enemy_index": i,
 			"enemy_name": enemy.get("name", ""),
-			"message": "%s 的%s效果消失了" % [enemy.get("name", ""), label]
+			"message": TranslationServer.translate("%s 的%s效果消失了") % [enemy.get("name", ""), label]
 		})
 	return logs
 

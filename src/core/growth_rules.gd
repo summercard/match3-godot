@@ -41,5 +41,5 @@ static func get_catchup_state(monster_level: int, reference_level: int) -> Dicti
 		"enabled": multiplier > 1.0,
 		"gap": gap,
 		"multiplier": multiplier,
-		"label": "追赶 x%.1f" % multiplier if multiplier > 1.0 else ""
+		"label": TranslationServer.translate("追赶 x%.1f") % multiplier if multiplier > 1.0 else ""
 	}

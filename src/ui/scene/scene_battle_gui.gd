@@ -416,7 +416,7 @@ func _sync_top_hud() -> void:
 	objective_label.text = str(objective.get("display", ""))
 	var phase_label := _label("TopHud/BossPhase")
 	phase_label.visible = status.get("is_boss_battle", false)
-	phase_label.text = "阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)]
+	phase_label.text = TranslationServer.translate("阶段 %d/%d") % [status.get("current_phase", 1), status.get("total_phases", 1)]
 
 func _sync_enemy_slots() -> void:
 	var enemy_count: int = mini(_battle.enemies.size(), 3)
@@ -548,7 +548,7 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_b
 	var is_elite := bool(unit.get("isElite", false))
 	var elite_prefix := "★精英 " if is_elite else ""
 	var name_label := slot.get_node("Name") as Label
-	name_label.text = "%s%s" % [elite_prefix, str(unit.get("name", "精灵"))]
+	name_label.text = "%s%s" % [TranslationServer.translate(elite_prefix), TranslationServer.translate(str(unit.get("name", "精灵")))]
 	name_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.16, 1.0) if is_elite else Color.WHITE)
 	var hp_bar := slot.get_node("HpBar")
 	hp_bar.set("fill_color", _hp_system_color(fill_color))
@@ -692,7 +692,7 @@ func _sync_item_confirm_popup() -> void:
 	_label("ItemConfirmLayer/Panel/Title").text = "使用道具"
 	_label("ItemConfirmLayer/Panel/Name").text = str(def.get("name", "道具"))
 	_label("ItemConfirmLayer/Panel/Desc").text = str(def.get("desc", ""))
-	_label("ItemConfirmLayer/Panel/Count").text = "拥有: %d" % int(item.get("count", 0))
+	_label("ItemConfirmLayer/Panel/Count").text = TranslationServer.translate("拥有: %d") % int(item.get("count", 0))
 	_label("ItemConfirmLayer/Panel/CancelButton/Text").text = "取消"
 	_label("ItemConfirmLayer/Panel/UseButton/Text").text = "使用"
 
@@ -807,7 +807,7 @@ func _execute_gem_type_shift(source: String, target: String) -> void:
 	var center_y := float(_board.offset_y) + float(_board.rows) * float(_board.cell_size) * 0.5
 	_spawn_item_use_effect("gem_shift", Vector2(center_x, center_y), GEM_COLORS.get(target, C["gold"]), 0.92, {"source": source, "target": target, "affected": affected})
 	_floating_texts.append({"text": "%s→%s × %d" % [source_emoji, target_emoji, affected], "x": center_x, "y": center_y, "color": C["gold"], "size": 16.0, "timer": 0.0, "duration": 1.0})
-	_show_message("使用 属性易形：%s → %s（%d 个宝石）" % [source_emoji, target_emoji, affected])
+	_show_message(TranslationServer.translate("使用 属性易形：%s → %s（%d 个宝石）") % [source_emoji, target_emoji, affected])
 	_sfx("battle_heal_leaf_bubble")
 	queue_redraw()
 	_close_gem_convert_picker(true)

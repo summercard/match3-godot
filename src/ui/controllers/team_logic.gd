@@ -4,7 +4,7 @@
 class_name SceneTeam
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const EcologyBondRulesScript = preload("res://src/core/ecology_bond_rules.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MonsterServiceScript = preload("res://src/core/monster_service.gd")
@@ -672,9 +672,11 @@ func _draw() -> void:
 		_draw_help_dialog(font)
 
 func _draw_text(font: Font, text: String, x: float, y: float, color: Color, size: float) -> void:
+	text = TranslationServer.translate(text)
 	draw_string(font, Vector2(x - 100.0, y), text, HORIZONTAL_ALIGNMENT_CENTER, 200.0, size, color)
 
 func _draw_text_in_rect(font: Font, text: String, rect: Rect2, color: Color, max_size: float, min_size: float = 8.0) -> void:
+	text = TranslationServer.translate(text)
 	var font_size := max_size
 	while font_size > min_size:
 		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(font_size))
@@ -736,7 +738,7 @@ func _draw_bond_summary(font: Font) -> void:
 	_draw_rounded_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 7.0, C["gold"] if active else Color(0.22, 0.36, 0.62, 0.82), 1.0)
 	var title := str(bond.get("name", "羁绊"))
 	var summary := str(bond.get("summary", "选择精灵查看羁绊方向。"))
-	_draw_text_in_rect(font, "分支：%s" % title, Rect2(rect.position.x + 8.0, rect.position.y + 1.0, 104.0, 19.0), C["gold"] if active else C["text_secondary"], 11.0, 10.0)
+	_draw_text_in_rect(font, TranslationServer.translate("分支：%s") % title, Rect2(rect.position.x + 8.0, rect.position.y + 1.0, 104.0, 19.0), C["gold"] if active else C["text_secondary"], 11.0, 10.0)
 	_draw_text_in_rect(font, summary, Rect2(rect.position.x + 112.0, rect.position.y + 1.0, 231.0, 19.0), C["text_primary"] if active else C["text_muted"], 10.0, 9.0)
 
 func _get_team_monster_defs() -> Array:
@@ -777,7 +779,7 @@ func _draw_roster_toolbar(font: Font) -> void:
 	var filter_label := "属性筛选"
 	if _active_filter != "all":
 		_draw_element_icon(_active_filter, Rect2(_filter_cycle_btn.position.x + 11.0, _filter_cycle_btn.position.y + 9.0, 26.0, 26.0))
-		filter_label = "%s系" % _get_element_name(_active_filter)
+		filter_label = TranslationServer.translate("%s系") % _get_element_name(_active_filter)
 	_draw_text(font, filter_label, _filter_cycle_btn.position.x + 76.0, _filter_cycle_btn.position.y + 28.0, C["white"], 13.0)
 	_draw_texture_fit(_tex("sort_dropdown"), _sort_btn)
 	_draw_text(font, str(SORT_OPTIONS[_sort_option]["label"]), _sort_btn.position.x + 48.0, _sort_btn.position.y + 28.0, C["text_secondary"], 13.0)

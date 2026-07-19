@@ -33,7 +33,7 @@ static func build_enemy_intent(enemy: Dictionary, skill_state: Dictionary, statu
 		return {
 			"type": "charge_release",
 			"label": "蓄力释放",
-			"desc": "即将造成 %.1fx 伤害" % multiplier,
+			"desc": TranslationServer.translate("即将造成 %.1fx 伤害") % multiplier,
 			"severity": "danger",
 			"hint": "破招: 束缚或守护"
 		}

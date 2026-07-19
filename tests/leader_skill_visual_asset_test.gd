@@ -162,6 +162,7 @@ func _finish() -> void:
 	if _failures.is_empty():
 		print("[LeaderSkillVisualAsset] OK")
 		quit(0)
+		return
 	for failure: String in _failures:
 		push_error("[LeaderSkillVisualAsset] " + failure)
 	quit(1)

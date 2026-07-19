@@ -66,8 +66,8 @@ func _test_capture_and_item_economy() -> void:
 
 func _test_stage_and_tower_progression() -> void:
 	var db := StageDBScript.new()
-	var chapter_one_config := [5, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13]
-	var chapter_one_combat := [8, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 13]
+	var chapter_one_config := [5, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
+	var chapter_one_combat := [8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 11]
 	for stage_index in range(chapter_one_config.size()):
 		var stage_no := stage_index + 1
 		var stage: Dictionary = db.get_stage("stage_1_%d" % stage_no)
@@ -75,9 +75,9 @@ func _test_stage_and_tower_progression() -> void:
 		_expect(configured_level == chapter_one_config[stage_index], "stage_1_%d configured level should match the final 1.3.2 curve" % stage_no)
 		var runtime_monster_id := "monster_boss_001" if stage_no == 12 else "monster_001"
 		_expect(StatCalculator.enemy_combat_level(runtime_monster_id, configured_level) == chapter_one_combat[stage_index], "stage_1_%d runtime level should apply the finalized ordinary/Boss rule" % stage_no)
-	_expect(int(db.get_stage("stage_2_1").get("enemyLevel", 0)) == 16, "chapter two ordinary stages should retain the +6 chapter bonus")
-	_expect(int(db.get_stage("stage_2_12").get("enemyLevel", 0)) == 21, "chapter two boss should retain the +6 chapter bonus")
-	_expect(int(db.get_stage("stage_5_12").get("enemyLevel", 0)) == 36, "chapter-five boss should follow the finalized boss formula")
+	_expect(int(db.get_stage("stage_2_1").get("enemyLevel", 0)) == 13, "chapter two ordinary stages should use the reduced +3 chapter bonus")
+	_expect(int(db.get_stage("stage_2_12").get("enemyLevel", 0)) == 18, "chapter two boss should use the reduced +3 chapter bonus")
+	_expect(int(db.get_stage("stage_5_12").get("enemyLevel", 0)) == 33, "chapter-five boss should follow the reduced boss formula")
 	_expect(str(db.get_stage("stage_1_6").get("battleHint", "")).is_empty(), "ordinary non-fountain stages should not show generic battle hints")
 	_expect(str(db.get_stage("stage_2_5").get("battleHint", "")).contains("喷泉"), "fountain stages should retain the Chinese mechanic hint")
 	_expect(TowerDBScript.UNLOCK_STAGE_ID == "stage_5_12", "tower should unlock from the chapter-five final boss")

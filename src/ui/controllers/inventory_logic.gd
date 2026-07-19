@@ -6,7 +6,7 @@
 class_name SceneInventory
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 const ItemDB = preload("res://src/data/item_db.gd")
 
@@ -245,12 +245,12 @@ func _use_item(item_id: String) -> void:
 				var result: Dictionary = _storage.add_shared_monster_exp(exp_gain) if _storage.has_method("add_shared_monster_exp") else {}
 				var added := int(result.get("added", exp_gain))
 				var overflow := int(result.get("overflow", 0))
-				_show_toast("经验槽 +%d%s" % [added, "（已满）" if overflow > 0 else ""])
+				_show_toast(TranslationServer.translate("经验槽 +%d%s") % [added, "（已满）" if overflow > 0 else ""])
 		"gold":
 			var gold_gain: int = effect.get("goldGain", 0)
 			if gold_gain > 0 and _storage.use_item(item_id, 1):
 				_storage.add_gold(gold_gain)
-				_show_toast("获得 %d 金币" % gold_gain)
+				_show_toast(TranslationServer.translate("获得 %d 金币") % gold_gain)
 		"capture":
 			if _storage and _storage.has_method("save_capture_settings"):
 				_capture_settings["equippedItem"] = item_id
@@ -309,12 +309,12 @@ func _toggle_battle_item_equip(item_id: String) -> void:
 		return
 	if item_id in _equipped_battle_items:
 		_equipped_battle_items.erase(item_id)
-		_show_toast("已卸下 %s" % str(item_data.get("name", "道具")))
+		_show_toast(TranslationServer.translate("已卸下 %s") % TranslationServer.translate(str(item_data.get("name", "道具"))))
 	else:
 		if _equipped_battle_items.size() >= 3:
 			_equipped_battle_items.remove_at(0)
 		_equipped_battle_items.append(item_id)
-		_show_toast("已装备 %s" % str(item_data.get("name", "道具")))
+		_show_toast(TranslationServer.translate("已装备 %s") % TranslationServer.translate(str(item_data.get("name", "道具"))))
 	_capture_settings["equippedBattleItems"] = _equipped_battle_items.duplicate()
 	_storage.save_capture_settings(_capture_settings)
 
@@ -338,7 +338,7 @@ func _equip_battle_item_to_slot(item_id: String, slot_idx: int) -> void:
 	_equipped_battle_items = compact
 	_capture_settings["equippedBattleItems"] = _equipped_battle_items.duplicate()
 	_storage.save_capture_settings(_capture_settings)
-	_show_toast("已装备 %s" % str(item_data.get("name", "道具")))
+	_show_toast(TranslationServer.translate("已装备 %s") % TranslationServer.translate(str(item_data.get("name", "道具"))))
 
 
 func _show_toast(text: String) -> void:
@@ -459,11 +459,11 @@ func _draw_detail_panel() -> void:
 	_draw_text_shadow(_rarity_label(int(item_data.get("rarity", 1))), Vector2(76.0, 636.0), C["muted"], 12.0, true, 80.0)
 	_draw_text_left(item_data.get("name", ""), Vector2(143.0, 549.0), C["blue"], 18.0, true, 160.0)
 	_draw_text_left(_wrap_text(item_data.get("desc", ""), 15), Vector2(143.0, 579.0), C["muted"], 13.0, false, 178.0)
-	_draw_text_left("拥有: %d" % int(_selected_item.get("count", 0)), Vector2(143.0, 630.0), C["gold"], 12.0, true, 100.0)
+	_draw_text_left(TranslationServer.translate("拥有: %d") % int(_selected_item.get("count", 0)), Vector2(143.0, 630.0), C["gold"], 12.0, true, 100.0)
 	var item_type := str(item_data.get("type", ""))
 	var equipped := item_type == "capture" and str(_capture_settings.get("equippedItem", "")) == item_id
 	if item_type == "capture":
-		_draw_text_left("战斗捕捉球: %s" % ("已装备" if equipped else "未装备"), Vector2(223.0, 630.0), C["gold"] if equipped else C["muted"], 12.0, true, 122.0)
+		_draw_text_left(TranslationServer.translate("战斗捕捉球: %s") % ("已装备" if equipped else "未装备"), Vector2(223.0, 630.0), C["gold"] if equipped else C["muted"], 12.0, true, 122.0)
 	_draw_texture_fit(_tex("use_button"), USE_BTN_RECT)
 	var button_text := "装备" if item_type == "capture" and not equipped else ("已装备" if item_type == "capture" else "使用")
 	_draw_text_shadow(button_text, USE_BTN_RECT.get_center() + Vector2(0, 8.0), C["white"], 18.0, true, USE_BTN_RECT.size.x)
@@ -549,6 +549,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
 
 
 func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	var left := center.x - width / 2.0
 	draw_string(PROJECT_ROUND_FONT, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
@@ -556,6 +557,7 @@ func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: f
 
 
 func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	var lines := text.split("\n")
 	for i in range(lines.size()):

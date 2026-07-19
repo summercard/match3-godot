@@ -27,8 +27,10 @@ func _run() -> void:
 	var enemy_base := StatCalculator.calc("enemy_001", StatCalculator.enemy_combat_level("enemy_001", 10), str(enemy_elite.get("nature", "")))
 	var elite_base_hp := int(float(enemy_base.get("hp", 0)) * StatCalculator.ELITE_BASE_STAT_MULT)
 	var elite_base_atk := int(float(enemy_base.get("atk", 0)) * StatCalculator.ELITE_BASE_STAT_MULT)
-	assert(int(enemy_elite.get("hp", 0)) == int(float(elite_base_hp) * StatCalculator.ELITE_ENEMY_HP_MULT), "enemy elite HP should apply base bonus then enemy HP multiplier")
-	assert(int(enemy_elite.get("atk", 0)) == int(float(elite_base_atk) * StatCalculator.ELITE_ENEMY_ATK_MULT), "enemy elite ATK should apply base bonus then enemy ATK multiplier")
+	var enemy_hp_before_stage_balance := int(float(elite_base_hp) * StatCalculator.ELITE_ENEMY_HP_MULT)
+	var enemy_atk_before_stage_balance := int(float(elite_base_atk) * StatCalculator.ELITE_ENEMY_ATK_MULT)
+	assert(int(enemy_elite.get("hp", 0)) == int(float(enemy_hp_before_stage_balance) * StatCalculator.STAGE_ENEMY_HP_MULT), "enemy elite HP should include the runtime-only 15 percent increase")
+	assert(int(enemy_elite.get("atk", 0)) == int(float(enemy_atk_before_stage_balance) * StatCalculator.STAGE_ENEMY_ATK_MULT), "enemy elite ATK should include the runtime-only 15 percent reduction")
 
 	print("[EliteTier] OK")
 	quit(0)

@@ -1265,30 +1265,30 @@ const VALID_ELEMENTS: Array[String] = ["fire", "water", "grass", "earth", "wind"
 
 const DEFAULT_BURST_EFFECTS: Dictionary = {
 	"grass": [
-		{"kind": "heal", "ratio": 0.42, "minimumAtkMultiplier": 1.4, "label": "Verdant Mend"}
+		{"kind": "heal", "ratio": 0.42, "minimumAtkMultiplier": 1.4, "label": "翠意治愈"}
 	],
 	"water": [
-		{"kind": "guard", "reduction": 0.50, "turns": 2, "label": "Tide Shell"}
+		{"kind": "guard", "reduction": 0.50, "turns": 2, "label": "潮汐护壳"}
 	],
 	"earth": [
-		{"kind": "guard", "reduction": 0.62, "turns": 2, "label": "Stone Bulwark"}
+		{"kind": "guard", "reduction": 0.62, "turns": 2, "label": "磐石壁垒"}
 	],
 	"light": [
-		{"kind": "convert_gems", "count": 2, "target_element": "light", "label": "Star Calling"}
+		{"kind": "convert_gems", "count": 2, "target_element": "light", "label": "星辰召唤"}
 	],
 	"dark": [
-		{"kind": "damage", "multiplier": 1.65, "pierce": false, "label": "Night Siphon"},
-		{"kind": "lifesteal", "ratio": 0.55, "label": "Siphon Heal"}
+		{"kind": "damage", "multiplier": 1.65, "pierce": false, "label": "暗夜汲取"},
+		{"kind": "lifesteal", "ratio": 0.55, "label": "汲取治愈"}
 	],
 	"thunder": [
-		{"kind": "damage", "multiplier": 1.75, "pierce": false, "label": "Thunder Pin"},
-		{"kind": "status", "status": "stun", "label": "Thunder Pin"}
+		{"kind": "damage", "multiplier": 1.75, "pierce": false, "label": "雷霆钉刺"},
+		{"kind": "status", "status": "stun", "label": "雷霆钉刺"}
 	],
 	"wind": [
-		{"kind": "weaken", "reduction": 0.40, "turns": 2, "label": "Gale Break"}
+		{"kind": "weaken", "reduction": 0.40, "turns": 2, "label": "疾风破势"}
 	],
 	"fire": [
-		{"kind": "damage", "multiplier": 1.55, "pierce": false, "label": "Leader Strike"}
+		{"kind": "damage", "multiplier": 1.55, "pierce": false, "label": "队长一击"}
 	]
 }
 

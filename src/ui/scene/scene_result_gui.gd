@@ -158,21 +158,41 @@ func _sync_capture_success_data(layer: Control) -> void:
 		summary_label.text = _capture_summary_label()
 	var element_label := layer.get_node_or_null("InfoPlaque/ElementLabel") as Label
 	if element_label != null:
-		element_label.text = "性格：" + _capture_nature_label()
+		element_label.text = TranslationServer.translate("性格：") + TranslationServer.translate(_capture_nature_label())
 	var star_label := layer.get_node_or_null("InfoPlaque/StarLabel") as Label
 	if star_label != null:
-		star_label.text = "属性：" + _capture_element_label()
+		star_label.text = TranslationServer.translate("属性：") + TranslationServer.translate(_capture_element_label())
+	_fit_capture_label(name_label, 24, 11)
+	_fit_capture_label(summary_label, 21, 9)
+	_fit_capture_label(element_label, 20, 8)
+	_fit_capture_label(star_label, 20, 8)
+	_fit_capture_label(layer.get_node_or_null("Buttons/ConfirmButton/Text") as Label, 24, 10)
+	_fit_capture_label(layer.get_node_or_null("Buttons/ViewDexButton/Text") as Label, 23, 9)
+
+
+func _fit_capture_label(label: Label, preferred_size: int, minimum_size: int) -> void:
+	if label == null:
+		return
+	var font := label.get_theme_font("font")
+	var available_width := maxf(1.0, label.size.x - 8.0)
+	var display_text := label.text.replace("\n", " ")
+	var fitted := preferred_size
+	while fitted > minimum_size and font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, fitted).x > available_width:
+		fitted -= 1
+	label.add_theme_font_size_override("font_size", fitted)
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
 
 func _capture_monster_name() -> String:
 	var name_text := str(_capture_target.get("name", ""))
 	if name_text.is_empty():
 		name_text = str(_capture_target.get("monsterId", _capture_target.get("id", "新精灵")))
-	return name_text
+	return TranslationServer.translate(name_text)
 
 func _capture_summary_label() -> String:
 	var rarity := clampi(int(_capture_target.get("rarity", 1)), 1, 5)
 	var level := maxi(1, int(_capture_target.get("level", _battle_result.get("enemyLevel", 1))))
-	return "星级：%d星  等级：Lv.%d" % [rarity, level]
+	return TranslationServer.translate("星级：%d星  等级：Lv.%d") % [rarity, level]
 
 func _capture_nature_label() -> String:
 	var nature_id := str(_capture_target.get("nature", ""))
@@ -403,7 +423,7 @@ func _sync_stars() -> void:
 func _sync_battle_info() -> void:
 	var turn_count := int(_battle_result.get("turnCount", 0))
 	var max_turns := int(_battle_result.get("maxTurns", 20))
-	_label("BattleInfo/TurnLabel").text = "回合 %d / %d" % [turn_count, max_turns]
+	_label("BattleInfo/TurnLabel").text = TranslationServer.translate("回合 %d / %d") % [turn_count, max_turns]
 	var enemy_label := _label("BattleInfo/EnemyLabel")
 	enemy_label.text = ""
 	enemy_label.visible = false
@@ -428,12 +448,15 @@ func _capture_lines() -> Array[String]:
 		var target_tags: Array = _capture_result.get("target_tags", [])
 		if target_tags.is_empty():
 			target_tags = CaptureSystemScript.get_target_value_tags(_capture_target)
-		lines.append("目标: %s  %s" % [str(_capture_target.get("name", "")), " / ".join(target_tags.slice(0, 3))])
+		var localized_tags: Array[String] = []
+		for tag in target_tags.slice(0, 3):
+			localized_tags.append(TranslationServer.translate(str(tag)))
+		lines.append(TranslationServer.translate("目标: %s  %s") % [TranslationServer.translate(str(_capture_target.get("name", ""))), " / ".join(localized_tags)])
 	if not _capture_item_used.is_empty():
-		lines.append("消耗: %s" % str(_capture_item_used.get("name", "")))
+		lines.append(TranslationServer.translate("消耗: %s") % TranslationServer.translate(str(_capture_item_used.get("name", ""))))
 	var reason := str(_capture_result.get("reason", ""))
 	if reason.is_empty() and not _capture_window.is_empty():
-		reason = "窗口: %s %d%%" % [str(_capture_window.get("label", "")), int(round(float(_capture_window.get("stability", 0.0)) * 100.0))]
+		reason = TranslationServer.translate("窗口: %s %d%%") % [TranslationServer.translate(str(_capture_window.get("label", ""))), int(round(float(_capture_window.get("stability", 0.0)) * 100.0))]
 	if not reason.is_empty():
 		lines.append(reason)
 	var advice := str(_capture_result.get("advice", ""))
@@ -454,7 +477,7 @@ func _sync_rewards() -> void:
 	var animated_total_exp := roundi(lerpf(float(old_total_exp), float(total_exp), number_progress))
 	var reward_items: Array[Dictionary] = [
 		{"icon": "gold", "amount": "+%d" % animated_gold},
-		{"icon": "exp", "amount": "总槽 %d\n获得 +%d" % [animated_total_exp, animated_gained_exp], "compact": true},
+		{"icon": "exp", "amount": TranslationServer.translate("总槽 %d\n获得 +%d") % [animated_total_exp, animated_gained_exp], "compact": true},
 	]
 	if int(_rewards.get("gems", 0)) > 0:
 		reward_items.append({"icon": "diamond", "amount": "+%d" % animated_gems})
@@ -486,7 +509,7 @@ func _sync_exp_panel() -> void:
 	var added := int(shared.get("added", _rewards.get("exp", 0)))
 	var current := int(shared.get("current", 0))
 	var capacity := int(shared.get("capacity", 0))
-	var desc := "本次 +%d · 经验槽 %d/%d" % [added, current, capacity]
+	var desc := TranslationServer.translate("本次 +%d · 经验槽 %d/%d") % [added, current, capacity]
 	if int(shared.get("overflow", 0)) > 0:
 		desc += "（已满）"
 	_label("ExpPanel/Desc").text = desc

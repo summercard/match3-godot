@@ -3,7 +3,7 @@
 class_name SceneRanch
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 signal exp_collected(total_exp: int)
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
@@ -390,7 +390,7 @@ func _can_open_feature(feature_id: String, show_feedback: bool = true) -> bool:
 		return true
 	if show_feedback:
 		var state := _feature_unlock_state(feature_id)
-		_show_status("%s将在玩家达到 Lv.%d 后解锁" % [str(state.get("label", "该功能")), int(state.get("required_level", 1))])
+		_show_status(TranslationServer.translate("%s将在玩家达到 Lv.%d 后解锁") % [TranslationServer.translate(str(state.get("label", "该功能"))), int(state.get("required_level", 1))])
 	return false
 
 func _toggle_care_focus_selected() -> void:
@@ -411,7 +411,7 @@ func _toggle_care_focus_selected() -> void:
 		_care_focus_instance_id = instance_id
 		var care := _get_care_state(instance_id)
 		var label := str(care.get("label", ""))
-		_show_status("专注培养已设定%s" % ("：" + label if not label.is_empty() else ""))
+		_show_status(TranslationServer.translate("专注培养已设定%s") % ("：" + label if not label.is_empty() else ""))
 	_load_data()
 	_refresh_ranch_view()
 
@@ -469,7 +469,7 @@ func _try_social_action() -> void:
 		_show_status("社交领取失败")
 		return
 	if place.get("started_at", null) != null:
-		_show_status("社交进行中 %d%%" % int(SocialRulesScript.progress(place) * 100.0))
+		_show_status(TranslationServer.translate("社交进行中 %d%%") % int(SocialRulesScript.progress(place) * 100.0))
 		return
 	if not SocialRulesScript.can_start(place):
 		_show_status("需要放入两只精灵")
@@ -498,7 +498,7 @@ func _cycle_social_place() -> void:
 		place["last_result"] = {}
 		_social_places[0] = place
 	var place_config := SocialRulesScript.place_config_for(_current_social_place())
-	_show_status("切换到%s" % str(place_config.get("name", "社交场所")))
+	_show_status(TranslationServer.translate("切换到%s") % TranslationServer.translate(str(place_config.get("name", "社交场所"))))
 	queue_redraw()
 
 func _get_instance_id(value: Variant) -> String:
@@ -758,7 +758,7 @@ func _collect_slot(slot_index: int) -> void:
 	_refresh_ranch_view()
 	exp_collected.emit(added)
 	_play_collect_feedback(slot_index)
-	_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
+	_show_status("经验槽已满" if added <= 0 else TranslationServer.translate("经验槽 +%d%s") % [added, "（已达上限）" if overflow > 0 else ""])
 
 func _on_collect_pressed() -> void:
 	var total_collected := 0
@@ -796,7 +796,7 @@ func _on_collect_pressed() -> void:
 		exp_collected.emit(added)
 		for slot: Dictionary in collectable_slots:
 			_play_collect_feedback(_slots_data.find(slot))
-		_show_status("经验槽已满" if added <= 0 else "经验槽 +%d%s" % [added, "（已达上限）" if overflow > 0 else ""])
+		_show_status("经验槽已满" if added <= 0 else TranslationServer.translate("经验槽 +%d%s") % [added, "（已达上限）" if overflow > 0 else ""])
 	else:
 		_show_status("暂无可收获收益")
 
@@ -809,13 +809,13 @@ func _on_evolve_pressed() -> void:
 		_show_status("当前形态无法进化")
 		return
 	if not bool(info.get("level_ok", false)):
-		_show_status("需要 Lv.%d" % int(info.get("required_level", 1)))
+		_show_status(TranslationServer.translate("需要 Lv.%d") % int(info.get("required_level", 1)))
 		return
 	if not bool(info.get("item_ok", false)):
-		_show_status("%s 不足" % str(info.get("item_name", "进化道具")))
+		_show_status(TranslationServer.translate("%s 不足") % TranslationServer.translate(str(info.get("item_name", "进化道具"))))
 		return
 	if not bool(info.get("gold_ok", false)):
-		_show_status("金币不足，需要 %d" % int(info.get("required_gold", 0)))
+		_show_status(TranslationServer.translate("金币不足，需要 %d") % int(info.get("required_gold", 0)))
 		return
 	var instance_id := str(info.get("instance_id", ""))
 	if _storage == null or not _storage.has_method("evolve_instance"):
@@ -823,7 +823,7 @@ func _on_evolve_pressed() -> void:
 		return
 	var result: Dictionary = _storage.evolve_instance(instance_id)
 	if not bool(result.get("ok", false)):
-		_show_status("进化失败：%s" % str(result.get("reason", "unknown")))
+		_show_status(TranslationServer.translate("进化失败：%s") % str(result.get("reason", "unknown")))
 		return
 	if _storage.has_method("add_achievement_progress"):
 		_storage.add_achievement_progress("evolveCount", 1)
@@ -831,7 +831,7 @@ func _on_evolve_pressed() -> void:
 	var new_data := MonsterDb.get_monster(new_id)
 	var report: Dictionary = result.get("evolutionReport", {})
 	var play_text := str(report.get("play_upgrade", ""))
-	_show_status("进化成功：%s %s" % [str(new_data.get("name", new_id)), play_text])
+	_show_status(TranslationServer.translate("进化成功：%s %s") % [TranslationServer.translate(str(new_data.get("name", new_id))), TranslationServer.translate(play_text)])
 	_load_data()
 	_refresh_ranch_view()
 
@@ -851,9 +851,9 @@ func _on_upgrade_pressed() -> Dictionary:
 			_: _show_status("升级失败")
 		return result
 	if bool(result.get("leveledUp", false)):
-		_show_status("升级成功：Lv.%d" % int(result.get("newLevel", 1)))
+		_show_status(TranslationServer.translate("升级成功：Lv.%d") % int(result.get("newLevel", 1)))
 	else:
-		_show_status("投入 %d 经验" % int(result.get("consumed", 0)))
+		_show_status(TranslationServer.translate("投入 %d 经验") % int(result.get("consumed", 0)))
 	_refresh_ranch_view()
 	return result
 
@@ -953,7 +953,7 @@ func _draw_slot(index: int, rect: Rect2) -> void:
 		_draw_texture_fit(_tex(RANCH_ASSETS["status_ribbon"]), Rect2(rect.position.x + 11.0, rect.position.y + 93.0, rect.size.x - 22.0, 18.0))
 		var placement_text := _format_elapsed_short(slot.get("placed_at", null))
 		if not care_label.is_empty():
-			placement_text = "专注 " + placement_text.trim_prefix("放置 ")
+			placement_text = TranslationServer.translate("专注 ") + placement_text.trim_prefix("放置 ")
 		var timer_color := Color(0.55, 1.0, 0.42) if int(_idle_exp_map.get(id, 0)) > 0 else Color(0.70, 0.86, 1.0)
 		_draw_text(placement_text, rect.get_center().x, rect.position.y + 106.0, timer_color, 9.5, rect.size.x - 24.0)
 	else:
@@ -1023,9 +1023,13 @@ func _draw_classroom_detail() -> void:
 	_draw_monster_portrait(instance_id, Rect2(28.0, 112.0, 91.0, 85.0))
 	_draw_text(str(monster.get("name", monster_id)), 222.0, 130.0, C["text"], 16.0, 130.0)
 	_draw_text(_owned_no_label(instance_id), 302.0, 130.0, Color(0.43, 0.24, 0.07), 10.0, 58.0)
-	_draw_text("Lv.%d · %s · %s" % [int(instance.get("level", 1)), _get_nature_name(str(instance.get("nature", ""))), ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", "")))], 222.0, 151.0, C["text_muted"], 10.5, 132.0)
+	_draw_text("Lv.%d · %s · %s" % [
+		int(instance.get("level", 1)),
+		TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))),
+		TranslationServer.translate(str(ELEMENT_LABELS.get(str(monster.get("element", "")), str(monster.get("element", ""))))),
+	], 222.0, 151.0, C["text_muted"], 10.5, 132.0)
 	_draw_text("HP %d   ATK %d   DEF %d" % [int(stats.get("hp", 0)), int(stats.get("atk", 0)), int(stats.get("def", 0))], 222.0, 171.0, Color(0.82, 0.92, 1.0), 10.0, 132.0)
-	_draw_text("进化目标：%s" % target_name, 222.0, 193.0, C["gold"] if bool(info.get("has_evolution", false)) else C["text_muted"], 11.5, 132.0)
+	_draw_text(TranslationServer.translate("进化目标：%s") % target_name, 222.0, 193.0, C["gold"] if bool(info.get("has_evolution", false)) else C["text_muted"], 11.5, 132.0)
 	_draw_text(str(info.get("condition_text", "无法进化")), 222.0, 211.0, C["text_muted"], 9.5, 132.0)
 	_draw_text(str(info.get("play_upgrade_text", "玩法升级: 无")), 126.0, 250.0, Color(0.76, 0.95, 1.0), 9.0, 178.0)
 	_draw_code_button(CLASS_EVOLVE_RECT, "进化", bool(info.get("can_evolve", false)))
@@ -1054,7 +1058,7 @@ func _draw_classroom_card(instance_id: String, rect: Rect2) -> void:
 	var elem: String = ELEMENT_LABELS.get(str(monster.get("element", "")), "")
 	_draw_owned_no_badge(instance_id, rect)
 	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 77.0, C["text"], 10.5, rect.size.x - 20.0)
-	_draw_text("Lv.%d · %s" % [int(instance.get("level", 1)), elem], rect.get_center().x, rect.position.y + 92.0, C["gold"], 9.0, rect.size.x - 20.0)
+	_draw_text("Lv.%d · %s" % [int(instance.get("level", 1)), TranslationServer.translate(elem)], rect.get_center().x, rect.position.y + 92.0, C["gold"], 9.0, rect.size.x - 20.0)
 	_draw_text(nature_short, rect.get_center().x, rect.position.y + 105.0, C["text_muted"], 8.0, rect.size.x - 20.0)
 
 	if _is_instance_in_team(instance_id):
@@ -1083,7 +1087,7 @@ func _draw_social_place() -> void:
 	var place_config := SocialRulesScript.place_config_for(place)
 	_draw_texture_fit(_tex(RANCH_ASSETS["social_place"]), SOCIAL_PLACE_RECT)
 	_draw_text(str(place_config.get("name", "社交场所")), 106.0, SOCIAL_PLACE_RECT.position.y + 32.0, C["gold"], 14.0, 116.0)
-	_draw_text("用时%s" % SocialRulesScript.duration_label_for_place(place), 106.0, SOCIAL_PLACE_RECT.position.y + 47.0, C["text_muted"], 9.0, 110.0)
+	_draw_text(TranslationServer.translate("用时%s") % SocialRulesScript.duration_label_for_place(place), 106.0, SOCIAL_PLACE_RECT.position.y + 47.0, C["text_muted"], 9.0, 110.0)
 	_draw_code_button(SOCIAL_PLACE_SWITCH_RECT, "换场", place.get("started_at", null) == null)
 	_draw_social_slot("slot_a", SOCIAL_SLOT_A_RECT, place)
 	_draw_social_slot("slot_b", SOCIAL_SLOT_B_RECT, place)
@@ -1107,7 +1111,10 @@ func _draw_social_slot(slot_key: String, rect: Rect2, place: Dictionary) -> void
 	_draw_monster_portrait(instance_id, Rect2(rect.position.x + 20.0, rect.position.y + 6.0, rect.size.x - 40.0, 50.0))
 	_draw_owned_no_badge(instance_id, rect)
 	_draw_text(str(monster.get("name", "")), rect.get_center().x, rect.position.y + 73.0, C["text"], 9.0, rect.size.x - 12.0)
-	_draw_text("%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))], rect.get_center().x, rect.position.y + 86.0, C["text_muted"], 7.5, rect.size.x - 12.0)
+	_draw_text("%s %s" % [
+		TranslationServer.translate(_gender_label(instance)),
+		TranslationServer.translate(_get_nature_name(str(instance.get("nature", "")))),
+	], rect.get_center().x, rect.position.y + 86.0, C["text_muted"], 7.5, rect.size.x - 12.0)
 
 func _draw_social_list() -> void:
 	_draw_texture_fit(_tex(RANCH_ASSETS["care_roster_panel"]), CLASS_LIST_RECT)
@@ -1138,7 +1145,7 @@ func _draw_social_relationship_detail(place: Dictionary) -> void:
 	if detail.is_empty():
 		_draw_text("放入两只精灵后显示学习概率", SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 17.0, C["text_muted"], 10.0, SOCIAL_RELATION_RECT.size.x - 12.0)
 		return
-	var title := "性格学习概率 %d%%" % int(detail.get("successPercent", 0))
+	var title := TranslationServer.translate("性格学习概率 %d%%") % int(detail.get("successPercent", 0))
 	_draw_text(title, SOCIAL_RELATION_RECT.get_center().x, SOCIAL_RELATION_RECT.position.y + 17.0, C["gold"], 10.0, SOCIAL_RELATION_RECT.size.x - 14.0)
 
 func _draw_social_result_popup() -> void:
@@ -1147,7 +1154,7 @@ func _draw_social_result_popup() -> void:
 	var accent := C["gold"]
 	_draw_texture_contain(_tex(RANCH_ASSETS["social_result"]), SOCIAL_RESULT_POPUP_RECT)
 	_draw_text(_social_result_title(result), DESIGN_W / 2.0, 178.0, accent, 20.0, 260.0)
-	_draw_text("本次学习概率 %d%%" % int(result.get("success_percent", 0)), DESIGN_W / 2.0, 206.0, C["text"], 10.0, 285.0)
+	_draw_text(TranslationServer.translate("本次学习概率 %d%%") % int(result.get("success_percent", 0)), DESIGN_W / 2.0, 206.0, C["text"], 10.0, 285.0)
 	_draw_text(str(result.get("place_name", "社交场所")), DESIGN_W / 2.0, 241.0, Color(0.76, 0.95, 1.0), 15.0, 260.0)
 	_draw_text(str(result.get("rule_text", "")), DESIGN_W / 2.0, 266.0, C["text_muted"], 10.2, 276.0)
 	var lines := _social_result_major_lines(result)
@@ -1323,13 +1330,13 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 	var gold_ok := player_gold >= required_gold
 	var condition := "无法进化"
 	if has_evolution:
-		condition = "Lv.%d / %s x%d / %d金币" % [required_level, item_name, required_item_count, required_gold]
+		condition = TranslationServer.translate("Lv.%d / %s x%d / %d金币") % [required_level, item_name, required_item_count, required_gold]
 		if level_ok and not item_ok:
-			condition = "%s不足(%d/%d)" % [item_name, item_count, required_item_count]
+			condition = TranslationServer.translate("%s不足(%d/%d)") % [item_name, item_count, required_item_count]
 		elif level_ok and item_ok and not gold_ok:
-			condition = "金币不足(%d/%d)" % [player_gold, required_gold]
+			condition = TranslationServer.translate("金币不足(%d/%d)") % [player_gold, required_gold]
 		elif not level_ok and item_ok:
-			condition = "等级不足(%d/%d)" % [level, required_level]
+			condition = TranslationServer.translate("等级不足(%d/%d)") % [level, required_level]
 		elif level_ok and item_ok and gold_ok:
 			condition = "条件满足"
 	return {
@@ -1350,7 +1357,7 @@ func _get_evolution_info_for_instance(instance_id: String) -> Dictionary:
 		"can_evolve": has_evolution and level_ok and item_ok and gold_ok,
 		"condition_text": condition,
 		"stat_summary": str(preview.get("stat_summary", "")),
-		"play_upgrade_text": "玩法: %s" % str(preview.get("play_upgrade", "稳定成长")) if has_evolution else "玩法: 已稳定",
+		"play_upgrade_text": TranslationServer.translate("玩法: %s") % str(preview.get("play_upgrade", "稳定成长")) if has_evolution else "玩法: 已稳定",
 		"social_text": str(preview.get("social_text", "社交启发: 无"))
 	}
 
@@ -1449,7 +1456,7 @@ func _social_preview_text(place: Dictionary) -> String:
 	if a.is_empty() or b.is_empty():
 		return "社交对象异常"
 	var preview := SocialRulesScript.preview(a, b, place)
-	return "学习概率 %d%% · %s" % [int(preview.get("success_percent", 0)), str(preview.get("rule_text", ""))]
+	return TranslationServer.translate("学习概率 %d%% · %s") % [int(preview.get("success_percent", 0)), TranslationServer.translate(str(preview.get("rule_text", "")))]
 
 func _social_event_text(place: Dictionary) -> String:
 	var a_id := str(place.get("slot_a", ""))
@@ -1624,7 +1631,7 @@ func _format_elapsed(placed_at: Variant) -> String:
 
 func _format_elapsed_short(placed_at: Variant) -> String:
 	var time := _format_elapsed(placed_at)
-	return "放置 " + time.substr(0, 5)
+	return TranslationServer.translate("放置 ") + time.substr(0, 5)
 
 func _format_count(value: Variant) -> String:
 	var num := float(value)
@@ -1732,6 +1739,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 	draw_texture_rect_region(tex, _scale_rect(rect), Rect2(source_pos, source_size), Color(1.0, 1.0, 1.0, opacity))
 
 func _draw_text(text: String, x: float, y: float, color: Color, font_size: float, max_w: float = 200.0) -> void:
+	text = TranslationServer.translate(text)
 	var font := PROJECT_ROUND_FONT
 	var sx := _sx()
 	var sy := _sy()

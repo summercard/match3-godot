@@ -3,7 +3,7 @@
 class_name SceneShop
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const ItemDB = preload("res://src/data/item_db.gd")
 
 signal purchase_completed(item_id: String, quantity: int)
@@ -323,7 +323,7 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 		_show_toast("今日购买次数已用完", "warning")
 		return
 	if quantity > remaining:
-		_show_toast("今日最多还能购买 %d 个" % remaining, "warning")
+		_show_toast(TranslationServer.translate("今日最多还能购买 %d 个") % remaining, "warning")
 		return
 	var player: Dictionary = _load_player_data()
 	var total_price: float = _get_item_price(item_id) * quantity
@@ -382,7 +382,7 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 	if not bool(tx.get("ok", false)):
 		var error := str(tx.get("error", "save_failed"))
 		if error == "daily_limit_changed":
-			_show_toast("今日最多还能购买 %d 个" % int(tx.get("remaining", 0)), "warning")
+			_show_toast(TranslationServer.translate("今日最多还能购买 %d 个") % int(tx.get("remaining", 0)), "warning")
 		elif error == "daily_limit_empty":
 			_show_toast("今日购买次数已用完", "warning")
 		elif error == "not_enough_gold":
@@ -397,7 +397,7 @@ func _confirm_purchase(item_id: String, quantity: int = 1) -> void:
 	player_data["gems"] = updated_player.get("gems", player.get("gems", 0))
 
 	emit_signal("purchase_completed", item_id, quantity)
-	_show_toast("获得 %s x%d" % [str(item_data.get("name", "")), quantity], "success")
+	_show_toast(TranslationServer.translate("获得 %s x%d") % [TranslationServer.translate(str(item_data.get("name", ""))), quantity], "success")
 	# print("[Shop] 购买成功: %s x%d" % [str(item_data.get("name", "")), quantity])
 
 
@@ -480,7 +480,7 @@ func _draw_tabs() -> void:
 		var active: bool = str(tab["id"]) == _active_tab
 		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
 		var color: Color = C["gold"] if active else C["muted"]
-		_draw_text_shadow("%s  %s" % [tab["icon"], tab["label"]], rect.get_center() + Vector2(0, 8), color, 17.0, true, rect.size.x)
+		_draw_text_shadow("%s  %s" % [tab["icon"], TranslationServer.translate(str(tab["label"]))], rect.get_center() + Vector2(0, 8), color, 17.0, true, rect.size.x)
 
 
 func _get_tab_rect(tab_id: String) -> Rect2:
@@ -577,7 +577,7 @@ func _draw_popup() -> void:
 	var item_id := str(popup.get("id", ""))
 	_draw_texture_fit(_get_item_texture(item_id), Rect2(rect.position.x + 31.0, rect.position.y + 59.0, 72.0, 72.0))
 	_draw_text_left(data.get("name", ""), Vector2(rect.position.x + 122.0, rect.position.y + 82.0), C["white"], 18.0, true, 150.0)
-	_draw_text_left("拥有：%d" % _get_item_count(item_id), Vector2(rect.position.x + 122.0, rect.position.y + 107.0), C["muted"], 13.0, false, 150.0)
+	_draw_text_left(TranslationServer.translate("拥有：%d") % _get_item_count(item_id), Vector2(rect.position.x + 122.0, rect.position.y + 107.0), C["muted"], 13.0, false, 150.0)
 	_draw_quantity_controls(rect)
 	_draw_total_price(rect)
 	_draw_texture_fit(_tex("buy_button_disabled"), _popup_cancel_rect())
@@ -641,7 +641,7 @@ func _popup_confirm_rect() -> Rect2:
 func _get_limit_text(shop_item: Dictionary) -> String:
 	var item_id := str(shop_item.get("id", ""))
 	var limit := _get_daily_limit(item_id)
-	return "每日限购 %d/%d" % [_get_daily_remaining(item_id), limit]
+	return TranslationServer.translate("每日限购 %d/%d") % [_get_daily_remaining(item_id), limit]
 
 
 func _default_daily_limit(item: Dictionary) -> int:
@@ -734,6 +734,7 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2) -> void:
 
 
 func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	var left := center.x - width / 2.0
 	draw_string(PROJECT_ROUND_FONT, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
@@ -741,6 +742,7 @@ func _draw_text_shadow(text: String, center: Vector2, color: Color, font_size: f
 
 
 func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, bold: bool = false, width: float = 160.0) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	draw_string(PROJECT_ROUND_FONT, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
 	draw_string(PROJECT_ROUND_FONT, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)

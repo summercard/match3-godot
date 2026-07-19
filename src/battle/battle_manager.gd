@@ -393,7 +393,7 @@ func _calc_and_apply_element_synergy() -> void:
 			"element": affinity,
 			"boardAffinity": affinity,
 			"count": count,
-			"label": "%s×%d %s共鸣 %s" % [affinity_emoji, count, affinity_name, pct_label]
+			"label": TranslationServer.translate("%s×%d %s共鸣 %s") % [affinity_emoji, count, affinity_name, pct_label]
 		})
 
 		for m in player_team:
@@ -1300,11 +1300,14 @@ func enemy_action() -> Dictionary:
 		var synergy_def_mult = get_synergy_def_mult(target_affinity)
 
 		# 委托给 DamageCalculator
+		var attack_element := str(enemy.get("element", ""))
+		var target_element := str(target.get("element", ""))
+		var element_multiplier := _damage_calc.get_element_multiplier(attack_element, target_element)
 		var damage = _damage_calc.calc_enemy_damage(
 			enemy.get("atk", 10),
-			enemy.get("element", ""),
+			attack_element,
 			target.get("def", 0),
-			target.get("element", ""),
+			target_element,
 			freeze_mult * tempo_mult,
 			leader_def_boost,
 			synergy_def_mult
@@ -1336,7 +1339,13 @@ func enemy_action() -> Dictionary:
 			"targetIndex": target_idx,
 			"target_emoji": target.get("emoji", ""),
 			"damage": damage,
-			"element": enemy.get("element", ""),
+			"element": attack_element,
+			"element_multiplier": element_multiplier,
+			"elementMultiplier": element_multiplier,
+			"is_effective": element_multiplier > 1.0,
+			"isEffective": element_multiplier > 1.0,
+			"is_weak": element_multiplier < 1.0,
+			"isWeak": element_multiplier < 1.0,
 			"target_died": target.get("hp", 0) <= 0,
 			"is_charged": damage_multiplier > 1.0,
 			"charge_multiplier": damage_multiplier,

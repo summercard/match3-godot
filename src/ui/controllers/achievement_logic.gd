@@ -3,7 +3,7 @@
 class_name SceneAchievement
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const AchievementDB = preload("res://src/data/achievement_db.gd")
 
 const DESIGN_W := 375.0
@@ -218,9 +218,9 @@ func _on_tap(point: Vector2) -> void:
 	if ach.get("unlocked", false) and not ach.get("claimed", false) and _get_claim_rect(card_rect).has_point(point):
 		_claim_achievement(ach)
 	elif ach.get("unlocked", false):
-		_show_toast("%s 已完成" % ach.get("name", "成就"))
+		_show_toast(TranslationServer.translate("%s 已完成") % ach.get("name", "成就"))
 	else:
-		_show_toast("目标进度 %d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
+		_show_toast(TranslationServer.translate("目标进度 %d/%d") % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
 
 
 func _scroll_by_delta(delta_y: float) -> void:
@@ -244,7 +244,7 @@ func _claim_achievement(ach: Dictionary) -> void:
 		_storage.save_achievements(save_data)
 	_all_achievements = _build_achievement_view_models(_storage.load_achievements() if _storage and _storage.has_method("load_achievements") else {})
 	_filter_by_category(_current_category)
-	_show_toast("领取成功 +%d 金币" % int(reward.get("gold", 0)))
+	_show_toast(TranslationServer.translate("领取成功 +%d 金币") % int(reward.get("gold", 0)))
 
 
 func _get_max_scroll_offset() -> float:
@@ -507,6 +507,7 @@ func _draw_background_region(rect: Rect2) -> void:
 
 
 func _draw_centered_text(text: String, center: Vector2, color: Color, font_size: float, width: float) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	var left := center.x - width / 2.0
 	draw_string(PROJECT_ROUND_FONT, Vector2(left + 1.0, center.y + 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, width, size_i, C["shadow"])
@@ -514,6 +515,7 @@ func _draw_centered_text(text: String, center: Vector2, color: Color, font_size:
 
 
 func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float, width: float) -> void:
+	text = TranslationServer.translate(text)
 	var size_i := int(font_size)
 	draw_string(PROJECT_ROUND_FONT, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
 	draw_string(PROJECT_ROUND_FONT, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)

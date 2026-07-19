@@ -136,16 +136,16 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 		var monster_id := str(current.get("monsterId", ""))
 		var monster: Dictionary = MonsterDb.get_monster(monster_id)
 		var display_name := str(current.get("name", monster.get("name", monster_id)))
-		_adventurer_name.text = "%s  ·  Lv.%d" % [display_name, int(current.get("level", 1))]
+		_adventurer_name.text = "%s  ·  Lv.%d" % [TranslationServer.translate(display_name), int(current.get("level", 1))]
 		var portrait_path := MonsterArtDBScript.get_art_path(monster_id, "ranch")
 		_adventurer_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
 		_adventurer_portrait.visible = _adventurer_portrait.texture != null
 	var daily_count := int(state.get("daily_send_count", 0))
-	_blessing_status.text = "图鉴星星：%d" % MailboxRulesScript.collection_star_total(state)
+	_blessing_status.text = TranslationServer.translate("图鉴星星：%d") % MailboxRulesScript.collection_star_total(state)
 	var remaining := maxi(0, MailContentDBScript.DAILY_SEND_LIMIT - daily_count)
 	_send_button.disabled = current.is_empty() or remaining <= 0 or _sending
-	_send_button.tooltip_text = "今日已送出上限" if remaining <= 0 else "今日还可送出 %d 次" % remaining
-	_daily_remaining.text = "今日还可送出 %d 次" % remaining
+	_send_button.tooltip_text = "今日已送出上限" if remaining <= 0 else TranslationServer.translate("今日还可送出 %d 次") % remaining
+	_daily_remaining.text = TranslationServer.translate("今日还可送出 %d 次") % remaining
 	var has_pending := not (state.get("pending_blessings", []) as Array).is_empty()
 	_journey_hint.text = "祝福已乘着星光启程。\n\n每日独立的陌生来信会在\n合适的时候悄悄抵达邮箱。" if has_pending else "送出后，星光会穿过云层。\n\n陌生旅人的祝福每天都会\n在不同时间抵达邮箱。"
 
@@ -175,7 +175,10 @@ func _refresh_inbox(state: Dictionary) -> void:
 		var unread_mail := mail.get("read_at", null) == null
 		read_status.text = "未读" if unread_mail else "已读"
 		read_status.add_theme_color_override("font_color", Color(0.90, 0.36, 0.10, 1.0) if unread_mail else Color(0.33, 0.51, 0.68, 1.0))
-		button.text = "%s\n%s" % [str(mail.get("title", "新邮件")), str(mail.get("sender_name", "远方的冒险者"))]
+		button.text = "%s\n%s" % [
+			TranslationServer.translate(str(mail.get("title", "新邮件"))),
+			TranslationServer.translate(str(mail.get("sender_name", "远方的冒险者"))),
+		]
 	if _selected_mail_id.is_empty() and not inbox.is_empty():
 		_selected_mail_id = str((inbox[0] as Dictionary).get("id", ""))
 	_show_selected_mail(inbox)
@@ -241,7 +244,7 @@ func _claim_selected_mail() -> void:
 		return
 	var result: Dictionary = _service.claim_mail(_selected_mail_id)
 	if bool(result.get("ok", false)):
-		_set_mail_detail(_mail_detail.text + "\n\n附件已收入背包。")
+		_set_mail_detail(_mail_detail.text + TranslationServer.translate("\n\n附件已收入背包。"))
 	_refresh()
 
 
@@ -250,7 +253,7 @@ func _delete_selected_mail() -> void:
 		return
 	var result: Dictionary = _service.delete_mail(_selected_mail_id)
 	if not bool(result.get("ok", false)):
-		_set_mail_detail(_mail_detail.text + "\n\n请先领取附件后再删除。")
+		_set_mail_detail(_mail_detail.text + TranslationServer.translate("\n\n请先领取附件后再删除。"))
 		return
 	_selected_mail_id = ""
 	_refresh()
@@ -382,7 +385,7 @@ func _attachment_label(attachments: Array) -> String:
 			continue
 		var data: Dictionary = raw
 		match str(data.get("kind", "")):
-			"gold": labels.append("金币 ×%d" % int(data.get("amount", 0)))
-			"shared_exp": labels.append("共享经验 ×%d" % int(data.get("amount", 0)))
+			"gold": labels.append(TranslationServer.translate("金币 ×%d") % int(data.get("amount", 0)))
+			"shared_exp": labels.append(TranslationServer.translate("共享经验 ×%d") % int(data.get("amount", 0)))
 			"item": labels.append("%s ×%d" % [str(data.get("item_id", "道具")), int(data.get("count", 1))])
-	return "附件：" + " / ".join(labels)
+	return TranslationServer.translate("附件：") + " / ".join(labels)

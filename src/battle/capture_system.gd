@@ -189,7 +189,7 @@ static func get_capture_feedback(probability: float, captured: bool, taming_wind
 	var window_label := str(taming_window.get("label", ""))
 	var window_line := ""
 	if not window_label.is_empty():
-		window_line = "\n窗口: %s（稳定度 %d%%）" % [window_label, int(round(float(taming_window.get("stability", 0.0)) * 100.0))]
+		window_line = TranslationServer.translate("\n窗口: %s（稳定度 %d%%）") % [window_label, int(round(float(taming_window.get("stability", 0.0)) * 100.0))]
 	var reason := _build_capture_reason(probability, captured, taming_window, options)
 	var advice := _build_capture_advice(probability, captured, taming_window, options)
 	var target: Dictionary = options.get("target", {})
@@ -197,7 +197,7 @@ static func get_capture_feedback(probability: float, captured: bool, taming_wind
 	if captured:
 		return {
 			"title": "✨ 收服成功！",
-			"desc": "收服成功（概率: %d%%）%s\n%s" % [percent, window_line, reason],
+			"desc": TranslationServer.translate("收服成功（概率: %d%%）%s\n%s") % [percent, window_line, reason],
 			"reason": reason,
 			"advice": advice,
 			"probability": probability,
@@ -206,7 +206,7 @@ static func get_capture_feedback(probability: float, captured: bool, taming_wind
 	else:
 		return {
 			"title": "💨 收服失败...",
-			"desc": "收服失败（概率: %d%%）%s\n%s" % [percent, window_line, reason],
+			"desc": TranslationServer.translate("收服失败（概率: %d%%）%s\n%s") % [percent, window_line, reason],
 			"reason": reason,
 			"advice": advice,
 			"probability": probability,
@@ -230,7 +230,7 @@ static func get_capture_skip_feedback(reason_id: String, options: Dictionary = {
 		reason = "未选择捕捉球，自动捕捉不会空手触发。"
 		advice = "在背包装备捕捉球，或在战斗底部道具栏选择本场使用的捕捉球。"
 	elif reason_id == "item_empty":
-		reason = "%s数量不足，自动捕捉已跳过。" % item_name
+		reason = TranslationServer.translate("%s数量不足，自动捕捉已跳过。") % item_name
 		advice = "通过掉落、商店或奖励补充捕捉球后再开启自动捕捉。"
 	elif reason_id == "invalid_item":
 		reason = "当前选择的道具不是捕捉球，本场不进行捕捉判定。"
@@ -277,7 +277,7 @@ static func get_target_value_tags(monster: Dictionary) -> Array[String]:
 	if affinity.is_empty():
 		affinity = str(monster.get("element", ""))
 	if not affinity.is_empty():
-		tags.append("%s能量" % _element_label(affinity))
+		tags.append(TranslationServer.translate("%s能量") % _element_label(affinity))
 	if bool(monster.get("isElite", false)):
 		tags.append("精英稀有")
 	var skill: Dictionary = monster.get("skill", {})
@@ -336,7 +336,7 @@ static func _skill_role_label(skill: Dictionary) -> String:
 	if skill_type == "tempo":
 		return "控场技"
 	var skill_name := str(skill.get("name", ""))
-	return "技能:%s" % skill_name if not skill_name.is_empty() else ""
+	return TranslationServer.translate("技能:%s") % skill_name if not skill_name.is_empty() else ""
 
 
 static func _element_label(element: String) -> String:

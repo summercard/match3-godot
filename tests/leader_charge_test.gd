@@ -19,6 +19,7 @@ func _run() -> void:
 	_test_dead_member_does_not_block_ready()
 	_test_dead_leader_promotes_next_leader_skill()
 	_test_dead_same_name_member_does_not_attack_after_match()
+	await process_frame
 	_finish()
 
 
@@ -32,7 +33,7 @@ func _test_fire_leader_burst_damage() -> void:
 	_expect(int(battle.leader_charge_points.get(battle.player_team[0].get("id", ""), -1)) == 0, "only the releasing leader charge should reset after burst")
 	for index in range(1, battle.player_team.size()):
 		_expect(int(battle.leader_charge_points.get(battle.player_team[index].get("id", ""), 0)) == BattleManager.LEADER_CHARGE_MAX, "other full leaders should keep their charges after an earlier burst")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_grass_leader_burst_heal() -> void:
@@ -47,7 +48,7 @@ func _test_grass_leader_burst_heal() -> void:
 	_expect(str(burst.get("element", "")) == "grass", "grass leader should produce grass burst")
 	_expect(healed, "grass burst should include a heal effect")
 	_expect(int(battle.player_team[1].get("hp", 0)) > before_hp, "grass burst should heal the lowest ally")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_light_leader_burst_converts_gems() -> void:
@@ -59,7 +60,7 @@ func _test_light_leader_burst_converts_gems() -> void:
 			converts = true
 	_expect(str(burst.get("element", "")) == "light", "light leader should produce light burst")
 	_expect(converts, "monster_035 should convert eight outer-two-ring gems into light gems")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_wind_leader_burst_weakens_two_turns() -> void:
@@ -72,7 +73,7 @@ func _test_wind_leader_burst_weakens_two_turns() -> void:
 	_expect(str(burst.get("element", "")) == "wind", "wind leader should produce wind burst")
 	_expect(weakens_two_turns, "wind burst should reduce attack for 2 turns")
 	_expect(int(battle.enemy_tempo_mods.get(0, {}).get("turns", 0)) == 2, "wind burst should store 2 weaken turns")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_dark_leader_burst_lifesteals() -> void:
@@ -87,7 +88,7 @@ func _test_dark_leader_burst_lifesteals() -> void:
 	_expect(str(burst.get("element", "")) == "dark", "dark leader should produce dark burst")
 	_expect(lifesteals, "dark burst should heal from dealt damage")
 	_expect(int(battle.player_team[1].get("hp", 0)) > before_hp, "dark lifesteal should heal the lowest ally")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_independent_charges_release_in_queue_order() -> void:
@@ -105,7 +106,7 @@ func _test_independent_charges_release_in_queue_order() -> void:
 	_expect(battle.is_leader_burst_ready(), "a second full leader should remain ready after the first release")
 	var second_burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
 	_expect(str(second_burst.get("leader_id", "")) == second_id, "the queue should release the next filled leader without refilling")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_dead_member_does_not_block_ready() -> void:
@@ -117,7 +118,7 @@ func _test_dead_member_does_not_block_ready() -> void:
 	_expect(battle.is_leader_burst_ready(), "dead team members should not block ready leader burst")
 	var burst: Dictionary = battle.consume_ready_leader_burst().get("leader_skill_log", {})
 	_expect(str(burst.get("leader_id", "")) == str(battle.player_team[0].get("id", "")), "living leftmost leader should release when a later member is dead")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_dead_leader_promotes_next_leader_skill() -> void:
@@ -132,7 +133,7 @@ func _test_dead_leader_promotes_next_leader_skill() -> void:
 	_expect(int(burst.get("leader_index", -1)) == 1, "promoted leader index should be recorded in burst log")
 	_expect(str(burst.get("leader_id", "")) == str(battle.player_team[1].get("id", "")), "promoted leader should release their own leader skill")
 	_expect(str(burst.get("skill_id", "")) == str(battle.player_team[1].get("leaderSkill", "")), "promoted leader burst should use the promoted member skill id")
-	battle.queue_free()
+	battle.free()
 
 
 func _test_dead_same_name_member_does_not_attack_after_match() -> void:
@@ -160,7 +161,7 @@ func _test_dead_same_name_member_does_not_attack_after_match() -> void:
 		_expect(int(log.get("attacker_index", -1)) == 1, "match damage log should identify the living attacker index")
 	_expect(int(battle.leader_charge_points.get(dead_id, -1)) == 0, "dead same-name member should not gain leader charge")
 	_expect(int(battle.leader_charge_points.get(alive_id, 0)) == 1, "living same-name member should gain leader charge")
-	battle.queue_free()
+	battle.free()
 
 
 func _make_battle(leader_id: String) -> BattleManager:
@@ -214,6 +215,7 @@ func _finish() -> void:
 	if _failures.is_empty():
 		print("[LeaderCharge] OK")
 		quit(0)
+		return
 	for failure: String in _failures:
 		push_error("[LeaderCharge] " + failure)
 	quit(1)

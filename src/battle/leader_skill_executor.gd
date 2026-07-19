@@ -119,7 +119,7 @@ func _damage_weakest(log: Dictionary, leader: Dictionary, effect: Dictionary) ->
 	log["target_died"] = bool(damage_result.get("target_died", int(target.get("hp", 0)) <= 0))
 	log["effects"].append({
 		"kind": "damage",
-		"label": str(effect.get("label", "Leader Strike")),
+		"label": str(effect.get("label", "队长一击")),
 		"target": str(target.get("name", "")),
 		"target_index": target_idx,
 		"amount": final_damage,
@@ -141,7 +141,7 @@ func _heal_lowest(log: Dictionary, leader: Dictionary, effect: Dictionary) -> vo
 	var actual := int(ally.get("hp", 0)) - prev_hp
 	log["effects"].append({
 		"kind": "heal",
-		"label": str(effect.get("label", "Leader Heal")),
+		"label": str(effect.get("label", "队长治愈")),
 		"target": str(ally.get("name", "")),
 		"target_id": str(ally.get("id", "")),
 		"target_index": int(battle_manager.call("_player_index_by_id", str(ally.get("id", "")))),
@@ -163,7 +163,7 @@ func _lifesteal_lowest(log: Dictionary, effect: Dictionary) -> void:
 	var actual := int(ally.get("hp", 0)) - prev_hp
 	log["effects"].append({
 		"kind": "lifesteal",
-		"label": str(effect.get("label", "Leader Lifesteal")),
+		"label": str(effect.get("label", "队长汲取")),
 		"target": str(ally.get("name", "")),
 		"target_id": str(ally.get("id", "")),
 		"target_index": int(battle_manager.call("_player_index_by_id", str(ally.get("id", "")))),
@@ -177,7 +177,7 @@ func _convert_gems(log: Dictionary, effect: Dictionary) -> void:
 	var cells := _convert_random_cells(target_element, maxi(1, int(effect.get("count", 1))), maxi(0, int(effect.get("edge_layers", 0))))
 	log["effects"].append({
 		"kind": "convert_gems",
-		"label": str(effect.get("label", "Leader Convert")),
+		"label": str(effect.get("label", "队长转化")),
 		"count": cells.size(),
 		"requested_count": maxi(1, int(effect.get("count", 1))),
 		"target_element": target_element,
@@ -444,7 +444,7 @@ func _guard_lowest(log: Dictionary, effect: Dictionary) -> void:
 	battle_manager.call("_apply_player_guard", ally, reduction, turns)
 	log["effects"].append({
 		"kind": "guard",
-		"label": str(effect.get("label", "Leader Guard")),
+		"label": str(effect.get("label", "队长守护")),
 		"target": str(ally.get("name", "")),
 		"target_id": str(ally.get("id", "")),
 		"target_index": int(battle_manager.call("_player_index_by_id", str(ally.get("id", "")))),
@@ -484,7 +484,7 @@ func _team_shield(log: Dictionary, leader: Dictionary, effect: Dictionary) -> vo
 		return
 	log["effects"].append({
 		"kind": "team_shield",
-		"label": str(effect.get("label", "Leader Shield")),
+		"label": str(effect.get("label", "队长护盾")),
 		"ratio": ratio,
 		"amount": amount,
 		"turns": turns,
@@ -528,7 +528,7 @@ func _status_weakest(log: Dictionary, leader: Dictionary, effect: Dictionary) ->
 		"turns": int(effect.get("turns", 1)),
 		"ratio": float(effect.get("ratio", 0.0)),
 		"increment_ratio": float(effect.get("increment_ratio", 0.0)),
-		"label": str(effect.get("label", "Leader Status"))
+		"label": str(effect.get("label", "队长状态"))
 	})
 
 
@@ -543,7 +543,7 @@ func _weaken_weakest(log: Dictionary, effect: Dictionary) -> void:
 	battle_manager.call("_refresh_capture_windows")
 	log["effects"].append({
 		"kind": "weaken",
-		"label": str(effect.get("label", "Leader Weaken")),
+		"label": str(effect.get("label", "队长削弱")),
 		"target": str(target.get("name", "")),
 		"target_index": target_idx,
 		"reduction": reduction,

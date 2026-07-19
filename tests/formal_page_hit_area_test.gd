@@ -18,8 +18,12 @@ func _run() -> void:
 		"HitAreas/BackButton",
 		"HitAreas/Rows/SoundRow",
 		"HitAreas/Rows/MusicRow",
+		"HitAreas/Rows/LanguageRow",
 		"HitAreas/Actions/ResetButton",
 		"HitAreas/ConfirmDialog/YesButton",
+		"HitAreas/LanguageDialog/Option0",
+		"HitAreas/LanguageDialog/Option8",
+		"HitAreas/LanguageDialog/CloseButton",
 	])
 	await _check_scene("sign_in", "res://src/ui/scenes/sign_in.tscn", [
 		"ContentPanels/HeroPanel",
@@ -51,6 +55,8 @@ func _check_scene(label: String, scene_path: String, required_paths: Array[Strin
 	if label == "settings":
 		var confirm := scene.get_node_or_null("HitAreas/ConfirmDialog") as Control
 		_expect(confirm != null and not confirm.visible, "settings confirm controls should be hidden until reset is requested")
+		var language_dialog := scene.get_node_or_null("HitAreas/LanguageDialog") as Control
+		_expect(language_dialog != null and not language_dialog.visible, "language choices should be hidden until the language row is pressed")
 	scene.queue_free()
 	await process_frame
 

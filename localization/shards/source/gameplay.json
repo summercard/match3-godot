@@ -1,0 +1,3090 @@
+{
+  "shard": "gameplay",
+  "message_count": 545,
+  "messages": {
+    "%s 学会了%s": {
+      "locations": [
+        "src/core/social_rules.gd:188"
+      ]
+    },
+    "%s将在玩家达到 Lv.%d 后解锁": {
+      "locations": [
+        "src/core/feature_unlock_rules.gd:33",
+        "src/ui/controllers/ranch_logic.gd:393"
+      ]
+    },
+    "%s：成功率 %d%%；%s。": {
+      "locations": [
+        "src/core/social_rules.gd:206"
+      ]
+    },
+    "1小时": {
+      "locations": [
+        "src/core/social_rules.gd:116",
+        "src/core/social_rules.gd:205",
+        "src/core/social_rules.gd:87"
+      ]
+    },
+    "Boss 会蓄力并在半血进入二阶段；用束缚压低蓄力伤害，用守护保住队伍。": {
+      "locations": [
+        "src/data/stage_db.gd:91"
+      ]
+    },
+    "HP药水 x1": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:10"
+      ]
+    },
+    "Lv.1 肖肖蜥 x1": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:12"
+      ]
+    },
+    "一份勇气祝福": {
+      "locations": [
+        "src/data/mail_content_db.gd:8"
+      ]
+    },
+    "一份温暖的祝福": {
+      "locations": [
+        "src/core/blessing_provider.gd:14",
+        "src/core/mailbox_rules.gd:166"
+      ]
+    },
+    "一只信使精灵越过云层，把旅行途中收集的小补给轻轻放进了你的信箱。": {
+      "locations": [
+        "src/data/mail_content_db.gd:13"
+      ]
+    },
+    "一只小精灵飞过你的营地，留下了陌生旅人的温柔祝福。": {
+      "locations": [
+        "src/data/mail_content_db.gd:9"
+      ]
+    },
+    "一周坚持": {
+      "locations": [
+        "src/data/achievement_db.gd:185",
+        "src/ui/scene/scene_achievement_gui.gd:71"
+      ]
+    },
+    "一封温暖来信": {
+      "locations": [
+        "src/data/mail_content_db.gd:9"
+      ]
+    },
+    "一颗带着叶香的星星落进信箱，里面装着陌生人的小小心意。": {
+      "locations": [
+        "src/data/mail_content_db.gd:11"
+      ]
+    },
+    "专注": {
+      "locations": [
+        "src/core/ranch_care_rules.gd:67",
+        "src/ui/controllers/ranch_logic.gd:1619"
+      ]
+    },
+    "专注水晶": {
+      "locations": [
+        "src/data/item_db.gd:179"
+      ]
+    },
+    "中心线打通后爆发": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:93"
+      ]
+    },
+    "主节奏": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:166"
+      ]
+    },
+    "云岚": {
+      "locations": [
+        "src/data/mail_content_db.gd:8"
+      ]
+    },
+    "从多目标里挑出真正危险的意图先处理。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:28"
+      ]
+    },
+    "优先在干区建立连线，把水元素留在低位作为退路。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:50"
+      ]
+    },
+    "优先打通中心线，制造跨区连锁。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:90"
+      ]
+    },
+    "优先打通岩石密集区，保留爆发处理关键堵点。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:40"
+      ]
+    },
+    "优先打通障碍密集区，保留爆发处理架盾或蓄力。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:20"
+      ]
+    },
+    "低压教学棋盘": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:12"
+      ]
+    },
+    "你已突破共鸣塔第 %d 层，阶段补给已寄入信箱。": {
+      "locations": [
+        "src/core/mailbox_service.gd:79"
+      ]
+    },
+    "使所有存活敌人的属性分别随机变为另一种属性，持续本局": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:8"
+      ]
+    },
+    "使用后共享经验槽增加100经验值": {
+      "locations": [
+        "src/data/item_db.gd:49"
+      ]
+    },
+    "使用后共享经验槽增加300经验值": {
+      "locations": [
+        "src/data/item_db.gd:60"
+      ]
+    },
+    "使用后获得2000金币": {
+      "locations": [
+        "src/data/item_db.gd:84"
+      ]
+    },
+    "使用后获得500金币": {
+      "locations": [
+        "src/data/item_db.gd:73"
+      ]
+    },
+    "保留可爆发的颜色，等解锁窗口一次推进。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:80"
+      ]
+    },
+    "元素风暴": {
+      "locations": [
+        "src/data/stage_db.gd:331"
+      ]
+    },
+    "先判断棋盘压力，再决定清除障碍还是集中输出。": {
+      "locations": [
+        "src/data/stage_db.gd:1035"
+      ]
+    },
+    "先处理最高威胁目标。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:146"
+      ]
+    },
+    "先恢复棋盘连通，再处理高威胁意图。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:70"
+      ]
+    },
+    "先手必胜": {
+      "locations": [
+        "src/data/leader_skill_db.gd:156"
+      ]
+    },
+    "先消除小火龙亲和的炽能，观察技能充能。": {
+      "locations": [
+        "src/data/stage_db.gd:49"
+      ]
+    },
+    "先清岩障，再抓住火系敌人的爆发空窗。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:18"
+      ]
+    },
+    "先读懂敌方意图，稳定完成消除，再决定是否使用技能。": {
+      "locations": [
+        "src/data/stage_db.gd:1033"
+      ]
+    },
+    "光之进化石": {
+      "locations": [
+        "src/data/item_db.gd:261"
+      ]
+    },
+    "光属性伤害+12%；队长爆发：随机转化1颗宝石为光，并治疗最低血量队友16%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:515",
+        "src/data/leader_skill_db.gd:539",
+        "src/data/leader_skill_db.gd:776"
+      ]
+    },
+    "光属性伤害+18%；队长爆发：随机转化2颗宝石为光，并治疗最低血量队友22%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:527",
+        "src/data/leader_skill_db.gd:551"
+      ]
+    },
+    "光属性伤害+25%；队长爆发：随机转化2颗宝石为光，并治疗最低血量队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:563"
+      ]
+    },
+    "光属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:54"
+      ]
+    },
+    "光精灵进化所需": {
+      "locations": [
+        "src/data/item_db.gd:262"
+      ]
+    },
+    "光耀入口": {
+      "locations": [
+        "src/data/stage_db.gd:718"
+      ]
+    },
+    "光耀回廊": {
+      "locations": [
+        "src/data/stage_db.gd:724"
+      ]
+    },
+    "光耀天使长": {
+      "locations": [
+        "src/data/stage_db.gd:776"
+      ]
+    },
+    "光耀祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:730"
+      ]
+    },
+    "光耀迷宫": {
+      "locations": [
+        "src/data/stage_db.gd:736"
+      ]
+    },
+    "光蝶谷": {
+      "locations": [
+        "src/data/stage_db.gd:325"
+      ]
+    },
+    "光辉试炼": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:107"
+      ]
+    },
+    "全体己方持续3次敌方行动，每次恢复20%最大生命": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:49"
+      ]
+    },
+    "全队HP+12%；队长爆发：最低血量队友获得35%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:281",
+        "src/data/leader_skill_db.gd:407"
+      ]
+    },
+    "全队HP+12%；队长爆发：治疗最低血量队友22%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:254",
+        "src/data/leader_skill_db.gd:767"
+      ]
+    },
+    "全队HP+15%，草属性伤害+19%；队长爆发：对最弱敌人造成ATK 155%草伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:386"
+      ]
+    },
+    "全队HP+18%；队长爆发：最低血量队友获得45%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:290",
+        "src/data/leader_skill_db.gd:416"
+      ]
+    },
+    "全队HP+18%；队长爆发：治疗最低血量队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:263"
+      ]
+    },
+    "全队HP+20%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:147"
+      ]
+    },
+    "全队HP+6%，水属性伤害+8%；队长爆发：对最弱敌人造成ATK 110%水伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:737"
+      ]
+    },
+    "全队HP+6%，草属性伤害+8%；队长爆发：对最弱敌人造成ATK 110%草伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:170",
+        "src/data/leader_skill_db.gd:362",
+        "src/data/leader_skill_db.gd:680"
+      ]
+    },
+    "全队HP+8%；队长爆发：最低血量队友获得25%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:272",
+        "src/data/leader_skill_db.gd:398"
+      ]
+    },
+    "全队HP+8%；队长爆发：治疗最低血量队友16%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:233",
+        "src/data/leader_skill_db.gd:758"
+      ]
+    },
+    "全队HP+9%，草属性伤害+12%；队长爆发：对最弱敌人造成ATK 125%草伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:374",
+        "src/data/leader_skill_db.gd:692"
+      ]
+    },
+    "全队受伤-13%；队长爆发：最低血量队友获得45%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:317",
+        "src/data/leader_skill_db.gd:629"
+      ]
+    },
+    "全队受伤-6%；队长爆发：最低血量队友获得25%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:299",
+        "src/data/leader_skill_db.gd:611",
+        "src/data/leader_skill_db.gd:662"
+      ]
+    },
+    "全队受伤-9%；队长爆发：最低血量队友获得35%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:308",
+        "src/data/leader_skill_db.gd:620",
+        "src/data/leader_skill_db.gd:671"
+      ]
+    },
+    "全队受到伤害-15%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:137"
+      ]
+    },
+    "全队获得30%反射伤害，持续2次敌方行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:24"
+      ]
+    },
+    "共鸣塔补给站": {
+      "locations": [
+        "src/core/mailbox_service.gd:77"
+      ]
+    },
+    "关卡猎人": {
+      "locations": [
+        "src/data/achievement_db.gd:69"
+      ]
+    },
+    "关卡目标": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:187"
+      ]
+    },
+    "关键意图前完成反制": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:149",
+        "src/data/chapter_mechanic_rules.gd:177"
+      ]
+    },
+    "冰冻全部敌人1次行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:35"
+      ]
+    },
+    "冰冻全部敌人2次行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:36"
+      ]
+    },
+    "冰冻全部敌人3次行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:37"
+      ]
+    },
+    "冰属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:90"
+      ]
+    },
+    "冰晶洞穴": {
+      "locations": [
+        "src/data/stage_db.gd:398"
+      ]
+    },
+    "冰道扰位": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:61"
+      ]
+    },
+    "冰霜巨龙": {
+      "locations": [
+        "src/data/stage_db.gd:433"
+      ]
+    },
+    "冰面地表": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:59"
+      ]
+    },
+    "冰面改变交换后的最终落点": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:62"
+      ]
+    },
+    "冰面滑行": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:57"
+      ]
+    },
+    "净化考验": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:111"
+      ]
+    },
+    "净水映照": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:41",
+        "src/data/leader_skill_v132_db.gd:42",
+        "src/data/leader_skill_v132_db.gd:43"
+      ]
+    },
+    "击败全部敌方精灵即可过关。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:158"
+      ]
+    },
+    "分割后收割": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:71"
+      ]
+    },
+    "分散敌群压迫行动优先级": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:32"
+      ]
+    },
+    "初出茅庐": {
+      "locations": [
+        "src/data/achievement_db.gd:14"
+      ]
+    },
+    "初次收服": {
+      "locations": [
+        "src/data/achievement_db.gd:82",
+        "src/ui/scene/scene_achievement_gui.gd:62"
+      ]
+    },
+    "初次进化": {
+      "locations": [
+        "src/data/achievement_db.gd:115"
+      ]
+    },
+    "初次通关": {
+      "locations": [
+        "src/data/achievement_db.gd:58",
+        "src/ui/scene/scene_achievement_gui.gd:60"
+      ]
+    },
+    "初露锋芒": {
+      "locations": [
+        "src/data/achievement_db.gd:161"
+      ]
+    },
+    "判断先破岩还是先解锁，避免被复合压力拖死。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:100"
+      ]
+    },
+    "利用消除和爆炸清开岩石，重新打开沙漠棋盘的落点。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:38"
+      ]
+    },
+    "利用连续冰面制造远距离三消": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:63"
+      ]
+    },
+    "双方没有可学习的新性格": {
+      "locations": [
+        "src/core/social_rules.gd:191"
+      ]
+    },
+    "同时处理岩障与封锁，选择最少行动的解法。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:98"
+      ]
+    },
+    "周期压迫": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:147",
+        "src/data/chapter_mechanic_rules.gd:167"
+      ]
+    },
+    "周期蓄力": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:11"
+      ]
+    },
+    "喷泉旁实际消除水宝石可触发水击；雨区只允许水宝石参与交换与匹配。": {
+      "locations": [
+        "src/data/stage_db.gd:1040",
+        "src/data/stage_db.gd:909"
+      ]
+    },
+    "噬魂巢穴": {
+      "locations": [
+        "src/data/stage_db.gd:459"
+      ]
+    },
+    "围绕安全区建立连锁，不让雾区吞掉中心。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:110"
+      ]
+    },
+    "圆润旋风与羽刃轨迹快速扫过，适合Combo、风伤和削弱表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:42"
+      ]
+    },
+    "圆润碎石、暖尘与地面冲击环撑起防线，适合土系减伤和守护表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:60"
+      ]
+    },
+    "土之进化石": {
+      "locations": [
+        "src/data/item_db.gd:270"
+      ]
+    },
+    "土属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:63"
+      ]
+    },
+    "土属性精灵进化所需": {
+      "locations": [
+        "src/data/item_db.gd:271"
+      ]
+    },
+    "圣光之耀": {
+      "locations": [
+        "src/data/leader_skill_db.gd:53"
+      ]
+    },
+    "在敌人攻击前释放藤蔓束缚，降低压力。": {
+      "locations": [
+        "src/data/stage_db.gd:79"
+      ]
+    },
+    "在棋盘最外两圈随机转化4颗宝石为光属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:17"
+      ]
+    },
+    "在棋盘最外两圈随机转化8颗宝石为光属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:18"
+      ]
+    },
+    "在爆发回合前完成蓄能": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:83"
+      ]
+    },
+    "在高密度雾区里保持核心连锁。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:108"
+      ]
+    },
+    "地脉反击": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:50",
+        "src/data/leader_skill_v132_db.gd:51",
+        "src/data/leader_skill_v132_db.gd:52"
+      ]
+    },
+    "场上每有1名水属性精灵，随机造成自身攻击力150%的伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:31"
+      ]
+    },
+    "场上每有1名水属性精灵，随机造成自身攻击力180%的伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:32"
+      ]
+    },
+    "均衡号令": {
+      "locations": [
+        "src/data/leader_skill_db.gd:169",
+        "src/data/leader_skill_db.gd:177",
+        "src/data/leader_skill_db.gd:361",
+        "src/data/leader_skill_db.gd:369",
+        "src/data/leader_skill_db.gd:373",
+        "src/data/leader_skill_db.gd:381",
+        "src/data/leader_skill_db.gd:385",
+        "src/data/leader_skill_db.gd:393",
+        "src/data/leader_skill_db.gd:679",
+        "src/data/leader_skill_db.gd:687",
+        "src/data/leader_skill_db.gd:691",
+        "src/data/leader_skill_db.gd:699",
+        "src/data/leader_skill_db.gd:736",
+        "src/data/leader_skill_db.gd:744"
+      ]
+    },
+    "均衡号令型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:19"
+      ]
+    },
+    "坚守阵线": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1228",
+        "src/data/leader_skill_db.gd:1233"
+      ]
+    },
+    "坚守阵线：全队受伤-18%；队长爆发：最低血量队友获得55%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1229"
+      ]
+    },
+    "增加收服精灵的概率": {
+      "locations": [
+        "src/data/item_db.gd:14"
+      ]
+    },
+    "复合压制": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:101"
+      ]
+    },
+    "复合障碍": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:99"
+      ]
+    },
+    "多目标意图": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:29"
+      ]
+    },
+    "夜色里的营火替远方旅人捎来问候：愿你和伙伴都能找到下一段风景。": {
+      "locations": [
+        "src/data/mail_content_db.gd:12"
+      ]
+    },
+    "大地之力": {
+      "locations": [
+        "src/data/leader_skill_db.gd:62"
+      ]
+    },
+    "大师捕获球": {
+      "locations": [
+        "src/data/item_db.gd:35"
+      ]
+    },
+    "大幅增加收服概率": {
+      "locations": [
+        "src/data/item_db.gd:25"
+      ]
+    },
+    "大面积雾区压缩安全行动": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:112"
+      ]
+    },
+    "学习结果待定": {
+      "locations": [
+        "src/core/social_rules.gd:195"
+      ]
+    },
+    "学会棋盘亲和会驱动对应精灵行动与技能充能。": {
+      "locations": [
+        "src/data/stage_db.gd:47"
+      ]
+    },
+    "守护与续航": {
+      "locations": [
+        "src/data/stage_db.gd:63"
+      ]
+    },
+    "守护护符": {
+      "locations": [
+        "src/data/item_db.gd:119"
+      ]
+    },
+    "安睡回春": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:47",
+        "src/data/leader_skill_v132_db.gd:48",
+        "src/data/leader_skill_v132_db.gd:49"
+      ]
+    },
+    "完成交流后，将按此概率学习对方未拥有的性格": {
+      "locations": [
+        "src/core/social_rules.gd:193"
+      ]
+    },
+    "完成第1场战斗": {
+      "locations": [
+        "src/data/achievement_db.gd:15"
+      ]
+    },
+    "宝石": {
+      "locations": [
+        "src/data/item_db.gd:331",
+        "src/data/item_db.gd:338",
+        "src/data/item_db.gd:340",
+        "src/data/item_db.gd:343",
+        "src/data/item_db.gd:344",
+        "src/data/item_db.gd:345",
+        "src/ui/controllers/inventory_logic.gd:83",
+        "src/ui/scene/scene_ranch_gui.gd:1332",
+        "src/ui/scenes/inventory.tscn:342"
+      ]
+    },
+    "宝石踏上冰面会沿移动方向继续滑行，停稳后才进行三消判定。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:58"
+      ]
+    },
+    "寒冰入口": {
+      "locations": [
+        "src/data/stage_db.gd:372"
+      ]
+    },
+    "将全部存活敌人的属性变为暗属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:22"
+      ]
+    },
+    "将场上75%的水宝石转为火属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:60"
+      ]
+    },
+    "将场上一半水宝石转为火属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:61"
+      ]
+    },
+    "将场上全部可操作宝石重新洗牌": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:14",
+        "src/data/leader_skill_v132_db.gd:15",
+        "src/data/leader_skill_v132_db.gd:16"
+      ]
+    },
+    "将场上全部水宝石转为火属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:62"
+      ]
+    },
+    "小有资产": {
+      "locations": [
+        "src/data/achievement_db.gd:139",
+        "src/ui/scene/scene_achievement_gui.gd:67"
+      ]
+    },
+    "小火龙进化所需": {
+      "locations": [
+        "src/data/item_db.gd:226"
+      ]
+    },
+    "属性易形": {
+      "locations": [
+        "src/data/item_db.gd:212"
+      ]
+    },
+    "岩壁阵线": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1039",
+        "src/data/leader_skill_db.gd:1044",
+        "src/data/leader_skill_db.gd:1048",
+        "src/data/leader_skill_db.gd:1053",
+        "src/data/leader_skill_db.gd:1057",
+        "src/data/leader_skill_db.gd:1062",
+        "src/data/leader_skill_db.gd:1201",
+        "src/data/leader_skill_db.gd:1206",
+        "src/data/leader_skill_db.gd:1219",
+        "src/data/leader_skill_db.gd:1224",
+        "src/data/leader_skill_db.gd:298",
+        "src/data/leader_skill_db.gd:303",
+        "src/data/leader_skill_db.gd:307",
+        "src/data/leader_skill_db.gd:312",
+        "src/data/leader_skill_db.gd:316",
+        "src/data/leader_skill_db.gd:321",
+        "src/data/leader_skill_db.gd:610",
+        "src/data/leader_skill_db.gd:615",
+        "src/data/leader_skill_db.gd:619",
+        "src/data/leader_skill_db.gd:624",
+        "src/data/leader_skill_db.gd:628",
+        "src/data/leader_skill_db.gd:633",
+        "src/data/leader_skill_db.gd:661",
+        "src/data/leader_skill_db.gd:666",
+        "src/data/leader_skill_db.gd:670",
+        "src/data/leader_skill_db.gd:675"
+      ]
+    },
+    "岩壁阵线型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:55"
+      ]
+    },
+    "岩壁阵线：全队受伤-13%；队长爆发：最低血量队友获得45%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1058"
+      ]
+    },
+    "岩壁阵线：全队受伤-18%；队长爆发：最低血量队友获得55%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1202"
+      ]
+    },
+    "岩壁阵线：全队受伤-18%；队长爆发：随机转化3颗宝石为土": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1220"
+      ]
+    },
+    "岩壁阵线：全队受伤-6%；队长爆发：最低血量队友获得25%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1040"
+      ]
+    },
+    "岩壁阵线：全队受伤-9%；队长爆发：最低血量队友获得35%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1049"
+      ]
+    },
+    "岩浆洞窟": {
+      "locations": [
+        "src/data/stage_db.gd:109"
+      ]
+    },
+    "岩石封锁关键落点和连线空间": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:42"
+      ]
+    },
+    "岩障": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:19",
+        "src/data/chapter_mechanic_rules.gd:39"
+      ]
+    },
+    "岩障与毒雾": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:69"
+      ]
+    },
+    "岩障压缩": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:41"
+      ]
+    },
+    "岩障和毒雾切断连锁路线": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:72"
+      ]
+    },
+    "岩障和锁定宝石叠加": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:102"
+      ]
+    },
+    "岩障封锁关键落点": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:22"
+      ]
+    },
+    "岩障开路": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:17"
+      ]
+    },
+    "常规棋盘压力": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:148"
+      ]
+    },
+    "幽暗入口": {
+      "locations": [
+        "src/data/stage_db.gd:227"
+      ]
+    },
+    "幽灵徘徊": {
+      "locations": [
+        "src/data/stage_db.gd:254"
+      ]
+    },
+    "幽灵池塘": {
+      "locations": [
+        "src/data/stage_db.gd:205"
+      ]
+    },
+    "底部水位逐步压缩可操作区域": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:52"
+      ]
+    },
+    "延迟爆发": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:81"
+      ]
+    },
+    "开场Combo+1，风属性伤害+13%；队长爆发：削弱最弱敌人攻击26%，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:221",
+        "src/data/leader_skill_db.gd:491",
+        "src/data/leader_skill_db.gd:716"
+      ]
+    },
+    "开场Combo+1，风属性伤害+8%；队长爆发：削弱最弱敌人攻击18%，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:209",
+        "src/data/leader_skill_db.gd:479",
+        "src/data/leader_skill_db.gd:704"
+      ]
+    },
+    "开场Combo+2，风属性伤害+20%；队长爆发：削弱最弱敌人攻击35%，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:242",
+        "src/data/leader_skill_db.gd:503"
+      ]
+    },
+    "德语": {
+      "locations": [
+        "src/core/localization_manager.gd:34"
+      ]
+    },
+    "怒意蓄势": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:56",
+        "src/data/leader_skill_v132_db.gd:57"
+      ]
+    },
+    "性格保持不变": {
+      "locations": [
+        "src/core/social_rules.gd:195"
+      ]
+    },
+    "性格学习成功": {
+      "locations": [
+        "src/core/social_rules.gd:195"
+      ]
+    },
+    "意图应对": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:143"
+      ]
+    },
+    "战斗中使用，为全队抵消下一次受到的伤害。": {
+      "locations": [
+        "src/data/item_db.gd:202"
+      ]
+    },
+    "战斗中使用，为全队提供2次35%伤害减免。": {
+      "locations": [
+        "src/data/item_db.gd:120"
+      ]
+    },
+    "战斗中使用，为存活队员补充2点技能充能。": {
+      "locations": [
+        "src/data/item_db.gd:180"
+      ]
+    },
+    "战斗中使用，击碎 1 个岩石障碍。": {
+      "locations": [
+        "src/data/item_db.gd:132"
+      ]
+    },
+    "战斗中使用，击碎当前棋盘上的全部岩石障碍。": {
+      "locations": [
+        "src/data/item_db.gd:144"
+      ]
+    },
+    "战斗中使用，恢复全队80%最大生命值。": {
+      "locations": [
+        "src/data/item_db.gd:109"
+      ]
+    },
+    "战斗中使用，恢复生命比例最低队员35%最大生命值": {
+      "locations": [
+        "src/data/item_db.gd:97"
+      ]
+    },
+    "战斗中使用，把棋盘上一种属性的宝石全部转换为另一种属性。": {
+      "locations": [
+        "src/data/item_db.gd:213"
+      ]
+    },
+    "战斗中使用，清除毒雾格子，适合冰雪与后期毒雾关。": {
+      "locations": [
+        "src/data/item_db.gd:169"
+      ]
+    },
+    "战斗中使用，解除若干锁链宝石。": {
+      "locations": [
+        "src/data/item_db.gd:157"
+      ]
+    },
+    "战斗中使用，重新生成整盘宝石，给陷入死局或元素分布极差的局面一条退路。": {
+      "locations": [
+        "src/data/item_db.gd:191"
+      ]
+    },
+    "战斗开始自带1层combo": {
+      "locations": [
+        "src/data/leader_skill_db.gd:157"
+      ]
+    },
+    "把目标压到低血会打开捕捉窗口；自动捕捉开启后胜利会尝试收服。": {
+      "locations": [
+        "src/data/stage_db.gd:58"
+      ]
+    },
+    "捕捉窗口练习": {
+      "locations": [
+        "src/data/stage_db.gd:53"
+      ]
+    },
+    "提前压低危险目标": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:33"
+      ]
+    },
+    "收服5只不同精灵": {
+      "locations": [
+        "src/data/achievement_db.gd:94"
+      ]
+    },
+    "收服全部精灵": {
+      "locations": [
+        "src/data/achievement_db.gd:105"
+      ]
+    },
+    "收服第1只精灵": {
+      "locations": [
+        "src/data/achievement_db.gd:83"
+      ]
+    },
+    "敌方意图": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:145",
+        "src/data/chapter_mechanic_rules.gd:9"
+      ]
+    },
+    "旅行精灵驿站": {
+      "locations": [
+        "src/core/mailbox_service.gd:104"
+      ]
+    },
+    "无性别": {
+      "locations": [
+        "src/core/social_rules.gd:9"
+      ]
+    },
+    "日本語": {
+      "locations": [
+        "src/core/localization_manager.gd:31"
+      ]
+    },
+    "日语": {
+      "locations": [
+        "src/core/localization_manager.gd:31"
+      ]
+    },
+    "时序封锁": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:77"
+      ]
+    },
+    "时空入口": {
+      "locations": [
+        "src/data/stage_db.gd:519"
+      ]
+    },
+    "时空属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:108"
+      ]
+    },
+    "时空巨龙": {
+      "locations": [
+        "src/data/stage_db.gd:562"
+      ]
+    },
+    "时空漩涡": {
+      "locations": [
+        "src/data/stage_db.gd:531"
+      ]
+    },
+    "时空迷宫": {
+      "locations": [
+        "src/data/stage_db.gd:556"
+      ]
+    },
+    "时间乱流": {
+      "locations": [
+        "src/data/stage_db.gd:525"
+      ]
+    },
+    "时间撕裂": {
+      "locations": [
+        "src/data/leader_skill_db.gd:107"
+      ]
+    },
+    "星光回廊": {
+      "locations": [
+        "src/data/stage_db.gd:584"
+      ]
+    },
+    "星耀之力": {
+      "locations": [
+        "src/data/leader_skill_db.gd:116"
+      ]
+    },
+    "星耀入口": {
+      "locations": [
+        "src/data/stage_db.gd:578"
+      ]
+    },
+    "星耀属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:117"
+      ]
+    },
+    "星耀巨龙": {
+      "locations": [
+        "src/data/stage_db.gd:635"
+      ]
+    },
+    "星耀祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:590"
+      ]
+    },
+    "星芽": {
+      "locations": [
+        "src/data/mail_content_db.gd:9"
+      ]
+    },
+    "星轨形雾区占据中心": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:92"
+      ]
+    },
+    "星轨阵型": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:87"
+      ]
+    },
+    "星辉引导：开场Combo+1；队长爆发：随机转化1颗宝石为光，并治疗最低血量队友16%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:986"
+      ]
+    },
+    "星辉引导：开场Combo+1；队长爆发：随机转化2颗宝石为光，并治疗最低血量队友22%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:995"
+      ]
+    },
+    "星辉引导：开场Combo+2；队长爆发：随机转化2颗宝石为光，并治疗最低血量队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1004"
+      ]
+    },
+    "星辰召唤": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1277"
+      ]
+    },
+    "星辰迷宫": {
+      "locations": [
+        "src/data/stage_db.gd:629"
+      ]
+    },
+    "晴空信使": {
+      "locations": [
+        "src/data/mail_content_db.gd:13"
+      ]
+    },
+    "暖阳": {
+      "locations": [
+        "src/core/social_rules.gd:20"
+      ]
+    },
+    "暖阳广场": {
+      "locations": [
+        "src/core/social_rules.gd:20"
+      ]
+    },
+    "暗之进化石": {
+      "locations": [
+        "src/data/item_db.gd:288"
+      ]
+    },
+    "暗夜汲取": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1280"
+      ]
+    },
+    "暗属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%暗伤，并回复最低血量队友造成伤害的33%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:326",
+        "src/data/leader_skill_db.gd:575",
+        "src/data/leader_skill_db.gd:587",
+        "src/data/leader_skill_db.gd:638"
+      ]
+    },
+    "暗属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%暗伤，并回复最低血量队友造成伤害的41%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:338",
+        "src/data/leader_skill_db.gd:599",
+        "src/data/leader_skill_db.gd:650"
+      ]
+    },
+    "暗属性伤害+25%；队长爆发：对最弱敌人造成ATK 175%暗伤，并回复最低血量队友造成伤害的49%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:350"
+      ]
+    },
+    "暗属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:81"
+      ]
+    },
+    "暗属性精灵进化所需": {
+      "locations": [
+        "src/data/item_db.gd:289"
+      ]
+    },
+    "暗影之力": {
+      "locations": [
+        "src/data/leader_skill_db.gd:80"
+      ]
+    },
+    "暗影同化": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:22"
+      ]
+    },
+    "暗影回流": {
+      "locations": [
+        "src/data/leader_skill_db.gd:332",
+        "src/data/leader_skill_db.gd:344",
+        "src/data/leader_skill_db.gd:356"
+      ]
+    },
+    "暗影小径": {
+      "locations": [
+        "src/data/stage_db.gd:170"
+      ]
+    },
+    "暗影巨兽": {
+      "locations": [
+        "src/data/stage_db.gd:211"
+      ]
+    },
+    "暗影巨龙": {
+      "locations": [
+        "src/data/stage_db.gd:289"
+      ]
+    },
+    "暗影蓄压": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:31"
+      ]
+    },
+    "暗影追击": {
+      "locations": [
+        "src/data/leader_skill_db.gd:325",
+        "src/data/leader_skill_db.gd:331",
+        "src/data/leader_skill_db.gd:337",
+        "src/data/leader_skill_db.gd:343",
+        "src/data/leader_skill_db.gd:349",
+        "src/data/leader_skill_db.gd:355",
+        "src/data/leader_skill_db.gd:574",
+        "src/data/leader_skill_db.gd:580",
+        "src/data/leader_skill_db.gd:581",
+        "src/data/leader_skill_db.gd:586",
+        "src/data/leader_skill_db.gd:592",
+        "src/data/leader_skill_db.gd:593",
+        "src/data/leader_skill_db.gd:598",
+        "src/data/leader_skill_db.gd:604",
+        "src/data/leader_skill_db.gd:605",
+        "src/data/leader_skill_db.gd:637",
+        "src/data/leader_skill_db.gd:643",
+        "src/data/leader_skill_db.gd:644",
+        "src/data/leader_skill_db.gd:649",
+        "src/data/leader_skill_db.gd:655",
+        "src/data/leader_skill_db.gd:656"
+      ]
+    },
+    "暗影追击型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:64"
+      ]
+    },
+    "暗影集火": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:27"
+      ]
+    },
+    "暗礁深谷": {
+      "locations": [
+        "src/data/stage_db.gd:182"
+      ]
+    },
+    "暗翼盘旋": {
+      "locations": [
+        "src/data/stage_db.gd:243"
+      ]
+    },
+    "暗蚀深渊": {
+      "locations": [
+        "src/data/stage_db.gd:497"
+      ]
+    },
+    "最低生命敌人中毒，首回合造成ATK 1%，之后每回合递增1%，直至死亡": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:33"
+      ]
+    },
+    "最低生命敌人中毒，首回合造成ATK 1.5%，之后每回合递增1.5%，直至死亡": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:34"
+      ]
+    },
+    "月光下的旅记": {
+      "locations": [
+        "src/data/mail_content_db.gd:12"
+      ]
+    },
+    "本局内自身攻击力提高10%": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:57"
+      ]
+    },
+    "本局内自身攻击力提高8%": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:56"
+      ]
+    },
+    "本局自身攻击力提高30%": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:12"
+      ]
+    },
+    "本局自身攻击力提高50%": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:13"
+      ]
+    },
+    "本次交流没有产生性格变化": {
+      "locations": [
+        "src/core/social_rules.gd:191"
+      ]
+    },
+    "来自远方的问候": {
+      "locations": [
+        "src/data/mail_content_db.gd:10"
+      ]
+    },
+    "极地冰原": {
+      "locations": [
+        "src/data/stage_db.gd:388"
+      ]
+    },
+    "极寒之心": {
+      "locations": [
+        "src/data/leader_skill_db.gd:89"
+      ]
+    },
+    "林野拟态": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:27",
+        "src/data/leader_skill_v132_db.gd:28"
+      ]
+    },
+    "林间邮差": {
+      "locations": [
+        "src/data/mail_content_db.gd:11"
+      ]
+    },
+    "架盾后强攻": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:21"
+      ]
+    },
+    "柔和花瓣、泡泡与生命光点绽放，适合治疗和生命加成表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:33"
+      ]
+    },
+    "根据意图标签切换集火目标，避免平均伤害拖慢节奏。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:30"
+      ]
+    },
+    "棋盘压力": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:171"
+      ]
+    },
+    "毁灭之力": {
+      "locations": [
+        "src/data/achievement_db.gd:172",
+        "src/ui/scene/scene_achievement_gui.gd:70"
+      ]
+    },
+    "每回合海水从底部上涨，水中只有水元素宝石还能正常操作。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:48"
+      ]
+    },
+    "毒蛛巢穴": {
+      "locations": [
+        "src/data/stage_db.gd:233"
+      ]
+    },
+    "水、冰、虚空属性和冷静、谨慎、温和性格更容易互相学习。": {
+      "locations": [
+        "src/core/social_rules.gd:28"
+      ]
+    },
+    "水之进化石": {
+      "locations": [
+        "src/data/item_db.gd:234"
+      ]
+    },
+    "水之进化石 x100": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:11"
+      ]
+    },
+    "水之进化石 x50": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:8"
+      ]
+    },
+    "水位封住底部前完成蓄能爆发": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:53"
+      ]
+    },
+    "水属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:27"
+      ]
+    },
+    "水波护体、泡泡与蓝色光环包裹队友，适合水系护盾和生命加成表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:51"
+      ]
+    },
+    "水潮共鸣": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:31",
+        "src/data/leader_skill_v132_db.gd:32"
+      ]
+    },
+    "水龟仔是守护位：潮能充能后可治疗最低血队友并减伤。": {
+      "locations": [
+        "src/data/stage_db.gd:68"
+      ]
+    },
+    "水龟仔进化所需": {
+      "locations": [
+        "src/data/item_db.gd:235"
+      ]
+    },
+    "汲取治愈": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1281"
+      ]
+    },
+    "沙暴裂隙": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:29",
+        "src/data/leader_skill_v132_db.gd:30"
+      ]
+    },
+    "沙漠岩障": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:37"
+      ]
+    },
+    "沸水蒸腾": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:60",
+        "src/data/leader_skill_v132_db.gd:61",
+        "src/data/leader_skill_v132_db.gd:62"
+      ]
+    },
+    "治疗1名最低生命队友：自身最大HP 10%×草宝石数": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:53"
+      ]
+    },
+    "治疗2名最低生命队友：自身最大HP 10%×草宝石数": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:54"
+      ]
+    },
+    "治疗3名最低生命队友：自身最大HP 10%×草宝石数": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:55"
+      ]
+    },
+    "沿星轨清出通路，避免中心被压死。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:88"
+      ]
+    },
+    "沿途的小补给": {
+      "locations": [
+        "src/data/mail_content_db.gd:13"
+      ]
+    },
+    "法语": {
+      "locations": [
+        "src/core/localization_manager.gd:33"
+      ]
+    },
+    "海岛涨潮": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:47"
+      ]
+    },
+    "消除全部光宝石，对全部敌人造成自身攻击力200%的光伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:21"
+      ]
+    },
+    "消除全部火宝石，对生命最高敌人造成ATK 20%×火宝石数的火伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:63"
+      ]
+    },
+    "消除全部风系（雷）宝石，使所有敌人受到伤害×3.5，持续各自3次行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:30"
+      ]
+    },
+    "消除炽能给小火龙充能；留意队伍卡片上的技能条。": {
+      "locations": [
+        "src/data/stage_db.gd:48"
+      ]
+    },
+    "涨潮水位": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:49"
+      ]
+    },
+    "深海毒潮": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:33",
+        "src/data/leader_skill_v132_db.gd:34"
+      ]
+    },
+    "混沌之怒": {
+      "locations": [
+        "src/data/leader_skill_db.gd:125"
+      ]
+    },
+    "混沌入口": {
+      "locations": [
+        "src/data/stage_db.gd:651"
+      ]
+    },
+    "混沌兽神": {
+      "locations": [
+        "src/data/stage_db.gd:702"
+      ]
+    },
+    "混沌回廊": {
+      "locations": [
+        "src/data/stage_db.gd:657"
+      ]
+    },
+    "混沌属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:126"
+      ]
+    },
+    "混沌祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:663"
+      ]
+    },
+    "混沌迷宫": {
+      "locations": [
+        "src/data/stage_db.gd:669"
+      ]
+    },
+    "混沌重压": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:97"
+      ]
+    },
+    "清出主通路后用控场抢回节奏": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:103"
+      ]
+    },
+    "清开主通路后集中爆发": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:43"
+      ]
+    },
+    "潮汐之力": {
+      "locations": [
+        "src/data/leader_skill_db.gd:26"
+      ]
+    },
+    "潮汐守护": {
+      "locations": [
+        "src/data/leader_skill_db.gd:271",
+        "src/data/leader_skill_db.gd:276",
+        "src/data/leader_skill_db.gd:280",
+        "src/data/leader_skill_db.gd:285",
+        "src/data/leader_skill_db.gd:289",
+        "src/data/leader_skill_db.gd:294",
+        "src/data/leader_skill_db.gd:397",
+        "src/data/leader_skill_db.gd:402",
+        "src/data/leader_skill_db.gd:406",
+        "src/data/leader_skill_db.gd:411",
+        "src/data/leader_skill_db.gd:415",
+        "src/data/leader_skill_db.gd:420",
+        "src/data/leader_skill_db.gd:727",
+        "src/data/leader_skill_db.gd:732",
+        "src/data/leader_skill_db.gd:748",
+        "src/data/leader_skill_db.gd:753",
+        "src/data/leader_skill_db.gd:814",
+        "src/data/leader_skill_db.gd:819",
+        "src/data/leader_skill_db.gd:823",
+        "src/data/leader_skill_db.gd:828"
+      ]
+    },
+    "潮汐守护型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:46"
+      ]
+    },
+    "潮汐守护：全队HP+12%；队长爆发：最低血量队友获得35%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:824"
+      ]
+    },
+    "潮汐守护：全队HP+8%；队长爆发：最低血量队友获得25%减伤，持续2回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:815"
+      ]
+    },
+    "潮汐护壳": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1271"
+      ]
+    },
+    "潮汐旅人": {
+      "locations": [
+        "src/data/mail_content_db.gd:10"
+      ]
+    },
+    "火、雷、风属性和勇敢、暴躁、敏捷性格更容易互相学习。": {
+      "locations": [
+        "src/core/social_rules.gd:21"
+      ]
+    },
+    "火之进化石": {
+      "locations": [
+        "src/data/item_db.gd:225"
+      ]
+    },
+    "火之进化石 x2": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:9"
+      ]
+    },
+    "火属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:18"
+      ]
+    },
+    "火山口": {
+      "locations": [
+        "src/data/stage_db.gd:103"
+      ]
+    },
+    "火焰池": {
+      "locations": [
+        "src/data/stage_db.gd:121"
+      ]
+    },
+    "烈焰之心": {
+      "locations": [
+        "src/data/leader_skill_db.gd:17"
+      ]
+    },
+    "烈焰扑击": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1093",
+        "src/data/leader_skill_db.gd:1098",
+        "src/data/leader_skill_db.gd:1102",
+        "src/data/leader_skill_db.gd:1107"
+      ]
+    },
+    "烈焰攻势": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1111",
+        "src/data/leader_skill_db.gd:1116",
+        "src/data/leader_skill_db.gd:1120",
+        "src/data/leader_skill_db.gd:1125",
+        "src/data/leader_skill_db.gd:1129",
+        "src/data/leader_skill_db.gd:1134",
+        "src/data/leader_skill_db.gd:1138",
+        "src/data/leader_skill_db.gd:1143",
+        "src/data/leader_skill_db.gd:1147",
+        "src/data/leader_skill_db.gd:1152",
+        "src/data/leader_skill_db.gd:1156",
+        "src/data/leader_skill_db.gd:1161",
+        "src/data/leader_skill_db.gd:1165",
+        "src/data/leader_skill_db.gd:1170",
+        "src/data/leader_skill_db.gd:1174",
+        "src/data/leader_skill_db.gd:1179",
+        "src/data/leader_skill_db.gd:1183",
+        "src/data/leader_skill_db.gd:1188",
+        "src/data/leader_skill_db.gd:1255",
+        "src/data/leader_skill_db.gd:1260"
+      ]
+    },
+    "烈焰攻势型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:10"
+      ]
+    },
+    "烈焰攻势：火属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%火伤，并附加灼烧": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1112",
+        "src/data/leader_skill_db.gd:1130",
+        "src/data/leader_skill_db.gd:1148",
+        "src/data/leader_skill_db.gd:1175"
+      ]
+    },
+    "烈焰攻势：火属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%火伤，并附加灼烧": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1121",
+        "src/data/leader_skill_db.gd:1139",
+        "src/data/leader_skill_db.gd:1157",
+        "src/data/leader_skill_db.gd:1166"
+      ]
+    },
+    "烈焰攻势：火属性伤害+25%；队长爆发：对最弱敌人造成ATK 175%火伤，并附加灼烧": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1184"
+      ]
+    },
+    "烈焰攻势：火属性伤害+35%；队长爆发：随机转化3颗宝石为火": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1256"
+      ]
+    },
+    "烈焰荒原": {
+      "locations": [
+        "src/data/stage_db.gd:115"
+      ]
+    },
+    "烈焰龙之巢": {
+      "locations": [
+        "src/data/stage_db.gd:144"
+      ]
+    },
+    "熔火吞噬": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:63"
+      ]
+    },
+    "熔锅连击": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:58",
+        "src/data/leader_skill_v132_db.gd:59"
+      ]
+    },
+    "生命之泉": {
+      "locations": [
+        "src/data/leader_skill_db.gd:146"
+      ]
+    },
+    "生命回响": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1066",
+        "src/data/leader_skill_db.gd:1071",
+        "src/data/leader_skill_db.gd:1075",
+        "src/data/leader_skill_db.gd:1080",
+        "src/data/leader_skill_db.gd:1084",
+        "src/data/leader_skill_db.gd:1089",
+        "src/data/leader_skill_db.gd:1192",
+        "src/data/leader_skill_db.gd:1197",
+        "src/data/leader_skill_db.gd:181",
+        "src/data/leader_skill_db.gd:186",
+        "src/data/leader_skill_db.gd:190",
+        "src/data/leader_skill_db.gd:195",
+        "src/data/leader_skill_db.gd:199",
+        "src/data/leader_skill_db.gd:204",
+        "src/data/leader_skill_db.gd:232",
+        "src/data/leader_skill_db.gd:237",
+        "src/data/leader_skill_db.gd:253",
+        "src/data/leader_skill_db.gd:258",
+        "src/data/leader_skill_db.gd:262",
+        "src/data/leader_skill_db.gd:267",
+        "src/data/leader_skill_db.gd:757",
+        "src/data/leader_skill_db.gd:762",
+        "src/data/leader_skill_db.gd:766",
+        "src/data/leader_skill_db.gd:771",
+        "src/data/leader_skill_db.gd:832",
+        "src/data/leader_skill_db.gd:837",
+        "src/data/leader_skill_db.gd:841",
+        "src/data/leader_skill_db.gd:846",
+        "src/data/leader_skill_db.gd:850",
+        "src/data/leader_skill_db.gd:855"
+      ]
+    },
+    "生命回响型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:28"
+      ]
+    },
+    "生命回响：全队HP+12%；队长爆发：治疗最低血量队友22%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1076",
+        "src/data/leader_skill_db.gd:842"
+      ]
+    },
+    "生命回响：全队HP+18%；队长爆发：治疗最低血量队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1085",
+        "src/data/leader_skill_db.gd:851"
+      ]
+    },
+    "生命回响：全队HP+25%；队长爆发：随机转化3颗宝石为草": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1193"
+      ]
+    },
+    "生命回响：全队HP+8%；队长爆发：治疗最低血量队友16%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1067",
+        "src/data/leader_skill_db.gd:833"
+      ]
+    },
+    "用棋盘亲和、守护和束缚学会第一套破招。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:8"
+      ]
+    },
+    "疾风之刃": {
+      "locations": [
+        "src/data/leader_skill_db.gd:71"
+      ]
+    },
+    "疾风先手": {
+      "locations": [
+        "src/data/leader_skill_db.gd:208",
+        "src/data/leader_skill_db.gd:216",
+        "src/data/leader_skill_db.gd:220",
+        "src/data/leader_skill_db.gd:228",
+        "src/data/leader_skill_db.gd:241",
+        "src/data/leader_skill_db.gd:249",
+        "src/data/leader_skill_db.gd:478",
+        "src/data/leader_skill_db.gd:486",
+        "src/data/leader_skill_db.gd:490",
+        "src/data/leader_skill_db.gd:498",
+        "src/data/leader_skill_db.gd:502",
+        "src/data/leader_skill_db.gd:510",
+        "src/data/leader_skill_db.gd:703",
+        "src/data/leader_skill_db.gd:711",
+        "src/data/leader_skill_db.gd:715",
+        "src/data/leader_skill_db.gd:723"
+      ]
+    },
+    "疾风先手型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:37"
+      ]
+    },
+    "疾风破势": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1288"
+      ]
+    },
+    "百万富翁": {
+      "locations": [
+        "src/data/achievement_db.gd:150",
+        "src/ui/scene/scene_achievement_gui.gd:68"
+      ]
+    },
+    "百战老兵": {
+      "locations": [
+        "src/data/achievement_db.gd:36",
+        "src/ui/scene/scene_achievement_gui.gd:58"
+      ]
+    },
+    "破招点": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:176"
+      ]
+    },
+    "破盾后集中爆发": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:23"
+      ]
+    },
+    "磐石壁垒": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1274"
+      ]
+    },
+    "社交场所": {
+      "locations": [
+        "src/core/social_rules.gd:116",
+        "src/core/social_rules.gd:204",
+        "src/core/social_rules.gd:206",
+        "src/ui/controllers/ranch_logic.gd:1089",
+        "src/ui/controllers/ranch_logic.gd:1158",
+        "src/ui/controllers/ranch_logic.gd:501",
+        "src/ui/scene/scene_ranch_gui.gd:1489",
+        "src/ui/scene/scene_ranch_gui.gd:1504",
+        "src/ui/scene/scene_ranch_gui.gd:1707"
+      ]
+    },
+    "社交广场": {
+      "locations": [
+        "src/core/feature_unlock_rules.gd:12",
+        "src/ui/scene/scene_ranch_gui.gd:510"
+      ]
+    },
+    "稳定安全区后反击": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:113"
+      ]
+    },
+    "穿过分割棋盘，找回连锁线路。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:68"
+      ]
+    },
+    "章节机制": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:172",
+        "src/data/chapter_mechanic_rules.gd:186",
+        "src/ui/controllers/stage_select_logic.gd:1100"
+      ]
+    },
+    "第 %d 层远征鼓励": {
+      "locations": [
+        "src/core/mailbox_service.gd:105"
+      ]
+    },
+    "第 %d 层阶段补给": {
+      "locations": [
+        "src/core/mailbox_service.gd:78"
+      ]
+    },
+    "第%d章·%02d": {
+      "locations": [
+        "src/data/stage_db.gd:844",
+        "src/data/stage_db.gd:860"
+      ]
+    },
+    "第%d章·首领%02d": {
+      "locations": [
+        "src/data/stage_db.gd:884"
+      ]
+    },
+    "第%d章第%02d关：逐步提高敌人数、棋盘压力和奖励节奏，迎接首领战。": {
+      "locations": [
+        "src/data/stage_db.gd:1029"
+      ]
+    },
+    "第%d章首领战：在双阶段压力下综合检验本章机制。": {
+      "locations": [
+        "src/data/stage_db.gd:907"
+      ]
+    },
+    "签到达人": {
+      "locations": [
+        "src/data/achievement_db.gd:196",
+        "src/ui/scene/scene_achievement_gui.gd:72"
+      ]
+    },
+    "简体中文": {
+      "locations": [
+        "src/core/localization_manager.gd:28"
+      ]
+    },
+    "管理角落封锁，等待关键回合爆发。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:78"
+      ]
+    },
+    "精灵农场": {
+      "locations": [
+        "src/core/feature_unlock_rules.gd:11",
+        "src/ui/scene/scene_ranch_gui.gd:506",
+        "src/ui/scenes/ranch_hub.tscn:4617"
+      ]
+    },
+    "精灵大师": {
+      "locations": [
+        "src/data/achievement_db.gd:104",
+        "src/ui/scene/scene_achievement_gui.gd:64"
+      ]
+    },
+    "精灵收藏家": {
+      "locations": [
+        "src/data/achievement_db.gd:93",
+        "src/ui/scene/scene_achievement_gui.gd:63"
+      ]
+    },
+    "精灵的祝福": {
+      "locations": [
+        "src/data/mail_content_db.gd:11"
+      ]
+    },
+    "精灵课堂": {
+      "locations": [
+        "src/core/feature_unlock_rules.gd:10",
+        "src/ui/controllers/ranch_logic.gd:911",
+        "src/ui/controllers/ranch_logic.gd:985",
+        "src/ui/scene/scene_ranch_gui.gd:508",
+        "src/ui/scenes/main_lobby.tscn:536",
+        "src/ui/scenes/ranch_hub.tscn:1681"
+      ]
+    },
+    "精英·光耀祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:742"
+      ]
+    },
+    "精英·时空漩涡": {
+      "locations": [
+        "src/data/stage_db.gd:537"
+      ]
+    },
+    "精英·星耀祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:596"
+      ]
+    },
+    "精英·暗影猎手": {
+      "locations": [
+        "src/data/stage_db.gd:188"
+      ]
+    },
+    "精英·沙漠蜃影": {
+      "locations": [
+        "src/data/stage_db.gd:266"
+      ]
+    },
+    "精英·深渊使者": {
+      "locations": [
+        "src/data/stage_db.gd:408"
+      ]
+    },
+    "精英·混沌祭坛": {
+      "locations": [
+        "src/data/stage_db.gd:675"
+      ]
+    },
+    "精英·烈焰守卫": {
+      "locations": [
+        "src/data/stage_db.gd:127"
+      ]
+    },
+    "精英·虚空裂隙": {
+      "locations": [
+        "src/data/stage_db.gd:471"
+      ]
+    },
+    "精英·雷暴守卫": {
+      "locations": [
+        "src/data/stage_db.gd:337"
+      ]
+    },
+    "紫黑影雾命中后带回粉紫生命回流，适合暗伤和吸血表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:69"
+      ]
+    },
+    "累计完成10场战斗": {
+      "locations": [
+        "src/data/achievement_db.gd:26"
+      ]
+    },
+    "累计完成50场战斗": {
+      "locations": [
+        "src/data/achievement_db.gd:37"
+      ]
+    },
+    "累计签到30天": {
+      "locations": [
+        "src/data/achievement_db.gd:197"
+      ]
+    },
+    "累计获得100000金币": {
+      "locations": [
+        "src/data/achievement_db.gd:151"
+      ]
+    },
+    "累计获得10000金币": {
+      "locations": [
+        "src/data/achievement_db.gd:140"
+      ]
+    },
+    "累计进化5只精灵": {
+      "locations": [
+        "src/data/achievement_db.gd:127"
+      ]
+    },
+    "累计造成10000点伤害": {
+      "locations": [
+        "src/data/achievement_db.gd:173"
+      ]
+    },
+    "累计造成1000点伤害": {
+      "locations": [
+        "src/data/achievement_db.gd:162"
+      ]
+    },
+    "繁体中文": {
+      "locations": [
+        "src/core/localization_manager.gd:29"
+      ]
+    },
+    "繁體中文": {
+      "locations": [
+        "src/core/localization_manager.gd:29"
+      ]
+    },
+    "经验水晶": {
+      "locations": [
+        "src/data/item_db.gd:59"
+      ]
+    },
+    "经验药水": {
+      "locations": [
+        "src/data/item_db.gd:48"
+      ]
+    },
+    "经验药水 x200": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:7"
+      ]
+    },
+    "翠意治愈": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1268"
+      ]
+    },
+    "肖肖蜥 x1": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:12"
+      ]
+    },
+    "能量响应训练": {
+      "locations": [
+        "src/data/stage_db.gd:43"
+      ]
+    },
+    "能量读招": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:7"
+      ]
+    },
+    "自动": {
+      "locations": [
+        "src/core/localization_manager.gd:27",
+        "src/ui/scene/scene_settings.gd:520"
+      ]
+    },
+    "自然之怒": {
+      "locations": [
+        "src/data/leader_skill_db.gd:35"
+      ]
+    },
+    "自身与随机1名队友持续3次敌方行动，每次恢复20%最大生命": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:48"
+      ]
+    },
+    "自身免伤叠加10%（最高80%），并对最低生命敌人造成ATK 300%土伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:50"
+      ]
+    },
+    "自身免伤叠加15%（最高80%），并对最低生命敌人造成ATK 330%土伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:51"
+      ]
+    },
+    "自身免伤叠加20%（最高80%），并对最低生命敌人造成ATK 360%土伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:52"
+      ]
+    },
+    "自身持续3次敌方行动，每次恢复20%最大生命": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:47"
+      ]
+    },
+    "自身获得30%反射伤害，持续2次敌方行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:23"
+      ]
+    },
+    "节拍洗牌": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:14",
+        "src/data/leader_skill_v132_db.gd:15",
+        "src/data/leader_skill_v132_db.gd:16"
+      ]
+    },
+    "花叶兽的破招": {
+      "locations": [
+        "src/data/stage_db.gd:83"
+      ]
+    },
+    "花叶兽蓄力时优先束缚或守护，半血后准备爆发。": {
+      "locations": [
+        "src/data/stage_db.gd:92"
+      ]
+    },
+    "英语": {
+      "locations": [
+        "src/core/localization_manager.gd:30"
+      ]
+    },
+    "草、光、土属性和温和、智慧性格更容易互相学习。": {
+      "locations": [
+        "src/core/social_rules.gd:14"
+      ]
+    },
+    "草之进化石": {
+      "locations": [
+        "src/data/item_db.gd:243"
+      ]
+    },
+    "草坪": {
+      "locations": [
+        "src/core/social_rules.gd:13"
+      ]
+    },
+    "草坪庭院": {
+      "locations": [
+        "src/core/social_rules.gd:13"
+      ]
+    },
+    "草属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%草伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:461"
+      ]
+    },
+    "草属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%草伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:470"
+      ]
+    },
+    "草属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:36"
+      ]
+    },
+    "草能爆发": {
+      "locations": [
+        "src/data/leader_skill_db.gd:460",
+        "src/data/leader_skill_db.gd:465",
+        "src/data/leader_skill_db.gd:469",
+        "src/data/leader_skill_db.gd:474"
+      ]
+    },
+    "草苗儿是控场位：生能充能后可束缚敌人，降低下一次攻击。": {
+      "locations": [
+        "src/data/stage_db.gd:78"
+      ]
+    },
+    "草苗儿进化所需": {
+      "locations": [
+        "src/data/item_db.gd:244"
+      ]
+    },
+    "草金聚能、叶片与暖光爆发，适合稳定伤害和通用增益的队长技表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:24"
+      ]
+    },
+    "草露滋养": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:53",
+        "src/data/leader_skill_v132_db.gd:54",
+        "src/data/leader_skill_v132_db.gd:55"
+      ]
+    },
+    "菌力蓄势": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:12",
+        "src/data/leader_skill_v132_db.gd:13"
+      ]
+    },
+    "萌灵消消大冒险": {
+      "locations": [
+        "src/core/localization_manager.gd:14"
+      ]
+    },
+    "蓄力前束缚或提前守护": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:13"
+      ]
+    },
+    "蓝金雷链与弹跳火花连锁穿击，适合雷伤和控制标记表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:78"
+      ]
+    },
+    "藤蔓束缚": {
+      "locations": [
+        "src/data/stage_db.gd:73"
+      ]
+    },
+    "虚空之眼": {
+      "locations": [
+        "src/data/leader_skill_db.gd:98"
+      ]
+    },
+    "虚空入口": {
+      "locations": [
+        "src/data/stage_db.gd:453"
+      ]
+    },
+    "虚空分割": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:67"
+      ]
+    },
+    "虚空属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:99"
+      ]
+    },
+    "虚空巨龙": {
+      "locations": [
+        "src/data/stage_db.gd:503"
+      ]
+    },
+    "虚空穿刺": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1012",
+        "src/data/leader_skill_db.gd:1017",
+        "src/data/leader_skill_db.gd:1021",
+        "src/data/leader_skill_db.gd:1026",
+        "src/data/leader_skill_db.gd:1030",
+        "src/data/leader_skill_db.gd:1035",
+        "src/data/leader_skill_db.gd:1246",
+        "src/data/leader_skill_db.gd:1251"
+      ]
+    },
+    "虚空穿刺：暗属性伤害+35%；队长爆发：随机转化3颗宝石为暗": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1247"
+      ]
+    },
+    "虚空穿刺：虚空/混沌属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%穿透伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1013"
+      ]
+    },
+    "虚空穿刺：虚空/混沌属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%穿透伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1022"
+      ]
+    },
+    "虚空穿刺：虚空/混沌属性伤害+25%；队长爆发：对最弱敌人造成ATK 175%穿透伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1031"
+      ]
+    },
+    "虚空裂隙": {
+      "locations": [
+        "src/data/stage_db.gd:465"
+      ]
+    },
+    "西班牙语": {
+      "locations": [
+        "src/core/localization_manager.gd:35"
+      ]
+    },
+    "观察底部捕捉窗口，目标越虚弱越稳定。": {
+      "locations": [
+        "src/data/stage_db.gd:59"
+      ]
+    },
+    "观察敌方意图，选择输出、守护或控场。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:144"
+      ]
+    },
+    "观察首领意图，保留守护和控制技能，并将爆发留到阶段转换时。": {
+      "locations": [
+        "src/data/stage_db.gd:908"
+      ]
+    },
+    "角落锁定限制布局": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:82"
+      ]
+    },
+    "解锁钥匙": {
+      "locations": [
+        "src/data/item_db.gd:156"
+      ]
+    },
+    "让水龟仔的守护技能有明确价值。": {
+      "locations": [
+        "src/data/stage_db.gd:67"
+      ]
+    },
+    "让玩家第一次看到低血会打开捕捉窗口。": {
+      "locations": [
+        "src/data/stage_db.gd:57"
+      ]
+    },
+    "让草苗儿的控场技能为 Boss 前做铺垫。": {
+      "locations": [
+        "src/data/stage_db.gd:77"
+      ]
+    },
+    "该功能": {
+      "locations": [
+        "src/core/feature_unlock_rules.gd:33",
+        "src/ui/controllers/ranch_logic.gd:393"
+      ]
+    },
+    "读意图后决定输出、守护或束缚。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:10"
+      ]
+    },
+    "超级捕获球": {
+      "locations": [
+        "src/data/item_db.gd:24"
+      ]
+    },
+    "跟随系统语言": {
+      "locations": [
+        "src/core/localization_manager.gd:27"
+      ]
+    },
+    "身经百战": {
+      "locations": [
+        "src/data/achievement_db.gd:25",
+        "src/ui/scene/scene_achievement_gui.gd:57"
+      ]
+    },
+    "辉光调律": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1210",
+        "src/data/leader_skill_db.gd:1215",
+        "src/data/leader_skill_db.gd:514",
+        "src/data/leader_skill_db.gd:520",
+        "src/data/leader_skill_db.gd:521",
+        "src/data/leader_skill_db.gd:526",
+        "src/data/leader_skill_db.gd:532",
+        "src/data/leader_skill_db.gd:533",
+        "src/data/leader_skill_db.gd:538",
+        "src/data/leader_skill_db.gd:544",
+        "src/data/leader_skill_db.gd:545",
+        "src/data/leader_skill_db.gd:550",
+        "src/data/leader_skill_db.gd:556",
+        "src/data/leader_skill_db.gd:557",
+        "src/data/leader_skill_db.gd:562",
+        "src/data/leader_skill_db.gd:568",
+        "src/data/leader_skill_db.gd:569",
+        "src/data/leader_skill_db.gd:775",
+        "src/data/leader_skill_db.gd:781",
+        "src/data/leader_skill_db.gd:782",
+        "src/data/leader_skill_db.gd:787",
+        "src/data/leader_skill_db.gd:792",
+        "src/data/leader_skill_db.gd:796",
+        "src/data/leader_skill_db.gd:801",
+        "src/data/leader_skill_db.gd:805",
+        "src/data/leader_skill_db.gd:810",
+        "src/data/leader_skill_db.gd:967",
+        "src/data/leader_skill_db.gd:972",
+        "src/data/leader_skill_db.gd:976",
+        "src/data/leader_skill_db.gd:981",
+        "src/data/leader_skill_v132_db.gd:17",
+        "src/data/leader_skill_v132_db.gd:18"
+      ]
+    },
+    "辉光调律：光属性伤害+12%；队长爆发：随机转化1颗宝石为光，并治疗最低血量队友16%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:797",
+        "src/data/leader_skill_db.gd:968"
+      ]
+    },
+    "辉光调律：光属性伤害+18%；队长爆发：随机转化2颗宝石为光，并治疗最低血量队友22%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:788",
+        "src/data/leader_skill_db.gd:806",
+        "src/data/leader_skill_db.gd:977"
+      ]
+    },
+    "辉光调律：光属性伤害+35%；队长爆发：随机转化3颗宝石为光": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1211"
+      ]
+    },
+    "这次远征先在第 %d 层休整吧。旅行精灵送来一份轻松补给，整理好队伍再来挑战！": {
+      "locations": [
+        "src/core/mailbox_service.gd:106"
+      ]
+    },
+    "进化狂热": {
+      "locations": [
+        "src/data/achievement_db.gd:126",
+        "src/ui/scene/scene_achievement_gui.gd:66"
+      ]
+    },
+    "远岭观星人": {
+      "locations": [
+        "src/data/mail_content_db.gd:12"
+      ]
+    },
+    "远方一位陌生冒险者，托精灵给你送来了祝福。": {
+      "locations": [
+        "src/core/blessing_provider.gd:15"
+      ]
+    },
+    "远方的冒险者": {
+      "locations": [
+        "src/core/blessing_provider.gd:12",
+        "src/core/mailbox_rules.gd:164",
+        "src/ui/scene/scene_mailbox.gd:180",
+        "src/ui/scene/scene_mailbox.gd:199"
+      ]
+    },
+    "远方的冒险者听说了你的旅途，愿你的伙伴始终陪在身边。": {
+      "locations": [
+        "src/data/mail_content_db.gd:10"
+      ]
+    },
+    "远方的冒险者托精灵捎来一句话：愿你在下一场战斗中保持勇气。": {
+      "locations": [
+        "src/data/mail_content_db.gd:8"
+      ]
+    },
+    "远方的冒险者托精灵捎来祝福。": {
+      "locations": [
+        "src/core/mailbox_rules.gd:167"
+      ]
+    },
+    "连续签到7天": {
+      "locations": [
+        "src/data/achievement_db.gd:186"
+      ]
+    },
+    "迷途轮转": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:6",
+        "src/data/leader_skill_v132_db.gd:7",
+        "src/data/leader_skill_v132_db.gd:8"
+      ]
+    },
+    "迷雾沼泽": {
+      "locations": [
+        "src/data/stage_db.gd:176"
+      ]
+    },
+    "追赶 x%.1f": {
+      "locations": [
+        "src/core/growth_rules.gd:44",
+        "src/core/ranch_care_rules.gd:69"
+      ]
+    },
+    "通关10个关卡": {
+      "locations": [
+        "src/data/achievement_db.gd:70"
+      ]
+    },
+    "通过第1关": {
+      "locations": [
+        "src/data/achievement_db.gd:59"
+      ]
+    },
+    "醉心迷乱": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:25",
+        "src/data/leader_skill_v132_db.gd:26"
+      ]
+    },
+    "重连棋盘后集中破招": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:73"
+      ]
+    },
+    "金币 x500": {
+      "locations": [
+        "src/data/sign_in_reward_db.gd:6"
+      ]
+    },
+    "金币箱": {
+      "locations": [
+        "src/data/item_db.gd:83"
+      ]
+    },
+    "金币袋": {
+      "locations": [
+        "src/data/item_db.gd:72"
+      ]
+    },
+    "钢铁意志": {
+      "locations": [
+        "src/data/leader_skill_db.gd:136"
+      ]
+    },
+    "锁定宝石": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:79"
+      ]
+    },
+    "队伍受伤后释放水之护盾，守住下一次攻击。": {
+      "locations": [
+        "src/data/stage_db.gd:69"
+      ]
+    },
+    "队长爆发：全队获得相当于队长自身HP 20%的护盾": {
+      "locations": [
+        "src/data/leader_skill_db.gd:728"
+      ]
+    },
+    "队长爆发：全队获得相当于队长自身HP 30%的护盾": {
+      "locations": [
+        "src/data/leader_skill_db.gd:749"
+      ]
+    },
+    "队长爆发：对最弱敌人造成ATK 300%火焰伤害": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1094",
+        "src/data/leader_skill_db.gd:1103"
+      ]
+    },
+    "队长爆发：治疗最低血量队友20%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:182"
+      ]
+    },
+    "队长爆发：治疗最低血量队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:191"
+      ]
+    },
+    "队长爆发：治疗最低血量队友40%HP": {
+      "locations": [
+        "src/data/leader_skill_db.gd:200"
+      ]
+    },
+    "阵型压缩": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:91"
+      ]
+    },
+    "阵型毒雾": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:89"
+      ]
+    },
+    "陪伴 +%d%%": {
+      "locations": [
+        "src/core/ranch_care_rules.gd:61",
+        "src/core/ranch_care_rules.gd:71"
+      ]
+    },
+    "随机1名敌人有30%概率在下一次攻击时误伤友军": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:25"
+      ]
+    },
+    "随机1名敌人有50%概率在下一次攻击时误伤友军": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:26"
+      ]
+    },
+    "随机使1名存活敌人的属性变为另一种属性，持续本局": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:6"
+      ]
+    },
+    "随机使2名存活敌人的属性各自变为另一种属性，持续本局": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:7"
+      ]
+    },
+    "随机使两名其他队友各获得1个队长蓄能点": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:45"
+      ]
+    },
+    "随机使两名其他队友各获得2个队长蓄能点": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:46"
+      ]
+    },
+    "随机使另一名队友获得1个队长蓄能点": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:44"
+      ]
+    },
+    "随机冰冻1名敌人1次行动，并治疗最低生命队友30%HP": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:38"
+      ]
+    },
+    "随机冰冻1名敌人1次行动，并治疗最低生命队友60%HP": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:39"
+      ]
+    },
+    "随机冰冻1名敌人1次行动，并治疗最低生命队友80%HP": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:40"
+      ]
+    },
+    "随机向存活敌人攻击10次，每次造成自身攻击力20%的火伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:59"
+      ]
+    },
+    "随机向存活敌人攻击8次，每次造成自身攻击力20%的火伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:58"
+      ]
+    },
+    "随机将场上3颗非水宝石变为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:41"
+      ]
+    },
+    "随机将场上4颗非水宝石变为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:42"
+      ]
+    },
+    "随机将场上5颗非水宝石变为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:43"
+      ]
+    },
+    "随机将场上其他3颗宝石转为草属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:27"
+      ]
+    },
+    "随机将场上其他5颗宝石转为草属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:28"
+      ]
+    },
+    "随机消除1颗风系（雷）宝石，使所有敌人受到伤害×3，持续各自3次行动": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:29"
+      ]
+    },
+    "随机消除3颗光宝石，对全部敌人造成自身攻击力200%的光伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:19"
+      ]
+    },
+    "随机消除5颗光宝石，对全部敌人造成自身攻击力200%的光伤害": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:20"
+      ]
+    },
+    "随机选择2颗水宝石，将其相邻宝石转为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:9"
+      ]
+    },
+    "随机选择3颗水宝石，将其相邻宝石转为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:10"
+      ]
+    },
+    "随机选择5颗水宝石，将其相邻宝石转为水属性": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:11"
+      ]
+    },
+    "雄性": {
+      "locations": [
+        "src/core/social_rules.gd:9"
+      ]
+    },
+    "雌性": {
+      "locations": [
+        "src/core/social_rules.gd:9"
+      ]
+    },
+    "雨滴扩散": {
+      "locations": [
+        "src/data/leader_skill_v132_db.gd:10",
+        "src/data/leader_skill_v132_db.gd:11",
+        "src/data/leader_skill_v132_db.gd:9"
+      ]
+    },
+    "雷之进化石": {
+      "locations": [
+        "src/data/item_db.gd:252"
+      ]
+    },
+    "雷小鼠进化所需": {
+      "locations": [
+        "src/data/item_db.gd:253"
+      ]
+    },
+    "雷属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%雷伤，并眩晕1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:425"
+      ]
+    },
+    "雷属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%雷伤，并眩晕1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:437"
+      ]
+    },
+    "雷属性伤害+25%；队长爆发：对最弱敌人造成ATK 175%雷伤，并眩晕1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:449"
+      ]
+    },
+    "雷属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:45"
+      ]
+    },
+    "雷霆之怒": {
+      "locations": [
+        "src/data/leader_skill_db.gd:44"
+      ]
+    },
+    "雷霆入口": {
+      "locations": [
+        "src/data/stage_db.gd:313"
+      ]
+    },
+    "雷霆巨兽": {
+      "locations": [
+        "src/data/stage_db.gd:356"
+      ]
+    },
+    "雷霆钉刺": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1284",
+        "src/data/leader_skill_db.gd:1285"
+      ]
+    },
+    "雷鸣连锁": {
+      "locations": [
+        "src/data/leader_skill_db.gd:424",
+        "src/data/leader_skill_db.gd:430",
+        "src/data/leader_skill_db.gd:431",
+        "src/data/leader_skill_db.gd:436",
+        "src/data/leader_skill_db.gd:442",
+        "src/data/leader_skill_db.gd:443",
+        "src/data/leader_skill_db.gd:448",
+        "src/data/leader_skill_db.gd:454",
+        "src/data/leader_skill_db.gd:455"
+      ]
+    },
+    "雷鸣连锁型": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:73"
+      ]
+    },
+    "雷鹰巢穴": {
+      "locations": [
+        "src/data/stage_db.gd:319"
+      ]
+    },
+    "霜冻节奏": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1237",
+        "src/data/leader_skill_db.gd:1242",
+        "src/data/leader_skill_db.gd:859",
+        "src/data/leader_skill_db.gd:864",
+        "src/data/leader_skill_db.gd:868",
+        "src/data/leader_skill_db.gd:873",
+        "src/data/leader_skill_db.gd:877",
+        "src/data/leader_skill_db.gd:882",
+        "src/data/leader_skill_db.gd:886",
+        "src/data/leader_skill_db.gd:891",
+        "src/data/leader_skill_db.gd:895",
+        "src/data/leader_skill_db.gd:900",
+        "src/data/leader_skill_db.gd:904",
+        "src/data/leader_skill_db.gd:909",
+        "src/data/leader_skill_db.gd:913",
+        "src/data/leader_skill_db.gd:918",
+        "src/data/leader_skill_db.gd:922",
+        "src/data/leader_skill_db.gd:927",
+        "src/data/leader_skill_db.gd:931",
+        "src/data/leader_skill_db.gd:936",
+        "src/data/leader_skill_db.gd:940",
+        "src/data/leader_skill_db.gd:945",
+        "src/data/leader_skill_db.gd:949",
+        "src/data/leader_skill_db.gd:954",
+        "src/data/leader_skill_db.gd:958",
+        "src/data/leader_skill_db.gd:963",
+        "src/data/leader_skill_v132_db.gd:35",
+        "src/data/leader_skill_v132_db.gd:36",
+        "src/data/leader_skill_v132_db.gd:37",
+        "src/data/leader_skill_v132_db.gd:38",
+        "src/data/leader_skill_v132_db.gd:39",
+        "src/data/leader_skill_v132_db.gd:40"
+      ]
+    },
+    "霜冻节奏：冰属性伤害+12%；队长爆发：对最弱敌人造成ATK 120%冰伤，并冰冻1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:860",
+        "src/data/leader_skill_db.gd:887",
+        "src/data/leader_skill_db.gd:914",
+        "src/data/leader_skill_db.gd:941"
+      ]
+    },
+    "霜冻节奏：冰属性伤害+18%；队长爆发：对最弱敌人造成ATK 145%冰伤，并冰冻1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:869",
+        "src/data/leader_skill_db.gd:896",
+        "src/data/leader_skill_db.gd:923",
+        "src/data/leader_skill_db.gd:950"
+      ]
+    },
+    "霜冻节奏：冰属性伤害+25%；队长爆发：对最弱敌人造成ATK 175%冰伤，并冰冻1回合": {
+      "locations": [
+        "src/data/leader_skill_db.gd:878",
+        "src/data/leader_skill_db.gd:905",
+        "src/data/leader_skill_db.gd:932",
+        "src/data/leader_skill_db.gd:959"
+      ]
+    },
+    "霜冻节奏：水属性伤害+35%；队长爆发：随机转化3颗宝石为水": {
+      "locations": [
+        "src/data/leader_skill_db.gd:1238"
+      ]
+    },
+    "霜狼巢穴": {
+      "locations": [
+        "src/data/stage_db.gd:378"
+      ]
+    },
+    "静水": {
+      "locations": [
+        "src/core/social_rules.gd:27"
+      ]
+    },
+    "静水池": {
+      "locations": [
+        "src/core/social_rules.gd:27"
+      ]
+    },
+    "面对后期高稀有精灵时，大幅提升收服概率。": {
+      "locations": [
+        "src/data/item_db.gd:36"
+      ]
+    },
+    "韩语": {
+      "locations": [
+        "src/core/localization_manager.gd:32"
+      ]
+    },
+    "预判滑行后的落点，用冰道把宝石送进更远的连线位置。": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:60"
+      ]
+    },
+    "风之进化石": {
+      "locations": [
+        "src/data/item_db.gd:279"
+      ]
+    },
+    "风属性宝石伤害+30%": {
+      "locations": [
+        "src/data/leader_skill_db.gd:72"
+      ]
+    },
+    "风属性精灵进化所需": {
+      "locations": [
+        "src/data/item_db.gd:280"
+      ]
+    },
+    "饱和火焰环向外爆发，适合火属性攻击、灼烧和强打击队长技表现。": {
+      "locations": [
+        "src/data/leader_skill_visual_db.gd:15"
+      ]
+    },
+    "首个 Boss 用蓄力和阶段变化检验输出、守护、控场。": {
+      "locations": [
+        "src/data/stage_db.gd:90"
+      ]
+    },
+    "首战告捷": {
+      "locations": [
+        "src/data/achievement_db.gd:47"
+      ]
+    },
+    "首次击败敌人": {
+      "locations": [
+        "src/data/achievement_db.gd:48",
+        "src/ui/scene/scene_achievement_gui.gd:59"
+      ]
+    },
+    "首次进化精灵": {
+      "locations": [
+        "src/data/achievement_db.gd:116",
+        "src/ui/scene/scene_achievement_gui.gd:65"
+      ]
+    },
+    "首领战前哨：保留生命值，并带着明确的技能计划进入下一战。": {
+      "locations": [
+        "src/data/stage_db.gd:1036"
+      ]
+    },
+    "高密度雾区": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:109"
+      ]
+    },
+    "高潮线压缩": {
+      "locations": [
+        "src/data/chapter_mechanic_rules.gd:51"
+      ]
+    },
+    "高级HP药水": {
+      "locations": [
+        "src/data/item_db.gd:108"
+      ]
+    },
+    "高级破岩锤": {
+      "locations": [
+        "src/data/item_db.gd:143"
+      ]
+    }
+  }
+}

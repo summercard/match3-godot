@@ -4,7 +4,8 @@
 class_name SceneResult
 extends Control
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
+const MonsterDb = preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
@@ -222,7 +223,7 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		if not reward_claim_succeeded:
 			_cancel_reward_receipt_claim()
 			_reward_claim_allowed = false
-			push_warning("[ResultLogic] 结算奖励事务失败: %s" % _reward_receipt_id)
+			push_warning(TranslationServer.translate("[ResultLogic] 结算奖励事务失败: %s") % _reward_receipt_id)
 	if reward_claim_succeeded:
 		_trigger_achievements()
 
@@ -813,7 +814,7 @@ func _draw_battle_info(font: Font, y: float) -> void:
 	
 	var turn_count: int = _battle_result.get("turnCount", 0)
 	var max_turns: int = _battle_result.get("maxTurns", 20)
-	_draw_centered_text(font, "回合 %d / %d" % [turn_count, max_turns], DESIGN_W / 2.0, y + 25.0, C["text_primary"], 13.0)
+	_draw_centered_text(font, TranslationServer.translate("回合 %d / %d") % [turn_count, max_turns], DESIGN_W / 2.0, y + 25.0, C["text_primary"], 13.0)
 	
 	var enemies: Array = _battle_result.get("enemies", [])
 	var defeated: Array = enemies.filter(func(e): return e and e.get("hp", 0) <= 0)
@@ -821,10 +822,10 @@ func _draw_battle_info(font: Font, y: float) -> void:
 	
 	if not defeated.is_empty():
 		var names := " / ".join(defeated.map(func(e): return e.get("name", e.get("emoji", ""))))
-		_draw_centered_text(font, "击败：%s" % names, DESIGN_W / 2.0, y + 58.0, C["danger_light"], 11.0)
+		_draw_centered_text(font, TranslationServer.translate("击败：%s") % names, DESIGN_W / 2.0, y + 58.0, C["danger_light"], 11.0)
 	elif not alive.is_empty():
 		var names := " / ".join(alive.map(func(e): return e.get("name", e.get("emoji", ""))))
-		_draw_centered_text(font, "仍在场：%s" % names, DESIGN_W / 2.0, y + 58.0, Color(0.5, 0.7, 1.0), 11.0)
+		_draw_centered_text(font, TranslationServer.translate("仍在场：%s") % names, DESIGN_W / 2.0, y + 58.0, Color(0.5, 0.7, 1.0), 11.0)
 
 func _draw_capture_section(font: Font, y: float) -> void:
 	if _capture_result.is_empty():
@@ -844,13 +845,13 @@ func _draw_capture_section(font: Font, y: float) -> void:
 		if target_tags.is_empty():
 			target_tags = CaptureSystemScript.get_target_value_tags(_capture_target)
 		var tag_text := " / ".join(target_tags.slice(0, 3))
-		lines.append("目标: %s  %s" % [_capture_target.get("name", ""), tag_text])
+		lines.append(TranslationServer.translate("目标: %s  %s") % [_capture_target.get("name", ""), tag_text])
 	if not _capture_item_used.is_empty():
-		lines.append("消耗: %s" % _capture_item_used.get("name", ""))
+		lines.append(TranslationServer.translate("消耗: %s") % _capture_item_used.get("name", ""))
 	var reason := str(_capture_result.get("reason", ""))
 	var advice := str(_capture_result.get("advice", ""))
 	if reason.is_empty() and not _capture_window.is_empty():
-		reason = "窗口: %s %d%%" % [_capture_window.get("label", ""), int(round(float(_capture_window.get("stability", 0.0)) * 100.0))]
+		reason = TranslationServer.translate("窗口: %s %d%%") % [_capture_window.get("label", ""), int(round(float(_capture_window.get("stability", 0.0)) * 100.0))]
 	if not reason.is_empty():
 		lines.append(reason)
 	if not advice.is_empty() and not _captured:
@@ -915,7 +916,7 @@ func _draw_exp_section(font: Font, y: float) -> void:
 	_draw_centered_text(font, "共享经验槽", DESIGN_W / 2.0, y + 18.0, C["text_primary"], 14.0)
 
 	var shared: Dictionary = _monster_exp_awards.get("shared", {})
-	var desc := "本次 +%d · 经验槽 %d/%d" % [int(shared.get("added", _rewards.get("exp", 0))), int(shared.get("current", 0)), int(shared.get("capacity", 0))]
+	var desc := TranslationServer.translate("本次 +%d · 经验槽 %d/%d") % [int(shared.get("added", _rewards.get("exp", 0))), int(shared.get("current", 0)), int(shared.get("capacity", 0))]
 	_draw_centered_text(font, desc, DESIGN_W / 2.0, y + 106.0, C["text_muted"], 9.5)
 
 	var team: Array = _battle_result.get("playerTeam", [])
@@ -939,11 +940,13 @@ func _draw_levelups_section(font: Font, y: float) -> void:
 	for i in range(display_ups.size()):
 		var up: Dictionary = display_ups[i]
 		var item_y := y + i * 28.0
+		var monster_id := str(up.get("monsterId", ""))
+		var monster_name := str(MonsterDb.get_monster(monster_id).get("name", monster_id if not monster_id.is_empty() else "精灵"))
 		
 		_draw_texture_fit(_tex("fx_levelup_glow"), Rect2(DESIGN_W / 2.0 - 130.0, item_y - 2.0, 260.0, 28.0), 0.38 * pulse)
-		draw_string(font, Vector2(DESIGN_W / 2.0 - 105.0, item_y + 17), "UP", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.84, 0.0, pulse))
-		draw_string(font, Vector2(DESIGN_W / 2.0 - 62.0, item_y + 17), str(up.get("monsterId", "?")), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, C["gold"])
-		draw_string(font, Vector2(DESIGN_W / 2.0 + 56.0, item_y + 17), "Lv.%d -> Lv.%d" % [up.get("oldLevel", 0), up.get("newLevel", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, C["success"])
+		draw_string(font, Vector2(DESIGN_W / 2.0 - 105.0, item_y + 17), TranslationServer.translate("升级"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.84, 0.0, pulse))
+		draw_string(font, Vector2(DESIGN_W / 2.0 - 62.0, item_y + 17), TranslationServer.translate(monster_name), HORIZONTAL_ALIGNMENT_LEFT, 112.0, 11, C["gold"])
+		draw_string(font, Vector2(DESIGN_W / 2.0 + 56.0, item_y + 17), "Lv.%d → Lv.%d" % [up.get("oldLevel", 0), up.get("newLevel", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, C["success"])
 
 func _draw_buttons(font: Font, y: float) -> void:
 	var progress := _button_anim_progress
@@ -1014,6 +1017,7 @@ func _draw_buttons(font: Font, y: float) -> void:
 # ==================== 绘制辅助 ====================
 
 func _draw_centered_text(font: Font, text: String, x: float, y: float, color: Color, size: float) -> void:
+	text = TranslationServer.translate(text)
 	var tw := 200.0
 	# 阴影
 	draw_string(font, Vector2(x - tw / 2.0 + 1, y + 1), text, HORIZONTAL_ALIGNMENT_CENTER, tw, size, Color(0, 0, 0, 0.4))

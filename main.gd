@@ -38,6 +38,9 @@ func _ready() -> void:
 	_configure_debug_window()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_create_letterbox_background()
+	var localization := get_node_or_null("/root/Localization")
+	if localization != null and localization.has_signal("locale_changed"):
+		localization.locale_changed.connect(_on_locale_changed)
 	# 启动时加载开始画面
 	switch_scene("start")
 
@@ -107,12 +110,27 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 	_current_scene = scene_node
 	_current_scene_name = scene_name
 	var typography_profile := "lobby" if scene_name in ["main", "result"] else scene_name
-	CartoonTypographyScript.apply(scene_node, typography_profile)
 	_layout_current_scene()
 	_initialize_scene(scene_node, scene_name, data)
+	CartoonTypographyScript.apply(scene_node, typography_profile)
 	if previous_scene != null:
 		previous_scene.queue_free()
 	return true
+
+
+func _on_locale_changed(_locale: String, _preference: String) -> void:
+	if _current_scene == null:
+		return
+	var typography_profile := "lobby" if _current_scene_name in ["main", "result"] else _current_scene_name
+	CartoonTypographyScript.apply(_current_scene, typography_profile)
+	_queue_redraw_tree(_current_scene)
+
+
+func _queue_redraw_tree(node: Node) -> void:
+	if node is CanvasItem:
+		(node as CanvasItem).queue_redraw()
+	for child in node.get_children():
+		_queue_redraw_tree(child)
 
 func _layout_current_scene() -> void:
 	if _current_scene == null:

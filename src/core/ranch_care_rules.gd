@@ -58,7 +58,7 @@ static func companion_label(occupied_count: int) -> String:
 	var mult := calc_companion_multiplier(occupied_count)
 	if mult <= 1.0:
 		return ""
-	return "陪伴 +%d%%" % int(round((mult - 1.0) * 100.0))
+	return TranslationServer.translate("陪伴 +%d%%") % int(round((mult - 1.0) * 100.0))
 
 
 static func build_label(is_focus: bool, companion_mult: float, catchup_mult: float) -> String:
@@ -66,7 +66,7 @@ static func build_label(is_focus: bool, companion_mult: float, catchup_mult: flo
 	if is_focus:
 		parts.append("专注")
 	if catchup_mult > 1.0:
-		parts.append("追赶 x%.1f" % catchup_mult)
+		parts.append(TranslationServer.translate("追赶 x%.1f") % catchup_mult)
 	if companion_mult > 1.0:
-		parts.append("陪伴 +%d%%" % int(round((companion_mult - 1.0) * 100.0)))
+		parts.append(TranslationServer.translate("陪伴 +%d%%") % int(round((companion_mult - 1.0) * 100.0)))
 	return " ".join(parts)

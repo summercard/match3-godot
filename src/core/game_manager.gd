@@ -52,7 +52,7 @@ func switch_scene(scene_name: String, data: Dictionary = {}, mode: String = "") 
 		scene_manager_node.switch_scene(scene_name, data, mode)
 		emit_signal("scene_changed", scene_name)
 	else:
-		push_warning("[GameManager] 无法切换场景: " + scene_name)
+		push_warning(TranslationServer.translate("[GameManager] 无法切换场景: ") + scene_name)
 
 ## 兼容仍调用 game.scene_manager.change_scene / game.change_scene 的旧界面代码
 func change_scene(scene_name: String, data: Dictionary = {}, mode: String = "") -> void:

@@ -25,7 +25,7 @@ func _ready() -> void:
 func configure(cards: Array, floor: int) -> void:
 	_cards = cards.duplicate(true)
 	if is_node_ready():
-		_title.text = "第 %d 层突破 · 选择一张共鸣卡" % floor
+		_title.text = TranslationServer.translate("第 %d 层突破 · 选择一张共鸣卡") % floor
 		_refresh()
 
 

@@ -125,11 +125,11 @@ static func get_ecology(monster: Dictionary) -> Dictionary:
 	var name := str(monster.get("name", monster_id))
 	return {
 		"id": monster_id,
-		"name": "%s生态札记" % name,
+		"name": TranslationServer.translate("%s生态札记") % name,
 		"origin": str(core.get("origin", "")),
 		"habitat": str(core.get("habitat", "")),
 		"niche": str(core.get("niche", "")),
-		"adventurerTip": "与%s同行时，留意它会%s；给它保留观察和休息的空间。" % [name, str(core.get("niche", "参与当地生态"))],
+		"adventurerTip": TranslationServer.translate("与%s同行时，留意它会%s；给它保留观察和休息的空间。") % [TranslationServer.translate(name), TranslationServer.translate(str(core.get("niche", "参与当地生态")))],
 	}
 
 
@@ -149,4 +149,3 @@ static func validate_catalog(monsters: Array) -> Dictionary:
 		else:
 			signatures[signature] = monster_id
 	return {"ok": missing.is_empty() and duplicates.is_empty(), "missing": missing, "duplicates": duplicates, "count": CORES.size()}
-

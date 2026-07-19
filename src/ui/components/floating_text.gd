@@ -11,7 +11,7 @@
 class_name FloatingText
 extends Node2D
 
-const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const PROJECT_ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 ## 单例
 static var instance: FloatingText
@@ -185,7 +185,8 @@ func _draw() -> void:
 		color.a = t_data["opacity"]
 		
 		var pos := Vector2(t_data["x"], t_data["y"])
-		draw_string(PROJECT_ROUND_FONT, pos + Vector2(0.0, -2.0), t_data["text"], HORIZONTAL_ALIGNMENT_CENTER, -1, display_size, color)
+		var localized_text := TranslationServer.translate(str(t_data["text"]))
+		draw_string(PROJECT_ROUND_FONT, pos + Vector2(0.0, -2.0), localized_text, HORIZONTAL_ALIGNMENT_CENTER, -1, display_size, color)
 
 ## ============================================
 # 公共方法

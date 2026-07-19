@@ -77,10 +77,10 @@ func _refresh() -> void:
 	_unlock_pill.visible = not unlocked
 	_unlock_text.text = TowerDB.unlock_hint()
 	_unlock_text.modulate = Color(1.0, 0.70, 0.50)
-	_floor_value.text = "第 %d 层" % int(state.get("current_floor", 1))
-	_wave_value.text = "第 %d/%d 波" % [int(floor.get("towerWave", 1)), int(floor.get("towerWaveCount", 5))]
+	_floor_value.text = TranslationServer.translate("第 %d 层") % int(state.get("current_floor", 1))
+	_wave_value.text = TranslationServer.translate("第 %d/%d 波") % [int(floor.get("towerWave", 1)), int(floor.get("towerWaveCount", 5))]
 	_theme_value.text = str(floor.get("towerTheme", "共鸣塔"))
-	_record_value.text = "最高 %d 层  ·  单回合 %d" % [int(state.get("highest_floor", 0)), int(state.get("highest_turn_damage", 0))]
+	_record_value.text = TranslationServer.translate("最高 %d 层  ·  单回合 %d") % [int(state.get("highest_floor", 0)), int(state.get("highest_turn_damage", 0))]
 	_start_button.disabled = not unlocked
 	_start_button_text.text = "继续远征" if bool(state.get("active", false)) else ("重新远征" if bool(state.get("completed", false)) else "开启远征")
 	_apply_start_visual(unlocked)
@@ -148,8 +148,8 @@ func _refresh_rank_rows(state: Dictionary) -> void:
 			row.text = ""
 			continue
 		var entry: Dictionary = entries[index]
-		var suffix := "单回合 %d" % int(entry.get("damage", 0)) if _show_burst else "第 %d 层 · %d 回合" % [int(entry.get("floor", 0)), int(entry.get("turns", 0))]
-		row.text = "%d  %s    %s" % [int(entry.get("rank", index + 1)), str(entry.get("name", "旅行者")), suffix]
+		var suffix := TranslationServer.translate("单回合 %d") % int(entry.get("damage", 0)) if _show_burst else TranslationServer.translate("第 %d 层 · %d 回合") % [int(entry.get("floor", 0)), int(entry.get("turns", 0))]
+		row.text = "%d  %s    %s" % [int(entry.get("rank", index + 1)), TranslationServer.translate(str(entry.get("name", "旅行者"))), suffix]
 		row.modulate = Color(1.0, 0.89, 0.50) if bool(entry.get("is_player", false)) else Color(0.89, 0.94, 1.0)
 
 

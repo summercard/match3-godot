@@ -3,7 +3,7 @@ class_name SceneAchievementGui
 extends "res://src/ui/controllers/achievement_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
-const _RoundFontSrc := preload("res://assets/fonts/jf-openhuninn-2.1.ttf")
+const _RoundFontSrc := preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 const GUI_ASSETS := {
 	"bg": "res://assets/images/ui/backgrounds/main_lobby_bg_day_v3.png",
@@ -206,10 +206,10 @@ func _on_gui_tap(point: Vector2) -> void:
 		_claim_achievement(ach)
 	elif bool(ach.get("unlocked", false)):
 		_play_feedback(card_rect)
-		_show_toast("%s 已完成" % _ach_name(ach))
+		_show_toast(TranslationServer.translate("%s 已完成") % _ach_name(ach))
 	else:
 		_play_feedback(card_rect)
-		_show_toast("目标进度 %d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
+		_show_toast(TranslationServer.translate("目标进度 %d/%d") % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
 
 
 func _connect_authored_hit_areas() -> void:
@@ -336,7 +336,7 @@ func _draw_summary_panel(font: Font) -> void:
 	var claimed := _claimed_ids.size()
 	var ratio := float(unlocked) / float(total)
 	_draw_text_left_gui(font, "冒险成就", Vector2(116.0, 137.0), Color(0.40, 0.22, 0.07), 18.0, 120.0)
-	_draw_text_left_gui(font, "已完成 %d/%d  已领取 %d" % [unlocked, total, claimed], Vector2(116.0, 159.0), Color(0.56, 0.32, 0.11), 12.0, 180.0)
+	_draw_text_left_gui(font, TranslationServer.translate("已完成 %d/%d  已领取 %d") % [unlocked, total, claimed], Vector2(116.0, 159.0), Color(0.56, 0.32, 0.11), 12.0, 180.0)
 	_draw_progress_bar_gui(Rect2(116.0, 176.0, 200.0, 16.0), ratio, "%d%%" % int(round(ratio * 100.0)))
 	_draw_texture_contain(_gui_tex("star"), Rect2(315.0, 133.0, 30.0, 30.0))
 
@@ -566,11 +566,13 @@ func _draw_texture_cover(tex: Texture2D, rect: Rect2, opacity: float = 1.0) -> v
 
 
 func _draw_center_text(font: Font, text: String, center: Vector2, color: Color, size: float, width: float) -> void:
+	text = TranslationServer.translate(text)
 	var left := center.x - width * 0.5
 	draw_string(font, Vector2(left, center.y), text, HORIZONTAL_ALIGNMENT_CENTER, width, int(size), color)
 
 
 func _draw_text_left_gui(font: Font, text: String, pos: Vector2, color: Color, size: float, width: float) -> void:
+	text = TranslationServer.translate(text)
 	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, int(size), color)
 
 

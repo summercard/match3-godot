@@ -213,7 +213,7 @@ func _trigger_tone(tone: String) -> void:
 			_add_fx({"kind": "fire_beam", "tone": tone, "from": leader_pos, "to": target_pos, "duration": 0.82})
 			_add_fx({"kind": "fire_impact", "tone": tone, "center": target_pos, "delay": 0.30, "duration": 0.72})
 			_add_float_text("-FIRE", target_pos + Vector2(0.0, -28.0), _tone_color(tone), 19.0, 0.24)
-			_add_float_text("BURN", target_pos + Vector2(0.0, -8.0), Color(1.0, 0.64, 0.12), 14.0, 0.44)
+			_add_float_text("灼烧", target_pos + Vector2(0.0, -8.0), Color(1.0, 0.64, 0.12), 14.0, 0.44)
 		_:
 			_add_fx({"kind": "beam", "tone": tone, "from": leader_pos, "to": target_pos, "duration": 0.78})
 			var label := "-火伤" if tone == "fire" else "-伤害"
@@ -294,7 +294,8 @@ func _draw_unit(unit: Dictionary, center: Vector2, enemy: bool) -> void:
 	draw_rect(Rect2(center.x - 32.0, center.y + 35.0, 64.0 * hp_ratio, 6.0), Color(0.25, 0.85, 0.30))
 	var font := ThemeDB.fallback_font
 	if font != null:
-		draw_string(font, center + Vector2(-38.0, 55.0), str(unit.get("name", "")), HORIZONTAL_ALIGNMENT_CENTER, 76.0, 12, Color(0.23, 0.12, 0.06))
+		var unit_name := TranslationServer.translate(str(unit.get("name", "")))
+		draw_string(font, center + Vector2(-38.0, 55.0), unit_name, HORIZONTAL_ALIGNMENT_CENTER, 76.0, 12, Color(0.23, 0.12, 0.06))
 
 
 func _draw_fx() -> void:
@@ -569,7 +570,7 @@ func _draw_float_texts() -> void:
 		var size_px := int(round(float(entry.get("size", 16.0)) * pop))
 		var y := float(entry.get("y", 0.0)) - p * 24.0
 		var center := Vector2(float(entry.get("x", 0.0)), y)
-		var text := str(entry.get("text", ""))
+		var text := TranslationServer.translate(str(entry.get("text", "")))
 		draw_string(font, center + Vector2(1.0, 1.0), text, HORIZONTAL_ALIGNMENT_CENTER, 96.0, size_px, Color(0.18, 0.08, 0.05, 0.75 * alpha))
 		draw_string(font, center, text, HORIZONTAL_ALIGNMENT_CENTER, 96.0, size_px, color)
 

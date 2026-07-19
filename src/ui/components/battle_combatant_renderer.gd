@@ -295,7 +295,7 @@ static func _draw_boss_visuals(scene, state: Dictionary, x: float, y: float, ind
 			var shield_color: Color = Color(0.314, 0.706, 1.0, 0.3 + shield_ratio * 0.4)
 			scene.draw_arc(Vector2(x + 55.0, y + 28.0), 36.0, 0.0, TAU, 32, shield_color, 2.0, true)
 		scene._draw_hp_bar(x + 12.0, y + 75.0, 96.0, 4.0, shield_hp, shield_max, colors.get("shield", Color.SKY_BLUE))
-		scene._draw_text_with_shadow("护盾 %d" % int(shield_hp), x + 55.0, y + 83.0, colors.get("shield", Color.SKY_BLUE), 7.4, true)
+		scene._draw_text_with_shadow(TranslationServer.translate("护盾 %d") % int(shield_hp), x + 55.0, y + 83.0, colors.get("shield", Color.SKY_BLUE), 7.4, true)
 	if vis.get("charge_timer", 0.0) > 0.0:
 		var blink_alpha: float = 0.5 + 0.5 * sin(idle_time * PI * 4.0)
 		var charge_tex: Texture2D = scene._get_texture("res://assets/images/effects/battle_fx_charge_aura.png")
