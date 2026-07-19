@@ -5,6 +5,8 @@ const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
 const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const CartoonButtonFeedbackScript = preload("res://src/ui/components/cartoon_button_feedback.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const MailContentDBScript = preload("res://src/data/mail_content_db.gd")
+const MAIL_PAGE_SIZE := 4
 
 signal back_pressed
 
@@ -13,18 +15,23 @@ var _service = null
 var _selected_instance_id := ""
 var _selected_mail_id := ""
 var _sending := false
-var _tab_inactive_style: StyleBox
-var _tab_active_style: StyleBox
+var _switching_adventurer := false
+var _mail_page := 0
 
 @onready var _inbox_panel: Control = %InboxPanel
 @onready var _blessing_panel: Control = %BlessingPanel
-@onready var _inbox_tab: Button = %InboxTab
-@onready var _blessing_tab: Button = %BlessingTab
+@onready var _inbox_tab: BaseButton = %InboxTab
+@onready var _blessing_tab: BaseButton = %BlessingTab
+@onready var _inbox_tab_text: Label = %InboxTabText
+@onready var _blessing_tab_text: Label = %BlessingTabText
 @onready var _unread_badge: Label = %UnreadBadge
 @onready var _mail_rows: Array[Button] = [%Mail0, %Mail1, %Mail2, %Mail3]
 @onready var _mail_row_statuses: Array[Label] = [%Mail0ReadStatus, %Mail1ReadStatus, %Mail2ReadStatus, %Mail3ReadStatus]
 @onready var _mail_detail_scroll: ScrollContainer = %MailDetailScroll
 @onready var _mail_detail: Label = %MailDetail
+@onready var _prev_mail_page: BaseButton = %PrevMailPage
+@onready var _next_mail_page: BaseButton = %NextMailPage
+@onready var _mail_page_value: Label = %MailPageValue
 @onready var _claim_button: Button = %ClaimButton
 @onready var _delete_button: Button = %DeleteButton
 @onready var _sender_portrait: TextureRect = %SenderPortrait
@@ -33,7 +40,11 @@ var _tab_active_style: StyleBox
 @onready var _collection_star_total: Label = %ReceivedStarTotal
 @onready var _adventurer_name: Label = %AdventurerName
 @onready var _adventurer_portrait: TextureRect = %AdventurerPortrait
+@onready var _adventurer_frame: Control = get_node("BlessingPanel/Panel/AdventurerFrame")
+@onready var _selection_sparkle: Control = %SelectionSparkle
 @onready var _blessing_status: Label = %BlessingStatus
+@onready var _journey_hint: Label = %JourneyHint
+@onready var _daily_remaining: Label = %DailyRemaining
 @onready var _send_button: Button = %SendButton
 @onready var _star: Control = %FlyingStar
 @onready var _blessing_star_trail: Control = %BlessingStarTrail
@@ -42,9 +53,7 @@ var _tab_active_style: StyleBox
 func _ready() -> void:
 	_storage = get_node_or_null("/root/SaveManager")
 	_service = MailboxServiceScript.new(_storage) if _storage != null else null
-	_tab_inactive_style = _inbox_tab.get_theme_stylebox("normal")
-	_tab_active_style = _inbox_tab.get_theme_stylebox("pressed")
-	for button in [_inbox_tab, _blessing_tab, _claim_button, _delete_button, _send_button, %PrevAdventurer, %NextAdventurer, %BackButton]:
+	for button in [_inbox_tab, _blessing_tab, _claim_button, _delete_button, _send_button, %PrevAdventurer, %NextAdventurer, _prev_mail_page, _next_mail_page, %BackButton]:
 		var feedback := CartoonButtonFeedbackScript.new() as CartoonButtonFeedback
 		button.add_child(feedback)
 		feedback.setup(button, CartoonButtonFeedback.Profile.ENTRY if button == _send_button else CartoonButtonFeedback.Profile.NAV)
@@ -55,6 +64,8 @@ func _ready() -> void:
 	_send_button.pressed.connect(_send_blessing)
 	%PrevAdventurer.pressed.connect(func(): _cycle_adventurer(-1))
 	%NextAdventurer.pressed.connect(func(): _cycle_adventurer(1))
+	_prev_mail_page.pressed.connect(func(): _change_mail_page(-1))
+	_next_mail_page.pressed.connect(func(): _change_mail_page(1))
 	%BackButton.pressed.connect(func(): back_pressed.emit())
 	for index in _mail_rows.size():
 		_mail_rows[index].pressed.connect(_open_mail_index.bind(index))
@@ -62,6 +73,7 @@ func _ready() -> void:
 	_blessing_star_trail.visible = false
 	_show_inbox()
 	_refresh()
+	call_deferred("_play_entry_animation")
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -101,12 +113,10 @@ func _show_blessing() -> void:
 
 
 func _update_tab_visuals(inbox_active: bool) -> void:
-	if _tab_inactive_style == null or _tab_active_style == null:
-		return
-	_inbox_tab.add_theme_stylebox_override("normal", _tab_active_style if inbox_active else _tab_inactive_style)
-	_blessing_tab.add_theme_stylebox_override("normal", _tab_inactive_style if inbox_active else _tab_active_style)
-	_inbox_tab.add_theme_color_override("font_color", Color.WHITE if inbox_active else Color(0.14, 0.34, 0.60, 1))
-	_blessing_tab.add_theme_color_override("font_color", Color(0.14, 0.34, 0.60, 1) if inbox_active else Color.WHITE)
+	_inbox_tab.self_modulate = Color.WHITE if inbox_active else Color(0.66, 0.79, 0.92, 0.84)
+	_blessing_tab.self_modulate = Color(0.66, 0.79, 0.92, 0.84) if inbox_active else Color.WHITE
+	_inbox_tab_text.add_theme_color_override("font_color", Color.WHITE if inbox_active else Color(0.75, 0.88, 0.98))
+	_blessing_tab_text.add_theme_color_override("font_color", Color(0.75, 0.88, 0.98) if inbox_active else Color.WHITE)
 
 
 func _refresh_blessing(owned: Array, state: Dictionary) -> void:
@@ -132,25 +142,36 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 		_adventurer_portrait.visible = _adventurer_portrait.texture != null
 	var daily_count := int(state.get("daily_send_count", 0))
 	_blessing_status.text = "图鉴星星：%d" % MailboxRulesScript.collection_star_total(state)
-	_send_button.disabled = current.is_empty() or daily_count >= 3 or _sending
-	_send_button.tooltip_text = "今日已送出上限" if daily_count >= 3 else "今日还可送出 %d 次" % maxi(0, 3 - daily_count)
+	var remaining := maxi(0, MailContentDBScript.DAILY_SEND_LIMIT - daily_count)
+	_send_button.disabled = current.is_empty() or remaining <= 0 or _sending
+	_send_button.tooltip_text = "今日已送出上限" if remaining <= 0 else "今日还可送出 %d 次" % remaining
+	_daily_remaining.text = "今日还可送出 %d 次" % remaining
+	var has_pending := not (state.get("pending_blessings", []) as Array).is_empty()
+	_journey_hint.text = "祝福已乘着星光启程。\n\n每日独立的陌生来信会在\n合适的时候悄悄抵达邮箱。" if has_pending else "送出后，星光会穿过云层。\n\n陌生旅人的祝福每天都会\n在不同时间抵达邮箱。"
 
 
 func _refresh_inbox(state: Dictionary) -> void:
 	var inbox: Array = state.get("inbox", [])
+	var page_count := maxi(1, ceili(float(inbox.size()) / float(MAIL_PAGE_SIZE)))
+	_mail_page = clampi(_mail_page, 0, page_count - 1)
+	var page_start := _mail_page * MAIL_PAGE_SIZE
 	var unread := int(state.get("unread_count", 0))
 	_unlocked_species_total.text = str((state.get("collection_star_species_ids", []) as Array).size())
 	_collection_star_total.text = str(MailboxRulesScript.collection_star_total(state))
 	_unread_badge.visible = unread > 0
 	_unread_badge.text = str(unread)
+	_mail_page_value.text = "%d / %d" % [_mail_page + 1, page_count]
+	_prev_mail_page.disabled = _mail_page <= 0
+	_next_mail_page.disabled = _mail_page >= page_count - 1
 	for index in _mail_rows.size():
 		var button := _mail_rows[index]
 		var read_status := _mail_row_statuses[index]
-		if index >= inbox.size():
+		var inbox_index := page_start + index
+		if inbox_index >= inbox.size():
 			button.visible = false
 			continue
 		button.visible = true
-		var mail: Dictionary = inbox[index]
+		var mail: Dictionary = inbox[inbox_index]
 		var unread_mail := mail.get("read_at", null) == null
 		read_status.text = "未读" if unread_mail else "已读"
 		read_status.add_theme_color_override("font_color", Color(0.90, 0.36, 0.10, 1.0) if unread_mail else Color(0.33, 0.51, 0.68, 1.0))
@@ -195,10 +216,23 @@ func _reset_mail_detail_scroll() -> void:
 
 func _open_mail_index(index: int) -> void:
 	var inbox: Array = _service.get_state().get("inbox", [])
-	if index < 0 or index >= inbox.size():
+	var inbox_index := _mail_page * MAIL_PAGE_SIZE + index
+	if inbox_index < 0 or inbox_index >= inbox.size():
 		return
-	_selected_mail_id = str((inbox[index] as Dictionary).get("id", ""))
+	_selected_mail_id = str((inbox[inbox_index] as Dictionary).get("id", ""))
 	_service.mark_read(_selected_mail_id)
+	_refresh()
+
+
+func _change_mail_page(direction: int) -> void:
+	var inbox: Array = _service.get_state().get("inbox", [])
+	var page_count := maxi(1, ceili(float(inbox.size()) / float(MAIL_PAGE_SIZE)))
+	var next_page := clampi(_mail_page + direction, 0, page_count - 1)
+	if next_page == _mail_page:
+		return
+	_mail_page = next_page
+	var page_start := _mail_page * MAIL_PAGE_SIZE
+	_selected_mail_id = str((inbox[page_start] as Dictionary).get("id", "")) if page_start < inbox.size() else ""
 	_refresh()
 
 
@@ -223,9 +257,22 @@ func _delete_selected_mail() -> void:
 
 
 func _cycle_adventurer(direction: int) -> void:
-	var owned: Array = _storage.call("get_owned_monsters") if _storage != null and _storage.has_method("get_owned_monsters") else []
-	if owned.is_empty():
+	if _switching_adventurer:
 		return
+	var owned: Array = _storage.call("get_owned_monsters") if _storage != null and _storage.has_method("get_owned_monsters") else []
+	if owned.size() <= 1:
+		return
+	_switching_adventurer = true
+	(%PrevAdventurer as BaseButton).disabled = true
+	(%NextAdventurer as BaseButton).disabled = true
+	var frame_rest := _adventurer_frame.position
+	var name_rest := _adventurer_name.position
+	var outgoing := create_tween().set_parallel(true)
+	outgoing.tween_property(_adventurer_frame, "position", frame_rest + Vector2(-direction * 22.0, -8.0), 0.13).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	outgoing.tween_property(_adventurer_frame, "modulate:a", 0.0, 0.12)
+	outgoing.tween_property(_adventurer_name, "position", name_rest + Vector2(-direction * 14.0, -4.0), 0.13)
+	outgoing.tween_property(_adventurer_name, "modulate:a", 0.0, 0.12)
+	await outgoing.finished
 	var current_index := 0
 	for index in owned.size():
 		if str((owned[index] as Dictionary).get("instanceId", "")) == _selected_instance_id:
@@ -235,6 +282,53 @@ func _cycle_adventurer(direction: int) -> void:
 	_selected_instance_id = str((owned[next_index] as Dictionary).get("instanceId", ""))
 	_service.select_adventurer(_selected_instance_id)
 	_refresh()
+	_adventurer_frame.position = frame_rest + Vector2(direction * 25.0, 9.0)
+	_adventurer_frame.scale = Vector2(0.92, 0.92)
+	_adventurer_frame.modulate.a = 0.0
+	_adventurer_name.position = name_rest + Vector2(direction * 16.0, 5.0)
+	_adventurer_name.modulate.a = 0.0
+	_selection_sparkle.visible = true
+	_selection_sparkle.scale = Vector2(0.72, 0.72)
+	_selection_sparkle.modulate.a = 0.0
+	var incoming := create_tween().set_parallel(true)
+	incoming.tween_property(_adventurer_frame, "position", frame_rest, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	incoming.tween_property(_adventurer_frame, "scale", Vector2.ONE, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	incoming.tween_property(_adventurer_frame, "modulate:a", 1.0, 0.12)
+	incoming.tween_property(_adventurer_name, "position", name_rest, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	incoming.tween_property(_adventurer_name, "modulate:a", 1.0, 0.12)
+	incoming.tween_property(_selection_sparkle, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	incoming.tween_property(_selection_sparkle, "modulate:a", 0.72, 0.08)
+	incoming.tween_property(_selection_sparkle, "modulate:a", 0.0, 0.14).set_delay(0.12)
+	await incoming.finished
+	_selection_sparkle.visible = false
+	(%PrevAdventurer as BaseButton).disabled = false
+	(%NextAdventurer as BaseButton).disabled = false
+	_switching_adventurer = false
+
+
+func _play_entry_animation() -> void:
+	_play_entry_group([get_node("HeaderPlaque"), get_node("Title"), get_node("TitleTrail"), %BackButton], 0.0, 12.0, 0.96)
+	_play_entry_group([_inbox_tab, _blessing_tab], 0.06, 8.0, 0.94)
+	_play_entry_group([get_node("InboxPanel/ListPanel")], 0.12, 14.0, 0.96)
+	_play_entry_group([get_node("InboxPanel/MailboxTotals"), get_node("InboxPanel/DetailPanel")], 0.18, -14.0, 0.96)
+	_play_entry_group([get_node("BlessingPanel/Panel/TravelCard"), get_node("BlessingPanel/Panel/Prompt"), get_node("BlessingPanel/Panel/TravelLine"), _adventurer_frame, _adventurer_name, %PrevAdventurer, %NextAdventurer, _journey_hint], 0.12, 14.0, 0.96)
+	_play_entry_group([get_node("BlessingPanel/Panel/ActionRail"), _blessing_status, _send_button, _daily_remaining], 0.18, -14.0, 0.96)
+
+
+func _play_entry_group(nodes: Array, delay: float, x_offset: float, start_scale: float) -> void:
+	for candidate in nodes:
+		var control := candidate as Control
+		if control == null:
+			continue
+		var rest_position := control.position
+		control.pivot_offset = control.size * 0.5
+		control.position = rest_position + Vector2(x_offset, 0.0)
+		control.scale = Vector2.ONE * start_scale
+		control.modulate.a = 0.0
+		var tween := create_tween().set_parallel(true)
+		tween.tween_property(control, "modulate:a", 1.0, 0.18).set_delay(delay)
+		tween.tween_property(control, "position", rest_position, 0.22).set_delay(delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(control, "scale", Vector2.ONE, 0.22).set_delay(delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _send_blessing() -> void:

@@ -22,6 +22,18 @@ const CASES := [
 		"settle": 12,
 	},
 	{
+		"id": "battle_boss_centered",
+		"scene": "battle",
+		"expected": "res://src/ui/scenes/battle_screen.tscn",
+		"settle": 14,
+	},
+	{
+		"id": "battle_three_centered",
+		"scene": "battle",
+		"expected": "res://src/ui/scenes/battle_screen.tscn",
+		"settle": 14,
+	},
+	{
 		"id": "settings_confirm_popup",
 		"scene": "settings",
 		"expected": "res://src/ui/scenes/settings.tscn",
@@ -69,6 +81,30 @@ const CASES := [
 		"expected": "res://src/ui/scenes/battle_result.tscn",
 		"settle": 18,
 	},
+	{
+		"id": "tower_locked",
+		"scene": "tower",
+		"expected": "res://src/ui/scenes/tower.tscn",
+		"settle": 36,
+	},
+	{
+		"id": "tower_unlocked",
+		"scene": "tower",
+		"expected": "res://src/ui/scenes/tower.tscn",
+		"settle": 36,
+	},
+	{
+		"id": "mailbox_inbox",
+		"scene": "mailbox",
+		"expected": "res://src/ui/scenes/mailbox.tscn",
+		"settle": 36,
+	},
+	{
+		"id": "mailbox_blessing",
+		"scene": "mailbox",
+		"expected": "res://src/ui/scenes/mailbox.tscn",
+		"settle": 36,
+	},
 ]
 
 var _failures: Array[String] = []
@@ -89,7 +125,8 @@ func _capture_case(capture_case: Dictionary) -> void:
 	await process_frame
 
 	var scene_name := str(capture_case.get("scene", ""))
-	var switched := bool(main.call("switch_scene", scene_name, _scene_data(scene_name)))
+	var case_id := str(capture_case.get("id", ""))
+	var switched := bool(main.call("switch_scene", scene_name, _scene_data(scene_name, case_id)))
 	_expect(switched, "%s should enter through main.switch_scene" % capture_case.get("id", "case"))
 	await process_frame
 	await process_frame
@@ -122,14 +159,22 @@ func _capture_case(capture_case: Dictionary) -> void:
 	main.queue_free()
 	await process_frame
 
-func _scene_data(scene_name: String) -> Dictionary:
+func _scene_data(scene_name: String, case_id: String = "") -> Dictionary:
 	if scene_name == "stage_select":
 		return {"chapterIndex": 0}
 	if scene_name == "battle":
 		var stage_db = load("res://src/data/stage_db.gd").new()
+		var stage_id := "stage_1_1"
+		if case_id == "battle_boss_centered":
+			stage_id = "stage_1_12"
+		elif case_id == "battle_three_centered":
+			stage_id = "stage_3_6"
+		var battle_stage: Dictionary = stage_db.get_stage(stage_id)
+		if case_id == "battle_default_hotbar":
+			battle_stage["disableRandomElite"] = true
 		return {
-			"stageId": "stage_1_1",
-			"stageData": stage_db.get_stage("stage_1_1"),
+			"stageId": stage_id,
+			"stageData": battle_stage,
 			"inputTestOnly": true,
 		}
 	if scene_name == "result":
@@ -177,6 +222,14 @@ func _apply_case_state(case_id: String, scene: Control) -> void:
 				scene.call("_mark_gui_dirty")
 			if scene.has_method("_sync_gui"):
 				scene.call("_sync_gui")
+		"battle_boss_centered":
+			var boss_centers: Array = scene.call("_collect_enemy_centers")
+			_expect(boss_centers.size() == 1 and is_equal_approx((boss_centers[0] as Vector2).y, 151.0), "boss screenshot should keep its target anchor at Y=151")
+		"battle_three_centered":
+			var enemy_centers: Array = scene.call("_collect_enemy_centers")
+			_expect(enemy_centers.size() == 3, "three-enemy screenshot should expose three targets")
+			for center: Vector2 in enemy_centers:
+				_expect(is_equal_approx(center.y, 151.0), "three-enemy screenshot should keep every target at Y=151")
 		"album_selected_detail":
 			scene.set("_captured_ids", ["monster_001"])
 			scene.set("_selected_tab", "album")
@@ -229,6 +282,30 @@ func _apply_case_state(case_id: String, scene: Control) -> void:
 				scene.call("_sync_gui")
 			var empty_items: Variant = scene.get("_item_list")
 			_expect(empty_items is Array and empty_items.is_empty(), "inventory empty case should keep the item list empty")
+		"tower_unlocked":
+			var storage := root.get_node_or_null("/root/SaveManager")
+			if storage != null:
+				storage.call("save_stage_stars", "stage_5_12", 3)
+			if scene.has_method("_refresh"):
+				scene.call("_refresh")
+			_expect(not (scene.get_node("StartButton") as BaseButton).disabled, "tower screenshot should show the unlocked gold expedition action")
+		"tower_locked":
+			var locked_storage := root.get_node_or_null("/root/SaveManager")
+			if locked_storage != null:
+				locked_storage.call("clear_all_data")
+			if scene.has_method("_refresh"):
+				scene.call("_refresh")
+			_expect((scene.get_node("StartButton") as BaseButton).disabled, "tower locked screenshot should show the cool-gray disabled expedition action")
+			var locked_material := (scene.get_node("StartButton/ButtonVisual") as TextureRect).material as ShaderMaterial
+			_expect(locked_material != null and float(locked_material.get_shader_parameter("disabled_amount")) > 0.99, "tower locked screenshot should drive the disabled texture shader")
+		"mailbox_inbox":
+			if scene.has_method("_show_inbox"):
+				scene.call("_show_inbox")
+			_expect((scene.get_node("InboxPanel") as Control).visible, "mailbox inbox screenshot should show the four-item list layout")
+		"mailbox_blessing":
+			if scene.has_method("_show_blessing"):
+				scene.call("_show_blessing")
+			_expect((scene.get_node("BlessingPanel") as Control).visible, "mailbox blessing screenshot should show the travel card and action rail")
 		_:
 			scene.queue_redraw()
 

@@ -46,14 +46,14 @@ const MONSTER_DB: Dictionary = {
 	"monster_001": {
 		"id": "monster_001", "name": "大眼蜗", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 160, "baseATK": 20, "baseDEF": 11, "baseSPD": 12,
+		"baseHP": 160, "baseATK": 32, "baseDEF": 11, "baseSPD": 12,
 		"skill": {"name": "大眼蜗冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_001"
 	},
 	"monster_002": {
 		"id": "monster_002", "name": "草兔兔", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 162, "baseATK": 16, "baseDEF": 22, "baseSPD": 15,
+		"baseHP": 162, "baseATK": 27, "baseDEF": 22, "baseSPD": 15,
 		"skill": {"name": "草兔兔冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_002",
 		"evolution": {"level": 16, "target": "monster_003"}
@@ -61,7 +61,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_003": {
 		"id": "monster_003", "name": "兔八子", "element": "grass",
 		"rarity": 2, "emoji": "",
-		"baseHP": 206, "baseATK": 33, "baseDEF": 19, "baseSPD": 23,
+		"baseHP": 206, "baseATK": 41, "baseDEF": 19, "baseSPD": 23,
 		"skill": {"name": "兔八子冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
 		"leaderSkill": "LS_MONSTER_003",
 		"evolution": {"level": 30, "target": "monster_004"}
@@ -69,7 +69,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_004": {
 		"id": "monster_004", "name": "草兔王", "element": "grass",
 		"rarity": 3, "emoji": "",
-		"baseHP": 293, "baseATK": 39, "baseDEF": 51, "baseSPD": 20,
+		"baseHP": 293, "baseATK": 45, "baseDEF": 51, "baseSPD": 20,
 		"skill": {"name": "草兔王冲击", "cost": 9, "type": "strike", "multiplier": 1.75, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.75}]},
 		"leaderSkill": "LS_MONSTER_004"
 	},
@@ -92,7 +92,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_007": {
 		"id": "monster_007", "name": "草洋洋", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 164, "baseATK": 18, "baseDEF": 20, "baseSPD": 18,
+		"baseHP": 164, "baseATK": 30, "baseDEF": 20, "baseSPD": 18,
 		"skill": {"name": "草洋洋冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_007",
 		"evolution": {"level": 16, "target": "monster_009"}
@@ -122,7 +122,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_011": {
 		"id": "monster_011", "name": "水珠花", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 167, "baseATK": 15, "baseDEF": 23, "baseSPD": 16,
+		"baseHP": 167, "baseATK": 27, "baseDEF": 23, "baseSPD": 16,
 		"skill": {"name": "水珠花冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_011",
 		"evolution": {"level": 16, "target": "monster_012"}
@@ -145,7 +145,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_014": {
 		"id": "monster_014", "name": "矿鼠鼠", "element": "earth",
 		"rarity": 1, "emoji": "",
-		"baseHP": 193, "baseATK": 14, "baseDEF": 34, "baseSPD": 6,
+		"baseHP": 193, "baseATK": 26, "baseDEF": 34, "baseSPD": 6,
 		"skill": {"name": "矿鼠鼠冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_014",
 		"evolution": {"level": 16, "target": "monster_015"}
@@ -191,7 +191,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_020": {
 		"id": "monster_020", "name": "迷路绵阳", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 159, "baseATK": 18, "baseDEF": 11, "baseSPD": 12,
+		"baseHP": 159, "baseATK": 30, "baseDEF": 11, "baseSPD": 12,
 		"skill": {"name": "迷路绵阳冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_020",
 		"evolution": {"level": 16, "target": "monster_021"}
@@ -214,7 +214,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_023": {
 		"id": "monster_023", "name": "小雨滴", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 167, "baseATK": 18, "baseDEF": 22, "baseSPD": 17,
+		"baseHP": 167, "baseATK": 30, "baseDEF": 22, "baseSPD": 17,
 		"skill": {"name": "小雨滴冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_023",
 		"evolution": {"level": 16, "target": "monster_024"}
@@ -358,7 +358,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_042": {
 		"id": "monster_042", "name": "甲球", "element": "earth",
 		"rarity": 1, "emoji": "",
-		"baseHP": 195, "baseATK": 14, "baseDEF": 37, "baseSPD": 6,
+		"baseHP": 195, "baseATK": 26, "baseDEF": 37, "baseSPD": 6,
 		"skill": {"name": "甲球冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_042",
 		"evolution": {"level": 16, "target": "monster_043"}
@@ -396,7 +396,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_047": {
 		"id": "monster_047", "name": "小岩球", "element": "earth",
 		"rarity": 1, "emoji": "",
-		"baseHP": 198, "baseATK": 14, "baseDEF": 36, "baseSPD": 6,
+		"baseHP": 198, "baseATK": 26, "baseDEF": 36, "baseSPD": 6,
 		"skill": {"name": "小岩球冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_047",
 		"evolution": {"level": 16, "target": "monster_048"}
@@ -411,7 +411,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_049": {
 		"id": "monster_049", "name": "肖肖蜥", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 152, "baseATK": 20, "baseDEF": 11, "baseSPD": 17,
+		"baseHP": 152, "baseATK": 32, "baseDEF": 11, "baseSPD": 17,
 		"skill": {"name": "肖肖蜥冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_049",
 		"evolution": {"level": 16, "target": "monster_050"}
@@ -441,7 +441,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_053": {
 		"id": "monster_053", "name": "信使龟", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 195, "baseATK": 14, "baseDEF": 31, "baseSPD": 11,
+		"baseHP": 195, "baseATK": 32, "baseDEF": 31, "baseSPD": 11,
 		"skill": {"name": "信使龟冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_053",
 		"evolution": {"level": 16, "target": "monster_054"}
@@ -449,7 +449,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_054": {
 		"id": "monster_054", "name": "破浪鬼", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 156, "baseATK": 19, "baseDEF": 13, "baseSPD": 16,
+		"baseHP": 156, "baseATK": 36, "baseDEF": 13, "baseSPD": 16,
 		"skill": {"name": "破浪鬼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_054",
 		"evolution": {"level": 30, "target": "monster_055"}
@@ -457,14 +457,14 @@ const MONSTER_DB: Dictionary = {
 	"monster_055": {
 		"id": "monster_055", "name": "超速闪电龟", "element": "thunder",
 		"rarity": 2, "emoji": "",
-		"baseHP": 215, "baseATK": 32, "baseDEF": 32, "baseSPD": 26,
+		"baseHP": 215, "baseATK": 48, "baseDEF": 32, "baseSPD": 26,
 		"skill": {"name": "超速闪电龟冲击", "cost": 8, "type": "strike", "multiplier": 1.5, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.5}]},
 		"leaderSkill": "LS_MONSTER_055"
 	},
 	"monster_056": {
 		"id": "monster_056", "name": "水泡泡", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 165, "baseATK": 16, "baseDEF": 21, "baseSPD": 12,
+		"baseHP": 165, "baseATK": 28, "baseDEF": 21, "baseSPD": 12,
 		"skill": {"name": "水泡泡冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_056",
 		"evolution": {"level": 16, "target": "monster_057"}
@@ -509,7 +509,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_062": {
 		"id": "monster_062", "name": "海噜噜", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 170, "baseATK": 14, "baseDEF": 20, "baseSPD": 15,
+		"baseHP": 170, "baseATK": 26, "baseDEF": 20, "baseSPD": 15,
 		"skill": {"name": "海噜噜冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_062",
 		"evolution": {"level": 16, "target": "monster_063"}
@@ -524,7 +524,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_064": {
 		"id": "monster_064", "name": "椰果果", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 165, "baseATK": 15, "baseDEF": 18, "baseSPD": 12,
+		"baseHP": 165, "baseATK": 27, "baseDEF": 18, "baseSPD": 12,
 		"skill": {"name": "椰果果冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_064",
 		"evolution": {"level": 16, "target": "monster_065"}
@@ -570,7 +570,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_070": {
 		"id": "monster_070", "name": "冰帝小企鹅", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 164, "baseATK": 15, "baseDEF": 25, "baseSPD": 14,
+		"baseHP": 164, "baseATK": 27, "baseDEF": 25, "baseSPD": 14,
 		"skill": {"name": "冰帝小企鹅冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_070",
 		"evolution": {"level": 16, "target": "monster_071"}
@@ -593,7 +593,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_073": {
 		"id": "monster_073", "name": "噗尼", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 169, "baseATK": 15, "baseDEF": 23, "baseSPD": 9,
+		"baseHP": 169, "baseATK": 27, "baseDEF": 23, "baseSPD": 9,
 		"skill": {"name": "噗尼冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_073",
 		"evolution": {"level": 16, "target": "monster_074"}
@@ -616,7 +616,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_076": {
 		"id": "monster_076", "name": "小白", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 191, "baseATK": 14, "baseDEF": 37, "baseSPD": 6,
+		"baseHP": 191, "baseATK": 26, "baseDEF": 37, "baseSPD": 6,
 		"skill": {"name": "小白冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_076",
 		"evolution": {"level": 16, "target": "monster_077"}
@@ -639,7 +639,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_079": {
 		"id": "monster_079", "name": "极光小熊", "element": "water",
 		"rarity": 1, "emoji": "",
-		"baseHP": 165, "baseATK": 18, "baseDEF": 24, "baseSPD": 11,
+		"baseHP": 165, "baseATK": 30, "baseDEF": 24, "baseSPD": 11,
 		"skill": {"name": "极光小熊冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_079",
 		"evolution": {"level": 16, "target": "monster_080"}
@@ -723,7 +723,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_090": {
 		"id": "monster_090", "name": "夜来香", "element": "grass",
 		"rarity": 1, "emoji": "",
-		"baseHP": 168, "baseATK": 15, "baseDEF": 21, "baseSPD": 12,
+		"baseHP": 168, "baseATK": 27, "baseDEF": 21, "baseSPD": 12,
 		"skill": {"name": "夜来香冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_090",
 		"evolution": {"level": 16, "target": "monster_091"}
@@ -761,7 +761,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_095": {
 		"id": "monster_095", "name": "熔岩蟹宝宝", "element": "fire",
 		"rarity": 1, "emoji": "",
-		"baseHP": 175, "baseATK": 21, "baseDEF": 24, "baseSPD": 9,
+		"baseHP": 175, "baseATK": 33, "baseDEF": 24, "baseSPD": 9,
 		"skill": {"name": "熔岩蟹宝宝冲击", "cost": 7, "type": "strike", "multiplier": 1.25, "effects": [{"kind": "damage", "target": "weakest_enemy", "multiplier": 1.25}]},
 		"leaderSkill": "LS_MONSTER_095",
 		"evolution": {"level": 16, "target": "monster_096"}

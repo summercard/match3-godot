@@ -14,6 +14,24 @@ func _run() -> void:
 	storage.clear_all_data()
 	var owned: Array = storage.get_owned_monsters()
 	_expect(not owned.is_empty(), "mailbox should have an owned adventurer to select")
+	var seeded_state: Dictionary = storage.get_mailbox_state()
+	var seeded_inbox: Array = []
+	for index in range(5):
+		seeded_inbox.append({
+			"id": "mailbox_page_seed:%d" % index,
+			"source": "qa",
+			"sender_name": "分页旅人 %d" % (index + 1),
+			"sender_monster_id": "monster_049",
+			"title": "分页测试来信 %d" % (index + 1),
+			"body": "用于验证四封一页的邮箱布局。",
+			"attachments": [],
+			"created_at": index + 1,
+			"read_at": 1,
+			"claimed_at": 1,
+			"reward_receipt_id": "mail_reward:mailbox_page_seed:%d" % index,
+		})
+	seeded_state["inbox"] = seeded_inbox
+	storage.save_mailbox_state(seeded_state)
 
 	var main: Control = load("res://main.tscn").instantiate()
 	root.add_child(main)
@@ -23,25 +41,36 @@ func _run() -> void:
 	var mailbox := main.get_current_scene() as Control
 	_expect(mailbox != null, "mailbox scene should load")
 	if mailbox != null:
-		var inbox_tab := mailbox.get_node("InboxTab") as Button
-		var blessing_tab := mailbox.get_node("BlessingTab") as Button
-		var next_adventurer := mailbox.get_node("BlessingPanel/Panel/NextAdventurer") as Button
-		var prev_adventurer := mailbox.get_node("BlessingPanel/Panel/PrevAdventurer") as Button
+		var inbox_tab := mailbox.get_node("InboxTab") as BaseButton
+		var blessing_tab := mailbox.get_node("BlessingTab") as BaseButton
+		var next_adventurer := mailbox.get_node("BlessingPanel/Panel/NextAdventurer") as BaseButton
+		var prev_adventurer := mailbox.get_node("BlessingPanel/Panel/PrevAdventurer") as BaseButton
 		var send_button := mailbox.get_node("BlessingPanel/Panel/SendButton") as Button
 		var claim_button := mailbox.get_node("InboxPanel/DetailPanel/ClaimButton") as Button
 		var delete_button := mailbox.get_node("InboxPanel/DetailPanel/DeleteButton") as Button
+		var prev_mail_page := mailbox.get_node("InboxPanel/ListPanel/PrevMailPage") as BaseButton
+		var next_mail_page := mailbox.get_node("InboxPanel/ListPanel/NextMailPage") as BaseButton
 		var detail_scroll := mailbox.get_node("InboxPanel/DetailPanel/MailDetailScroll") as ScrollContainer
 		var back_button := mailbox.get_node("BackButton") as Button
-		for button in [inbox_tab, blessing_tab, prev_adventurer, next_adventurer, send_button, claim_button, delete_button, back_button]:
+		for button in [inbox_tab, blessing_tab, prev_adventurer, next_adventurer, prev_mail_page, next_mail_page, send_button, claim_button, delete_button, back_button]:
 			_expect(button.has_node("CartoonFeedback"), "%s should retain press feedback" % button.name)
 		_expect((mailbox.get_node("InboxPanel") as Control).visible, "inbox should be the default tab")
+		_expect(not next_mail_page.disabled, "five messages should enable the second four-item inbox page")
+		next_mail_page.pressed.emit()
+		_expect(int(mailbox.get("_mail_page")) == 1, "next page should advance the inbox page index")
+		prev_mail_page.pressed.emit()
+		_expect(int(mailbox.get("_mail_page")) == 0, "previous page should return to the first inbox page")
 		blessing_tab.pressed.emit()
 		_expect((mailbox.get_node("BlessingPanel") as Control).visible and not (mailbox.get_node("InboxPanel") as Control).visible, "blessing tab should switch the visible panel")
 		var first_id := str(mailbox.get("_selected_instance_id"))
 		if owned.size() > 1:
 			next_adventurer.pressed.emit()
+			for _frame in range(28):
+				await process_frame
 			_expect(str(mailbox.get("_selected_instance_id")) != first_id, "next adventurer button should change the selected adventurer")
 			prev_adventurer.pressed.emit()
+			for _frame in range(28):
+				await process_frame
 			_expect(str(mailbox.get("_selected_instance_id")) == first_id, "previous adventurer button should restore the prior adventurer")
 		var before_send: Dictionary = storage.get_mailbox_state()
 		var pending_before := (before_send.get("pending_blessings", []) as Array).size()
@@ -87,7 +116,7 @@ func _run() -> void:
 		_expect(read_status.text == "未读", "an unread mail row should show its unread marker")
 		mail_row.pressed.emit()
 		state = storage.get_mailbox_state()
-		_expect(int(state.get("unread_count", 0)) == 0, "opening a mail row should mark it as read")
+		_expect(int(state.get("unread_count", 0)) == unread_before, "opening a mail row should mark that message as read without changing other daily arrivals")
 		_expect(read_status.text == "已读", "opened mail should update to the read marker")
 		var sender_portrait := mailbox.get_node("InboxPanel/DetailPanel/SenderPortraitFrame/SenderPortrait") as TextureRect
 		_expect(sender_portrait.visible and sender_portrait.texture != null, "blessing mail should show its sender spirit portrait")
@@ -104,6 +133,7 @@ func _run() -> void:
 		claim_button.pressed.emit()
 		state = storage.get_mailbox_state()
 		var inbox: Array = state.get("inbox", [])
+		var inbox_size_before_delete := inbox.size()
 		_expect(not inbox.is_empty() and (inbox[0] as Dictionary).get("claimed_at", null) != null, "claim button should persist attachment collection")
 		_expect(claim_button.disabled, "claimed mail should disable its claim button")
 		_expect(claim_button.get_theme_stylebox("disabled") != null, "claimed mail should retain a colored disabled button style")
@@ -111,7 +141,7 @@ func _run() -> void:
 		_expect(delete_button.get_theme_stylebox("normal") != claim_button.get_theme_stylebox("disabled"), "delete should use the claimed-button shape with a distinct warning color")
 		delete_button.pressed.emit()
 		state = storage.get_mailbox_state()
-		_expect((state.get("inbox", []) as Array).is_empty(), "delete button should remove claimed mail")
+		_expect((state.get("inbox", []) as Array).size() == inbox_size_before_delete - 1, "delete button should remove the claimed mail without discarding other daily arrivals")
 		var back_events: Array = []
 		mailbox.back_pressed.connect(func(): back_events.append(true))
 		back_button.pressed.emit()

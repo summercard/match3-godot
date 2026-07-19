@@ -26,7 +26,8 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	main.switch_scene("tower")
-	await process_frame
+	for _frame in range(45):
+		await process_frame
 	var tower := main.get_current_scene() as Control
 	_expect(tower != null, "tower scene should load")
 	if tower != null:
@@ -35,13 +36,19 @@ func _run() -> void:
 		_expect(not (tower.get_node("StartButton") as BaseButton).disabled, "tower should be directly testable after its gate is unlocked")
 		_expect(tower.get_node("StartButton").get_child_count() > 0, "tower start action should keep press feedback attached")
 		_expect(not (tower.get_node("UnlockPill") as Control).visible, "tower should hide the unlock hint after its gate is met")
-		_expect((tower.get_node("StartButton") as TextureButton).texture_normal.resource_path.ends_with("main_ui_entry_shop_v3.png"), "tower start should use the shared glossy entry-button style")
+		_expect((tower.get_node("StartButton/ButtonVisual") as TextureRect).texture.resource_path.ends_with("button_butter_gold.png"), "tower start should use the Cocos gold expedition button")
+		var tower_start := tower.get_node("StartButton") as Control
+		_expect(tower_start.position.is_equal_approx(Vector2(208.0, 283.0)) and tower_start.size.is_equal_approx(Vector2(157.0, 63.0)), "tower start button should match the Cocos 1.3.2 bounds (position=%s size=%s)" % [tower_start.position, tower_start.size])
+		_expect((tower.get_node("StatusPanel") as Control).position.is_equal_approx(Vector2(14.0, 193.0)), "tower status card should share the Cocos baseline with the expedition action")
+		_expect((tower.get_node("BackButton") as TextureButton).texture_normal.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "tower back action should use the shared map paging art")
+		_expect((tower.get_node("RankPanel/ClimbTab") as TextureButton).texture_normal.resource_path.ends_with("battle_flow_new_ui_battle_continue_button.png"), "tower rank tabs should use the Cocos blue map-button art")
 		var rank_scroll := tower.get_node("RankPanel/RankScroll") as ScrollContainer
-		_expect(rank_scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_SHOW_NEVER, "tower rankings should be vertically scrollable")
-		_expect(rank_scroll.get_v_scroll_bar().max_value > 0.0, "tower rankings should overflow into the vertical scroll area")
+		_expect(rank_scroll.size.y == 154.0, "tower rankings should preserve the exact seven-row Cocos viewport")
+		_expect((tower.get_node("RankPanel/RankScroll/RankList/Rank0") as Control).custom_minimum_size.y == 22.0, "tower ranking rows should use the Cocos 22-pixel cadence")
 
 	main.switch_scene("mailbox")
-	await process_frame
+	for _frame in range(45):
+		await process_frame
 	var mailbox := main.get_current_scene() as Control
 	_expect(mailbox != null, "mailbox scene should load")
 	if mailbox != null:
@@ -51,6 +58,15 @@ func _run() -> void:
 		_expect(not mailbox.has_node("ArrivalStar") and not mailbox.has_node("ArrivalTrail"), "new-mail arrival animation should no longer play in the mailbox")
 		_expect(mailbox.has_node("BlessingPanel/BlessingStarTrail"), "sending a blessing should have a visible star trail")
 		_expect((mailbox.get_node("BlessingPanel/Panel/ActionRail/RailTitle") as Label).text == "给远方的陌生人\n送出祝福", "blessing prompt should address distant strangers")
+		_expect((mailbox.get_node("InboxTab") as Control).position.is_equal_approx(Vector2(18.0, 72.0)) and (mailbox.get_node("InboxTab") as Control).size.is_equal_approx(Vector2(164.0, 42.0)), "mailbox tabs should match the Cocos 1.3.2 bounds")
+		_expect((mailbox.get_node("InboxTab") as TextureButton).texture_normal.resource_path.ends_with("battle_flow_new_ui_battle_continue_button.png"), "mailbox tabs should use the Cocos blue map-button art")
+		_expect(mailbox.has_node("InboxPanel/ListPanel/PrevMailPage") and mailbox.has_node("InboxPanel/ListPanel/NextMailPage"), "mailbox should expose four-item page navigation")
+		_expect((mailbox.get_node("InboxPanel/MailboxTotals") as Control).size.y == 79.0, "mailbox star totals should use the shortened Cocos card")
+		_expect((mailbox.get_node("InboxPanel/DetailPanel") as Control).position.y == 240.0, "mailbox detail card should start at the Cocos vertical baseline")
+		_expect((mailbox.get_node("BlessingPanel/Panel/TravelCard") as Control).size.is_equal_approx(Vector2(198.0, 478.0)), "mailbox travel card should match the Cocos blessing layout")
+		_expect((mailbox.get_node("BlessingPanel/Panel/PrevAdventurer") as TextureButton).texture_normal.resource_path.ends_with("ranch_ui_btn_previous_round.png"), "mailbox previous-adventurer action should use shared paging art")
+		_expect((mailbox.get_node("BlessingPanel/Panel/NextAdventurer") as TextureButton).texture_normal.resource_path.ends_with("ranch_ui_btn_next_round.png"), "mailbox next-adventurer action should use shared paging art")
+		_expect(mailbox.has_node("BlessingPanel/Panel/DailyRemaining") and (mailbox.get_node("BlessingPanel/Panel/ActionRail/RailStep") as Control).visible, "mailbox blessing rail should show Cocos steps and daily remaining count")
 		var action_rail := mailbox.get_node("BlessingPanel/Panel/ActionRail") as Control
 		_expect(action_rail.position.x > 200.0 and action_rail.position.y > 200.0, "mailbox action rail should sit in the lower-right thumb zone")
 		mailbox.call("_show_blessing")

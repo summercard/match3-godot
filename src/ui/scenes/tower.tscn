@@ -1,12 +1,13 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://src/ui/scene/scene_tower.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/images/tower_new/tower_resonance_casual_bg_v2.png" id="2_tower_bg"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="3_title_plaque"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="7_star"]
 [ext_resource type="Texture2D" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="8_sparkle"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/main_ui_entry_shop_v3.png" id="9_start_entry"]
-[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/main_ui_entry_inn_v3.png" id="10_locked_entry"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/nine_patch/button_butter_gold.png" id="9_start_entry"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png" id="10_rank_tab"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="11_back"]
 
 [sub_resource type="StyleBoxFlat" id="StylePanel"]
 bg_color = Color(0.96, 0.99, 1, 0.80)
@@ -153,19 +154,17 @@ theme_override_font_sizes/font_size = 24
 text = "共鸣塔"
 horizontal_alignment = 1
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BackButton" type="TextureButton" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 14.0
-offset_top = 17.0
-offset_right = 62.0
-offset_bottom = 50.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.22, 0.44, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBlueButton")
-text = "返回"
+offset_left = 10.0
+offset_top = 12.0
+offset_right = 58.0
+offset_bottom = 60.0
+texture_normal = ExtResource("11_back")
+texture_pressed = ExtResource("11_back")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="UnlockPill" type="Panel" parent="."]
 unique_name_in_owner = true
@@ -195,9 +194,9 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 14.0
-offset_top = 122.0
+offset_top = 193.0
 offset_right = 204.0
-offset_bottom = 275.0
+offset_bottom = 346.0
 theme_override_styles/panel = SubResource("StylePanel")
 
 [node name="PanelCaption" type="Label" parent="StatusPanel"]
@@ -322,30 +321,38 @@ text = "BOSS"
 [node name="StartButton" type="TextureButton" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 216.0
-offset_top = 288.0
-offset_right = 357.0
-offset_bottom = 343.0
-texture_normal = ExtResource("9_start_entry")
-texture_pressed = ExtResource("9_start_entry")
-texture_disabled = ExtResource("10_locked_entry")
-ignore_texture_size = true
-stretch_mode = 5
+offset_left = 208.0
+offset_top = 283.0
+offset_right = 365.0
+offset_bottom = 346.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.46, 0.08, 0.05, 1)
 theme_override_constants/outline_size = 3
 
+[node name="ButtonVisual" type="TextureRect" parent="StartButton"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_start_entry")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
+
 [node name="StartButtonText" type="Label" parent="StartButton"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 17.0
-offset_top = 9.0
-offset_right = 124.0
-offset_bottom = 47.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.46, 0.08, 0.05, 1)
+offset_left = 16.0
+offset_top = 11.0
+offset_right = 141.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.38, 0.18, 0.04, 1)
+theme_override_colors/font_outline_color = Color(1, 0.91, 0.51, 1)
 theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 18
 text = "开启远征"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -392,40 +399,70 @@ theme_override_colors/font_color = Color(0.18, 0.39, 0.66, 1)
 theme_override_font_sizes/font_size = 14
 text = "远行者记录"
 
-[node name="ClimbTab" type="Button" parent="RankPanel"]
+[node name="ClimbTab" type="TextureButton" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 20.0
-offset_top = 44.0
-offset_right = 166.0
-offset_bottom = 80.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBlueButton")
-theme_override_styles/hover = SubResource("StyleBlueButton")
-theme_override_styles/pressed = SubResource("StyleBlueButton")
+offset_left = 11.0
+offset_top = 37.0
+offset_right = 173.0
+offset_bottom = 85.0
+texture_normal = ExtResource("10_rank_tab")
+texture_pressed = ExtResource("10_rank_tab")
+ignore_texture_size = true
+stretch_mode = 0
 toggle_mode = true
-text = "登塔榜"
 
-[node name="BurstTab" type="Button" parent="RankPanel"]
+[node name="ClimbTabText" type="Label" parent="RankPanel/ClimbTab"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.23, 0.52, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "登塔榜"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
+
+[node name="BurstTab" type="TextureButton" parent="RankPanel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 181.0
-offset_top = 44.0
-offset_right = 327.0
-offset_bottom = 80.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBlueButton")
-theme_override_styles/hover = SubResource("StyleBlueButton")
-theme_override_styles/pressed = SubResource("StyleBlueButton")
+offset_left = 174.0
+offset_top = 37.0
+offset_right = 336.0
+offset_bottom = 85.0
+texture_normal = ExtResource("10_rank_tab")
+texture_pressed = ExtResource("10_rank_tab")
+ignore_texture_size = true
+stretch_mode = 0
 toggle_mode = true
+
+[node name="BurstTabText" type="Label" parent="RankPanel/BurstTab"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.23, 0.52, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 text = "爆发榜"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
 
 [node name="RankScroll" type="ScrollContainer" parent="RankPanel"]
 layout_mode = 0
 offset_left = 18.0
-offset_top = 92.0
+offset_top = 91.0
 offset_right = 329.0
 offset_bottom = 245.0
 horizontal_scroll_mode = 1
@@ -434,53 +471,53 @@ follow_focus = true
 
 [node name="RankList" type="VBoxContainer" parent="RankPanel/RankScroll"]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 0
 
 [node name="Rank0" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank1" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank2" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank3" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank4" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank5" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 
 [node name="Rank6" type="Label" parent="RankPanel/RankScroll/RankList"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(294, 26)
+custom_minimum_size = Vector2(294, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.31, 0.56, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12

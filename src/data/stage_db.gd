@@ -920,14 +920,14 @@ static func _chapter_number(chapter: Dictionary) -> int:
 	return 1
 
 static func _normal_enemy_level(chapter_num: int, stage_no: int) -> int:
-	# ★ 主人定 2026-06-10：ch1 起步 Lv5，每章 +5 递增，每章内 9 关平拹 5 级
-	var chapter_base := 5 + (chapter_num - 1) * 5
-	var base_level := chapter_base + int(floor(float(stage_no - 1) * 5.0 / float(NORMAL_STAGES_PER_CHAPTER - 1)))
-	return base_level if chapter_num == 1 and stage_no == 1 else base_level + 6
+	# 1.3.2 定稿：第一章使用 +3 教学章节加成，第二章起使用 +6。
+	var base_level := 5 + (chapter_num - 1) * 5 + floori(float(stage_no - 1) * 5.0 / 10.0)
+	var chapter_bonus := 3 if chapter_num == 1 else 6
+	return base_level + (0 if chapter_num == 1 and stage_no == 1 else chapter_bonus)
 
 static func _boss_enemy_level(chapter_num: int) -> int:
-	# ★ 主人定 2026-06-28：ch1 Boss = Lv10，每章 Boss +5
-	return 16 + (chapter_num - 1) * 5
+	var chapter_bonus := 3 if chapter_num == 1 else 6
+	return 10 + (chapter_num - 1) * 5 + chapter_bonus
 
 static func _normal_max_turns(chapter_num: int, stage_no: int) -> int:
 	# 普通关仍保持短节奏；中后期机制关给少量读盘/清障空间。

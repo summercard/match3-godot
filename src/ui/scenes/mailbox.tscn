@@ -1,10 +1,13 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://src/ui/scene/scene_mailbox.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/images/mailbox_new/mailbox_travel_casual_bg_v2.png" id="2_mailbox_bg"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/icons/battle_flow_new_icon_star_gold.png" id="3_star"]
 [ext_resource type="Texture2D" path="res://assets/images/ui/panels/shop_ui_shop_title_plaque_image2.png" id="4_title_plaque"]
 [ext_resource type="Texture2D" path="res://assets/images/effects/album_fx_sparkle_cluster.png" id="8_sparkle"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/battle_flow_new_ui_battle_continue_button.png" id="9_tab"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/ranch_ui_btn_previous_round.png" id="10_previous"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/buttons/ranch_ui_btn_next_round.png" id="11_next"]
 
 [sub_resource type="StyleBoxFlat" id="StylePanel"]
 bg_color = Color(0.96, 0.99, 1, 0.82)
@@ -143,6 +146,18 @@ corner_radius_bottom_left = 17
 shadow_color = Color(0.42, 0.06, 0.08, 0.28)
 shadow_size = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleUnread"]
+bg_color = Color(0.91, 0.18, 0.24, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.76, 0.68, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [node name="Mailbox" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -225,50 +240,81 @@ theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBlueButton")
 text = "返回"
 
-[node name="InboxTab" type="Button" parent="."]
+[node name="InboxTab" type="TextureButton" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 23.0
-offset_top = 75.0
-offset_right = 177.0
-offset_bottom = 111.0
-theme_override_colors/font_color = Color(0.14, 0.34, 0.60, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleTabInactive")
-theme_override_styles/hover = SubResource("StyleBlueButton")
-theme_override_styles/pressed = SubResource("StyleBlueButton")
+offset_left = 18.0
+offset_top = 72.0
+offset_right = 182.0
+offset_bottom = 114.0
+texture_normal = ExtResource("9_tab")
+texture_pressed = ExtResource("9_tab")
+ignore_texture_size = true
+stretch_mode = 0
 toggle_mode = true
 button_pressed = true
+
+[node name="InboxTabText" type="Label" parent="InboxTab"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.23, 0.52, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 17
 text = "收件箱"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
 
 [node name="UnreadBadge" type="Label" parent="InboxTab"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 121.0
-offset_top = -8.0
-offset_right = 146.0
-offset_bottom = 18.0
+offset_left = 126.0
+offset_top = -5.0
+offset_right = 151.0
+offset_bottom = 21.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.48, 0.05, 0.08, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_outline_color = Color(0.48, 0.05, 0.08, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleUnread")
 text = "1"
 horizontal_alignment = 1
 
-[node name="BlessingTab" type="Button" parent="."]
+[node name="BlessingTab" type="TextureButton" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 197.0
-offset_top = 75.0
-offset_right = 351.0
-offset_bottom = 111.0
-theme_override_colors/font_color = Color(0.14, 0.34, 0.60, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleTabInactive")
-theme_override_styles/hover = SubResource("StyleBlueButton")
-theme_override_styles/pressed = SubResource("StyleBlueButton")
+offset_left = 193.0
+offset_top = 72.0
+offset_right = 357.0
+offset_bottom = 114.0
+texture_normal = ExtResource("9_tab")
+texture_pressed = ExtResource("9_tab")
+ignore_texture_size = true
+stretch_mode = 0
 toggle_mode = true
+
+[node name="BlessingTabText" type="Label" parent="BlessingTab"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.75, 0.88, 0.98, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.23, 0.52, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 17
 text = "送出祝福"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
 
 [node name="InboxPanel" type="Control" parent="."]
 unique_name_in_owner = true
@@ -399,10 +445,47 @@ mouse_filter = 2
 text = "未读"
 horizontal_alignment = 2
 
+[node name="PrevMailPage" type="Button" parent="InboxPanel/ListPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 11.0
+offset_top = 462.0
+offset_right = 45.0
+offset_bottom = 498.0
+theme_override_colors/font_color = Color(0.14, 0.34, 0.60, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleTabInactive")
+text = "‹"
+
+[node name="MailPageValue" type="Label" parent="InboxPanel/ListPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 47.0
+offset_top = 468.0
+offset_right = 96.0
+offset_bottom = 492.0
+theme_override_colors/font_color = Color(0.17, 0.38, 0.66, 1)
+theme_override_font_sizes/font_size = 10
+text = "1 / 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextMailPage" type="Button" parent="InboxPanel/ListPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 98.0
+offset_top = 462.0
+offset_right = 132.0
+offset_bottom = 498.0
+theme_override_colors/font_color = Color(0.14, 0.34, 0.60, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleTabInactive")
+text = "›"
+
 [node name="DetailPanel" type="Panel" parent="InboxPanel"]
 layout_mode = 0
 offset_left = 149.0
-offset_top = 246.0
+offset_top = 240.0
 offset_right = 351.0
 offset_bottom = 516.0
 theme_override_styles/panel = SubResource("StylePanel")
@@ -412,14 +495,14 @@ layout_mode = 0
 offset_left = 149.0
 offset_top = 155.0
 offset_right = 351.0
-offset_bottom = 246.0
+offset_bottom = 234.0
 theme_override_styles/panel = SubResource("StylePanel")
 
 [node name="TotalsCaption" type="Label" parent="InboxPanel/MailboxTotals"]
 layout_mode = 0
-offset_top = 8.0
+offset_top = 5.0
 offset_right = 202.0
-offset_bottom = 28.0
+offset_bottom = 25.0
 theme_override_colors/font_color = Color(0.17, 0.38, 0.66, 1)
 theme_override_font_sizes/font_size = 12
 text = "图鉴星星总量"
@@ -428,9 +511,9 @@ horizontal_alignment = 1
 [node name="SentStarCaption" type="Label" parent="InboxPanel/MailboxTotals"]
 layout_mode = 0
 offset_left = 13.0
-offset_top = 33.0
+offset_top = 26.0
 offset_right = 95.0
-offset_bottom = 53.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
 theme_override_font_sizes/font_size = 11
 text = "解锁精灵"
@@ -440,9 +523,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 13.0
-offset_top = 50.0
+offset_top = 42.0
 offset_right = 95.0
-offset_bottom = 80.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(0.95, 0.55, 0.08, 1)
 theme_override_font_sizes/font_size = 22
 text = "0"
@@ -451,9 +534,9 @@ horizontal_alignment = 1
 [node name="ReceivedStarCaption" type="Label" parent="InboxPanel/MailboxTotals"]
 layout_mode = 0
 offset_left = 107.0
-offset_top = 33.0
+offset_top = 26.0
 offset_right = 189.0
-offset_bottom = 53.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.39, 0.28, 0.10, 1)
 theme_override_font_sizes/font_size = 11
 text = "获得星星"
@@ -463,9 +546,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 107.0
-offset_top = 50.0
+offset_top = 42.0
 offset_right = 189.0
-offset_bottom = 80.0
+offset_bottom = 73.0
 theme_override_colors/font_color = Color(0.95, 0.55, 0.08, 1)
 theme_override_font_sizes/font_size = 22
 text = "0"
@@ -509,7 +592,7 @@ layout_mode = 0
 offset_left = 14.0
 offset_top = 70.0
 offset_right = 188.0
-offset_bottom = 199.0
+offset_bottom = 205.0
 horizontal_scroll_mode = 2
 vertical_scroll_mode = 0
 
@@ -526,9 +609,9 @@ autowrap_mode = 2
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 23.0
-offset_top = 207.0
+offset_top = 213.0
 offset_right = 118.0
-offset_bottom = 255.0
+offset_bottom = 261.0
 theme_override_colors/font_color = Color(0.31, 0.12, 0.02, 1)
 theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.74, 1)
@@ -542,9 +625,9 @@ text = "领取附件"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 123.0
-offset_top = 207.0
+offset_top = 213.0
 offset_right = 179.0
-offset_bottom = 255.0
+offset_bottom = 261.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.48, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 2
@@ -572,7 +655,7 @@ layout_mode = 0
 offset_left = 0.0
 offset_top = 9.0
 offset_right = 198.0
-offset_bottom = 478.0
+offset_bottom = 487.0
 theme_override_styles/panel = SubResource("StylePanel")
 
 [node name="Prompt" type="Label" parent="BlessingPanel/Panel"]
@@ -615,6 +698,21 @@ offset_bottom = 122.0
 expand_mode = 1
 stretch_mode = 5
 
+[node name="SelectionSparkle" type="TextureRect" parent="BlessingPanel/Panel"]
+unique_name_in_owner = true
+visible = false
+z_index = 4
+layout_mode = 0
+offset_left = 21.0
+offset_top = 75.0
+offset_right = 177.0
+offset_bottom = 239.0
+texture = ExtResource("8_sparkle")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+modulate = Color(1, 0.86, 0.31, 0)
+
 [node name="AdventurerName" type="Label" parent="BlessingPanel/Panel"]
 unique_name_in_owner = true
 layout_mode = 0
@@ -623,47 +721,47 @@ offset_top = 234.0
 offset_right = 185.0
 offset_bottom = 270.0
 theme_override_colors/font_color = Color(0.13, 0.32, 0.58, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 13
 text = "小火龙"
 horizontal_alignment = 1
 
-[node name="PrevAdventurer" type="Button" parent="BlessingPanel/Panel"]
+[node name="PrevAdventurer" type="TextureButton" parent="BlessingPanel/Panel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 17.0
-offset_top = 130.0
-offset_right = 51.0
-offset_bottom = 176.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBlueButton")
-text = "‹"
+offset_left = 55.0
+offset_top = 430.0
+offset_right = 99.0
+offset_bottom = 474.0
+texture_normal = ExtResource("10_previous")
+texture_pressed = ExtResource("10_previous")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="NextAdventurer" type="Button" parent="BlessingPanel/Panel"]
+[node name="NextAdventurer" type="TextureButton" parent="BlessingPanel/Panel"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 148.0
-offset_top = 130.0
-offset_right = 182.0
-offset_bottom = 176.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBlueButton")
-text = "›"
+offset_left = 101.0
+offset_top = 430.0
+offset_right = 145.0
+offset_bottom = 474.0
+texture_normal = ExtResource("11_next")
+texture_pressed = ExtResource("11_next")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="JourneyHint" type="Label" parent="BlessingPanel/Panel"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 17.0
-offset_top = 300.0
+offset_top = 290.0
 offset_right = 181.0
-offset_bottom = 449.0
+offset_bottom = 424.0
 theme_override_colors/font_color = Color(0.16, 0.37, 0.62, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 0.9)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 12
-text = "送出后，星光会向上穿过云层。\n\n远方的冒险者也会将祝福投进你的邮箱。"
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 10
+text = "送出后，星光会穿过云层。\n\n陌生旅人的祝福每天都会\n在不同时间抵达邮箱。"
 autowrap_mode = 2
-horizontal_alignment = 1
 
 [node name="ActionRail" type="Panel" parent="BlessingPanel/Panel"]
 layout_mode = 0
@@ -689,34 +787,34 @@ horizontal_alignment = 1
 [node name="RailStar" type="TextureRect" parent="BlessingPanel/Panel/ActionRail"]
 layout_mode = 0
 offset_left = 36.0
-offset_top = 57.0
+offset_top = 55.0
 offset_right = 91.0
-offset_bottom = 123.0
+offset_bottom = 113.0
 texture = ExtResource("3_star")
 expand_mode = 1
 stretch_mode = 5
 mouse_filter = 2
 [node name="RailStep" type="Label" parent="BlessingPanel/Panel/ActionRail"]
-visible = false
 layout_mode = 0
-offset_left = 10.0
-offset_top = 110.0
-offset_right = 117.0
-offset_bottom = 185.0
+offset_left = 9.0
+offset_top = 112.0
+offset_right = 123.0
+offset_bottom = 147.0
 theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "1  选好精灵\n2  点亮星星\n3  飞向远方"
+theme_override_constants/line_spacing = -3
+theme_override_font_sizes/font_size = 8
+text = "① 选精灵  ② 点星星\n③ 让祝福飞向远方"
 horizontal_alignment = 1
 
 [node name="BlessingStatus" type="Label" parent="BlessingPanel/Panel"]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 217.0
-offset_top = 355.0
-offset_right = 324.0
-offset_bottom = 389.0
+offset_top = 377.0
+offset_right = 329.0
+offset_bottom = 396.0
 theme_override_colors/font_color = Color(0.91, 0.97, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "图鉴星星：0"
 autowrap_mode = 2
 horizontal_alignment = 1
@@ -725,9 +823,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 215.0
-offset_top = 399.0
+offset_top = 400.0
 offset_right = 326.0
-offset_bottom = 451.0
+offset_bottom = 450.0
 theme_override_colors/font_color = Color(0.31, 0.12, 0.02, 1)
 theme_override_colors/font_outline_color = Color(1, 0.95, 0.74, 1)
 theme_override_constants/outline_size = 2
@@ -735,16 +833,27 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleGoldButton")
 text = "送出祝福"
 
-[node name="RailHint" type="Label" parent="BlessingPanel/Panel/ActionRail"]
-visible = false
+[node name="DailyRemaining" type="Label" parent="BlessingPanel/Panel"]
+unique_name_in_owner = true
 layout_mode = 0
-offset_left = 12.0
-offset_top = 199.0
-offset_right = 115.0
-offset_bottom = 248.0
+offset_left = 215.0
+offset_top = 452.0
+offset_right = 326.0
+offset_bottom = 469.0
+theme_override_colors/font_color = Color(0.85, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "今日还可送出 1 次"
+horizontal_alignment = 1
+
+[node name="RailHint" type="Label" parent="BlessingPanel/Panel/ActionRail"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 239.0
+offset_right = 118.0
+offset_bottom = 256.0
 theme_override_colors/font_color = Color(0.83, 0.93, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "拇指可直接触达\n送出按钮"
+theme_override_font_sizes/font_size = 8
+text = "点亮星星，把祝福送远方"
 horizontal_alignment = 1
 
 [node name="BlessingStarTrail" type="TextureRect" parent="BlessingPanel"]

@@ -2,11 +2,13 @@ class_name BattleCombatantRenderer
 extends RefCounted
 
 const DEFEATED_GHOST_ASSET := "res://assets/images/effects/battle_fx_defeated_ghost.png"
-const SINGLE_ENEMY_SPRITE_SIZE := 128.0
-const SINGLE_BOSS_SPRITE_SIZE := 192.0
-const MULTI_ENEMY_SPRITE_SIZE := 62.0
+const SINGLE_ENEMY_SPRITE_SIZE := 156.0
+const SINGLE_BOSS_SPRITE_SIZE := 156.0
+const MULTI_ENEMY_SPRITE_SIZE := 66.0
+const MULTI_ENEMY_SPRITE_HEIGHT := 60.0
 const MULTI_BOSS_SPRITE_SIZE := 124.0
 const SINGLE_BOSS_STATUS_OFFSET_Y := -56.0
+const STANDARD_ENEMY_CENTER_Y := 151.0
 
 static func draw_enemies(scene, battle, state: Dictionary) -> void:
 	var design_w: float = state.get("design_w", 375.0)
@@ -34,7 +36,7 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var is_boss: bool = enemy.get("isBoss", false)
 	var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == 0)
 	if hp <= 0:
-		var defeat_y: float = 176.0 if is_boss else 170.0
+		var defeat_y := STANDARD_ENEMY_CENTER_Y
 		_ensure_enemy_defeat_fx(scene, state, 0, Vector2(design_w / 2.0, defeat_y), colors.get("danger", Color.RED))
 		var ghost_size := Vector2(128.0, 128.0) if is_boss else Vector2(96.0, 96.0)
 		# ★ 主人定 2026-06-11：倒下时按阶段画幽灵（冲下→渐显）
@@ -56,12 +58,11 @@ static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp:
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
 		var boss_scale: float = SINGLE_BOSS_SPRITE_SIZE if is_boss else SINGLE_ENEMY_SPRITE_SIZE
-		# ★ 主人定 2026-06-10：phase 2 体型 ×1.5（在原 boss_scale 基础上）
-		var visual_scale: float = float(enemy.get("_visualScale", 1.0))
+		# 最终敌方框保持固定尺寸；共鸣塔可通过独立倍率整体放大。
+		var visual_scale: float = float(enemy.get("_towerVisualScale", 1.0))
 		var final_size: float = boss_scale * visual_scale * elastic
-		var monster_y: float = 104.0 if is_boss else 111.0
-		# 体型变大后以中心点为锚，避免乱跳
-		var monster_rect := Rect2(design_w / 2.0 - final_size / 2.0, monster_y - (final_size - boss_scale * elastic) * 0.3 + sin(idle_time * TAU / 1.8) * 3.0, final_size, final_size)
+		# 最终框以 Y=151 为中心；体型变化只围绕中心缩放。
+		var monster_rect := Rect2(design_w / 2.0 - final_size / 2.0, STANDARD_ENEMY_CENTER_Y - final_size / 2.0, final_size, final_size)
 		scene._draw_texture_contain(monster_tex, monster_rect, 1.0)
 		if not flash.is_empty():
 			_draw_hit_ring(scene, _enemy_sprite_center(enemy, 0, battle, state), 96.0 if is_boss else 82.0, flash[0])
@@ -75,26 +76,26 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 	var colors: Dictionary = state.get("colors", {})
 	var idle_time: float = state.get("idle_time", 0.0)
 	var slot_w: float = 96.0
-	var sprite_size: float = MULTI_BOSS_SPRITE_SIZE if enemy.get("isBoss", false) else MULTI_ENEMY_SPRITE_SIZE
+	var sprite_size := Vector2(MULTI_BOSS_SPRITE_SIZE, MULTI_BOSS_SPRITE_SIZE) if enemy.get("isBoss", false) else Vector2(MULTI_ENEMY_SPRITE_SIZE, MULTI_ENEMY_SPRITE_HEIGHT)
 	var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == index)
 	var has_flash: bool = flash.size() > 0
 	var cx: float = x + slot_w / 2.0
 	# ★ 主人定 2026-06-11：倒下阶段
 	if hp <= 0:
-		_ensure_enemy_defeat_fx(scene, state, index, Vector2(cx, y + 48.0), colors.get("danger", Color.RED))
+		_ensure_enemy_defeat_fx(scene, state, index, Vector2(cx, STANDARD_ENEMY_CENTER_Y), colors.get("danger", Color.RED))
 		var ghost_size := Vector2(66.0, 66.0) if enemy.get("isBoss", false) else Vector2(58.0, 58.0)
 		var phase := _defeat_phase(scene, state, true, index, idle_time)
 		if bool(phase.get("ghost_visible", true)):
 			var alpha: float = float(phase.get("ghost_alpha", 1.0))
-			scene._draw_texture_contain(_get_ghost_texture(scene), Rect2(cx - ghost_size.x * 0.5, y + 43.0 - ghost_size.y * 0.5 + float(phase.get("ghost_offset_y", 0.0)) + sin(idle_time * TAU / 1.6 + index * 0.4) * 1.6, ghost_size.x, ghost_size.y), alpha)
+			scene._draw_texture_contain(_get_ghost_texture(scene), Rect2(cx - ghost_size.x * 0.5, STANDARD_ENEMY_CENTER_Y - ghost_size.y * 0.5 + float(phase.get("ghost_offset_y", 0.0)) + sin(idle_time * TAU / 1.6 + index * 0.4) * 1.6, ghost_size.x, ghost_size.y), alpha)
 		# 渐隐期：仍画活体图，按 alpha 衰减
 		if bool(phase.get("alive_visible", false)):
 			var fade_alpha: float = float(phase.get("alive_alpha", 0.0))
 			var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 			if monster_tex:
-				var visual_scale: float = float(enemy.get("_visualScale", 1.0))
-				var final_sprite_size: float = sprite_size * visual_scale
-				scene._draw_texture_contain(monster_tex, Rect2(cx - final_sprite_size / 2.0, y + 11.0 - (final_sprite_size - sprite_size) * 0.3 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, final_sprite_size, final_sprite_size), fade_alpha)
+				var visual_scale: float = float(enemy.get("_towerVisualScale", 1.0))
+				var final_sprite_size := sprite_size * visual_scale
+				scene._draw_texture_contain(monster_tex, Rect2(Vector2(cx, STANDARD_ENEMY_CENTER_Y) - final_sprite_size * 0.5, final_sprite_size), fade_alpha)
 		return
 	if has_flash:
 		_draw_hit_ring(scene, _enemy_sprite_center(enemy, index, battle, state), 82.0, flash[0])
@@ -102,10 +103,10 @@ static func draw_enemy_card(scene, battle, state: Dictionary, x: float, y: float
 	var elastic := _attacker_elastic_factor(state, true, index)
 	var monster_tex: Texture2D = scene._get_monster_texture(enemy)
 	if monster_tex:
-		# ★ 主人定 2026-06-10：phase 2 体型 ×1.5
-		var visual_scale: float = float(enemy.get("_visualScale", 1.0))
-		var final_sprite_size: float = sprite_size * visual_scale * elastic
-		var sprite_rect := Rect2(cx - final_sprite_size / 2.0, y + 11.0 - (final_sprite_size - sprite_size * elastic) * 0.3 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4, final_sprite_size, final_sprite_size)
+		# 最终敌方框保持固定尺寸；共鸣塔可通过独立倍率整体放大。
+		var visual_scale: float = float(enemy.get("_towerVisualScale", 1.0))
+		var final_sprite_size := sprite_size * visual_scale * elastic
+		var sprite_rect := Rect2(Vector2(cx, STANDARD_ENEMY_CENTER_Y) - final_sprite_size * 0.5, final_sprite_size)
 		scene._draw_texture_contain(monster_tex, sprite_rect, 1.0)
 		if has_flash:
 			_draw_soft_hit_flash(scene, monster_tex, sprite_rect, flash[0])
@@ -163,17 +164,17 @@ static func _draw_enemy_intent(scene, state: Dictionary, x: float, y: float, ind
 
 static func _multi_enemy_slots(enemy_count: int) -> Array[Vector2]:
 	if enemy_count <= 1:
-		return [Vector2(139.5, 63.0)]
+		return [Vector2(139.5, 84.0)]
 	if enemy_count == 2:
-		return [Vector2(82.0, 74.0), Vector2(197.0, 74.0)]
-	return [Vector2(24.0, 72.0), Vector2(139.5, 63.0), Vector2(255.0, 72.0)]
+		return [Vector2(82.0, 84.0), Vector2(197.0, 84.0)]
+	return [Vector2(24.0, 84.0), Vector2(139.5, 84.0), Vector2(255.0, 84.0)]
 
 static func uses_featured_single_layout(enemy: Dictionary) -> bool:
 	return enemy != null and (bool(enemy.get("isBoss", false)) or bool(enemy.get("isElite", false)))
 
 # ★ 主人定 2026-06-11：算出敌人 sprite 的真实视觉中心
 # 优先用 .tscn 里 Portrait 节点的实际位置（gui_enemy_centers），让攻击特效跟着场景布局走
-# 没有场景节点时回落到老的硬编码 Rect2 计算（与 draw_enemy_stage / draw_enemy_card 保持一致）
+# 没有场景节点时回落到 1.3.2 最终布局常量。
 static func _enemy_sprite_center(enemy: Dictionary, index: int, battle, state: Dictionary) -> Vector2:
 	# 优先：场景节点中心（.tscn 里 Portrait 的真实位置）
 	var gui_centers: Array = state.get("gui_enemy_centers", [])
@@ -181,29 +182,17 @@ static func _enemy_sprite_center(enemy: Dictionary, index: int, battle, state: D
 		var c: Vector2 = gui_centers[index]
 		if c != Vector2.ZERO:
 			return c
-	# 回落：老的硬编码 Rect2 计算
+	# 回落：1.3.2 最终布局常量
 	var design_w: float = state.get("design_w", 375.0)
-	var idle_time: float = state.get("idle_time", 0.0)
-	var is_boss: bool = bool(enemy.get("isBoss", false))
-	var visual_scale: float = float(enemy.get("_visualScale", 1.0))
 	var enemy_count: int = battle.enemies.size() if battle != null else 1
 	if enemy_count <= 1 and uses_featured_single_layout(enemy):
-		# 只有单 Boss / 单精英使用放大的 stage 布局。
-		var boss_scale: float = SINGLE_BOSS_SPRITE_SIZE if is_boss else SINGLE_ENEMY_SPRITE_SIZE
-		var final_size: float = boss_scale * visual_scale
-		var base_y: float = 104.0 if is_boss else 111.0
-		var top_y: float = base_y - (final_size - boss_scale) * 0.3 + sin(idle_time * TAU / 1.8) * 3.0
-		return Vector2(design_w / 2.0, top_y + final_size / 2.0)
+		return Vector2(design_w / 2.0, STANDARD_ENEMY_CENTER_Y)
 	# 多怪 card 布局
 	var slots := _multi_enemy_slots(mini(enemy_count, 3))
 	if index < 0 or index >= slots.size():
-		return Vector2(design_w / 2.0, 170.0)
+		return Vector2(design_w / 2.0, STANDARD_ENEMY_CENTER_Y)
 	var slot_x: float = slots[index].x
-	var slot_y: float = slots[index].y
-	var sprite_size: float = MULTI_BOSS_SPRITE_SIZE if is_boss else MULTI_ENEMY_SPRITE_SIZE
-	var final_sprite_size: float = sprite_size * visual_scale
-	var top_y: float = slot_y + 11.0 - (final_sprite_size - sprite_size) * 0.3 + sin(idle_time * TAU / 1.5 + index * 0.4) * 2.4
-	return Vector2(slot_x + 48.0, top_y + final_sprite_size / 2.0)
+	return Vector2(slot_x + 48.0, STANDARD_ENEMY_CENTER_Y)
 
 # ★ 主人定 2026-06-11：算出玩家 sprite 的真实视觉中心
 # 优先用 .tscn 里 Portrait 节点的实际位置（gui_player_centers）；GUI 模式下不叠加旧 lunge，
@@ -363,7 +352,7 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 			return
 		var hp: int = maxi(enemy.get("hp", 0), 0)
 		if hp <= 0:
-			_ensure_enemy_defeat_fx(scene, state, 0, Vector2(state.get("design_w", 375.0) / 2.0, 170.0), colors.get("danger", Color.RED))
+			_ensure_enemy_defeat_fx(scene, state, 0, _enemy_sprite_center(enemy, 0, battle, state), colors.get("danger", Color.RED))
 		else:
 			var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == 0)
 			if not flash.is_empty():
@@ -380,9 +369,8 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 			var hp: int = maxi(enemy.get("hp", 0), 0)
 			var x: float = stage_slots[i].x
 			var y: float = stage_slots[i].y
-			var cx: float = x + 48.0
 			if hp <= 0:
-				_ensure_enemy_defeat_fx(scene, state, i, Vector2(cx, y + 48.0), colors.get("danger", Color.RED))
+				_ensure_enemy_defeat_fx(scene, state, i, _enemy_sprite_center(enemy, i, battle, state), colors.get("danger", Color.RED))
 				continue
 			var flash: Array = state.get("hit_flashes", []).filter(func(f): return f.get("isEnemy", false) and f.get("monsterIndex", -1) == i)
 			if not flash.is_empty():

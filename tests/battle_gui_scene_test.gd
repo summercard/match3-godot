@@ -14,10 +14,12 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	var stage_db = load("res://src/data/stage_db.gd").new()
+	var ordinary_single_stage: Dictionary = stage_db.get_stage("stage_1_1")
+	ordinary_single_stage["disableRandomElite"] = true
 
 	main.switch_scene("battle", {
 		"stageId": "stage_1_1",
-		"stageData": stage_db.get_stage("stage_1_1"),
+		"stageData": ordinary_single_stage,
 		"inputTestOnly": true,
 	})
 	await process_frame
@@ -89,7 +91,10 @@ func _run() -> void:
 	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "a lone ordinary enemy should use the regular enemy layer")
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy2") as Control).visible, "a lone ordinary enemy should occupy the centered regular slot")
 	_expect(not (battle.get_node("Combatants/MultiEnemies/Enemy1") as Control).visible and not (battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "a lone ordinary enemy should not duplicate into side slots")
-	var normal_enemy_portrait_size := (battle.get_node("Combatants/MultiEnemies/Enemy2/Portrait") as TextureRect).size
+	var normal_enemy_portrait := battle.get_node("Combatants/MultiEnemies/Enemy2/Portrait") as TextureRect
+	var normal_enemy_portrait_size := normal_enemy_portrait.size
+	_expect(_rect_in_scene(battle, normal_enemy_portrait).is_equal_approx(Rect2(154.5, 121.0, 66.0, 60.0)), "ordinary single enemy portrait should use the final Rect2(154.5, 121, 66, 60)")
+	_expect(is_equal_approx((battle.call("_collect_enemy_centers") as Array)[0].y, 151.0), "ordinary enemy hit/skill anchor should follow the portrait center at Y=151")
 	var ordinary_enemy: Dictionary = battle.get("_battle").enemies[0]
 	ordinary_enemy["isElite"] = true
 	ordinary_enemy["_visualScale"] = 1.35
@@ -130,7 +135,10 @@ func _run() -> void:
 	_expect((battle.get_node("Background") as TextureRect).texture.resource_path.ends_with("warbackgrouds/map2.png"), "chapter 2 battle should use map2 war background")
 	var boss_portrait_size := (battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect).size
 	var boss_hp_y := (battle.get_node("Combatants/SingleEnemy/HpFrameBase") as TextureRect).position.y
-	_expect(boss_portrait_size.x > normal_enemy_portrait_size.x and boss_portrait_size.x <= 192.0, "boss portrait should stay emphasized without using the oversized 2x scale")
+	var boss_portrait := battle.get_node("Combatants/SingleEnemy/Portrait") as TextureRect
+	_expect(boss_portrait_size == Vector2(156.0, 156.0), "boss portrait should use the finalized 156x156 frame without rarity scaling")
+	_expect(_rect_in_scene(battle, boss_portrait).is_equal_approx(Rect2(107.5, 73.0, 156.0, 156.0)), "boss portrait should use the final Rect2(107.5, 73, 156, 156)")
+	_expect(is_equal_approx((battle.call("_collect_enemy_centers") as Array)[0].y, 151.0), "boss hit/skill anchor should follow the portrait center at Y=151")
 	_expect(boss_hp_y <= featured_non_boss_hp_y - 40.0, "boss battle hp frame should keep its special upward offset")
 
 	main.switch_scene("battle", {
@@ -144,6 +152,10 @@ func _run() -> void:
 	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should show for three enemies")
 	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
 	_expect(battle.has_node("Combatants/MultiEnemies/Enemy3/HpFrameBase"), "multi-enemy hp bars should keep the base frame layer")
+	var three_enemy_centers: Array = battle.call("_collect_enemy_centers")
+	_expect(three_enemy_centers.size() == 3, "three-enemy battle should expose three target anchors")
+	for center: Vector2 in three_enemy_centers:
+		_expect(is_equal_approx(center.y, 151.0), "every three-enemy portrait and target anchor should share Y=151")
 
 	main.switch_scene("battle", {
 		"stageId": "stage_4_2",
@@ -164,6 +176,16 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
+
+func _rect_in_scene(scene: Control, control: Control) -> Rect2:
+	var to_scene := scene.get_global_transform_with_canvas().affine_inverse() * control.get_global_transform_with_canvas()
+	var p0 := to_scene * Vector2.ZERO
+	var p1 := to_scene * Vector2(control.size.x, 0.0)
+	var p2 := to_scene * Vector2(0.0, control.size.y)
+	var p3 := to_scene * control.size
+	var min_pos := Vector2(minf(minf(p0.x, p1.x), minf(p2.x, p3.x)), minf(minf(p0.y, p1.y), minf(p2.y, p3.y)))
+	var max_pos := Vector2(maxf(maxf(p0.x, p1.x), maxf(p2.x, p3.x)), maxf(maxf(p0.y, p1.y), maxf(p2.y, p3.y)))
+	return Rect2(min_pos, max_pos - min_pos)
 
 func _collect_base_buttons(node: Node) -> Array[BaseButton]:
 	var buttons: Array[BaseButton] = []

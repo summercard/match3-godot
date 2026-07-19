@@ -23,6 +23,7 @@ func _init() -> void:
 func _run() -> void:
 	_test_capture_and_item_economy()
 	_test_stage_and_tower_progression()
+	_test_finalized_monster_base_attack()
 	_test_sign_in_single_source()
 	_test_ecology_catalog()
 	_test_leader_skill_override_catalog()
@@ -65,9 +66,18 @@ func _test_capture_and_item_economy() -> void:
 
 func _test_stage_and_tower_progression() -> void:
 	var db := StageDBScript.new()
-	_expect(int(db.get_stage("stage_1_1").get("enemyLevel", 0)) == 5, "stage_1_1 should keep its baseline enemy level")
-	_expect(int(db.get_stage("stage_1_2").get("enemyLevel", 0)) == 11, "stage_1_2 should receive the six-level increase")
-	_expect(int(db.get_stage("stage_5_12").get("enemyLevel", 0)) == 36, "chapter-five boss should receive the six-level increase")
+	var chapter_one_config := [5, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13]
+	var chapter_one_combat := [8, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 13]
+	for stage_index in range(chapter_one_config.size()):
+		var stage_no := stage_index + 1
+		var stage: Dictionary = db.get_stage("stage_1_%d" % stage_no)
+		var configured_level := int(stage.get("enemyLevel", 0))
+		_expect(configured_level == chapter_one_config[stage_index], "stage_1_%d configured level should match the final 1.3.2 curve" % stage_no)
+		var runtime_monster_id := "monster_boss_001" if stage_no == 12 else "monster_001"
+		_expect(StatCalculator.enemy_combat_level(runtime_monster_id, configured_level) == chapter_one_combat[stage_index], "stage_1_%d runtime level should apply the finalized ordinary/Boss rule" % stage_no)
+	_expect(int(db.get_stage("stage_2_1").get("enemyLevel", 0)) == 16, "chapter two ordinary stages should retain the +6 chapter bonus")
+	_expect(int(db.get_stage("stage_2_12").get("enemyLevel", 0)) == 21, "chapter two boss should retain the +6 chapter bonus")
+	_expect(int(db.get_stage("stage_5_12").get("enemyLevel", 0)) == 36, "chapter-five boss should follow the finalized boss formula")
 	_expect(str(db.get_stage("stage_1_6").get("battleHint", "")).is_empty(), "ordinary non-fountain stages should not show generic battle hints")
 	_expect(str(db.get_stage("stage_2_5").get("battleHint", "")).contains("喷泉"), "fountain stages should retain the Chinese mechanic hint")
 	_expect(TowerDBScript.UNLOCK_STAGE_ID == "stage_5_12", "tower should unlock from the chapter-five final boss")
@@ -77,6 +87,24 @@ func _test_stage_and_tower_progression() -> void:
 	_expect(is_equal_approx(float(default_prepare.call("_preview_random_elite_chance", {})), 0.10), "ordinary prepare flow should inherit the battle core's ten-percent elite rate")
 	default_prepare.free()
 	_test_elite_encounter_snapshot()
+
+
+func _test_finalized_monster_base_attack() -> void:
+	var expected_base_attack := {
+		"monster_001": 32, "monster_002": 27, "monster_003": 41, "monster_004": 45,
+		"monster_007": 30, "monster_011": 27, "monster_014": 26, "monster_020": 30,
+		"monster_023": 30, "monster_042": 26, "monster_047": 26, "monster_049": 32,
+		"monster_053": 32, "monster_054": 36, "monster_055": 48, "monster_056": 28,
+		"monster_062": 26, "monster_064": 27, "monster_070": 27, "monster_073": 27,
+		"monster_076": 26, "monster_079": 30, "monster_090": 27, "monster_095": 33,
+	}
+	for monster_id: String in expected_base_attack:
+		var monster: Dictionary = MonsterDb.get_monster(monster_id)
+		_expect(int(monster.get("baseATK", 0)) == int(expected_base_attack[monster_id]), "%s base attack should match the finalized 1.3.2 value" % monster_id)
+	var grass_rabbit_line := ["monster_002", "monster_003", "monster_004"]
+	var messenger_turtle_line := ["monster_053", "monster_054", "monster_055"]
+	_expect(grass_rabbit_line.map(func(id): return int(MonsterDb.get_monster(id).get("baseATK", 0))) == [27, 41, 45], "grass-rabbit evolution should reject the superseded 34/51/57 values")
+	_expect(messenger_turtle_line.map(func(id): return int(MonsterDb.get_monster(id).get("baseATK", 0))) == [32, 36, 48], "messenger-turtle evolution should reject the superseded 36/41/54 values")
 
 
 func _test_elite_encounter_snapshot() -> void:

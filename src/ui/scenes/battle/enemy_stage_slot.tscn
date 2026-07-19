@@ -13,10 +13,10 @@ mouse_filter = 2
 
 [node name="Portrait" type="TextureRect" parent="." unique_id=1632765082]
 layout_mode = 0
-offset_left = 123.5
-offset_top = 111.0
-offset_right = 251.5
-offset_bottom = 239.0
+offset_left = 109.5
+offset_top = 97.0
+offset_right = 265.5
+offset_bottom = 253.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5

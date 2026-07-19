@@ -2662,7 +2662,7 @@ func _combatant_effect_center(is_enemy: bool, index: int) -> Vector2:
 	if index >= 0 and index < centers.size():
 		return centers[index]
 	if is_enemy:
-		return Vector2(25.0 + float(index) * 120.0 + 55.0, 88.0)
+		return Vector2(25.0 + float(index) * 120.0 + 55.0, 151.0)
 	return Vector2(15.0 + float(index) * 120.0 + 55.0, 230.0)
 
 func _player_element_at(index: int) -> String:

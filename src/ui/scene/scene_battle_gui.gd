@@ -542,7 +542,7 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_b
 	var max_hp := maxi(int(unit.get("maxHP", 1)), 1)
 	_apply_combatant_status_offset(slot, allow_boss_status_offset and bool(unit.get("isBoss", false)) and hp > 0)
 	var portrait := slot.get_node("Portrait") as TextureRect
-	_apply_portrait_visual_scale(portrait, _combatant_portrait_scale(unit, hp))
+	_apply_portrait_visual_scale(portrait, _combatant_portrait_scale(slot, unit, hp))
 	portrait.texture = _get_monster_texture(unit) if hp > 0 else _get_texture(DEFEATED_GHOST_ASSET)
 	portrait.modulate.a = 1.0
 	var is_elite := bool(unit.get("isElite", false))
@@ -565,9 +565,14 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_b
 var _portrait_base_rect_cache: Dictionary = {}
 var _status_base_rect_cache: Dictionary = {}
 
-func _combatant_portrait_scale(unit: Dictionary, hp: int) -> float:
+func _combatant_portrait_scale(slot: Control, unit: Dictionary, hp: int) -> float:
 	if hp <= 0:
 		return 1.0
+	# Cocos/微信 1.3.2 的战局敌方框使用固定尺寸；只保留共鸣塔
+	# 独立的 1.30 倍体型规则。这样稀有度不会再次改写最终立绘框。
+	var slot_path := str(slot.get_path())
+	if slot_path.contains("/Combatants/SingleEnemy") or slot_path.contains("/Combatants/MultiEnemies/"):
+		return float(unit.get("_towerVisualScale", 1.0))
 	return float(unit.get("_visualScale", StatCalculator.visual_scale_for_stats(unit)))
 
 func _apply_portrait_visual_scale(portrait: TextureRect, visual_scale: float) -> void:
