@@ -5,6 +5,7 @@ extends "res://src/ui/controllers/ranch_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const GrowthRulesScript := preload("res://src/core/growth_rules.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 const PAGE_BACKGROUNDS := {
 	"ranch": "res://assets/images/ui/backgrounds/ranch_optimized_bg_ranch_pasture_750.png",
 	"classroom": "res://assets/images/ui/backgrounds/ranch_optimized_bg_pet_academy_750.png",
@@ -1125,6 +1126,8 @@ func _sync_classroom_page() -> void:
 		empty.visible = false
 		portrait.texture = _portrait_texture(instance_id)
 		target_portrait.texture = _monster_portrait_texture(target_id)
+		MonsterIdleAnimatorScript.bind(portrait, monster_id)
+		MonsterIdleAnimatorScript.bind(target_portrait, target_id)
 		stone_icon.texture = _tex(_evolution_stone_icon_path(required_item))
 		var classroom_name := panel.get_node("Name") as Label
 		classroom_name.text = "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", monster_id)))]
@@ -1615,6 +1618,7 @@ func _sync_social_slot(node: TextureButton, slot_key: String, place: Dictionary)
 	name_label.visible = true
 	detail_label.visible = true
 	portrait.texture = _portrait_texture(instance_id)
+	MonsterIdleAnimatorScript.bind(portrait, str(instance.get("monsterId", "")))
 	name_label.text = "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", "")))]
 	CartoonTypography.fit_label(name_label, 17, 7)
 	detail_label.text = "%s %s" % [_gender_label(instance), _get_nature_name(str(instance.get("nature", "")))]
@@ -1661,9 +1665,12 @@ func _sync_card_strip(paths: Array, start_index: int, context: String) -> void:
 		card.tooltip_text = "农场挂机中，先从农场取下" if ranch_locked else ""
 
 func _sync_card(card: TextureButton, instance_id: String, selected: bool, context: String, in_team: bool = false) -> void:
-	var monster := MonsterDb.get_monster(_get_monster_id(instance_id))
+	var monster_id := _get_monster_id(instance_id)
+	var monster := MonsterDb.get_monster(monster_id)
 	var instance := _get_instance(instance_id)
-	_set_texture(card.get_node("Portrait") as TextureRect, _portrait_texture(instance_id))
+	var portrait := card.get_node("Portrait") as TextureRect
+	_set_texture(portrait, _portrait_texture(instance_id))
+	MonsterIdleAnimatorScript.bind(portrait, monster_id)
 	var card_name := card.get_node("Name") as Label
 	_set_text(card_name, "%s%s" % [_elite_prefix(instance), TranslationServer.translate(str(monster.get("name", "")))])
 	CartoonTypography.fit_label(card_name, 12, 6)

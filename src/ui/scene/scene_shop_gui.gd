@@ -4,6 +4,7 @@ class_name SceneShopGui
 extends "res://src/ui/controllers/shop_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 const TAB_ACTIVE_TEXTURE := preload("res://assets/images/ui/buttons/shop_ui_shop_tab_active_image2_clean.png")
 const TAB_NORMAL_TEXTURE := preload("res://assets/images/ui/buttons/shop_ui_shop_tab_normal_image2_clean.png")
 const PAGE_SIZE := 9
@@ -38,6 +39,7 @@ func _ready() -> void:
 	_connect_gui_actions()
 	_attach_shop_feedback()
 	_sync_gui()
+	MonsterIdleAnimatorScript.bind(get_node_or_null("Mascot") as TextureRect, "monster_002")
 	call_deferred("_play_enter_animation")
 
 func init(data: Dictionary = {}) -> void:

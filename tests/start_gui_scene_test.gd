@@ -43,6 +43,19 @@ func _run() -> void:
 	]:
 		_expect(scene.get_node_or_null(path) != null, "editable node should exist: %s" % path)
 
+	var starter_paths := [
+		"Content/Monsters/FireMonster",
+		"Content/Monsters/WaterMonster",
+		"Content/Monsters/GrassMonster",
+	]
+	var starter_positions := {}
+	for path in starter_paths:
+		starter_positions[path] = (scene.get_node(path) as TextureRect).position
+	await create_timer(0.24).timeout
+	for path in starter_paths:
+		var monster := scene.get_node(path) as TextureRect
+		_expect(monster.position == starter_positions[path], "starter portrait should stay fixed while its frame animation plays: %s" % path)
+
 	var button := scene.get_node("Content/StartButton") as TextureButton
 	_expect(not button.disabled, "start button should begin enabled")
 	_expect(button.has_node("CartoonFeedback"), "start button should expose cartoon feedback")

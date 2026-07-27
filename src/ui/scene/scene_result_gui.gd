@@ -5,6 +5,7 @@ extends "res://src/ui/controllers/result_logic.gd"
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const CartoonTypographyScript := preload("res://src/ui/components/cartoon_typography.gd")
 const ResultConfettiLayerScript := preload("res://src/ui/components/result_confetti_layer.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 const STAR_PATHS := ["StarRow/Star1", "StarRow/Star2", "StarRow/Star3"]
 const REWARD_SLOT_PATHS := [
@@ -150,6 +151,7 @@ func _sync_capture_success_data(layer: Control) -> void:
 	var portrait := layer.get_node_or_null("Stage/MonsterPortrait") as TextureRect
 	if portrait != null:
 		portrait.texture = _monster_texture(_capture_target, "result")
+		MonsterIdleAnimatorScript.bind(portrait, str(_capture_target.get("monsterId", _capture_target.get("id", ""))))
 	var name_label := layer.get_node_or_null("InfoPlaque/Badge") as Label
 	if name_label != null:
 		name_label.text = _capture_monster_name()
@@ -521,7 +523,9 @@ func _sync_exp_panel() -> void:
 		if i >= display_team.size():
 			continue
 		var monster: Dictionary = display_team[i]
-		(card.get_node("Portrait") as TextureRect).texture = _monster_texture(monster, "result")
+		var portrait := card.get_node("Portrait") as TextureRect
+		portrait.texture = _monster_texture(monster, "result")
+		MonsterIdleAnimatorScript.bind(portrait, str(monster.get("monsterId", monster.get("id", ""))))
 		(card.get_node("Level") as Label).visible = false
 		(card.get_node("Exp") as Label).visible = false
 

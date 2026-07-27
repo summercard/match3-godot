@@ -20,6 +20,9 @@ Thumbs.db
 
 # Source art and one-off development outputs
 美术开发/
+!美术开发/
+美术开发/*
+!美术开发/精灵立绘资产代入表.md
 assets/images/concepts/
 tmp_*.gd.uid
 tmp/test-logs/

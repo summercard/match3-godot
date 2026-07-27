@@ -3,6 +3,7 @@ class_name SceneBattleGui
 extends "res://src/ui/scene/scene_battle.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 const MULTI_ENEMY_PATHS := [
 	"Combatants/MultiEnemies/Enemy1",
 	"Combatants/MultiEnemies/Enemy2",
@@ -544,6 +545,11 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String, allow_b
 	var portrait := slot.get_node("Portrait") as TextureRect
 	_apply_portrait_visual_scale(portrait, _combatant_portrait_scale(slot, unit, hp))
 	portrait.texture = _get_monster_texture(unit) if hp > 0 else _get_texture(DEFEATED_GHOST_ASSET)
+	var monster_id := str(unit.get("monsterId", unit.get("id", "")))
+	if hp > 0:
+		MonsterIdleAnimatorScript.bind(portrait, monster_id)
+	else:
+		MonsterIdleAnimatorScript.unbind(portrait)
 	portrait.modulate.a = 1.0
 	var is_elite := bool(unit.get("isElite", false))
 	var elite_prefix := "★精英 " if is_elite else ""
@@ -1089,6 +1095,7 @@ func _apply_defeat_feedback(slot: Control, is_enemy: bool, index: int) -> void:
 		else:
 			# legacy：没 transition 记录时，按旧行为：直接显示 ghost
 			_portrait_defeat_ghost_cache[portrait_id] = true
+			MonsterIdleAnimatorScript.unbind(portrait)
 			portrait.texture = _get_texture(DEFEATED_GHOST_ASSET)
 			portrait.position = base_pos
 			portrait.modulate.a = 1.0
@@ -1115,6 +1122,7 @@ func _apply_defeat_feedback(slot: Control, is_enemy: bool, index: int) -> void:
 	else:
 		# 阶段 3：幽灵从下冲上 + 渐显
 		# 每帧锁定为 ghost 图，确保淡入上浮阶段不被其他同步逻辑覆盖。
+		MonsterIdleAnimatorScript.unbind(portrait)
 		portrait.texture = _get_texture(DEFEATED_GHOST_ASSET)
 		_portrait_defeat_ghost_cache[portrait_id] = true
 		var rise: float = clampf((t - 0.30) / 0.70, 0.0, 1.0)

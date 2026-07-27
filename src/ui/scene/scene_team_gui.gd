@@ -5,6 +5,7 @@ const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_bu
 const MonsterArtDBScript := preload("res://src/data/monster_art_db.gd")
 const MonsterDBScript := preload("res://src/data/monster_db.gd")
 const BattlePowerRulesScript := preload("res://src/core/battle_power_rules.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 signal team_changed(team: Dictionary)
 signal scene_exit()
@@ -556,6 +557,8 @@ func _sync_team_slots() -> void:
 		var portrait := slot_node.find_child("Portrait", true, false) as TextureRect
 		if portrait != null:
 			portrait.visible = occupied
+			if not occupied:
+				MonsterIdleAnimatorScript.unbind(portrait)
 		(slot_node.get_node("Fallback") as Label).visible = false
 		(slot_node.get_node("Selection") as Panel).visible = _selected_slot == key
 		var leader_badge := slot_node.find_child("LeaderBadge", true, false) as CanvasItem
@@ -639,6 +642,7 @@ func _sync_empty_roster_card(card: TextureButton) -> void:
 	card.modulate.a = 0.42
 	(card.get_node("Frame") as TextureRect).texture = _gui_tex("roster_card")
 	(card.get_node("Portrait") as TextureRect).texture = null
+	MonsterIdleAnimatorScript.unbind(card.get_node("Portrait") as TextureRect)
 	(card.get_node("Check") as TextureRect).visible = false
 	_sync_owned_no_label(card, "")
 	(card.get_node("Level") as Label).text = ""
@@ -726,16 +730,24 @@ func _prepare_roster_texture_page(page: int) -> void:
 	for path: String in ROSTER_PATHS:
 		var portrait := get_node_or_null(path + "/Portrait") as TextureRect
 		if portrait != null:
+			MonsterIdleAnimatorScript.unbind(portrait)
 			portrait.texture = null
 	_roster_texture_cache.clear()
 	_loaded_roster_page = page
 
 
 func _request_portrait_texture(monster_id: String, target: TextureRect, scope: String) -> void:
-	var path := MonsterArtDBScript.get_art_path(_get_monster_id(monster_id), "team")
+	var resolved_monster_id := _get_monster_id(monster_id)
+	var path := MonsterArtDBScript.get_art_path(resolved_monster_id, "team")
 	if path.is_empty():
 		target.texture = null
+		MonsterIdleAnimatorScript.unbind(target)
 		return
+	if MonsterArtDBScript.has_animation(resolved_monster_id, "idle"):
+		target.texture = _get_texture(path)
+		MonsterIdleAnimatorScript.bind(target, resolved_monster_id)
+		return
+	MonsterIdleAnimatorScript.unbind(target)
 	var cache := _team_portrait_cache if scope == "team" else _roster_texture_cache
 	if cache.has(path):
 		target.texture = cache[path]

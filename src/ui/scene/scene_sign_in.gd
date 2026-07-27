@@ -8,6 +8,7 @@ signal sign_in_complete(reward: Dictionary)
 
 const _RoundFontSrc := preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 const SignInRewardDBScript := preload("res://src/data/sign_in_reward_db.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 const DESIGN_WIDTH := 375.0
 const DESIGN_HEIGHT := 667.0
@@ -91,6 +92,8 @@ const ENTRY_TOTAL_DURATION := 1.30  # 入场总时长（含元素依次入场）
 const ENTRY_TOP_OFFSET_START := 26.0
 const ENTRY_BOTTOM_OFFSET_START := 26.0
 var _entry_t := 0.0
+var _idle_elapsed := 0.0
+var _idle_start_frame := 0
 
 # === 元素级入场（参考胜利界面奖励槽节奏）===
 # hero 面板（连续签到 + 今日奖励）：顶部滑下
@@ -118,6 +121,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_connect_authored_hit_areas()
 	_storage = get_node_or_null("/root/SaveManager")
+	_idle_start_frame = MonsterIdleAnimatorScript.random_start_frame("monster_002")
 	self.modulate.a = 0.0  # 入场动画起点：透明
 
 
@@ -222,6 +226,7 @@ func get_today_reward() -> Dictionary:
 
 
 func _process(dt: float) -> void:
+	_idle_elapsed += dt
 	for i in range(_particles.size() - 1, -1, -1):
 		var p: Dictionary = _particles[i]
 		p["x"] += p["vx"]
@@ -363,7 +368,7 @@ func _draw_hero() -> void:
 func _draw_hero_inner() -> void:
 	_draw_nine_patch("month_panel", HERO_RECT)
 	_draw_texture_contain(_tex("calendar"), Rect2(28.0, 88.0, 88.0, 82.0))
-	_draw_texture_contain(_tex("mascot"), Rect2(255.0, 76.0, 88.0, 100.0))
+	_draw_texture_contain(MonsterIdleAnimatorScript.texture_at_time("monster_002", _idle_elapsed, "idle", _idle_start_frame), Rect2(255.0, 76.0, 88.0, 100.0))
 	var consecutive := int(_sign_in_data.get("consecutiveDays", 0))
 	var next_reward := _get_schedule_item(_current_cycle_day())
 	_draw_text("连续签到", 174.0, 112.0, Color(0.55, 0.31, 0.12), 18.0, true, 110.0)

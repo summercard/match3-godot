@@ -9,9 +9,9 @@ extends Control
 signal hold_pressed
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 const FADE_SPEED := 1.8
 const PULSE_SPEED := 1.7
-const MONSTER_BOB_HEIGHT := 3.0
 const GEM_BOB_HEIGHT := 3.5
 const WELCOME_ART_LOCALES: PackedStringArray = [
 	"zh_CN",
@@ -27,11 +27,7 @@ const TITLE_TEXTURE_PATTERN := "res://assets/images/ui/icons/localized/start_tit
 const BUTTON_NORMAL_TEXTURE_PATTERN := "res://assets/images/ui/buttons/localized/start_ui_btn_start_normal_%s.png"
 const BUTTON_PRESSED_TEXTURE_PATTERN := "res://assets/images/ui/buttons/localized/start_ui_btn_start_pressed_%s.png"
 
-const MONSTER_PHASES := {
-	"FireMonster": -0.5,
-	"WaterMonster": 0.0,
-	"GrassMonster": 0.55,
-}
+const STARTER_MONSTER_IDS := ["monster_093", "monster_053", "monster_002"]
 
 const GEM_PHASES := {
 	"FireGem": 0.0,
@@ -63,7 +59,6 @@ var _elapsed := 0.0
 var _opacity := 0.0
 var _entering := false
 var _entry_queued := false
-var _monster_base_positions: Dictionary = {}
 var _gem_base_positions: Dictionary = {}
 
 func _ready() -> void:
@@ -77,9 +72,10 @@ func _ready() -> void:
 		localization.locale_changed.connect(_on_locale_changed)
 	_start_glow.pivot_offset = _start_glow.size * 0.5
 	_attach_button_feedback(_start_button, CartoonButtonFeedback.Profile.PRIMARY)
-	for node in _monster_nodes:
+	for index in _monster_nodes.size():
+		var node := _monster_nodes[index]
 		node.pivot_offset = node.size * 0.5
-		_monster_base_positions[node.name] = node.position
+		MonsterIdleAnimatorScript.bind(node, STARTER_MONSTER_IDS[index])
 	for node in _gem_nodes:
 		node.pivot_offset = node.size * 0.5
 		_gem_base_positions[node.name] = node.position
@@ -115,15 +111,8 @@ func _process(delta: float) -> void:
 	if _opacity < 1.0:
 		_opacity = minf(1.0, _opacity + delta * FADE_SPEED)
 	_content.modulate.a = _opacity
-	_animate_monsters()
 	_animate_gems()
 	_animate_button()
-
-func _animate_monsters() -> void:
-	for node in _monster_nodes:
-		var phase: float = MONSTER_PHASES.get(node.name, 0.0)
-		var base_position: Vector2 = _monster_base_positions[node.name]
-		node.position = base_position + Vector2(0.0, sin(_elapsed * PULSE_SPEED + phase) * MONSTER_BOB_HEIGHT)
 
 func _animate_gems() -> void:
 	for node in _gem_nodes:

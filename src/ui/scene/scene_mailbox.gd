@@ -6,6 +6,7 @@ const MailboxRulesScript = preload("res://src/core/mailbox_rules.gd")
 const CartoonButtonFeedbackScript = preload("res://src/ui/components/cartoon_button_feedback.gd")
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const MailContentDBScript = preload("res://src/data/mail_content_db.gd")
+const MonsterIdleAnimatorScript = preload("res://src/ui/components/monster_idle_animator.gd")
 const MAIL_PAGE_SIZE := 4
 
 signal back_pressed
@@ -130,6 +131,7 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 		_selected_instance_id = str(current.get("instanceId", ""))
 	if current.is_empty():
 		_adventurer_name.text = "暂无可派遣精灵"
+		MonsterIdleAnimatorScript.unbind(_adventurer_portrait)
 		_adventurer_portrait.texture = null
 		_adventurer_portrait.visible = false
 	else:
@@ -139,6 +141,7 @@ func _refresh_blessing(owned: Array, state: Dictionary) -> void:
 		_adventurer_name.text = "%s  ·  Lv.%d" % [TranslationServer.translate(display_name), int(current.get("level", 1))]
 		var portrait_path := MonsterArtDBScript.get_art_path(monster_id, "ranch")
 		_adventurer_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
+		MonsterIdleAnimatorScript.bind(_adventurer_portrait, monster_id)
 		_adventurer_portrait.visible = _adventurer_portrait.texture != null
 	var daily_count := int(state.get("daily_send_count", 0))
 	_blessing_status.text = TranslationServer.translate("图鉴星星：%d") % MailboxRulesScript.collection_star_total(state)
@@ -205,6 +208,7 @@ func _show_selected_mail(inbox: Array) -> void:
 	var sender_monster_id := str(mail.get("sender_monster_id", ""))
 	var portrait_path := MonsterArtDBScript.get_art_path(sender_monster_id, "ranch")
 	_sender_portrait.texture = load(portrait_path) as Texture2D if not portrait_path.is_empty() else null
+	MonsterIdleAnimatorScript.bind(_sender_portrait, sender_monster_id)
 	_sender_portrait_frame.visible = _sender_portrait.texture != null
 
 

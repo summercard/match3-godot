@@ -6,6 +6,7 @@ extends "res://src/ui/controllers/stage_select_logic.gd"
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const AnimationHelperScript := preload("res://src/engine/animation_player.gd")
 const StageSelectChapterRegistryScript := preload("res://src/ui/scene/stage_select_chapter_registry.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 const CHAPTER_MAP_NODES := StageSelectChapterRegistryScript.CHAPTER_MAP_NODES
 const CHAPTER_MAP_SCENES := StageSelectChapterRegistryScript.CHAPTER_MAP_SCENES
@@ -682,16 +683,19 @@ func _apply_stage_portrait(button: TextureButton, card: Dictionary) -> void:
 	var enabled := bool(card.get("enabled", true))
 	var stars := int(card.get("stars", 0))
 	if not enabled or stars > 0:
+		MonsterIdleAnimatorScript.unbind(portrait)
 		portrait.visible = false
 		portrait.texture = null
 		return
 	var monster_id := _feature_enemy_id(card)
 	var path := MonsterArtDB.get_battle_portrait_path(monster_id) if not monster_id.is_empty() else ""
 	if path.is_empty() or not ResourceLoader.exists(path):
+		MonsterIdleAnimatorScript.unbind(portrait)
 		portrait.visible = false
 		portrait.texture = null
 		return
 	portrait.texture = load(path)
+	MonsterIdleAnimatorScript.bind(portrait, monster_id)
 	# 保留原色（白 modulate = 无修改）
 	portrait.modulate = Color(1, 1, 1, 1)
 	# 动态定位：图片底部对准台子中心并略向上抬，水平居中。
@@ -705,10 +709,12 @@ func _apply_boss_portrait(button: TextureButton, card: Dictionary) -> void:
 	var monster_id := _feature_enemy_id(card)
 	var path := MonsterArtDB.get_battle_portrait_path(monster_id) if not monster_id.is_empty() else ""
 	if path.is_empty() or not ResourceLoader.exists(path):
+		MonsterIdleAnimatorScript.unbind(portrait)
 		portrait.visible = false
 		portrait.texture = null
 		return
 	portrait.texture = _stage_select_boss_portrait_texture(path)
+	MonsterIdleAnimatorScript.bind(portrait, monster_id)
 	portrait.modulate = Color(1, 1, 1, 1)
 	portrait.z_index = 1
 	_center_boss_portrait_on_pedestal(button, portrait)

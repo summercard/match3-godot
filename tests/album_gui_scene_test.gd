@@ -32,7 +32,7 @@ func _run() -> void:
 	await process_frame
 	var initial_captured: Array = scene.get("_captured_ids")
 	var all_monsters: Array = scene.get("_all_monsters")
-	_assert(initial_captured.size() < all_monsters.size(), "album runtime should not use the QA all-unlocked override")
+	_assert(initial_captured.size() == all_monsters.size(), "temporary 1.3.5 acceptance mode should unlock the complete album")
 
 	_assert(scene.scene_file_path == SCENE_PATH, "album should be a PackedScene GUI")
 	_assert(scene.has_node("AlbumPage/Grid/Card1"), "card nodes should be editable")

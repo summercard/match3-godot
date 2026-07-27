@@ -5,6 +5,7 @@ extends "res://src/ui/controllers/album_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
 const LockedSilhouetteShader := preload("res://src/ui/shaders/album_locked_silhouette.gdshader")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 # === 图鉴入场动画时间线 ===
 const ENTRY_BAR_DELAY := 0.00
@@ -289,6 +290,7 @@ func _sync_card(card: TextureButton, monster: Dictionary, index: int) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.visible = true
 	portrait.texture = _monster_texture(id, "album")
+	MonsterIdleAnimatorScript.bind(portrait, id)
 	portrait.material = null if unlocked else _locked_portrait_material()
 	(card.get_node("LockIcon") as TextureRect).visible = false
 	(card.get_node("Stars") as Control).visible = false
@@ -326,7 +328,9 @@ func _sync_detail() -> void:
 	CartoonTypography.fit_label(detail_name, 24, 9)
 	_label("DetailPanel/Nature").text = _detail_nature_text(id)
 	_label("DetailPanel/Owned").text = "未收录" if owned_count <= 0 else "已收录"
-	(get_node("DetailPanel/PortraitStage/Portrait") as TextureRect).texture = _monster_texture(id, "album")
+	var detail_portrait := get_node("DetailPanel/PortraitStage/Portrait") as TextureRect
+	detail_portrait.texture = _monster_texture(id, "album")
+	MonsterIdleAnimatorScript.bind(detail_portrait, id)
 	_sync_detail_stars(monster)
 	_sync_detail_stats(monster)
 	_sync_detail_skill(monster)
@@ -371,13 +375,16 @@ func _sync_detail_evolution(monster: Dictionary) -> void:
 	var from := get_node("DetailPanel/EvolutionStrip/From") as TextureRect
 	from.visible = true
 	from.texture = _monster_texture(id, "album")
+	MonsterIdleAnimatorScript.bind(from, id)
 	var has_evolution := _selected_has_evolution()
 	(get_node("DetailPanel/EvolutionStrip/Arrow") as TextureRect).visible = has_evolution
 	(get_node("DetailPanel/EvolutionStrip/To") as TextureRect).visible = has_evolution
 	_label("DetailPanel/EvolutionStrip/Empty").visible = not has_evolution
 	if has_evolution:
 		var target_id := str(monster.get("evolution", {}).get("target", ""))
-		(get_node("DetailPanel/EvolutionStrip/To") as TextureRect).texture = _monster_texture(target_id, "album")
+		var target_portrait := get_node("DetailPanel/EvolutionStrip/To") as TextureRect
+		target_portrait.texture = _monster_texture(target_id, "album")
+		MonsterIdleAnimatorScript.bind(target_portrait, target_id)
 
 func _sync_detail_ecology(monster: Dictionary) -> void:
 	var identity: Dictionary = EcologyBondRulesScript.get_monster_identity(monster)

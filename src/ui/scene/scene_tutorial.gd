@@ -5,6 +5,7 @@ extends Control
 signal tutorial_completed()
 
 const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
+const MonsterIdleAnimatorScript = preload("res://src/ui/components/monster_idle_animator.gd")
 const ROUND_FONT: Font = preload("res://assets/fonts/noto-cjk/NotoSansCJK-Regular.ttc")
 
 const DESIGN_WIDTH := 375.0
@@ -97,6 +98,7 @@ var _anim_time := 0.0
 var _step_time := 0.0
 var _tutorial_ready := false
 var _texture_cache: Dictionary = {}
+var _idle_start_frames: Dictionary = {}
 
 static var instance: SceneTutorial
 
@@ -221,6 +223,17 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+func _idle_texture(monster_id: String) -> Texture2D:
+	if not _idle_start_frames.has(monster_id):
+		_idle_start_frames[monster_id] = MonsterIdleAnimatorScript.random_start_frame(monster_id)
+	return MonsterIdleAnimatorScript.texture_at_time(
+		monster_id,
+		_anim_time,
+		"idle",
+		int(_idle_start_frames[monster_id])
+	)
+
+
 func _draw() -> void:
 	var a := _opacity
 	if a <= 0.0:
@@ -255,7 +268,7 @@ func _draw_enemy_row(a: float) -> void:
 		var bob := sin(_anim_time * 2.1 + rect.position.x * 0.03) * 2.4
 		_draw_texture_fit(_tex("enemy_card"), Rect2(rect.position.x - 13.0, rect.position.y - 7.0, 104.0, 118.0), 0.54 * a)
 		_draw_texture_contain(_tex(str(enemy["element"])), Rect2(rect.position.x - 14.0, 96.0 + bob, 26.0, 26.0), 0.84 * a)
-		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(enemy["id"]))), _offset_rect(rect, Vector2(0.0, bob)), a)
+		_draw_texture_contain(_idle_texture(str(enemy["id"])), _offset_rect(rect, Vector2(0.0, bob)), a)
 		_draw_text(str(enemy["hp"]), rect.get_center().x, 188.0, C["white"], 15.0, true, 70.0, a)
 		_draw_hp_bar(Rect2(rect.position.x - 7.0, 195.0, 92.0, 9.0), Color(0.92, 0.14, 0.12, a), 0.72)
 
@@ -272,7 +285,7 @@ func _draw_team_row(a: float) -> void:
 		var draw_card := _offset_rect(card, Vector2(0.0, bob))
 		_draw_texture_fit(_tex(str(member["card"])), draw_card, 0.96 * a)
 		_draw_texture_contain(_tex(str(member["element"])), Rect2(card.position.x + 8.0, card.position.y + 9.0 + bob, 24.0, 24.0), a)
-		_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path(str(member["id"]))), Rect2(card.position.x + 13.0, card.position.y + 17.0 + bob, 66.0, 58.0), a)
+		_draw_texture_contain(_idle_texture(str(member["id"])), Rect2(card.position.x + 13.0, card.position.y + 17.0 + bob, 66.0, 58.0), a)
 		_draw_hp_bar(Rect2(card.position.x + 15.0, card.position.y + 76.0, 62.0, 8.0), Color(0.26, 0.82, 0.28, a), 1.0)
 		_draw_text(str(member["hp"]), card.get_center().x, card.position.y + 84.0, C["white"], 9.0, true, 72.0, a)
 
@@ -295,7 +308,7 @@ func _draw_focus_overlay(focus: String, a: float) -> void:
 	var hint_alpha := a * (0.78 + sin(_anim_time * 4.8) * 0.16)
 	match focus:
 		"overview":
-			_draw_texture_contain(_get_texture(MonsterArtDBScript.get_battle_portrait_path("monster_002")), Rect2(18.0, 390.0 + sin(_anim_time * 2.7) * 4.0, 110.0, 115.0), a)
+			_draw_texture_contain(_idle_texture("monster_002"), Rect2(18.0, 390.0 + sin(_anim_time * 2.7) * 4.0, 110.0, 115.0), a)
 			_draw_texture_fit(_tex("prompt_dark"), _intro_rect(Rect2(139.0, 332.0, 166.0, 50.0), Vector2(0.0, 18.0)), a)
 			_draw_text("先看战斗布局", 222.0, 363.0, C["gold"], 18.0, true, 132.0, a)
 		"match":

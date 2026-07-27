@@ -2,6 +2,7 @@
 extends "res://src/ui/controllers/battle_prepare_logic.gd"
 
 const CartoonButtonFeedbackScript := preload("res://src/ui/components/cartoon_button_feedback.gd")
+const MonsterIdleAnimatorScript := preload("res://src/ui/components/monster_idle_animator.gd")
 
 const ENEMY_CARD_PATHS := [
 	"EnemyPanel/Cards/EnemyCard1",
@@ -246,6 +247,7 @@ func _style_label(path: NodePath, color: Color, outline_color: Color, outline_si
 func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(monster, "team" if is_team else "battle")
+	MonsterIdleAnimatorScript.bind(portrait, str(monster.get("monsterId", monster.get("id", ""))))
 	_apply_portrait_visual_scale(portrait, _monster_visual_scale(monster))
 	# ★ 主人定 2026-06-11：精英宠物/精英怪名字前缀 ★精英
 	var is_elite := bool(monster.get("isElite", false))
@@ -278,6 +280,7 @@ func _set_enemy_boss_card(card: Control, enemy: Dictionary) -> void:
 	_set_enemy_card_details_visible(card, false)
 	var portrait := card.get_node("Portrait") as TextureRect
 	portrait.texture = _monster_texture(enemy, "battle")
+	MonsterIdleAnimatorScript.bind(portrait, str(enemy.get("monsterId", enemy.get("id", ""))))
 	_apply_portrait_visual_scale(portrait, _monster_visual_scale(enemy))
 	var name_label := card.get_node("Name") as Label
 	name_label.visible = true

@@ -121,6 +121,307 @@ const MONSTER_ART := {
 }
 
 const ART_USAGES := ["battle", "team", "ranch", "album", "result"]
+const MONSTER_ANIMATIONS := {
+	"monster_001": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_001/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_002": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_002/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_003": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_003/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_004": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_004/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_005": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_005/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_006": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_006/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_007": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_007/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_008": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_008/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_009": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_009/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_010": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_010/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_011": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_011/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_012": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_012/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_013": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_013/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_014": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_014/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_015": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_015/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_016": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_016/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_018": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_018/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_019": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_019/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_020": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_020/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_022": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_022/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_023": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_023/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_024": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_024/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_025": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_025/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_026": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_026/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_027": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_027/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_028": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_028/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_029": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_029/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_030": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_030/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_031": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_031/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_032": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_032/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_033": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_033/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_034": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_034/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_035": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_035/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_036": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_036/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_037": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_037/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_053": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_053/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_093": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_093/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+}
+const ANIMATION_ALIASES := {
+	"enemy_003": "monster_002",
+}
 
 static func get_battle_portrait_path(monster_id: String) -> String:
 	return get_art_path(monster_id, "battle")
@@ -128,6 +429,43 @@ static func get_battle_portrait_path(monster_id: String) -> String:
 static func has_battle_portrait(monster_id: String) -> bool:
 	var path := get_battle_portrait_path(monster_id)
 	return not path.is_empty() and ResourceLoader.exists(path)
+
+static func get_animation_info(monster_id: String, animation_name: String = "idle") -> Dictionary:
+	var owner_id := str(ANIMATION_ALIASES.get(monster_id, monster_id))
+	var animations: Dictionary = MONSTER_ANIMATIONS.get(owner_id, {})
+	var info: Dictionary = animations.get(animation_name, {})
+	return info.duplicate(true)
+
+static func has_animation(monster_id: String, animation_name: String = "idle") -> bool:
+	var info := get_animation_info(monster_id, animation_name)
+	if info.is_empty():
+		return false
+	var frame_count := int(info.get("frame_count", 0))
+	var frame_pattern := str(info.get("frame_pattern", ""))
+	return frame_count > 0 and not frame_pattern.is_empty() and ResourceLoader.exists(frame_pattern % 0)
+
+static func get_animation_frame_path(monster_id: String, animation_name: String = "idle", frame_index: int = 0) -> String:
+	var info := get_animation_info(monster_id, animation_name)
+	var frame_count := int(info.get("frame_count", 0))
+	if frame_count <= 0:
+		return ""
+	var frame_pattern := str(info.get("frame_pattern", ""))
+	if frame_pattern.is_empty():
+		return ""
+	var safe_index := posmod(frame_index, frame_count)
+	var path := frame_pattern % safe_index
+	return path if ResourceLoader.exists(path) or FileAccess.file_exists(path) else ""
+
+static func get_animation_frame_paths(monster_id: String, animation_name: String = "idle") -> PackedStringArray:
+	var result := PackedStringArray()
+	var info := get_animation_info(monster_id, animation_name)
+	var frame_count := int(info.get("frame_count", 0))
+	for frame_index in range(frame_count):
+		var path := get_animation_frame_path(monster_id, animation_name, frame_index)
+		if path.is_empty():
+			return PackedStringArray()
+		result.append(path)
+	return result
 
 static func get_art_path(monster_id: String, usage: String = "battle") -> String:
 	var info: Dictionary = MONSTER_ART.get(monster_id, {})
