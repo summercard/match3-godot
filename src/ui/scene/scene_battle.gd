@@ -26,6 +26,7 @@ const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 const LeaderSkillVisualDbScript = preload("res://src/data/leader_skill_visual_db.gd")
+const LeaderSkillVfxSequenceDbScript = preload("res://src/data/leader_skill_vfx_sequence_db.gd")
 const TowerRunControllerScript = preload("res://src/core/tower_run_controller.gd")
 const TowerRulesScript = preload("res://src/core/tower_rules.gd")
 const MailboxServiceScript = preload("res://src/core/mailbox_service.gd")
@@ -2495,32 +2496,42 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 	var tone := str(visual.get("tone", _leader_fx_default_tone(element)))
 	var color := _leader_fx_color(element)
 	var board_center := _board_center()
+	var caster_idx := int(log.get("leader_index", -1))
+	if caster_idx < 0:
+		caster_idx = _find_player_index(str(log.get("leader_id", "")), str(log.get("leader", "")))
+	var caster_center := _combatant_effect_center(false, caster_idx) if caster_idx >= 0 else board_center
+	var target_idx := int(log.get("target_index", -1))
+	var effects: Array = log.get("effects", [])
+	var sequence_target_center := caster_center
+	var sequence_all_target_centers: Array[Vector2] = []
+	var sequence_chain_target_center := caster_center
+	if target_idx >= 0:
+		sequence_target_center = _combatant_effect_center(true, target_idx)
+	else:
+		for effect: Dictionary in effects:
+			var friendly_target_idx := int(effect.get("target_index", -1))
+			if friendly_target_idx >= 0:
+				sequence_target_center = _combatant_effect_center(false, friendly_target_idx)
+				break
+	if LeaderSkillVfxSequenceDbScript.uses_target_scope(tone, "all_targets"):
+		for i in range(_battle.enemy_team.size() if _battle != null else 0):
+			sequence_all_target_centers.append(_combatant_effect_center(true, i))
+		if sequence_all_target_centers.is_empty():
+			sequence_all_target_centers.append(sequence_target_center)
+	if LeaderSkillVfxSequenceDbScript.uses_target_scope(tone, "chain_target"):
+		var enemy_count: int = int(_battle.enemy_team.size()) if _battle != null else 0
+		var primary_index := clampi(target_idx, 0, maxi(0, enemy_count - 1))
+		var chain_index := primary_index - 1 if primary_index > 0 else mini(1, maxi(0, enemy_count - 1))
+		sequence_chain_target_center = _combatant_effect_center(true, chain_index)
 	_trigger_element_glow(element, Color(color.r, color.g, color.b, 0.18))
 	_trigger_element_ripple(element, color)
 	_show_message("队长爆发")
 	_sfx("powerup_burst_soft")
-	_leader_skill_fx.append({
-		"kind": "crest",
-		"element": element,
-		"tone": tone,
-		"center": board_center,
-		"timer": 0.74,
-		"maxTimer": 0.74
-	})
-	for i in range(mini(3, _battle.player_team.size() if _battle != null else 0)):
-		_leader_skill_fx.append({
-			"kind": "gather",
-			"element": element,
-			"tone": tone,
-			"from": _combatant_effect_center(false, i),
-			"to": board_center,
-			"timer": 0.42,
-			"maxTimer": 0.42
-		})
-	await get_tree().create_timer(0.20).timeout
+	_queue_leader_skill_sequence(tone, caster_center, sequence_target_center, element, sequence_all_target_centers, sequence_chain_target_center)
+	var impact_delay := LeaderSkillVfxSequenceDbScript.get_impact_start(tone)
+	if impact_delay > 0.0:
+		await get_tree().create_timer(impact_delay).timeout
 
-	var target_idx := int(log.get("target_index", -1))
-	var effects: Array = log.get("effects", [])
 	var has_damage := int(log.get("remaining_damage", log.get("damage", 0))) > 0
 	var has_multi_damage := false
 	for raw_effect in effects:
@@ -2529,17 +2540,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 			break
 	if has_damage and target_idx >= 0 and not has_multi_damage:
 		var target_center := _combatant_effect_center(true, target_idx)
-		_leader_skill_fx.append({
-			"kind": "beam",
-			"element": element,
-			"tone": tone,
-			"from": board_center,
-			"to": target_center,
-			"timer": 0.56,
-			"maxTimer": 0.56
-		})
 		_sfx_attack_by_element(element)
-		await get_tree().create_timer(0.18).timeout
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.48, "maxTimer": 0.48})
 		_trigger_attack_shake()
 		var leader_effective := bool(log.get("is_effective", false))
@@ -2556,6 +2557,8 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 			var ally_center := _combatant_effect_center(false, p_idx)
 			_leader_skill_fx.append({
 				"kind": "ally_burst",
+				"vfx_type": "hit",
+				"anchor": "target",
 				"element": element,
 				"tone": tone,
 				"center": ally_center,
@@ -2578,6 +2581,8 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				var ally_center := _combatant_effect_center(false, p_idx)
 				_leader_skill_fx.append({
 					"kind": "ally_burst",
+					"vfx_type": "hit",
+					"anchor": "target",
 					"element": element,
 					"tone": "guard",
 					"center": ally_center,
@@ -2594,37 +2599,37 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				_spawn_item_use_effect("gem_shift", board_center, color, 0.72, {"source": "mixed", "target": str(effect.get("target_element", "light")), "affected": converted.size()})
 				for cell: Dictionary in converted:
 					var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
-					_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", "light")), "tone": tone, "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
+					_leader_skill_fx.append({"kind": "convert_cell", "vfx_type": "hit", "anchor": "board", "element": str(effect.get("target_element", "light")), "tone": tone, "center": cell_center, "timer": 0.62, "maxTimer": 0.62})
 				_floating_texts.append({"text": "%s x%d" % [str(effect.get("label", "宝石转化")), converted.size()], "x": board_center.x, "y": board_center.y - 20.0, "color": C["gold"], "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind == "status" or kind == "weaken":
 			var e_idx := int(effect.get("target_index", target_idx))
 			if e_idx < 0:
 				continue
 			var e_center := _combatant_effect_center(true, e_idx)
-			_leader_skill_fx.append({"kind": "mark", "element": element, "tone": tone, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
+			_leader_skill_fx.append({"kind": "mark", "vfx_type": "hit", "anchor": "target", "element": element, "tone": tone, "center": e_center, "timer": 0.56, "maxTimer": 0.56})
 			var label := str(effect.get("status", "倒下")).to_upper() if kind == "status" else "倒下"
 			_floating_texts.append({"text": label, "x": e_center.x, "y": e_center.y + 12.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif effect.has("hits"):
 			var cleared_cells: Array = effect.get("cells", [])
 			for cell: Dictionary in cleared_cells:
 				var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
-				_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.48, "maxTimer": 0.48})
+				_leader_skill_fx.append({"kind": "convert_cell", "vfx_type": "hit", "anchor": "board", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.48, "maxTimer": 0.48})
 			_sfx_attack_by_element(element)
 			for hit: Dictionary in effect.get("hits", []):
 				var hit_index := int(hit.get("target_index", -1))
 				if hit_index < 0:
 					continue
 				var hit_center := _combatant_effect_center(true, hit_index)
-				_leader_skill_fx.append({"kind": "beam", "element": element, "tone": tone, "from": board_center, "to": hit_center, "timer": 0.34, "maxTimer": 0.34})
+				_leader_skill_fx.append({"kind": "beam", "vfx_type": "flight" if LeaderSkillVisualDbScript.tone_uses_vfx_layer(tone, "flight") else "link", "anchor": "path", "element": element, "tone": tone, "from": caster_center, "to": hit_center, "timer": 0.34, "maxTimer": 0.34})
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": hit_index, "timer": 0.30, "maxTimer": 0.30})
 				_floating_texts.append(_damage_floating_entry(int(hit.get("amount", 0)), hit_center.x, hit_center.y - 14.0, false, false, 17.0, LEADER_BURST_EFFECT_HOLD, true, element))
 				await get_tree().create_timer(0.055).timeout
 		elif kind in ["remove_random_element_gems", "shuffle_board"]:
 			_sfx("powerup_created_star")
-			_leader_skill_fx.append({"kind": "crest", "element": element, "tone": tone, "center": board_center, "timer": 0.58, "maxTimer": 0.58})
+			_leader_skill_fx.append({"kind": "crest", "vfx_type": "release", "anchor": "board", "element": element, "tone": tone, "center": board_center, "timer": 0.58, "maxTimer": 0.58})
 			for cell: Dictionary in effect.get("cells", []):
 				var cell_center := _board_cell_center(int(cell.get("row", 0)), int(cell.get("col", 0)))
-				_leader_skill_fx.append({"kind": "convert_cell", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.46, "maxTimer": 0.46})
+				_leader_skill_fx.append({"kind": "convert_cell", "vfx_type": "hit", "anchor": "board", "element": str(effect.get("target_element", element)), "tone": tone, "center": cell_center, "timer": 0.46, "maxTimer": 0.46})
 			_floating_texts.append({"text": str(effect.get("label", "棋盘变化")), "x": board_center.x, "y": board_center.y - 20.0, "color": color, "size": 17.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind in ["randomize_enemy_element", "enemy_damage_vulnerability", "confuse_enemy_attack"]:
 			for target_info: Dictionary in effect.get("targets", []):
@@ -2632,7 +2637,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				if enemy_index < 0:
 					continue
 				var enemy_center := _combatant_effect_center(true, enemy_index)
-				_leader_skill_fx.append({"kind": "mark", "element": str(target_info.get("new_element", element)), "tone": tone, "center": enemy_center, "timer": 0.72, "maxTimer": 0.72})
+				_leader_skill_fx.append({"kind": "mark", "vfx_type": "hit", "anchor": "target", "element": str(target_info.get("new_element", element)), "tone": tone, "center": enemy_center, "timer": 0.72, "maxTimer": 0.72})
 				_floating_texts.append({"text": str(effect.get("label", "状态变化")), "x": enemy_center.x, "y": enemy_center.y + 12.0, "color": color, "size": 14.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 		elif kind in ["heal_over_time", "grant_ally_charge", "reflect_damage"]:
 			_sfx("battle_heal_leaf_bubble" if kind == "heal_over_time" else "battle_shield_soft_bloom")
@@ -2641,7 +2646,7 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 				if ally_index < 0:
 					continue
 				var ally_center := _combatant_effect_center(false, ally_index)
-				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": ally_center, "timer": 0.70, "maxTimer": 0.70})
+				_leader_skill_fx.append({"kind": "ally_burst", "vfx_type": "hit", "anchor": "target", "element": element, "tone": tone, "center": ally_center, "timer": 0.70, "maxTimer": 0.70})
 				var target_label := TranslationServer.translate("回春 %d回合") % int(effect.get("turns", 3))
 				if kind == "grant_ally_charge":
 					target_label = TranslationServer.translate("充能 +%d") % int(target_info.get("amount", effect.get("charge_amount", 1)))
@@ -2652,10 +2657,24 @@ func _play_leader_skill_log(log: Dictionary) -> void:
 			var self_index := int(effect.get("target_index", -1))
 			if self_index >= 0:
 				var self_center := _combatant_effect_center(false, self_index)
-				_leader_skill_fx.append({"kind": "ally_burst", "element": element, "tone": tone, "center": self_center, "timer": 0.70, "maxTimer": 0.70})
+				_leader_skill_fx.append({"kind": "ally_burst", "vfx_type": "hit", "anchor": "target", "element": element, "tone": tone, "center": self_center, "timer": 0.70, "maxTimer": 0.70})
 				var self_label := TranslationServer.translate("攻击 +%d") % int(effect.get("amount", 0)) if kind == "self_atk_boost" else TranslationServer.translate("减伤 %d%%") % int(round(float(effect.get("total_reduction", 0.0)) * 100.0))
 				_floating_texts.append({"text": self_label, "x": self_center.x, "y": self_center.y - 8.0, "color": color, "size": 15.0, "timer": 0.0, "duration": LEADER_BURST_EFFECT_HOLD, "critical": true})
 	await get_tree().create_timer(0.28).timeout
+
+
+## 从特效序列表派发方形原型块。替换效果块资源时，不需要改战斗流程。
+func _queue_leader_skill_sequence(tone: String, caster_center: Vector2, target_center: Vector2, element: String, all_target_centers: Array = [], chain_target_center: Vector2 = Vector2.ZERO) -> void:
+	var resolved_chain_target := chain_target_center if chain_target_center != Vector2.ZERO else target_center
+	for step: Dictionary in LeaderSkillVfxSequenceDbScript.build_playback_for_chain(tone, caster_center, target_center, resolved_chain_target, all_target_centers):
+		var duration := float(step.get("duration", 0.25))
+		var delay := float(step.get("delay", 0.0))
+		step["element"] = element
+		step["timer"] = duration + delay
+		step["maxTimer"] = duration
+		_leader_skill_fx.append(step)
+	while _leader_skill_fx.size() > LEADER_SKILL_FX_LIMIT:
+		_leader_skill_fx.remove_at(0)
 
 func _board_center() -> Vector2:
 	if _board == null:
@@ -4944,12 +4963,57 @@ func _draw_leader_skill_fx() -> void:
 	for fx: Dictionary in _leader_skill_fx:
 		var duration := maxf(0.01, float(fx.get("maxTimer", fx.get("duration", 0.6))))
 		var remaining := clampf(float(fx.get("timer", 0.0)), 0.0, duration)
+		if float(fx.get("timer", 0.0)) > duration:
+			continue
 		var progress := clampf(1.0 - remaining / duration, 0.0, 1.0)
 		var alpha := clampf(1.0 - maxf(0.0, progress - 0.72) / 0.28, 0.0, 1.0)
 		var element := str(fx.get("element", "fire"))
 		var tone := str(fx.get("tone", _leader_fx_default_tone(element)))
 		var color := _leader_fx_color(element)
 		match str(fx.get("kind", "")):
+			"block_tidal_release":
+				_draw_leader_tidal_release_blocks(fx, progress, alpha)
+			"block_tidal_big_ball":
+				_draw_leader_tidal_ball_blocks(fx, progress, alpha, false)
+			"block_tidal_splash":
+				_draw_leader_tidal_splash_blocks(fx, progress, alpha, true)
+			"block_tidal_small_ball":
+				_draw_leader_tidal_ball_blocks(fx, progress, alpha, true)
+			"block_tidal_chain_splash":
+				_draw_leader_tidal_splash_blocks(fx, progress, alpha, false)
+			"block_rock_release":
+				_draw_leader_rock_release_blocks(fx, progress, alpha)
+			"block_rock_flight":
+				_draw_leader_rock_flight_blocks(fx, progress, alpha)
+			"block_rock_impact":
+				_draw_leader_rock_impact_blocks(fx, progress, alpha)
+			"block_wind_lightning_link":
+				_draw_leader_wind_lightning_link(fx, progress, alpha)
+			"block_wind_lightning_hit":
+				_draw_leader_wind_lightning_hit(fx, progress, alpha)
+			"block_gold_heal_release":
+				_draw_leader_gold_heal_release_blocks(fx, progress, alpha)
+			"block_gold_heal_rise":
+				_draw_leader_gold_heal_rise_blocks(fx, progress, alpha)
+			"block_heal_release":
+				_draw_leader_heal_release_blocks(fx, progress, alpha)
+			"block_heal_rise":
+				_draw_leader_heal_rise_blocks(fx, progress, alpha)
+			"block_fire_release":
+				_draw_leader_fire_release_blocks(fx, progress, alpha)
+			"block_fireball_sprite":
+				_draw_leader_fireball_sprite_block(fx, progress, alpha)
+			"block_fireball_trail":
+				_draw_leader_fireball_trail_blocks(fx, progress, alpha)
+			"block_fire_impact":
+				_draw_leader_fire_impact_blocks(fx, progress, alpha)
+			"block_release", "block_hit":
+				var block_center: Vector2 = fx.get("center", Vector2.ZERO)
+				_draw_leader_vfx_block(block_center, Color.html(str(fx.get("color", "#ffffff"))), float(fx.get("size", 24.0)), progress, alpha)
+			"block_flight", "block_link":
+				var block_start: Vector2 = fx.get("from", Vector2.ZERO)
+				var block_finish: Vector2 = fx.get("to", Vector2.ZERO)
+				_draw_leader_vfx_block_path(block_start, block_finish, Color.html(str(fx.get("color", "#ffffff"))), float(fx.get("size", 16.0)), progress, alpha, str(fx.get("kind", "")) == "block_link")
 			"crest":
 				var center: Vector2 = fx.get("center", Vector2.ZERO)
 				_draw_leader_crest(center, color, tone, progress, alpha)
@@ -5020,6 +5084,318 @@ func _draw_leader_skill_fx() -> void:
 				draw_line(center - Vector2(0.0, 8.0), center + Vector2(0.0, 8.0), Color(1.0, 1.0, 0.88, 0.88 * alpha), 1.6)
 				_draw_soft_sparkles(self, center, color, alpha, true)
 
+
+func _draw_leader_vfx_block(center: Vector2, color: Color, size_px: float, progress: float, alpha: float) -> void:
+	var scale := 0.55 + sin(clampf(progress / 0.45, 0.0, 1.0) * PI) * 0.55
+	var size := size_px * scale
+	draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(color.r, color.g, color.b, alpha * 0.84))
+
+
+func _draw_leader_vfx_block_path(start: Vector2, finish: Vector2, color: Color, size_px: float, progress: float, alpha: float, linked: bool) -> void:
+	var reach := clampf(progress / 0.65, 0.0, 1.0)
+	if linked:
+		draw_line(start, start.lerp(finish, reach), Color(color.r, color.g, color.b, alpha * 0.78), 3.0)
+	var pos := start.lerp(finish, reach)
+	draw_rect(Rect2(pos - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(color.r, color.g, color.b, alpha * 0.90))
+
+
+func _draw_leader_wind_lightning_link(fx: Dictionary, progress: float, alpha: float) -> void:
+	var start: Vector2 = fx.get("from", Vector2.ZERO)
+	var finish: Vector2 = fx.get("to", Vector2.ZERO)
+	var color := Color.html(str(fx.get("color", "#9df5ff")))
+	# 固定直线锁定施放者—目标关系，折线随时间变化而不改变端点。
+	draw_line(start, finish, Color(color.r, color.g, color.b, alpha * 0.26), 5.0)
+	var points := LeaderSkillVfxSequenceDbScript.sample_lightning_link(fx, progress)
+	draw_polyline(points, Color(color.r, color.g, color.b, alpha * 0.92), float(fx.get("size", 5.0)), true)
+	draw_polyline(points, Color(0.94, 1.0, 1.0, alpha * 0.90), 1.5, true)
+
+
+func _draw_leader_wind_lightning_hit(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := 0.58 + 0.42 * sin(progress * TAU * 4.0)
+	draw_rect(Rect2(center - Vector2.ONE * size_px * (0.24 + pulse * 0.12), Vector2.ONE * size_px * (0.48 + pulse * 0.24)), Color(0.56, 0.91, 1.0, alpha * 0.58))
+	var seed := float(fx.get("particle_seed", 191.0))
+	for i in range(int(fx.get("particle_count", 7))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * TAU
+		var flicker := 0.30 + 0.70 * absf(sin(progress * TAU * (2.4 + float(i) * 0.23) + float(i)))
+		var distance := float(fx.get("particle_spread", 30.0)) * (0.25 + 0.75 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0)) * (0.40 + pulse * 0.46)
+		var chunk_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * flicker
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.82, 0.98, 1.0, alpha * flicker * 0.90))
+
+
+func _draw_leader_heal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 30.0))
+	var pulse := sin(clampf(progress / 0.50, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.48 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.18, 0.82, 0.36, alpha * 0.80))
+	var count := int(fx.get("particle_count", 6))
+	var spread := float(fx.get("particle_spread", 26.0))
+	var seed := float(fx.get("particle_seed", 51.0))
+	for i in range(count):
+		var x_offset := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) - 0.5) * spread
+		var y_offset := -spread * (0.14 + progress * (0.42 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)))
+		var particle_size := 5.0 + 5.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(center + Vector2(x_offset, y_offset) - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.70, 1.0, 0.48, alpha * (0.88 - progress * 0.30)))
+
+
+func _draw_leader_heal_rise_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var height := float(fx.get("bar_height", 70.0))
+	var bar_count := int(fx.get("bar_count", 3))
+	var lift := height * clampf(progress * 1.16, 0.0, 1.0)
+	for i in range(bar_count):
+		var lane := float(i) - float(bar_count - 1) * 0.5
+		var bar_width := 6.0 + float(i % 2) * 2.0
+		var bar_height := height * (0.46 + float(i) * 0.10)
+		var bar_center := center + Vector2(lane * 11.0, 18.0 - lift + float(i) * 7.0)
+		draw_rect(Rect2(bar_center.x - bar_width * 0.5, bar_center.y - bar_height * 0.5, bar_width, bar_height), Color(0.22, 0.90, 0.42, alpha * (0.44 + 0.16 * float(i))))
+		var cap_size := 9.0
+		draw_rect(Rect2(bar_center + Vector2(0.0, -bar_height * 0.5) - Vector2.ONE * cap_size * 0.5, Vector2.ONE * cap_size), Color(0.78, 1.0, 0.48, alpha * 0.88))
+	var count := int(fx.get("particle_count", 9))
+	var spread := float(fx.get("particle_spread", 30.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.20))
+	var seed := float(fx.get("particle_seed", 67.0))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var particle_pos := center + Vector2(
+			(LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * spread,
+			22.0 - height * particle_progress
+		)
+		var particle_size := (4.0 + 6.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * (1.0 - particle_progress * 0.32)
+		draw_rect(Rect2(particle_pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.72, 1.0, 0.54, alpha * (0.86 - particle_progress * 0.40)))
+
+
+func _draw_leader_gold_heal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := sin(clampf(progress / 0.52, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.48 + pulse * 0.46)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.64, 0.12, alpha * 0.84))
+	var seed := float(fx.get("particle_seed", 81.0))
+	for i in range(int(fx.get("particle_count", 8))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var radius := float(fx.get("particle_spread", 32.0)) * (0.25 + 0.75 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)) * (0.30 + progress * 0.70)
+		var sparkle_pos := center + Vector2(cos(angle), sin(angle)) * radius + Vector2(0.0, -progress * 12.0)
+		var sparkle_size := 4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(sparkle_pos - Vector2.ONE * sparkle_size * 0.5, Vector2.ONE * sparkle_size), Color(1.0, 0.90, 0.38, alpha * (0.88 - progress * 0.28)))
+
+
+func _draw_leader_gold_heal_rise_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var height := float(fx.get("bar_height", 78.0))
+	var lift := height * clampf(progress * 1.12, 0.0, 1.0)
+	var bar_count := int(fx.get("bar_count", 2))
+	for i in range(bar_count):
+		var lane := float(i) - float(bar_count - 1) * 0.5
+		var bar_height := height * (0.58 + float(i) * 0.08)
+		var bar_width := 8.0
+		var bar_center := center + Vector2(lane * 15.0, 18.0 - lift + float(i) * 5.0)
+		draw_rect(Rect2(bar_center.x - bar_width * 0.5, bar_center.y - bar_height * 0.5, bar_width, bar_height), Color(1.0, 0.68, 0.14, alpha * 0.55))
+		draw_rect(Rect2(bar_center + Vector2(0.0, -bar_height * 0.5) - Vector2.ONE * 6.0, Vector2.ONE * 12.0), Color(1.0, 0.94, 0.56, alpha * 0.92))
+	var seed := float(fx.get("particle_seed", 97.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.24))
+	for i in range(int(fx.get("particle_count", 12))):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var particle_pos := center + Vector2(
+			(LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * float(fx.get("particle_spread", 34.0)),
+			24.0 - height * particle_progress
+		)
+		var particle_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * (1.0 - particle_progress * 0.34)
+		draw_rect(Rect2(particle_pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(1.0, 0.84, 0.28, alpha * (0.90 - particle_progress * 0.42)))
+
+
+func _draw_leader_tidal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var pulse := sin(clampf(progress / 0.40, 0.0, 1.0) * PI)
+	var core_size := float(fx.get("size", 34.0)) * (0.48 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.22, 0.74, 1.0, alpha * 0.82))
+	var seed := float(fx.get("particle_seed", 111.0))
+	for i in range(int(fx.get("particle_count", 6))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var distance := float(fx.get("particle_spread", 24.0)) * (0.25 + progress * 0.75)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)
+		var particle_size := 5.0 + 5.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.66, 0.94, 1.0, alpha * 0.78))
+
+
+func _draw_leader_tidal_ball_blocks(fx: Dictionary, progress: float, alpha: float, small: bool) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var rotation := float(motion.get("rotation", 0.0))
+	var size_px := float(fx.get("size", 18.0))
+	draw_set_transform(position, rotation)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(0.20, 0.70, 1.0, alpha * 0.86))
+	var core_size := size_px * (0.40 if small else 0.52)
+	draw_rect(Rect2(-core_size * 0.5, -core_size * 0.5, core_size, core_size), Color(0.76, 0.96, 1.0, alpha * 0.96))
+	draw_set_transform(Vector2.ZERO, 0.0)
+	var seed := float(fx.get("particle_seed", 113.0))
+	for i in range(int(fx.get("particle_count", 4))):
+		var tail_progress := maxf(0.0, progress - (float(i) + 1.0) * 0.075)
+		var tail_motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var tail_pos: Vector2 = tail_motion.get("position", position)
+		var spread := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i)) - 0.5) * float(fx.get("particle_spread", 8.0))
+		var tail_size := size_px * (0.20 + 0.10 * float(i))
+		draw_rect(Rect2(tail_pos + Vector2(spread, 0.0) - Vector2.ONE * tail_size * 0.5, Vector2.ONE * tail_size), Color(0.44, 0.84, 1.0, alpha * (0.66 - float(i) * 0.10)))
+
+
+func _draw_leader_tidal_splash_blocks(fx: Dictionary, progress: float, alpha: float, large: bool) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 32.0))
+	var core_size := size_px * (0.72 - progress * 0.30)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.34, 0.80, 1.0, alpha * (0.78 - progress * 0.40)))
+	var seed := float(fx.get("particle_seed", 127.0))
+	var count := int(fx.get("particle_count", 8))
+	var birth_range := float(fx.get("particle_birth_range", 0.12))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var p := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) * TAU
+		var distance := float(fx.get("particle_spread", 26.0)) * (0.22 + 0.78 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * pow(p, 0.72)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance + Vector2(0.0, -p * (14.0 if large else 8.0))
+		var drop_size := (5.0 + 6.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 3.0)) * (1.0 - p * 0.34)
+		draw_rect(Rect2(pos - Vector2.ONE * drop_size * 0.5, Vector2.ONE * drop_size), Color(0.64, 0.93, 1.0, alpha * (0.88 - p * 0.44)))
+
+
+func _draw_leader_rock_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var pulse := sin(clampf(progress / 0.28, 0.0, 1.0) * PI)
+	var size_px := float(fx.get("size", 42.0)) * (0.42 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(0.48, 0.27, 0.12, alpha * 0.82))
+	draw_rect(Rect2(center - Vector2.ONE * size_px * 0.27 + Vector2(3.0, -4.0), Vector2.ONE * size_px * 0.54), Color(0.76, 0.52, 0.27, alpha * 0.92))
+	var seed := float(fx.get("particle_seed", 151.0)) + float(fx.get("repeat_index", 0)) * 19.0
+	for i in range(int(fx.get("particle_count", 5))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * TAU
+		var distance := float(fx.get("particle_spread", 24.0)) * (0.22 + progress * 0.78) * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0)
+		var chunk_size := 5.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.68, 0.42, 0.20, alpha * 0.76))
+
+
+func _draw_leader_rock_flight_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var roll := progress * TAU * float(fx.get("roll_turns", 2.6)) * float(fx.get("roll_direction", 1.0))
+	var size_px := float(fx.get("size", 48.0))
+	draw_set_transform(position, roll)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(0.40, 0.23, 0.12, alpha * 0.90))
+	draw_rect(Rect2(-size_px * 0.28, -size_px * 0.30, size_px * 0.56, size_px * 0.56), Color(0.68, 0.43, 0.23, alpha * 0.98))
+	draw_rect(Rect2(-size_px * 0.17, -size_px * 0.05, size_px * 0.34, size_px * 0.12), Color(0.88, 0.66, 0.37, alpha * 0.72))
+	draw_set_transform(Vector2.ZERO, 0.0)
+	var seed := float(fx.get("particle_seed", 157.0)) + float(fx.get("repeat_index", 0)) * 23.0
+	for i in range(int(fx.get("particle_count", 3))):
+		var tail_progress := maxf(0.0, progress - (float(i) + 1.0) * 0.09)
+		var tail_motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var tail_pos: Vector2 = tail_motion.get("position", position)
+		var spread := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i)) - 0.5) * float(fx.get("particle_spread", 12.0))
+		var dust_size := 7.0 - float(i) * 1.5
+		draw_rect(Rect2(tail_pos + Vector2(spread, 8.0) - Vector2.ONE * dust_size * 0.5, Vector2.ONE * dust_size), Color(0.65, 0.42, 0.23, alpha * (0.56 - float(i) * 0.12)))
+
+
+func _draw_leader_rock_impact_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 46.0))
+	var burst := sin(clampf(progress / 0.42, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.38 + burst * 0.52)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.46, 0.25, 0.12, alpha * 0.82))
+	var seed := float(fx.get("particle_seed", 163.0)) + float(fx.get("repeat_index", 0)) * 29.0
+	var birth_range := float(fx.get("particle_birth_range", 0.12))
+	for i in range(int(fx.get("particle_count", 10))):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 1.0) * TAU
+		var distance := float(fx.get("particle_spread", 42.0)) * (0.22 + 0.78 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 2.0)) * pow(particle_progress, 0.70)
+		var chunk_size := (5.0 + 8.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 3.0)) * (1.0 - particle_progress * 0.42)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance + Vector2(0.0, particle_progress * 12.0)
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.74, 0.49, 0.25, alpha * (0.90 - particle_progress * 0.52)))
+
+
+func _draw_leader_fire_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := sin(clampf(progress / 0.56, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.52 + pulse * 0.52)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.25, 0.04, alpha * 0.88))
+	var count := int(fx.get("particle_count", 7))
+	var spread := float(fx.get("particle_spread", 30.0))
+	var seed := float(fx.get("particle_seed", 11.0))
+	for i in range(count):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var radius := spread * (0.20 + 0.80 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)) * (0.18 + progress * 0.82)
+		var offset := Vector2(cos(angle), sin(angle) - 0.35) * radius
+		var spark_size := (5.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)) * (1.0 - progress * 0.18)
+		draw_rect(Rect2(center + offset - Vector2.ONE * spark_size * 0.5, Vector2.ONE * spark_size), Color(1.0, 0.58 + 0.26 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) + 3.0), 0.12, alpha * (0.90 - progress * 0.34)))
+
+
+func _draw_leader_fireball_sprite_block(fx: Dictionary, progress: float, alpha: float) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var rotation := float(motion.get("rotation", 0.0))
+	var size_px := float(fx.get("size", 22.0))
+	# 本地 Y 轴沿 rotation 指向飞行前方，贴图接入时可直接复用。
+	draw_set_transform(position, rotation)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(1.0, 0.22, 0.03, alpha * 0.92))
+	var core_size := size_px * 0.42
+	draw_rect(Rect2(-core_size * 0.5, size_px * 0.04, core_size, core_size), Color(1.0, 0.86, 0.28, alpha))
+	draw_set_transform(Vector2.ZERO, 0.0)
+
+
+func _draw_leader_fireball_trail_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var count := int(fx.get("particle_count", 8))
+	var step_time := float(fx.get("particle_step", 0.095))
+	var spread := float(fx.get("particle_spread", 22.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.16))
+	var seed := float(fx.get("particle_seed", 23.0))
+	for i in range(count):
+		var birth_offset := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		var particle_age := float(i) * step_time + birth_offset
+		if particle_age > progress:
+			continue
+		var tail_progress := maxf(0.0, progress - particle_age)
+		var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var position: Vector2 = motion.get("position", Vector2.ZERO)
+		var direction: Vector2 = motion.get("direction", Vector2.UP)
+		var lateral := direction.orthogonal() * (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * spread * (0.30 + particle_age * 1.8)
+		var backward := -direction * particle_age * (20.0 + 26.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0))
+		var size_px := float(fx.get("size", 12.0)) * (0.48 + 0.52 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 3.0)) * maxf(0.28, 1.0 - particle_age * 0.82)
+		var trail_alpha := alpha * maxf(0.12, 1.0 - particle_age * 1.24)
+		draw_rect(Rect2(position + lateral + backward - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(1.0, 0.16 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 4.0), 0.03, trail_alpha * 0.80))
+
+
+func _draw_leader_fire_impact_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 38.0))
+	var burst := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.42 + burst * 0.60)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.30, 0.04, alpha * 0.88))
+	var count := int(fx.get("particle_count", 12))
+	var spread := float(fx.get("particle_spread", 48.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.16))
+	var seed := float(fx.get("particle_seed", 37.0))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 1.0) * TAU
+		var initial_radius := size_px * 0.10 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 2.0)
+		var distance := initial_radius + spread * (0.28 + 0.72 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 3.0)) * pow(particle_progress, 0.72)
+		var spark_pos := center + Vector2(cos(angle), sin(angle)) * distance
+		var spark_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 4.0)) * (1.0 - particle_progress * 0.42)
+		draw_rect(Rect2(spark_pos - Vector2.ONE * spark_size * 0.5, Vector2.ONE * spark_size), Color(1.0, 0.52 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 5.0), 0.10, alpha * (0.92 - particle_progress * 0.52)))
+
 func _draw_leader_crest(center: Vector2, color: Color, tone: String, progress: float, alpha: float) -> void:
 	if tone == "fire":
 		_draw_leader_fire_emitter(center, progress, alpha)
@@ -5077,6 +5453,11 @@ func _draw_leader_chain_zap(start: Vector2, finish: Vector2, color: Color, progr
 	draw_line(prev, finish, Color(1.0, 0.96, 0.42, 0.86 * alpha), 2.0)
 
 func _draw_leader_vfx_texture(center: Vector2, tone: String, size: float, alpha: float, progress: float = 0.0, phase: String = "burst") -> void:
+	# 临时原型阶段：不调用队长技贴图，统一以方形色块验证时序与绑定点。
+	var block_color := _leader_fx_color(str(LeaderSkillVisualDbScript.get_profile(tone).get("id", "fire")))
+	var block_size := maxf(8.0, size * (0.58 + sin(clampf(progress / 0.46, 0.0, 1.0) * PI) * 0.42))
+	draw_rect(Rect2(center - Vector2.ONE * block_size * 0.5, Vector2.ONE * block_size), Color(block_color.r, block_color.g, block_color.b, alpha * 0.72))
+	return
 	var tex := _get_texture(LeaderSkillVisualDbScript.get_asset_path(tone))
 	if tex == null:
 		return
@@ -5092,6 +5473,11 @@ func _draw_leader_vfx_texture(center: Vector2, tone: String, size: float, alpha:
 	)
 
 func _draw_leader_particles(center: Vector2, color: Color, tone: String, progress: float, alpha: float, count: int, radius: float, shard: bool) -> void:
+	for i in range(mini(maxi(count, 0), 3)):
+		var angle := progress * TAU + float(i) * TAU / float(maxi(1, mini(count, 3)))
+		var pos := center + Vector2(cos(angle), sin(angle)) * radius * (0.3 + progress * 0.55)
+		draw_rect(Rect2(pos - Vector2(5.0, 5.0), Vector2(10.0, 10.0)), Color(color.r, color.g, color.b, alpha * 0.75))
+	return
 	if tone == "fire":
 		_draw_leader_fire_particles(center, progress, alpha, count, radius)
 		return
@@ -5148,6 +5534,10 @@ func _draw_leader_particles(center: Vector2, color: Color, tone: String, progres
 			draw_circle(pos, size * 0.28, modulate)
 
 func _draw_leader_element_trail_particles(start: Vector2, finish: Vector2, element: String, tone: String, progress: float, alpha: float) -> void:
+	var p := start.lerp(finish, clampf(progress / 0.55, 0.0, 1.0))
+	var color := _leader_fx_color(element)
+	draw_rect(Rect2(p - Vector2(6.0, 6.0), Vector2(12.0, 12.0)), Color(color.r, color.g, color.b, alpha * 0.82))
+	return
 	var dir := finish - start
 	if dir.length() <= 0.1:
 		return
@@ -5269,6 +5659,8 @@ func _draw_leader_fire_particles(center: Vector2, progress: float, alpha: float,
 		_draw_leader_fire_sprite(pos, i, size, alpha * 0.86, angle)
 
 func _draw_leader_fire_sprite(center: Vector2, index: int, size_px: float, alpha: float, spin: float) -> void:
+	draw_rect(Rect2(center - Vector2.ONE * size_px * 0.24, Vector2.ONE * size_px * 0.48), Color(1.0, 0.35, 0.05, alpha))
+	return
 	var tex := _get_texture(BATTLE_FX_ASSETS["leader_fire_particle"])
 	if tex == null:
 		var a := clampf(alpha, 0.0, 1.0)

@@ -32,7 +32,8 @@ const BUTTON_DESCRIPTIONS := {
 	"achievement": "查看冒险成就进度",
 	"tower": "挑战共鸣塔，验证后期精灵培养",
 	"mailbox": "查看远方冒险者的祝福",
-	"settings": "游戏设置和选项"
+	"settings": "游戏设置和选项",
+	"test_tool": "打开队长技能类型与表现测试"
 }
 
 const BUTTON_IDS := {
@@ -46,7 +47,8 @@ const BUTTON_IDS := {
 	"SettingsButton": "settings",
 	"SigninButton": "signin",
 	"TowerButton": "tower",
-	"MailboxButton": "mailbox"
+	"MailboxButton": "mailbox",
+	"TestToolButton": "test_tool"
 }
 static var instance: SceneMain
 

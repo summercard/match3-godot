@@ -1,6 +1,8 @@
 class_name LeaderSkillExecutor
 extends RefCounted
 
+const SkillTypeTableScript := preload("res://src/data/skill_type_table.gd")
+
 var battle_manager = null
 
 
@@ -33,57 +35,14 @@ func execute_burst(leader: Dictionary, skill_data: Dictionary = {}) -> Dictionar
 
 
 func _apply_effect(log: Dictionary, leader: Dictionary, effect: Dictionary) -> void:
-	match str(effect.get("kind", "")):
-		"damage":
-			_damage_weakest(log, leader, effect)
-		"heal":
-			_heal_lowest(log, leader, effect)
-		"heal_over_time":
-			_heal_over_time(log, leader, effect)
-		"heal_by_gem_count":
-			_heal_by_gem_count(log, leader, effect)
-		"lifesteal":
-			_lifesteal_lowest(log, effect)
-		"convert_gems":
-			_convert_gems(log, effect)
-		"convert_element_gems_by_ratio":
-			_convert_element_gems_by_ratio(log, effect)
-		"convert_adjacent_gems_from_random_source":
-			_convert_adjacent_gems(log, effect)
-		"shuffle_board":
-			_shuffle_board(log, effect)
-		"remove_random_element_gems":
-			_remove_random_element_gems(log, effect)
-		"clear_random_element_gems_damage_all":
-			_clear_element_gems_damage_all(log, leader, effect)
-		"clear_element_gems_damage_highest_hp":
-			_clear_element_gems_damage_highest(log, leader, effect)
-		"random_multi_hit":
-			_random_multi_hit(log, leader, effect)
-		"damage_per_living_element_unit":
-			_damage_per_living_element_unit(log, leader, effect)
-		"self_atk_boost":
-			_self_atk_boost(log, leader, effect)
-		"self_damage_reduction":
-			_self_damage_reduction(log, leader, effect)
-		"randomize_enemy_element":
-			_randomize_enemy_element(log, effect)
-		"grant_ally_charge":
-			_grant_ally_charge(log, leader, effect)
-		"reflect_damage":
-			_reflect_damage(log, leader, effect)
-		"enemy_damage_vulnerability":
-			_enemy_damage_vulnerability(log, effect)
-		"confuse_enemy_attack":
-			_confuse_enemy_attack(log, effect)
-		"guard":
-			_guard_lowest(log, effect)
-		"team_shield":
-			_team_shield(log, leader, effect)
-		"status":
-			_status_weakest(log, leader, effect)
-		"weaken":
-			_weaken_weakest(log, effect)
+	var kind := str(effect.get("kind", ""))
+	var profile := SkillTypeTableScript.get_leader_burst_effect(kind)
+	var handler := str(profile.get("handler", ""))
+	if handler.is_empty() or not has_method(handler):
+		push_warning("Unsupported leader burst effect: %s" % kind)
+		return
+	var accepts_leader := SkillTypeTableScript.leader_burst_requires_leader(kind)
+	callv(handler, [log, leader, effect] if accepts_leader else [log, effect])
 
 
 func _damage_weakest(log: Dictionary, leader: Dictionary, effect: Dictionary) -> void:

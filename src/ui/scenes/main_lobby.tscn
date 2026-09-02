@@ -539,7 +539,6 @@ vertical_alignment = 1
 
 [node name="TestToolButton" type="TextureButton" parent="PrimaryButtons" unique_id=1320913285]
 unique_name_in_owner = true
-visible = false
 layout_mode = 0
 offset_left = 277.0
 offset_top = 166.0
@@ -559,7 +558,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.24, 0.08, 0.44, 1)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 11
-text = "测试工具"
+text = "队长技测试"
 horizontal_alignment = 1
 vertical_alignment = 1
 

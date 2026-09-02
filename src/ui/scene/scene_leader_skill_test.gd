@@ -5,6 +5,7 @@ signal back_pressed
 const MonsterDbScript := preload("res://src/data/monster_db.gd")
 const MonsterArtDBScript := preload("res://src/data/monster_art_db.gd")
 const LeaderSkillVisualDbScript := preload("res://src/data/leader_skill_visual_db.gd")
+const LeaderSkillVfxSequenceDbScript := preload("res://src/data/leader_skill_vfx_sequence_db.gd")
 const MOTE_PATH := "res://assets/images/ui/leader_skills/particles/leader_fx_mote.png"
 const FIRE_PARTICLE_PATH := "res://assets/images/ui/leader_skills/particles/leader_fx_element_fire.png"
 const ELEMENT_PARTICLE_PATHS := {
@@ -39,7 +40,7 @@ const FIRE_IMPACT_SPRITE_SIZE := 58.0
 const FIRE_IMPACT_SPRITE_VARIANCE := 30.0
 
 const DESIGN_SIZE := Vector2(375.0, 667.0)
-const TEAM_IDS := ["monster_002", "monster_093", "monster_053"]
+const CASTER_ID := "monster_002"
 const ENEMY_IDS := ["monster_015", "monster_026", "monster_083"]
 const TONE_ORDER := ["fire", "balanced", "heal", "speed", "guard", "bulwark", "siphon", "chain"]
 const TONE_LABELS := {
@@ -56,8 +57,9 @@ const TONE_LABELS := {
 var _texture_cache: Dictionary = {}
 var _fx: Array[Dictionary] = []
 var _float_texts: Array[Dictionary] = []
-var _team: Array[Dictionary] = []
+var _caster: Dictionary = {}
 var _enemies: Array[Dictionary] = []
+var _selected_target_index := 0
 var _last_tone := "balanced"
 var _last_dispatch := "crest_beam"
 var _status_label: Label = null
@@ -82,8 +84,10 @@ func get_test_profile() -> Dictionary:
 		active_kinds.append(str(fx.get("kind", "")))
 	return {
 		"tones": TONE_ORDER.duplicate(),
-		"team_count": _team.size(),
+		"caster_count": 0 if _caster.is_empty() else 1,
 		"enemy_count": _enemies.size(),
+		"selected_target_index": _selected_target_index,
+		"selected_target_id": str(_selected_target().get("id", "")),
 		"active_fx": _fx.size(),
 		"active_kinds": active_kinds,
 		"last_tone": _last_tone,
@@ -96,13 +100,10 @@ func get_test_profile() -> Dictionary:
 
 
 func _setup_units() -> void:
-	_team.clear()
-	for id in TEAM_IDS:
-		var unit := MonsterDbScript.get_monster_stats(id, 18)
-		if unit.is_empty():
-			unit = {"id": id, "name": id, "element": "grass", "hp": 100, "maxHP": 100}
-		unit["hp"] = int(float(unit.get("maxHP", 100)) * (0.62 + 0.12 * float(_team.size())))
-		_team.append(unit)
+	_caster = MonsterDbScript.get_monster_stats(CASTER_ID, 18)
+	if _caster.is_empty():
+		_caster = {"id": CASTER_ID, "name": CASTER_ID, "element": "grass", "hp": 100, "maxHP": 100}
+	_caster["hp"] = int(float(_caster.get("maxHP", 100)) * 0.82)
 	_enemies.clear()
 	for id in ENEMY_IDS:
 		var enemy := MonsterDbScript.get_monster_stats(id, 16)
@@ -138,7 +139,7 @@ func _build_ui() -> void:
 		var button := Button.new()
 		button.name = "SkillButton_%s" % tone
 		button.text = str(TONE_LABELS.get(tone, tone))
-		button.position = Vector2(13.0 + float(i % 4) * 87.0, 56.0 + float(i / 4) * 38.0)
+		button.position = Vector2(13.0 + float(i % 4) * 87.0, 582.0 + float(i / 4) * 38.0)
 		button.size = Vector2(80.0, 32.0)
 		button.focus_mode = Control.FOCUS_NONE
 		button.add_theme_font_size_override("font_size", 14)
@@ -148,14 +149,25 @@ func _build_ui() -> void:
 
 	_status_label = Label.new()
 	_status_label.name = "StatusLabel"
-	_status_label.text = "选择上方按钮释放技能表现"
-	_status_label.position = Vector2(12.0, 130.0)
+	_status_label.text = "点击上方目标勾选，再点击下方技能立即释放"
+	_status_label.position = Vector2(12.0, 48.0)
 	_status_label.size = Vector2(351.0, 26.0)
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_status_label.add_theme_font_size_override("font_size", 13)
 	_status_label.add_theme_color_override("font_color", Color(0.42, 0.22, 0.08))
 	add_child(_status_label)
+
+	for i in range(_enemies.size()):
+		var target_button := Button.new()
+		target_button.name = "TargetButton_%d" % i
+		target_button.flat = true
+		target_button.tooltip_text = "勾选 %s 作为技能目标" % str(_enemies[i].get("name", "目标"))
+		target_button.position = _enemy_pos(i) - Vector2(48.0, 50.0)
+		target_button.size = Vector2(96.0, 118.0)
+		target_button.focus_mode = Control.FOCUS_NONE
+		target_button.pressed.connect(_select_target.bind(i))
+		add_child(target_button)
 
 
 func _process(delta: float) -> void:
@@ -176,51 +188,39 @@ func _process(delta: float) -> void:
 
 func _trigger_tone(tone: String) -> void:
 	_last_tone = tone
-	_last_dispatch = LeaderSkillVisualDbScript.get_dispatch(tone)
-	if tone == "fire":
-		_last_dispatch = "fire_burst"
-	_status_label.text = "%s / %s" % [str(TONE_LABELS.get(tone, tone)), _last_dispatch]
+	_last_dispatch = "sequence_table"
+	_status_label.text = "%s → %s / %s" % [str(_caster.get("name", "施放者")), str(_selected_target().get("name", "目标")), str(TONE_LABELS.get(tone, tone))]
 	_fx.clear()
 	_float_texts.clear()
-	var leader_pos := _team_pos(0)
-	var target_pos := _enemy_pos(1)
-	_add_fx({"kind": "crest", "tone": tone, "center": leader_pos, "duration": 0.72})
-	match _last_dispatch:
-		"ally_bloom":
-			for i in range(_team.size()):
-				_add_fx({"kind": "ally", "tone": tone, "center": _team_pos(i), "delay": 0.08 * float(i), "duration": 0.82})
-				_add_float_text("+恢复", _team_pos(i) + Vector2(0.0, -26.0), Color(0.20, 0.88, 0.35), 17.0, 0.10 + 0.08 * float(i))
-		"enemy_mark":
-			for i in range(_enemies.size()):
-				_add_fx({"kind": "mark", "tone": tone, "center": _enemy_pos(i), "delay": 0.07 * float(i), "duration": 0.78})
-				_add_float_text("攻击下降", _enemy_pos(i) + Vector2(0.0, -24.0), _tone_color(tone), 15.0, 0.15 + 0.07 * float(i))
-		"ally_shell":
-			for i in range(_team.size()):
-				_add_fx({"kind": "shell", "tone": tone, "center": _team_pos(i), "delay": 0.06 * float(i), "duration": 0.88})
-				_add_float_text("减伤", _team_pos(i) + Vector2(0.0, -25.0), _tone_color(tone), 16.0, 0.12 + 0.06 * float(i))
-		"beam_lifesteal":
-			_add_fx({"kind": "beam", "tone": tone, "from": leader_pos, "to": target_pos, "duration": 0.76})
-			_add_fx({"kind": "ally", "tone": tone, "center": _team_pos(2), "delay": 0.30, "duration": 0.76})
-			_add_float_text("-暗伤", target_pos + Vector2(0.0, -26.0), _tone_color(tone), 18.0, 0.28)
-			_add_float_text("+吸血", _team_pos(2) + Vector2(0.0, -26.0), Color(0.95, 0.28, 0.86), 16.0, 0.42)
-		"beam_status":
-			for i in range(_enemies.size()):
-				_add_fx({"kind": "beam", "tone": tone, "from": leader_pos, "to": _enemy_pos(i), "delay": 0.08 * float(i), "duration": 0.74})
-				_add_fx({"kind": "mark", "tone": tone, "center": _enemy_pos(i), "delay": 0.25 + 0.08 * float(i), "duration": 0.74})
-				_add_float_text("-雷伤", _enemy_pos(i) + Vector2(0.0, -28.0), _tone_color(tone), 17.0, 0.22 + 0.08 * float(i))
-				_add_float_text("眩晕", _enemy_pos(i) + Vector2(0.0, -8.0), Color(1.0, 0.78, 0.18), 14.0, 0.42 + 0.08 * float(i))
-		"fire_burst":
-			_add_fx({"kind": "fire_beam", "tone": tone, "from": leader_pos, "to": target_pos, "duration": 0.82})
-			_add_fx({"kind": "fire_impact", "tone": tone, "center": target_pos, "delay": 0.30, "duration": 0.72})
-			_add_float_text("-FIRE", target_pos + Vector2(0.0, -28.0), _tone_color(tone), 19.0, 0.24)
-			_add_float_text("灼烧", target_pos + Vector2(0.0, -8.0), Color(1.0, 0.64, 0.12), 14.0, 0.44)
-		_:
-			_add_fx({"kind": "beam", "tone": tone, "from": leader_pos, "to": target_pos, "duration": 0.78})
-			var label := "-火伤" if tone == "fire" else "-伤害"
-			_add_float_text(label, target_pos + Vector2(0.0, -28.0), _tone_color(tone), 19.0, 0.24)
-			if tone == "fire":
-				_add_float_text("灼烧", target_pos + Vector2(0.0, -8.0), Color(1.0, 0.64, 0.12), 14.0, 0.44)
+	var leader_pos := _caster_pos()
+	var target_pos := _enemy_pos(_selected_target_index)
+	var chain_target_pos := _enemy_pos(_adjacent_target_index(_selected_target_index))
+	var all_target_positions: Array[Vector2] = []
+	for i in range(_enemies.size()):
+		all_target_positions.append(_enemy_pos(i))
+	for step in LeaderSkillVfxSequenceDbScript.build_playback_for_chain(tone, leader_pos, target_pos, chain_target_pos, all_target_positions):
+		_add_fx(step)
+	_add_float_text(str(TONE_LABELS.get(tone, tone)), target_pos + Vector2(0.0, -26.0), _tone_color(tone), 18.0, 0.22)
 	queue_redraw()
+
+
+func _select_target(index: int) -> void:
+	_selected_target_index = clampi(index, 0, maxi(0, _enemies.size() - 1))
+	_status_label.text = "已勾选 %s；点击下方技能立即释放" % str(_selected_target().get("name", "目标"))
+	queue_redraw()
+
+
+func _selected_target() -> Dictionary:
+	if _enemies.is_empty():
+		return {}
+	return _enemies[clampi(_selected_target_index, 0, _enemies.size() - 1)]
+
+
+func _adjacent_target_index(index: int) -> int:
+	if _enemies.size() <= 1:
+		return 0
+	# 优先向左弹射；左侧不存在时，向右侧的最近角色弹射。
+	return index - 1 if index > 0 else 1
 
 
 func _add_fx(data: Dictionary) -> void:
@@ -247,20 +247,23 @@ func _add_float_text(text: String, pos: Vector2, color: Color, size_px: float, d
 func _draw() -> void:
 	_draw_background()
 	_draw_board()
-	for i in range(_team.size()):
-		_draw_unit(_team[i], _team_pos(i), false)
+	_draw_unit(_caster, _caster_pos(), false, true)
 	for i in range(_enemies.size()):
-		_draw_unit(_enemies[i], _enemy_pos(i), true)
+		_draw_unit(_enemies[i], _enemy_pos(i), true, i == _selected_target_index)
 	_draw_fx()
 	_draw_float_texts()
 
 
 func _draw_background() -> void:
 	draw_rect(Rect2(Vector2.ZERO, DESIGN_SIZE), Color(0.73, 0.88, 0.96))
-	draw_rect(Rect2(12.0, 158.0, 351.0, 470.0), Color(1.0, 0.96, 0.78, 0.70))
-	draw_rect(Rect2(20.0, 166.0, 335.0, 454.0), Color(0.55, 0.78, 0.92, 0.18))
-	draw_line(Vector2(187.0, 176.0), Vector2(187.0, 610.0), Color(1.0, 1.0, 1.0, 0.32), 2.0)
-	draw_arc(Vector2(187.0, 392.0), 126.0, 0.0, TAU, 96, Color(1.0, 1.0, 1.0, 0.18), 2.0, true)
+	draw_rect(Rect2(12.0, 84.0, 351.0, 478.0), Color(1.0, 0.96, 0.78, 0.70))
+	draw_rect(Rect2(20.0, 92.0, 335.0, 462.0), Color(0.55, 0.78, 0.92, 0.18))
+	draw_line(Vector2(24.0, 286.0), Vector2(351.0, 286.0), Color(1.0, 1.0, 1.0, 0.42), 2.0)
+	draw_arc(Vector2(187.0, 406.0), 112.0, PI * 1.05, PI * 1.95, 48, Color(1.0, 1.0, 1.0, 0.22), 2.0, true)
+	var font := ThemeDB.fallback_font
+	if font != null:
+		draw_string(font, Vector2(18.0, 105.0), "勾选技能目标", HORIZONTAL_ALIGNMENT_LEFT, 160.0, 14, Color(0.29, 0.15, 0.06))
+		draw_string(font, Vector2(18.0, 547.0), "施放者", HORIZONTAL_ALIGNMENT_LEFT, 160.0, 14, Color(0.29, 0.15, 0.06))
 
 
 func _draw_board() -> void:
@@ -271,16 +274,21 @@ func _draw_board() -> void:
 		Color(0.95, 0.78, 0.20),
 		Color(0.66, 0.44, 0.86)
 	]
-	var start := Vector2(132.0, 315.0)
-	for y in range(5):
-		for x in range(5):
+	var start := Vector2(154.0, 326.0)
+	for y in range(3):
+		for x in range(3):
 			var p := start + Vector2(float(x) * 22.0, float(y) * 22.0)
-			draw_rect(Rect2(p.x, p.y, 18.0, 18.0), Color(1.0, 1.0, 1.0, 0.45))
 			draw_circle(p + Vector2(9.0, 9.0), 6.0, colors[(x + y * 2) % colors.size()])
 
 
-func _draw_unit(unit: Dictionary, center: Vector2, enemy: bool) -> void:
+func _draw_unit(unit: Dictionary, center: Vector2, enemy: bool, selected: bool) -> void:
 	var ring := Color(0.42, 0.22, 0.08, 0.22) if not enemy else Color(0.62, 0.14, 0.10, 0.22)
+	if selected:
+		draw_circle(center + Vector2(0.0, 24.0), 42.0, Color(1.0, 0.80, 0.12, 0.25))
+		draw_arc(center + Vector2(0.0, 24.0), 40.0, 0.0, TAU, 40, Color(1.0, 0.76, 0.08), 2.4, true)
+		var marker_font := ThemeDB.fallback_font
+		if marker_font != null:
+			draw_string(marker_font, center + Vector2(-36.0, -49.0), "✓ 已勾选" if enemy else "施放者", HORIZONTAL_ALIGNMENT_CENTER, 72.0, 12, Color(0.42, 0.22, 0.08))
 	draw_circle(center + Vector2(0.0, 24.0), 34.0, ring)
 	var path := MonsterArtDBScript.get_art_path(str(unit.get("id", "")), "battle")
 	var tex := _get_texture(path)
@@ -310,6 +318,46 @@ func _draw_fx() -> void:
 		var tone := str(fx.get("tone", _last_tone))
 		var color := _tone_color(tone)
 		match str(fx.get("kind", "")):
+			"block_tidal_release":
+				_draw_tidal_release_blocks(fx, progress, alpha)
+			"block_tidal_big_ball":
+				_draw_tidal_ball_blocks(fx, progress, alpha, false)
+			"block_tidal_splash":
+				_draw_tidal_splash_blocks(fx, progress, alpha, true)
+			"block_tidal_small_ball":
+				_draw_tidal_ball_blocks(fx, progress, alpha, true)
+			"block_tidal_chain_splash":
+				_draw_tidal_splash_blocks(fx, progress, alpha, false)
+			"block_rock_release":
+				_draw_rock_release_blocks(fx, progress, alpha)
+			"block_rock_flight":
+				_draw_rock_flight_blocks(fx, progress, alpha)
+			"block_rock_impact":
+				_draw_rock_impact_blocks(fx, progress, alpha)
+			"block_wind_lightning_link":
+				_draw_wind_lightning_link(fx, progress, alpha)
+			"block_wind_lightning_hit":
+				_draw_wind_lightning_hit(fx, progress, alpha)
+			"block_gold_heal_release":
+				_draw_gold_heal_release_blocks(fx, progress, alpha)
+			"block_gold_heal_rise":
+				_draw_gold_heal_rise_blocks(fx, progress, alpha)
+			"block_heal_release":
+				_draw_heal_release_blocks(fx, progress, alpha)
+			"block_heal_rise":
+				_draw_heal_rise_blocks(fx, progress, alpha)
+			"block_fire_release":
+				_draw_fire_release_blocks(fx, progress, alpha)
+			"block_fireball_sprite":
+				_draw_fireball_sprite_block(fx, progress, alpha)
+			"block_fireball_trail":
+				_draw_fireball_trail_blocks(fx, progress, alpha)
+			"block_fire_impact":
+				_draw_fire_impact_blocks(fx, progress, alpha)
+			"block_release", "block_hit":
+				_draw_vfx_block(fx.get("center", Vector2.ZERO), Color.html(str(fx.get("color", "#ffffff"))), float(fx.get("size", 24.0)), progress, alpha)
+			"block_flight", "block_link":
+				_draw_vfx_block_path(fx.get("from", Vector2.ZERO), fx.get("to", Vector2.ZERO), Color.html(str(fx.get("color", "#ffffff"))), float(fx.get("size", 16.0)), progress, alpha, str(fx.get("kind", "")) == "block_link")
 			"crest":
 				if tone == "fire":
 					_draw_fire_emitter(fx.get("center", Vector2.ZERO), progress, alpha)
@@ -343,6 +391,319 @@ func _draw_beam(start: Vector2, finish: Vector2, tone: String, color: Color, pro
 	if reach >= 0.95:
 		_draw_vfx_texture(finish, tone, 90.0, alpha, progress, "impact")
 		_draw_particles(finish, color, tone, progress, alpha, 5, 24.0)
+
+
+func _draw_vfx_block(center: Vector2, color: Color, size_px: float, progress: float, alpha: float) -> void:
+	var scale := 0.55 + sin(clampf(progress / 0.45, 0.0, 1.0) * PI) * 0.55
+	var size := size_px * scale
+	draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(color.r, color.g, color.b, alpha * 0.82))
+
+
+func _draw_vfx_block_path(start: Vector2, finish: Vector2, color: Color, size_px: float, progress: float, alpha: float, linked: bool) -> void:
+	var reach := clampf(progress / 0.65, 0.0, 1.0)
+	if linked:
+		draw_line(start, start.lerp(finish, reach), Color(color.r, color.g, color.b, alpha * 0.78), 3.0)
+	var pos := start.lerp(finish, reach)
+	draw_rect(Rect2(pos - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(color.r, color.g, color.b, alpha * 0.90))
+
+
+func _draw_wind_lightning_link(fx: Dictionary, progress: float, alpha: float) -> void:
+	var start: Vector2 = fx.get("from", Vector2.ZERO)
+	var finish: Vector2 = fx.get("to", Vector2.ZERO)
+	var color := Color.html(str(fx.get("color", "#9df5ff")))
+	# 固定的直线负责锁定关系，外层动态折线提供闪电流动感。
+	draw_line(start, finish, Color(color.r, color.g, color.b, alpha * 0.26), 5.0)
+	var points := LeaderSkillVfxSequenceDbScript.sample_lightning_link(fx, progress)
+	draw_polyline(points, Color(color.r, color.g, color.b, alpha * 0.92), float(fx.get("size", 5.0)), true)
+	draw_polyline(points, Color(0.94, 1.0, 1.0, alpha * 0.90), 1.5, true)
+
+
+func _draw_wind_lightning_hit(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := 0.58 + 0.42 * sin(progress * TAU * 4.0)
+	draw_rect(Rect2(center - Vector2.ONE * size_px * (0.24 + pulse * 0.12), Vector2.ONE * size_px * (0.48 + pulse * 0.24)), Color(0.56, 0.91, 1.0, alpha * 0.58))
+	var seed := float(fx.get("particle_seed", 191.0))
+	for i in range(int(fx.get("particle_count", 7))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * TAU
+		var flicker := 0.30 + 0.70 * absf(sin(progress * TAU * (2.4 + float(i) * 0.23) + float(i)))
+		var distance := float(fx.get("particle_spread", 30.0)) * (0.25 + 0.75 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0)) * (0.40 + pulse * 0.46)
+		var chunk_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * flicker
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.82, 0.98, 1.0, alpha * flicker * 0.90))
+
+
+func _draw_heal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 30.0))
+	var pulse := sin(clampf(progress / 0.50, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.48 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.18, 0.82, 0.36, alpha * 0.80))
+	var count := int(fx.get("particle_count", 6))
+	var spread := float(fx.get("particle_spread", 26.0))
+	var seed := float(fx.get("particle_seed", 51.0))
+	for i in range(count):
+		var x_offset := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) - 0.5) * spread
+		var y_offset := -spread * (0.14 + progress * (0.42 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)))
+		var particle_size := 5.0 + 5.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(center + Vector2(x_offset, y_offset) - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.70, 1.0, 0.48, alpha * (0.88 - progress * 0.30)))
+
+
+func _draw_heal_rise_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var height := float(fx.get("bar_height", 70.0))
+	var bar_count := int(fx.get("bar_count", 3))
+	var lift := height * clampf(progress * 1.16, 0.0, 1.0)
+	for i in range(bar_count):
+		var lane := float(i) - float(bar_count - 1) * 0.5
+		var bar_width := 6.0 + float(i % 2) * 2.0
+		var bar_height := height * (0.46 + float(i) * 0.10)
+		var bar_center := center + Vector2(lane * 11.0, 18.0 - lift + float(i) * 7.0)
+		draw_rect(Rect2(bar_center.x - bar_width * 0.5, bar_center.y - bar_height * 0.5, bar_width, bar_height), Color(0.22, 0.90, 0.42, alpha * (0.44 + 0.16 * float(i))))
+		var cap_size := 9.0
+		draw_rect(Rect2(bar_center + Vector2(0.0, -bar_height * 0.5) - Vector2.ONE * cap_size * 0.5, Vector2.ONE * cap_size), Color(0.78, 1.0, 0.48, alpha * 0.88))
+	var count := int(fx.get("particle_count", 9))
+	var spread := float(fx.get("particle_spread", 30.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.20))
+	var seed := float(fx.get("particle_seed", 67.0))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var particle_pos := center + Vector2(
+			(LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * spread,
+			22.0 - height * particle_progress
+		)
+		var particle_size := (4.0 + 6.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * (1.0 - particle_progress * 0.32)
+		draw_rect(Rect2(particle_pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.72, 1.0, 0.54, alpha * (0.86 - particle_progress * 0.40)))
+
+
+func _draw_gold_heal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := sin(clampf(progress / 0.52, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.48 + pulse * 0.46)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.64, 0.12, alpha * 0.84))
+	var seed := float(fx.get("particle_seed", 81.0))
+	for i in range(int(fx.get("particle_count", 8))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var radius := float(fx.get("particle_spread", 32.0)) * (0.25 + 0.75 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)) * (0.30 + progress * 0.70)
+		var sparkle_pos := center + Vector2(cos(angle), sin(angle)) * radius + Vector2(0.0, -progress * 12.0)
+		var sparkle_size := 4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(sparkle_pos - Vector2.ONE * sparkle_size * 0.5, Vector2.ONE * sparkle_size), Color(1.0, 0.90, 0.38, alpha * (0.88 - progress * 0.28)))
+
+
+func _draw_gold_heal_rise_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var height := float(fx.get("bar_height", 78.0))
+	var lift := height * clampf(progress * 1.12, 0.0, 1.0)
+	var bar_count := int(fx.get("bar_count", 2))
+	for i in range(bar_count):
+		var lane := float(i) - float(bar_count - 1) * 0.5
+		var bar_height := height * (0.58 + float(i) * 0.08)
+		var bar_width := 8.0
+		var bar_center := center + Vector2(lane * 15.0, 18.0 - lift + float(i) * 5.0)
+		draw_rect(Rect2(bar_center.x - bar_width * 0.5, bar_center.y - bar_height * 0.5, bar_width, bar_height), Color(1.0, 0.68, 0.14, alpha * 0.55))
+		draw_rect(Rect2(bar_center + Vector2(0.0, -bar_height * 0.5) - Vector2.ONE * 6.0, Vector2.ONE * 12.0), Color(1.0, 0.94, 0.56, alpha * 0.92))
+	var seed := float(fx.get("particle_seed", 97.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.24))
+	for i in range(int(fx.get("particle_count", 12))):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var particle_pos := center + Vector2(
+			(LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * float(fx.get("particle_spread", 34.0)),
+			24.0 - height * particle_progress
+		)
+		var particle_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * (1.0 - particle_progress * 0.34)
+		draw_rect(Rect2(particle_pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(1.0, 0.84, 0.28, alpha * (0.90 - particle_progress * 0.42)))
+
+
+func _draw_tidal_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var pulse := sin(clampf(progress / 0.40, 0.0, 1.0) * PI)
+	var core_size := float(fx.get("size", 34.0)) * (0.48 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.22, 0.74, 1.0, alpha * 0.82))
+	var seed := float(fx.get("particle_seed", 111.0))
+	for i in range(int(fx.get("particle_count", 6))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var distance := float(fx.get("particle_spread", 24.0)) * (0.25 + progress * 0.75)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)
+		var particle_size := 5.0 + 5.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)
+		draw_rect(Rect2(pos - Vector2.ONE * particle_size * 0.5, Vector2.ONE * particle_size), Color(0.66, 0.94, 1.0, alpha * 0.78))
+
+
+func _draw_tidal_ball_blocks(fx: Dictionary, progress: float, alpha: float, small: bool) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var rotation := float(motion.get("rotation", 0.0))
+	var size_px := float(fx.get("size", 18.0))
+	draw_set_transform(position, rotation)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(0.20, 0.70, 1.0, alpha * 0.86))
+	var core_size := size_px * (0.40 if small else 0.52)
+	draw_rect(Rect2(-core_size * 0.5, -core_size * 0.5, core_size, core_size), Color(0.76, 0.96, 1.0, alpha * 0.96))
+	draw_set_transform(Vector2.ZERO, 0.0)
+	var seed := float(fx.get("particle_seed", 113.0))
+	for i in range(int(fx.get("particle_count", 4))):
+		var tail_progress := maxf(0.0, progress - (float(i) + 1.0) * 0.075)
+		var tail_motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var tail_pos: Vector2 = tail_motion.get("position", position)
+		var spread := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i)) - 0.5) * float(fx.get("particle_spread", 8.0))
+		var tail_size := size_px * (0.20 + 0.10 * float(i))
+		draw_rect(Rect2(tail_pos + Vector2(spread, 0.0) - Vector2.ONE * tail_size * 0.5, Vector2.ONE * tail_size), Color(0.44, 0.84, 1.0, alpha * (0.66 - float(i) * 0.10)))
+
+
+func _draw_tidal_splash_blocks(fx: Dictionary, progress: float, alpha: float, large: bool) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 32.0))
+	var core_size := size_px * (0.72 - progress * 0.30)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.34, 0.80, 1.0, alpha * (0.78 - progress * 0.40)))
+	var seed := float(fx.get("particle_seed", 127.0))
+	var count := int(fx.get("particle_count", 8))
+	var birth_range := float(fx.get("particle_birth_range", 0.12))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		if progress < birth:
+			continue
+		var p := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) * TAU
+		var distance := float(fx.get("particle_spread", 26.0)) * (0.22 + 0.78 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)) * pow(p, 0.72)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance + Vector2(0.0, -p * (14.0 if large else 8.0))
+		var drop_size := (5.0 + 6.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 3.0)) * (1.0 - p * 0.34)
+		draw_rect(Rect2(pos - Vector2.ONE * drop_size * 0.5, Vector2.ONE * drop_size), Color(0.64, 0.93, 1.0, alpha * (0.88 - p * 0.44)))
+
+
+func _draw_rock_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var pulse := sin(clampf(progress / 0.28, 0.0, 1.0) * PI)
+	var size_px := float(fx.get("size", 42.0)) * (0.42 + pulse * 0.48)
+	draw_rect(Rect2(center - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(0.48, 0.27, 0.12, alpha * 0.82))
+	draw_rect(Rect2(center - Vector2.ONE * size_px * 0.27 + Vector2(3.0, -4.0), Vector2.ONE * size_px * 0.54), Color(0.76, 0.52, 0.27, alpha * 0.92))
+	var seed := float(fx.get("particle_seed", 151.0)) + float(fx.get("repeat_index", 0)) * 19.0
+	for i in range(int(fx.get("particle_count", 5))):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * TAU
+		var distance := float(fx.get("particle_spread", 24.0)) * (0.22 + progress * 0.78) * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0)
+		var chunk_size := 5.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.68, 0.42, 0.20, alpha * 0.76))
+
+
+func _draw_rock_flight_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var roll := progress * TAU * float(fx.get("roll_turns", 2.6)) * float(fx.get("roll_direction", 1.0))
+	var size_px := float(fx.get("size", 48.0))
+	draw_set_transform(position, roll)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(0.40, 0.23, 0.12, alpha * 0.90))
+	draw_rect(Rect2(-size_px * 0.28, -size_px * 0.30, size_px * 0.56, size_px * 0.56), Color(0.68, 0.43, 0.23, alpha * 0.98))
+	draw_rect(Rect2(-size_px * 0.17, -size_px * 0.05, size_px * 0.34, size_px * 0.12), Color(0.88, 0.66, 0.37, alpha * 0.72))
+	draw_set_transform(Vector2.ZERO, 0.0)
+	var seed := float(fx.get("particle_seed", 157.0)) + float(fx.get("repeat_index", 0)) * 23.0
+	for i in range(int(fx.get("particle_count", 3))):
+		var tail_progress := maxf(0.0, progress - (float(i) + 1.0) * 0.09)
+		var tail_motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var tail_pos: Vector2 = tail_motion.get("position", position)
+		var spread := (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i)) - 0.5) * float(fx.get("particle_spread", 12.0))
+		var dust_size := 7.0 - float(i) * 1.5
+		draw_rect(Rect2(tail_pos + Vector2(spread, 8.0) - Vector2.ONE * dust_size * 0.5, Vector2.ONE * dust_size), Color(0.65, 0.42, 0.23, alpha * (0.56 - float(i) * 0.12)))
+
+
+func _draw_rock_impact_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 46.0))
+	var burst := sin(clampf(progress / 0.42, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.38 + burst * 0.52)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(0.46, 0.25, 0.12, alpha * 0.82))
+	var seed := float(fx.get("particle_seed", 163.0)) + float(fx.get("repeat_index", 0)) * 29.0
+	var birth_range := float(fx.get("particle_birth_range", 0.12))
+	for i in range(int(fx.get("particle_count", 10))):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 1.0) * TAU
+		var distance := float(fx.get("particle_spread", 42.0)) * (0.22 + 0.78 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 2.0)) * pow(particle_progress, 0.70)
+		var chunk_size := (5.0 + 8.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 3.0)) * (1.0 - particle_progress * 0.42)
+		var pos := center + Vector2(cos(angle), sin(angle)) * distance + Vector2(0.0, particle_progress * 12.0)
+		draw_rect(Rect2(pos - Vector2.ONE * chunk_size * 0.5, Vector2.ONE * chunk_size), Color(0.74, 0.49, 0.25, alpha * (0.90 - particle_progress * 0.52)))
+
+
+func _draw_fire_release_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 34.0))
+	var pulse := sin(clampf(progress / 0.56, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.52 + pulse * 0.52)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.25, 0.04, alpha * 0.88))
+	var count := int(fx.get("particle_count", 7))
+	var spread := float(fx.get("particle_spread", 30.0))
+	var seed := float(fx.get("particle_seed", 11.0))
+	for i in range(count):
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0) * TAU
+		var radius := spread * (0.20 + 0.80 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 1.0)) * (0.18 + progress * 0.82)
+		var offset := Vector2(cos(angle), sin(angle) - 0.35) * radius
+		var spark_size := (5.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 2.0 + 2.0)) * (1.0 - progress * 0.18)
+		draw_rect(Rect2(center + offset - Vector2.ONE * spark_size * 0.5, Vector2.ONE * spark_size), Color(1.0, 0.58 + 0.26 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) + 3.0), 0.12, alpha * (0.90 - progress * 0.34)))
+
+
+func _draw_fireball_sprite_block(fx: Dictionary, progress: float, alpha: float) -> void:
+	var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, progress)
+	var position: Vector2 = motion.get("position", Vector2.ZERO)
+	var rotation := float(motion.get("rotation", 0.0))
+	var size_px := float(fx.get("size", 22.0))
+	# 本地 Y 轴沿 rotation 指向飞行前方，未来替换箭头/火球贴图时可直接沿用。
+	draw_set_transform(position, rotation)
+	draw_rect(Rect2(-size_px * 0.5, -size_px * 0.5, size_px, size_px), Color(1.0, 0.22, 0.03, alpha * 0.92))
+	var core_size := size_px * 0.42
+	draw_rect(Rect2(-core_size * 0.5, size_px * 0.04, core_size, core_size), Color(1.0, 0.86, 0.28, alpha))
+	draw_set_transform(Vector2.ZERO, 0.0)
+
+
+func _draw_fireball_trail_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var count := int(fx.get("particle_count", 8))
+	var step_time := float(fx.get("particle_step", 0.095))
+	var spread := float(fx.get("particle_spread", 22.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.16))
+	var seed := float(fx.get("particle_seed", 23.0))
+	for i in range(count):
+		var birth_offset := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0) * birth_range
+		var particle_age := float(i) * step_time + birth_offset
+		if particle_age > progress:
+			continue
+		var tail_progress := maxf(0.0, progress - particle_age)
+		var motion := LeaderSkillVfxSequenceDbScript.sample_flight_motion(fx, tail_progress)
+		var position: Vector2 = motion.get("position", Vector2.ZERO)
+		var direction: Vector2 = motion.get("direction", Vector2.UP)
+		var lateral := direction.orthogonal() * (LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 1.0) - 0.5) * spread * (0.30 + particle_age * 1.8)
+		var backward := -direction * particle_age * (20.0 + 26.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 2.0))
+		var size_px := float(fx.get("size", 12.0)) * (0.48 + 0.52 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 3.0)) * maxf(0.28, 1.0 - particle_age * 0.82)
+		var trail_alpha := alpha * maxf(0.12, 1.0 - particle_age * 1.24)
+		draw_rect(Rect2(position + lateral + backward - Vector2.ONE * size_px * 0.5, Vector2.ONE * size_px), Color(1.0, 0.16 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 3.0 + 4.0), 0.03, trail_alpha * 0.80))
+
+
+func _draw_fire_impact_blocks(fx: Dictionary, progress: float, alpha: float) -> void:
+	var center: Vector2 = fx.get("center", Vector2.ZERO)
+	var size_px := float(fx.get("size", 38.0))
+	var burst := sin(clampf(progress / 0.48, 0.0, 1.0) * PI)
+	var core_size := size_px * (0.42 + burst * 0.60)
+	draw_rect(Rect2(center - Vector2.ONE * core_size * 0.5, Vector2.ONE * core_size), Color(1.0, 0.30, 0.04, alpha * 0.88))
+	# 每枚火花从随机半径、随机时刻出生，再按不同速度向外爆散。
+	var count := int(fx.get("particle_count", 12))
+	var spread := float(fx.get("particle_spread", 48.0))
+	var birth_range := float(fx.get("particle_birth_range", 0.16))
+	var seed := float(fx.get("particle_seed", 37.0))
+	for i in range(count):
+		var birth := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0) * birth_range
+		if progress < birth:
+			continue
+		var particle_progress := clampf((progress - birth) / maxf(0.01, 1.0 - birth), 0.0, 1.0)
+		var angle := LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 1.0) * TAU
+		var initial_radius := size_px * 0.10 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 2.0)
+		var distance := initial_radius + spread * (0.28 + 0.72 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 3.0)) * pow(particle_progress, 0.72)
+		var spark_pos := center + Vector2(cos(angle), sin(angle)) * distance
+		var spark_size := (4.0 + 7.0 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 4.0)) * (1.0 - particle_progress * 0.42)
+		draw_rect(Rect2(spark_pos - Vector2.ONE * spark_size * 0.5, Vector2.ONE * spark_size), Color(1.0, 0.52 + 0.38 * LeaderSkillVfxSequenceDbScript.stable_noise(seed, float(i) * 4.0 + 5.0), 0.10, alpha * (0.92 - particle_progress * 0.52)))
 
 
 func _draw_element_trail_particles(start: Vector2, finish: Vector2, tone: String, progress: float, alpha: float) -> void:
@@ -575,12 +936,12 @@ func _draw_float_texts() -> void:
 		draw_string(font, center, text, HORIZONTAL_ALIGNMENT_CENTER, 96.0, size_px, color)
 
 
-func _team_pos(index: int) -> Vector2:
-	return [Vector2(78.0, 265.0), Vector2(78.0, 392.0), Vector2(78.0, 520.0)][clampi(index, 0, 2)]
+func _caster_pos() -> Vector2:
+	return Vector2(187.0, 484.0)
 
 
 func _enemy_pos(index: int) -> Vector2:
-	return [Vector2(300.0, 250.0), Vector2(300.0, 385.0), Vector2(300.0, 520.0)][clampi(index, 0, 2)]
+	return [Vector2(78.0, 194.0), Vector2(187.0, 194.0), Vector2(297.0, 194.0)][clampi(index, 0, 2)]
 
 
 func _tone_color(tone: String) -> Color:

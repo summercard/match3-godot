@@ -54,6 +54,14 @@ func _run() -> void:
 		var max_budget := 10 if tone == "fire" else 8
 		_expect(int(profile.get("particleBudget", 0)) > 0 and int(profile.get("particleBudget", 0)) <= max_budget, "%s particle budget should stay bounded" % tone)
 		_check_asset_alpha(tone, asset_path)
+		_expect(LeaderSkillVisualDb.tone_uses_vfx_layer(tone, "release"), "%s should always have a caster release layer" % tone)
+		_expect(LeaderSkillVisualDb.tone_uses_vfx_layer(tone, "hit"), "%s should always have a target hit layer" % tone)
+		_expect(str(LeaderSkillVisualDb.get_vfx_layer("release").get("anchor", "")) == "caster", "release layer must bind to the caster center")
+		_expect(str(LeaderSkillVisualDb.get_vfx_layer("hit").get("anchor", "")) == "target", "hit layer must bind to the target center")
+	_expect(LeaderSkillVisualDb.tone_uses_vfx_layer("fire", "flight"), "fire should use the flying-particle layer")
+	_expect(LeaderSkillVisualDb.tone_uses_vfx_layer("chain", "link"), "chain should use the link layer")
+	_expect(not LeaderSkillVisualDb.tone_uses_vfx_layer("heal", "link"), "heal should not render an unnecessary cross-character link")
+	_expect(ResourceLoader.exists(LeaderSkillVisualDb.get_layer_asset_path("chain", "link")), "link layer should point to a real thunder particle asset")
 	_check_motion_curves()
 	_finish()
 

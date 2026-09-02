@@ -4,6 +4,32 @@ extends RefCounted
 const ASSET_DIR := "res://assets/images/ui/leader_skills/effects"
 const PARTICLE_DIR := "res://assets/images/ui/leader_skills/particles"
 
+# 队长技特效以“层”而非技能名管理。anchor 是该层必须绑定的节点：
+# caster = 施放者中心；target = 受影响角色中心；path = 两者之间；board = 棋盘节点。
+const VFX_LAYERS: Dictionary = {
+	"release": {"name": "自身释放特效", "anchor": "caster", "asset_role": "tone_effect", "render_kind": "crest"},
+	"flight": {"name": "飞行特效", "anchor": "path", "asset_role": "element_particle", "render_kind": "fire_beam"},
+	"link": {"name": "连线特效", "anchor": "path", "asset_role": "element_particle", "render_kind": "beam"},
+	"hit": {"name": "受击特效", "anchor": "target", "asset_role": "tone_effect", "render_kind": "impact"},
+}
+
+# 每种现有表现色调会启用的层；治疗与防护直接绑定目标，没有无意义的飞行线。
+const TONE_VFX_LAYERS: Dictionary = {
+	"fire": ["release", "flight", "hit"],
+	"balanced": ["release", "link", "hit"],
+	"heal": ["release", "hit"],
+	"speed": ["release", "link", "hit"],
+	"guard": ["release", "hit"],
+	"bulwark": ["release", "hit"],
+	"siphon": ["release", "link", "hit"],
+	"chain": ["release", "link", "hit"],
+}
+
+const TONE_PARTICLE_ELEMENTS: Dictionary = {
+	"fire": "fire", "balanced": "grass", "heal": "grass", "speed": "wind",
+	"guard": "water", "bulwark": "earth", "siphon": "dark", "chain": "thunder",
+}
+
 const TYPES: Dictionary = {
 	"fire": {
 		"id": "fire",
@@ -86,6 +112,26 @@ static func get_profile(tone: String) -> Dictionary:
 
 static func get_asset_path(tone: String) -> String:
 	return str(get_profile(tone).get("asset", ""))
+
+
+static func get_vfx_layer(layer: String) -> Dictionary:
+	return VFX_LAYERS.get(layer, {}).duplicate(true)
+
+
+static func get_tone_vfx_layers(tone: String) -> Array:
+	return TONE_VFX_LAYERS.get(tone, TONE_VFX_LAYERS["balanced"]).duplicate()
+
+
+static func tone_uses_vfx_layer(tone: String, layer: String) -> bool:
+	return get_tone_vfx_layers(tone).has(layer)
+
+
+static func get_layer_asset_path(tone: String, layer: String) -> String:
+	var profile := get_profile(tone)
+	var layer_info := get_vfx_layer(layer)
+	if str(layer_info.get("asset_role", "")) == "element_particle":
+		return str(profile.get("asset", "")) if tone == "fire" else PARTICLE_DIR + "/leader_fx_element_%s.png" % str(TONE_PARTICLE_ELEMENTS.get(tone, "grass"))
+	return str(profile.get("asset", ""))
 
 
 static func get_dispatch(tone: String) -> String:
