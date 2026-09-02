@@ -7,6 +7,7 @@ extends Node
 
 const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
 const BattleObjectiveEvaluatorScript = preload("res://src/battle/battle_objective_evaluator.gd")
+const ActiveSkillExecutorScript = preload("res://src/battle/active_skill_executor.gd")
 const LeaderSkillExecutorScript = preload("res://src/battle/leader_skill_executor.gd")
 
 ## 战斗核心逻辑：玩家队伍/敌方精灵初始化、连锁伤害计算、
@@ -77,6 +78,7 @@ var _status_effect: BattleStatusEffect = BattleStatusEffect.new()
 var _phase_handler: PhaseHandler = PhaseHandler.new(self)
 var _damage_calc: DamageCalculator = DamageCalculator.new()
 var _objective_evaluator = BattleObjectiveEvaluatorScript.new()
+var _active_skill_executor = ActiveSkillExecutorScript.new(self)
 var _leader_skill_executor = LeaderSkillExecutorScript.new(self)
 
 # 关卡数据
@@ -549,183 +551,7 @@ func consume_ready_leader_burst() -> Dictionary:
 
 
 func use_active_skill(monster_id: String) -> Dictionary:
-	if battle_over:
-		return { "success": false, "reason": "battle_over" }
-
-	var monster: Dictionary = _get_player_monster(monster_id)
-	if monster.is_empty():
-		return { "success": false, "reason": "monster_unavailable" }
-	if monster.get("hp", 0) <= 0:
-		return { "success": false, "reason": "dead" }
-
-	var skill: Dictionary = MonsterDb.normalize_skill(monster.get("skill", {}))
-	if skill.is_empty():
-		return { "success": false, "reason": "no_skill" }
-
-	var cost: int = int(skill.get("cost", 999))
-	var charge: int = int(skill_charges.get(monster_id, 0))
-	if charge < cost:
-		return {
-			"success": false,
-			"reason": "not_ready",
-			"charge": charge,
-			"cost": cost
-		}
-
-	var element := _fantasy_element(monster)
-	var board_affinity := _board_affinity(monster)
-	var skill_type := str(skill.get("type", "strike"))
-	var target = _get_weakest_enemy()
-	var target_idx: int = enemies.find(target) if target != null else -1
-	var total_damage: int = 0
-	var remaining_damage: int = 0
-	var shield_absorbed: int = 0
-	var element_mult: float = 1.0
-	var effect_logs: Array = []
-	var acted: bool = false
-	var last_ally: Dictionary = {}
-
-	for effect: Dictionary in skill.get("effects", []):
-		var kind := str(effect.get("kind", "damage"))
-		if kind == "damage":
-			if target == null:
-				continue
-			element_mult = MonsterDb.get_element_multiplier(element, target.get("element", ""))
-			var leader_atk_boost: float = LeaderSkillDb.get_leader_atk_boost(leader_skill_data, element)
-			var synergy_atk_mult: float = get_synergy_atk_mult(board_affinity)
-			var effect_mult := float(effect.get("multiplier", skill.get("multiplier", 1.0)))
-			var effect_damage: int = _damage_calc.calc_player_damage(
-				monster.get("atk", 10),
-				element,
-				target.get("def", 0),
-				3,
-				1,
-				element_mult,
-				leader_atk_boost,
-				synergy_atk_mult
-			)
-			effect_damage = maxi(1, int(round(effect_damage * effect_mult)))
-			effect_damage = _apply_tower_player_damage(effect_damage)
-			effect_damage = _apply_enemy_vulnerability_damage(effect_damage, target_idx)
-			var effect_remaining := effect_damage
-			var effect_absorbed := 0
-			if _enemy_skill_system != null and target_idx >= 0:
-				var shield_result: Dictionary = _enemy_skill_system.execute_shield_before_damage(target_idx, effect_damage)
-				effect_absorbed = shield_result.get("absorbed", 0)
-				effect_remaining = shield_result.get("remaining", 0)
-				_enemy_skill_system.get_skill_state(target_idx, "shield")
-			target["hp"] = target.get("hp", 0) - effect_remaining
-			_update_capture_window(target_idx)
-			total_damage += effect_damage
-			remaining_damage += effect_remaining
-			shield_absorbed += effect_absorbed
-			acted = true
-			effect_logs.append({
-				"kind": "damage",
-				"target": target.get("name", ""),
-				"target_index": target_idx,
-				"amount": effect_damage,
-				"remaining": effect_remaining,
-				"shield_absorbed": effect_absorbed
-			})
-		elif kind == "heal":
-			var ally := _get_lowest_hp_ally()
-			if ally.is_empty():
-				continue
-			var heal_ratio := float(effect.get("ratio", 0.25))
-			var min_heal := int(effect.get("min", 0))
-			var heal_amount := maxi(min_heal, int(round(float(ally.get("maxHP", 0)) * heal_ratio)))
-			var prev_hp := int(ally.get("hp", 0))
-			ally["hp"] = mini(int(ally.get("maxHP", prev_hp)), prev_hp + heal_amount)
-			var actual_heal := int(ally.get("hp", 0)) - prev_hp
-			last_ally = ally
-			acted = true
-			effect_logs.append({
-				"kind": "heal",
-				"target": ally.get("name", ""),
-				"target_id": ally.get("id", ""),
-				"amount": actual_heal
-			})
-		elif kind == "guard":
-			var guard_ally := last_ally if not last_ally.is_empty() else _get_lowest_hp_ally()
-			if guard_ally.is_empty():
-				continue
-			var reduction := clampf(float(effect.get("reduction", 0.25)), 0.0, 0.8)
-			var turns := maxi(1, int(effect.get("turns", 1)))
-			_apply_player_guard(guard_ally, reduction, turns)
-			acted = true
-			effect_logs.append({
-				"kind": "guard",
-				"target": guard_ally.get("name", ""),
-				"target_id": guard_ally.get("id", ""),
-				"reduction": reduction,
-				"turns": turns
-			})
-		elif kind == "weaken":
-			if target == null or target_idx < 0:
-				continue
-			var weaken_reduction := clampf(float(effect.get("reduction", 0.35)), 0.0, 0.8)
-			var weaken_turns := maxi(1, int(effect.get("turns", 1)))
-			_apply_enemy_tempo_mod(target_idx, weaken_reduction, weaken_turns)
-			acted = true
-			effect_logs.append({
-				"kind": "weaken",
-				"target": target.get("name", ""),
-				"target_index": target_idx,
-				"reduction": weaken_reduction,
-				"turns": weaken_turns
-			})
-
-	if not acted:
-		return { "success": false, "reason": "no_valid_effect" }
-
-	skill_charges[monster_id] = maxi(0, charge - cost)
-	if remaining_damage > 0:
-		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + remaining_damage
-		_record_player_turn_damage(remaining_damage)
-
-	var target_died: bool = target != null and target.get("hp", 0) <= 0
-	var result := {
-		"success": true,
-		"type": "active_skill",
-		"skill_type": skill_type,
-		"skillType": skill_type,
-		"attacker": monster.get("name", ""),
-		"attacker_id": monster_id,
-		"attackerId": monster_id,
-		"attacker_emoji": monster.get("emoji", ""),
-		"skill": skill.duplicate(true),
-		"skill_name": skill.get("name", "技能"),
-		"skillName": skill.get("name", "技能"),
-		"target": target.get("name", "") if target != null else "",
-		"target_emoji": target.get("emoji", "") if target != null else "",
-		"target_index": target_idx,
-		"targetIndex": target_idx,
-		"damage": total_damage,
-		"remaining_damage": remaining_damage,
-		"remainingDamage": remaining_damage,
-		"shield_absorbed": shield_absorbed,
-		"shieldAbsorbed": shield_absorbed,
-		"element": element,
-		"boardAffinity": board_affinity,
-		"is_effective": element_mult > 1.0,
-		"isEffective": element_mult > 1.0,
-		"is_weak": element_mult < 1.0,
-		"isWeak": element_mult < 1.0,
-		"target_died": target_died,
-		"targetDied": target_died,
-		"effect_logs": effect_logs,
-		"effectLogs": effect_logs,
-		"battle_ended": false,
-		"battleEnded": false
-	}
-	damage_dealt.emit(result)
-
-	if check_battle_end():
-		result["battle_ended"] = true
-		result["battleEnded"] = true
-
-	return result
+	return _active_skill_executor.execute(monster_id)
 
 
 func is_leader_burst_ready() -> bool:

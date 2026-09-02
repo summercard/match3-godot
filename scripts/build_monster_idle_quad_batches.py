@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and split the next three 2x2 monster-idle video batches."""
+"""Build and split configured 2x2 monster-idle video batches."""
 
 from __future__ import annotations
 
@@ -35,11 +35,19 @@ VIDEO_FILENAME = "idle_seedance_2_mini_4s.mp4"
 
 
 def _monster_source(monster_id: str) -> Path:
+    category = "boss" if monster_id.startswith("monster_boss_") else "monster"
     return (
         PROJECT_ROOT
-        / "assets/images/monsters/monster"
+        / "assets/images/monsters"
+        / category
         / f"{monster_id}.png"
     )
+
+
+def _runtime_monster_root(monster_id: str) -> Path:
+    if monster_id.startswith("monster_boss_"):
+        return PROJECT_ROOT / "assets/images/monsters/boss" / monster_id
+    return RUNTIME_ROOT / monster_id
 
 
 # Groups 01-06 used a bottom-right helper to absorb the watermark. Starting
@@ -117,6 +125,102 @@ GROUPS = {
         ("monster_044", 0, 1, True),
         ("monster_045", 1, 1, True),
     ),
+   "group_13": (
+       ("monster_046", 0, 0, True),
+       ("monster_047", 1, 0, True),
+       ("monster_048", 0, 1, True),
+       ("monster_049", 1, 1, True),
+   ),
+    "group_14": (
+        ("monster_050", 0, 0, True),
+        ("monster_051", 1, 0, True),
+        ("monster_052", 0, 1, True),
+        ("monster_054", 1, 1, True),
+    ),
+    "group_15": (
+        ("monster_055", 0, 0, True),
+        ("monster_056", 1, 0, True),
+        ("monster_057", 0, 1, True),
+        ("monster_058", 1, 1, True),
+    ),
+    "group_16": (
+        ("monster_059", 0, 0, True),
+        ("monster_060", 1, 0, True),
+        ("monster_061", 0, 1, True),
+        ("monster_062", 1, 1, True),
+    ),
+    "group_17": (
+        ("monster_063", 0, 0, True),
+        ("monster_064", 1, 0, True),
+        ("monster_065", 0, 1, True),
+        ("monster_066", 1, 1, True),
+    ),
+    "group_18": (
+        ("monster_067", 0, 0, True),
+        ("monster_068", 1, 0, True),
+        ("monster_069", 0, 1, True),
+        ("monster_070", 1, 1, True),
+    ),
+    "group_19": (
+        ("monster_071", 0, 0, True),
+        ("monster_072", 1, 0, True),
+        ("monster_073", 0, 1, True),
+        ("monster_074", 1, 1, True),
+    ),
+    "group_20": (
+        ("monster_075", 0, 0, True),
+        ("monster_076", 1, 0, True),
+        ("monster_077", 0, 1, True),
+        ("monster_078", 1, 1, True),
+    ),
+    "group_21": (
+        ("monster_079", 0, 0, True),
+        ("monster_080", 1, 0, True),
+        ("monster_081", 0, 1, True),
+        ("monster_082", 1, 1, True),
+    ),
+    "group_22": (
+        ("monster_083", 0, 0, True),
+        ("monster_084", 1, 0, True),
+        ("monster_085", 0, 1, True),
+        ("monster_086", 1, 1, True),
+    ),
+    "group_23": (
+        ("monster_087", 0, 0, True),
+        ("monster_088", 1, 0, True),
+        ("monster_089", 0, 1, True),
+        ("monster_090", 1, 1, True),
+    ),
+    "group_24": (
+        ("monster_091", 0, 0, True),
+        ("monster_092", 1, 0, True),
+        ("monster_094", 0, 1, True),
+        ("monster_095", 1, 1, True),
+    ),
+    "group_25": (
+        ("monster_096", 0, 0, True),
+        ("monster_097", 1, 0, True),
+        ("monster_098", 0, 1, True),
+        ("monster_099", 1, 1, True),
+    ),
+    "group_26": (
+        ("monster_100", 0, 0, True),
+        ("monster_101", 1, 0, True),
+        ("monster_102", 0, 1, True),
+        ("monster_103", 1, 1, True),
+    ),
+    "group_27": (
+        ("monster_boss_001", 0, 0, True),
+        ("monster_boss_002", 1, 0, True),
+        ("monster_boss_003", 0, 1, True),
+        ("monster_boss_004", 1, 1, True),
+    ),
+    "group_28": (
+        ("monster_boss_005", 0, 0, True),
+        ("monster_boss_006", 1, 0, True),
+        ("monster_boss_007", 0, 1, True),
+        ("monster_boss_008", 1, 1, True),
+    ),
 }
 
 
@@ -168,13 +272,47 @@ def _make_watermark_safe_cell(cell: Image.Image) -> Image.Image:
     return safe_cell
 
 
+def _make_subject_margin_cell(cell: Image.Image) -> Image.Image:
+    """Keep large silhouettes away from the video frame and grid edges."""
+
+    scale = 0.94
+    target_size = int(round(CELL_SIZE * scale))
+    resized = cell.resize(
+        (target_size, target_size),
+        Image.Resampling.LANCZOS,
+    )
+    safe_cell = Image.new("RGBA", (CELL_SIZE, CELL_SIZE), MAGENTA)
+    offset = (CELL_SIZE - target_size) // 2
+    safe_cell.alpha_composite(resized, (offset, offset))
+    return safe_cell
+
+
+def _erase_bottom_right_source_watermark(cell: Image.Image) -> Image.Image:
+    """Remove a legacy generator mark that sits outside the subject."""
+
+    cleaned = cell.copy()
+    cleaned.paste(MAGENTA, (780, 930, CELL_SIZE, CELL_SIZE))
+    return cleaned
+
+
 def build_group_input(group_name: str) -> None:
     canvas = Image.new("RGBA", (GRID_SIZE, GRID_SIZE), MAGENTA)
     for monster_id, column, row, _ in GROUPS[group_name]:
         cell = _flatten_to_magenta(_monster_source(monster_id))
+        if monster_id in ("monster_095", "monster_boss_007"):
+            cell = _erase_bottom_right_source_watermark(cell)
         if group_name in (
-            "group_07", "group_08", "group_09",
-            "group_10", "group_11", "group_12",
+            "group_23", "group_24", "group_25", "group_26",
+            "group_27", "group_28",
+        ) and not (column == 1 and row == 1):
+            cell = _make_subject_margin_cell(cell)
+        if group_name in (
+           "group_07", "group_08", "group_09",
+            "group_10", "group_11", "group_12", "group_13",
+            "group_14", "group_15", "group_16", "group_17",
+            "group_18", "group_19", "group_20", "group_21", "group_22",
+            "group_23", "group_24", "group_25", "group_26",
+            "group_27", "group_28",
         ) and column == 1 and row == 1:
             cell = _make_watermark_safe_cell(cell)
         x = column * (CELL_SIZE + GUTTER)
@@ -284,6 +422,38 @@ def _remove_small_right_islands(frame: np.ndarray) -> np.ndarray:
     return cleaned
 
 
+def _write_qa_assets(
+    group_name: str,
+    monster_id: str,
+    frames: list[np.ndarray],
+) -> None:
+    """Write a 4x4 contact sheet and runtime-speed looping preview."""
+
+    qa_dir = _group_root(group_name) / "qa"
+    qa_dir.mkdir(parents=True, exist_ok=True)
+    pil_frames = [Image.fromarray(frame, "RGBA") for frame in frames]
+    contact_sheet = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+    for index, frame in enumerate(pil_frames):
+        x = (index % 4) * 256
+        y = (index // 4) * 256
+        contact_sheet.alpha_composite(frame, (x, y))
+    contact_sheet.save(
+        qa_dir / f"{monster_id}_contact_sheet.png",
+        optimize=True,
+    )
+    pil_frames[0].save(
+        qa_dir / f"{monster_id}_idle_8fps.gif",
+        save_all=True,
+        append_images=pil_frames[1:],
+        # GIF stores delay in 10 ms units. Alternate 120/130 ms so the
+        # 16-frame preview averages the runtime's exact 125 ms (8 FPS).
+        duration=[120 if index % 2 == 0 else 130 for index in range(FRAME_COUNT)],
+        loop=0,
+        disposal=2,
+        optimize=False,
+    )
+
+
 def build_group_runtime(group_name: str) -> None:
     video_path = _group_root(group_name) / VIDEO_FILENAME
     if not video_path.exists():
@@ -312,7 +482,6 @@ def build_group_runtime(group_name: str) -> None:
                 frame,
                 column,
                 row,
-                refine_foreground=monster_id != "monster_018",
             )
             for frame in sampled
         ]
@@ -344,13 +513,14 @@ def build_group_runtime(group_name: str) -> None:
                 for frame in finished
             ]
         _validate(finished, monster_id)
-        output_dir = RUNTIME_ROOT / monster_id / "idle"
+        output_dir = _runtime_monster_root(monster_id) / "idle"
         output_dir.mkdir(parents=True, exist_ok=True)
         for index, frame in enumerate(finished):
             Image.fromarray(frame, "RGBA").save(
                 output_dir / f"idle_{index:03d}.png",
                 optimize=True,
             )
+        _write_qa_assets(group_name, monster_id, finished)
         print(
             f"{group_name}/{monster_id}: wrote {FRAME_COUNT} idle frames"
         )

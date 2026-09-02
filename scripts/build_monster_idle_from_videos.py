@@ -117,16 +117,23 @@ def _remove_magenta(rgb: np.ndarray) -> np.ndarray:
         & (rgb_i16[..., 0] > 130)
         & (rgb_i16[..., 2] > 105)
     )
+    # Remove near-key pixels even when a limb, branch, or accessory encloses
+    # the background. Only the high-confidence key range is global; the loose
+    # compression range must still connect to the canvas edge so character
+    # colors close to magenta remain protected.
+    core_background = (distance < 50.0) & magenta_like
     loose_background = _border_connected((distance < 92.0) & magenta_like)
     loose_background = cv2.morphologyEx(
         loose_background.astype(np.uint8),
         cv2.MORPH_CLOSE,
         np.ones((3, 3), np.uint8),
     ).astype(bool)
+    keyed_background = core_background | loose_background
 
     alpha = np.full(distance.shape, 255.0, dtype=np.float32)
     matte = np.clip((distance - 10.0) / (64.0 - 10.0), 0.0, 1.0)
-    alpha[loose_background] = matte[loose_background] * 255.0
+    alpha[keyed_background] = matte[keyed_background] * 255.0
+    alpha[core_background] = 0.0
     alpha[alpha < 3.0] = 0.0
 
     output_rgb = rgb.astype(np.float32)
@@ -151,12 +158,12 @@ def _cleanup_bottom_artifacts(rgba: np.ndarray) -> np.ndarray:
     cleaned = rgba.copy()
     rgb_i16 = cleaned[..., :3].astype(np.int16)
     bottom_band = np.indices((height, width))[0] >= int(round(height * 0.72))
-    magenta_ground = (
-        bottom_band
-        & (rgb_i16[..., 0] - rgb_i16[..., 1] > 18)
+    magenta_like = (
+        (rgb_i16[..., 0] - rgb_i16[..., 1] > 18)
         & (rgb_i16[..., 2] - rgb_i16[..., 1] > 12)
         & (np.minimum(rgb_i16[..., 0], rgb_i16[..., 2]) > 45)
     )
+    magenta_ground = bottom_band & _border_connected(magenta_like)
     cleaned[magenta_ground] = 0
 
     foreground = (cleaned[..., 3] > 0).astype(np.uint8)
@@ -166,11 +173,15 @@ def _cleanup_bottom_artifacts(rgba: np.ndarray) -> np.ndarray:
     if component_count <= 1:
         return cleaned
 
-    bottom_band_y = int(round(height * 0.9))
-    max_island_area = int(round(height * width * 0.012))
+    bottom_band_y = int(round(height * 0.82))
+    max_island_area = int(round(height * width * 0.02))
     for component_id in range(1, component_count):
         x, y, component_width, component_height, area = stats[component_id]
-        if y < bottom_band_y or area > max_island_area:
+        if (
+            y < bottom_band_y
+            or x < int(round(width * 0.50))
+            or area > max_island_area
+        ):
             continue
         cleaned[labels == component_id] = 0
     return cleaned

@@ -402,6 +402,126 @@ const MONSTER_ANIMATIONS := {
 			"loop": true,
 		},
 	},
+	"monster_038": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_038/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_039": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_039/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_040": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_040/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_041": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_041/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_042": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_042/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_043": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_043/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_044": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_044/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_045": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_045/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_046": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_046/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_047": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_047/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_048": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_048/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_049": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_049/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_050": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_050/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_051": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_051/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_052": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_052/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
 	"monster_053": {
 		"idle": {
 			"frame_pattern": "res://assets/images/monsters/monster/monster_053/idle/idle_%03d.png",
@@ -410,9 +530,465 @@ const MONSTER_ANIMATIONS := {
 			"loop": true,
 		},
 	},
+	"monster_054": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_054/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_055": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_055/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_056": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_056/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_057": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_057/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_058": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_058/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_059": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_059/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_060": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_060/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_061": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_061/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_062": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_062/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_063": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_063/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_064": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_064/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_065": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_065/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_066": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_066/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_067": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_067/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_068": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_068/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_069": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_069/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_070": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_070/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_071": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_071/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_072": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_072/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_073": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_073/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_074": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_074/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_075": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_075/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_076": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_076/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_077": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_077/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_078": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_078/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_079": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_079/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_080": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_080/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_081": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_081/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_082": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_082/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_083": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_083/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_084": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_084/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_085": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_085/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_086": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_086/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_087": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_087/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_088": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_088/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_089": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_089/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_090": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_090/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_091": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_091/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_092": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_092/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
 	"monster_093": {
 		"idle": {
 			"frame_pattern": "res://assets/images/monsters/monster/monster_093/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_094": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_094/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_095": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_095/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_096": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_096/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_097": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_097/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_098": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_098/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_099": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_099/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_100": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_100/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_101": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_101/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_102": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_102/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_103": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/monster/monster_103/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_001": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_001/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_002": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_002/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_003": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_003/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_004": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_004/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_005": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_005/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_006": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_006/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_007": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_007/idle/idle_%03d.png",
+			"frame_count": 16,
+			"fps": 8.0,
+			"loop": true,
+		},
+	},
+	"monster_boss_008": {
+		"idle": {
+			"frame_pattern": "res://assets/images/monsters/boss/monster_boss_008/idle/idle_%03d.png",
 			"frame_count": 16,
 			"fps": 8.0,
 			"loop": true,

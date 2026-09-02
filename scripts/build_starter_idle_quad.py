@@ -10,7 +10,7 @@ After the 1:1 four-second Seedance 2.0 Mini clip is downloaded, the script:
 
 1. samples exactly 16 fixed-camera frames;
 2. splits the top-left, top-right, and bottom-left grid cells;
-3. converts border-connected magenta to alpha;
+3. converts only border-connected magenta to alpha, preserving white details;
 4. clears small bottom artifacts and resizes each cell to 256x256;
 5. validates real per-frame pose changes before replacing runtime idle frames.
 """
@@ -21,7 +21,6 @@ import argparse
 from pathlib import Path
 import sys
 
-import cv2
 import numpy as np
 from PIL import Image
 
@@ -169,19 +168,6 @@ def _cell_bounds(
     return x0, y0, x1, y1
 
 
-def _remove_border_white(rgba: np.ndarray) -> np.ndarray:
-    """Remove white grid separators/rounded corners connected to cell edges."""
-
-    rgb = rgba[..., :3]
-    minimum = rgb.min(axis=2)
-    spread = rgb.max(axis=2) - minimum
-    near_white = (minimum > 165) & (spread < 72)
-    border_white = _border_connected(near_white)
-    cleaned = rgba.copy()
-    cleaned[border_white] = 0
-    return cleaned
-
-
 def _remove_border_magenta_residue(rgba: np.ndarray) -> np.ndarray:
     """Clear pale/gradient magenta that video compression moved off key color."""
 
@@ -197,57 +183,25 @@ def _remove_border_magenta_residue(rgba: np.ndarray) -> np.ndarray:
     return cleaned
 
 
-def _refine_foreground(cell_rgb: np.ndarray, rgba: np.ndarray) -> np.ndarray:
-    """Use chroma-derived foreground seeds to reject model-added gray shadows."""
+def _remove_outer_grid_white(rgba: np.ndarray) -> np.ndarray:
+    """Clear only the video model's white rounded frame in the outer safe band."""
 
-    rgb_i16 = cell_rgb.astype(np.int16)
-    minimum = rgb_i16.min(axis=2)
-    maximum = rgb_i16.max(axis=2)
-    spread = maximum - minimum
-    magenta_like = (
-        (rgb_i16[..., 0] - rgb_i16[..., 1] > 12)
-        & (rgb_i16[..., 2] - rgb_i16[..., 1] > 10)
-        & (np.minimum(rgb_i16[..., 0], rgb_i16[..., 2]) > 65)
-    )
-    colorful_subject = (spread > 36) & ~magenta_like
-    bright_neutral_subject = (minimum > 150) & (spread < 58)
-    opaque = rgba[..., 3] > 210
-    subject_seed = opaque & (colorful_subject | bright_neutral_subject)
-
-    mask = np.full(cell_rgb.shape[:2], cv2.GC_PR_BGD, dtype=np.uint8)
-    mask[rgba[..., 3] == 0] = cv2.GC_BGD
-    mask[subject_seed] = cv2.GC_FGD
-    if not np.any(mask == cv2.GC_FGD) or not np.any(mask == cv2.GC_BGD):
-        return rgba
-
-    background_model = np.zeros((1, 65), np.float64)
-    foreground_model = np.zeros((1, 65), np.float64)
-    cv2.grabCut(
-        cv2.cvtColor(cell_rgb, cv2.COLOR_RGB2BGR),
-        mask,
-        None,
-        background_model,
-        foreground_model,
-        4,
-        cv2.GC_INIT_WITH_MASK,
-    )
-    foreground = np.isin(mask, (cv2.GC_FGD, cv2.GC_PR_FGD)).astype(np.uint8)
-    foreground = cv2.morphologyEx(
-        foreground,
-        cv2.MORPH_CLOSE,
-        np.ones((3, 3), np.uint8),
-    )
-    soft_foreground = cv2.GaussianBlur(
-        foreground.astype(np.float32),
-        (3, 3),
-        0.55,
+    height, width = rgba.shape[:2]
+    rgb = rgba[..., :3]
+    minimum = rgb.min(axis=2)
+    spread = rgb.max(axis=2) - minimum
+    near_white = (minimum > 175) & (spread < 66)
+    yy, xx = np.indices((height, width))
+    band_y = max(4, int(round(height * 0.075)))
+    band_x = max(4, int(round(width * 0.075)))
+    outer_band = (
+        (yy < band_y)
+        | (yy >= height - band_y)
+        | (xx < band_x)
+        | (xx >= width - band_x)
     )
     cleaned = rgba.copy()
-    cleaned[..., 3] = np.minimum(
-        cleaned[..., 3].astype(np.float32),
-        soft_foreground * 255.0,
-    ).astype(np.uint8)
-    cleaned[cleaned[..., 3] == 0, :3] = 0
+    cleaned[near_white & outer_band] = 0
     return cleaned
 
 
@@ -255,7 +209,6 @@ def _finish_cell(
     frame: np.ndarray,
     column: int,
     row: int,
-    refine_foreground: bool = True,
 ) -> np.ndarray:
     x0, y0, x1, y1 = _cell_bounds(frame, column, row)
     cell_rgb = frame[y0:y1, x0:x1]
@@ -266,15 +219,20 @@ def _finish_cell(
         )
     rgba = _remove_magenta(cell_rgb)
     rgba = _remove_border_magenta_residue(rgba)
-    rgba = _remove_border_white(rgba)
-    if refine_foreground:
-        rgba = _refine_foreground(cell_rgb, rgba)
+    rgba = _remove_outer_grid_white(rgba)
+    # White/light character details are intentionally untouched. The former
+    # border-white and GrabCut passes could punch holes through eyes, teeth,
+    # fur, highlights, or pale accessories.
     rgba = _cleanup_bottom_artifacts(rgba)
     finished = _resize_fixed_camera(rgba)
-    finished[:2, :] = 0
-    finished[-2:, :] = 0
-    finished[:, :2] = 0
-    finished[:, -2:] = 0
+    # The video model may draw a one-pixel rounded frame plus compressed
+    # separator specks. Source portraits have a deliberate safe margin, so a
+    # narrow fixed outer trim removes those remnants without touching sprites.
+    edge_clear = max(2, int(round(min(finished.shape[:2]) * 0.05)))
+    finished[:edge_clear, :] = 0
+    finished[-edge_clear:, :] = 0
+    finished[:, :edge_clear] = 0
+    finished[:, -edge_clear:] = 0
     return finished
 
 
