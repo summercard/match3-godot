@@ -1,3 +1,4 @@
+## tested by superagent
 ## main.gd — 项目入口
 ## 管理场景切换；已迁移界面使用可编辑 PackedScene。
 extends Control
