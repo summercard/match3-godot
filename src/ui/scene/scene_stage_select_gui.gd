@@ -103,9 +103,19 @@ func _update_chapter_buttons() -> void:
 	_next_chapter_btn.disabled = _current_chapter_index >= _chapters.size() - 1
 
 func _update_page_dots() -> void:
+	var visible_count := mini(_chapters.size(), DOT_PATHS.size())
+	if visible_count <= 0:
+		return
+	var dots := get_node("Header/Dots") as Control
+	var last_width := 10.0 if _current_chapter_index == visible_count - 1 else 5.0
+	var total_width := 14.0 * float(visible_count - 1) + last_width
+	var start_x := DESIGN_W * 0.5 - dots.position.x - total_width * 0.5
 	for i in DOT_PATHS.size():
 		var dot := get_node(DOT_PATHS[i]) as ColorRect
-		dot.visible = i < _chapters.size()
+		dot.visible = i < visible_count
+		if not dot.visible:
+			continue
+		dot.position.x = start_x + 14.0 * float(i)
 		dot.color = Color(1.0, 0.82, 0.18, 1.0) if i == _current_chapter_index else Color(1.0, 1.0, 1.0, 0.34)
 		dot.size = Vector2(10.0, 6.0) if i == _current_chapter_index else Vector2(5.0, 5.0)
 

@@ -4,6 +4,7 @@ extends Control
 
 const DESIGN_SIZE: Vector2 = Vector2(375.0, 667.0)
 const TARGET_FPS: int = 60
+const UiPressFeedbackScript = preload("res://src/ui/components/ui_press_feedback.gd")
 
 # 场景映射：场景名 → 脚本路径
 const SCENE_MAP: Dictionary = {
@@ -129,6 +130,13 @@ func switch_scene(scene_name: String, data: Dictionary = {}, _mode: String = "")
 	_current_scene_name = scene_name
 	_layout_current_scene()
 	_initialize_scene(scene_node, scene_name, data)
+	_attach_press_feedback(scene_node, scene_name)
+
+func _attach_press_feedback(scene_node: Control, scene_name: String) -> void:
+	# 开始页自己做了按钮缩放，避免两套动画互相打架。
+	if scene_name == "start":
+		return
+	UiPressFeedbackScript.attach(scene_node)
 
 func _layout_current_scene() -> void:
 	if _current_scene == null:

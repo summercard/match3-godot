@@ -201,7 +201,7 @@ func _sync_detail() -> void:
 	_label("DetailPanel/Content/Desc").text = _wrap_text(str(item_data.get("desc", "")), 15)
 	_label("DetailPanel/Content/Count").text = "拥有: %d" % int(_selected_item.get("count", 0))
 	_label("DetailPanel/Content/Type").text = _type_label(item_type)
-	_label("DetailPanel/Content/EquipState").text = "捕捉球: %s" % ("已装备" if equipped else "未装备") if item_type == "capture" else ""
+	_label("DetailPanel/Content/EquipState").text = ("已装备" if equipped else "未装备") if item_type == "capture" else ""
 	var use_button := get_node("DetailPanel/UseButton") as TextureButton
 	use_button.disabled = false
 	use_button.modulate.a = 1.0

@@ -110,6 +110,9 @@ func _set_monster_card(card: Control, monster: Dictionary, is_team: bool) -> voi
 	portrait.texture = _monster_texture(monster, "team" if is_team else "battle")
 	(card.get_node("Name") as Label).text = str(monster.get("name", "怪物"))
 	(card.get_node("Level") as Label).text = "Lv.%d" % int(monster.get("level", 1))
+	# 敌方卡只有 104px 高，卡面内放不下战力/星级，数值统一由战力对比区承载。
+	(card.get_node("Power") as Label).visible = is_team
+	(card.get_node("Stars") as Label).visible = is_team
 	(card.get_node("Power") as Label).text = "%d" % int(monster.get("power", 0))
 	var element := MonsterDBScript.get_board_affinity(monster) if is_team else str(monster.get("element", ""))
 	var badge := card.get_node("ElementBadge") as TextureRect
