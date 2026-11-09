@@ -40,6 +40,9 @@ static var instance: SceneMain
 ## 大厅背景音乐：复用战斗 BGM 的合成器与全局单播放器约束，只切换轨道参数。
 var _lobby_bgm: Node = null
 
+## 大厅按钮音效：复用 battle_sfx.gd；场景销毁时连同播放器一起释放。
+var _button_sfx: BattleSfx = null
+
 var _storage: Node = null
 var _player: Dictionary = {
 	"name": "冒险者小帅",
@@ -59,6 +62,9 @@ var _player: Dictionary = {
 
 func _ready() -> void:
 	instance = self
+	_button_sfx = BattleSfx.new()
+	_button_sfx.name = "ButtonSfx"
+	add_child(_button_sfx)
 	_lobby_bgm = BattleBgmScript.new()
 	_lobby_bgm.name = "LobbyBgm"
 	_lobby_bgm.set_track("lobby")
@@ -105,7 +111,14 @@ func _update_player_display() -> void:
 	_diamond_value.text = _format_number(int(_player.get("gems", 0)))
 
 func _on_button_pressed(button_id: String) -> void:
+	_play_button_click()
 	button_pressed.emit(button_id)
+
+
+func _play_button_click() -> void:
+	# soundOn=false 时不向音效层发请求；按钮正常导航，只是没有声音。
+	if _button_sfx != null and _button_sfx.enabled:
+		_button_sfx.play("button_click")
 
 func _on_start_pressed() -> void:
 	_on_button_pressed("start")

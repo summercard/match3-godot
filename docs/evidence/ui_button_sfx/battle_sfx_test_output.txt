@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BattleSfx] match_clear freq=880.0Hz end=880.0Hz dur=0.120s wave=sine attack=0.004s decay=30.0
+[BattleSfx] hit         freq=220.0Hz end=220.0Hz dur=0.090s wave=triangle attack=0.002s decay=35.0
+[BattleSfx] crit        freq=520.0Hz end=520.0Hz dur=0.220s wave=square attack=0.002s decay=14.0
+[BattleSfx] take_damage freq=110.0Hz end=110.0Hz dur=0.180s wave=noise attack=0.003s decay=18.0
+[BattleSfx] victory     freq=660.0Hz end=990.0Hz dur=0.500s wave=saw attack=0.010s decay=3.5
+[BattleSfx] defeat      freq=300.0Hz end=120.0Hz dur=0.600s wave=pulse attack=0.005s decay=4.0
+[BattleSfx] break       freq=440.0Hz end=880.0Hz dur=0.300s wave=saw attack=0.006s decay=8.0
+[BattleSfx] button_click freq=1046.5Hz end=1046.5Hz dur=0.045s wave=click attack=0.001s decay=60.0
+[BattleSfx] frame cap: frame1 played=8 dropped=4, frame2 played=8 dropped=5, players=8
+[BattleSfx] combat log: damage=12 taken=3 turns=4 result=win
+[BattleSfx] on/off identical=true on_played=8 off_played=0 off_players=0
+[BattleSfx] OK

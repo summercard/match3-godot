@@ -1,8 +1,9 @@
 extends SceneTree
 
 ## 战斗音效层回归：
-## 1. 七个程序化音效（含 1-5 破招专用音）的参数互不相同：频率、时长、波形等至少 3 项不同；
-## 2. 每个音效都生成可播放的 16-bit PCM，且七段数据互不相同；
+## 1. 八个程序化音效（七个战斗音 + 1 个按钮点击）的参数互不相同：
+##    频率、时长、波形等至少 3 项不同；既有七个战斗音参数保持冻结；
+## 2. 每个音效都生成可播放的 16-bit PCM，且八段数据互不相同；
 ## 3. 总开关关闭时不创建播放器、不播放，播放器数为 0；
 ## 4. 同一引擎帧最多触发 8 个播放实例，超出的丢弃并计数，播放器池不超过 8；
 ## 5. 音效开/关两种状态下，stage_1_1 固定种子的伤害日志、承伤日志与结算统计逐位一致。
@@ -11,6 +12,38 @@ const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
 const BattleManagerScript = preload("res://src/battle/battle_manager.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const SOUND_KEYS := ["frequency", "duration", "waveform", "attack", "decay"]
+
+## 冻结 PR #22 之后 battle_sfx.gd 里的七个战斗音参数；本轮只允许新增 button_click。
+const FROZEN_BATTLE_SOUNDS := {
+	"match_clear": {
+		"frequency": 880.0, "duration": 0.12, "waveform": "sine",
+		"attack": 0.004, "decay": 30.0, "harmonic": 2.0, "harmonic_gain": 0.25,
+	},
+	"hit": {
+		"frequency": 220.0, "duration": 0.09, "waveform": "triangle",
+		"attack": 0.002, "decay": 35.0, "harmonic": 3.0, "harmonic_gain": 0.15,
+	},
+	"crit": {
+		"frequency": 520.0, "duration": 0.22, "waveform": "square",
+		"attack": 0.002, "decay": 14.0, "harmonic": 1.5, "harmonic_gain": 0.30,
+	},
+	"take_damage": {
+		"frequency": 110.0, "duration": 0.18, "waveform": "noise",
+		"attack": 0.003, "decay": 18.0, "harmonic": 1.0, "harmonic_gain": 0.0,
+	},
+	"victory": {
+		"frequency": 660.0, "frequency_end": 990.0, "duration": 0.50, "waveform": "saw",
+		"attack": 0.010, "decay": 3.5, "harmonic": 2.0, "harmonic_gain": 0.20,
+	},
+	"defeat": {
+		"frequency": 300.0, "frequency_end": 120.0, "duration": 0.60, "waveform": "pulse",
+		"attack": 0.005, "decay": 4.0, "harmonic": 0.5, "harmonic_gain": 0.20,
+	},
+	"break": {
+		"frequency": 440.0, "frequency_end": 880.0, "duration": 0.30, "waveform": "saw",
+		"attack": 0.006, "decay": 8.0, "harmonic": 3.0, "harmonic_gain": 0.30,
+	},
+}
 
 var _failures: Array[String] = []
 
@@ -43,13 +76,18 @@ func _run() -> void:
 
 func _test_config_distinctness() -> void:
 	var ids: Array = BattleSfxScript.SOUND_IDS
-	_expect(ids.size() == 7, "应有七个战斗音效（含破招），实际 %d" % ids.size())
+	_expect(ids.size() == 8, "应有八个音效（七个战斗音 + 按钮点击），实际 %d" % ids.size())
 	for sound_id: String in ids:
 		var params: Dictionary = BattleSfxScript.CONFIG["sounds"].get(sound_id, {})
 		_expect(not params.is_empty(), "音效 %s 应有配置" % sound_id)
 		_expect(float(params.get("frequency", 0.0)) > 0.0, "%s 应有正频率" % sound_id)
 		_expect(float(params.get("duration", 0.0)) > 0.0, "%s 应有正时长" % sound_id)
 		_expect(not str(params.get("waveform", "")).is_empty(), "%s 应声明波形" % sound_id)
+	# 冻结既有七个战斗音的全部可调参数：本轮只新增 button_click。
+	for sound_id: String in FROZEN_BATTLE_SOUNDS:
+		for key: String in FROZEN_BATTLE_SOUNDS[sound_id]:
+			_expect(BattleSfxScript.CONFIG["sounds"][sound_id].get(key) == FROZEN_BATTLE_SOUNDS[sound_id][key],
+				"%s.%s 不应改动" % [sound_id, key])
 	# 每两个音效至少在 SOUND_KEYS 中 3 项不同；破招沿用锯齿波，但频率/时长/起音/衰减不同。
 	for i in range(ids.size()):
 		for j in range(i + 1, ids.size()):
@@ -61,11 +99,19 @@ func _test_config_distinctness() -> void:
 					differences += 1
 			_expect(differences >= 3,
 				"%s 与 %s 应至少 3 项参数不同，实际 %d" % [ids[i], ids[j], differences])
+	# 按钮点击相对既有七音，波形/频率/时长三项都必须不同，便于直接按主按钮辨别。
+	var click: Dictionary = BattleSfxScript.CONFIG["sounds"]["button_click"]
+	for sound_id: String in FROZEN_BATTLE_SOUNDS:
+		var params: Dictionary = BattleSfxScript.CONFIG["sounds"][sound_id]
+		for key: String in ["waveform", "frequency", "duration"]:
+			_expect(click[key] != params[key],
+				"button_click.%s 应与 %s 不同" % [key, sound_id])
 	var waveforms := {}
 	for sound_id: String in ids:
 		waveforms[str(BattleSfxScript.CONFIG["sounds"][sound_id]["waveform"])] = true
-	_expect(waveforms.size() >= 6, "七种音效应至少覆盖六种波形，实际 %d" % waveforms.size())
+	_expect(waveforms.size() >= 7, "八种音效应至少覆盖七种波形，实际 %d" % waveforms.size())
 	_expect(BattleSfxScript.CONFIG["sounds"].has("break"), "破招音效应加入 battle_sfx CONFIG")
+	_expect(BattleSfxScript.CONFIG["sounds"].has("button_click"), "按钮点击音效应加入 battle_sfx CONFIG")
 	for sound_id: String in ids:
 		var params: Dictionary = BattleSfxScript.CONFIG["sounds"][sound_id]
 		print("[BattleSfx] %-11s freq=%.1fHz end=%.1fHz dur=%.3fs wave=%s attack=%.3fs decay=%.1f" % [

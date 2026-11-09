@@ -1,0 +1,8 @@
+[UiButtonSfx] on  page=main           taps=9 played=9 requests=9 dropped=0 players=8
+[UiButtonSfx] on  page=stage_select   taps=3 played=3 requests=3 dropped=0 players=8
+[UiButtonSfx] on  page=battle_prepare taps=1 played=1 requests=1 dropped=0 players=8
+[UiButtonSfx] on  page=inventory      taps=5 played=5 requests=5 dropped=0 players=8
+[UiButtonSfx] on  page=shop           taps=5 played=5 requests=5 dropped=0 players=8
+[UiButtonSfx] on  page=album          taps=5 played=5 requests=5 dropped=0 players=8
+[UiButtonSfx] on  page=settings       taps=5 played=5 requests=5 dropped=0 players=8
+[UiButtonSfx] totals: on_taps=33 on_played=33 on_requests=33; off_taps=33 off_played=0 off_requests=0

@@ -108,6 +108,7 @@ var confirm_dialog := false
 var reset_success := false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
+var _button_sfx: BattleSfx = null
 
 
 func _init(game_ref: Node = null) -> void:
@@ -116,6 +117,9 @@ func _init(game_ref: Node = null) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_button_sfx = BattleSfx.new()
+	_button_sfx.name = "ButtonSfx"
+	add_child(_button_sfx)
 
 
 func init(_data: Dictionary = {}) -> void:
@@ -123,6 +127,8 @@ func init(_data: Dictionary = {}) -> void:
 		game = _get_autoload("GameManager")
 	_storage = _get_storage()
 	_load_settings()
+	if _button_sfx != null:
+		_button_sfx.apply_settings(settings_data)
 	confirm_dialog = false
 	reset_success = false
 	queue_redraw()
@@ -219,9 +225,15 @@ func _on_tap(point: Vector2) -> void:
 
 
 func _vibrate_button() -> void:
+	_play_button_click()
 	var vibration := get_node_or_null("/root/VibrationFeedback")
 	if vibration != null:
 		vibration.request("button_tap")
+
+
+func _play_button_click() -> void:
+	if _button_sfx != null and _button_sfx.enabled:
+		_button_sfx.play("button_click")
 
 
 func _toggle_bool(key: String) -> void:
@@ -229,6 +241,8 @@ func _toggle_bool(key: String) -> void:
 		return
 	settings_data[key] = not bool(settings_data.get(key, true))
 	_save_settings()
+	if _button_sfx != null:
+		_button_sfx.apply_settings(settings_data)
 	queue_redraw()
 
 
@@ -236,6 +250,8 @@ func _restore_defaults() -> void:
 	for row: Dictionary in SETTINGS_ROWS:
 		settings_data[str(row.get("key", ""))] = row.get("default")
 	_save_settings()
+	if _button_sfx != null:
+		_button_sfx.apply_settings(settings_data)
 	reset_success = false
 	queue_redraw()
 
