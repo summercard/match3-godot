@@ -29,6 +29,10 @@ const DESIGN_H := 667.0
 const BATTLE_BOARD_CELL_SIZE := 39
 const BATTLE_BOARD_Y := 300
 
+## 波次切换：清空后约 1 秒补下一波，横幅提示保持约 1.6 秒
+const WAVE_GAP_SECONDS := 1.0
+const WAVE_BANNER_SECONDS := 1.6
+
 ## 状态枚举
 enum BattleState {
 	IDLE,
@@ -36,6 +40,7 @@ enum BattleState {
 	MATCHING,
 	FALLING,
 	ENEMY_TURN,
+	WAVE_TRANSITION,
 	BATTLE_END
 }
 
@@ -138,6 +143,9 @@ var _phase_transition_state: Dictionary = {
 	"timer": 0.0,
 	"boss_name": ""
 }
+
+## 波次横幅（清空 / 下一波来袭）
+var _wave_banner: Dictionary = {}
 var _screen_flash_timer: float = 0.0
 var _shake_timer: float = 0.0
 
@@ -397,6 +405,7 @@ func init(data: Dictionary = {}) -> void:
 	_battle_end_overlay_started = false
 	_battle_end_particles_spawned = false
 	_result_transitioning = false
+	_wave_banner = {}
 	
 	_stage_data = stage_data if stage_data else { "id": stage_id, "name": stage_id, "enemies": [], "enemyLevel": 3 }
 	_stage_id = stage_id
@@ -467,15 +476,7 @@ func _init_battle() -> void:
 	if not _battle.skill_ready.is_connected(_on_skill_ready):
 		_battle.skill_ready.connect(_on_skill_ready)
 
-	# 精英关卡：应用eliteMultiplier加成敌人属性
-	var elite_mult: float = _stage_data.get("eliteMultiplier", 0.0)
-	if elite_mult > 0.0:
-		for enemy: Dictionary in _battle.enemies:
-			if enemy and not enemy.is_empty():
-				enemy["maxHP"] = int(enemy.get("maxHP", 0) * elite_mult)
-				enemy["hp"] = enemy["maxHP"]
-				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
-				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
+	# 精英倍率由 BattleManager 在初始化所有波次时统一应用。
 	
 	var battle_hint := str(_stage_data.get("battleHint", ""))
 	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
@@ -715,6 +716,8 @@ func _try_use_skill_at_position(pos: Vector2) -> bool:
 			return true
 		var result: Dictionary = _battle.use_active_skill(monster_id)
 		_apply_skill_result_visuals(result)
+		if _battle != null and _battle.wave_transition_pending:
+			_begin_wave_transition()
 		return true
 	return false
 
@@ -1218,6 +1221,9 @@ func _start_enemy_turn() -> void:
 		_begin_battle_end_overlay()
 		_show_message(next_state.get("message", "战斗结束"))
 		return
+	if _battle != null and _battle.wave_transition_pending:
+		_begin_wave_transition()
+		return
 	_state = BattleState.IDLE
 	_show_message(next_state.get("message", "你的回合"))
 
@@ -1233,7 +1239,54 @@ func _check_battle_end() -> bool:
 		else:
 			_trigger_inline_capture_miss()
 		return true
+	# 当前波已清空但整场还有后续波次：播放波次切换，不结算胜利
+	if _battle != null and _battle.wave_transition_pending:
+		_begin_wave_transition()
+		return true
 	return false
+
+
+## 一波清空后间隔约 1 秒再补下一波，并给出可感知的横幅/闪白提示
+func _begin_wave_transition() -> void:
+	if _battle == null or _state == BattleState.WAVE_TRANSITION:
+		return
+	_state = BattleState.WAVE_TRANSITION
+	var cleared_wave := int(_battle.wave_index)
+	var total_waves := int(_battle.wave_total)
+	_show_message("第 %d 波 已清空！" % cleared_wave)
+	_begin_wave_banner(cleared_wave, total_waves, "已清空！")
+	await get_tree().create_timer(WAVE_GAP_SECONDS).timeout
+	if not is_inside_tree() or _battle == null or _state != BattleState.WAVE_TRANSITION:
+		return
+	var next_enemies: Array = _battle.start_next_wave()
+	if next_enemies.is_empty():
+		_state = BattleState.IDLE
+		return
+	_clear_enemy_wave_visuals()
+	_begin_wave_banner(int(_battle.wave_index), int(_battle.wave_total), "来袭！")
+	_show_message("第 %d 波 来袭！" % int(_battle.wave_index))
+	_screen_flash_timer = 0.25
+	_state = BattleState.IDLE
+
+
+func _begin_wave_banner(index: int, total: int, subtitle: String) -> void:
+	_wave_banner = {
+		"timer": WAVE_BANNER_SECONDS,
+		"duration": WAVE_BANNER_SECONDS,
+		"title": "第 %d / %d 波" % [index, total],
+		"subtitle": subtitle
+	}
+
+
+func _clear_enemy_wave_visuals() -> void:
+	_enemy_display_hp.clear()
+	_defeated_enemies.clear()
+	_boss_skill_visuals.clear()
+	_hit_flashes.clear()
+	_fall_messages.clear()
+	_damage_popup_queue.clear()
+	_enemy_attacks.clear()
+	_floating_texts.clear()
 
 func _begin_battle_end_overlay() -> void:
 	if _battle_end_overlay_started:
@@ -1703,6 +1756,12 @@ func _process(delta: float) -> void:
 		pt_timer = BattleAnimationControllerScript.tick_countdown(pt_timer, effective_delta)
 		_phase_transition_state["timer"] = pt_timer
 	
+	# 更新波次横幅
+	if not _wave_banner.is_empty():
+		var wb_timer: float = _wave_banner.get("timer", 0.0)
+		wb_timer = BattleAnimationControllerScript.tick_countdown(wb_timer, effective_delta)
+		_wave_banner["timer"] = wb_timer
+	
 	# 更新连击弹窗
 	if _combo_popup.has("combo"):
 		_update_combo_popup(effective_delta)
@@ -1901,6 +1960,9 @@ func _draw() -> void:
 	# 阶段切换提示
 	_draw_phase_transition()
 	
+	# 波次提示（清空 / 下一波来袭）
+	_draw_wave_banner()
+	
 	# 元素连锁光晕
 	_draw_element_glow()
 	
@@ -1997,12 +2059,14 @@ func _draw_title_bar() -> void:
 	else:
 		_draw_rounded_rect(333.0, 9.0, 30.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
 	
-	# BOSS阶段指示器
+	# BOSS阶段指示器 / 波次指示器
 	if _battle != null:
 		var status: Dictionary = _battle.get_status()
 		if status.get("is_boss_battle", false):
 			var phase_color := C["fire"] if _phase_transition_state.get("timer", 0.0) > 0 else C["danger"]
 			_draw_text_with_shadow("阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)], DESIGN_W - 62.0, 62.0, phase_color, 9.2, true)
+		elif int(status.get("wave_total", 1)) > 1:
+			_draw_text_with_shadow("波次 %d/%d" % [status.get("wave_index", 1), status.get("wave_total", 1)], DESIGN_W - 62.0, 62.0, C["gold"], 9.2, true)
 	
 func _draw_enemies() -> void:
 	BattleCombatantRendererScript.draw_enemies(self, _battle, _combatant_render_state())
@@ -2524,6 +2588,26 @@ func _draw_phase_transition() -> void:
 	var fire_color := Color(1.0, 0.4, 0.1, alpha)
 	_draw_text_with_shadow("⚡ %s" % boss_name, DESIGN_W / 2.0, DESIGN_H / 2.0 - 5, fire_color, 16.0, true)
 	_draw_text_with_shadow("进入激战状态！", DESIGN_W / 2.0, DESIGN_H / 2.0 + 20, C["white"], 14.0)
+
+func _draw_wave_banner() -> void:
+	if _wave_banner.is_empty():
+		return
+	var timer: float = _wave_banner.get("timer", 0.0)
+	if timer <= 0.0:
+		_wave_banner.clear()
+		return
+	var duration: float = maxf(0.01, float(_wave_banner.get("duration", WAVE_BANNER_SECONDS)))
+	var elapsed: float = duration - timer
+	var alpha: float = clampf(minf(elapsed / 0.18, timer / 0.35), 0.0, 1.0)
+	var center_y: float = 238.0
+	var band_w: float = 252.0 * clampf(elapsed / 0.22, 0.2, 1.0)
+	var left: float = DESIGN_W / 2.0 - band_w / 2.0
+	_draw_rounded_rect(left, center_y - 32.0, band_w, 64.0, 12.0, Color(0.03, 0.05, 0.10, 0.86 * alpha))
+	_draw_rounded_rect(left + 3.0, center_y - 29.0, band_w - 6.0, 58.0, 10.0, Color(0.10, 0.16, 0.28, 0.55 * alpha))
+	var title: String = str(_wave_banner.get("title", ""))
+	var subtitle: String = str(_wave_banner.get("subtitle", ""))
+	_draw_text_with_shadow(title, DESIGN_W / 2.0, center_y - 2.0, Color(1.0, 0.82, 0.32, alpha), 21.0, true)
+	_draw_text_with_shadow(subtitle, DESIGN_W / 2.0, center_y + 21.0, Color(1.0, 1.0, 1.0, alpha), 11.5, true)
 
 ## ============================================
 # 特殊元素渲染（锁定宝石、障碍物、毒雾）
