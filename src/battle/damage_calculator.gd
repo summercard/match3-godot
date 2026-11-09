@@ -35,7 +35,7 @@ static func chain_damage_multiplier(combo_count: int) -> float:
 # ============================================
 # 玩家伤害计算
 # ============================================
-# 基础伤害 = ATK × (消除数 / 3) × combo加成(1 + (combo-1)×0.3)
+# 基础伤害 = ATK × (消除数 / 3) × combo加成(1 + (combo-1)×0.2)
 # 总伤害 = 基础伤害 × 连锁加成 × 属性克制 × 队长ATK加成 × 属性协同ATK加成
 # 最终伤害 = 总伤害 × (1 - def/(def+100)) × 随机波动(0.9~1.1)
 static func calc_player_damage(
@@ -54,8 +54,8 @@ static func calc_player_damage(
 	# 基础伤害
 	var base_damage := attacker_atk * (effective_gem_count / 3.0)
 	
-	# Combo 加成: 每次 combo +30%
-	var combo_multiplier := 1.0 + (combo_count - 1) * 0.3
+	# Combo 加成: 每次 combo +20%
+	var combo_multiplier := 1.0 + (combo_count - 1) * 0.2
 	
 	# 连锁加成: 第 2 连锁起每级 +4%，最多吃到第 3 连锁
 	var chain_multiplier := chain_damage_multiplier(combo_count)

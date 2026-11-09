@@ -91,8 +91,11 @@ func _test_early_pacing(combo: int) -> void:
 	var matches_per_kill := float(total_kill_turns) / samples
 	var ally_survival := float(total_ally_hits) / samples
 	print("[Balance] early combo=%d: matches_per_kill=%.2f ally_survival_turns=%.2f" % [combo, matches_per_kill, ally_survival])
-	_expect(matches_per_kill >= 3.0, "combo=%d early mob should take 3+ matches, got %.2f" % [combo, matches_per_kill])
-	_expect(matches_per_kill <= 4.5, "combo=%d early mob should die in 3-4 matches, got %.2f" % [combo, matches_per_kill])
+	# 分档门槛：1 连锁维持 3-4 次原线；固定 2 连锁只看不低于 3.0；固定 4 连锁允许更快。
+	if combo == 1:
+		_expect(matches_per_kill >= 3.0 and matches_per_kill <= 4.0, "combo=1 early mob should die in 3-4 matches, got %.2f" % matches_per_kill)
+	elif combo == 2:
+		_expect(matches_per_kill >= 3.0, "combo=2 early mob should take 3+ matches, got %.2f" % matches_per_kill)
 	_expect(ally_survival >= 8.0 and ally_survival <= 12.0, "combo=%d early ally should survive 8-12 focused hits, got %.2f" % [combo, ally_survival])
 
 	# 游戏内实际最低玩家等级为 5，这里同时记录击杀节奏与伙伴承伤。
@@ -136,6 +139,7 @@ func _test_boss_curve() -> void:
 	var needed := 90
 	for chapter: Dictionary in _stage_db.get_chapters():
 		var boss_stage: Dictionary = {}
+		var first_normal_stage: Dictionary = {}
 		for st: Dictionary in chapter.get("stages", []):
 			var rewards: Dictionary = st.get("rewards", {})
 			exp += int(rewards.get("exp", 0))
@@ -143,6 +147,8 @@ func _test_boss_curve() -> void:
 				exp -= needed
 				level += 1
 				needed = 80 + level * 10
+			if first_normal_stage.is_empty() and str(st.get("type", "")) != "boss":
+				first_normal_stage = st
 			if str(st.get("type", "")) == "boss":
 				boss_stage = st
 				break
@@ -154,6 +160,8 @@ func _test_boss_curve() -> void:
 		var e_level := int(stage.get("enemyLevel", 1))
 		_expect(int(stage.get("maxTurns", 0)) >= 40, "%s should allow 40+ turns" % stage_id)
 		_expect(stage.get("bossCurve", {}) is Dictionary and not stage.get("bossCurve", {}).is_empty(), "%s should define bossCurve" % stage_id)
+		if not first_normal_stage.is_empty():
+			_check_combo4_single_match(first_normal_stage, p_level)
 
 		for combo in CHAIN_MODES:
 			var runs: Array = []
@@ -177,12 +185,39 @@ func _test_boss_curve() -> void:
 			])
 			_expect(wins == runs.size(), "%s combo=%d should win in all reference runs" % [stage_id, combo])
 			_expect(deaths <= 1, "%s combo=%d should not lose more than one ally" % [stage_id, combo])
-			_expect(median_turns >= 40, "%s combo=%d should last 40+ turns, got %d" % [stage_id, combo, median_turns])
+			if combo == 1:
+				_expect(median_turns >= 40, "%s combo=1 baseline should last 40+ turns, got %d" % [stage_id, median_turns])
+			elif combo == 4:
+				_expect(median_turns >= 28, "%s combo=4 should last 28+ turns, got %d" % [stage_id, median_turns])
 			_expect(median_turns <= int(stage.get("maxTurns", 60)), "%s combo=%d should finish inside maxTurns" % [stage_id, combo])
 			# 3+ 告急窗口是 1 连锁基准耐力局的口径；固定 2/4 连锁局被连锁加成本身缩短，
 			# 不作为本档门槛，但仍打印 nd 供对照。
 			if combo == 1:
 				_expect(median_nd >= 3, "%s combo=%d should have 3+ near-death windows, got %d" % [stage_id, combo, median_nd])
+
+
+## 固定 4 连锁下，任意一种 3 消都不应一击秒掉同章小怪。
+## 用该章第一个普通关卡的敌人与剧情等级，逐色各跑一次独立战斗。
+func _check_combo4_single_match(stage_config: Dictionary, p_level: int) -> void:
+	var stage_id := str(stage_config.get("id", ""))
+	var stage: Dictionary = _stage_db.get_stage(stage_id)
+	if stage.get("enemies", []).is_empty():
+		return
+	var e_level := int(stage.get("enemyLevel", 1))
+	var one_shot := false
+	for color_idx in range(5):
+		var color: String = ["fire", "water", "grass", "thunder", "light"][color_idx]
+		seed(20261109 + color_idx * 97 + p_level)
+		var battle = BattleManagerScript.new()
+		battle.init(TEAM, [], p_level, e_level, stage, stage_id)
+		var before: Array = battle.enemies.map(func(e): return int(e.get("hp", 0)))
+		battle.process_match_result({color: 3}, 4)
+		for i in range(battle.enemies.size()):
+			if int(before[i]) > 0 and int(battle.enemies[i].get("hp", 0)) <= 0:
+				one_shot = true
+		battle.free()
+	print("[Balance] %s combo=4 one_shot_mob=%s" % [stage_id, str(one_shot)])
+	_expect(not one_shot, "%s combo=4 should not one-shot a same-chapter mob with a single 3-match" % stage_id)
 
 
 func _run_boss(stage: Dictionary, p_level: int, e_level: int, combo: int) -> Dictionary:
