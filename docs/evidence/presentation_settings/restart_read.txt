@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[PresentationRestart] read path=/tmp/match3_presentation_restart_final.cfg quality=low performance=rich
+[PresentationRestart] battle profile quality=low performance=rich particle_density=0.75 shake_scale=1.25 popup_layers=3
+[PresentationRestart] OK

@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[PresentationRestart] write path=/tmp/match3_presentation_restart_final.cfg quality=low performance=rich soundOn=false musicOn=false vibrationOn=false
+[PresentationRestart] OK
