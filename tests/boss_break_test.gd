@@ -3,7 +3,7 @@ extends SceneTree
 ## 1-5「花叶兽的破招」回归：
 ## 1. 固定种子、全程不破招时，蓄力释放次数与每次伤害等于基线；
 ## 2. 蓄力回合内挂眩晕 → 本次释放 0 次、伤害 0、蓄力清空、总回合数变长且仍能 win；
-## 3. 只有蓄力中的敌人能被破招；普攻怪吃眩晕仍走原眩晕逻辑，不多跳一回合；
+## 3. 只有蓄力中的敌人能被破招；普攻怪吃眩晕当回合跳过整次行动（0 伤害、不产生破招）；
 ## 4. 数据化蓄力（×1.9）同样可被破招；
 ## 5. 战斗场景在破招瞬间给出「破招」飘字、短震屏与专用音效。
 
@@ -154,17 +154,20 @@ func _test_break_cancels_charge(baseline: Dictionary, broken: Dictionary) -> voi
 
 
 func _test_only_charging_enemies_break() -> void:
-	# 普攻怪：眩晕前后走完全相同的原逻辑（不多跳一回合、不产生破招）。
+	# 普攻怪：眩晕当回合跳过整次行动（0 伤害、不产生破招）；未眩晕仍正常出手。
 	var normal_before := _run_single_enemy_action(["enemy_001"], "stage_1_1", false)
 	var normal_with_stun := _run_single_enemy_action(["enemy_001"], "stage_1_1", true)
-	_expect(JSON.stringify(normal_before["actions"]) == JSON.stringify(normal_with_stun["actions"]),
-		"ordinary enemy should keep its existing stun behaviour, before=%s after=%s" % [str(normal_before["actions"]), str(normal_with_stun["actions"])])
-	print("[BossBreak] ordinary enemy identical=%s damage=%d" % [
-		JSON.stringify(normal_before["actions"]) == JSON.stringify(normal_with_stun["actions"]),
-		int(normal_with_stun["damage"])])
+	print("[BossBreak] ordinary enemy controlDamage=%d stunnedDamage=%d breakCount=%d" % [
+		int(normal_before["damage"]), int(normal_with_stun["damage"]), int(normal_with_stun["break_count"])])
+	_expect(int(normal_before["damage"]) > 0, "unstunned ordinary enemy should still attack")
+	_expect((normal_with_stun["actions"] as Array).size() == 1,
+		"stunned ordinary enemy should emit one skipped action, got %d" % (normal_with_stun["actions"] as Array).size())
+	if (normal_with_stun["actions"] as Array).size() == 1:
+		_expect(bool((normal_with_stun["actions"] as Array)[0].get("is_stunned", false)),
+			"ordinary enemy action should report is_stunned")
 	_expect(int(normal_with_stun["break_count"]) == 0, "ordinary enemy must not be broken")
 	_expect(not _has_break_action(normal_with_stun["actions"]), "ordinary enemy action must not be a break")
-	_expect(int(normal_with_stun["damage"]) > 0, "ordinary enemy should still attack after stun as before")
+	_expect(int(normal_with_stun["damage"]) == 0, "ordinary enemy should skip its action after stun")
 
 	# 数据化蓄力：enemy_006 轮次 strike → charge → 释放；打断后按轮次进入 sweep。
 	var modes_battle = _build_attack_mode_battle()

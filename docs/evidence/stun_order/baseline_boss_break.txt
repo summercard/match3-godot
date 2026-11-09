@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BossBreak] baseline seed=2 turns=43 result=win releaseDamage=[26, 7, 7, 26, 15, 15, 22, 11, 11, 22, 13, 11, 7] breakCount=0
+[BossBreak] break seed=2 turns=52 result=win releases=0 breakCount=12
+[BossBreak] ordinary enemy identical=true damage=6
+[BossBreak] data-charge break=1.9x, non-charging boss breakCount=0
+[BossBreak] scene popup=true shake=0.20 sfx=break message=破招！花叶兽 的蓄力被打断
+[BossBreak] OK

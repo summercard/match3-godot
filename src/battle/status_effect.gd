@@ -10,7 +10,7 @@ extends RefCounted
 ## - burn: DoT, sourceATK×0.15, 3回合
 ## - freeze: ATK降低30%, 2回合
 ## - poison: DoT, sourceATK×0.20, 3回合
-## - stun: 50%跳过攻击, 1回合
+## - stun: 命中后当回合跳过整次行动, 1回合
 ## - 4颗触发50%概率，5颗+触发100%概率
 ## - Boss抗性：stun概率×50%
 
@@ -38,7 +38,6 @@ const STATUS_DEFS: Dictionary = {
 	},
 	"stun": {
 		"element": "thunder",
-		"skip_chance": 0.50,
 		"duration": 1,
 		"label": "⚡眩晕"
 	}
@@ -99,15 +98,14 @@ func apply_status_effect(enemy_index: int, status_type: String, source_atk: int 
 	return true
 
 
-## 检查敌人是否被眩晕（应跳过攻击）
+## 检查敌人是否被眩晕（命中后必定跳过本回合行动，命中概率已在施加时结算）
 func is_enemy_stunned(enemy_index: int) -> bool:
 	if enemy_index < 0 or enemy_index >= _effects.size():
 		return false
 	var effect = _effects[enemy_index]
-	if effect == null or not effect is Dictionary or effect.get("type", "") != "stun":
+	if effect == null or not effect is Dictionary:
 		return false
-	var skip_chance: float = STATUS_DEFS["stun"].get("skip_chance", 0.50)
-	return randf() < skip_chance
+	return str(effect.get("type", "")) == "stun"
 
 
 ## 获取敌人的冰冻ATK降低倍率
