@@ -76,8 +76,9 @@ static func damage_lane_offset(anchor: Vector2, lane: int) -> Vector2:
 
 ## 计算新伤害飘字的出现时间与层位：
 ## - 同一目标连续命中按 0.12s 依次出现；
-## - 同一时刻最多 3 层，第 4 段排队到最早一层结束后。
-static func schedule_damage_popup(existing: Array, anchor_key: String, now: float, duration: float, prefer_center: bool = false) -> Dictionary:
+## - 同一时刻最多 max_layers 层（默认 3 层），多出的段排队到最早一层结束后。
+## max_layers 由战斗表现档位传入：轻量档 1 层，均衡 / 华丽档 3 层。
+static func schedule_damage_popup(existing: Array, anchor_key: String, now: float, duration: float, prefer_center: bool = false, max_layers: int = DAMAGE_MAX_LAYERS) -> Dictionary:
 	var intervals: Array[Dictionary] = []
 	var latest_start := -INF
 	for entry in existing:
@@ -96,14 +97,22 @@ static func schedule_damage_popup(existing: Array, anchor_key: String, now: floa
 	var start_at := now
 	if latest_start > -INF:
 		start_at = maxf(now, latest_start + DAMAGE_STAGGER_SECONDS)
-	var lane_order := [0, 1, 2] if prefer_center else [1, 2, 0]
+	var layer_count := clampi(max_layers, 1, DAMAGE_MAX_LAYERS)
+	var lane_order: Array[int] = []
+	if prefer_center:
+		for candidate_lane in range(layer_count):
+			lane_order.append(candidate_lane)
+	else:
+		for candidate_lane in range(1, layer_count):
+			lane_order.append(candidate_lane)
+		lane_order.append(0)
 	var guard := 0
 	while guard < 64:
 		var overlapping: Array[Dictionary] = []
 		for interval in intervals:
 			if start_at < float(interval["end"]) - 0.001 and start_at + duration > float(interval["start"]) + 0.001:
 				overlapping.append(interval)
-		if overlapping.size() < DAMAGE_MAX_LAYERS:
+		if overlapping.size() < layer_count:
 			if overlapping.is_empty():
 				return {"delay": maxf(0.0, start_at - now), "lane": 0}
 			var used: Array[int] = []
@@ -116,7 +125,7 @@ static func schedule_damage_popup(existing: Array, anchor_key: String, now: floa
 					break
 			if lane < 0:
 				lane = 0
-				while used.has(lane) and lane < DAMAGE_MAX_LAYERS:
+				while used.has(lane) and lane < layer_count:
 					lane += 1
 			return {"delay": maxf(0.0, start_at - now), "lane": lane}
 		var next_end := INF
@@ -135,12 +144,12 @@ static func tick_timed_entries(entries: Array, dt: float, timer_key: String = "t
 		if entries[i][timer_key] <= 0.0:
 			entries.remove_at(i)
 
-static func update_attack_shake(timer: float, flash_timer: float, dt: float) -> Dictionary:
+static func update_attack_shake(timer: float, flash_timer: float, dt: float, amplitude: float = 4.0) -> Dictionary:
 	if timer <= 0.0:
 		return {"timer": 0.0, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": 0.0}
 	timer = maxf(0.0, timer - dt)
 	var shake_speed := TAU / 0.05
-	var offset_x := sin(timer * shake_speed) * 4.0
+	var offset_x := sin(timer * shake_speed) * amplitude
 	return {"timer": timer, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": offset_x}
 
 static func update_hp_display(trackers: Array, dt: float) -> void:
@@ -172,16 +181,17 @@ static func update_floating_texts(floating_texts: Array, element_glow: Dictionar
 
 	tick_timed_entries(swipe_trail, dt)
 
-static func update_board_shake(timer: float, dt: float, rng: RandomNumberGenerator = null) -> Dictionary:
+static func update_board_shake(timer: float, dt: float, rng: RandomNumberGenerator = null, amplitude_scale: float = 1.0) -> Dictionary:
 	if timer <= 0.0:
 		return {"timer": 0.0, "offset": Vector2.ZERO}
 	timer = maxf(0.0, timer - dt)
 	var intensity: float = maxf(0.0, timer / 0.3)
 	var rx := rng.randf() if rng != null else randf()
 	var ry := rng.randf() if rng != null else randf()
+	var scale := maxf(0.0, amplitude_scale)
 	return {
 		"timer": timer,
-		"offset": Vector2((rx - 0.5) * 6.0 * intensity, (ry - 0.5) * 4.0 * intensity)
+		"offset": Vector2((rx - 0.5) * 6.0 * intensity * scale, (ry - 0.5) * 4.0 * intensity * scale)
 	}
 
 static func update_particle_list(particles: Array, dt: float, default_gravity: float) -> void:

@@ -1,0 +1,15 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[Presentation] mapping lite=lite balanced=balanced rich=rich quality_low=0.50 quality_high=1.00
+[Presentation] next_frame balanced_to_lite particles=8->4 nodes=87->87
+[Presentation] lobby_after_lite current=main battle_freed=true lobby_particles=18
+[Presentation] run quality=high performance=lite actions=7 turns=7 logs=10/6 result=win peak_particles=66 max_shake=3.75px
+[Presentation] run quality=high performance=balanced actions=7 turns=7 logs=10/6 result=win peak_particles=138 max_shake=7.50px
+[Presentation] run quality=high performance=rich actions=7 turns=7 logs=10/6 result=win peak_particles=204 max_shake=9.38px
+[Presentation] fixed_seed=20261110 identical lite=rich:true balanced=rich:true
+[Presentation] peak_particles lite=66 balanced=138 rich=204 ratio=0.324
+[Presentation] max_shake_px lite=3.75 balanced=7.50 rich=9.38 ratio=0.400
+[Presentation] popup_layers lite=1 balanced=3 rich=3
+[Presentation] run quality=low performance=rich actions=7 turns=7 logs=10/6 result=win peak_particles=102 max_shake=9.38px
+[Presentation] quality peak_particles low=102 high=204 ratio=0.500 identical=true
+[Presentation] OK

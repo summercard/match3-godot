@@ -22,6 +22,7 @@ const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
 const MatchHitFeedbackScript = preload("res://src/ui/components/match_hit_feedback.gd")
+const PresentationProfileScript = preload("res://src/ui/components/presentation_profile.gd")
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
 const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
@@ -203,6 +204,10 @@ var _time_scale_applied: bool = false
 ## 表现层随机数：与战斗逻辑共用全局 RNG 时，帧数变化会改变后续伤害随机；
 ## 倍速下用独立 RNG 隔离粒子/震屏，保证 1x/2x 的战斗日志与结算一致。
 var _fx_rng := RandomNumberGenerator.new()
+
+## 画质 / 战斗表现档位映射；每帧从设置页重新解析，下一帧生效。
+## 只影响粒子密度、震屏幅度与飘字错峰层数，不参与战斗数值。
+var _presentation: Dictionary = {}
 
 ## 棋盘屏幕震动（大量消除时，旧版表现；命中反馈开启时由命中震屏接管）
 var _board_shake_timer: float = 0.0
@@ -408,6 +413,7 @@ func _ready() -> void:
 	_fx_rng.seed = 0x5EEDBEEF
 	Engine.time_scale = 1.0
 	_time_scale_applied = false
+	_sync_presentation_settings()
 	# 先按 soundOn 同步战斗音效总开关；关闭时不创建任何音频播放器，
 	# 连锁音效节点也一并跳过，保证设置页关闭后场上播放器数为 0。
 	_battle_sfx = BattleSfxScript.new()
@@ -456,6 +462,36 @@ func toggle_battle_speed() -> void:
 func _get_speed_button_rect() -> Rect2:
 	return Rect2(285.0, 5.0, 42.0, 48.0)
 
+## ============================================
+# 画质等级 / 战斗表现
+## ============================================
+
+## 从存档读取两个设置档位；未知或缺失时使用中央映射的默认值。
+## 本函数只被战斗场景调用，映射结果不写入任何全局状态。
+func _sync_presentation_settings() -> void:
+	var storage := _storage
+	if storage == null or not is_instance_valid(storage):
+		storage = get_node_or_null("/root/SaveManager")
+	var settings: Dictionary = {}
+	if storage != null and storage.has_method("load_settings"):
+		settings = storage.load_settings()
+	_presentation = PresentationProfileScript.from_settings(settings)
+
+## 供测试和现场排查读取当前生效的表现参数。
+func get_presentation_profile() -> Dictionary:
+	return _presentation.duplicate(true)
+
+## 按画质密度 × 战斗表现粒子倍率缩放基准粒子数。
+func _scaled_particles(base_count: int, minimum: int = 1) -> int:
+	return PresentationProfileScript.scaled_particle_count(base_count, _presentation, minimum)
+
+## 当前档位的震屏倍率与上限。
+func _shake_scale() -> float:
+	return float(_presentation.get("shake_scale", 1.0))
+
+func _clamp_shake(offset: Vector2) -> Vector2:
+	return PresentationProfileScript.clamp_shake(offset, _presentation)
+
 func init(data: Dictionary = {}) -> void:
 	var stage_data = data.get("stageData", null)
 	var stage_id = data.get("stageId", "stage_1_1")
@@ -464,6 +500,7 @@ func init(data: Dictionary = {}) -> void:
 	_speed_pointer_active = false
 	Engine.time_scale = 1.0
 	_time_scale_applied = false
+	_sync_presentation_settings()
 	
 	_selected_gem = Vector2i(-1, -1)
 	_hit_flashes = []
@@ -1167,8 +1204,8 @@ func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
 	var cell_size := float(_board.cell_size) if _board != null else 39.0
 	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 8.0 * cell_size) / 2.0
 	var board_y := float(_board.offset_y) if _board != null else float(BATTLE_BOARD_Y)
-	var count := int(burst_config.get("particles_per_gem", 12))
-	var core_count := int(burst_config.get("core_particles", 3))
+	var count := _scaled_particles(int(burst_config.get("particles_per_gem", 12)))
+	var core_count := _scaled_particles(int(burst_config.get("core_particles", 3)))
 	var speed := float(burst_config.get("speed", 190.0))
 	var life := float(burst_config.get("life", 0.24))
 	var size := float(burst_config.get("size", 5.5))
@@ -1737,7 +1774,10 @@ func _register_hit_flash(is_enemy: bool, index: int, flash_timer: float) -> void
 
 
 func _add_hit_reaction(is_enemy: bool, index: int) -> void:
-	BattleHitReactionScript.trigger(_hit_reactions, is_enemy, index)
+	var entry := BattleHitReactionScript.trigger(_hit_reactions, is_enemy, index)
+	if not entry.is_empty():
+		# 受击抖动也随战斗表现档位缩放；只改表现幅度，不改持续时间。
+		entry["shake_amplitude"] = float(entry.get("shake_amplitude", 0.0)) * _shake_scale()
 
 
 func _trigger_attack_shake() -> void:
@@ -1789,7 +1829,8 @@ func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
 func _spawn_damage_popup(text: String, anchor: Vector2, anchor_key: String, critical: bool, weak: bool = false, heavy: bool = false) -> void:
 	var style := BattleAnimationControllerScript.damage_style(critical, weak, heavy)
 	var schedule := BattleAnimationControllerScript.schedule_damage_popup(
-		_floating_texts, anchor_key, _fx_time, float(style["duration"]), critical or heavy
+		_floating_texts, anchor_key, _fx_time, float(style["duration"]), critical or heavy,
+		int(_presentation.get("popup_layers", BattleAnimationControllerScript.DAMAGE_MAX_LAYERS))
 	)
 	var lane := int(schedule["lane"])
 	var offset := BattleAnimationControllerScript.damage_lane_offset(anchor, lane)
@@ -2009,6 +2050,8 @@ func _find_player_index(name: String, fallback_name: String = "") -> int:
 ## ============================================
 
 func _process(delta: float) -> void:
+	# 每帧同步设置页档位；运行中切换画质 / 战斗表现时下一帧生效。
+	_sync_presentation_settings()
 	# 战斗结束慢动作效果（局部时间缩放，不影响 Engine.time_scale）
 	var effective_delta: float = delta
 	if _slowmotion_timer > 0:
@@ -2122,15 +2165,17 @@ func _process(delta: float) -> void:
 			_spawn_victory_particles()
 	
 	# 更新棋盘屏幕震动（旧版表现，命中反馈开启时不使用）
-	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, anim_delta, _fx_rng)
+	var board_shake := BattleAnimationControllerScript.update_board_shake(
+		_board_shake_timer, anim_delta, _fx_rng, _shake_scale())
 	_board_shake_timer = board_shake["timer"]
-	_board_shake_offset = board_shake["offset"]
+	_board_shake_offset = _clamp_shake(board_shake["offset"])
 	
 	# 更新命中震屏（顿帧期间仍继续播放）
 	var match_shake := MatchHitFeedbackScript.update_shake(
-		_match_shake_timer, _match_shake_duration, _match_shake_amplitude, effective_delta, _fx_rng)
+		_match_shake_timer, _match_shake_duration, _match_shake_amplitude * _shake_scale(),
+		effective_delta, _fx_rng)
 	_match_shake_timer = match_shake["timer"]
-	_match_shake_offset = match_shake["offset"]
+	_match_shake_offset = _clamp_shake(match_shake["offset"])
 
 	# 更新特殊宝石激活动画
 	if _special_transform_anim.get("timer", 0.0) > 0:
@@ -2152,10 +2197,13 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _update_attack_shake(dt: float) -> void:
-	var state := BattleAnimationControllerScript.update_attack_shake(_attack_shake_timer, _attack_flash_timer, dt)
+	var state := BattleAnimationControllerScript.update_attack_shake(
+		_attack_shake_timer, _attack_flash_timer, dt, 4.0 * _shake_scale())
 	_attack_shake_timer = state["timer"]
 	_attack_flash_timer = state["flash_timer"]
-	_attack_shake_offset_x = state["offset_x"]
+	_attack_shake_offset_x = PresentationProfileScript.clamp_shake(
+		Vector2(float(state["offset_x"]), 0.0), _presentation
+	).x
 
 func _update_hp_display(dt: float) -> void:
 	BattleAnimationControllerScript.update_hp_display(_enemy_display_hp, dt)
@@ -2280,7 +2328,7 @@ func _draw() -> void:
 ## ============================================
 
 func _draw_apply_shake() -> void:
-	var offset := BattleUIFeedbackScript.shake_offset(_attack_shake_timer)
+	var offset := BattleUIFeedbackScript.shake_offset(_attack_shake_timer, 0.2, 4.0 * _shake_scale())
 	draw_set_transform(offset, 0.0, Vector2.ONE)
 
 func _draw_restore() -> void:
@@ -2990,7 +3038,7 @@ func spawn_eliminate_particles(row: int, col: int, gem_type: String) -> void:
 	var cy: float = board_y + row * cell_size + cell_size / 2.0
 	
 	var gem_color: Color = GEM_COLORS.get(gem_type, C["white"])
-	var particle_count := 8
+	var particle_count := _scaled_particles(8)
 	var speed_base := 80.0
 	
 	for i in range(particle_count):
@@ -3015,7 +3063,7 @@ func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
 	var cx: float = board_x + col * cell_size + cell_size / 2.0
 	var cy: float = board_y + row * cell_size + cell_size / 2.0
 	
-	var particle_count := 12
+	var particle_count := _scaled_particles(12)
 	var speed_base := 100.0
 	
 	for i in range(particle_count):
@@ -3074,8 +3122,8 @@ func _update_victory_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_victory_particles, delta, 80.0)
 
 func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
-	# 生成 8-12 个粒子向外散射
-	var count: int = 8 + _fx_rng.randi() % 5
+	# 基准 8-12 个粒子向外散射，再按当前特效密度缩放。
+	var count: int = _scaled_particles(8 + _fx_rng.randi() % 5)
 	for i in range(count):
 		var angle: float = _fx_rng.randf() * TAU
 		var speed: float = 80.0 + _fx_rng.randf() * 120.0
@@ -3093,7 +3141,7 @@ func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
 func _spawn_victory_particles() -> void:
 	# 全屏胜利粒子爆发
 	var colors: Array[Color] = [C["gold"], C["success"], Color(1.0, 1.0, 1.0), C["primary"]]
-	for i in range(30):
+	for i in range(_scaled_particles(30)):
 		var x: float = _fx_rng.randf() * DESIGN_W
 		var y: float = DESIGN_H + 20.0  # 从底部开始
 		var vx: float = (_fx_rng.randf() - 0.5) * 60.0
