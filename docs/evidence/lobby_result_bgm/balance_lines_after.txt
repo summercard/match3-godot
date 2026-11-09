@@ -1,0 +1,72 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[Balance] early combo=1: matches_per_kill=4.00 ally_survival_turns=11.25
+[Balance] early-lv5 combo=1: matches_per_kill=3.00 ally_survival_turns=12.65
+[Balance] early combo=2: matches_per_kill=3.05 ally_survival_turns=10.90
+[Balance] early-lv5 combo=2: matches_per_kill=2.80 ally_survival_turns=12.95
+[Balance] early combo=4: matches_per_kill=2.80 ally_survival_turns=11.10
+[Balance] early-lv5 combo=4: matches_per_kill=2.00 ally_survival_turns=12.85
+[Balance] stage_1_1 combo=4 one_shot_mob=false
+[Balance] stage_1_5 combo=1 p=5 e=3 turns=[48, 49, 59] median=49 max=59 nd=[4, 4, 5] result=["win", "win", "win"]
+[Balance] stage_1_5 combo=2 p=5 e=3 turns=[44, 46, 52] median=46 max=52 nd=[3, 3, 5] result=["win", "win", "win"]
+[Balance] stage_1_5 combo=4 p=5 e=3 turns=[34, 34, 37] median=34 max=37 nd=[2, 2, 2] result=["win", "win", "win"]
+[Balance] stage_2_1 combo=4 one_shot_mob=false
+[Balance] stage_2_5 combo=1 p=7 e=6 turns=[45, 46, 47] median=46 max=47 nd=[1, 5, 6] result=["win", "win", "win"]
+[Balance] stage_2_5 combo=2 p=7 e=6 turns=[36, 37, 38] median=37 max=38 nd=[1, 2, 4] result=["win", "win", "win"]
+[Balance] stage_2_5 combo=4 p=7 e=6 turns=[26, 26, 27] median=26 max=27 nd=[1, 1, 2] result=["win", "win", "win"]
+[Balance] stage_3_1 combo=4 one_shot_mob=false
+[Balance] stage_3_5 combo=1 p=10 e=10 turns=[41, 52, 59] median=52 max=59 nd=[1, 4, 6] result=["win", "win", "win"]
+[Balance] stage_3_5 combo=2 p=10 e=10 turns=[34, 36, 50] median=36 max=50 nd=[1, 2, 4] result=["win", "win", "win"]
+[Balance] stage_3_5 combo=4 p=10 e=10 turns=[25, 26, 28] median=26 max=28 nd=[0, 0, 1] result=["win", "win", "win"]
+[Balance] stage_4_1 combo=4 one_shot_mob=false
+[Balance] stage_4_5 combo=1 p=13 e=15 turns=[46, 46, 49] median=46 max=49 nd=[4, 4, 4] result=["win", "win", "win"]
+[Balance] stage_4_5 combo=2 p=13 e=15 turns=[34, 36, 39] median=36 max=39 nd=[1, 2, 2] result=["win", "win", "win"]
+[Balance] stage_4_5 combo=4 p=13 e=15 turns=[25, 25, 27] median=25 max=27 nd=[1, 1, 1] result=["win", "win", "win"]
+[Balance] stage_5_1 combo=4 one_shot_mob=false
+[Balance] stage_5_5 combo=1 p=16 e=20 turns=[48, 48, 48] median=48 max=48 nd=[4, 5, 7] result=["win", "win", "win"]
+[Balance] stage_5_5 combo=2 p=16 e=20 turns=[37, 37, 38] median=37 max=38 nd=[3, 3, 4] result=["win", "win", "win"]
+[Balance] stage_5_5 combo=4 p=16 e=20 turns=[27, 30, 31] median=30 max=31 nd=[3, 4, 4] result=["win", "win", "win"]
+[Balance] stage_6_1 combo=4 one_shot_mob=false
+[Balance] stage_6_5 combo=1 p=19 e=25 turns=[42, 44, 46] median=44 max=46 nd=[5, 5, 6] result=["win", "win", "win"]
+[Balance] stage_6_5 combo=2 p=19 e=25 turns=[34, 36, 38] median=36 max=38 nd=[2, 3, 4] result=["win", "win", "win"]
+[Balance] stage_6_5 combo=4 p=19 e=25 turns=[22, 23, 25] median=23 max=25 nd=[0, 0, 0] result=["win", "win", "win"]
+[Balance] stage_7_1 combo=4 one_shot_mob=false
+[Balance] stage_7_5 combo=1 p=21 e=30 turns=[50, 61, 66] median=61 max=66 nd=[6, 6, 9] result=["win", "win", "win"]
+[Balance] stage_7_5 combo=2 p=21 e=30 turns=[40, 44, 49] median=44 max=49 nd=[5, 6, 7] result=["win", "win", "win"]
+[Balance] stage_7_5 combo=4 p=21 e=30 turns=[24, 30, 31] median=30 max=31 nd=[3, 3, 4] result=["win", "win", "win"]
+[Balance] stage_8_1 combo=4 one_shot_mob=false
+[Balance] stage_8_5 combo=1 p=24 e=35 turns=[42, 43, 51] median=43 max=51 nd=[3, 5, 5] result=["win", "win", "win"]
+[Balance] stage_8_5 combo=2 p=24 e=35 turns=[33, 34, 34] median=34 max=34 nd=[3, 3, 4] result=["win", "win", "win"]
+[Balance] stage_8_5 combo=4 p=24 e=35 turns=[22, 22, 23] median=22 max=23 nd=[0, 1, 1] result=["win", "win", "win"]
+[Balance] stage_9_1 combo=4 one_shot_mob=false
+[Balance] stage_9_5 combo=1 p=27 e=40 turns=[49, 53, 57] median=53 max=57 nd=[6, 6, 8] result=["win", "win", "win"]
+[Balance] stage_9_5 combo=2 p=27 e=40 turns=[32, 37, 40] median=37 max=40 nd=[3, 4, 6] result=["win", "win", "win"]
+[Balance] stage_9_5 combo=4 p=27 e=40 turns=[22, 25, 25] median=25 max=25 nd=[1, 2, 3] result=["win", "win", "win"]
+[Balance] stage_10_1 combo=4 one_shot_mob=false
+[Balance] stage_10_5 combo=1 p=30 e=45 turns=[45, 46, 54] median=46 max=54 nd=[2, 4, 5] result=["win", "win", "win"]
+[Balance] stage_10_5 combo=2 p=30 e=45 turns=[32, 36, 37] median=36 max=37 nd=[2, 3, 5] result=["win", "win", "win"]
+[Balance] stage_10_5 combo=4 p=30 e=45 turns=[22, 23, 24] median=23 max=24 nd=[0, 1, 2] result=["win", "win", "win"]
+[Balance] stage_11_1 combo=4 one_shot_mob=false
+[Balance] stage_11_5 combo=1 p=32 e=50 turns=[43, 45, 60] median=45 max=60 nd=[3, 6, 6] result=["win", "win", "win"]
+[Balance] stage_11_5 combo=2 p=32 e=50 turns=[31, 31, 32] median=31 max=32 nd=[1, 2, 3] result=["win", "win", "win"]
+[Balance] stage_11_5 combo=4 p=32 e=50 turns=[20, 22, 22] median=22 max=22 nd=[0, 1, 1] result=["win", "win", "win"]
+[CombatBalance] OK
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BossBreak] baseline seed=2 turns=43 result=win releaseDamage=[26, 7, 7, 26, 15, 15, 22, 11, 11, 22, 13, 11, 7] breakCount=0
+[BossBreak] break seed=2 turns=52 result=win releases=0 breakCount=12
+[BossBreak] ordinary enemy controlDamage=6 stunnedDamage=0 breakCount=0
+[BossBreak] data-charge break=1.9x, non-charging boss breakCount=0
+[BossBreak] scene popup=true shake=0.20 sfx=break message=破招！花叶兽 的蓄力被打断
+[BossBreak] OK
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[StunOrder] control damage=7 actions=[{"attack_mode":"strike","attacker":"野火虫","attacker_emoji":"🐛","charge_multiplier":1.0,"damage":7,"element":"fire","guard_absorbed":0,"is_charged":false,"is_weakened":false,"target":"水龟仔","target_died":false,"target_emoji":"🐢","target_index":1,"weaken_reduction":0.0}]
+[StunOrder] stunned damage=0 actions=[{"attacker":"野火虫","attacker_emoji":"🐛","damage":0,"element":"fire","is_stunned":true,"target":null,"target_died":false,"target_emoji":null}] breakCount=0
+[StunOrder] thunder5 applied=true nextActionDamage=0 isStunned=true
+[StunOrder] survival control turns=10 result=lose
+[StunOrder] survival stunned turns=11 result=lose
+[StunOrder] OK
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BattleRules] OK
