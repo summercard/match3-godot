@@ -34,6 +34,7 @@ var total_damage_dealt_amount: int = 0   # 本场总伤害（与各伙伴伤害�
 var damage_taken_by_index: Dictionary = {}  # 按队伍位置统计本场承伤
 var total_damage_taken: int = 0           # 本场总承伤
 var max_combo: int = 0              # 本场最高连锁档
+var break_count: int = 0            # 本场破招次数（蓄力被眩晕打断）
 var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: charge }
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
@@ -159,6 +160,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	turn = 0
 	combo = 0
 	max_combo = 0
+	break_count = 0
 	total_damage_dealt = {}
 	total_damage_dealt_amount = 0
 	damage_taken_by_index = {}
@@ -741,8 +743,37 @@ func enemy_action() -> Dictionary:
 		return {}
 	var actions: Array = []
 
+	# 破招：蓄力中的敌人若带着眩晕进入本回合，则本次蓄力作废。
+	# 眩晕在 process_status_effects 里会被消耗，所以必须在处理状态前先判定；
+	# 只有“正在蓄力”的敌人才会被破招，普通敌人继续走原有眩晕逻辑。
+	var pending_breaks: Dictionary = {}
+	for i in range(enemies.size()):
+		var charge_enemy = enemies[i]
+		if charge_enemy == null or charge_enemy.get("hp", 0) <= 0:
+			continue
+		if not _status_effect.has_status(i, "stun"):
+			continue
+		if _enemy_skill_system != null and _enemy_skill_system.is_charging(i):
+			var legacy_multiplier := _enemy_skill_system.get_charge_damage_multiplier(i)
+			if _enemy_skill_system.cancel_charge(i):
+				pending_breaks[i] = { "charge_multiplier": legacy_multiplier }
+		elif _attack_modes != null and _attack_modes.is_charging(i):
+			var mode_multiplier: float = _attack_modes.get_charge_multiplier(i)
+			if _attack_modes.cancel_charge(i):
+				pending_breaks[i] = { "charge_multiplier": mode_multiplier }
+
 	# 状态效果处理（委托给 BattleStatusEffect）
 	var status_logs = _status_effect.process_status_effects(enemies)
+	# 被破招的敌人不再重复提示“眩晕中/眩晕结束”，由破招动作统一表现。
+	if not pending_breaks.is_empty():
+		var remaining_logs: Array = []
+		for status_log in status_logs:
+			var log_idx := int(status_log.get("enemy_index", -1))
+			var log_type := str(status_log.get("type", ""))
+			if pending_breaks.has(log_idx) and (log_type == "stun" or log_type == "stun_end"):
+				continue
+			remaining_logs.append(status_log)
+		status_logs = remaining_logs
 
 	var dot_kills: Array = []
 	for i in range(enemies.size()):
@@ -757,6 +788,24 @@ func enemy_action() -> Dictionary:
 
 		var alive_team = player_team.filter(func(m): return m != null and m.get("hp", 0) > 0)
 		if alive_team.is_empty():
+			continue
+
+		# 破招动作：本次蓄力已作废，不出手、不结算伤害。
+		if pending_breaks.has(i):
+			var break_info: Dictionary = pending_breaks[i]
+			break_count += 1
+			actions.append({
+				"attacker": enemy.get("name", ""),
+				"attacker_emoji": enemy.get("emoji", ""),
+				"target": null,
+				"target_emoji": null,
+				"damage": 0,
+				"element": enemy.get("element", ""),
+				"target_died": false,
+				"is_broken": true,
+				"attack_mode": EnemyAttackModesScript.MODE_BREAK,
+				"charge_multiplier": float(break_info.get("charge_multiplier", 0.0))
+			})
 			continue
 
 		# 眩晕检查（委托给 BattleStatusEffect）
@@ -1413,6 +1462,8 @@ func get_battle_result() -> Dictionary:
 		"allyStats": ally_stats,
 		"max_combo": max_combo,
 		"maxCombo": max_combo,
+		"break_count": break_count,
+		"breakCount": break_count,
 		"highest_chain": max_combo,
 		"highestChain": max_combo,
 		"player_level": player_level,

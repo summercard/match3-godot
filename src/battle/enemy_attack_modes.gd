@@ -23,6 +23,7 @@ extends RefCounted
 const MODE_STRIKE := "strike"
 const MODE_CHARGE := "charge"
 const MODE_CHARGE_RELEASE := "charge_release"
+const MODE_BREAK := "break"
 const MODE_SWEEP := "sweep"
 
 const STYLE_STRIKE := "strike"
@@ -156,6 +157,31 @@ func has_config(enemy_idx: int) -> bool:
 	return _configs.has(enemy_idx)
 
 
+## 当前是否处于蓄力中（下一回合本该释放）。
+func is_charging(enemy_idx: int) -> bool:
+	var state: Dictionary = _states.get(enemy_idx, {})
+	return bool(state.get("charging", false))
+
+
+## 当前蓄力的释放倍率；未蓄力时返回 0。
+func get_charge_multiplier(enemy_idx: int) -> float:
+	var state: Dictionary = _states.get(enemy_idx, {})
+	if not bool(state.get("charging", false)):
+		return 0.0
+	return float(state.get("release_multiplier", DEFAULT_CHARGE_MULTIPLIER))
+
+
+## 破招：清空蓄力进度，让本次释放作废。返回是否真的取消了蓄力。
+func cancel_charge(enemy_idx: int) -> bool:
+	var state: Dictionary = _states.get(enemy_idx, {})
+	if state.is_empty() or not bool(state.get("charging", false)):
+		return false
+	state["charging"] = false
+	state["pending"] = {}
+	state["release_multiplier"] = 0.0
+	return true
+
+
 func get_config(enemy_idx: int) -> Dictionary:
 	return (_configs.get(enemy_idx, {}) as Dictionary).duplicate(true)
 
@@ -177,6 +203,8 @@ static func mode_label(mode_type: String) -> String:
 			return "蓄力"
 		MODE_CHARGE_RELEASE:
 			return "蓄力释放"
+		MODE_BREAK:
+			return "破招"
 		MODE_SWEEP:
 			return "全体攻击"
 		_:

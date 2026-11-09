@@ -1,6 +1,6 @@
 class_name BattleSfx
 extends Node
-## 战斗音效层：六个运行时合成的短音，不依赖外部/二进制音频资源。
+## 战斗音效层：七个运行时合成的短音，不依赖外部/二进制音频资源。
 ##
 ## 所有可调参数集中在本文件 CONFIG；`enabled` 是总开关，由设置页的
 ## `soundOn` 在战斗场景创建时同步。总开关关闭时不会创建任何
@@ -11,7 +11,7 @@ extends Node
 ## - 波形在运行时写入 AudioStreamWAV（16-bit PCM），不落盘；
 ## - 同一个引擎帧最多触发 CONFIG.max_plays_per_frame 个实例，超出丢弃并计数。
 
-const SOUND_IDS := ["match_clear", "hit", "crit", "take_damage", "victory", "defeat"]
+const SOUND_IDS := ["match_clear", "hit", "crit", "take_damage", "victory", "defeat", "break"]
 
 const CONFIG := {
 	"sample_rate": 22050,
@@ -82,6 +82,17 @@ const CONFIG := {
 			"decay": 4.0,
 			"harmonic": 0.5,
 			"harmonic_gain": 0.20,
+		},
+		"break": {
+			"label": "破招",
+			"frequency": 440.0,
+			"frequency_end": 880.0,
+			"duration": 0.30,
+			"waveform": "saw",
+			"attack": 0.006,
+			"decay": 8.0,
+			"harmonic": 3.0,
+			"harmonic_gain": 0.30,
 		},
 	},
 }

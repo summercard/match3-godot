@@ -84,7 +84,7 @@ var _chain_display: Dictionary = {
 	"pulse": 0.0
 }
 var _combo_sfx: ComboSfx = null
-## 战斗音效层：六个程序化合成音，参数与总开关见 battle_sfx.gd
+## 战斗音效层：七个程序化合成音（含破招），参数与总开关见 battle_sfx.gd
 var _battle_sfx: Node = null
 
 ## 消息
@@ -1278,6 +1278,10 @@ func _start_enemy_turn() -> void:
 		_fall_messages.append({"text": "☠️ %s 被状态效果击杀！" % name, "timer": 1.5})
 	
 	for action: Dictionary in result.get("actions", []):
+		# 破招：蓄力被打断，不释放、不出伤；只做破招表现。
+		if action.get("is_broken", false):
+			_play_break_feedback(action)
+			continue
 		# 蓄力回合：只显示蓄力提示，不显示伤害
 		if action.get("is_charging", false):
 			_show_message("⚡ %s 正在蓄力..." % action.get("attacker", ""))
@@ -1638,6 +1642,32 @@ func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.2
 	_attack_flash_timer = 0.1
 	_attack_shake_offset_x = 0.0
+
+
+## 破招瞬间：「破招」飘字 + 短震屏 + 专用音效，并清掉蓄力光环。
+func _play_break_feedback(action: Dictionary) -> void:
+	var attacker_idx := _find_enemy_index(str(action.get("attacker", "")))
+	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
+	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, maxi(attacker_idx, 0))
+	_show_message("破招！%s 的蓄力被打断" % str(action.get("attacker", "敌人")))
+	_floating_texts.append({
+		"text": "破招",
+		"x": anchor.x,
+		"y": anchor.y,
+		"start_y": anchor.y,
+		"color": Color(1.0, 0.86, 0.2),
+		"size": 26.0,
+		"timer": 0.0,
+		"duration": 1.1,
+		"damage_style": "heavy",
+		"damage_anchor": "enemy:%d" % maxi(attacker_idx, 0),
+		"lane": 0
+	})
+	_trigger_attack_shake()
+	if attacker_idx >= 0 and _boss_skill_visuals.has(attacker_idx):
+		_boss_skill_visuals[attacker_idx]["charge_timer"] = 0.0
+	if _battle_sfx != null:
+		_battle_sfx.play("break")
 
 func _trigger_element_glow(element_type: String, glow_color: Color) -> void:
 	_element_glow = {"type": element_type, "timer": 0.5, "color": glow_color}

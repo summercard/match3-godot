@@ -97,6 +97,7 @@ func _sync_stats() -> void:
 	_label("StatsPanel/Turns/Value").text = "%d / %d" % [turn_count, max_turns]
 	var combo := _result_max_combo()
 	_label("StatsPanel/MaxChain/Value").text = "%d 连锁" % combo if combo > 0 else "—"
+	_label("StatsPanel/BreakCount/Value").text = "%d 次" % int(_battle_result.get("breakCount", _battle_result.get("break_count", 0)))
 	var stats := _result_ally_stats()
 	for i in range(3):
 		var row := _node("StatsPanel/TeamRows/Row%d" % (i + 1))
