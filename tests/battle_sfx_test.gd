@@ -20,6 +20,14 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# 本回归只验证 soundOn；关掉 musicOn，避免战斗 BGM 播放器混入播放器计数。
+	var save_manager = root.get_node_or_null("SaveManager")
+	var original_settings: Dictionary = {}
+	if save_manager != null:
+		original_settings = save_manager.load_settings().duplicate(true)
+		var isolated: Dictionary = original_settings.duplicate(true)
+		isolated["musicOn"] = false
+		save_manager.save_settings(isolated)
 	_test_config_distinctness()
 	_test_streams_generated()
 	_test_master_switch_off()
@@ -28,6 +36,8 @@ func _run() -> void:
 	await _test_scene_integration()
 	await _test_scene_sound_off_zero_players()
 	BattleSfxScript.enabled = true
+	if save_manager != null and not original_settings.is_empty():
+		save_manager.save_settings(original_settings)
 	_finish()
 
 
@@ -322,12 +332,16 @@ func _test_scene_integration() -> void:
 		battle_scene.call("_begin_battle_end_overlay")
 		_expect(sfx.last_sound_id == "defeat", "失败结算应播放失败音效，实际 %s" % sfx.last_sound_id)
 
+	var integration_bgm = battle_scene.get("_battle_bgm") if battle_scene != null else null
+	if integration_bgm != null:
+		integration_bgm.stop()
 	main.queue_free()
 	await process_frame
 	BattleSfxScript.enabled = true
 
 
-## 设置页 soundOn 关闭时，整场战斗不创建任何 AudioStreamPlayer（含连锁音效池）。
+## 设置页 soundOn 关闭时，整场战斗不创建任何音效播放器（含连锁音效池）；
+## 本用例把 musicOn 也关掉，避免战斗 BGM 播放器混入播放器计数。
 func _test_scene_sound_off_zero_players() -> void:
 	var save_manager = root.get_node_or_null("SaveManager")
 	if save_manager == null:
@@ -353,14 +367,18 @@ func _test_scene_sound_off_zero_players() -> void:
 	await process_frame
 	var battle_scene: Control = main.get_current_scene()
 	var sfx = battle_scene.get("_battle_sfx") if battle_scene != null else null
+	var bgm = battle_scene.get("_battle_bgm") if battle_scene != null else null
 	_expect(sfx != null, "关闭 soundOn 时战斗场景仍应挂载 BattleSfx 节点")
 	if sfx != null:
 		_expect(sfx.enabled == false, "关闭 soundOn 后战斗音效总开关应为关闭")
 		_expect(sfx.player_count() == 0, "关闭 soundOn 后战斗音效播放器数应为 0")
 		_expect(battle_scene.get("_combo_sfx") == null, "关闭 soundOn 后不应创建连锁音效播放器池")
 		var player_nodes: Array = battle_scene.find_children("*", "AudioStreamPlayer", true, false)
-		_expect(player_nodes.is_empty(), "关闭 soundOn 后场上 AudioStreamPlayer 数应为 0，实际 %d" % player_nodes.size())
+		_expect(player_nodes.is_empty(),
+			"关闭 soundOn 且 musicOn=false 后场上 AudioStreamPlayer 数应为 0，实际 %d" % player_nodes.size())
 
+	if bgm != null:
+		bgm.stop()
 	main.queue_free()
 	await process_frame
 	save_manager.save_settings(original)

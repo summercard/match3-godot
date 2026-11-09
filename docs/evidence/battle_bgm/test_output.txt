@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BattleBgm] loop: bpm=100.0 beats_per_bar=4 bars=2 duration=4.800s sample_rate=22050 frames=105840
+[BattleBgm] key: root_midi=45(A2,110.00Hz) scale=minor_pentatonic degrees=[0, 3, 5, 7, 10]
+[BattleBgm] layer bed  wave=sine gain=0.12 attack=0.000s
+[BattleBgm] layer bass wave=sine octave=0 bar_roots=[0, 3] pattern=[0, -1, 7, -1] gain=0.38 attack=0.012s decay=2.40 release=0.060s
+[BattleBgm] layer pad  wave=sine octave=0 bar_roots=[0, 3] chord=[0, 7, 12] gain=0.08 attack=0.060s decay=0.00 release=0.120s
+[BattleBgm] layer lead wave=triangle octave=12 bar_roots=[0, 3] pattern=[0, -1, 2, 4, 3, -1, 2, 1, 0, -1, 4, 3, 2, -1, 1, 0] gain=0.24 attack=0.006s decay=5.00 release=0.050s
+[BattleBgm] layer kick wave=sine freq=92.0->44.0Hz pattern=[0, -1, 2, -1] gain=0.30 attack=0.002s decay=18.00
+[BattleBgm] master_gain=0.72 loop_mode=LOOP_FORWARD loop_begin=0 loop_end=frames
+[BattleBgm] stream: bytes=211680 peak=23592 first=0 last=-123 seam=123 rms(first/last)=10583.8/2353.6
+[BattleBgm] battle on/off identical=true on_players=1 off_players=0 turns=4 damage_logs=12 taken_logs=3 result=win
+[BattleBgm] OK
