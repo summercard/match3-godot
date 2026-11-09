@@ -314,6 +314,9 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--battle-demo-break=", "0") == "1":
 		_seed_battle_break_demo(battle_scene)
 		return
+	if _read_arg("--battle-demo-stun=", "0") == "1":
+		_seed_battle_stun_demo(battle_scene)
+		return
 	if _read_arg("--battle-demo-hit=", "0") == "1":
 		_seed_battle_hit_demo(battle_scene)
 		return
@@ -384,6 +387,28 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		}
 	})
 	battle_scene.queue_redraw()
+
+## 普通怪眩晕证据：给当前敌人挂眩晕，再走真实敌方回合。
+## 0.6s 前摇结束后进入敌方行动；配合 --hold-seconds=0.72 截取无伤害结算与眩晕收尾提示。
+func _seed_battle_stun_demo(battle_scene: Control) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null or battle.enemies.is_empty():
+		return
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	battle_scene.set("_floating_texts", [])
+	battle_scene.set("_hit_flashes", [])
+	battle_scene.set("_hit_reactions", [])
+	var status_effect = battle.get("_status_effect")
+	if status_effect != null:
+		if status_effect.has_method("apply_status_effect"):
+			status_effect.apply_status_effect(0, "stun")
+		else:
+			var effects = status_effect.get("_effects")
+			if effects is Array:
+				effects[0] = {"type": "stun", "source_atk": 10, "turns_left": 1, "element": "thunder"}
+	battle_scene.call("_start_enemy_turn")
+
 
 ## 破招瞬间证据：让 1-5 花叶兽进入蓄力并在本回合带眩晕，再走真实敌方回合。
 ## 0.6s 前摇结束后触发破招飘字/短震屏/专用音效；配合 --hold-seconds=0.72 截图。

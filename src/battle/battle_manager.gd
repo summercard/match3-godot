@@ -743,16 +743,18 @@ func enemy_action() -> Dictionary:
 		return {}
 	var actions: Array = []
 
-	# 破招：蓄力中的敌人若带着眩晕进入本回合，则本次蓄力作废。
-	# 眩晕在 process_status_effects 里会被消耗，所以必须在处理状态前先判定；
-	# 只有“正在蓄力”的敌人才会被破招，普通敌人继续走原有眩晕逻辑。
+	# 眩晕在 process_status_effects 里会被消耗，所以必须在处理状态前先记录本回合的眩晕：
+	# - 蓄力中的敌人 → 本次蓄力作废（破招）；
+	# - 普通敌人 → 本回合整次行动跳过（0 伤害、不产生破招）。
 	var pending_breaks: Dictionary = {}
+	var stunned_enemies: Dictionary = {}
 	for i in range(enemies.size()):
 		var charge_enemy = enemies[i]
 		if charge_enemy == null or charge_enemy.get("hp", 0) <= 0:
 			continue
-		if not _status_effect.has_status(i, "stun"):
+		if not _status_effect.is_enemy_stunned(i):
 			continue
+		stunned_enemies[i] = true
 		if _enemy_skill_system != null and _enemy_skill_system.is_charging(i):
 			var legacy_multiplier := _enemy_skill_system.get_charge_damage_multiplier(i)
 			if _enemy_skill_system.cancel_charge(i):
@@ -808,8 +810,8 @@ func enemy_action() -> Dictionary:
 			})
 			continue
 
-		# 眩晕检查（委托给 BattleStatusEffect）
-		if _status_effect.is_enemy_stunned(i):
+		# 普通敌人的眩晕：当回合整次行动跳过（状态已在上面结算并消耗）。
+		if stunned_enemies.has(i):
 			actions.append({
 				"attacker": enemy.get("name", ""),
 				"attacker_emoji": enemy.get("emoji", ""),

@@ -45,10 +45,10 @@ $GODOT --path . --script res://tests/capture_runtime_scene.gd -- \
 ## 破招口径
 
 - 游戏内没有独立的「束缚」状态；破招直接用既有 `stun`（眩晕）实现，并在战斗提示里写明。
-- 只有“正在蓄力”的敌人能被破招；普通敌人吃眩晕仍走既有路径，不额外跳过回合。
-- 现有 `BattleStatusEffect.process_status_effects` 会在眩晕判定前消耗 1 回合眩晕，因此普通敌人的眩晕
-  跳行动本来就未真正生效。本 PR 不改这条既有链路，只在状态消耗前记录蓄力破招，测试断言普攻怪
-  动作与未眩晕时逐位一致。
+- 只有“正在蓄力”的敌人能被破招；普通敌人吃眩晕按后续修复当回合跳过整次行动（见
+  `docs/evidence/stun_order/`）。
+- 本 PR 合并时 `BattleStatusEffect.process_status_effects` 仍会在眩晕判定前消耗 1 回合眩晕，
+  普通敌人的眩晕跳行动未真正生效；后续 stun 修复调整了状态消耗顺序，破招链路本身未改。
 - 未破招时本次蓄力仍按原倍率释放；本 PR 未改 `stage_1_5` / `monster_boss_001` / `bossCurve` 数据。
 
 ## 测试
