@@ -236,31 +236,63 @@ const MONSTER_DB: Dictionary = {
 		"id": "enemy_004", "name": "深海鱼", "element": "water",
 		"rarity": 1, "emoji": "🐟",
 		"baseHP": 170, "baseATK": 32, "baseDEF": 10, "baseSPD": 14,
-		"skill": { "name": "水弹", "cost": 5, "multiplier": 1.6 }
+		"skill": { "name": "水弹", "cost": 5, "multiplier": 1.6 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["strike", "strike", "sweep"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"enemy_005": {
 		"id": "enemy_005", "name": "岩蜥", "element": "earth",
 		"rarity": 1, "emoji": "🦎",
 		"baseHP": 155, "baseATK": 32, "baseDEF": 10, "baseSPD": 8,
-		"skill": { "name": "石击", "cost": 5, "multiplier": 1.5 }
+		"skill": { "name": "石击", "cost": 5, "multiplier": 1.5 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["charge", "strike", "strike"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"enemy_006": {
 		"id": "enemy_006", "name": "风蛾", "element": "wind",
 		"rarity": 1, "emoji": "🦋",
 		"baseHP": 165, "baseATK": 32, "baseDEF": 10, "baseSPD": 18,
-		"skill": { "name": "风切", "cost": 5, "multiplier": 1.7 }
+		"skill": { "name": "风切", "cost": 5, "multiplier": 1.7 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["strike", "charge", "sweep"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"enemy_007": {
 		"id": "enemy_007", "name": "暗蛛", "element": "dark",
 		"rarity": 1, "emoji": "🕷️",
 		"baseHP": 180, "baseATK": 32, "baseDEF": 10, "baseSPD": 20,
-		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 }
+		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["sweep", "strike", "strike", "charge"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"enemy_008": {
 		"id": "enemy_008", "name": "光蝇", "element": "light",
 		"rarity": 1, "emoji": "✨",
 		"baseHP": 145, "baseATK": 32, "baseDEF": 10, "baseSPD": 22,
-		"skill": { "name": "光刺", "cost": 5, "multiplier": 1.9 }
+		"skill": { "name": "光刺", "cost": 5, "multiplier": 1.9 },
+		"attackModes": {
+			"select": "weight",
+			"weighted": [
+				{ "type": "strike", "weight": 50 },
+				{ "type": "charge", "weight": 30, "multiplier": 1.9 },
+				{ "type": "sweep", "weight": 20, "multiplier": 0.5 }
+			]
+		}
 	},
 	"monster_boss_003": {
 		"id": "monster_boss_003", "name": "深海海马王", "element": "water",
@@ -331,19 +363,39 @@ const MONSTER_DB: Dictionary = {
 		"id": "enemy_009", "name": "暗夜蝙蝠", "element": "dark",
 		"rarity": 1, "emoji": "🦇",
 		"baseHP": 155, "baseATK": 32, "baseDEF": 13, "baseSPD": 22,
-		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 }
+		"skill": { "name": "暗袭", "cost": 5, "multiplier": 1.8 },
+		"attackModes": {
+			"select": "weight",
+			"weighted": [
+				{ "type": "strike", "weight": 45 },
+				{ "type": "charge", "weight": 35, "multiplier": 1.9 },
+				{ "type": "sweep", "weight": 20, "multiplier": 0.5 }
+			]
+		}
 	},
 	"enemy_010": {
 		"id": "enemy_010", "name": "暗毒蛛", "element": "dark",
 		"rarity": 1, "emoji": "🕷️",
 		"baseHP": 180, "baseATK": 32, "baseDEF": 13, "baseSPD": 10,
-		"skill": { "name": "毒咬", "cost": 5, "multiplier": 1.9 }
+		"skill": { "name": "毒咬", "cost": 5, "multiplier": 1.9 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["sweep", "strike", "charge"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"enemy_011": {
 		"id": "enemy_011", "name": "暗幽灵", "element": "dark",
 		"rarity": 1, "emoji": "👻",
 		"baseHP": 160, "baseATK": 32, "baseDEF": 13, "baseSPD": 25,
-		"skill": { "name": "穿体", "cost": 5, "multiplier": 2.0 }
+		"skill": { "name": "穿体", "cost": 5, "multiplier": 2.0 },
+		"attackModes": {
+			"select": "rotation",
+			"sequence": ["strike", "charge", "sweep"],
+			"chargeMultiplier": 1.9,
+			"sweepMultiplier": 0.5
+		}
 	},
 	"monster_025": {
 		"id": "monster_025", "name": "雷翼龙", "element": "thunder",
@@ -1156,6 +1208,7 @@ static func get_monster_stats(monster_id: String, level: int = 1, nature_id: Str
 		"skillCharge": 0,
 		"isBoss": data.get("isBoss", false),
 		"enemySkills": null if not data.has("enemySkills") else data.get("enemySkills", []).duplicate(true),
+		"attackModes": null if not data.has("attackModes") else data.get("attackModes", {}).duplicate(true),
 		"leaderSkill": data.get("leaderSkill", "")
 	}
 

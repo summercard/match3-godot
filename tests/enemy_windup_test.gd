@@ -1,7 +1,6 @@
 extends SceneTree
 
 const BattleManagerScript = preload("res://src/battle/battle_manager.gd")
-const StageDBScript = preload("res://src/data/stage_db.gd")
 
 var _failures: Array[String] = []
 
@@ -18,7 +17,9 @@ func _run() -> void:
 
 func _test_upcoming_attackers() -> void:
 	var battle := BattleManagerScript.new()
-	battle.init(["monster_001", "monster_002", "monster_003"], ["enemy_006", "enemy_007", "enemy_008"], 5, 9)
+	# 波次规则：首波 1 只。4 只敌人会分成 1/3 两波，补第二波后才有 3 只在场。
+	battle.init(["monster_001", "monster_002", "monster_003"], ["enemy_006", "enemy_007", "enemy_008", "enemy_009"], 5, 9)
+	battle.start_next_wave()
 
 	var attackers: Array = battle.get_upcoming_attackers()
 	_expect(attackers.size() == 3, "three alive enemies should all be marked as upcoming attackers")
@@ -38,10 +39,18 @@ func _test_scene_windup() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
-	var stage_db := StageDBScript.new()
+	# 用 4 只敌人的测试关卡补出 3 只在场，验证三敌人前摇；不修改波次规则。
+	var stage_data := {
+		"id": "test_windup_stage",
+		"name": "前摇测试",
+		"type": "normal",
+		"enemies": ["enemy_006", "enemy_007", "enemy_008", "enemy_009"],
+		"enemyLevel": 9,
+		"maxTurns": 20
+	}
 	main.switch_scene("battle", {
-		"stageId": "stage_3_3",
-		"stageData": stage_db.get_stage("stage_3_3"),
+		"stageId": "test_windup_stage",
+		"stageData": stage_data,
 		"inputTestOnly": true,
 	})
 	await process_frame
@@ -50,6 +59,9 @@ func _test_scene_windup() -> void:
 	if battle_scene == null:
 		main.queue_free()
 		return
+	var battle = battle_scene.get("_battle")
+	if battle != null:
+		battle.start_next_wave()
 
 	var hp_before: int = _team_hp(battle_scene)
 	battle_scene.call("_start_enemy_turn")

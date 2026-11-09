@@ -6,6 +6,7 @@ class_name BattleManager
 extends Node
 
 const EnemyIntentRulesScript = preload("res://src/battle/enemy_intent_rules.gd")
+const EnemyAttackModesScript = preload("res://src/battle/enemy_attack_modes.gd")
 
 ## 战斗核心逻辑：玩家队伍/敌方怪物初始化、连锁伤害计算、
 ## BOSS多阶段、敌人技能系统、C4状态效果、队长技能、属性协同
@@ -69,6 +70,8 @@ var capture_window_best: Dictionary = {} # { enemyIndex: best tamingWindow reach
 var _status_effect: BattleStatusEffect = BattleStatusEffect.new()
 var _phase_handler: PhaseHandler = PhaseHandler.new(self)
 var _damage_calc: DamageCalculator = DamageCalculator.new()
+## 敌人出手模式（数据驱动：怪物/关卡数据里的 attackModes）
+var _attack_modes = EnemyAttackModesScript.new()
 
 # 关卡数据
 var stage_data: Variant = null
@@ -210,6 +213,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	if _enemy_skill_system == null:
 		_enemy_skill_system = EnemySkillSystem.new()
 	_enemy_skill_system.init_skill_state(enemies)
+	_attack_modes.init(enemies, stage_data)
 
 	# 连接 EnemySkillSystem 的特定信号到 BattleManager
 	_connect_enemy_skill_signals()
@@ -264,6 +268,7 @@ func start_next_wave() -> Array:
 		_enemy_skill_system = EnemySkillSystem.new()
 	_enemy_skill_system.reset()
 	_enemy_skill_system.init_skill_state(enemies)
+	_attack_modes.init(enemies, stage_data)
 	_connect_enemy_skill_signals()
 	return enemies
 
@@ -768,18 +773,42 @@ func enemy_action() -> Dictionary:
 		if _enemy_skill_system != null and has_skills:
 			_enemy_skill_system.execute_heal(i, enemy)
 
-		# 蓄力检查（委托给 EnemySkillSystem）
+		# 蓄力检查（旧版 enemySkills.charge 链路；带该配置的 Boss 保持原行为）
 		var skip_attack = false
 		var damage_multiplier = 1.0
+		var attack_mode := EnemyAttackModesScript.MODE_STRIKE
+		var attack_mode_multiplier := 1.0
+		var legacy_charge := _enemy_skill_system != null and _enemy_skill_system.has_skill_type(i, "charge")
 
-		if _enemy_skill_system != null:
+		if legacy_charge:
+			var was_charging := _enemy_skill_system.is_charging(i)
 			damage_multiplier = _enemy_skill_system.check_and_release_charge(i)
 			if _enemy_skill_system.is_charging(i):
 				skip_attack = true
+				attack_mode = EnemyAttackModesScript.MODE_CHARGE
 			else:
 				_enemy_skill_system.update_and_check_charge_start(i)
+				if was_charging:
+					attack_mode = EnemyAttackModesScript.MODE_CHARGE_RELEASE
+		elif _attack_modes != null:
+			# 新链路：模式完全由怪物/关卡数据决定，BattleManager 不再硬编码轮次。
+			var mode: Dictionary = _attack_modes.consume_turn(i)
+			attack_mode = str(mode.get("type", EnemyAttackModesScript.MODE_STRIKE))
+			attack_mode_multiplier = float(mode.get("multiplier", 1.0))
+			match attack_mode:
+				EnemyAttackModesScript.MODE_CHARGE:
+					skip_attack = true
+				EnemyAttackModesScript.MODE_CHARGE_RELEASE:
+					damage_multiplier = attack_mode_multiplier
+				EnemyAttackModesScript.MODE_SWEEP:
+					pass
+				_:
+					attack_mode = EnemyAttackModesScript.MODE_STRIKE
 
 		if skip_attack:
+			var shown_multiplier := attack_mode_multiplier
+			if legacy_charge:
+				shown_multiplier = _enemy_skill_system.get_charge_damage_multiplier(i)
 			actions.append({
 				"attacker": enemy.get("name", ""),
 				"attacker_emoji": enemy.get("emoji", ""),
@@ -788,40 +817,48 @@ func enemy_action() -> Dictionary:
 				"damage": 0,
 				"element": enemy.get("element", ""),
 				"target_died": false,
-				"is_charging": true
+				"is_charging": true,
+				"attack_mode": attack_mode,
+				"charge_multiplier": shown_multiplier
 			})
 			continue
-
-		# 普通攻击
-		var target = alive_team[randi() % alive_team.size()]
 
 		# 冰冻ATK降低（委托给 BattleStatusEffect）
 		var freeze_mult = _status_effect.get_freeze_atk_multiplier(i)
 		var tempo_mod := _consume_enemy_tempo_multiplier(i)
 		var tempo_mult := float(tempo_mod.get("multiplier", 1.0))
 
-		# 队长DEF加成
-		var leader_def_boost = LeaderSkillDb.get_leader_def_boost(leader_skill_data)
+		if attack_mode == EnemyAttackModesScript.MODE_SWEEP:
+			# 全体攻击：对每个存活伙伴分别走防御/协同/护盾结算，倍率约单体一半。
+			for sweep_target in alive_team:
+				var sweep_hit := _resolve_enemy_hit(enemy, sweep_target, attack_mode_multiplier, freeze_mult, tempo_mult)
+				sweep_target["hp"] = sweep_target.get("hp", 0) - int(sweep_hit.get("damage", 0))
+				actions.append({
+					"attacker": enemy.get("name", ""),
+					"attacker_emoji": enemy.get("emoji", ""),
+					"target": sweep_target.get("name", ""),
+					"target_emoji": sweep_target.get("emoji", ""),
+					"target_index": player_team.find(sweep_target),
+					"damage": int(sweep_hit.get("damage", 0)),
+					"element": enemy.get("element", ""),
+					"target_died": sweep_target.get("hp", 0) <= 0,
+					"is_charged": false,
+					"charge_multiplier": 1.0,
+					"is_aoe": true,
+					"attack_mode": EnemyAttackModesScript.MODE_SWEEP,
+					"sweep_multiplier": attack_mode_multiplier,
+					"is_weakened": tempo_mult < 1.0,
+					"weaken_reduction": tempo_mod.get("reduction", 0.0),
+					"guard_absorbed": int(sweep_hit.get("guard_absorbed", 0))
+				})
+			_refresh_capture_windows()
+			continue
 
-		# 属性协同DEF
-		var target_affinity := _board_affinity(target)
-		var synergy_def_mult = get_synergy_def_mult(target_affinity)
-
-		# 委托给 DamageCalculator
-		var damage = _damage_calc.calc_enemy_damage(
-			enemy.get("atk", 10),
-			enemy.get("element", ""),
-			target.get("def", 0),
-			target.get("element", ""),
-			freeze_mult * tempo_mult,
-			leader_def_boost,
-			synergy_def_mult
-		)
-
-		damage = int(damage * damage_multiplier)
-		var guard_result := _apply_guard_to_damage(target, damage)
-		damage = int(guard_result.get("damage", damage))
-		var guard_absorbed := int(guard_result.get("guard_absorbed", 0))
+		# 普通攻击 / 蓄力释放：单体目标
+		var target = alive_team[randi() % alive_team.size()]
+		var hit := _resolve_enemy_hit(enemy, target, damage_multiplier, freeze_mult, tempo_mult)
+		var damage := int(hit.get("damage", 0))
+		var guard_absorbed := int(hit.get("guard_absorbed", 0))
 
 		target["hp"] = target.get("hp", 0) - damage
 		_refresh_capture_windows()
@@ -831,11 +868,13 @@ func enemy_action() -> Dictionary:
 			"attacker_emoji": enemy.get("emoji", ""),
 			"target": target.get("name", ""),
 			"target_emoji": target.get("emoji", ""),
+			"target_index": player_team.find(target),
 			"damage": damage,
 			"element": enemy.get("element", ""),
 			"target_died": target.get("hp", 0) <= 0,
 			"is_charged": damage_multiplier > 1.0,
 			"charge_multiplier": damage_multiplier,
+			"attack_mode": attack_mode,
 			"is_weakened": tempo_mult < 1.0,
 			"weaken_reduction": tempo_mod.get("reduction", 0.0),
 			"guard_absorbed": guard_absorbed
@@ -862,6 +901,28 @@ func enemy_action() -> Dictionary:
 		check_battle_end()
 
 	return { "actions": actions, "status_logs": status_logs, "dot_kills": dot_kills }
+
+
+## 单个目标的敌方伤害结算：防御、属性协同、冰冻/束缚、护盾/守护都在这里统一处理。
+func _resolve_enemy_hit(enemy: Dictionary, target: Dictionary, multiplier: float, freeze_mult: float, tempo_mult: float) -> Dictionary:
+	var leader_def_boost = LeaderSkillDb.get_leader_def_boost(leader_skill_data)
+	var target_affinity := _board_affinity(target)
+	var synergy_def_mult = get_synergy_def_mult(target_affinity)
+	var damage = _damage_calc.calc_enemy_damage(
+		enemy.get("atk", 10),
+		enemy.get("element", ""),
+		target.get("def", 0),
+		target.get("element", ""),
+		freeze_mult * tempo_mult,
+		leader_def_boost,
+		synergy_def_mult
+	)
+	damage = maxi(1, int(float(damage) * multiplier))
+	var guard_result := _apply_guard_to_damage(target, damage)
+	return {
+		"damage": int(guard_result.get("damage", damage)),
+		"guard_absorbed": int(guard_result.get("guard_absorbed", 0))
+	}
 
 
 func _get_weakest_enemy() -> Variant:
@@ -958,6 +1019,7 @@ func execute_phase_transition(phase_config: Dictionary) -> Array:
 	if _enemy_skill_system == null:
 		_enemy_skill_system = EnemySkillSystem.new()
 	_enemy_skill_system.init_skill_state(enemies)
+	_attack_modes.init(enemies, stage_data)
 	_connect_enemy_skill_signals()
 	phase_transition.emit(current_phase, enemies)
 	return enemies
@@ -975,8 +1037,28 @@ func get_enemy_intents() -> Dictionary:
 	return EnemyIntentRulesScript.build_enemy_intents(
 		enemies,
 		_build_enemy_skill_states_dict(),
-		_status_effect.get_effects_snapshot()
+		_status_effect.get_effects_snapshot(),
+		_build_attack_mode_previews()
 	)
+
+## 数据化出手模式的预览：只返回会改变意图文案的模式（蓄力/全体）。
+## 普通 strike 继续交给 EnemyIntentRules 的既有逻辑，保持 Boss 蓄力文本不变。
+func _build_attack_mode_previews() -> Dictionary:
+	var previews: Dictionary = {}
+	if _attack_modes == null:
+		return previews
+	for i in range(enemies.size()):
+		var enemy = enemies[i]
+		if enemy == null or not enemy is Dictionary or int(enemy.get("hp", 0)) <= 0:
+			continue
+		# 带旧版 enemySkills.charge 的敌人继续走既有蓄力链路，避免双重蓄力。
+		if _enemy_skill_system != null and _enemy_skill_system.has_skill_type(i, "charge"):
+			continue
+		var mode: Dictionary = _attack_modes.peek(i)
+		var mode_type := str(mode.get("type", EnemyAttackModesScript.MODE_STRIKE))
+		if mode_type != EnemyAttackModesScript.MODE_STRIKE:
+			previews[i] = mode
+	return previews
 
 ## 本回合会出手的敌人索引（供战斗界面做出手前摇预警）。
 ## 存活敌人都会在敌方回合行动；蓄力中的敌人会在本回合释放蓄力并攻击。
@@ -992,6 +1074,34 @@ func get_upcoming_attackers() -> Array:
 			continue
 		attackers.append(i)
 	return attackers
+
+## 前摇视觉数据：{ enemy_idx: { mode, style, label, multiplier } }。
+## 普通出招为红色箭头；蓄力/蓄力释放为紫色闪电；全体攻击为青色扇形。
+func get_enemy_windup_cues() -> Dictionary:
+	var cues: Dictionary = {}
+	if battle_over:
+		return cues
+	for i in range(enemies.size()):
+		var enemy = enemies[i]
+		if enemy == null or not enemy is Dictionary or int(enemy.get("hp", 0)) <= 0:
+			continue
+		var mode_type := EnemyAttackModesScript.MODE_STRIKE
+		var multiplier := 1.0
+		if _enemy_skill_system != null and _enemy_skill_system.has_skill_type(i, "charge"):
+			if _enemy_skill_system.is_charging(i):
+				mode_type = EnemyAttackModesScript.MODE_CHARGE_RELEASE
+				multiplier = _enemy_skill_system.get_charge_damage_multiplier(i)
+		elif _attack_modes != null:
+			var mode: Dictionary = _attack_modes.peek(i)
+			mode_type = str(mode.get("type", EnemyAttackModesScript.MODE_STRIKE))
+			multiplier = float(mode.get("multiplier", 1.0))
+		cues[i] = {
+			"mode": mode_type,
+			"style": EnemyAttackModesScript.windup_style(mode_type),
+			"label": EnemyAttackModesScript.mode_label(mode_type),
+			"multiplier": multiplier
+		}
+	return cues
 
 
 # ========== 获取状态摘要 ==========
@@ -1013,6 +1123,7 @@ func get_status() -> Dictionary:
 		"wave_pending": has_next_wave(),
 		"enemy_skill_states": _build_enemy_skill_states_dict(),
 		"enemy_intents": get_enemy_intents(),
+		"enemy_attack_modes": _build_attack_mode_previews(),
 		"leader_skill_info": leader_skill_info,
 		"synergy_info": synergy_info,
 		"synergy_bonuses": synergy_bonuses.duplicate(true) if synergy_bonuses != null else null,

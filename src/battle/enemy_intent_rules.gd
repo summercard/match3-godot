@@ -2,7 +2,7 @@ class_name EnemyIntentRules
 extends RefCounted
 
 
-static func build_enemy_intents(enemies: Array, skill_states: Dictionary, status_effects: Array = []) -> Dictionary:
+static func build_enemy_intents(enemies: Array, skill_states: Dictionary, status_effects: Array = [], attack_modes: Dictionary = {}) -> Dictionary:
 	var result := {}
 	for i in range(enemies.size()):
 		var enemy = enemies[i]
@@ -13,11 +13,12 @@ static func build_enemy_intents(enemies: Array, skill_states: Dictionary, status
 			continue
 		var state: Dictionary = skill_states.get(i, {})
 		var status: Dictionary = status_effects[i] if i < status_effects.size() and status_effects[i] is Dictionary else {}
-		result[i] = build_enemy_intent(enemy_data, state, status)
+		var attack_mode: Dictionary = attack_modes.get(i, {}) if attack_modes.get(i, {}) is Dictionary else {}
+		result[i] = build_enemy_intent(enemy_data, state, status, attack_mode)
 	return result
 
 
-static func build_enemy_intent(enemy: Dictionary, skill_state: Dictionary, status: Dictionary = {}) -> Dictionary:
+static func build_enemy_intent(enemy: Dictionary, skill_state: Dictionary, status: Dictionary = {}, attack_mode: Dictionary = {}) -> Dictionary:
 	if str(status.get("type", "")) == "stun":
 		return {
 			"type": "stunned",
@@ -25,6 +26,34 @@ static func build_enemy_intent(enemy: Dictionary, skill_state: Dictionary, statu
 			"desc": "本回合无法行动",
 			"severity": "safe",
 			"hint": "趁机输出或调整棋盘"
+		}
+
+	# 数据化出手模式优先：蓄力回合与全体攻击必须与普攻意图一眼可区分。
+	var attack_mode_type := str(attack_mode.get("type", ""))
+	if attack_mode_type == "charge":
+		return {
+			"type": "charge_windup",
+			"label": "蓄力",
+			"desc": "本回合蓄力，下回合重击",
+			"severity": "warning",
+			"hint": "本回合不会造成伤害"
+		}
+	if attack_mode_type == "charge_release":
+		var attack_multiplier := float(attack_mode.get("multiplier", 2.0))
+		return {
+			"type": "charge_release",
+			"label": "蓄力释放",
+			"desc": "即将造成 %.1fx 伤害" % attack_multiplier,
+			"severity": "danger",
+			"hint": "破招: 束缚或守护"
+		}
+	if attack_mode_type == "sweep":
+		return {
+			"type": "sweep",
+			"label": "全体攻击",
+			"desc": "攻击我方全体存活伙伴",
+			"severity": "danger",
+			"hint": "治疗或守护"
 		}
 
 	var charge: Dictionary = skill_state.get("charge", {})

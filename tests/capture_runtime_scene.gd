@@ -277,6 +277,28 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		_seed_battle_damage_demo(battle_scene)
 		return
 	if _read_arg("--battle-demo-windup=", "0") == "1":
+		var battle = battle_scene.get("_battle")
+		# 走完 N 个真实敌方回合，再进入下一次前摇，用于展示轮次模式。
+		var pre_turns := int(_read_arg("--battle-demo-enemy-turns=", "0"))
+		if battle != null:
+			for _i in range(pre_turns):
+				if battle.battle_over:
+					break
+				battle.enemy_action()
+		# 清掉上一回合留下的飘字/闪烁，截图只保留前摇本身。
+		var floating_texts = battle_scene.get("_floating_texts")
+		if floating_texts is Array:
+			floating_texts.clear()
+		var hit_flashes = battle_scene.get("_hit_flashes")
+		if hit_flashes is Array:
+			hit_flashes.clear()
+		battle_scene.set("_message_timer", 0.0)
+		# 测试证据也可强制某一种出手模式，便于在同一战局对比三种前摇。
+		var forced_mode := _read_arg("--battle-demo-attack-mode=", "")
+		if not forced_mode.is_empty() and battle != null:
+			var attack_modes = battle.get("_attack_modes")
+			if attack_modes != null and attack_modes.has_method("force_next_mode"):
+				attack_modes.call("force_next_mode", 0, forced_mode)
 		battle_scene.call("_start_enemy_turn")
 	var chain_level := int(_read_arg("--battle-demo-chain=", "0"))
 	if chain_level >= 2:
