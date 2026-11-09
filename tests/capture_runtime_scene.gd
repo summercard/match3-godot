@@ -1,11 +1,13 @@
 extends SceneTree
 
 const DEFAULT_OUTPUT := "user://runtime_scene_capture.png"
+const GEM_TYPES := ["fire", "water", "grass", "thunder", "light"]
 
 func _init() -> void:
 	call_deferred("_capture")
 
 func _capture() -> void:
+	seed(int(_read_arg("--capture-seed=", "20261109")))
 	var scene_name := _read_arg("--scene-name=", "stage_select")
 	var output_path := _read_arg("--output=", DEFAULT_OUTPUT)
 	var main: Control = load("res://main.tscn").instantiate()
@@ -18,6 +20,11 @@ func _capture() -> void:
 	await process_frame
 	_seed_demo_state(main, scene_name)
 	await process_frame
+	var record_seconds := float(_read_arg("--record-seconds=", "0"))
+	if record_seconds > 0.0:
+		await create_timer(record_seconds).timeout
+		quit(0)
+		return
 	for _frame in range(int(_read_arg("--settle-frames=", "0"))):
 		await process_frame
 	var image := root.get_texture().get_image()
@@ -254,10 +261,16 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
 	if battle_scene == null:
 		return
+	if _read_arg("--battle-demo-match=", "0") == "1":
+		_seed_battle_match_demo(battle_scene)
+		return
 	if _read_arg("--battle-art-aspect-qa=", "0") == "1":
 		_seed_battle_art_aspect_qa(battle_scene)
 	if _read_arg("--battle-demo-hp=", "0") == "1":
 		_seed_battle_demo_hp(battle_scene)
+	if _read_arg("--battle-demo-damage=", "0") == "1":
+		_seed_battle_damage_demo(battle_scene)
+		return
 	if _read_arg("--battle-demo-fx=", "0") != "1":
 		battle_scene.queue_redraw()
 		return
@@ -289,6 +302,37 @@ func _seed_battle_demo_fx(main: Control) -> void:
 			"charge_timer": 0.8
 		}
 	})
+	battle_scene.queue_redraw()
+
+func _seed_battle_match_demo(battle_scene: Control) -> void:
+	var board = battle_scene.get("_board")
+	if board == null:
+		return
+	for r in range(board.rows):
+		for c in range(board.cols):
+			board.grid[r][c] = GEM_TYPES[(r + c * 2) % GEM_TYPES.size()]
+			board.obstacles[r][c] = null
+			board.locked_gems[r][c] = null
+			board.poison_fog[r][c] = null
+	# 交换 (0,0) 与 (0,1)：第 0 行形成 3 个水珠（对火属性敌人暴击），
+	# 第 0 列形成 3 个火珠（普通伤害），一次三消产生两段伤害。
+	board.grid[0][0] = "water"
+	board.grid[0][1] = "fire"
+	board.grid[0][2] = "water"
+	board.grid[0][3] = "water"
+	board.grid[1][0] = "fire"
+	board.grid[2][0] = "fire"
+	board.cascade_count = 0
+	battle_scene.call("_do_swap", 0, 0, 0, 1)
+
+func _seed_battle_damage_demo(battle_scene: Control) -> void:
+	var target_idx := clampi(int(_read_arg("--damage-target-index=", "0")), 0, 2)
+	battle_scene.set("_message_text", "效果拔群！")
+	battle_scene.set("_message_timer", 1.2)
+	battle_scene.call("_spawn_enemy_damage_popup", "-368", target_idx, true)
+	battle_scene.call("_spawn_enemy_damage_popup", "-94", target_idx, false)
+	battle_scene.call("_spawn_enemy_damage_popup", "-112", target_idx, false)
+	battle_scene.call("_spawn_enemy_damage_popup", "-521", target_idx, true)
 	battle_scene.queue_redraw()
 
 func _seed_battle_demo_hp(battle_scene: Control) -> void:

@@ -66,6 +66,9 @@ var _swipe_trail: Array[Dictionary] = []
 ## 浮动文字管理器
 var _floating_texts: Array[Dictionary] = []
 
+## 战斗表现时钟（伤害飘字排队用）
+var _fx_time: float = 0.0
+
 ## 连击提示
 var _combo_popup: Dictionary = {
 	"combo": 0,
@@ -148,9 +151,6 @@ var _attack_shake_offset_x: float = 0.0
 
 ## 元素连锁光晕
 var _element_glow: Dictionary = {"type": "", "timer": 0.0, "color": Color()}
-
-## 伤害数字弹出队列
-var _damage_popup_queue: Array[Dictionary] = []
 
 ## 敌人倒下粒子爆散
 var _defeat_explosions: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size}]
@@ -389,7 +389,6 @@ func init(data: Dictionary = {}) -> void:
 	_screen_flash_timer = 0.0
 	_attack_flash_timer = 0.0
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
-	_damage_popup_queue = []
 	_selection_pulse = 0.0
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail = []
@@ -739,28 +738,23 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	_trigger_attack_shake()
 	if target_idx < 0:
 		target_idx = _find_enemy_index(result.get("target", ""))
-	var popup_x: float = DESIGN_W / 2.0
-	var popup_y: float = 95.0
+	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
+	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, target_idx if target_idx >= 0 else 0)
 	if target_idx >= 0:
-		popup_x = 25.0 + target_idx * 120.0 + 55.0
-		popup_y = 80.0
 		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.3, "maxTimer": 0.3})
 	if damage > 0:
-		_floating_texts.append({
-			"text": "-%d" % damage,
-			"x": popup_x,
-			"y": popup_y,
-			"color": C["gold"] if not result.get("isWeak", false) else C["text_muted"],
-			"size": 24.0 if result.get("isEffective", false) else 19.0,
-			"timer": 0.0,
-			"duration": 0.9,
-			"critical": result.get("isEffective", false)
-		})
+		_spawn_damage_popup(
+			"-%d" % damage,
+			anchor,
+			"enemy:%d" % maxi(target_idx, 0),
+			bool(result.get("isEffective", false)),
+			bool(result.get("isWeak", false))
+		)
 	if shield_absorbed > 0:
 		_floating_texts.append({
 			"text": "盾-%d" % shield_absorbed,
-			"x": popup_x,
-			"y": popup_y + 16.0,
+			"x": anchor.x,
+			"y": anchor.y + 16.0 if anchor.y >= 100.0 else anchor.y - 16.0,
 			"color": C["shield"],
 			"size": 13.0,
 			"timer": 0.0,
@@ -783,11 +777,11 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			})
 		elif kind == "weaken":
 			var weaken_idx := int(effect.get("target_index", target_idx))
-			var wx := 25.0 + weaken_idx * 120.0 + 55.0 if weaken_idx >= 0 else popup_x
+			var weaken_anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, weaken_idx if weaken_idx >= 0 else 0)
 			_floating_texts.append({
 				"text": "缚-%d%%" % int(round(float(effect.get("reduction", 0.0)) * 100.0)),
-				"x": wx,
-				"y": 100.0,
+				"x": weaken_anchor.x,
+				"y": weaken_anchor.y + 16.0 if weaken_anchor.y >= 100.0 else weaken_anchor.y - 16.0,
 				"color": GEM_COLORS["grass"],
 				"size": 15.0,
 				"timer": 0.0,
@@ -913,10 +907,10 @@ func _process_matches() -> void:
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
 	for log: Dictionary in result.get("damage_log", []):
 		var log_damage: int = log.get("damage", 0)
-		var log_effective: bool = log.get("isEffective", false)
-		var log_weak: bool = log.get("isWeak", false)
+		var log_effective: bool = log.get("isEffective", log.get("is_effective", false))
+		var log_weak: bool = log.get("isWeak", log.get("is_weak", false))
 		var log_target: String = log.get("target", "")
-		var log_died: bool = log.get("targetDied", false)
+		var log_died: bool = log.get("targetDied", log.get("target_died", false))
 		
 		# 克制提示
 		if log_effective:
@@ -924,38 +918,15 @@ func _process_matches() -> void:
 		elif log_weak:
 			_show_message("效果不佳...")
 		
-		# 克制伤害颜色/大小
-		var popup_color: Color = C["fire"] if log_effective else (C["text_muted"] if log_weak else C["gold"])
-		var popup_size: float = 24.0 if log_effective else (12.0 if log_weak else 18.0)
-		
 		var target_idx := _find_enemy_index(log_target)
+		_spawn_enemy_damage_popup("-%d" % log_damage, target_idx, log_effective, log_weak)
 		if target_idx >= 0:
-			var ex := 25.0 + target_idx * 120.0 + 55.0
-			var ey := 80.0
-			_floating_texts.append({
-				"text": "-%d" % log_damage,
-				"x": ex, "y": ey,
-				"color": popup_color,
-				"size": popup_size,
-				"timer": 0.0,
-				"duration": 0.8,
-				"critical": log_effective
-			})
 			if not log_died:
 				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
 				_trigger_attack_shake()
 			if log_died:
 				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
 		else:
-			# 找不到目标敌人在敌方列表，显示到中央
-			_floating_texts.append({
-				"text": "-%d" % log_damage,
-				"x": DESIGN_W / 2.0, "y": 95.0,
-				"color": popup_color,
-				"size": popup_size,
-				"timer": 0.0,
-				"duration": 0.8
-			})
 			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
 			_trigger_attack_shake()
 	
@@ -1174,34 +1145,14 @@ func _start_enemy_turn() -> void:
 			continue
 		
 		if action.get("damage", 0) > 0:
-			var dmg_size := 28.0 if action.get("is_charged", false) else 16.0
-			var dmg_color := C["charged_attack"] if action.get("is_charged", false) else C["danger"]
+			# 伤害飘字由 enemy_attacked 信号统一生成，这里只补护盾/束缚提示。
 			var target_idx := _find_player_index(action.get("target", ""))
-			var popup_x: float = 80.0
-			var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
-			if target_idx >= 0:
-				popup_x = 15.0 + target_idx * 120.0 + 55.0
-				popup_y = 218.0
-				_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
-			# 伤害数字加入队列（依次弹出，延迟编排）
-			var entry: Dictionary = {
-				"text": "-%d" % action.get("damage", 0),
-				"x": popup_x,
-				"y": popup_y,
-				"color": dmg_color,
-				"size": dmg_size,
-				"delay": _damage_popup_queue.size() * 0.1,
-				"elapsed": 0.0,
-				"duration": 0.8,
-				"critical": action.get("is_charged", false)
-			}
-			if _damage_popup_queue.size() < 5:
-				_damage_popup_queue.append(entry)
+			var anchor := BattleAnimationControllerScript.player_damage_anchor(target_idx)
 			if int(action.get("guard_absorbed", 0)) > 0:
 				_floating_texts.append({
 					"text": "护-%d" % int(action.get("guard_absorbed", 0)),
-					"x": popup_x,
-					"y": popup_y + 16.0,
+					"x": anchor.x,
+					"y": anchor.y + 16.0,
 					"color": C["shield"],
 					"size": 13.0,
 					"timer": 0.0,
@@ -1463,6 +1414,46 @@ func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
 	}
 
 ## ============================================
+# 伤害飘字（普通 / 暴击）
+## ============================================
+
+func _spawn_damage_popup(text: String, anchor: Vector2, anchor_key: String, critical: bool, weak: bool = false, heavy: bool = false) -> void:
+	var style := BattleAnimationControllerScript.damage_style(critical, weak, heavy)
+	var schedule := BattleAnimationControllerScript.schedule_damage_popup(
+		_floating_texts, anchor_key, _fx_time, float(style["duration"]), critical or heavy
+	)
+	var lane := int(schedule["lane"])
+	var offset := BattleAnimationControllerScript.damage_lane_offset(anchor, lane)
+	var popup_x := clampf(anchor.x + offset.x, 52.0, DESIGN_W - 52.0)
+	var popup_y := anchor.y + offset.y
+	_floating_texts.append({
+		"text": text,
+		"x": popup_x,
+		"y": popup_y,
+		"start_y": popup_y,
+		"color": style["color"],
+		"size": style["size"],
+		"timer": 0.0,
+		"duration": style["duration"],
+		"delay": schedule["delay"],
+		"critical": critical,
+		"damage_style": style["style"],
+		"damage_anchor": anchor_key,
+		"lane": lane
+	})
+
+func _spawn_enemy_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false) -> void:
+	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
+	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, target_idx)
+	var key := "enemy:%d" % maxi(target_idx, 0)
+	_spawn_damage_popup(text, anchor, key, critical, weak)
+
+func _spawn_player_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false, heavy: bool = false) -> void:
+	var anchor := BattleAnimationControllerScript.player_damage_anchor(target_idx)
+	var key := "player:%d" % maxi(target_idx, 0)
+	_spawn_damage_popup(text, anchor, key, critical, weak, heavy)
+
+## ============================================
 # 伤害数字信号处理
 ## ============================================
 
@@ -1484,41 +1475,23 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 	else:
 		target_idx = _find_enemy_index(target_name)
 
-	# 颜色与大小分类
-	var popup_color: Color = C["gold"]
-	var popup_size: float = 20.0
-	if is_critical:
-		popup_color = C["fire"]
-		popup_size = 26.0
-	elif is_weak:
-		popup_color = C["text_muted"]
-		popup_size = 14.0
-
-	# 位置计算
-	var popup_x: float = DESIGN_W / 2.0
-	var popup_y: float = 95.0
-	if target_idx >= 0:
-		popup_x = 25.0 + target_idx * 120.0 + 55.0
-		popup_y = 80.0
-
-	_floating_texts.append({
-		"text": "-%d" % damage,
-		"x": popup_x,
-		"y": popup_y,
-		"color": popup_color,
-		"size": popup_size,
-		"timer": 0.0,
-		"duration": 0.9,
-		"critical": is_critical
-	})
+	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
+	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, target_idx if target_idx >= 0 else 0)
+	_spawn_damage_popup(
+		"-%d" % damage,
+		anchor,
+		"enemy:%d" % maxi(target_idx, 0),
+		is_critical,
+		is_weak
+	)
 
 	# 护盾吸收显示
 	var shield_absorbed: int = damage_info.get("shieldAbsorbed", damage_info.get("shield_absorbed", 0))
 	if shield_absorbed > 0:
 		_floating_texts.append({
 			"text": "盾-%d" % shield_absorbed,
-			"x": popup_x,
-			"y": popup_y + 18.0,
+			"x": anchor.x,
+			"y": anchor.y + 18.0 if anchor.y >= 100.0 else anchor.y - 18.0,
 			"color": C["shield"],
 			"size": 13.0,
 			"timer": 0.0,
@@ -1536,30 +1509,12 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 		return
 
 	var is_charged: bool = action_info.get("is_charged", false)
-	var dmg_size: float = 28.0 if is_charged else 16.0
-	var dmg_color: Color = C["charged_attack"] if is_charged else C["danger"]
 	var target_name: String = action_info.get("target", "")
 	var target_idx: int = _find_player_index(target_name)
 
-	var popup_x: float = 80.0
-	var popup_y: float = 225.0 + _damage_popup_queue.size() * 20.0
+	_spawn_player_damage_popup("-%d" % damage, target_idx, false, false, is_charged)
 	if target_idx >= 0:
-		popup_x = 15.0 + target_idx * 120.0 + 55.0
-		popup_y = 218.0
 		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
-
-	if _damage_popup_queue.size() < 5:
-		_damage_popup_queue.append({
-			"text": "-%d" % damage,
-			"x": popup_x,
-			"y": popup_y,
-			"color": dmg_color,
-			"size": dmg_size,
-			"delay": _damage_popup_queue.size() * 0.1,
-			"elapsed": 0.0,
-			"duration": 0.8,
-			"critical": is_charged
-		})
 
 func _on_skill_ready(monster: Dictionary) -> void:
 	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
@@ -1813,7 +1768,8 @@ func _update_hp_display(dt: float) -> void:
 	BattleAnimationControllerScript.update_hp_display(_player_display_hp, dt)
 
 func _update_floating_texts(dt: float) -> void:
-	BattleAnimationControllerScript.update_floating_texts(_floating_texts, _damage_popup_queue, _element_glow, _swipe_trail, dt)
+	_fx_time += dt
+	BattleAnimationControllerScript.update_floating_texts(_floating_texts, _element_glow, _swipe_trail, dt)
 
 ## ============================================
 # 渲染
@@ -2087,6 +2043,11 @@ func _draw_selection() -> void:
 
 func _draw_floating_texts() -> void:
 	for ft in _floating_texts:
+		if float(ft.get("delay", 0.0)) > 0.0:
+			continue
+		if not str(ft.get("damage_style", "")).is_empty():
+			_draw_damage_popup(ft)
+			continue
 		var text: String = ft.get("text", "")
 		var x: float = ft.get("x", 0.0)
 		var y: float = ft.get("y", 0.0)
@@ -2104,6 +2065,44 @@ func _draw_floating_texts() -> void:
 				_draw_texture_fit(plate_tex, Rect2(x - plate_w / 2.0, y - plate_h * 0.62, plate_w, plate_h), 0.92 * fade)
 		color.a *= fade
 		_draw_text_with_shadow(text, x, y, color, size)
+
+## 伤害飘字：普通/暴击共用上飘+淡出，暴击额外放大与轻微抖动。
+func _draw_damage_popup(ft: Dictionary) -> void:
+	var text: String = ft.get("text", "")
+	var timer: float = ft.get("timer", 0.0)
+	var duration: float = maxf(ft.get("duration", 0.9), 0.01)
+	var fade: float = clampf(1.0 - maxf(0.0, timer - duration * 0.62) / maxf(0.01, duration * 0.38), 0.0, 1.0)
+	if fade <= 0.0:
+		return
+	var critical := str(ft.get("damage_style", "")) == "crit"
+	var color: Color = ft.get("color", C["white"])
+	var size: float = ft.get("size", 20.0)
+	var x: float = ft.get("x", 0.0)
+	var start_y: float = ft.get("start_y", ft.get("y", 0.0))
+	var rise: float = BattleAnimationControllerScript.DAMAGE_RISE if start_y < 100.0 else BattleAnimationControllerScript.DAMAGE_BAND_RISE
+	var y: float = start_y - rise * clampf(timer / 0.35, 0.0, 1.0)
+	var pop: float = clampf(timer / 0.12, 0.0, 1.0)
+	var scale: float = 0.72 + 0.28 * (1.0 - pow(1.0 - pop, 2.0))
+	if timer > 0.12:
+		var settle: float = clampf((timer - 0.12) / 0.18, 0.0, 1.0)
+		scale = 1.0 + 0.12 * (1.0 - settle)
+	if critical:
+		scale *= 1.06
+		x += sin(timer * 48.0) * 1.8 * clampf(1.0 - timer / 0.3, 0.0, 1.0)
+	color.a = fade
+	size *= scale
+	if critical:
+		_draw_crit_damage_text(text, x, y, color, size, fade)
+	else:
+		_draw_text_with_shadow(text, x, y, color, size, true)
+
+func _draw_crit_damage_text(text: String, x: float, y: float, color: Color, size: float, fade: float) -> void:
+	# 「暴击」作为前缀标签放在数字上方，既保证一眼可辨，又避免横向占宽压住相邻飘字。
+	var prefix := BattleAnimationControllerScript.DAMAGE_CRIT_PREFIX
+	var prefix_size := maxf(12.0, size * 0.55)
+	var prefix_color := Color(1.0, 0.86, 0.55, fade)
+	_draw_text_with_shadow(prefix, x, y - size * 0.95, prefix_color, prefix_size, true)
+	_draw_text_with_shadow(text, x, y, color, size, true)
 
 func _draw_combo_popup() -> void:
 	if not _combo_popup.has("combo"):
