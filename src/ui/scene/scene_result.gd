@@ -8,6 +8,7 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const CaptureSystemScript = preload("res://src/battle/capture_system.gd")
 const RewardRulesScript = preload("res://src/battle/reward_rules.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
+const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
 
 # === 静态常量 ===
 const DESIGN_W: float = 375.0
@@ -69,6 +70,9 @@ var _achievement_manager: Node = null
 var _battle_result: Dictionary = {}
 var _is_win: bool = false
 var _stars: int = 0
+
+## 结算页背景音乐：胜利用 result_win、失败用 result_loss，仍复用同一个合成器。
+var _result_bgm: Node = null
 
 # 收服
 var _capture_target: Dictionary = {}
@@ -164,6 +168,7 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		_achievement_manager = _game.get_node("AchievementManager")
 	_battle_result = _normalize_battle_result(battle_result)
 	_is_win = _battle_result.get("result", "") == "win"
+	_sync_result_bgm()
 	_calc_stars()
 	var capture_played_inline: bool = _battle_result.get("capture_played_inline", false)
 	if capture_played_inline:
@@ -182,6 +187,17 @@ func initialize(game: Node, battle_result: Dictionary) -> void:
 		if _storage and _storage.has_method("save_stage_stars"):
 			_storage.save_stage_stars(_battle_result["stageId"], _stars)
 	_trigger_achievements()
+
+## 结算页一进场就按胜负选轨道；同一节点重复 initialize 只换代，不叠播放器。
+func _sync_result_bgm() -> void:
+	var track := "result_win" if _is_win else "result_loss"
+	if _result_bgm == null or not is_instance_valid(_result_bgm):
+		_result_bgm = BattleBgmScript.new()
+		_result_bgm.name = "ResultBgm"
+		_result_bgm.set_track(track)
+		add_child(_result_bgm)
+	elif str(_result_bgm.track_name) != track:
+		_result_bgm.set_track(track)
 
 func _normalize_battle_result(result: Dictionary) -> Dictionary:
 	var normalized := result.duplicate(true)

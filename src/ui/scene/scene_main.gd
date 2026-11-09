@@ -8,6 +8,8 @@ extends Control
 
 signal button_pressed(btn_id: String)
 
+const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
+
 const BUTTON_DESCRIPTIONS := {
 	"start": "选择关卡，开始三消冒险战斗！",
 	"team": "编队你的怪物伙伴，打造最强阵容",
@@ -35,6 +37,9 @@ const EXP_BAR_WIDTH := 108.0
 
 static var instance: SceneMain
 
+## 大厅背景音乐：复用战斗 BGM 的合成器与全局单播放器约束，只切换轨道参数。
+var _lobby_bgm: Node = null
+
 var _storage: Node = null
 var _player: Dictionary = {
 	"name": "冒险者小帅",
@@ -54,6 +59,10 @@ var _player: Dictionary = {
 
 func _ready() -> void:
 	instance = self
+	_lobby_bgm = BattleBgmScript.new()
+	_lobby_bgm.name = "LobbyBgm"
+	_lobby_bgm.set_track("lobby")
+	add_child(_lobby_bgm)
 	for button_name in BUTTON_IDS:
 		var button := get_node("%" + button_name) as TextureButton
 		var button_id: String = BUTTON_IDS[button_name]

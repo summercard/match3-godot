@@ -1,0 +1,67 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[LobbyResultBgm] track battle      bpm=100.0 bars=2 loop=4.800s root=45(A2,110.00Hz) scale=minor_pentatonic degrees=[0, 3, 5, 7, 10] master=0.72
+[LobbyResultBgm] layer battle.bed       enabled=true wave=sine gain=0.12
+[LobbyResultBgm] layer battle.bass      enabled=true wave=sine gain=0.38 bar_roots=[0, 3] pattern=[0, -1, 7, -1]
+[LobbyResultBgm] layer battle.pad       enabled=true wave=sine gain=0.08 bar_roots=[0, 3] chord=[0, 7, 12]
+[LobbyResultBgm] layer battle.lead      enabled=true wave=triangle gain=0.24 bar_roots=[0, 3] pattern=[0, -1, 2, 4, 3, -1, 2, 1, 0, -1, 4, 3, 2, -1, 1, 0]
+[LobbyResultBgm] layer battle.kick      enabled=true wave=sine gain=0.30 pattern=[0, -1, 2, -1]
+[LobbyResultBgm] track lobby       bpm=76.0 bars=4 loop=12.632s root=48(C3,130.81Hz) scale=major_pentatonic degrees=[0, 2, 4, 7, 9] master=0.68
+[LobbyResultBgm] layer lobby.bed        enabled=true wave=sine gain=0.10
+[LobbyResultBgm] layer lobby.bass       enabled=true wave=sine gain=0.26 bar_roots=[0, 5, 7, 9] pattern=[0, -1, 7, -1]
+[LobbyResultBgm] layer lobby.pad        enabled=true wave=sine gain=0.07 bar_roots=[0, 5, 7, 9] chord=[0, 4, 7]
+[LobbyResultBgm] layer lobby.lead       enabled=true wave=triangle gain=0.16 bar_roots=[0, 5, 7, 9] pattern=[0, -1, 2, 4, 3, -1, 2, -1, 1, -1, 3, 4, 2, -1, 1, -1, 2, -1, 4, 3, 2, -1, 0, -1, 3, -1, 2, 1, 0, -1, 2, -1]
+[LobbyResultBgm] layer lobby.kick       enabled=false wave=sine gain=0.30 pattern=[0, -1, 2, -1]
+[LobbyResultBgm] track result_win  bpm=112.0 bars=2 loop=4.286s root=48(C3,130.81Hz) scale=major_pentatonic degrees=[0, 2, 4, 7, 9] master=0.72
+[LobbyResultBgm] layer result_win.bed      enabled=true wave=sine gain=0.09
+[LobbyResultBgm] layer result_win.bass      enabled=true wave=sine gain=0.30 bar_roots=[0, 7] pattern=[0, -1, 7, -1]
+[LobbyResultBgm] layer result_win.pad      enabled=true wave=sine gain=0.09 bar_roots=[0, 7] chord=[0, 4, 7]
+[LobbyResultBgm] layer result_win.lead      enabled=true wave=triangle gain=0.26 bar_roots=[0, 7] pattern=[0, 2, 4, 4, 3, 4, 2, 0, 1, 2, 3, 4, 2, 4, 1, 0]
+[LobbyResultBgm] layer result_win.kick      enabled=true wave=sine gain=0.22 pattern=[0, -1, 2, -1]
+[LobbyResultBgm] track result_loss bpm=66.0 bars=2 loop=7.273s root=45(A2,110.00Hz) scale=minor_pentatonic degrees=[0, 3, 5, 7, 10] master=0.62
+[LobbyResultBgm] layer result_loss.bed      enabled=true wave=sine gain=0.13
+[LobbyResultBgm] layer result_loss.bass      enabled=true wave=sine gain=0.28 bar_roots=[0, 3] pattern=[0, -1, 3, -1]
+[LobbyResultBgm] layer result_loss.pad      enabled=true wave=sine gain=0.08 bar_roots=[0, 3] chord=[0, 3, 7]
+[LobbyResultBgm] layer result_loss.lead      enabled=true wave=triangle gain=0.15 bar_roots=[0, 3] pattern=[0, -1, -1, 2, -1, 1, -1, -1, 0, -1, -1, 3, -1, 2, -1, -1]
+[LobbyResultBgm] layer result_loss.kick      enabled=false wave=sine gain=0.30 pattern=[0, -1, 2, -1]
+[LobbyResultBgm] stream lobby       frames=278526 bytes=557052 loop=12.632s peak=22281 first=0 last=-229 seam=229 rms(first/last)=9762.9/2678.0
+[LobbyResultBgm] stream battle      frames=105840 bytes=211680 loop=4.800s peak=23592 first=0 last=-123 seam=123 rms(first/last)=10583.8/2353.6
+[LobbyResultBgm] stream result_win  frames=94500 bytes=189000 loop=4.286s peak=23592 first=0 last=-119 seam=119 rms(first/last)=9597.3/1977.4
+[LobbyResultBgm] stream result_loss frames=160364 bytes=320728 loop=7.273s peak=20315 first=0 last=-100 seam=100 rms(first/last)=9025.7/2895.7
+[LobbyResultBgm] walk lobby              scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk battle             scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk result_win         scene=result track=result_win  players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk result_loss        scene=result track=result_loss players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk back_lobby         scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round1_lobby       scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round1_battle      scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round1_result_win  scene=result track=result_win  players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round1_back_lobby  scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] cycle round=1 result=win total_playing=1 track=lobby
+[LobbyResultBgm] walk round2_lobby       scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round2_battle      scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round2_result_loss scene=result track=result_loss players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round2_back_lobby  scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] cycle round=2 result=lose total_playing=1 track=lobby
+[LobbyResultBgm] walk round3_lobby       scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round3_battle      scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round3_result_win  scene=result track=result_win  players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round3_back_lobby  scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] cycle round=3 result=win total_playing=1 track=lobby
+[LobbyResultBgm] walk round4_lobby       scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round4_battle      scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round4_result_loss scene=result track=result_loss players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round4_back_lobby  scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] cycle round=4 result=lose total_playing=1 track=lobby
+[LobbyResultBgm] walk round5_lobby       scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round5_battle      scene=battle track=battle      players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round5_result_win  scene=result track=result_win  players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] walk round5_back_lobby  scene=main   track=lobby       players=1 playing=1 total=1 session=true active=true
+[LobbyResultBgm] cycle round=5 result=win total_playing=1 track=lobby
+[LobbyResultBgm] walk off_lobby          scene=main   track=lobby       players=0 playing=0 total=0 session=true active=true
+[LobbyResultBgm] walk off_battle         scene=battle track=battle      players=0 playing=0 total=0 session=true active=true
+[LobbyResultBgm] walk off_result_win     scene=result track=result_win  players=0 playing=0 total=0 session=true active=true
+[LobbyResultBgm] walk off_result_loss    scene=result track=result_loss players=0 playing=0 total=0 session=true active=true
+[LobbyResultBgm] walk off_lobby_again    scene=main   track=lobby       players=0 playing=0 total=0 session=true active=true
+[LobbyResultBgm] battle_transcript_identical=true bytes=8855
+[LobbyResultBgm] OK

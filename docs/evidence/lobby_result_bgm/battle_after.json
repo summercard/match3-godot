@@ -1,0 +1,454 @@
+{
+	"damage_dealt_log": [
+		{
+			"attacker": "小火龙",
+			"attacker_emoji": "🦎",
+			"attacker_id": "monster_001",
+			"boardAffinity": "fire",
+			"combo": 2,
+			"damage": 77,
+			"element": "fire",
+			"is_effective": false,
+			"is_weak": false,
+			"target": "野火虫",
+			"target_died": false,
+			"target_emoji": "🐛"
+		},
+		{
+			"attacker": "水龟仔",
+			"attacker_emoji": "🐢",
+			"attacker_id": "monster_002",
+			"boardAffinity": "water",
+			"combo": 2,
+			"damage": 90,
+			"element": "water",
+			"is_effective": true,
+			"is_weak": false,
+			"target": "野火虫",
+			"target_died": true,
+			"target_emoji": "🐛"
+		}
+	],
+	"damage_taken_log": [
+		{
+			"attack_mode": "strike",
+			"attacker": "野火虫",
+			"attacker_emoji": "🐛",
+			"charge_multiplier": 1.0,
+			"damage": 6,
+			"element": "fire",
+			"guard_absorbed": 0,
+			"is_charged": false,
+			"is_weakened": false,
+			"target": "水龟仔",
+			"target_died": false,
+			"target_emoji": "🐢",
+			"target_index": 1,
+			"weaken_reduction": 0.0
+		}
+	],
+	"result": {
+		"allyStats": [
+			{
+				"damageDealt": 77,
+				"damageTaken": 0,
+				"damage_dealt": 77,
+				"damage_taken": 0,
+				"emoji": "🦎",
+				"id": "monster_001",
+				"level": 1,
+				"monsterId": "monster_001",
+				"name": "小火龙"
+			},
+			{
+				"damageDealt": 90,
+				"damageTaken": 6,
+				"damage_dealt": 90,
+				"damage_taken": 6,
+				"emoji": "🐢",
+				"id": "monster_002",
+				"level": 1,
+				"monsterId": "monster_002",
+				"name": "水龟仔"
+			},
+			{
+				"damageDealt": 0,
+				"damageTaken": 0,
+				"damage_dealt": 0,
+				"damage_taken": 0,
+				"emoji": "🌱",
+				"id": "monster_003",
+				"level": 1,
+				"monsterId": "monster_003",
+				"name": "草苗儿"
+			}
+		],
+		"ally_stats": [
+			{
+				"damageDealt": 77,
+				"damageTaken": 0,
+				"damage_dealt": 77,
+				"damage_taken": 0,
+				"emoji": "🦎",
+				"id": "monster_001",
+				"level": 1,
+				"monsterId": "monster_001",
+				"name": "小火龙"
+			},
+			{
+				"damageDealt": 90,
+				"damageTaken": 6,
+				"damage_dealt": 90,
+				"damage_taken": 6,
+				"emoji": "🐢",
+				"id": "monster_002",
+				"level": 1,
+				"monsterId": "monster_002",
+				"name": "水龟仔"
+			},
+			{
+				"damageDealt": 0,
+				"damageTaken": 0,
+				"damage_dealt": 0,
+				"damage_taken": 0,
+				"emoji": "🌱",
+				"id": "monster_003",
+				"level": 1,
+				"monsterId": "monster_003",
+				"name": "草苗儿"
+			}
+		],
+		"best_capture_window": {
+			"bonus": 0.06,
+			"enemy_id": "enemy_001",
+			"enemy_index": 0,
+			"enemy_name": "野火虫",
+			"hp_ratio": 0.486666666666667,
+			"label": "不稳",
+			"reason": "目标开始动摇，但窗口还不稳定。",
+			"score": 0.1464,
+			"stability": 0.48,
+			"state": "unstable",
+			"suppressed": false
+		},
+		"breakCount": 0,
+		"break_count": 0,
+		"capture_window_best": {
+			"0": {
+				"bonus": 0.06,
+				"enemy_id": "enemy_001",
+				"enemy_index": 0,
+				"enemy_name": "野火虫",
+				"hp_ratio": 0.486666666666667,
+				"label": "不稳",
+				"reason": "目标开始动摇，但窗口还不稳定。",
+				"score": 0.1464,
+				"stability": 0.48,
+				"state": "unstable",
+				"suppressed": false
+			}
+		},
+		"capture_windows": {
+			"0": {
+				"bonus": 0.04,
+				"enemy_id": "enemy_001",
+				"enemy_index": 0,
+				"enemy_name": "野火虫",
+				"hp_ratio": 0.0,
+				"label": "过载",
+				"reason": "目标已被击倒，仍可尝试捕捉，但稳定度下降。",
+				"score": 0.121,
+				"stability": 0.45,
+				"state": "overpowered",
+				"suppressed": false
+			}
+		},
+		"enemies": [
+			{
+				"atk": 32,
+				"attackModes": null,
+				"boardAffinity": "fire",
+				"def": 7,
+				"element": "fire",
+				"emoji": "🐛",
+				"enemySkills": null,
+				"hp": -17,
+				"id": "enemy_001",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 150,
+				"name": "野火虫",
+				"rarity": 1,
+				"skill": {
+					"cost": 5,
+					"effects": [
+						{
+							"kind": "damage",
+							"multiplier": 1.5,
+							"target": "weakest_enemy"
+						}
+					],
+					"multiplier": 1.5,
+					"name": "火星",
+					"type": "strike"
+				},
+				"skillCharge": 0,
+				"spd": 10
+			}
+		],
+		"enemyLevel": 1,
+		"enemy_level": 1,
+		"highestChain": 2,
+		"highest_chain": 2,
+		"maxCombo": 2,
+		"maxTurns": 40,
+		"max_combo": 2,
+		"max_turns": 40,
+		"playerLevel": 5,
+		"playerTeam": [
+			{
+				"atk": 62,
+				"attackModes": null,
+				"boardAffinity": "fire",
+				"def": 42,
+				"element": "fire",
+				"emoji": "🦎",
+				"enemySkills": null,
+				"hp": 188,
+				"id": "monster_001",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 188,
+				"name": "小火龙",
+				"rarity": 2,
+				"skill": {
+					"cost": 8,
+					"effects": [
+						{
+							"kind": "damage",
+							"multiplier": 2.5,
+							"target": "weakest_enemy"
+						}
+					],
+					"multiplier": 2.5,
+					"name": "火焰冲击",
+					"type": "strike"
+				},
+				"skillCharge": 0,
+				"spd": 21
+			},
+			{
+				"atk": 49,
+				"attackModes": null,
+				"boardAffinity": "water",
+				"def": 56,
+				"element": "water",
+				"emoji": "🐢",
+				"enemySkills": null,
+				"hp": 204,
+				"id": "monster_002",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 210,
+				"name": "水龟仔",
+				"rarity": 2,
+				"skill": {
+					"cost": 7,
+					"effects": [
+						{
+							"kind": "heal",
+							"min": 24,
+							"ratio": 0.28,
+							"target": "lowest_ally"
+						},
+						{
+							"kind": "guard",
+							"reduction": 0.25,
+							"target": "lowest_ally",
+							"turns": 1
+						}
+					],
+					"multiplier": 1.0,
+					"name": "水之护盾",
+					"type": "ward"
+				},
+				"skillCharge": 0,
+				"spd": 16
+			},
+			{
+				"atk": 53,
+				"attackModes": null,
+				"boardAffinity": "grass",
+				"def": 49,
+				"element": "grass",
+				"emoji": "🌱",
+				"enemySkills": null,
+				"hp": 177,
+				"id": "monster_003",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 177,
+				"name": "草苗儿",
+				"rarity": 2,
+				"skill": {
+					"cost": 6,
+					"effects": [
+						{
+							"kind": "damage",
+							"multiplier": 1.35,
+							"target": "weakest_enemy"
+						},
+						{
+							"kind": "weaken",
+							"reduction": 0.35,
+							"target": "damaged_enemy",
+							"turns": 1
+						}
+					],
+					"multiplier": 1.35,
+					"name": "藤蔓束缚",
+					"type": "tempo"
+				},
+				"skillCharge": 0,
+				"spd": 25
+			}
+		],
+		"player_level": 5,
+		"player_team": [
+			{
+				"atk": 62,
+				"attackModes": null,
+				"boardAffinity": "fire",
+				"def": 42,
+				"element": "fire",
+				"emoji": "🦎",
+				"enemySkills": null,
+				"hp": 188,
+				"id": "monster_001",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 188,
+				"name": "小火龙",
+				"rarity": 2,
+				"skill": {
+					"cost": 8,
+					"effects": [
+						{
+							"kind": "damage",
+							"multiplier": 2.5,
+							"target": "weakest_enemy"
+						}
+					],
+					"multiplier": 2.5,
+					"name": "火焰冲击",
+					"type": "strike"
+				},
+				"skillCharge": 0,
+				"spd": 21
+			},
+			{
+				"atk": 49,
+				"attackModes": null,
+				"boardAffinity": "water",
+				"def": 56,
+				"element": "water",
+				"emoji": "🐢",
+				"enemySkills": null,
+				"hp": 204,
+				"id": "monster_002",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 210,
+				"name": "水龟仔",
+				"rarity": 2,
+				"skill": {
+					"cost": 7,
+					"effects": [
+						{
+							"kind": "heal",
+							"min": 24,
+							"ratio": 0.28,
+							"target": "lowest_ally"
+						},
+						{
+							"kind": "guard",
+							"reduction": 0.25,
+							"target": "lowest_ally",
+							"turns": 1
+						}
+					],
+					"multiplier": 1.0,
+					"name": "水之护盾",
+					"type": "ward"
+				},
+				"skillCharge": 0,
+				"spd": 16
+			},
+			{
+				"atk": 53,
+				"attackModes": null,
+				"boardAffinity": "grass",
+				"def": 49,
+				"element": "grass",
+				"emoji": "🌱",
+				"enemySkills": null,
+				"hp": 177,
+				"id": "monster_003",
+				"isBoss": false,
+				"leaderSkill": "",
+				"maxHP": 177,
+				"name": "草苗儿",
+				"rarity": 2,
+				"skill": {
+					"cost": 6,
+					"effects": [
+						{
+							"kind": "damage",
+							"multiplier": 1.35,
+							"target": "weakest_enemy"
+						},
+						{
+							"kind": "weaken",
+							"reduction": 0.35,
+							"target": "damaged_enemy",
+							"turns": 1
+						}
+					],
+					"multiplier": 1.35,
+					"name": "藤蔓束缚",
+					"type": "tempo"
+				},
+				"skillCharge": 0,
+				"spd": 25
+			}
+		],
+		"result": "win",
+		"stageId": "stage_1_1",
+		"stageRewards": {
+			"exp": 45,
+			"gold": 45
+		},
+		"stage_id": "stage_1_1",
+		"stage_rewards": {
+			"exp": 45,
+			"gold": 45
+		},
+		"totalDamage": 167,
+		"totalDamageDealt": {
+			"monster_001": 77,
+			"monster_002": 90
+		},
+		"totalDamageTaken": 6,
+		"total_damage": 167,
+		"total_damage_dealt": {
+			"monster_001": 77,
+			"monster_002": 90
+		},
+		"total_damage_taken": 6,
+		"turnCount": 2,
+		"turn_count": 2
+	},
+	"seed": 20261111,
+	"stage_id": "stage_1_1",
+	"turns": 2
+}

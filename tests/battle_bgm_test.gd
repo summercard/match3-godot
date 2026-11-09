@@ -302,7 +302,7 @@ func _test_scene_lifecycle_and_toggle() -> void:
 	_expect(bgm.player_count() == 0, "结算后 BGM 播放器应为 0")
 	_expect(not bgm.is_playing(), "结算后 BGM 不应继续播放")
 
-	# 离开战斗进入结算页：结算页不挂 BGM，也不存在音乐播放器。
+	# 离开战斗进入结算页：结算页挂自己的 BGM 轨道，场上仍只有 1 个播放器。
 	main.switch_scene("result", _result_payload())
 	await process_frame
 	await process_frame
@@ -310,9 +310,14 @@ func _test_scene_lifecycle_and_toggle() -> void:
 	var result_scene: Control = main.get_current_scene()
 	_expect(result_scene != null, "结算页应能加载")
 	if result_scene != null:
-		_expect(result_scene.get("_battle_bgm") == null, "结算页不应挂载 BattleBgm")
-		_expect(result_scene.find_children("*", "AudioStreamPlayer", true, false).is_empty(),
-			"结算页不应存在音乐播放器")
+		var result_bgm = result_scene.get("_result_bgm")
+		_expect(result_bgm != null, "结算页应挂载 BGM 节点")
+		if result_bgm != null:
+			_expect(str(result_bgm.track_name) == "result_win", "胜利结算应使用 result_win 轨道")
+			_expect(result_bgm.player_count() == 1, "musicOn=true 时结算 BGM 应恰好 1 个播放器")
+			_expect(result_bgm.is_playing(), "musicOn=true 时结算 BGM 应在播放")
+		_expect(result_scene.find_children("*", "AudioStreamPlayer", true, false).size() == 1,
+			"结算页场上应只有 1 个 BGM 播放器")
 
 	main.queue_free()
 	await process_frame
