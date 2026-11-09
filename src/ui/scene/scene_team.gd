@@ -434,43 +434,52 @@ func _on_tap(x: float, y: float) -> void:
 	
 	# 返回按钮
 	if _point_in_rect(pos, _back_btn):
+		_vibrate_button()
 		_change_to_scene("main")
 		return
 
 	if _point_in_rect(pos, _help_btn):
+		_vibrate_button()
 		_show_help = true
 		queue_redraw()
 		return
 	
 	# 保存按钮
 	if _point_in_rect(pos, _save_btn):
+		_vibrate_button()
 		_save_team()
 		_change_to_scene("main")
 		return
 	
 	# 取消按钮
 	if _point_in_rect(pos, _cancel_btn):
+		_vibrate_button()
 		_show_confirm = true
 		queue_redraw()
 		return
 
 	if _point_in_rect(pos, _filter_all_btn):
+		_vibrate_button()
 		_select_filter("all")
 		return
 
 	if _point_in_rect(pos, _filter_cycle_btn):
+		_vibrate_button()
 		_cycle_element_filter()
 		return
 
 	if _point_in_rect(pos, _sort_btn):
+		_vibrate_button()
 		_cycle_sort_option()
 		return
 
 	if _point_in_rect(pos, _roster_prev_btn):
+		_vibrate_button()
 		_turn_roster_page(-1)
 		return
 
 	if _point_in_rect(pos, _roster_next_btn):
+		_vibrate_button()
 		_turn_roster_page(1)
 		return
 	
@@ -487,6 +496,12 @@ func _on_tap(x: float, y: float) -> void:
 		_assign_to_slot(_get_instance_id(visible_monsters[monster_idx]))
 		return
 
+func _vibrate_button() -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.request("button_tap")
+
+
 func _handle_confirm_tap(pos: Vector2) -> void:
 	var cx := DESIGN_W / 2.0
 	var cy := DESIGN_H / 2.0
@@ -495,9 +510,11 @@ func _handle_confirm_tap(pos: Vector2) -> void:
 	var dialog_rect := Rect2(cx - 125.0, cy - 75.0, 250.0, 150.0)
 	
 	if _point_in_rect(pos, confirm_btn):
+		_vibrate_button()
 		_show_confirm = false
 		_change_to_scene("main")
 	elif _point_in_rect(pos, continue_btn):
+		_vibrate_button()
 		_show_confirm = false
 		queue_redraw()
 	elif not _point_in_rect(pos, dialog_rect):

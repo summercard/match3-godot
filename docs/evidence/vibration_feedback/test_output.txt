@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[Vibration] skill_cast strength=0.60 duration=40ms label=技能释放
+[Vibration] victory    strength=0.90 duration=160ms label=战斗胜利
+[Vibration] defeat     strength=0.75 duration=240ms label=战斗失败
+[Vibration] button_tap strength=0.30 duration=18ms label=按钮点击
+[Vibration] idle 2s requests=0 dropped=0
+[Vibration] scene on : requests=4 dropped=0 counts={"button_tap":1,"defeat":1,"skill_cast":1,"victory":1}
+[Vibration] scene off: requests=0 dropped=4 counts={"button_tap":0,"defeat":0,"skill_cast":0,"victory":0}
+[Vibration] battle on/off identical=true turns=4 damage_logs=12 taken_logs=3 result=win
+[Vibration] OK

@@ -623,6 +623,12 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 					drag_dir = Vector2i(0, 1 if dy > 0 else -1)
 				_drag_preview = {"active": true, "direction": drag_dir}
 
+func _vibration_request(event_id: String) -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null and vibration.has_method("request"):
+		vibration.request(event_id)
+
+
 func _get_pointer_position(event: InputEvent, already_local: bool) -> Vector2:
 	var raw_pos: Vector2 = event.position
 	var candidates: Array[Vector2] = BattleInputMapperScript.pointer_candidates(self, event, already_local)
@@ -785,6 +791,8 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	_show_message("%s 释放 %s！" % [attacker, skill_name])
 	_screen_flash_timer = 0.18
 	_trigger_attack_shake()
+	# 技能释放成功：四类震动事件之一（参数见 vibration_feedback.gd CONFIG）。
+	_vibration_request("skill_cast")
 	if target_idx < 0:
 		target_idx = _find_enemy_index(result.get("target", ""))
 	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
@@ -1411,6 +1419,8 @@ func _begin_battle_end_overlay() -> void:
 		_battle_bgm.stop()
 	if _battle_sfx != null:
 		_battle_sfx.play("victory" if _battle != null and _battle.battle_result == "win" else "defeat")
+	# 胜负结算：四类震动事件之一；总开关关闭时只累计丢弃数。
+	_vibration_request("victory" if _battle != null and _battle.battle_result == "win" else "defeat")
 	_clear_chain_combo()
 	_battle_end_overlay_timer = 0.0
 	_battle_end_particles_spawned = false
@@ -2673,6 +2683,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 	"""检测独立底部捕捉控件，不依赖整块底栏背板。"""
 	var bottom_y: float = float(_board.offset_y + _board.rows * _board.cell_size + 7.0) if _board != null else 619.0
 	if _get_capture_toggle_rect(bottom_y).has_point(Vector2(x, y)):
+		_vibration_request("button_tap")
 		_auto_capture_enabled = not _auto_capture_enabled
 		_save_capture_preferences()
 		if _auto_capture_enabled and _equipped_capture_item_id.is_empty():
@@ -2695,6 +2706,7 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 		if item.is_empty() or item.get("count", 0) <= 0:
 			return false
 		var def: Dictionary = ItemDB.get_item(item["id"])
+		_vibration_request("button_tap")
 		if str(def.get("type", "")) == "capture":
 			_try_use_item_at_slot(i)
 			return true
