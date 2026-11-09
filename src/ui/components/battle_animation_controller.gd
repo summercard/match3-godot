@@ -135,37 +135,6 @@ static func tick_timed_entries(entries: Array, dt: float, timer_key: String = "t
 		if entries[i][timer_key] <= 0.0:
 			entries.remove_at(i)
 
-static func update_combo_popup(combo_popup: Dictionary, dt: float) -> void:
-	if not combo_popup.has("combo"):
-		return
-	combo_popup["timer"] += dt
-	var t: float = combo_popup["timer"]
-	var phase: String = combo_popup["phase"]
-	if phase == "in":
-		if t < 0.15:
-			var progress: float = t / 0.15
-			combo_popup["scale"] = 0.5 + 0.7 * progress
-			combo_popup["opacity"] = progress
-		else:
-			combo_popup["phase"] = "peak"
-			combo_popup["timer"] = 0.0
-			combo_popup["scale"] = 1.2
-			combo_popup["opacity"] = 1.0
-	elif phase == "peak":
-		if t < 0.15:
-			var progress: float = t / 0.15
-			combo_popup["scale"] = 1.2 - 0.2 * progress
-		else:
-			combo_popup["phase"] = "out"
-			combo_popup["timer"] = 0.0
-			combo_popup["scale"] = 1.0
-	elif phase == "out":
-		if t < 0.3:
-			var progress: float = t / 0.3
-			combo_popup["opacity"] = 1.0 - progress
-		else:
-			combo_popup.clear()
-
 static func update_attack_shake(timer: float, flash_timer: float, dt: float) -> Dictionary:
 	if timer <= 0.0:
 		return {"timer": 0.0, "flash_timer": tick_countdown(flash_timer, dt), "offset_x": 0.0}
