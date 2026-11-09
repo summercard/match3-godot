@@ -15,6 +15,7 @@ const MonsterArtDBScript = preload("res://src/data/monster_art_db.gd")
 const BattleUIFeedbackScript = preload("res://src/ui/components/battle_ui_feedback.gd")
 const BattleInputMapperScript = preload("res://src/ui/components/battle_input_mapper.gd")
 const BattleAnimationControllerScript = preload("res://src/ui/components/battle_animation_controller.gd")
+const BattleHitReactionScript = preload("res://src/ui/components/battle_hit_reaction.gd")
 const BattleBoardRendererScript = preload("res://src/ui/components/battle_board_renderer.gd")
 const BattleCombatantRendererScript = preload("res://src/ui/components/battle_combatant_renderer.gd")
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
@@ -98,8 +99,11 @@ var _enemy_windup_cues: Dictionary = {}
 var _enemy_windup_timer: float = 0.0
 var _enemy_windup_total: float = 0.0
 
-## 受击闪烁
+## 受击闪烁（旧版光标，保留原时长与表现）
 var _hit_flashes: Array[Dictionary] = []
+
+## 受击反应：0.2s 抖动 + 闪白，参数与总开关见 battle_hit_reaction.gd
+var _hit_reactions: Array[Dictionary] = []
 
 ## 倒下提示
 var _fall_messages: Array[Dictionary] = []
@@ -398,6 +402,7 @@ func init(data: Dictionary = {}) -> void:
 	
 	_selected_gem = Vector2i(-1, -1)
 	_hit_flashes = []
+	_hit_reactions = []
 	_fall_messages = []
 	_enemy_display_hp = []
 	_player_display_hp = []
@@ -769,7 +774,7 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
 	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, target_idx if target_idx >= 0 else 0)
 	if target_idx >= 0:
-		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.3, "maxTimer": 0.3})
+		_register_hit_flash(true, target_idx, 0.3)
 	if damage > 0:
 		_spawn_damage_popup(
 			"-%d" % damage,
@@ -964,12 +969,13 @@ func _process_matches() -> void:
 		_spawn_enemy_damage_popup("-%d" % log_damage, target_idx, log_effective, log_weak)
 		if target_idx >= 0:
 			if not log_died:
-				_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+				_register_hit_flash(true, target_idx, 0.25)
 				_trigger_attack_shake()
+			_add_hit_reaction(true, target_idx)
 			if log_died:
 				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
 		else:
-			_hit_flashes.append({"isEnemy": true, "monsterIndex": 0, "timer": 0.25, "maxTimer": 0.25})
+			_register_hit_flash(true, 0, 0.25)
 			_trigger_attack_shake()
 	
 	# ===== 第7.5步：特殊消除的毒雾清除 & 锁定解锁 =====
@@ -1239,7 +1245,7 @@ func _start_enemy_turn() -> void:
 				"duration": 0.8
 			})
 			# 受击闪烁
-			_hit_flashes.append({"isEnemy": true, "monsterIndex": enemy_idx, "timer": 0.25, "maxTimer": 0.25})
+			_register_hit_flash(true, enemy_idx, 0.25)
 		
 		elif log_type == "stun":
 			_show_message("⚡ %s 眩晕了，无法行动！" % enemy_name)
@@ -1365,6 +1371,7 @@ func _clear_enemy_wave_visuals() -> void:
 	_defeated_enemies.clear()
 	_boss_skill_visuals.clear()
 	_hit_flashes.clear()
+	_hit_reactions.clear()
 	_fall_messages.clear()
 	_enemy_attacks.clear()
 	_floating_texts.clear()
@@ -1593,6 +1600,23 @@ func _clear_chain_combo() -> void:
 	if _combo_sfx != null:
 		_combo_sfx.stop_all()
 
+## 记录旧版受击闪烁，并同时触发 0.2s 抖动 + 闪白。
+func _register_hit_flash(is_enemy: bool, index: int, flash_timer: float) -> void:
+	if index < 0:
+		return
+	_hit_flashes.append({
+		"isEnemy": is_enemy,
+		"monsterIndex": index,
+		"timer": flash_timer,
+		"maxTimer": flash_timer
+	})
+	_add_hit_reaction(is_enemy, index)
+
+
+func _add_hit_reaction(is_enemy: bool, index: int) -> void:
+	BattleHitReactionScript.trigger(_hit_reactions, is_enemy, index)
+
+
 func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.2
 	_attack_flash_timer = 0.1
@@ -1696,7 +1720,7 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 
 	# 敌人受击闪烁
 	if target_idx >= 0:
-		_hit_flashes.append({"isEnemy": true, "monsterIndex": target_idx, "timer": 0.25, "maxTimer": 0.25})
+		_register_hit_flash(true, target_idx, 0.25)
 
 func _on_enemy_attacked(action_info: Dictionary) -> void:
 	"""处理 BattleManager.enemy_attacked 信号，显示敌人攻击伤害"""
@@ -1710,7 +1734,7 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 
 	_spawn_player_damage_popup("-%d" % damage, target_idx, false, false, is_charged)
 	if target_idx >= 0:
-		_hit_flashes.append({"isEnemy": false, "monsterIndex": target_idx, "timer": 0.35, "maxTimer": 0.35})
+		_register_hit_flash(false, target_idx, 0.35)
 
 func _on_skill_ready(monster: Dictionary) -> void:
 	"""处理 BattleManager.skill_ready 信号，显示技能充能完成提示"""
@@ -1873,6 +1897,9 @@ func _process(delta: float) -> void:
 	# 更新受击闪烁
 	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, anim_delta)
 	
+	# 更新受击反应（抖动 / 闪白）
+	BattleHitReactionScript.tick(_hit_reactions, anim_delta)
+
 	# 更新倒下提示
 	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, anim_delta)
 	
@@ -2120,6 +2147,7 @@ func _combatant_render_state() -> Dictionary:
 		"colors": C,
 		"idle_time": _idle_time,
 		"hit_flashes": _hit_flashes,
+		"hit_reactions": _hit_reactions,
 		"defeated_enemies": _defeated_enemies,
 		"boss_skill_visuals": _boss_skill_visuals,
 		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
@@ -3187,6 +3215,7 @@ func _go_to_result() -> void:
 func destroy() -> void:
 	_floating_texts.clear()
 	_hit_flashes.clear()
+	_hit_reactions.clear()
 	_fall_messages.clear()
 	_eliminating_gems.clear()
 	_falling_gems.clear()

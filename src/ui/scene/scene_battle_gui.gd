@@ -18,6 +18,11 @@ const ITEM_PATHS := [
 	"BottomControls/Item3",
 ]
 
+## 头像原始位置与闪白材质缓存；受击反应只改表现，不碰战斗状态。
+var _portrait_base_positions: Dictionary = {}
+var _portrait_flash_materials: Dictionary = {}
+
+
 func _ready() -> void:
 	super._ready()
 	_sync_gui()
@@ -40,6 +45,7 @@ func _sync_gui() -> void:
 	_sync_enemy_slots()
 	_sync_player_slots()
 	_sync_bottom_controls()
+	_sync_hit_reactions()
 
 func _sync_top_hud() -> void:
 	_label("TopHud/TurnBadge/Value").text = "%d/%d" % [_battle.turn_count, _battle.max_turns]
@@ -95,8 +101,73 @@ func _set_combatant(slot: Control, unit: Dictionary, fill_color: String) -> void
 	(slot.get_node("Name") as Label).text = str(unit.get("name", "精灵"))
 	var hp_bar := slot.get_node("HpBar")
 	hp_bar.set("fill_color", _hp_system_color(fill_color))
-	hp_bar.set("value", float(hp) / float(max_hp) * 100.0)
+	var next_ratio := float(hp) / float(max_hp) * 100.0
+	var unit_key := "%s|%s|%d" % [unit.get("id", ""), unit.get("name", ""), max_hp]
+	if str(slot.get_meta("hp_unit_key", "")) != unit_key:
+		slot.set_meta("hp_unit_key", unit_key)
+		hp_bar.call("snap_to_value", next_ratio)
+	else:
+		hp_bar.call("set_target_value", next_ratio)
 	(slot.get_node("HpText") as Label).text = "%d/%d" % [hp, max_hp]
+
+
+## 受击反应：按 0.2s 计时驱动头像抖动与闪白；总开关关闭时恢复原位置与材质。
+func _sync_hit_reactions() -> void:
+	if not BattleHitReactionScript.enabled:
+		_reset_slot_reaction("Combatants/SingleEnemy")
+		for path in MULTI_ENEMY_PATHS:
+			_reset_slot_reaction(path)
+		for path in PLAYER_PATHS:
+			_reset_slot_reaction(path)
+		return
+	_sync_slot_reaction("Combatants/SingleEnemy", true, 0)
+	for i in MULTI_ENEMY_PATHS.size():
+		_sync_slot_reaction(MULTI_ENEMY_PATHS[i], true, i)
+	for i in PLAYER_PATHS.size():
+		_sync_slot_reaction(PLAYER_PATHS[i], false, i)
+
+
+func _sync_slot_reaction(path: String, is_enemy: bool, index: int) -> void:
+	var slot := get_node_or_null(path) as Control
+	if slot == null:
+		return
+	var portrait := slot.get_node_or_null("Portrait") as TextureRect
+	if portrait == null:
+		return
+	var base := _portrait_base_position(portrait)
+	var reaction := BattleHitReactionScript.find(_hit_reactions, is_enemy, index)
+	portrait.position = base + BattleHitReactionScript.shake_offset(reaction)
+	_apply_portrait_flash(portrait, BattleHitReactionScript.flash_alpha(reaction))
+
+
+func _reset_slot_reaction(path: String) -> void:
+	var slot := get_node_or_null(path) as Control
+	if slot == null:
+		return
+	var portrait := slot.get_node_or_null("Portrait") as TextureRect
+	if portrait == null:
+		return
+	portrait.position = _portrait_base_position(portrait)
+	var material: ShaderMaterial = _portrait_flash_materials.get(portrait)
+	if material != null:
+		material.set_shader_parameter("flash_amount", 0.0)
+	portrait.material = null
+
+
+func _portrait_base_position(portrait: TextureRect) -> Vector2:
+	if not _portrait_base_positions.has(portrait):
+		_portrait_base_positions[portrait] = portrait.position
+	return _portrait_base_positions[portrait]
+
+
+func _apply_portrait_flash(portrait: TextureRect, alpha: float) -> void:
+	var material: ShaderMaterial = _portrait_flash_materials.get(portrait)
+	if material == null:
+		material = BattleHitReactionScript.new_flash_material()
+		_portrait_flash_materials[portrait] = material
+	if portrait.material != material:
+		portrait.material = material
+	material.set_shader_parameter("flash_amount", clampf(alpha, 0.0, 1.0))
 
 func _hp_system_color(fill_color: String) -> Color:
 	match fill_color:
