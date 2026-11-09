@@ -298,6 +298,14 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--match-hit-feedback=", "on") == "off":
 		var hit_feedback = load("res://src/ui/components/match_hit_feedback.gd")
 		hit_feedback.enabled = false
+	# 证据采集：--hit-reaction=off 关掉受击反应总开关，用于开/关对照。
+	if _read_arg("--hit-reaction=", "on") == "off":
+		var hit_reaction = load("res://src/ui/components/battle_hit_reaction.gd")
+		if hit_reaction != null:
+			hit_reaction.enabled = false
+	if _read_arg("--battle-demo-reaction=", "0") == "1":
+		_seed_battle_reaction_demo(battle_scene)
+		return
 	if _read_arg("--battle-demo-hit=", "0") == "1":
 		_seed_battle_hit_demo(battle_scene)
 		return
@@ -367,6 +375,42 @@ func _seed_battle_demo_fx(main: Control) -> void:
 			"charge_timer": 0.8
 		}
 	})
+	battle_scene.queue_redraw()
+
+## 受击反应证据：同一帧制造一次敌方受击与一次我方受击，展示 0.2s 抖动/闪白与 0.25s 血条缓降。
+## 直接改 HP 后走场景现有的 damage handler，基线（37d121c）也能用同一脚本录制 before。
+func _seed_battle_reaction_demo(battle_scene: Control) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null:
+		return
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	battle_scene.set("_floating_texts", [])
+	battle_scene.set("_hit_flashes", [])
+	if battle.enemies.is_empty():
+		return
+	var enemy: Dictionary = battle.enemies[0]
+	var enemy_max := maxi(int(enemy.get("maxHP", 1)), 1)
+	var enemy_damage := maxi(int(float(enemy_max) * 0.45), 1)
+	enemy["hp"] = maxi(enemy_max - enemy_damage, 1)
+	battle_scene.call("_on_damage_dealt", {
+		"damage": enemy_damage,
+		"target": enemy.get("name", "敌人"),
+		"attacker": "demo",
+		"type": "match"
+	})
+	if not battle.player_team.is_empty():
+		var player: Dictionary = battle.player_team[0]
+		var player_max := maxi(int(player.get("maxHP", 1)), 1)
+		var player_damage := maxi(int(float(player_max) * 0.35), 1)
+		player["hp"] = maxi(player_max - player_damage, 1)
+		battle_scene.call("_on_enemy_attacked", {
+			"damage": player_damage,
+			"target": player.get("name", "伙伴"),
+			"is_charged": false
+		})
+	if battle_scene.has_method("_sync_gui"):
+		battle_scene.call("_sync_gui")
 	battle_scene.queue_redraw()
 
 func _seed_battle_match_demo(battle_scene: Control) -> void:

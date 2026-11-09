@@ -1,6 +1,8 @@
 class_name BattleHpBar
 extends Control
 
+const BattleHitReactionScript = preload("res://src/ui/components/battle_hit_reaction.gd")
+
 @export var value: float = 100.0:
 	set(next_value):
 		value = next_value
@@ -21,9 +23,68 @@ extends Control
 		track_color = next_color
 		queue_redraw()
 
+## 实际要显示的目标值；`value` 是当前绘制值，会按 0.25s 缓动追上去。
+var target_value: float = 100.0
+var _ease_from: float = 100.0
+var _ease_elapsed: float = 0.0
+var _easing: bool = false
+var _initialized: bool = false
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_initialized = true
+	target_value = value
+	set_process(true)
+
+
+func _process(delta: float) -> void:
+	if not BattleHitReactionScript.enabled:
+		if _easing or not is_equal_approx(value, target_value):
+			_easing = false
+			value = target_value
+		return
+	if not _easing:
+		return
+	_ease_elapsed += delta
+	var duration := BattleHitReactionScript.hp_ease_duration()
+	value = BattleHitReactionScript.eased_value(_ease_from, target_value, _ease_elapsed, duration)
+	if _ease_elapsed >= duration:
+		value = target_value
+		_easing = false
+
+
+## 设置新的血条目标值：开启时从当前绘制值缓降到目标，关闭时立即跳转。
+func set_target_value(next_value: float) -> void:
+	var next := clampf(next_value, 0.0, maximum)
+	if not _initialized:
+		_initialized = true
+		target_value = next
+		value = next
+		return
+	if is_equal_approx(next, target_value):
+		return
+	target_value = next
+	if not BattleHitReactionScript.enabled:
+		_easing = false
+		value = next
+		return
+	_ease_from = value
+	_ease_elapsed = 0.0
+	_easing = true
+
+
+## 兵员/波次切换时直接对齐到新目标，不把上一场血条缓动带过来。
+func snap_to_value(next_value: float) -> void:
+	_initialized = true
+	target_value = clampf(next_value, 0.0, maximum)
+	_easing = false
+	_ease_elapsed = 0.0
+	value = target_value
+
+
+func is_easing() -> bool:
+	return _easing
 
 
 func _draw() -> void:
