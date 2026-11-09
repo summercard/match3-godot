@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[PrepareMatchup] pairs=169 elements=13
+[PrepareMatchup] sentence=水克火：水龟仔 +50%；草被火克：草苗儿 -25% / 火被水克：小火龙 -25%；草克水：草苗儿 +50%
+[PrepareMatchup] neutral_sentence=属性无明显克制关系
+[PrepareMatchup] gui_clear_line1=岩障开路：岩障开路 line2=优先打通障碍密集区，保留爆发处理架盾或蓄力。 line3=水克火：水龟仔 +50%；草被火克：草苗儿 -25%
+[PrepareMatchup] battle_transcript_identical=true bytes=8855
+[PrepareMatchup] OK

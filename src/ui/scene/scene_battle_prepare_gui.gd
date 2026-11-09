@@ -134,6 +134,14 @@ func _sync_mechanic_hint() -> void:
 	var lines := str(_get_element_hint()).split("\n")
 	_label("MechanicPanel/Line1").text = str(lines[0]) if lines.size() > 0 else ""
 	_label("MechanicPanel/Line2").text = str(lines[1]) if lines.size() > 1 else ""
+	var matchup := str(lines[2]) if lines.size() > 2 else ""
+	var matchup_extra := str(lines[3]) if lines.size() > 3 else ""
+	_label("MechanicPanel/Line3").text = matchup
+	_label("MechanicPanel/Line4").text = matchup_extra
+	var has_matchup := not matchup.is_empty() and matchup != "属性无明显克制关系"
+	var matchup_color: Color = C["warning"] if has_matchup else C["text_muted"]
+	_label("MechanicPanel/Line3").add_theme_color_override("font_color", matchup_color)
+	_label("MechanicPanel/Line4").add_theme_color_override("font_color", matchup_color)
 
 func _sync_synergy() -> void:
 	var synergies := _calc_synergy_preview()

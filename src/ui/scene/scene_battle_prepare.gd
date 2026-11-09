@@ -130,8 +130,21 @@ const ELEMENT_NAMES := {
 	"water": "水",
 	"grass": "草",
 	"thunder": "雷",
-	"light": "光"
+	"light": "光",
+	"earth": "土",
+	"wind": "风",
+	"dark": "暗",
+	"ice": "冰",
+	"void": "虚",
+	"temporal": "时",
+	"star": "星",
+	"chaos": "混"
 }
+
+## 属性克制分析阈值：倍率 >=1.2 算强，<=0.8 算弱，其余中性。
+## 倍率本身只读取 MonsterDb 的现有克制表，不在这里复制第二张表。
+const MATCHUP_STRONG_THRESHOLD := 1.2
+const MATCHUP_WEAK_THRESHOLD := 0.8
 
 ## 元素颜色映射
 const ELEMENT_COLORS := {
@@ -247,6 +260,7 @@ func _is_player_team_empty() -> bool:
 func _get_element_hint() -> String:
 	if _enemy_team.is_empty():
 		return ""
+	var matchup_text := str(_build_element_matchup_report(_enemy_team, _player_team).get("text", "属性无明显克制关系"))
 	var mechanic_summary := _get_stage_mechanic_summary()
 	if not mechanic_summary.is_empty():
 		var lines := PackedStringArray()
@@ -257,13 +271,93 @@ func _get_element_hint() -> String:
 		else:
 			var goal_tip := str(_stage_data.get("stageGoal", {}).get("tip", ""))
 			lines.append(goal_tip if not goal_tip.is_empty() else str(_stage_data.get("prepareHint", "")))
+		lines.append_array(_wrap_matchup_text(matchup_text))
 		return "\n".join(lines)
 	var prepare_hint := str(_stage_data.get("prepareHint", ""))
 	if not prepare_hint.is_empty():
-		return prepare_hint
-	
-	# TODO: 实现属性克制分析
-	return "属性无明显克制关系"
+		var fallback_lines := PackedStringArray([prepare_hint])
+		fallback_lines.append_array(_wrap_matchup_text(matchup_text))
+		return "\n".join(fallback_lines)
+	return "\n".join(_wrap_matchup_text(matchup_text))
+
+## 长句在来源分隔符处折成两行，避免准备页横向裁切。
+func _wrap_matchup_text(text: String) -> PackedStringArray:
+	var lines := PackedStringArray([text])
+	if text.length() <= 36 or not ("；" in text):
+		return lines
+	var clauses := text.split("；")
+	var first := str(clauses[0])
+	for i in range(1, clauses.size()):
+		var candidate := first + "；" + str(clauses[i])
+		if candidate.length() > text.length() / 2:
+			break
+		first = candidate
+	if first == text:
+		return lines
+	return PackedStringArray([first, text.substr(first.length() + 1)])
+
+## 克制倍率分档：强 / 弱 / 中性。
+static func classify_element_matchup(multiplier: float) -> String:
+	if multiplier >= MATCHUP_STRONG_THRESHOLD:
+		return "strong"
+	if multiplier <= MATCHUP_WEAK_THRESHOLD:
+		return "weak"
+	return "neutral"
+
+## 按敌方属性 × 每个上阵伙伴属性生成克制分析。
+## 每个伙伴都以上阵顺序参与；同一敌方属性只展开一次，避免重复文案。
+func _build_element_matchup_report(enemy_team: Array, player_team: Array) -> Dictionary:
+	var entries: Array = []
+	var clauses := PackedStringArray()
+	var seen_enemy_elements: Dictionary = {}
+	for enemy in enemy_team:
+		if not (enemy is Dictionary) or (enemy as Dictionary).is_empty():
+			continue
+		var enemy_element := str((enemy as Dictionary).get("element", ""))
+		if enemy_element.is_empty() or seen_enemy_elements.has(enemy_element):
+			continue
+		seen_enemy_elements[enemy_element] = true
+		for ally in player_team:
+			if not (ally is Dictionary) or (ally as Dictionary).is_empty():
+				continue
+			var ally_element := str((ally as Dictionary).get("element", ""))
+			if ally_element.is_empty():
+				continue
+			var ally_name := str((ally as Dictionary).get("name", "伙伴"))
+			var multiplier: float = MonsterDBScript.get_element_multiplier(ally_element, enemy_element)
+			var verdict := classify_element_matchup(multiplier)
+			var clause := ""
+			if verdict == "strong":
+				clause = "%s克%s：%s +%d%%" % [
+					_get_element_name(ally_element),
+					_get_element_name(enemy_element),
+					ally_name,
+					int(round((multiplier - 1.0) * 100.0)),
+				]
+			elif verdict == "weak":
+				clause = "%s被%s克：%s -%d%%" % [
+					_get_element_name(ally_element),
+					_get_element_name(enemy_element),
+					ally_name,
+					int(round((1.0 - multiplier) * 100.0)),
+				]
+			entries.append({
+				"enemy_element": enemy_element,
+				"ally_element": ally_element,
+				"ally_name": ally_name,
+				"multiplier": multiplier,
+				"verdict": verdict,
+				"text": clause,
+			})
+			if not clause.is_empty():
+				clauses.append(clause)
+	var text := "属性无明显克制关系"
+	if not clauses.is_empty():
+		text = "；".join(clauses)
+	return {
+		"entries": entries,
+		"text": text,
+	}
 
 func _get_stage_mechanic_summary() -> String:
 	return ChapterMechanicRulesScript.build_prepare_summary(_stage_data)
@@ -582,11 +676,12 @@ func _render_element_hint() -> void:
 	var hint: String = _get_element_hint()
 	var lines: Array = hint.split("\n")
 	
-	var line_y: float = y + 42.0
+	var line_y: float = y + 37.0
 	for line in lines:
-		var color: Color = C["warning"] if "警告" in line else C["text_muted"]
-		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, 12.0, false, 304.0)
-		line_y += 17.0
+		var is_matchup: bool = ("克" in line) and not ("无明显" in line)
+		var color: Color = C["warning"] if ("警告" in line or is_matchup) else C["text_muted"]
+		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, 11.0, false, 304.0)
+		line_y += 12.0
 
 func _render_synergy_preview() -> void:
 	var synergies: Array = _calc_synergy_preview()
