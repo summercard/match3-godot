@@ -1,0 +1,4 @@
+$ git diff --stat 59181c5 -- src/data src/battle/damage_calculator.gd src/battle/enemy_attack_modes.gd src/battle/battle_manager.gd tests/combat_balance_test.gd
+
+$ git diff 59181c5 -- <same paths> | wc -l
+       0

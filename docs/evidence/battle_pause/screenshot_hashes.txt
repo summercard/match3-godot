@@ -1,0 +1,7 @@
+$ shasum -a 256 docs/evidence/battle_pause/*.png
+a2e0c9a3aa7df60f0996b1d74560671530b51ed5a8d3757d52d9c039349e870d  docs/evidence/battle_pause/after_paused.png
+6b556b7a9c0f5dc5cc5f4c3cbcaa6c32c3fc92f7d477b500a8b2d56f76be2b4f  docs/evidence/battle_pause/after_unpaused.png
+6b556b7a9c0f5dc5cc5f4c3cbcaa6c32c3fc92f7d477b500a8b2d56f76be2b4f  docs/evidence/battle_pause/before_unpaused.png
+
+$ cmp docs/evidence/battle_pause/before_unpaused.png docs/evidence/battle_pause/after_unpaused.png
+cmp: identical
