@@ -1,0 +1,15 @@
+# 1x / 2x 录像采集命令与结果
+# 环境：Godot 4.7.2.stable，macOS Apple M1，750x1334 渲染（375x667 逻辑视口），默认主题。
+# 同一种子 / 同一关卡 / 同一落子顺序；2x 在开场点击顶栏 x2 按钮切入。
+
+Godot --path . --write-movie /tmp/battle_speed_1x.avi --fixed-fps 30 \
+  --script res://tests/battle_speed_demo.gd -- --speed-level=1
+[BattleSpeedDemo] speed=1x stage=stage_1_1 seed=20261110 actions=4 turns=4 result=win frames=409 fps=30 simulated=13.63s label=1x
+
+Godot --path . --write-movie /tmp/battle_speed_2x.avi --fixed-fps 30 \
+  --script res://tests/battle_speed_demo.gd -- --speed-level=2
+[BattleSpeedDemo] speed=2x stage=stage_1_1 seed=20261110 actions=4 turns=4 result=win frames=228 fps=30 simulated=7.60s label=2x
+
+# 转码：
+# ffmpeg -i /tmp/battle_speed_1x.avi -vf scale=376:668 -c:v libx264 -crf 23 -pix_fmt yuv420p battle_1x.mp4
+# ffmpeg -i /tmp/battle_speed_2x.avi -vf scale=376:668 -c:v libx264 -crf 23 -pix_fmt yuv420p battle_2x.mp4

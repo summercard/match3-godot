@@ -38,6 +38,10 @@ const BATTLE_BOARD_Y := 300
 const WAVE_GAP_SECONDS := 1.0
 const WAVE_BANNER_SECONDS := 1.6
 
+## 战斗倍速：只改引擎时间尺度，不改任何伤害/回合/随机数逻辑。
+const SPEED_LEVELS: Array[int] = [1, 2]
+const DEFAULT_SPEED_LEVEL := 1
+
 ## 状态枚举
 enum BattleState {
 	IDLE,
@@ -190,6 +194,15 @@ var _battle_end_overlay_timer: float = 0.0
 var _battle_end_overlay_started: bool = false
 var _battle_end_particles_spawned: bool = false
 var _result_transitioning: bool = false
+
+## 战斗倍速（1x / 2x）与点击消费标记
+var _battle_speed: int = DEFAULT_SPEED_LEVEL
+var _speed_pointer_active: bool = false
+var _time_scale_applied: bool = false
+
+## 表现层随机数：与战斗逻辑共用全局 RNG 时，帧数变化会改变后续伤害随机；
+## 倍速下用独立 RNG 隔离粒子/震屏，保证 1x/2x 的战斗日志与结算一致。
+var _fx_rng := RandomNumberGenerator.new()
 
 ## 棋盘屏幕震动（大量消除时，旧版表现；命中反馈开启时由命中震屏接管）
 var _board_shake_timer: float = 0.0
@@ -392,6 +405,9 @@ func _ready() -> void:
 	instance = self
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_fx_rng.seed = 0x5EEDBEEF
+	Engine.time_scale = 1.0
+	_time_scale_applied = false
 	# 先按 soundOn 同步战斗音效总开关；关闭时不创建任何音频播放器，
 	# 连锁音效节点也一并跳过，保证设置页关闭后场上播放器数为 0。
 	_battle_sfx = BattleSfxScript.new()
@@ -408,13 +424,46 @@ func _ready() -> void:
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
 
+func _exit_tree() -> void:
+	# 倍速使用全局 Engine.time_scale，离开战斗必须还原，避免影响大厅/结算。
+	if _time_scale_applied or not is_equal_approx(Engine.time_scale, 1.0):
+		Engine.time_scale = 1.0
+		_time_scale_applied = false
+
 func _uses_editable_gui() -> bool:
 	return false
+
+## ============================================
+# 战斗倍速
+## ============================================
+
+func get_battle_speed() -> int:
+	return _battle_speed
+
+## 设置 1x / 2x；切换后下一帧起动画、前摇、飘字与结算延迟立即按新时间尺度推进。
+func set_battle_speed(level: int) -> void:
+	if not SPEED_LEVELS.has(level):
+		return
+	_battle_speed = level
+	if is_inside_tree():
+		Engine.time_scale = float(level)
+		_time_scale_applied = true
+
+## 在 1x 与 2x 之间切换。
+func toggle_battle_speed() -> void:
+	set_battle_speed(2 if _battle_speed == 1 else 1)
+
+func _get_speed_button_rect() -> Rect2:
+	return Rect2(285.0, 5.0, 42.0, 48.0)
 
 func init(data: Dictionary = {}) -> void:
 	var stage_data = data.get("stageData", null)
 	var stage_id = data.get("stageId", "stage_1_1")
 	_input_test_only = data.get("inputTestOnly", false)
+	_battle_speed = DEFAULT_SPEED_LEVEL
+	_speed_pointer_active = false
+	Engine.time_scale = 1.0
+	_time_scale_applied = false
 	
 	_selected_gem = Vector2i(-1, -1)
 	_hit_flashes = []
@@ -546,6 +595,11 @@ func _gui_input(event: InputEvent) -> void:
 	_handle_input_event(event, true)
 
 func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
+	# 倍速按钮独立于战斗状态机：前摇/连锁/敌方回合中也能立即切档，
+	# 按下与抬起都被消费，避免同一次点击落到棋盘或技能上。
+	if _handle_speed_pointer(event, already_local):
+		get_viewport().set_input_as_handled()
+		return
 	if _state == BattleState.BATTLE_END:
 		# 收服特效播放中不允许点击跳转
 		if _capture_waiting_for_effect:
@@ -622,6 +676,34 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 				else:
 					drag_dir = Vector2i(0, 1 if dy > 0 else -1)
 				_drag_preview = {"active": true, "direction": drag_dir}
+
+func _handle_speed_pointer(event: InputEvent, already_local: bool) -> bool:
+	if _state == BattleState.BATTLE_END:
+		return false
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			if _get_speed_button_rect().has_point(_get_pointer_position(event, already_local)):
+				_speed_pointer_active = true
+				toggle_battle_speed()
+				return true
+			_speed_pointer_active = false
+		elif _speed_pointer_active:
+			_speed_pointer_active = false
+			return true
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			if _get_speed_button_rect().has_point(_get_pointer_position(event, already_local)):
+				_speed_pointer_active = true
+				toggle_battle_speed()
+				return true
+			_speed_pointer_active = false
+		elif _speed_pointer_active:
+			_speed_pointer_active = false
+			return true
+	elif event is InputEventScreenDrag and _speed_pointer_active:
+		# 从倍速按钮开始的拖动不应落到棋盘上。
+		return true
+	return false
 
 func _vibration_request(event_id: String) -> void:
 	var vibration := get_node_or_null("/root/VibrationFeedback")
@@ -1110,8 +1192,8 @@ func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
 			"alpha": glow_alpha
 		})
 		for i in range(count):
-			var angle: float = TAU * float(i) / float(maxi(count, 1)) + randf() * 0.35
-			var particle_speed: float = speed * (0.55 + randf() * 0.75)
+			var angle: float = TAU * float(i) / float(maxi(count, 1)) + _fx_rng.randf() * 0.35
+			var particle_speed: float = speed * (0.55 + _fx_rng.randf() * 0.75)
 			_gem_particles.append({
 				"x": cx,
 				"y": cy,
@@ -1120,11 +1202,11 @@ func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
 				"life": life,
 				"max_life": life,
 				"color": gem_color,
-				"size": size + randf() * 2.0
+				"size": size + _fx_rng.randf() * 2.0
 			})
 		for i in range(core_count):
-			var core_angle: float = randf() * TAU
-			var core_speed: float = speed * (0.25 + randf() * 0.35)
+			var core_angle: float = _fx_rng.randf() * TAU
+			var core_speed: float = speed * (0.25 + _fx_rng.randf() * 0.35)
 			_gem_particles.append({
 				"x": cx,
 				"y": cy,
@@ -1133,7 +1215,7 @@ func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
 				"life": life * 0.7,
 				"max_life": life * 0.7,
 				"color": Color(1.0, 1.0, 1.0),
-				"size": size * 1.1 + randf() * 1.5
+				"size": size * 1.1 + _fx_rng.randf() * 1.5
 			})
 
 func _apply_gravity() -> void:
@@ -2040,13 +2122,13 @@ func _process(delta: float) -> void:
 			_spawn_victory_particles()
 	
 	# 更新棋盘屏幕震动（旧版表现，命中反馈开启时不使用）
-	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, anim_delta)
+	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, anim_delta, _fx_rng)
 	_board_shake_timer = board_shake["timer"]
 	_board_shake_offset = board_shake["offset"]
 	
 	# 更新命中震屏（顿帧期间仍继续播放）
 	var match_shake := MatchHitFeedbackScript.update_shake(
-		_match_shake_timer, _match_shake_duration, _match_shake_amplitude, effective_delta)
+		_match_shake_timer, _match_shake_duration, _match_shake_amplitude, effective_delta, _fx_rng)
 	_match_shake_timer = match_shake["timer"]
 	_match_shake_offset = match_shake["offset"]
 
@@ -2271,7 +2353,7 @@ func _draw_title_bar() -> void:
 		_draw_texture_contain(speed_tex, Rect2(285.0, 5.0, 42.0, 48.0), 1.0)
 	else:
 		_draw_rounded_rect(287.0, 9.0, 38.0, 42.0, 5.0, Color(0.08, 0.15, 0.30, 0.90))
-	_draw_text_with_shadow("x2", 306.0, 40.0, C["white"], 9.5, true)
+	_draw_text_with_shadow("%dx" % _battle_speed, 306.0, 40.0, C["white"], 9.5, true)
 	if settings_tex:
 		_draw_texture_contain(settings_tex, Rect2(330.0, 5.0, 42.0, 48.0), 1.0)
 	else:
@@ -2912,8 +2994,8 @@ func spawn_eliminate_particles(row: int, col: int, gem_type: String) -> void:
 	var speed_base := 80.0
 	
 	for i in range(particle_count):
-		var angle: float = TAU * i / particle_count + randf() * 0.3
-		var speed: float = speed_base * (0.6 + randf() * 0.8)
+		var angle: float = TAU * i / particle_count + _fx_rng.randf() * 0.3
+		var speed: float = speed_base * (0.6 + _fx_rng.randf() * 0.8)
 		_gem_particles.append({
 			"x": cx,
 			"y": cy,
@@ -2922,7 +3004,7 @@ func spawn_eliminate_particles(row: int, col: int, gem_type: String) -> void:
 			"life": 0.3,
 			"max_life": 0.3,
 			"color": gem_color,
-			"size": 4.0 + randf() * 3.0
+			"size": 4.0 + _fx_rng.randf() * 3.0
 		})
 
 func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
@@ -2937,8 +3019,8 @@ func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
 	var speed_base := 100.0
 	
 	for i in range(particle_count):
-		var angle: float = TAU * i / particle_count + randf() * 0.4
-		var speed: float = speed_base * (0.4 + randf() * 1.2)
+		var angle: float = TAU * i / particle_count + _fx_rng.randf() * 0.4
+		var speed: float = speed_base * (0.4 + _fx_rng.randf() * 1.2)
 		_obstacle_particles.append({
 			"x": cx,
 			"y": cy,
@@ -2947,7 +3029,7 @@ func spawn_obstacle_destroy_particles(row: int, col: int) -> void:
 			"life": 0.5,
 			"max_life": 0.5,
 			"color": OBSTACLE_COLORS.rock,
-			"size": 5.0 + randf() * 4.0,
+			"size": 5.0 + _fx_rng.randf() * 4.0,
 			"gravity": 300.0
 		})
 
@@ -2961,8 +3043,8 @@ func spawn_unlock_particles(row: int, col: int) -> void:
 	
 	var dirs := [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]
 	for d: Array in dirs:
-		var dist: float = 15.0 + randf() * 10.0
-		var angle: float = atan2(d[1], d[0]) + randf() * 0.5 - 0.25
+		var dist: float = 15.0 + _fx_rng.randf() * 10.0
+		var angle: float = atan2(d[1], d[0]) + _fx_rng.randf() * 0.5 - 0.25
 		_unlock_animations.append({
 			"row": row,
 			"col": col,
@@ -2993,39 +3075,39 @@ func _update_victory_particles(delta: float) -> void:
 
 func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
 	# 生成 8-12 个粒子向外散射
-	var count: int = 8 + randi() % 5
+	var count: int = 8 + _fx_rng.randi() % 5
 	for i in range(count):
-		var angle: float = randf() * TAU
-		var speed: float = 80.0 + randf() * 120.0
+		var angle: float = _fx_rng.randf() * TAU
+		var speed: float = 80.0 + _fx_rng.randf() * 120.0
 		_defeat_explosions.append({
 			"x": cx,
 			"y": cy,
 			"vx": cos(angle) * speed,
 			"vy": sin(angle) * speed - 50.0,
-			"life": 0.4 + randf() * 0.2,
-			"max_life": 0.4 + randf() * 0.2,
+			"life": 0.4 + _fx_rng.randf() * 0.2,
+			"max_life": 0.4 + _fx_rng.randf() * 0.2,
 			"color": color,
-			"size": 4.0 + randf() * 4.0
+			"size": 4.0 + _fx_rng.randf() * 4.0
 		})
 
 func _spawn_victory_particles() -> void:
 	# 全屏胜利粒子爆发
 	var colors: Array[Color] = [C["gold"], C["success"], Color(1.0, 1.0, 1.0), C["primary"]]
 	for i in range(30):
-		var x: float = randf() * DESIGN_W
+		var x: float = _fx_rng.randf() * DESIGN_W
 		var y: float = DESIGN_H + 20.0  # 从底部开始
-		var vx: float = (randf() - 0.5) * 60.0
-		var vy: float = -120.0 - randf() * 80.0  # 向上飞
-		var color: Color = colors[randi() % colors.size()]
+		var vx: float = (_fx_rng.randf() - 0.5) * 60.0
+		var vy: float = -120.0 - _fx_rng.randf() * 80.0  # 向上飞
+		var color: Color = colors[_fx_rng.randi() % colors.size()]
 		_victory_particles.append({
 			"x": x,
 			"y": y,
 			"vx": vx,
 			"vy": vy,
-			"life": 1.0 + randf() * 0.5,
-			"max_life": 1.0 + randf() * 0.5,
+			"life": 1.0 + _fx_rng.randf() * 0.5,
+			"max_life": 1.0 + _fx_rng.randf() * 0.5,
 			"color": color,
-			"size": 3.0 + randf() * 3.0
+			"size": 3.0 + _fx_rng.randf() * 3.0
 		})
 
 func _draw_gem_particles() -> void:

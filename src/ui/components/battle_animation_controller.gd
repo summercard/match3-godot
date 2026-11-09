@@ -172,14 +172,16 @@ static func update_floating_texts(floating_texts: Array, element_glow: Dictionar
 
 	tick_timed_entries(swipe_trail, dt)
 
-static func update_board_shake(timer: float, dt: float) -> Dictionary:
+static func update_board_shake(timer: float, dt: float, rng: RandomNumberGenerator = null) -> Dictionary:
 	if timer <= 0.0:
 		return {"timer": 0.0, "offset": Vector2.ZERO}
 	timer = maxf(0.0, timer - dt)
 	var intensity: float = maxf(0.0, timer / 0.3)
+	var rx := rng.randf() if rng != null else randf()
+	var ry := rng.randf() if rng != null else randf()
 	return {
 		"timer": timer,
-		"offset": Vector2((randf() - 0.5) * 6.0 * intensity, (randf() - 0.5) * 4.0 * intensity)
+		"offset": Vector2((rx - 0.5) * 6.0 * intensity, (ry - 0.5) * 4.0 * intensity)
 	}
 
 static func update_particle_list(particles: Array, dt: float, default_gravity: float) -> void:

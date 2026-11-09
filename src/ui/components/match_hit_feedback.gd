@@ -65,13 +65,18 @@ static func added_delay(chain_level: int) -> float:
 
 
 ## 命中震屏：振幅随剩余时间线性衰减，单帧位移长度不超过 amplitude。
-static func update_shake(timer: float, duration: float, amplitude: float, dt: float) -> Dictionary:
+## rng 由战斗场景传入独立的表现层随机源，避免帧数变化影响战斗逻辑随机数。
+static func update_shake(timer: float, duration: float, amplitude: float, dt: float, rng: RandomNumberGenerator = null) -> Dictionary:
 	if not enabled or timer <= 0.0 or duration <= 0.0 or amplitude <= 0.0:
 		return {"timer": 0.0, "offset": Vector2.ZERO}
 	timer = maxf(0.0, timer - dt)
 	if timer <= 0.0:
 		return {"timer": 0.0, "offset": Vector2.ZERO}
 	var intensity: float = clampf(timer / duration, 0.0, 1.0)
-	var angle: float = randf() * TAU
+	var angle: float
+	if rng != null:
+		angle = rng.randf() * TAU
+	else:
+		angle = randf() * TAU
 	var offset := Vector2(cos(angle), sin(angle)) * amplitude * intensity
 	return {"timer": timer, "offset": offset}
