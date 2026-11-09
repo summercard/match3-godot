@@ -23,6 +23,7 @@ func _run() -> void:
 		"TeamPanel/Cards/TeamCard1/Portrait",
 		"PowerPanel/PlayerPower",
 		"MechanicPanel/Line1",
+		"MechanicPanel/Line3",
 		"RewardPreview/Slots/RewardSlot3/Icon",
 		"StartButton/Frame",
 		"AlertPopup",
