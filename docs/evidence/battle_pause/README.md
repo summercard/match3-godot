@@ -103,8 +103,8 @@
 
 ## 固定种子逐字节一致
 
-- [battle_before.json](battle_before.json)：基线 `59181c5` 的转录（复用
-  `docs/evidence/ui_button_sfx/battle_before.json`）。
+- [battle_before.json](battle_before.json)：在基线 `59181c5` Worktree 中重新运行
+  `prepare_matchup_transcript.gd` 生成；与 `docs/evidence/ui_button_sfx/battle_before.json` 相同。
 - [battle_after.json](battle_after.json)：本分支同口径输出。
 - `cmp` 无差异，两份 SHA-256 均为
   `0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb`。
