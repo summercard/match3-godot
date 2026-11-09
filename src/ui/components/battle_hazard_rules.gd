@@ -29,7 +29,10 @@ static func process_poison_turn(board, battle, damage_per_tile: float = 0.03) ->
 	var hits: Array = []
 	for member in alive_team:
 		member["hp"] = maxi(member.get("hp", 0) - damage_per_member, 0)
-		hits.append({"team_index": battle.player_team.find(member), "damage": damage_per_member})
+		var team_index: int = battle.player_team.find(member)
+		if battle.has_method("record_damage_taken"):
+			battle.record_damage_taken(team_index, damage_per_member)
+		hits.append({"team_index": team_index, "damage": damage_per_member})
 
 	var all_dead := true
 	for m in battle.player_team:

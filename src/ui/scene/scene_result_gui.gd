@@ -55,6 +55,7 @@ func _sync_gui() -> void:
 	_sync_banner()
 	_sync_stars()
 	_sync_battle_info()
+	_sync_stats()
 	_sync_capture_panel()
 	_sync_rewards()
 	_sync_exp_panel()
@@ -85,6 +86,28 @@ func _sync_battle_info() -> void:
 		_label("BattleInfo/EnemyLabel").text = "仍在场：" + " / ".join(alive.map(func(e): return str(e.get("name", e.get("emoji", "")))))
 	else:
 		_label("BattleInfo/EnemyLabel").text = ""
+	_label("StatsPanel/Subtitle").text = _label("BattleInfo/EnemyLabel").text
+
+## 本场战绩：总伤害 / 回合 / 最高连锁 + 每位伙伴的伤害与承伤。
+## 所有数值都优先取战斗结果里的真实字段，不在结算页重算战斗公式。
+func _sync_stats() -> void:
+	var turn_count := int(_battle_result.get("turnCount", 0))
+	var max_turns := int(_battle_result.get("maxTurns", 20))
+	_label("StatsPanel/TotalDamage/Value").text = str(_result_total_damage())
+	_label("StatsPanel/Turns/Value").text = "%d / %d" % [turn_count, max_turns]
+	var combo := _result_max_combo()
+	_label("StatsPanel/MaxChain/Value").text = "%d 连锁" % combo if combo > 0 else "—"
+	var stats := _result_ally_stats()
+	for i in range(3):
+		var row := _node("StatsPanel/TeamRows/Row%d" % (i + 1))
+		row.visible = i < stats.size()
+		if i >= stats.size():
+			continue
+		var stat: Dictionary = stats[i]
+		(row.get_node("Portrait") as TextureRect).texture = _monster_texture(stat, "result")
+		(row.get_node("Name") as Label).text = str(stat.get("name", ""))
+		(row.get_node("Dealt") as Label).text = str(int(stat.get("damageDealt", stat.get("damage_dealt", 0))))
+		(row.get_node("Taken") as Label).text = str(int(stat.get("damageTaken", stat.get("damage_taken", 0))))
 
 func _sync_capture_panel() -> void:
 	var panel := _node("CaptureResultPanel")
@@ -175,12 +198,22 @@ func _sync_levelups() -> void:
 	]
 
 func _sync_buttons() -> void:
-	_node("Buttons/BackButton").visible = _is_win or _has_next_stage
-	_node("Buttons/NextButton").visible = _is_win and _has_next_stage
-	_node("Buttons/RetryButton").visible = _has_next_stage or not _is_win
-	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else ("返回关卡" if _is_win else "重试")
+	var back := _node("Buttons/BackButton")
+	var next := _node("Buttons/NextButton")
+	var retry := _node("Buttons/RetryButton")
+	var show_next := _is_win and _has_next_stage
+	var show_retry := show_next or not _is_win
+	# 失败只留「重打」；胜利才出现「下一关」。
+	back.visible = _is_win
+	next.visible = show_next
+	retry.visible = show_retry
+	back.position.x = 0.0 if show_next else 114.0
+	next.position.x = 119.0
+	retry.position.x = 238.0 if show_next else 114.0
+	_label("Buttons/BackButton/Text").text = "返回" if _has_next_stage else "返回关卡"
 	_label("Buttons/NextButton/Text").text = "下一关"
-	_label("Buttons/RetryButton/Text").text = "再来一次" if _is_win else "重试"
+	_label("Buttons/RetryButton/Text").text = "再来一次" if _is_win else "重打"
+	(retry.get_node("Frame") as TextureRect).texture = _result_texture("btn_retry") if not _is_win else _result_texture("btn_secondary")
 
 func _result_texture(key: String) -> Texture2D:
 	var path := str(RESULT_ASSETS.get(key, COMMON_ASSETS.get(key, "")))

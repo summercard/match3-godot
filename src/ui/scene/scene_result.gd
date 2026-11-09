@@ -201,11 +201,103 @@ func _normalize_battle_result(result: Dictionary) -> Dictionary:
 		normalized["stageRewards"] = normalized["stage_rewards"]
 	if not normalized.has("totalDamageDealt") and normalized.has("total_damage_dealt"):
 		normalized["totalDamageDealt"] = normalized["total_damage_dealt"]
+	if not normalized.has("total_damage_dealt") and normalized.has("totalDamageDealt"):
+		normalized["total_damage_dealt"] = normalized["totalDamageDealt"]
+	if not normalized.has("totalDamage") and normalized.has("total_damage"):
+		normalized["totalDamage"] = normalized["total_damage"]
+	if not normalized.has("total_damage") and normalized.has("totalDamage"):
+		normalized["total_damage"] = normalized["totalDamage"]
+	if not normalized.has("totalDamageTaken") and normalized.has("total_damage_taken"):
+		normalized["totalDamageTaken"] = normalized["total_damage_taken"]
+	if not normalized.has("total_damage_taken") and normalized.has("totalDamageTaken"):
+		normalized["total_damage_taken"] = normalized["totalDamageTaken"]
+	if not normalized.has("allyStats") and normalized.has("ally_stats"):
+		normalized["allyStats"] = normalized["ally_stats"]
+	if not normalized.has("ally_stats") and normalized.has("allyStats"):
+		normalized["ally_stats"] = normalized["allyStats"]
+	if not normalized.has("maxCombo") and normalized.has("max_combo"):
+		normalized["maxCombo"] = normalized["max_combo"]
+	if not normalized.has("max_combo") and normalized.has("maxCombo"):
+		normalized["max_combo"] = normalized["maxCombo"]
+	if not normalized.has("highestChain") and normalized.has("highest_chain"):
+		normalized["highestChain"] = normalized["highest_chain"]
+	if not normalized.has("highest_chain") and normalized.has("highestChain"):
+		normalized["highest_chain"] = normalized["highestChain"]
 	if not normalized.has("playerLevel") and normalized.has("player_level"):
 		normalized["playerLevel"] = normalized["player_level"]
 	if not normalized.has("enemyLevel") and normalized.has("enemy_level"):
 		normalized["enemyLevel"] = normalized["enemy_level"]
 	return normalized
+
+## 结算页展示的每伙伴伤害/承伤。真实战斗结果由 BattleManager 直接提供；
+## 旧测试/旧存档payload缺少该字段时，只用结果里已有的数值兜底，不重新计算战斗。
+func _result_ally_stats() -> Array:
+	var raw = _battle_result.get("allyStats", null)
+	if raw is Array and not (raw as Array).is_empty():
+		return raw
+	var dealt_map = _battle_result.get("totalDamageDealt", {})
+	if not dealt_map is Dictionary:
+		dealt_map = {}
+	var taken_map = _battle_result.get("damageTaken", {})
+	if not taken_map is Dictionary:
+		taken_map = {}
+	var stats: Array = []
+	for monster in _battle_result.get("playerTeam", []):
+		if monster == null or not monster is Dictionary:
+			continue
+		var monster_id := str(monster.get("id", ""))
+		var dealt := int(dealt_map.get(monster_id, 0))
+		var taken := int(taken_map.get(monster_id, 0))
+		stats.append({
+			"id": monster_id,
+			"monsterId": str(monster.get("monsterId", monster_id)),
+			"name": str(monster.get("name", "")),
+			"emoji": str(monster.get("emoji", "")),
+			"level": int(monster.get("level", 1)),
+			"damageDealt": dealt,
+			"damageTaken": taken,
+			"damage_dealt": dealt,
+			"damage_taken": taken
+		})
+	return stats
+
+## 本场总伤害：优先读取战斗结果携带的真实值，其次才用同一份伙伴数据兜底。
+func _result_total_damage() -> int:
+	if _battle_result.has("totalDamage"):
+		return int(_battle_result.get("totalDamage", 0))
+	if _battle_result.has("total_damage"):
+		return int(_battle_result.get("total_damage", 0))
+	var total := 0
+	for stat: Dictionary in _result_ally_stats():
+		total += int(stat.get("damageDealt", stat.get("damage_dealt", 0)))
+	if total > 0:
+		return total
+	var legacy_map = _battle_result.get("totalDamageDealt", {})
+	if legacy_map is Dictionary:
+		for value in legacy_map.values():
+			total += int(value)
+	return total
+
+func _result_max_combo() -> int:
+	if _battle_result.has("maxCombo"):
+		return int(_battle_result.get("maxCombo", 0))
+	if _battle_result.has("max_combo"):
+		return int(_battle_result.get("max_combo", 0))
+	if _battle_result.has("highestChain"):
+		return int(_battle_result.get("highestChain", 0))
+	if _battle_result.has("highest_chain"):
+		return int(_battle_result.get("highest_chain", 0))
+	return 0
+
+func _result_total_damage_taken() -> int:
+	if _battle_result.has("totalDamageTaken"):
+		return int(_battle_result.get("totalDamageTaken", 0))
+	if _battle_result.has("total_damage_taken"):
+		return int(_battle_result.get("total_damage_taken", 0))
+	var total := 0
+	for stat: Dictionary in _result_ally_stats():
+		total += int(stat.get("damageTaken", stat.get("damage_taken", 0)))
+	return total
 
 func init(data: Dictionary = {}) -> void:
 	var game := get_node_or_null("/root/GameManager")
