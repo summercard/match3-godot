@@ -43,8 +43,22 @@ func _run() -> void:
 	})
 	await process_frame
 	battle = main.get_current_scene()
-	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should show for three enemies")
-	_expect((battle.get_node("Combatants/MultiEnemies/Enemy3") as Control).visible, "third enemy slot should remain editable and visible")
+	var battle_manager = battle.get("_battle")
+	_expect(battle_manager.enemies.size() == 1, "first wave should only spawn one enemy")
+	_expect((battle.get_node("Combatants/SingleEnemy") as Control).visible, "single enemy layer should show during the first wave")
+	_expect(not (battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should stay hidden during the first wave")
+	_expect((battle.get_node("TopHud/WaveLabel") as Label).visible, "wave label should show for multi-wave battles")
+	_expect((battle.get_node("TopHud/WaveLabel") as Label).text == "波次 1/2", "wave label should show the current wave")
+	battle_manager.enemies[0]["hp"] = 0
+	battle.call("_check_battle_end")
+	_expect(int(battle.get("_state")) == SceneBattle.BattleState.WAVE_TRANSITION, "clearing a non-final wave should enter the wave transition state")
+	await create_timer(1.25).timeout
+	await process_frame
+	_expect(battle_manager.wave_index == 2, "wave transition should start the next wave after the gap")
+	_expect((battle.get_node("Combatants/MultiEnemies") as Control).visible, "multi-enemy layer should show when the next wave arrives")
+	_expect(not (battle.get_node("Combatants/SingleEnemy") as Control).visible, "single enemy layer should hide when the next wave has multiple enemies")
+	_expect((battle.get_node("Combatants/MultiEnemies/Enemy2") as Control).visible, "second enemy slot should be visible in the second wave")
+	_expect((battle.get_node("TopHud/WaveLabel") as Label).text == "波次 2/2", "wave label should advance with the wave")
 
 	main.queue_free()
 	await process_frame

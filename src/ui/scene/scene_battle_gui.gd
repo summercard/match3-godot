@@ -47,6 +47,10 @@ func _sync_top_hud() -> void:
 	var phase_label := _label("TopHud/BossPhase")
 	phase_label.visible = status.get("is_boss_battle", false)
 	phase_label.text = "阶段 %d/%d" % [status.get("current_phase", 1), status.get("total_phases", 1)]
+	var wave_label := _label("TopHud/WaveLabel")
+	var show_wave: bool = not status.get("is_boss_battle", false) and int(status.get("wave_total", 1)) > 1
+	wave_label.visible = show_wave
+	wave_label.text = "波次 %d/%d" % [status.get("wave_index", 1), status.get("wave_total", 1)]
 
 func _sync_enemy_slots() -> void:
 	var enemy_count: int = mini(_battle.enemies.size(), 3)

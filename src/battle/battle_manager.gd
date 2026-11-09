@@ -19,6 +19,10 @@ signal skill_ready(monster: Dictionary)
 signal phase_transition(phase: int, new_enemies: Array)
 signal enemy_skill_action(action_info: Dictionary)
 
+# 波次配置：首波只出 1 只，之后每波最多 3 只，清空后由界面延迟补下一波
+const WAVE_FIRST_SIZE: int = 1
+const WAVE_MAX_ON_FIELD: int = 3
+
 # ========== 实例变量 ==========
 var player_team: Array = []        # 玩家队伍 [{...stats}]
 var enemies: Array = []            # 敌方怪物 [{...stats}]
@@ -70,6 +74,13 @@ var _damage_calc: DamageCalculator = DamageCalculator.new()
 var stage_data: Variant = null
 var stage_id: String = ""
 
+# 波次状态
+var wave_index: int = 1                    # 当前波次（从 1 开始）
+var wave_total: int = 1                    # 总波次数
+var wave_transition_pending: bool = false  # 当前波已清空，等待界面补下一波
+var _pending_waves: Array = []             # 后续波次的敌人属性数组
+var _wave_enemy_history: Array = []        # 各波敌人列表（结算时展示整场击败情况）
+
 # 等级
 var player_level: int = 1
 var enemy_level: int = 1
@@ -100,9 +111,17 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	stage_phases = []
 	current_phase = 1
 	phase_transition_triggered = {}
+	wave_index = 1
+	wave_total = 1
+	wave_transition_pending = false
+	_pending_waves = []
+	_wave_enemy_history = []
 
-	if s_data != null and s_data.has("phases") and s_data.get("phases", []).size() > 0:
-		stage_phases = s_data.get("phases")
+	var data: Dictionary = s_data if s_data is Dictionary else {}
+	var elite_mult: float = float(data.get("eliteMultiplier", 0.0))
+
+	if not data.is_empty() and data.has("phases") and data.get("phases", []).size() > 0:
+		stage_phases = data.get("phases")
 		_phase_handler.set_phase_configs(stage_phases)
 		var phase1: Dictionary = stage_phases[0] if stage_phases.size() > 0 else {}
 		if not phase1.is_empty():
@@ -113,10 +132,19 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 					monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 					monster["hp"] = monster["maxHP"]
 					monster["atk"] = int(monster.get("atk", 0) * hp_mult)
+				if monster != null and elite_mult > 0.0:
+					_scale_enemy_stats(monster, elite_mult)
 				return monster
 			)
 	else:
-		enemies = enemy_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, e_level))
+		# 普通/精英关：全部敌人先按波次切分，首波只放出 1 只
+		var all_enemies: Array = enemy_monster_ids.map(func(id):
+			var monster = MonsterDb.get_monster_stats(id, e_level)
+			if monster != null and elite_mult > 0.0:
+				_scale_enemy_stats(monster, elite_mult)
+			return monster
+		)
+		_build_enemy_waves(all_enemies)
 
 	boss_curve = s_data.get("bossCurve", {}) if s_data != null and s_data is Dictionary else {}
 	_apply_boss_tuning(enemies)
@@ -185,6 +213,59 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	# 连接 EnemySkillSystem 的特定信号到 BattleManager
 	_connect_enemy_skill_signals()
+
+
+# ========== 波次 ==========
+
+## 把整场敌人按波次切分：首波 1 只，其余每波最多 3 只
+func _build_enemy_waves(all_enemies: Array) -> void:
+	_pending_waves = []
+	wave_index = 1
+	wave_transition_pending = false
+	if all_enemies.is_empty():
+		enemies = []
+		wave_total = 1
+		return
+	var waves: Array = [all_enemies.slice(0, WAVE_FIRST_SIZE)]
+	var cursor: int = WAVE_FIRST_SIZE
+	while cursor < all_enemies.size():
+		waves.append(all_enemies.slice(cursor, cursor + WAVE_MAX_ON_FIELD))
+		cursor += WAVE_MAX_ON_FIELD
+	enemies = waves[0]
+	_pending_waves = waves.slice(1)
+	_wave_enemy_history = waves.duplicate()
+	wave_total = waves.size()
+
+
+func _scale_enemy_stats(enemy: Dictionary, mult: float) -> void:
+	enemy["maxHP"] = int(enemy.get("maxHP", 0) * mult)
+	enemy["hp"] = enemy["maxHP"]
+	enemy["atk"] = int(enemy.get("atk", 0) * mult)
+	enemy["def"] = int(enemy.get("def", 0) * mult)
+
+
+func has_next_wave() -> bool:
+	return not _pending_waves.is_empty()
+
+
+## 补下一波敌人，返回新的敌人列表；没有后续波次时返回空数组
+func start_next_wave() -> Array:
+	if _pending_waves.is_empty():
+		return []
+	enemies = _pending_waves.pop_front()
+	wave_index += 1
+	wave_transition_pending = false
+	enemy_tempo_mods = {}
+	capture_windows = {}
+	capture_window_best = {}
+	_status_effect.init_effects(enemies.size())
+	_refresh_capture_windows()
+	if _enemy_skill_system == null:
+		_enemy_skill_system = EnemySkillSystem.new()
+	_enemy_skill_system.reset()
+	_enemy_skill_system.init_skill_state(enemies)
+	_connect_enemy_skill_signals()
+	return enemies
 
 
 # ========== 属性协同加成 ==========
@@ -801,6 +882,10 @@ func _get_weakest_enemy() -> Variant:
 func check_battle_end() -> bool:
 	var all_dead = enemies.all(func(e): return e == null or e.get("hp", 0) <= 0)
 	if all_dead:
+		# 还有后续波次：不结算胜利，交给界面播放波次切换
+		if has_next_wave():
+			wave_transition_pending = true
+			return false
 		battle_over = true
 		battle_result = "win"
 		battle_ended.emit("win")
@@ -908,6 +993,9 @@ func get_status() -> Dictionary:
 		"current_phase": current_phase,
 		"total_phases": stage_phases.size() if not stage_phases.is_empty() else 1,
 		"is_boss_battle": not stage_phases.is_empty(),
+		"wave_index": wave_index,
+		"wave_total": wave_total,
+		"wave_pending": has_next_wave(),
 		"enemy_skill_states": _build_enemy_skill_states_dict(),
 		"enemy_intents": get_enemy_intents(),
 		"leader_skill_info": leader_skill_info,
@@ -1127,12 +1215,17 @@ func _on_enemy_skill_skill_seal(enemy_idx: int, target_idx: int, chance: float, 
 # ========== 获取战斗结果（用于结算） ==========
 
 func get_battle_result() -> Dictionary:
+	var result_enemies: Array = enemies
+	if not _wave_enemy_history.is_empty():
+		result_enemies = []
+		for wave_enemies: Array in _wave_enemy_history:
+			result_enemies.append_array(wave_enemies)
 	return {
 		"result": battle_result,
 		"turn_count": turn_count,
 		"max_turns": max_turns,
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
-		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
+		"enemies": result_enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"total_damage_dealt": total_damage_dealt.duplicate(),
 		"totalDamageDealt": total_damage_dealt.duplicate(),
 		"player_level": player_level,
