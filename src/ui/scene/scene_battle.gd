@@ -154,6 +154,9 @@ var _damage_popup_queue: Array[Dictionary] = []
 
 ## 敌人倒下粒子爆散
 var _defeat_explosions: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size}]
+
+## 命中特效粒子（按属性上色）
+var _combat_particles: Array[Dictionary] = []  # [{x, y, vx, vy, life, max_life, color, size, gravity}]
 var _defeated_enemies: Array[int] = []  # 已触发倒下特效的敌人索引（防止重复触发）
 
 ## 胜利粒子效果
@@ -932,6 +935,8 @@ func _process_matches() -> void:
 		if target_idx >= 0:
 			var ex := 25.0 + target_idx * 120.0 + 55.0
 			var ey := 80.0
+			var anchor := _enemy_fx_anchor(target_idx)
+			_spawn_combat_burst(anchor.x, anchor.y, _enemy_element_at(target_idx), 1.0 if log_effective else 0.8)
 			_floating_texts.append({
 				"text": "-%d" % log_damage,
 				"x": ex, "y": ey,
@@ -946,6 +951,8 @@ func _process_matches() -> void:
 				_trigger_attack_shake()
 			if log_died:
 				_fall_messages.append({"text": "💢 %s 倒下了！" % log_target, "timer": 1.5})
+				# 节奏：击杀后短暂停顿，让“倒下”被看见
+				await get_tree().create_timer(0.18).timeout
 		else:
 			# 找不到目标敌人在敌方列表，显示到中央
 			_floating_texts.append({
@@ -1765,6 +1772,9 @@ func _process(delta: float) -> void:
 	
 	# 更新敌人倒下粒子
 	_update_defeat_particles(effective_delta)
+
+	# 更新命中特效粒子
+	_update_combat_particles(effective_delta)
 	
 	# 更新胜利粒子
 	_update_victory_particles(effective_delta)
@@ -1860,6 +1870,9 @@ func _draw() -> void:
 	
 	# 渲染敌人倒下粒子
 	_draw_defeat_particles()
+
+	# 渲染命中特效粒子
+	_draw_combat_particles()
 	
 	# 渲染胜利粒子
 	_draw_victory_particles()
@@ -2651,6 +2664,49 @@ func _spawn_defeat_particles(cx: float, cy: float, color: Color) -> void:
 			"size": 4.0 + randf() * 4.0
 		})
 
+## 命中特效：按属性在目标位置炸开一团粒子
+func _spawn_combat_burst(cx: float, cy: float, element: String, power: float = 1.0) -> void:
+	var color: Color = GEM_COLORS.get(element, C["gold"])
+	var count: int = int(8 + 6 * power)
+	for i in range(count):
+		var angle: float = randf() * TAU
+		var speed: float = (70.0 + randf() * 110.0) * power
+		_combat_particles.append({
+			"x": cx + randf() * 8.0 - 4.0,
+			"y": cy + randf() * 8.0 - 4.0,
+			"vx": cos(angle) * speed,
+			"vy": sin(angle) * speed - 40.0,
+			"life": 0.28 + randf() * 0.22,
+			"max_life": 0.28 + randf() * 0.22,
+			"color": color,
+			"size": 3.0 + randf() * 4.0 * power,
+			"gravity": 260.0
+		})
+
+func _update_combat_particles(delta: float) -> void:
+	BattleAnimationControllerScript.update_particle_list(_combat_particles, delta, 260.0)
+
+func _draw_combat_particles() -> void:
+	for p: Dictionary in _combat_particles:
+		var progress: float = 1.0 - p["life"] / p["max_life"]
+		var alpha: float = 1.0 - progress
+		var size: float = p["size"] * (1.0 - progress * 0.4)
+		var color: Color = p["color"]
+		_draw_circle(p["x"], p["y"], size, Color(color.r, color.g, color.b, alpha))
+
+## 敌人锚点（绘制坐标），用于把特效打到正确位置
+func _enemy_fx_anchor(idx: int) -> Vector2:
+	return Vector2(25.0 + idx * 120.0 + 55.0, 88.0)
+
+## 目标属性
+func _enemy_element_at(idx: int) -> String:
+	if _battle == null or idx < 0 or idx >= _battle.enemies.size():
+		return ""
+	var e = _battle.enemies[idx]
+	if e == null or not e is Dictionary:
+		return ""
+	return str(e.get("element", ""))
+
 func _spawn_victory_particles() -> void:
 	# 全屏胜利粒子爆发
 	var colors: Array[Color] = [C["gold"], C["success"], Color(1.0, 1.0, 1.0), C["primary"]]
@@ -2926,6 +2982,7 @@ func destroy() -> void:
 	_obstacle_particles.clear()
 	_special_elim_phases.clear()
 	_defeat_explosions.clear()
+	_combat_particles.clear()
 	_victory_particles.clear()
 	_defeated_enemies.clear()
 	_screen_flash_timer = 0.0
