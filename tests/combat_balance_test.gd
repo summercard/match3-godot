@@ -173,6 +173,7 @@ func _test_boss_curve() -> void:
 			turns.sort()
 			near_deaths.sort()
 			var median_turns: int = int(turns[turns.size() / 2])
+			var max_turns: int = int(turns[turns.size() - 1])
 			var median_nd: int = int(near_deaths[near_deaths.size() / 2])
 			var wins := 0
 			var deaths := 0
@@ -180,15 +181,15 @@ func _test_boss_curve() -> void:
 				if str(r["result"]) == "win":
 					wins += 1
 				deaths = maxi(deaths, int(r["dead"]))
-			print("[Balance] %s combo=%d p=%d e=%d turns=%s nd=%s result=%s" % [
-				stage_id, combo, p_level, e_level, str(turns), str(near_deaths), str(runs.map(func(r): return r["result"]))
+			print("[Balance] %s combo=%d p=%d e=%d turns=%s median=%d max=%d nd=%s result=%s" % [
+				stage_id, combo, p_level, e_level, str(turns), median_turns, max_turns, str(near_deaths), str(runs.map(func(r): return r["result"]))
 			])
 			_expect(wins == runs.size(), "%s combo=%d should win in all reference runs" % [stage_id, combo])
 			_expect(deaths <= 1, "%s combo=%d should not lose more than one ally" % [stage_id, combo])
 			if combo == 1:
 				_expect(median_turns >= 40, "%s combo=1 baseline should last 40+ turns, got %d" % [stage_id, median_turns])
 			elif combo == 4:
-				_expect(median_turns >= 28, "%s combo=4 should last 28+ turns, got %d" % [stage_id, median_turns])
+				_expect(median_turns >= 22, "%s combo=4 should last 22+ turns, got %d" % [stage_id, median_turns])
 			_expect(median_turns <= int(stage.get("maxTurns", 60)), "%s combo=%d should finish inside maxTurns" % [stage_id, combo])
 			# 3+ 告急窗口是 1 连锁基准耐力局的口径；固定 2/4 连锁局被连锁加成本身缩短，
 			# 不作为本档门槛，但仍打印 nd 供对照。

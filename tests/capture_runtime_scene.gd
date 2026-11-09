@@ -329,6 +329,15 @@ func _seed_battle_match_demo(battle_scene: Control) -> void:
 func _seed_battle_chain_demo(battle_scene: Control, level: int) -> void:
 	battle_scene.set("_message_text", "")
 	battle_scene.set("_message_timer", 0.0)
+	# 固定敌我血量，让 Before/After 在相同战局状态下比较连锁提示。
+	var battle = battle_scene.get("_battle")
+	if battle != null:
+		var fixed_player_hp := [135, 165, 127]
+		for i in range(mini(battle.player_team.size(), fixed_player_hp.size())):
+			battle.player_team[i]["maxHP"] = fixed_player_hp[i]
+			battle.player_team[i]["hp"] = fixed_player_hp[i]
+		if battle_scene.has_method("_sync_gui"):
+			battle_scene.call("_sync_gui")
 	battle_scene.set("_chain_display", {"level": level, "pulse": 0.0})
 	battle_scene.call("_spawn_enemy_damage_popup", "-%d" % (level * 86), 0, false)
 	battle_scene.call("_spawn_player_damage_popup", "-34", 0, false)

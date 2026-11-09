@@ -1241,7 +1241,6 @@ func _clear_enemy_wave_visuals() -> void:
 	_boss_skill_visuals.clear()
 	_hit_flashes.clear()
 	_fall_messages.clear()
-	_damage_popup_queue.clear()
 	_enemy_attacks.clear()
 	_floating_texts.clear()
 
