@@ -111,13 +111,15 @@ static func _multi_enemy_slots(enemy_count: int) -> Array[Vector2]:
 		return [Vector2(82.0, 74.0), Vector2(197.0, 74.0)]
 	return [Vector2(24.0, 72.0), Vector2(139.5, 63.0), Vector2(255.0, 72.0)]
 
-## 敌方出手前摇：在会出手的敌人头顶画跳动警示箭头，并给目标套锁定光环。
+## 敌方出手前摇：普通出招画红色跳跃箭头，蓄力画紫色闪电，全体攻击画青色扇形。
+## 颜色和图标同时区分，玩家不看血条也能判断下回合是普攻、蓄力还是全体。
 static func draw_windup(scene, battle, state: Dictionary) -> void:
 	var indices: Array = state.get("enemy_windup_indices", [])
 	var total: float = float(state.get("enemy_windup_total", 0.0))
 	var timer: float = float(state.get("enemy_windup_timer", 0.0))
 	if battle == null or indices.is_empty() or total <= 0.0:
 		return
+	var cues: Dictionary = state.get("enemy_windup_cues", {})
 	var elapsed: float = clampf(total - timer, 0.0, total)
 	var fade: float = clampf(elapsed / 0.10, 0.0, 1.0)
 	var bob: float = sin(elapsed * 24.0) * 4.0
@@ -128,9 +130,11 @@ static func draw_windup(scene, battle, state: Dictionary) -> void:
 		var enemy = battle.enemies[index]
 		if enemy == null or int(enemy.get("hp", 0)) <= 0:
 			continue
-		if battle.enemies.size() > 1:
-			_draw_windup_ring(scene, _windup_sprite_center(battle, index), elapsed, fade)
-		_draw_windup_arrow(scene, _windup_arrow_tip(battle, index) + Vector2(0.0, bob), fade * pulse)
+		var cue: Dictionary = cues.get(index, {}) if cues.get(index, {}) is Dictionary else {}
+		var style: String = str(cue.get("style", "strike"))
+		if battle.enemies.size() > 1 or style != "strike":
+			_draw_windup_ring(scene, _windup_sprite_center(battle, index), elapsed, fade, style)
+		_draw_windup_arrow(scene, _windup_arrow_tip(battle, index) + Vector2(0.0, bob), fade * pulse, style, elapsed)
 
 static func _windup_arrow_tip(battle, index: int) -> Vector2:
 	if battle.enemies.size() == 1:
@@ -142,27 +146,74 @@ static func _windup_sprite_center(battle, index: int) -> Vector2:
 	var slots := _multi_enemy_slots(mini(battle.enemies.size(), 3))
 	return slots[index] + Vector2(48.0, 42.0)
 
-static func _draw_windup_ring(scene, center: Vector2, elapsed: float, fade: float) -> void:
+## 前摇颜色契约：普通红、蓄力紫、全体青。UI 和测试共用。
+static func windup_style_color(style: String) -> Color:
+	match style:
+		"charge":
+			return Color(0.82, 0.38, 1.0)
+		"sweep":
+			return Color(0.20, 0.88, 1.0)
+		_:
+			return Color(0.98, 0.16, 0.10)
+
+
+static func _draw_windup_ring(scene, center: Vector2, elapsed: float, fade: float, style: String = "strike") -> void:
 	var pulse_alpha: float = (0.34 + 0.24 * sin(elapsed * 18.0)) * fade
-	var ring_color := Color(1.0, 0.24, 0.16, pulse_alpha)
+	var base_color := windup_style_color(style)
+	var ring_color := Color(base_color.r, base_color.g, base_color.b, pulse_alpha)
 	scene.draw_arc(center, 41.0, 0.0, TAU, 40, ring_color, 2.2, true)
 	var lock_angle: float = elapsed * 5.0
-	var lock_color := Color(1.0, 0.62, 0.26, minf(1.0, pulse_alpha + 0.30))
+	var lock_color := Color(base_color.r, base_color.g, base_color.b, minf(1.0, pulse_alpha + 0.30))
 	scene.draw_arc(center, 44.0, lock_angle, lock_angle + 1.15, 12, lock_color, 2.6, true)
 	scene.draw_arc(center, 44.0, lock_angle + PI, lock_angle + PI + 1.15, 12, lock_color, 2.6, true)
 
-static func _draw_windup_arrow(scene, tip: Vector2, alpha: float) -> void:
+static func _draw_windup_arrow(scene, tip: Vector2, alpha: float, style: String = "strike", elapsed: float = 0.0) -> void:
 	if alpha <= 0.01:
 		return
+	var color := windup_style_color(style)
 	var points := _windup_arrow_points(tip, 0.72 + 0.28 * alpha)
 	var shadow := PackedVector2Array()
 	for point in points:
 		shadow.append(point + Vector2(0.0, 4.0))
 	scene.draw_colored_polygon(shadow, Color(0.10, 0.02, 0.02, 0.28 * alpha))
-	scene.draw_colored_polygon(points, Color(0.98, 0.16, 0.10, alpha))
+	scene.draw_colored_polygon(points, Color(color.r, color.g, color.b, alpha))
 	var outline := points.duplicate()
 	outline.append(points[0])
-	scene.draw_polyline(outline, Color(0.32, 0.03, 0.02, alpha), 2.4, true)
+	scene.draw_polyline(outline, Color(color.r * 0.45, color.g * 0.45, color.b * 0.45, alpha), 2.4, true)
+	if style == "charge":
+		_draw_charge_badge(scene, tip, alpha, elapsed)
+	elif style == "sweep":
+		_draw_sweep_badge(scene, tip, alpha, elapsed)
+
+## 蓄力图标：紫色圆牌 + 金色闪电，和普通红箭头一眼区分。
+static func _draw_charge_badge(scene, tip: Vector2, alpha: float, elapsed: float) -> void:
+	var center := tip + Vector2(24.0, -20.0)
+	var pulse := 0.9 + 0.1 * sin(elapsed * 22.0)
+	scene.draw_circle(center, 12.0 * pulse, Color(0.30, 0.08, 0.48, 0.92 * alpha))
+	scene.draw_arc(center, 12.0 * pulse, 0.0, TAU, 24, Color(0.92, 0.58, 1.0, alpha), 2.2, true)
+	var bolt := PackedVector2Array([
+		center + Vector2(2.6, -8.2),
+		center + Vector2(-5.8, 1.0),
+		center + Vector2(-1.0, 1.0),
+		center + Vector2(-2.8, 8.2),
+		center + Vector2(6.8, -2.0),
+		center + Vector2(1.4, -2.0),
+	])
+	scene.draw_colored_polygon(bolt, Color(1.0, 0.86, 0.28, alpha))
+
+## 全体攻击图标：青色圆牌 + 三枚向下的箭头，表示命中全部伙伴。
+static func _draw_sweep_badge(scene, tip: Vector2, alpha: float, elapsed: float) -> void:
+	var center := tip + Vector2(-24.0, -20.0)
+	var pulse := 0.9 + 0.1 * sin(elapsed * 22.0)
+	scene.draw_circle(center, 12.0 * pulse, Color(0.03, 0.26, 0.38, 0.92 * alpha))
+	scene.draw_arc(center, 12.0 * pulse, 0.0, TAU, 24, Color(0.40, 0.94, 1.0, alpha), 2.2, true)
+	for offset in [-6.5, 0.0, 6.5]:
+		var head := center + Vector2(offset, -5.0)
+		scene.draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-3.0, 0.0),
+			head + Vector2(3.0, 0.0),
+			head + Vector2(0.0, 6.0),
+		]), Color(0.55, 0.98, 1.0, alpha))
 
 static func _windup_arrow_points(tip: Vector2, scale: float) -> PackedVector2Array:
 	var raw := [

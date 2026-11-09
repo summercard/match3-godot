@@ -93,6 +93,7 @@ var _enemy_attack_timer: float = 0.0
 ## 敌方出手前摇：先标出本回合会出手的敌人，再结算攻击
 const ENEMY_WINDUP_DURATION: float = 0.6
 var _enemy_windup_indices: Array = []
+var _enemy_windup_cues: Dictionary = {}
 var _enemy_windup_timer: float = 0.0
 var _enemy_windup_total: float = 0.0
 
@@ -1095,12 +1096,15 @@ func _play_enemy_windup() -> void:
 	if _battle == null:
 		return
 	_enemy_windup_indices = _battle.get_upcoming_attackers()
+	_enemy_windup_cues = _battle.get_enemy_windup_cues()
 	if _enemy_windup_indices.is_empty():
+		_enemy_windup_cues = {}
 		return
 	_enemy_windup_total = ENEMY_WINDUP_DURATION
 	_enemy_windup_timer = ENEMY_WINDUP_DURATION
 	await get_tree().create_timer(ENEMY_WINDUP_DURATION).timeout
 	_enemy_windup_indices.clear()
+	_enemy_windup_cues = {}
 	_enemy_windup_timer = 0.0
 	_enemy_windup_total = 0.0
 
@@ -1177,6 +1181,12 @@ func _start_enemy_turn() -> void:
 				_boss_skill_visuals[attacker_idx]["charge_timer"] = 999.0
 			continue
 		
+		# 新数据化蓄力：释放回合清掉“蓄力中”光环，避免视觉状态残留到下一轮。
+		if str(action.get("attack_mode", "")) == "charge_release":
+			var charge_idx := _find_enemy_index(action.get("attacker", ""))
+			if charge_idx >= 0 and _boss_skill_visuals.has(charge_idx):
+				_boss_skill_visuals[charge_idx]["charge_timer"] = 0.0
+
 		if action.get("damage", 0) > 0:
 			# 伤害飘字由 enemy_attacked 信号统一生成，这里只补护盾/束缚提示。
 			var target_idx := _find_player_index(action.get("target", ""))
@@ -2001,6 +2011,7 @@ func _combatant_render_state() -> Dictionary:
 		"boss_skill_visuals": _boss_skill_visuals,
 		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
 		"enemy_windup_indices": _enemy_windup_indices.duplicate(),
+		"enemy_windup_cues": _enemy_windup_cues.duplicate(true),
 		"enemy_windup_timer": _enemy_windup_timer,
 		"enemy_windup_total": _enemy_windup_total,
 		"status_emoji": STATUS_EMOJI,

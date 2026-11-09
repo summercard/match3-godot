@@ -160,7 +160,16 @@ const STAGES_DATA: Dictionary = {
 					"id": "stage_3_3", "name": "暗礁深谷", "type": "normal",
 					"enemies": ["enemy_006", "enemy_007", "enemy_008"],
 					"enemyLevel": 9,
-					"rewards": {"gold": 120, "exp": 70}
+					"rewards": {"gold": 120, "exp": 70},
+					# 关卡数据可覆盖怪物默认出手模式：本关光蝇固定按轮次出招。
+					"enemyAttackModes": {
+						"enemy_008": {
+							"select": "rotation",
+							"sequence": ["sweep", "strike", "charge"],
+							"chargeMultiplier": 1.9,
+							"sweepMultiplier": 0.5
+						}
+					}
 				},
 				{
 					"id": "stage_3_3e", "name": "精英·暗影猎手", "type": "elite",
