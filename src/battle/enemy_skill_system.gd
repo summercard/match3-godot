@@ -280,6 +280,17 @@ func is_charging(enemy_idx: int) -> bool:
 	return state.get("is_charging", false)
 
 
+## 破招：清空蓄力进度，让本次释放作废。返回是否真的取消了蓄力。
+## 与 check_and_release_charge 不同，不触发释放信号、不进入伤害结算。
+func cancel_charge(enemy_idx: int) -> bool:
+	var state = get_skill_state(enemy_idx, "charge")
+	if state.is_empty() or not state.get("is_charging", false):
+		return false
+	state["is_charging"] = false
+	state["turns_since_last"] = 0
+	return true
+
+
 # ==================== Phase 3: 护盾技能解耦 ====================
 
 ## 护盾减伤计算

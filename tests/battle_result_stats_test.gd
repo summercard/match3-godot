@@ -103,6 +103,7 @@ func _test_result_screen_win() -> void:
 	_expect(_label(screen, "StatsPanel/TotalDamage/Value") == "2830", "win screen should show the battle total damage")
 	_expect(_label(screen, "StatsPanel/Turns/Value") == "7 / 20", "win screen should show turns played")
 	_expect(_label(screen, "StatsPanel/MaxChain/Value") == "4 连锁", "win screen should show the highest chain tier")
+	_expect(_label(screen, "StatsPanel/BreakCount/Value") == "3 次", "win screen should show the battle break count")
 	_expect(_label(screen, "StatsPanel/TeamRows/Row1/Dealt") == "1240", "win screen should show per-ally damage dealt")
 	_expect(_label(screen, "StatsPanel/TeamRows/Row1/Taken") == "310", "win screen should show per-ally damage taken")
 	_expect((screen.get_node("Buttons/NextButton") as Control).visible, "win screen should offer the next stage")
@@ -120,6 +121,7 @@ func _test_result_screen_loss() -> void:
 	_expect(_label(screen, "StatsPanel/TotalDamage/Value") == "2830", "loss screen should show the battle total damage")
 	_expect(_label(screen, "StatsPanel/Turns/Value") == "9 / 20", "loss screen should show turns played")
 	_expect(_label(screen, "StatsPanel/MaxChain/Value") == "3 连锁", "loss screen should show the highest chain tier")
+	_expect(_label(screen, "StatsPanel/BreakCount/Value") == "1 次", "loss screen should show the battle break count")
 	_expect(not (screen.get_node("Buttons/NextButton") as Control).visible, "loss screen must not offer the next stage")
 	_expect(not (screen.get_node("Buttons/BackButton") as Control).visible, "loss screen should only expose retry")
 	_expect((screen.get_node("Buttons/RetryButton") as Control).visible, "loss screen should offer retry")
@@ -142,6 +144,8 @@ func _result_payload(mode: String) -> Dictionary:
 		"totalDamageTaken": 805,
 		"maxCombo": 4 if is_win else 3,
 		"highestChain": 4 if is_win else 3,
+		"breakCount": 3 if is_win else 1,
+		"break_count": 3 if is_win else 1,
 		"allyStats": [
 			{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "damageDealt": 1240, "damageTaken": 310},
 			{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 4, "damageDealt": 860, "damageTaken": 270},

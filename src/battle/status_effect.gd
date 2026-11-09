@@ -74,6 +74,31 @@ static func get_status_def(status_type: String) -> Dictionary:
 	return STATUS_DEFS.get(status_type, {})
 
 
+## 敌人当前是否挂着指定状态（不消耗、不判定概率）。
+func has_status(enemy_index: int, status_type: String) -> bool:
+	if enemy_index < 0 or enemy_index >= _effects.size():
+		return false
+	var effect = _effects[enemy_index]
+	return effect is Dictionary and str(effect.get("type", "")) == status_type
+
+
+## 直接挂一个状态，供状态命中与破招演示/测试共用。
+func apply_status_effect(enemy_index: int, status_type: String, source_atk: int = 10, turns_left: int = -1) -> bool:
+	if enemy_index < 0 or enemy_index >= _effects.size():
+		return false
+	var def: Dictionary = STATUS_DEFS.get(status_type, {})
+	if def.is_empty():
+		return false
+	var duration := turns_left if turns_left > 0 else int(def.get("duration", 2))
+	_effects[enemy_index] = {
+		"type": status_type,
+		"source_atk": source_atk,
+		"turns_left": duration,
+		"element": str(def.get("element", ""))
+	}
+	return true
+
+
 ## 检查敌人是否被眩晕（应跳过攻击）
 func is_enemy_stunned(enemy_index: int) -> bool:
 	if enemy_index < 0 or enemy_index >= _effects.size():
@@ -130,13 +155,7 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 				source_atk = m.get("atk", 10)
 				break
 
-		var duration: int = STATUS_DEFS[status_type].get("duration", 2)
-		_effects[target_idx] = {
-			"type": status_type,
-			"source_atk": source_atk,
-			"turns_left": duration,
-			"element": element
-		}
+		apply_status_effect(target_idx, status_type, source_atk)
 
 		var label: String = STATUS_DEFS[status_type].get("label", status_type)
 		_effect_log.append({

@@ -1,8 +1,8 @@
 extends SceneTree
 
 ## 战斗音效层回归：
-## 1. 六个程序化音效的参数互不相同：频率、时长、波形等至少 3 项不同；
-## 2. 每个音效都生成可播放的 16-bit PCM，且六段数据互不相同；
+## 1. 七个程序化音效（含 1-5 破招专用音）的参数互不相同：频率、时长、波形等至少 3 项不同；
+## 2. 每个音效都生成可播放的 16-bit PCM，且七段数据互不相同；
 ## 3. 总开关关闭时不创建播放器、不播放，播放器数为 0；
 ## 4. 同一引擎帧最多触发 8 个播放实例，超出的丢弃并计数，播放器池不超过 8；
 ## 5. 音效开/关两种状态下，stage_1_1 固定种子的伤害日志、承伤日志与结算统计逐位一致。
@@ -33,14 +33,14 @@ func _run() -> void:
 
 func _test_config_distinctness() -> void:
 	var ids: Array = BattleSfxScript.SOUND_IDS
-	_expect(ids.size() == 6, "应有六个战斗音效，实际 %d" % ids.size())
+	_expect(ids.size() == 7, "应有七个战斗音效（含破招），实际 %d" % ids.size())
 	for sound_id: String in ids:
 		var params: Dictionary = BattleSfxScript.CONFIG["sounds"].get(sound_id, {})
 		_expect(not params.is_empty(), "音效 %s 应有配置" % sound_id)
 		_expect(float(params.get("frequency", 0.0)) > 0.0, "%s 应有正频率" % sound_id)
 		_expect(float(params.get("duration", 0.0)) > 0.0, "%s 应有正时长" % sound_id)
 		_expect(not str(params.get("waveform", "")).is_empty(), "%s 应声明波形" % sound_id)
-	# 每两个音效至少在 SOUND_KEYS 中 3 项不同；六种波形全部不同时天然满足。
+	# 每两个音效至少在 SOUND_KEYS 中 3 项不同；破招沿用锯齿波，但频率/时长/起音/衰减不同。
 	for i in range(ids.size()):
 		for j in range(i + 1, ids.size()):
 			var a: Dictionary = BattleSfxScript.CONFIG["sounds"][ids[i]]
@@ -54,7 +54,8 @@ func _test_config_distinctness() -> void:
 	var waveforms := {}
 	for sound_id: String in ids:
 		waveforms[str(BattleSfxScript.CONFIG["sounds"][sound_id]["waveform"])] = true
-	_expect(waveforms.size() == ids.size(), "六个音效应使用六种不同波形")
+	_expect(waveforms.size() >= 6, "七种音效应至少覆盖六种波形，实际 %d" % waveforms.size())
+	_expect(BattleSfxScript.CONFIG["sounds"].has("break"), "破招音效应加入 battle_sfx CONFIG")
 	for sound_id: String in ids:
 		var params: Dictionary = BattleSfxScript.CONFIG["sounds"][sound_id]
 		print("[BattleSfx] %-11s freq=%.1fHz end=%.1fHz dur=%.3fs wave=%s attack=%.3fs decay=%.1f" % [

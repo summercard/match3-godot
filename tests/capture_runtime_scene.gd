@@ -111,6 +111,11 @@ func _result_demo_payload(mode: String) -> Dictionary:
 			{"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "hp": 0 if is_win else 180, "maxHP": 300}
 		],
 	}
+	payload["breakCount"] = int(_read_arg("--result-break-count=", "0"))
+	payload["break_count"] = int(payload["breakCount"])
+	payload["turnCount"] = int(_read_arg("--result-turns=", str(payload["turnCount"])))
+	payload["maxTurns"] = int(_read_arg("--result-max-turns=", str(payload["maxTurns"])))
+	payload["stageId"] = _read_arg("--result-stage-id=", str(payload["stageId"]))
 	if is_win:
 		payload["capture_played_inline"] = true
 		payload["captured"] = true
@@ -306,6 +311,9 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--battle-demo-reaction=", "0") == "1":
 		_seed_battle_reaction_demo(battle_scene)
 		return
+	if _read_arg("--battle-demo-break=", "0") == "1":
+		_seed_battle_break_demo(battle_scene)
+		return
 	if _read_arg("--battle-demo-hit=", "0") == "1":
 		_seed_battle_hit_demo(battle_scene)
 		return
@@ -376,6 +384,43 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		}
 	})
 	battle_scene.queue_redraw()
+
+## 破招瞬间证据：让 1-5 花叶兽进入蓄力并在本回合带眩晕，再走真实敌方回合。
+## 0.6s 前摇结束后触发破招飘字/短震屏/专用音效；配合 --hold-seconds=0.72 截图。
+func _seed_battle_break_demo(battle_scene: Control) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null:
+		return
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	battle_scene.set("_floating_texts", [])
+	battle_scene.set("_hit_flashes", [])
+	battle_scene.set("_hit_reactions", [])
+	var skill_system = battle.get("_enemy_skill_system")
+	if skill_system == null or not skill_system.has_skill_type(0, "charge"):
+		return
+	var charge_state = skill_system.get_skill_state(0, "charge")
+	charge_state["is_charging"] = true
+	charge_state["turns_since_last"] = 0
+	# 基线分支没有 apply_status_effect 时直接写入状态数组，保证同一采集脚本可在 eddd1ed 重跑。
+	var status_effect = battle.get("_status_effect")
+	if status_effect != null:
+		if status_effect.has_method("apply_status_effect"):
+			status_effect.apply_status_effect(0, "stun")
+		else:
+			var effects = status_effect.get("_effects")
+			if effects is Array:
+				effects[0] = {"type": "stun", "source_atk": 10, "turns_left": 1, "element": "thunder"}
+	battle.turn_count = 4
+	battle_scene.set("_boss_skill_visuals", {
+		0: {
+			"charge_timer": 999.0,
+			"shield_hp": 0.0,
+			"shield_max_hp": 0.0,
+			"heal_floats": []
+		}
+	})
+	battle_scene.call("_start_enemy_turn")
 
 ## 受击反应证据：同一帧制造一次敌方受击与一次我方受击，展示 0.2s 抖动/闪白与 0.25s 血条缓降。
 ## 直接改 HP 后走场景现有的 damage handler，基线（37d121c）也能用同一脚本录制 before。
