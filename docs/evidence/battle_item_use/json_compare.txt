@@ -1,0 +1,7 @@
+$ cmp battle_unused_baseline.json battle_unused.json
+cmp: identical
+
+$ shasum -a 256 battle_unused_baseline.json battle_unused.json battle_used.json
+1061a31bdb3186bced90220928d6c0967099491679f68c95e53519311e13885e  battle_unused_baseline.json
+1061a31bdb3186bced90220928d6c0967099491679f68c95e53519311e13885e  battle_unused.json
+3c97d00246b20b9cbb9a1f144cc58f51cbcd382999a9084f7c803ef2218f5c6a  battle_used.json

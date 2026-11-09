@@ -1,0 +1,43 @@
+Branch: agent/battle-item-use-f261161ba624 (base b07a03e)
+Godot 4.7.2.stable; MATCH3_SAVE_PATH per test; --fixed-fps 60
+Item test output: test_output.txt
+
+test exit
+battle_item_use_test 0
+battle_pause_test 0
+battle_input_test 0
+battle_gui_scene_test 0
+capture_auto_item_test 0
+inventory_gui_scene_test 0
+battle_rules_test 0
+enemy_windup_test 0
+battle_sfx_test 0
+battle_bgm_test 0
+vibration_feedback_test 0
+combat_balance_test 0
+p0_smoke_test 0
+p1_ch1_slice_test 0
+stage_progress_loop_test 0
+battle_result_stats_test 0
+ui_button_sfx_test 0
+battle_hit_reaction_test 0
+combo_chain_test 0
+match_hit_feedback_test 0
+boss_break_test 0
+stun_order_test 0
+presentation_settings_restart_test (write then read, same save path) 0
+
+battle_speed_test 1 (pre-existing environment failure, reproduced on base b07a03e)
+  branch : [BattleSpeed] mid_switch ... immediate_0.2s_timer=34.0ms
+  base   : [BattleSpeed] mid_switch ... immediate_0.2s_timer=33.0ms
+  both fail only the wall-clock 60-180ms window assertion; identical=true,
+  ratio/turns/logs assertions pass. Not caused by this change.
+
+Item test raw output:
+[BattleItem] zero_count count=0 turn=0 hp=415 state=0 enemy_hits=0 panel_above_board=true
+[BattleItem] use count=2->1 turn=0->1 heal=207/207 ratio=0.5 windup=true enemy_hits=1
+[BattleItem] persisted count=1
+[BattleItem] zero_after_last count=0 turn=1 hp=281 enemy_hits=1
+[BattleItem] speed2x_pause heal=207 turn=1 enemy_hits=1 time_scale=2.00
+[BattleItem] fixed_seed_transcript sha256=0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb baseline=0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb bytes=8500
+[BattleItem] OK

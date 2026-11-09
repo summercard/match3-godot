@@ -14,11 +14,12 @@ func _capture() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	_seed_save_inventory_from_arg()
 	main.switch_scene(scene_name, _scene_data(scene_name))
 	await process_frame
 	await process_frame
 	await process_frame
-	_seed_demo_state(main, scene_name)
+	await _seed_demo_state(main, scene_name)
 	if _read_arg("--open-pause=", "0") == "1":
 		var current_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
 		if current_scene != null and current_scene.has_method("open_pause_panel"):
@@ -131,7 +132,7 @@ func _result_demo_payload(mode: String) -> Dictionary:
 
 func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "battle":
-		_seed_battle_demo_fx(main)
+		await _seed_battle_demo_fx(main)
 		return
 	if scene_name == "ranch":
 		_seed_ranch_demo(main)
@@ -299,6 +300,51 @@ func _seed_shop_demo(main: Control) -> void:
 	else:
 		shop_scene.queue_redraw()
 
+## 截图前写入背包，保证「道具」面板有可展示的战斗道具与捕捉道具。
+func _seed_save_inventory_from_arg() -> void:
+	var spec := _read_arg("--battle-inventory=", "")
+	if spec.is_empty():
+		return
+	var storage := root.get_node_or_null("SaveManager")
+	if storage == null or not storage.has_method("save_inventory"):
+		return
+	var inventory := {}
+	for part in spec.split(",", false):
+		var bits := part.split(":", false)
+		if bits.size() == 2:
+			inventory[bits[0]] = int(bits[1])
+	storage.save_inventory(inventory)
+
+
+## 战斗内道具截图：
+##   panel   展开道具列表；
+##   damaged 把全队压到 20% 血，展示使用前血量；
+##   use     压血后使用 1 个 HP 药水，展示回血飘字与血条变化。
+func _seed_battle_item_demo(battle_scene: Control, mode: String) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null:
+		return
+	battle_scene.call("_load_battle_items")
+	battle_scene.set("_message_timer", 0.0)
+	if mode == "panel":
+		battle_scene.call("open_item_panel")
+		return
+	for m in battle.player_team:
+		if m == null or not m is Dictionary:
+			continue
+		var monster: Dictionary = m
+		if int(monster.get("hp", 0)) <= 0:
+			continue
+		monster["hp"] = maxi(1, int(int(monster.get("maxHP", 1)) * 0.2))
+	battle_scene.call("_load_battle_items")
+	# 留出受击/血条缓降时间，让使用前后的血量都稳定可读。
+	for _i in range(20):
+		await process_frame
+	if mode == "use":
+		battle_scene.call("_use_battle_item", "hp_potion")
+	battle_scene.queue_redraw()
+
+
 func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
 	if battle_scene == null:
@@ -312,6 +358,10 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		var hit_reaction = load("res://src/ui/components/battle_hit_reaction.gd")
 		if hit_reaction != null:
 			hit_reaction.enabled = false
+	var item_demo := _read_arg("--battle-item-demo=", "")
+	if not item_demo.is_empty():
+		await _seed_battle_item_demo(battle_scene, item_demo)
+		return
 	if _read_arg("--battle-demo-reaction=", "0") == "1":
 		_seed_battle_reaction_demo(battle_scene)
 		return
