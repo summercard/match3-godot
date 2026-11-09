@@ -29,7 +29,11 @@ var player_team: Array = []        # 玩家队伍 [{...stats}]
 var enemies: Array = []            # 敌方怪物 [{...stats}]
 var turn: int = 0
 var combo: int = 0                # 当前连锁数
-var total_damage_dealt: Dictionary = {}  # 按属性统计伤害
+var total_damage_dealt: Dictionary = {}  # 按伙伴统计本场伤害
+var total_damage_dealt_amount: int = 0   # 本场总伤害（与各伙伴伤害合计一致）
+var damage_taken_by_index: Dictionary = {}  # 按队伍位置统计本场承伤
+var total_damage_taken: int = 0           # 本场总承伤
+var max_combo: int = 0              # 本场最高连锁档
 var skill_charges: Dictionary = {}       # 技能充能 { instanceId/monsterId: charge }
 var battle_over: bool = false
 var battle_result: String = ""     # 'win' | 'lose'
@@ -154,7 +158,11 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 
 	turn = 0
 	combo = 0
+	max_combo = 0
 	total_damage_dealt = {}
+	total_damage_dealt_amount = 0
+	damage_taken_by_index = {}
+	total_damage_taken = 0
 	battle_over = false
 	battle_result = ""
 	turn_count = 0
@@ -191,6 +199,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 						m["hp"] = m["maxHP"]
 			if skill_data.get("type") == "combo_start":
 				combo = skill_data.get("initialCombo", 1)
+	max_combo = combo
 
 	synergy_bonuses = null
 	synergy_info = []
@@ -338,6 +347,7 @@ func get_synergy_def_mult(element: String) -> float:
 
 func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionary:
 	self.combo = combo_count
+	max_combo = maxi(max_combo, combo_count)
 	var damage_log: Array = []
 
 	for monster in player_team:
@@ -388,9 +398,11 @@ func process_match_result(gem_counts: Dictionary, combo_count: int) -> Dictionar
 		_update_capture_window(target_idx)
 
 		total_damage_dealt[mon_id] = total_damage_dealt.get(mon_id, 0) + total_damage
+		total_damage_dealt_amount += total_damage
 
 		damage_log.append({
 			"attacker": monster.get("name", ""),
+			"attacker_id": mon_id,
 			"attacker_emoji": monster.get("emoji", ""),
 			"target": target.get("name", ""),
 			"target_emoji": target.get("emoji", ""),
@@ -547,6 +559,7 @@ func use_active_skill(monster_id: String) -> Dictionary:
 	skill_charges[monster_id] = maxi(0, charge - cost)
 	if total_damage > 0:
 		total_damage_dealt[monster_id] = total_damage_dealt.get(monster_id, 0) + total_damage
+		total_damage_dealt_amount += total_damage
 
 	var target_died: bool = target != null and target.get("hp", 0) <= 0
 	var result := {
@@ -832,14 +845,16 @@ func enemy_action() -> Dictionary:
 			# 全体攻击：对每个存活伙伴分别走防御/协同/护盾结算，倍率约单体一半。
 			for sweep_target in alive_team:
 				var sweep_hit := _resolve_enemy_hit(enemy, sweep_target, attack_mode_multiplier, freeze_mult, tempo_mult)
-				sweep_target["hp"] = sweep_target.get("hp", 0) - int(sweep_hit.get("damage", 0))
+				var sweep_damage := int(sweep_hit.get("damage", 0))
+				sweep_target["hp"] = sweep_target.get("hp", 0) - sweep_damage
+				record_damage_taken(player_team.find(sweep_target), sweep_damage)
 				actions.append({
 					"attacker": enemy.get("name", ""),
 					"attacker_emoji": enemy.get("emoji", ""),
 					"target": sweep_target.get("name", ""),
 					"target_emoji": sweep_target.get("emoji", ""),
 					"target_index": player_team.find(sweep_target),
-					"damage": int(sweep_hit.get("damage", 0)),
+					"damage": sweep_damage,
 					"element": enemy.get("element", ""),
 					"target_died": sweep_target.get("hp", 0) <= 0,
 					"is_charged": false,
@@ -861,6 +876,7 @@ func enemy_action() -> Dictionary:
 		var guard_absorbed := int(hit.get("guard_absorbed", 0))
 
 		target["hp"] = target.get("hp", 0) - damage
+		record_damage_taken(player_team.find(target), damage)
 		_refresh_capture_windows()
 
 		actions.append({
@@ -955,6 +971,15 @@ func check_battle_end() -> bool:
 
 
 # ========== 辅助函数 ==========
+
+## 记录某个伙伴在本场受到的伤害。
+## 结算页只读取这里累计的真实值，不在 UI 侧重新计算。
+func record_damage_taken(team_index: int, damage: int) -> void:
+	if team_index < 0 or team_index >= player_team.size() or damage <= 0:
+		return
+	damage_taken_by_index[team_index] = int(damage_taken_by_index.get(team_index, 0)) + int(damage)
+	total_damage_taken += int(damage)
+
 
 func get_enemies() -> Array:
 	return enemies
@@ -1110,6 +1135,7 @@ func get_status() -> Dictionary:
 	return {
 		"turn_count": turn_count,
 		"combo": combo,
+		"max_combo": max_combo,
 		"player_team": player_team.map(func(m): return m.duplicate(true) if m != null else null),
 		"enemies": enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"skill_charges": skill_charges.duplicate(),
@@ -1340,12 +1366,37 @@ func _on_enemy_skill_skill_seal(enemy_idx: int, target_idx: int, chance: float, 
 
 # ========== 获取战斗结果（用于结算） ==========
 
+## 每个伙伴的伤害/承伤，按出战顺序返回；结算页与测试都读取这一份结果。
+func get_ally_battle_stats() -> Array:
+	var stats: Array = []
+	for i in range(player_team.size()):
+		var monster = player_team[i]
+		if monster == null or not monster is Dictionary:
+			continue
+		var monster_id := str(monster.get("id", ""))
+		var dealt := int(total_damage_dealt.get(monster_id, 0))
+		var taken := int(damage_taken_by_index.get(i, 0))
+		stats.append({
+			"id": monster_id,
+			"monsterId": str(monster.get("monsterId", monster_id)),
+			"name": str(monster.get("name", "")),
+			"emoji": str(monster.get("emoji", "")),
+			"level": int(monster.get("level", 1)),
+			"damage_dealt": dealt,
+			"damage_taken": taken,
+			"damageDealt": dealt,
+			"damageTaken": taken
+		})
+	return stats
+
+
 func get_battle_result() -> Dictionary:
 	var result_enemies: Array = enemies
 	if not _wave_enemy_history.is_empty():
 		result_enemies = []
 		for wave_enemies: Array in _wave_enemy_history:
 			result_enemies.append_array(wave_enemies)
+	var ally_stats := get_ally_battle_stats()
 	return {
 		"result": battle_result,
 		"turn_count": turn_count,
@@ -1354,6 +1405,16 @@ func get_battle_result() -> Dictionary:
 		"enemies": result_enemies.map(func(e): return e.duplicate(true) if e != null else null),
 		"total_damage_dealt": total_damage_dealt.duplicate(),
 		"totalDamageDealt": total_damage_dealt.duplicate(),
+		"total_damage": total_damage_dealt_amount,
+		"totalDamage": total_damage_dealt_amount,
+		"total_damage_taken": total_damage_taken,
+		"totalDamageTaken": total_damage_taken,
+		"ally_stats": ally_stats,
+		"allyStats": ally_stats,
+		"max_combo": max_combo,
+		"maxCombo": max_combo,
+		"highest_chain": max_combo,
+		"highestChain": max_combo,
 		"player_level": player_level,
 		"playerLevel": player_level,
 		"enemy_level": enemy_level,

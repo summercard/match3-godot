@@ -67,30 +67,58 @@ func _scene_data(scene_name: String) -> Dictionary:
 			"stageData": stage_db.get_stage(stage_id)
 		}
 	if scene_name == "result":
-		return {
-			"result": "win",
-			"stageId": "stage_1_1",
-			"turnCount": 5,
-			"maxTurns": 20,
-			"playerLevel": 5,
-			"enemyLevel": 3,
-			"stageRewards": {"gold": 80, "exp": 30, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
-			"playerTeam": [
-				{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "hp": 20, "maxHP": 20},
-				{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 3, "hp": 18, "maxHP": 18},
-				{"id": "monster_003", "monsterId": "monster_003", "name": "草苗儿", "level": 5, "hp": 22, "maxHP": 22}
-			],
-			"enemies": [
-				{"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "hp": 0, "maxHP": 16}
-			],
-			"capture_played_inline": true,
-			"captured": true,
-			"capture_target": {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1},
-			"capture_result_text": {"title": "收服成功", "reason": "窗口稳定"},
-			"capture_item_used": {"name": "捕捉球"},
-			"capture_window": {"label": "稳定", "stability": 0.82}
-		}
+		return _result_demo_payload(_read_arg("--result-mode=", "win"))
 	return {}
+
+func _result_demo_payload(mode: String) -> Dictionary:
+	var is_win := mode != "lose"
+	var ally_stats: Array = [
+		{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "damageDealt": 1240, "damageTaken": 310},
+		{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 4, "damageDealt": 860, "damageTaken": 270},
+		{"id": "monster_003", "monsterId": "monster_003", "name": "草苗儿", "level": 5, "damageDealt": 730, "damageTaken": 225},
+	]
+	var total_damage := 0
+	var total_taken := 0
+	for stat: Dictionary in ally_stats:
+		total_damage += int(stat["damageDealt"])
+		total_taken += int(stat["damageTaken"])
+		stat["damage_dealt"] = int(stat["damageDealt"])
+		stat["damage_taken"] = int(stat["damageTaken"])
+	var payload := {
+		"result": "win" if is_win else "lose",
+		"stageId": "stage_1_1",
+		"turnCount": 7 if is_win else 9,
+		"maxTurns": 20,
+		"playerLevel": 5,
+		"enemyLevel": 3,
+		"stageRewards": {"gold": 45, "exp": 45, "guaranteedItems": [{"id": "capture_ball", "count": 1}]},
+		"totalDamage": total_damage,
+		"totalDamageTaken": total_taken,
+		"maxCombo": 4 if is_win else 3,
+		"highestChain": 4 if is_win else 3,
+		"allyStats": ally_stats,
+		"totalDamageDealt": {
+			"monster_001": 1240,
+			"monster_002": 860,
+			"monster_003": 730,
+		},
+		"playerTeam": [
+			{"id": "monster_001", "monsterId": "monster_001", "name": "小火龙", "level": 5, "hp": 210, "maxHP": 520},
+			{"id": "monster_002", "monsterId": "monster_002", "name": "水龟仔", "level": 4, "hp": 160, "maxHP": 430},
+			{"id": "monster_003", "monsterId": "monster_003", "name": "草苗儿", "level": 5, "hp": 185, "maxHP": 410},
+		],
+		"enemies": [
+			{"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "hp": 0 if is_win else 180, "maxHP": 300}
+		],
+	}
+	if is_win:
+		payload["capture_played_inline"] = true
+		payload["captured"] = true
+		payload["capture_target"] = {"id": "enemy_001", "monsterId": "enemy_001", "name": "野火虫", "rarity": 1}
+		payload["capture_result_text"] = {"title": "收服成功", "reason": "窗口稳定"}
+		payload["capture_item_used"] = {"name": "捕捉球"}
+		payload["capture_window"] = {"label": "稳定", "stability": 0.82}
+	return payload
 
 func _seed_demo_state(main: Control, scene_name: String) -> void:
 	if scene_name == "battle":
