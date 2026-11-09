@@ -24,6 +24,7 @@ const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_r
 const MatchHitFeedbackScript = preload("res://src/ui/components/match_hit_feedback.gd")
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
+const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 
@@ -86,6 +87,8 @@ var _chain_display: Dictionary = {
 var _combo_sfx: ComboSfx = null
 ## 战斗音效层：七个程序化合成音（含破招），参数与总开关见 battle_sfx.gd
 var _battle_sfx: Node = null
+## 战斗背景音乐层：一段运行时合成的循环 BGM，参数与总开关见 battle_bgm.gd
+var _battle_bgm: Node = null
 
 ## 消息
 var _message_text: String = ""
@@ -398,6 +401,10 @@ func _ready() -> void:
 		_combo_sfx = ComboSfxScript.new()
 		_combo_sfx.name = "ComboSfx"
 		add_child(_combo_sfx)
+	# 战斗 BGM 在场景进入时起播；musicOn=false 时节点存在但不会创建播放器。
+	_battle_bgm = BattleBgmScript.new()
+	_battle_bgm.name = "BattleBgm"
+	add_child(_battle_bgm)
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
 
@@ -1399,6 +1406,9 @@ func _begin_battle_end_overlay() -> void:
 	if _battle_end_overlay_started:
 		return
 	_battle_end_overlay_started = true
+	# 结算开始即停 BGM，避免与胜负音效叠在一起；离开战斗时也会再次兜底停止。
+	if _battle_bgm != null:
+		_battle_bgm.stop()
 	if _battle_sfx != null:
 		_battle_sfx.play("victory" if _battle != null and _battle.battle_result == "win" else "defeat")
 	_clear_chain_combo()
@@ -3234,6 +3244,8 @@ func _go_to_result() -> void:
 	if _result_transitioning:
 		return
 	_result_transitioning = true
+	if _battle_bgm != null:
+		_battle_bgm.stop()
 	
 	var remaining: float = maxf(0.0, 0.72 - _battle_end_overlay_timer)
 	if remaining > 0.0:
@@ -3297,6 +3309,8 @@ func destroy() -> void:
 		_combo_sfx.stop_all()
 	if _battle_sfx != null:
 		_battle_sfx.stop_all()
+	if _battle_bgm != null:
+		_battle_bgm.stop()
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail.clear()
 	_battle_end_overlay_timer = 0.0
