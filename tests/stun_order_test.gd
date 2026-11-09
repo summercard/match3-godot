@@ -23,6 +23,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_single_enemy_action()
+	_test_thunder_gem_skips_action()
 	_test_battle_lasts_one_turn_longer()
 	_test_stun_is_deterministic()
 	_finish()
@@ -50,6 +51,32 @@ func _test_single_enemy_action() -> void:
 	_expect(int(stunned["break_count"]) == 0, "stunned ordinary enemy must not increment break_count, got %d" % int(stunned["break_count"]))
 	_expect(not bool(stunned["has_status"]), "stun should be consumed after the skipped turn")
 	_expect(not bool(control["has_status"]), "unstunned enemy should not carry a stun status")
+
+
+## 从真实 5 颗雷宝石的施加路径进入，确认宝石命中的眩晕同样能跳过当回合行动。
+func _test_thunder_gem_skips_action() -> void:
+	seed(SEED)
+	var stage: Dictionary = StageDBScript.new().get_stage("stage_1_1")
+	var battle = BattleManagerScript.new()
+	battle.init(TEAM, ["enemy_001"], 1, 1, stage, "stage_1_1")
+	for monster: Dictionary in battle.player_team:
+		monster["maxHP"] = 99999
+		monster["hp"] = 99999
+	var status = battle.get("_status_effect")
+	battle.process_match_result({ "thunder": 5 }, 1)
+	var applied: bool = status.has_status(0, "stun")
+	var result: Dictionary = battle.enemy_action()
+	var damage := 0
+	var stunned := false
+	for action: Dictionary in result.get("actions", []):
+		damage += int(action.get("damage", 0))
+		stunned = stunned or bool(action.get("is_stunned", false))
+	print("[StunOrder] thunder5 applied=%s nextActionDamage=%d isStunned=%s" % [
+		str(applied), damage, str(stunned)])
+	_expect(applied, "a 5-thunder match should apply stun to the weakest ordinary enemy")
+	_expect(damage == 0, "the stunned enemy should deal 0 damage on the same turn after a 5-thunder match, got %d" % damage)
+	_expect(stunned, "the enemy action should be marked is_stunned after a 5-thunder match")
+	battle.free()
 
 
 func _test_battle_lasts_one_turn_longer() -> void:

@@ -2,6 +2,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 [StunOrder] control damage=7 actions=[{"attack_mode":"strike","attacker":"野火虫","attacker_emoji":"🐛","charge_multiplier":1.0,"damage":7,"element":"fire","guard_absorbed":0,"is_charged":false,"is_weakened":false,"target":"水龟仔","target_died":false,"target_emoji":"🐢","target_index":1,"weaken_reduction":0.0}]
 [StunOrder] stunned damage=0 actions=[{"attacker":"野火虫","attacker_emoji":"🐛","damage":0,"element":"fire","is_stunned":true,"target":null,"target_died":false,"target_emoji":null}] breakCount=0
+[StunOrder] thunder5 applied=true nextActionDamage=0 isStunned=true
 [StunOrder] survival control turns=10 result=lose
 [StunOrder] survival stunned turns=11 result=lose
 [StunOrder] OK

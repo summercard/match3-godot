@@ -2,35 +2,46 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 [StunOrder] control damage=7 actions=[{"attack_mode":"strike","attacker":"野火虫","attacker_emoji":"🐛","charge_multiplier":1.0,"damage":7,"element":"fire","guard_absorbed":0,"is_charged":false,"is_weakened":false,"target":"水龟仔","target_died":false,"target_emoji":"🐢","target_index":1,"weaken_reduction":0.0}]
 [StunOrder] stunned damage=7 actions=[{"attack_mode":"strike","attacker":"野火虫","attacker_emoji":"🐛","charge_multiplier":1.0,"damage":7,"element":"fire","guard_absorbed":0,"is_charged":false,"is_weakened":false,"target":"水龟仔","target_died":false,"target_emoji":"🐢","target_index":1,"weaken_reduction":0.0}] breakCount=0
+[StunOrder] thunder5 applied=true nextActionDamage=38 isStunned=false
 [StunOrder] survival control turns=10 result=lose
 [StunOrder] survival stunned turns=10 result=lose
 ERROR: [StunOrder] stunned ordinary enemy must deal 0 damage this turn, got 7
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
 ERROR: [StunOrder] stunned action should be marked is_stunned, got { "attacker": "野火虫", "attacker_emoji": "🐛", "target": "水龟仔", "target_emoji": "🐢", "target_index": 1, "damage": 7, "element": "fire", "target_died": false, "is_charged": false, "charge_multiplier": 1.0, "attack_mode": "strike", "is_weakened": false, "weaken_reduction": 0.0, "guard_absorbed": 0 }
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
 ERROR: [StunOrder] stunned action must not pick a target, got 水龟仔
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
 ERROR: [StunOrder] stunned action must report zero damage, got 7
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
+ERROR: [StunOrder] the stunned enemy should deal 0 damage on the same turn after a 5-thunder match, got 38
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
+ERROR: [StunOrder] the enemy action should be marked is_stunned after a 5-thunder match
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
 ERROR: [StunOrder] stunned battle should last exactly one turn longer (10 -> 10)
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
 ERROR: [StunOrder] an applied stun should always skip the action, not roll a second 50% chance
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] _finish (res://tests/stun_order_test.gd:145)
-       [1] _run (res://tests/stun_order_test.gd:28)
+       [0] _finish (res://tests/stun_order_test.gd:172)
+       [1] _run (res://tests/stun_order_test.gd:29)
