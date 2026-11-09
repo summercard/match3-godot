@@ -61,7 +61,7 @@ const STAGES_DATA: Dictionary = {
 					],
 					"enemyLevel": 3,
 					"maxTurns": 70,
-					"bossCurve": {"hp": 5.6, "atk": 0.24, "def": 0.8, "charge": 1.5, "shield": 0.25, "heal": 0.25},
+					"bossCurve": {"hp": 5.6, "atk": 0.20, "def": 0.8, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 150, "exp": 120, "guaranteedItems": [{"id": "capture_ball_plus", "count": 1}]},
 					"designGoal": "首个 Boss 用蓄力和阶段变化检验输出、守护、控场。",
 					"prepareHint": "Boss 会蓄力并在半血进入二阶段；用束缚压低蓄力伤害，用守护保住队伍。",

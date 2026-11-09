@@ -31,6 +31,10 @@ var battle_result: String = ""     # 'win' | 'lose'
 var turn_count: int = 0
 var max_turns: int = 20
 
+# 5 级起步折算：新手保护等级 5 的队伍血量按 75% 计入战斗，
+# 让 5 级开局的伙伴约 13 下倒下，同时保留 1 级基准与 Boss 输出不变。
+const LEVEL5_OPENING_HP_FACTOR: float = 0.75
+
 # Boss 关卡曲线（stageData.bossCurve，只作用于 isBoss 敌人）
 var boss_curve: Dictionary = {}
 
@@ -164,6 +168,12 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	capture_windows = {}
 	capture_window_best = {}
 	_calc_and_apply_element_synergy()
+
+	if p_level == 5:
+		for m in player_team:
+			if m != null:
+				m["maxHP"] = maxi(1, int(m.get("maxHP", 1) * LEVEL5_OPENING_HP_FACTOR))
+				m["hp"] = m["maxHP"]
 
 	_status_effect.init_effects(enemies.size())
 	_refresh_capture_windows()

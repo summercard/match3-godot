@@ -3,7 +3,7 @@ extends SceneTree
 ## 数值平衡回归：前期小怪节奏 + 每章 Boss 曲线。
 ##
 ## 口径：
-## - 前期小怪按需求给定的 Lv.1 基准测量（三消一次 = 1 回合）。
+## - 前期小怪按需求给定的 Lv.1 基准测量（三消一次 = 1 回合），并验证 5 级起步折算后的承伤。
 ## - Boss 用真实 BattleManager 跑固定参考策略：按剧情经验推进的玩家等级、
 ##   每回合一次三消、技能就绪即按血量择机释放。
 ## - “血条告急”= 存活队友血量首次跌破 40% 且之后回到 50% 以上，算一次独立告急窗口。
@@ -91,9 +91,10 @@ func _test_early_pacing() -> void:
 	_expect(matches_per_kill >= 3.0 and matches_per_kill <= 4.5, "early mob should die in 3-4 matches, got %.2f" % matches_per_kill)
 	_expect(ally_survival >= 8.0 and ally_survival <= 12.0, "early ally should survive 8-12 focused hits, got %.2f" % ally_survival)
 
-	# 游戏内实际最低玩家等级为 5，这里记录但不作为 8-12 基准。
+	# 游戏内实际最低玩家等级为 5，这里同时记录击杀节奏与伙伴承伤。
 	seed(424242)
 	var lv5_kill_turns := 0
+	var lv5_ally_hits := 0
 	for i in range(samples):
 		var battle = BattleManagerScript.new()
 		battle.init(["monster_001"], ["enemy_001"], 5, 1, _stage_db.get_stage("stage_1_1"), "stage_1_1")
@@ -107,8 +108,22 @@ func _test_early_pacing() -> void:
 			battle.enemy_action()
 		lv5_kill_turns += turns
 		battle.free()
-	print("[Balance] early-lv5: matches_per_kill=%.2f" % (float(lv5_kill_turns) / samples))
-	_expect(float(lv5_kill_turns) / samples <= 4.5, "in-game level 5 should still kill early mobs in <=4 matches")
+
+		var solo5 = BattleManagerScript.new()
+		solo5.init(["monster_001"], ["enemy_001"], 5, 1, null, "")
+		solo5.max_turns = 999
+		var hits5 := 0
+		while solo5.player_team[0].get("hp", 0) > 0 and hits5 < 999:
+			hits5 += 1
+			solo5.enemy_action()
+		lv5_ally_hits += hits5
+		solo5.free()
+	var lv5_matches := float(lv5_kill_turns) / samples
+	var lv5_survival := float(lv5_ally_hits) / samples
+	print("[Balance] early-lv5: matches_per_kill=%.2f ally_survival_turns=%.2f" % [lv5_matches, lv5_survival])
+	_expect(lv5_matches <= 4.5, "in-game level 5 should still kill early mobs in <=4 matches")
+	_expect(lv5_survival <= 13.0, "level-5 opening ally should fall within 13 hits, got %.2f" % lv5_survival)
+	_expect(lv5_survival >= 8.0, "level-5 opening ally should not fall below 8 hits, got %.2f" % lv5_survival)
 
 
 func _test_boss_curve() -> void:
