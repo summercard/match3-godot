@@ -210,6 +210,11 @@ func _get_speed_button_rect() -> Rect2:
 		return _control_rect("TopHud/SpeedButton")
 	return super._get_speed_button_rect()
 
+func _get_settings_button_rect() -> Rect2:
+	if is_inside_tree() and has_node("TopHud/SettingsButton"):
+		return _control_rect("TopHud/SettingsButton")
+	return super._get_settings_button_rect()
+
 func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
 	if is_inside_tree() and slot_idx >= 0 and slot_idx < ITEM_PATHS.size():
 		return _control_rect(ITEM_PATHS[slot_idx])

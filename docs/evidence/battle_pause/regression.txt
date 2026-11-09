@@ -1,0 +1,30 @@
+Branch: agent/battle-pause-panel-d2c8b8be2997 (base 59181c5)
+Godot 4.7.2.stable; MATCH3_SAVE_PATH per test; --fixed-fps 60
+
+test exit
+battle_pause_test 0
+battle_input_test 0
+battle_gui_scene_test 0
+enemy_windup_test 0
+battle_sfx_test 0
+battle_bgm_test 0
+vibration_feedback_test 0
+ui_button_sfx_test 0
+combat_balance_test 0
+boss_break_test 0
+stun_order_test 0
+battle_rules_test 0
+battle_hit_reaction_test 0
+combo_chain_test 0
+match_hit_feedback_test 0
+p0_smoke_test 0
+p1_ch1_slice_test 0
+stage_progress_loop_test 0
+battle_result_stats_test 0
+presentation_settings_restart_test (write then read, same save path) 0
+
+battle_speed_test 1 (pre-existing environment failure, reproduced on base 59181c5)
+  branch : [BattleSpeed] mid_switch ... immediate_0.2s_timer=32.0ms
+  base   : [BattleSpeed] mid_switch ... immediate_0.2s_timer=33.0ms
+  both fail only the wall-clock 60-180ms window assertion; identical=true,
+  ratio and all battle JSON/round assertions pass. Not caused by this change.

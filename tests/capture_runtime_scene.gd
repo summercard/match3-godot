@@ -19,6 +19,10 @@ func _capture() -> void:
 	await process_frame
 	await process_frame
 	_seed_demo_state(main, scene_name)
+	if _read_arg("--open-pause=", "0") == "1":
+		var current_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
+		if current_scene != null and current_scene.has_method("open_pause_panel"):
+			current_scene.call("open_pause_panel")
 	if _read_arg("--hide-toast=", "0") == "1":
 		main.get_current_scene().set("_message_timer", 0.0)
 	await process_frame

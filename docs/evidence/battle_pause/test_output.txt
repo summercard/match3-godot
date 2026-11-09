@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[BattlePause] open settings_click played=1 last=button_click time_scale=0.00
+[BattlePause] toggle soundOff saved=false enabled=false players=0
+[BattlePause] toggle musicOff saved=false enabled=false players=0
+[BattlePause] toggle vibrationOff saved=false enabled=false requests=3->3 dropped=1->2
+[BattlePause] toggles restored sound=true music=true vibration=true bgm_players=1
+[BattlePause] resume time_scale=2.00 played=5 last=button_click
+[BattlePause] freeze 3000ms turn=1->1 damage_logs=1->1 windup=0.600->0.600 state=4->4 timer_fired=false
+[BattlePause] resume_continue turn=1 damage_logs=1 timer_fired=true
+[BattlePause] run pause_after=-1 actions=7 turns=7 damage_logs=11 taken_logs=6 result=win
+[BattlePause] run pause_after=2 actions=7 turns=7 damage_logs=11 taken_logs=6 result=win
+[BattlePause] full_run identical=true sha256=692d253f2574c35be4cadbb549eb5bbbffef8e01d1849800f4e09d47c4476f44 turns=7 damage_logs=11 taken_logs=6 result=win
+[BattlePause] exit scene=stage_select time_scale=1.00 player_equal=true progress_equal=true stars=2
+[BattlePause] fixed_seed_transcript sha256=0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb baseline=0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb bytes=8500
+[BattlePause] OK

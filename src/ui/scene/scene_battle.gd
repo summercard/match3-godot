@@ -26,6 +26,7 @@ const PresentationProfileScript = preload("res://src/ui/components/presentation_
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
 const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
+const BattlePauseOverlayScript = preload("res://src/ui/components/battle_pause_overlay.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 
@@ -200,6 +201,17 @@ var _result_transitioning: bool = false
 var _battle_speed: int = DEFAULT_SPEED_LEVEL
 var _speed_pointer_active: bool = false
 var _time_scale_applied: bool = false
+
+## 战斗内暂停：打开时保存当前倍速时间尺度并冻结为 0，继续时原样恢复。
+## 暂停只冻结时间与输入，不改任何战斗数据，因此从原处接着走、不会重结算。
+var _pause_overlay: BattlePauseOverlay = null
+var _paused: bool = false
+var _pause_saved_time_scale: float = 1.0
+var _pause_settings: Dictionary = {}
+var _settings_pointer_active: bool = false
+## 退出战斗后禁止旧的协程再触发结算/波次切换。
+var _exiting_battle: bool = false
+const PAUSE_SETTING_KEYS := ["soundOn", "musicOn", "vibrationOn"]
 
 ## 表现层随机数：与战斗逻辑共用全局 RNG 时，帧数变化会改变后续伤害随机；
 ## 倍速下用独立 RNG 隔离粒子/震屏，保证 1x/2x 的战斗日志与结算一致。
@@ -427,6 +439,10 @@ func _ready() -> void:
 	_battle_bgm = BattleBgmScript.new()
 	_battle_bgm.name = "BattleBgm"
 	add_child(_battle_bgm)
+	# 暂停浮层最后加入并置顶绘制，打开时压住棋盘与 HUD；输入仍由战斗场景统一分发。
+	_pause_overlay = BattlePauseOverlayScript.new()
+	_pause_overlay.name = "PauseOverlay"
+	add_child(_pause_overlay)
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
 
@@ -452,6 +468,10 @@ func set_battle_speed(level: int) -> void:
 		return
 	_battle_speed = level
 	if is_inside_tree():
+		if _paused:
+			# 暂停期间切档只记录目标倍速，等继续时再恢复，避免把冻结中的时间尺度改回正数。
+			_pause_saved_time_scale = float(level)
+			return
 		Engine.time_scale = float(level)
 		_time_scale_applied = true
 
@@ -461,6 +481,149 @@ func toggle_battle_speed() -> void:
 
 func _get_speed_button_rect() -> Rect2:
 	return Rect2(285.0, 5.0, 42.0, 48.0)
+
+func _get_settings_button_rect() -> Rect2:
+	return Rect2(330.0, 5.0, 42.0, 48.0)
+
+## ============================================
+# 战斗内暂停
+## ============================================
+
+## 打开暂停面板：保存当前倍速并把时间尺度冻结为 0。
+## 所有 await 的 SceneTreeTimer 都会一起冻结，因此前摇、消除与敌方回合都停在原处。
+func open_pause_panel() -> bool:
+	if _paused or _exiting_battle or _state == BattleState.BATTLE_END:
+		return false
+	_pause_settings = _load_pause_settings()
+	_pause_saved_time_scale = Engine.time_scale if Engine.time_scale > 0.0 else 1.0
+	_paused = true
+	Engine.time_scale = 0.0
+	_play_button_click()
+	_vibration_request("button_tap")
+	if _pause_overlay != null:
+		_pause_overlay.open(_pause_settings)
+	return true
+
+## 关闭暂停面板：恢复暂停前的倍速时间尺度，战斗从原处继续。
+func close_pause_panel() -> bool:
+	if not _paused:
+		return false
+	_paused = false
+	Engine.time_scale = _pause_saved_time_scale
+	_play_button_click()
+	_vibration_request("button_tap")
+	if _pause_overlay != null:
+		_pause_overlay.close()
+	return true
+
+
+func is_paused() -> bool:
+	return _paused
+
+
+func get_pause_settings() -> Dictionary:
+	return _pause_settings.duplicate(true)
+
+
+func _toggle_pause_setting(key: String) -> void:
+	if not _paused or key.is_empty():
+		return
+	_pause_settings[key] = not bool(_pause_settings.get(key, true))
+	_save_pause_settings()
+	_apply_pause_settings()
+	# 先写回设置再播音效：关闭音效时这一下也不会再起播放器。
+	_play_button_click()
+	_vibration_request("button_tap")
+	if _pause_overlay != null:
+		_pause_overlay.refresh_settings(_pause_settings)
+
+
+func _play_button_click() -> void:
+	if _battle_sfx != null:
+		_battle_sfx.play("button_click")
+
+
+func _load_pause_settings() -> Dictionary:
+	var storage := _pause_storage()
+	var settings: Dictionary = {}
+	if storage != null and storage.has_method("load_settings"):
+		settings = storage.load_settings()
+	for key: String in PAUSE_SETTING_KEYS:
+		if not settings.has(key):
+			settings[key] = true
+	settings["version"] = settings.get("version", "v0.1.0")
+	return settings
+
+
+func _save_pause_settings() -> void:
+	var storage := _pause_storage()
+	if storage != null and storage.has_method("save_settings"):
+		storage.save_settings(_pause_settings)
+
+
+func _pause_storage() -> Node:
+	if _storage != null and is_instance_valid(_storage):
+		return _storage
+	return get_node_or_null("/root/SaveManager")
+
+
+## 三个开关同时驱动场上音频/震动节点，不必等下一帧轮询。
+func _apply_pause_settings() -> void:
+	_sync_combo_sfx_for_sound(bool(_pause_settings.get("soundOn", true)))
+	if _battle_sfx != null:
+		_battle_sfx.apply_settings(_pause_settings)
+	if _battle_bgm != null:
+		_battle_bgm.apply_settings(_pause_settings)
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null and vibration.has_method("apply_settings"):
+		vibration.apply_settings(_pause_settings)
+
+
+## 连锁音效节点不走 BattleSfx 的播放器池：关闭音效时立即停掉并释放，
+## 重新打开时再按需创建，保证关闭状态下场上没有残留播放器。
+func _sync_combo_sfx_for_sound(sound_on: bool) -> void:
+	if sound_on:
+		if _combo_sfx == null and is_inside_tree():
+			_combo_sfx = ComboSfxScript.new()
+			_combo_sfx.name = "ComboSfx"
+			add_child(_combo_sfx)
+		return
+	if _combo_sfx != null:
+		_combo_sfx.stop_all()
+		_combo_sfx.queue_free()
+		_combo_sfx = null
+
+
+## 退出战斗：不经过结算场景，不写星级/资源，只回到对应章节的选关页。
+func exit_battle_to_stage_select() -> bool:
+	if _exiting_battle:
+		return false
+	_exiting_battle = true
+	_paused = false
+	Engine.time_scale = 1.0
+	_time_scale_applied = false
+	if _pause_overlay != null:
+		_pause_overlay.close()
+	if _battle_bgm != null:
+		_battle_bgm.stop()
+	if _battle_sfx != null:
+		_battle_sfx.stop_all()
+	if _combo_sfx != null:
+		_combo_sfx.stop_all()
+	var scene_manager := get_node_or_null("/root/SceneManager")
+	if scene_manager != null and scene_manager.has_method("switch_scene"):
+		scene_manager.switch_scene("stage_select", {
+			"chapterIndex": _chapter_index_from_stage_id(_stage_id)
+		})
+		return true
+	return false
+
+
+func _chapter_index_from_stage_id(stage_id: String) -> int:
+	var parts := stage_id.split("_")
+	if parts.size() >= 2 and parts[0] == "stage":
+		return maxi(0, int(parts[1]) - 1)
+	return 0
 
 ## ============================================
 # 画质等级 / 战斗表现
@@ -500,6 +663,13 @@ func init(data: Dictionary = {}) -> void:
 	_speed_pointer_active = false
 	Engine.time_scale = 1.0
 	_time_scale_applied = false
+	_paused = false
+	_pause_saved_time_scale = 1.0
+	_pause_settings = {}
+	_settings_pointer_active = false
+	_exiting_battle = false
+	if _pause_overlay != null:
+		_pause_overlay.close()
 	_sync_presentation_settings()
 	
 	_selected_gem = Vector2i(-1, -1)
@@ -632,6 +802,18 @@ func _gui_input(event: InputEvent) -> void:
 	_handle_input_event(event, true)
 
 func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
+	# 暂停时所有指针事件只交给浮层，避免点到棋盘、技能或倍速按钮。
+	if _paused:
+		_handle_pause_pointer(event, already_local)
+		return
+	if _exiting_battle:
+		if event is InputEventMouseButton or event is InputEventScreenTouch or event is InputEventScreenDrag:
+			get_viewport().set_input_as_handled()
+		return
+	# 右上角设置按钮（暂停）独立于战斗状态机：前摇/连锁/敌方回合中也能立即暂停。
+	if _handle_settings_pointer(event, already_local):
+		get_viewport().set_input_as_handled()
+		return
 	# 倍速按钮独立于战斗状态机：前摇/连锁/敌方回合中也能立即切档，
 	# 按下与抬起都被消费，避免同一次点击落到棋盘或技能上。
 	if _handle_speed_pointer(event, already_local):
@@ -713,6 +895,62 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 				else:
 					drag_dir = Vector2i(0, 1 if dy > 0 else -1)
 				_drag_preview = {"active": true, "direction": drag_dir}
+
+func _handle_pause_pointer(event: InputEvent, already_local: bool) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_on_pause_tap(_get_pointer_position(event, already_local))
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_on_pause_tap(_get_pointer_position(event, already_local))
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag:
+		get_viewport().set_input_as_handled()
+
+
+func _on_pause_tap(pos: Vector2) -> void:
+	if _pause_overlay == null:
+		return
+	if _pause_overlay.resume_rect().has_point(pos):
+		close_pause_panel()
+		return
+	if _pause_overlay.exit_rect().has_point(pos):
+		exit_battle_to_stage_select()
+		return
+	var toggle_index: int = _pause_overlay.toggle_index_at(pos)
+	if toggle_index >= 0:
+		_toggle_pause_setting(_pause_overlay.toggle_key(toggle_index))
+
+
+func _handle_settings_pointer(event: InputEvent, already_local: bool) -> bool:
+	if _state == BattleState.BATTLE_END or _exiting_battle:
+		return false
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			if _get_settings_button_rect().has_point(_get_pointer_position(event, already_local)):
+				_settings_pointer_active = true
+				open_pause_panel()
+				return true
+			_settings_pointer_active = false
+		elif _settings_pointer_active:
+			_settings_pointer_active = false
+			return true
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			if _get_settings_button_rect().has_point(_get_pointer_position(event, already_local)):
+				_settings_pointer_active = true
+				open_pause_panel()
+				return true
+			_settings_pointer_active = false
+		elif _settings_pointer_active:
+			_settings_pointer_active = false
+			return true
+	elif event is InputEventScreenDrag and _settings_pointer_active:
+		# 从设置按钮开始的拖动不应落到棋盘上。
+		return true
+	return false
+
 
 func _handle_speed_pointer(event: InputEvent, already_local: bool) -> bool:
 	if _state == BattleState.BATTLE_END:
@@ -1087,6 +1325,8 @@ func _process_matches() -> void:
 	# ===== 第5步：播放普通消除动画 =====
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
 	_eliminating_gems.clear()
+	if _exiting_battle:
+		return
 	
 	# ===== 第5.5步：毒雾清除 & 锁定宝石解锁检查 =====
 	_check_poison_fog_clears(matches)
@@ -1183,6 +1423,8 @@ func _process_matches() -> void:
 	# 微信版时序：explosion 100ms, bomb 150ms, rainbow 200ms, 每段动画 ~300ms
 	await get_tree().create_timer(BattleMatchRulesScript.get_special_wait(_special_elim_phases, ELIMINATE_DURATION, FALL_DURATION)).timeout
 	_special_elim_phases.clear()
+	if _exiting_battle:
+		return
 	
 	# ===== 第8步：下落 + 递归 =====
 	_apply_gravity()
@@ -1368,6 +1610,8 @@ func _start_enemy_turn() -> void:
 
 	# 出手前摇：先标出本回合会出手的敌人，让玩家只看画面就能预判。
 	await _play_enemy_windup()
+	if _exiting_battle:
+		return
 
 	var result: Dictionary = _battle.enemy_action()
 	
@@ -1469,6 +1713,8 @@ func _start_enemy_turn() -> void:
 	_show_message(next_state.get("message", "你的回合"))
 
 func _check_battle_end() -> bool:
+	if _exiting_battle:
+		return false
 	if BattleFlowControllerScript.should_end_battle(_battle):
 		_state = BattleState.BATTLE_END
 		_begin_battle_end_overlay()
@@ -1489,7 +1735,7 @@ func _check_battle_end() -> bool:
 
 ## 一波清空后间隔约 1 秒再补下一波，并给出可感知的横幅/闪白提示
 func _begin_wave_transition() -> void:
-	if _battle == null or _state == BattleState.WAVE_TRANSITION:
+	if _exiting_battle or _battle == null or _state == BattleState.WAVE_TRANSITION:
 		return
 	_state = BattleState.WAVE_TRANSITION
 	var cleared_wave := int(_battle.wave_index)
@@ -1497,7 +1743,7 @@ func _begin_wave_transition() -> void:
 	_show_message("第 %d 波 已清空！" % cleared_wave)
 	_begin_wave_banner(cleared_wave, total_waves, "已清空！")
 	await get_tree().create_timer(WAVE_GAP_SECONDS).timeout
-	if not is_inside_tree() or _battle == null or _state != BattleState.WAVE_TRANSITION:
+	if not is_inside_tree() or _exiting_battle or _battle == null or _state != BattleState.WAVE_TRANSITION:
 		return
 	var next_enemies: Array = _battle.start_next_wave()
 	if next_enemies.is_empty():
@@ -1530,7 +1776,7 @@ func _clear_enemy_wave_visuals() -> void:
 	_floating_texts.clear()
 
 func _begin_battle_end_overlay() -> void:
-	if _battle_end_overlay_started:
+	if _exiting_battle or _battle_end_overlay_started:
 		return
 	_battle_end_overlay_started = true
 	# 结算开始即停 BGM，避免与胜负音效叠在一起；离开战斗时也会再次兜底停止。
@@ -2050,6 +2296,10 @@ func _find_player_index(name: String, fallback_name: String = "") -> int:
 ## ============================================
 
 func _process(delta: float) -> void:
+	# 暂停期间不推进任何战斗/表现计时；时间尺度同时为 0，await 的计时器也一起冻结。
+	if _paused:
+		queue_redraw()
+		return
 	# 每帧同步设置页档位；运行中切换画质 / 战斗表现时下一帧生效。
 	_sync_presentation_settings()
 	# 战斗结束慢动作效果（局部时间缩放，不影响 Engine.time_scale）
@@ -3380,6 +3630,8 @@ func _floating_text_plate_path(text: String, ft: Dictionary) -> String:
 ## ============================================
 
 func _go_to_result() -> void:
+	if _exiting_battle:
+		return
 	# 如果收服特效还在播放，等待完成
 	if _capture_waiting_for_effect:
 		return
