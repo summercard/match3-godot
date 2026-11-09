@@ -4,6 +4,7 @@ extends SceneTree
 ##
 ## 口径：
 ## - 前期小怪按需求给定的 Lv.1 基准测量（三消一次 = 1 回合），并验证 5 级起步折算后的承伤。
+## - 连锁档位：分别固定 1 / 2 / 4 连锁，测量新连锁加成对击杀节奏与 Boss 回合的影响。
 ## - Boss 用真实 BattleManager 跑固定参考策略：按剧情经验推进的玩家等级、
 ##   每回合一次三消、技能就绪即按血量择机释放。
 ## - “血条告急”= 存活队友血量首次跌破 40% 且之后回到 50% 以上，算一次独立告急窗口。
@@ -14,6 +15,7 @@ const MonsterDbScript = preload("res://src/data/monster_db.gd")
 
 const TEAM := ["monster_001", "monster_002", "monster_003"]
 const BOSS_SEEDS := [20261109, 20261110, 20261111]
+const CHAIN_MODES := [1, 2, 4]
 
 var _failures: Array[String] = []
 var _stage_db
@@ -26,7 +28,8 @@ func _init() -> void:
 func _run() -> void:
 	_stage_db = StageDBScript.new()
 	_test_early_mobs()
-	_test_early_pacing()
+	for combo in CHAIN_MODES:
+		_test_early_pacing(combo)
 	_test_boss_curve()
 	_finish()
 
@@ -57,7 +60,7 @@ func _test_early_mobs() -> void:
 		_expect(atk == 32 or atk == 35, "%s ATK should be the x3.2 band" % id)
 
 
-func _test_early_pacing() -> void:
+func _test_early_pacing(combo: int) -> void:
 	seed(424242)
 	var samples := 20
 	var total_kill_turns := 0
@@ -69,7 +72,7 @@ func _test_early_pacing() -> void:
 		var turns := 0
 		while not battle.battle_over and turns < 99:
 			turns += 1
-			battle.process_match_result({"fire": 3}, 1)
+			battle.process_match_result({"fire": 3}, combo)
 			if battle.check_battle_end():
 				break
 			battle.enemy_action()
@@ -87,9 +90,13 @@ func _test_early_pacing() -> void:
 		solo.free()
 	var matches_per_kill := float(total_kill_turns) / samples
 	var ally_survival := float(total_ally_hits) / samples
-	print("[Balance] early: matches_per_kill=%.2f ally_survival_turns=%.2f" % [matches_per_kill, ally_survival])
-	_expect(matches_per_kill >= 3.0 and matches_per_kill <= 4.5, "early mob should die in 3-4 matches, got %.2f" % matches_per_kill)
-	_expect(ally_survival >= 8.0 and ally_survival <= 12.0, "early ally should survive 8-12 focused hits, got %.2f" % ally_survival)
+	print("[Balance] early combo=%d: matches_per_kill=%.2f ally_survival_turns=%.2f" % [combo, matches_per_kill, ally_survival])
+	# 分档门槛：1 连锁维持 3-4 次原线；固定 2 连锁只看不低于 3.0；固定 4 连锁允许更快。
+	if combo == 1:
+		_expect(matches_per_kill >= 3.0 and matches_per_kill <= 4.0, "combo=1 early mob should die in 3-4 matches, got %.2f" % matches_per_kill)
+	elif combo == 2:
+		_expect(matches_per_kill >= 3.0, "combo=2 early mob should take 3+ matches, got %.2f" % matches_per_kill)
+	_expect(ally_survival >= 8.0 and ally_survival <= 12.0, "combo=%d early ally should survive 8-12 focused hits, got %.2f" % [combo, ally_survival])
 
 	# 游戏内实际最低玩家等级为 5，这里同时记录击杀节奏与伙伴承伤。
 	seed(424242)
@@ -102,7 +109,7 @@ func _test_early_pacing() -> void:
 		var turns := 0
 		while not battle.battle_over and turns < 99:
 			turns += 1
-			battle.process_match_result({"fire": 3}, 1)
+			battle.process_match_result({"fire": 3}, combo)
 			if battle.check_battle_end():
 				break
 			battle.enemy_action()
@@ -120,10 +127,10 @@ func _test_early_pacing() -> void:
 		solo5.free()
 	var lv5_matches := float(lv5_kill_turns) / samples
 	var lv5_survival := float(lv5_ally_hits) / samples
-	print("[Balance] early-lv5: matches_per_kill=%.2f ally_survival_turns=%.2f" % [lv5_matches, lv5_survival])
-	_expect(lv5_matches <= 4.5, "in-game level 5 should still kill early mobs in <=4 matches")
-	_expect(lv5_survival <= 13.0, "level-5 opening ally should fall within 13 hits, got %.2f" % lv5_survival)
-	_expect(lv5_survival >= 8.0, "level-5 opening ally should not fall below 8 hits, got %.2f" % lv5_survival)
+	print("[Balance] early-lv5 combo=%d: matches_per_kill=%.2f ally_survival_turns=%.2f" % [combo, lv5_matches, lv5_survival])
+	_expect(lv5_matches <= 4.5, "combo=%d in-game level 5 should still kill early mobs in <=4 matches" % combo)
+	_expect(lv5_survival <= 13.0, "combo=%d level-5 opening ally should fall within 13 hits, got %.2f" % [combo, lv5_survival])
+	_expect(lv5_survival >= 8.0, "combo=%d level-5 opening ally should not fall below 8 hits, got %.2f" % [combo, lv5_survival])
 
 
 func _test_boss_curve() -> void:
@@ -132,6 +139,7 @@ func _test_boss_curve() -> void:
 	var needed := 90
 	for chapter: Dictionary in _stage_db.get_chapters():
 		var boss_stage: Dictionary = {}
+		var first_normal_stage: Dictionary = {}
 		for st: Dictionary in chapter.get("stages", []):
 			var rewards: Dictionary = st.get("rewards", {})
 			exp += int(rewards.get("exp", 0))
@@ -139,6 +147,8 @@ func _test_boss_curve() -> void:
 				exp -= needed
 				level += 1
 				needed = 80 + level * 10
+			if first_normal_stage.is_empty() and str(st.get("type", "")) != "boss":
+				first_normal_stage = st
 			if str(st.get("type", "")) == "boss":
 				boss_stage = st
 				break
@@ -150,34 +160,68 @@ func _test_boss_curve() -> void:
 		var e_level := int(stage.get("enemyLevel", 1))
 		_expect(int(stage.get("maxTurns", 0)) >= 40, "%s should allow 40+ turns" % stage_id)
 		_expect(stage.get("bossCurve", {}) is Dictionary and not stage.get("bossCurve", {}).is_empty(), "%s should define bossCurve" % stage_id)
+		if not first_normal_stage.is_empty():
+			_check_combo4_single_match(first_normal_stage, p_level)
 
-		var runs: Array = []
-		for s: int in BOSS_SEEDS:
-			seed(s)
-			runs.append(_run_boss(stage, p_level, e_level))
-		var turns: Array = runs.map(func(r): return int(r["turns"]))
-		var near_deaths: Array = runs.map(func(r): return int(r["near_death"]))
-		turns.sort()
-		near_deaths.sort()
-		var median_turns: int = int(turns[turns.size() / 2])
-		var median_nd: int = int(near_deaths[near_deaths.size() / 2])
-		var wins := 0
-		var deaths := 0
-		for r: Dictionary in runs:
-			if str(r["result"]) == "win":
-				wins += 1
-			deaths = maxi(deaths, int(r["dead"]))
-		print("[Balance] %s p=%d e=%d turns=%s nd=%s result=%s" % [
-			stage_id, p_level, e_level, str(turns), str(near_deaths), str(runs.map(func(r): return r["result"]))
-		])
-		_expect(wins == runs.size(), "%s should win in all reference runs" % stage_id)
-		_expect(deaths <= 1, "%s should not lose more than one ally" % stage_id)
-		_expect(median_turns >= 40, "%s should last 40+ turns, got %d" % [stage_id, median_turns])
-		_expect(median_turns <= int(stage.get("maxTurns", 60)), "%s should finish inside maxTurns" % stage_id)
-		_expect(median_nd >= 3, "%s should have 3+ near-death windows, got %d" % [stage_id, median_nd])
+		for combo in CHAIN_MODES:
+			var runs: Array = []
+			for s: int in BOSS_SEEDS:
+				seed(s)
+				runs.append(_run_boss(stage, p_level, e_level, combo))
+			var turns: Array = runs.map(func(r): return int(r["turns"]))
+			var near_deaths: Array = runs.map(func(r): return int(r["near_death"]))
+			turns.sort()
+			near_deaths.sort()
+			var median_turns: int = int(turns[turns.size() / 2])
+			var max_turns: int = int(turns[turns.size() - 1])
+			var median_nd: int = int(near_deaths[near_deaths.size() / 2])
+			var wins := 0
+			var deaths := 0
+			for r: Dictionary in runs:
+				if str(r["result"]) == "win":
+					wins += 1
+				deaths = maxi(deaths, int(r["dead"]))
+			print("[Balance] %s combo=%d p=%d e=%d turns=%s median=%d max=%d nd=%s result=%s" % [
+				stage_id, combo, p_level, e_level, str(turns), median_turns, max_turns, str(near_deaths), str(runs.map(func(r): return r["result"]))
+			])
+			_expect(wins == runs.size(), "%s combo=%d should win in all reference runs" % [stage_id, combo])
+			_expect(deaths <= 1, "%s combo=%d should not lose more than one ally" % [stage_id, combo])
+			if combo == 1:
+				_expect(median_turns >= 40, "%s combo=1 baseline should last 40+ turns, got %d" % [stage_id, median_turns])
+			elif combo == 4:
+				_expect(median_turns >= 22, "%s combo=4 should last 22+ turns, got %d" % [stage_id, median_turns])
+			_expect(median_turns <= int(stage.get("maxTurns", 60)), "%s combo=%d should finish inside maxTurns" % [stage_id, combo])
+			# 3+ 告急窗口是 1 连锁基准耐力局的口径；固定 2/4 连锁局被连锁加成本身缩短，
+			# 不作为本档门槛，但仍打印 nd 供对照。
+			if combo == 1:
+				_expect(median_nd >= 3, "%s combo=%d should have 3+ near-death windows, got %d" % [stage_id, combo, median_nd])
 
 
-func _run_boss(stage: Dictionary, p_level: int, e_level: int) -> Dictionary:
+## 固定 4 连锁下，任意一种 3 消都不应一击秒掉同章小怪。
+## 用该章第一个普通关卡的敌人与剧情等级，逐色各跑一次独立战斗。
+func _check_combo4_single_match(stage_config: Dictionary, p_level: int) -> void:
+	var stage_id := str(stage_config.get("id", ""))
+	var stage: Dictionary = _stage_db.get_stage(stage_id)
+	if stage.get("enemies", []).is_empty():
+		return
+	var e_level := int(stage.get("enemyLevel", 1))
+	var one_shot := false
+	for color_idx in range(5):
+		var color: String = ["fire", "water", "grass", "thunder", "light"][color_idx]
+		seed(20261109 + color_idx * 97 + p_level)
+		var battle = BattleManagerScript.new()
+		battle.init(TEAM, [], p_level, e_level, stage, stage_id)
+		var before: Array = battle.enemies.map(func(e): return int(e.get("hp", 0)))
+		battle.process_match_result({color: 3}, 4)
+		for i in range(battle.enemies.size()):
+			if int(before[i]) > 0 and int(battle.enemies[i].get("hp", 0)) <= 0:
+				one_shot = true
+		battle.free()
+	print("[Balance] %s combo=4 one_shot_mob=%s" % [stage_id, str(one_shot)])
+	_expect(not one_shot, "%s combo=4 should not one-shot a same-chapter mob with a single 3-match" % stage_id)
+
+
+func _run_boss(stage: Dictionary, p_level: int, e_level: int, combo: int) -> Dictionary:
 	var battle = BattleManagerScript.new()
 	battle.init(TEAM, [], p_level, e_level, stage, str(stage.get("id", "")))
 	var near_death := 0
@@ -208,7 +252,7 @@ func _run_boss(stage: Dictionary, p_level: int, e_level: int) -> Dictionary:
 			break
 
 		var affinity := _best_affinity(battle, lowest)
-		var match_result: Dictionary = battle.process_match_result({affinity: 3}, 1)
+		var match_result: Dictionary = battle.process_match_result({affinity: 3}, combo)
 		if match_result.has("phase_transition"):
 			battle.execute_phase_transition(match_result.get("phase_transition", {}))
 		if battle.check_battle_end():

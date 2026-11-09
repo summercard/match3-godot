@@ -271,17 +271,18 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--battle-demo-damage=", "0") == "1":
 		_seed_battle_damage_demo(battle_scene)
 		return
+	var chain_level := int(_read_arg("--battle-demo-chain=", "0"))
+	if chain_level >= 2:
+		_seed_battle_chain_demo(battle_scene, chain_level)
+		return
 	if _read_arg("--battle-demo-fx=", "0") != "1":
 		battle_scene.queue_redraw()
 		return
 	battle_scene.set("_message_text", "效果拔群!")
 	battle_scene.set("_message_timer", 1.2)
-	battle_scene.set("_combo_popup", {
-		"combo": 3,
-		"timer": 0.18,
-		"phase": "peak",
-		"scale": 1.12,
-		"opacity": 1.0
+	battle_scene.set("_chain_display", {
+		"level": 3,
+		"pulse": 0.0
 	})
 	var floating_texts: Array[Dictionary] = [
 		{"text": "-5687", "x": 248.0, "y": 162.0, "color": Color(1.0, 0.74, 0.10), "size": 23.0, "timer": 0.18, "duration": 1.0, "critical": true},
@@ -324,6 +325,23 @@ func _seed_battle_match_demo(battle_scene: Control) -> void:
 	board.grid[2][0] = "fire"
 	board.cascade_count = 0
 	battle_scene.call("_do_swap", 0, 0, 0, 1)
+
+func _seed_battle_chain_demo(battle_scene: Control, level: int) -> void:
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	# 固定敌我血量，让 Before/After 在相同战局状态下比较连锁提示。
+	var battle = battle_scene.get("_battle")
+	if battle != null:
+		var fixed_player_hp := [135, 165, 127]
+		for i in range(mini(battle.player_team.size(), fixed_player_hp.size())):
+			battle.player_team[i]["maxHP"] = fixed_player_hp[i]
+			battle.player_team[i]["hp"] = fixed_player_hp[i]
+		if battle_scene.has_method("_sync_gui"):
+			battle_scene.call("_sync_gui")
+	battle_scene.set("_chain_display", {"level": level, "pulse": 0.0})
+	battle_scene.call("_spawn_enemy_damage_popup", "-%d" % (level * 86), 0, false)
+	battle_scene.call("_spawn_player_damage_popup", "-34", 0, false)
+	battle_scene.queue_redraw()
 
 func _seed_battle_damage_demo(battle_scene: Control) -> void:
 	var target_idx := clampi(int(_read_arg("--damage-target-index=", "0")), 0, 2)

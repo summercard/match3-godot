@@ -20,6 +20,7 @@ const BattleCombatantRendererScript = preload("res://src/ui/components/battle_co
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
+const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 
@@ -74,14 +75,12 @@ var _floating_texts: Array[Dictionary] = []
 ## 战斗表现时钟（伤害飘字排队用）
 var _fx_time: float = 0.0
 
-## 连击提示
-var _combo_popup: Dictionary = {
-	"combo": 0,
-	"timer": 0.0,
-	"phase": "",
-	"scale": 0.5,
-	"opacity": 0.0
+## 连锁提示：第 2 连锁起常驻显示，断链即清除；pulse 用于升级时的放大反馈
+var _chain_display: Dictionary = {
+	"level": 0,
+	"pulse": 0.0
 }
+var _combo_sfx: ComboSfx = null
 
 ## 消息
 var _message_text: String = ""
@@ -367,6 +366,9 @@ func _ready() -> void:
 	instance = self
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_combo_sfx = ComboSfxScript.new()
+	_combo_sfx.name = "ComboSfx"
+	add_child(_combo_sfx)
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
 
@@ -396,6 +398,7 @@ func init(data: Dictionary = {}) -> void:
 	_rainbow_flash = 0.0
 	_screen_flash_timer = 0.0
 	_attack_flash_timer = 0.0
+	_chain_display = {"level": 0, "pulse": 0.0}
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
 	_selection_pulse = 0.0
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
@@ -838,6 +841,7 @@ func _do_swap(r1: int, c1: int, r2: int, c2: int) -> void:
 		_state = BattleState.IDLE
 		return
 	_board.cascade_count = 0
+	_clear_chain_combo()
 	_process_matches()
 
 ## ============================================
@@ -854,8 +858,8 @@ func _process_matches() -> void:
 	var matches: Array = match_context.get("matches", [])
 	
 	if not match_context.get("has_matches", false):
-		if _board.cascade_count >= 2:
-			_show_combo_popup(_board.cascade_count)
+		# 连锁断掉：中部提示立即消失，然后进入敌方回合。
+		_clear_chain_combo()
 		if _check_battle_end():
 			return
 		_start_enemy_turn()
@@ -863,6 +867,8 @@ func _process_matches() -> void:
 	
 	_state = BattleState.MATCHING
 	_board.cascade_count += 1
+	if _board.cascade_count >= 2:
+		_show_chain_combo(_board.cascade_count)
 	
 	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
 	var total_elim: int = match_context.get("total_elim", 0)
@@ -1235,7 +1241,6 @@ func _clear_enemy_wave_visuals() -> void:
 	_boss_skill_visuals.clear()
 	_hit_flashes.clear()
 	_fall_messages.clear()
-	_damage_popup_queue.clear()
 	_enemy_attacks.clear()
 	_floating_texts.clear()
 
@@ -1243,6 +1248,7 @@ func _begin_battle_end_overlay() -> void:
 	if _battle_end_overlay_started:
 		return
 	_battle_end_overlay_started = true
+	_clear_chain_combo()
 	_battle_end_overlay_timer = 0.0
 	_battle_end_particles_spawned = false
 	_result_transitioning = false
@@ -1437,18 +1443,24 @@ func _show_message(text: String) -> void:
 func _request_battle_fx(event: Dictionary) -> void:
 	emit_signal("battle_fx_requested", event)
 
-func _show_combo_popup(combo: int) -> void:
-	_combo_popup = {
-		"combo": combo,
-		"timer": 0.0,
-		"phase": "in",
-		"scale": 0.5,
-		"opacity": 0.0
-	}
-	# Burst Combo 增强视觉：cascade 3次以上触发屏幕闪白
-	if combo >= 3:
-		_screen_flash_timer = 0.15 if combo == 3 else 0.25
+func _show_chain_combo(level: int) -> void:
+	if level < 2:
+		_clear_chain_combo()
+		return
+	_chain_display["level"] = level
+	_chain_display["pulse"] = 1.0
+	if _combo_sfx != null:
+		_combo_sfx.play_chain(level)
+	# Burst Combo 增强视觉：3 连锁以上触发屏幕闪白
+	if level >= 3:
+		_screen_flash_timer = 0.15 if level == 3 else 0.25
 		_trigger_attack_shake()
+
+func _clear_chain_combo() -> void:
+	_chain_display["level"] = 0
+	_chain_display["pulse"] = 0.0
+	if _combo_sfx != null:
+		_combo_sfx.stop_all()
 
 func _trigger_attack_shake() -> void:
 	_attack_shake_timer = 0.2
@@ -1717,9 +1729,9 @@ func _process(delta: float) -> void:
 		wb_timer = BattleAnimationControllerScript.tick_countdown(wb_timer, effective_delta)
 		_wave_banner["timer"] = wb_timer
 	
-	# 更新连击弹窗
-	if _combo_popup.has("combo"):
-		_update_combo_popup(effective_delta)
+	# 更新连锁提示：升级时 pulse 放大，随后自然回落到稳定尺寸。
+	if int(_chain_display.get("level", 0)) > 0:
+		_chain_display["pulse"] = maxf(0.0, float(_chain_display.get("pulse", 0.0)) - effective_delta * 4.0)
 	
 	# 更新受击闪烁
 	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, effective_delta)
@@ -1813,9 +1825,6 @@ func _process(delta: float) -> void:
 	# 每帧重绘
 	queue_redraw()
 
-func _update_combo_popup(dt: float) -> void:
-	BattleAnimationControllerScript.update_combo_popup(_combo_popup, dt)
-
 func _update_attack_shake(dt: float) -> void:
 	var state := BattleAnimationControllerScript.update_attack_shake(_attack_shake_timer, _attack_flash_timer, dt)
 	_attack_shake_timer = state["timer"]
@@ -1894,8 +1903,8 @@ func _draw() -> void:
 	# 浮动文字
 	_draw_floating_texts()
 	
-	# 连锁弹窗
-	_draw_combo_popup()
+	# 连锁提示
+	_draw_chain_combo()
 	
 	# 倒下提示
 	_draw_fall_messages()
@@ -2168,29 +2177,32 @@ func _draw_crit_damage_text(text: String, x: float, y: float, color: Color, size
 	_draw_text_with_shadow(prefix, x, y - size * 0.95, prefix_color, prefix_size, true)
 	_draw_text_with_shadow(text, x, y, color, size, true)
 
-func _draw_combo_popup() -> void:
-	if not _combo_popup.has("combo"):
-		return
-	
+## 连锁提示区域：固定在棋盘中部，避开顶部血条/头像与顶部伤害飘字。
+func get_chain_display_rect(scale: float = 1.0) -> Rect2:
 	var cx := DESIGN_W / 2.0
 	var cy: float = float(_board.offset_y) + 150.0 if _board != null else 450.0
-	var combo: int = _combo_popup["combo"]
-	var scale: float = _combo_popup["scale"]
-	var opacity: float = _combo_popup["opacity"]
-	if combo <= 0 or opacity <= 0.0:
-		return
-	
 	var box_w := 166.0 * scale
 	var box_h := 62.0 * scale
+	return Rect2(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h)
+
+func _draw_chain_combo() -> void:
+	var level := int(_chain_display.get("level", 0))
+	if level < 2:
+		return
+	var pulse := clampf(float(_chain_display.get("pulse", 0.0)), 0.0, 1.0)
+	var scale := 1.0 + 0.14 * pulse
+	var rect := get_chain_display_rect(scale)
+	var cx := rect.get_center().x
+	var cy := rect.get_center().y
+
 	var banner_tex := _get_texture(BATTLE_UI_ASSETS["combo_banner"])
 	if banner_tex:
-		_draw_texture_fit(banner_tex, Rect2(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h), opacity)
+		_draw_texture_fit(banner_tex, rect, 1.0)
 	else:
-		var bg_color := Color(0.0, 0.0, 0.0, 0.7 * opacity)
-		_draw_rounded_rect(cx - box_w / 2.0, cy - box_h / 2.0, box_w, box_h, 12.0 * scale, bg_color)
-	
-	var text_color := Color(1.0, 0.85, 0.0, opacity)
-	_draw_text_with_shadow("%d连击！" % combo, cx, cy, text_color, 22.0 * scale, true)
+		_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 12.0 * scale, Color(0.0, 0.0, 0.0, 0.7))
+
+	var text_color := Color(1.0, 0.85, 0.0, 1.0)
+	_draw_text_with_shadow("%d 连锁" % level, cx, cy, text_color, 22.0 * scale, true)
 
 func _draw_fall_messages() -> void:
 	for i in range(_fall_messages.size()):
@@ -3020,7 +3032,9 @@ func destroy() -> void:
 	_special_transform_anim = {"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false}
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
-	_combo_popup = {"combo": 0, "timer": 0.0, "phase": "", "scale": 0.5, "opacity": 0.0}
+	_chain_display = {"level": 0, "pulse": 0.0}
+	if _combo_sfx != null:
+		_combo_sfx.stop_all()
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail.clear()
 	_battle_end_overlay_timer = 0.0
