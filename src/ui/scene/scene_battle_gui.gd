@@ -49,6 +49,7 @@ func _sync_gui() -> void:
 
 func _sync_top_hud() -> void:
 	_label("TopHud/TurnBadge/Value").text = "%d/%d" % [_battle.turn_count, _battle.max_turns]
+	_label("TopHud/SpeedLabel").text = "%dx" % _battle_speed
 	var status: Dictionary = _battle.get_status()
 	var phase_label := _label("TopHud/BossPhase")
 	phase_label.visible = status.get("is_boss_battle", false)
@@ -203,6 +204,11 @@ func _get_capture_toggle_rect(base_y: float) -> Rect2:
 	if is_inside_tree() and has_node("BottomControls/CaptureToggle"):
 		return _control_rect("BottomControls/CaptureToggle")
 	return super._get_capture_toggle_rect(base_y)
+
+func _get_speed_button_rect() -> Rect2:
+	if is_inside_tree() and has_node("TopHud/SpeedButton"):
+		return _control_rect("TopHud/SpeedButton")
+	return super._get_speed_button_rect()
 
 func _get_hotbar_slot_rect(base_y: float, slot_idx: int) -> Rect2:
 	if is_inside_tree() and slot_idx >= 0 and slot_idx < ITEM_PATHS.size():
