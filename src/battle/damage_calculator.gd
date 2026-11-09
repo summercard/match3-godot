@@ -23,10 +23,10 @@ static func get_element_multiplier(attacker_elem: String, defender_elem: String)
 # ============================================
 # 连锁伤害加成
 # ============================================
-# 第 2 连锁起每级追加 8% 伤害，最多吃到第 5 连锁（封顶 +32%）。
+# 第 2 连锁起每级追加 4% 伤害，最多吃到第 3 连锁（封顶 +8%）。
 # 与原有 combo 基础倍率分开：基础倍率保留既有手感，连锁加成负责新反馈。
-const CHAIN_BONUS_PER_LEVEL: float = 0.08
-const CHAIN_BONUS_MAX_LEVEL: int = 5
+const CHAIN_BONUS_PER_LEVEL: float = 0.04
+const CHAIN_BONUS_MAX_LEVEL: int = 3
 
 static func chain_damage_multiplier(combo_count: int) -> float:
 	var chain_level := mini(maxi(combo_count, 1), CHAIN_BONUS_MAX_LEVEL)
@@ -57,7 +57,7 @@ static func calc_player_damage(
 	# Combo 加成: 每次 combo +30%
 	var combo_multiplier := 1.0 + (combo_count - 1) * 0.3
 	
-	# 连锁加成: 第 2 连锁起每级 +8%，最多吃到第 5 连锁
+	# 连锁加成: 第 2 连锁起每级 +4%，最多吃到第 3 连锁
 	var chain_multiplier := chain_damage_multiplier(combo_count)
 
 	# 总伤害雏形

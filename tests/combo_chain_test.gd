@@ -21,7 +21,7 @@ func _run() -> void:
 	_finish()
 
 func _test_chain_damage_bonus() -> void:
-	var expected := {1: 1.0, 2: 1.08, 3: 1.16, 4: 1.24, 5: 1.32, 6: 1.32}
+	var expected := {1: 1.0, 2: 1.04, 3: 1.08, 4: 1.08, 5: 1.08, 6: 1.08}
 	for level: int in expected.keys():
 		var multiplier: float = DamageCalculatorScript.chain_damage_multiplier(level)
 		_expect(is_equal_approx(multiplier, expected[level]),
@@ -36,7 +36,7 @@ func _test_chain_damage_bonus() -> void:
 	_expect(chain2 > chain1, "second chain should deal more damage than a single match")
 	_expect(chain4 > chain2, "fourth chain should deal more damage than the second chain")
 	_expect(DamageCalculatorScript.chain_damage_multiplier(7) == DamageCalculatorScript.chain_damage_multiplier(5),
-		"chain damage bonus should stop growing after the fifth chain")
+		"chain damage bonus should stop growing after the third chain")
 
 
 func _test_chain_audio() -> void:
@@ -57,7 +57,7 @@ func _test_chain_audio() -> void:
 		_expect(stream.format == AudioStreamWAV.FORMAT_16_BITS, "combo sfx should use 16-bit PCM")
 	sfx.play_chain(3)
 	sfx.stop_all()
-	sfx.queue_free()
+	sfx.free()
 
 
 func _test_battle_scene_chain_display() -> void:
