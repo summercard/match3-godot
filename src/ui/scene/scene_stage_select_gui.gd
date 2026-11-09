@@ -27,9 +27,13 @@ const TEXT_MUTED := Color(0.66, 0.75, 0.88)
 
 var _chapter_map: Control = null
 var _chapter_map_id: String = ""
+var _button_sfx: BattleSfx = null
 
 func _ready() -> void:
 	super._ready()
+	_button_sfx = BattleSfx.new()
+	_button_sfx.name = "ButtonSfx"
+	add_child(_button_sfx)
 	_connect_shell_actions()
 	_sync_gui()
 
@@ -67,8 +71,17 @@ func _connect_shell_actions() -> void:
 		shade.gui_input.connect(_on_popup_shade_input)
 
 func _connect_button(button: BaseButton, action: Callable) -> void:
+	if button == null:
+		return
+	if not button.has_meta("ui_button_sfx_wired"):
+		button.set_meta("ui_button_sfx_wired", true)
+		button.pressed.connect(_play_button_click)
 	if not button.pressed.is_connected(action):
 		button.pressed.connect(action)
+
+func _play_button_click() -> void:
+	if _button_sfx != null and _button_sfx.enabled:
+		_button_sfx.play("button_click")
 
 func _gui_input(_event: InputEvent) -> void:
 	# The editable chapter map buttons own all touch input.

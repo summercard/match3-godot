@@ -1,9 +1,10 @@
 class_name BattleSfx
 extends Node
-## 战斗音效层：七个运行时合成的短音，不依赖外部/二进制音频资源。
+## 音效层：八个运行时合成的短音，不依赖外部/二进制音频资源。
 ##
+## 前七个是战斗音效，`button_click` 供战斗外七个页面的主按钮复用。
 ## 所有可调参数集中在本文件 CONFIG；`enabled` 是总开关，由设置页的
-## `soundOn` 在战斗场景创建时同步。总开关关闭时不会创建任何
+## `soundOn` 在场景创建时同步。总开关关闭时不会创建任何
 ## AudioStreamPlayer，也不会播放已有音效。
 ##
 ## 合成口径：
@@ -11,7 +12,7 @@ extends Node
 ## - 波形在运行时写入 AudioStreamWAV（16-bit PCM），不落盘；
 ## - 同一个引擎帧最多触发 CONFIG.max_plays_per_frame 个实例，超出丢弃并计数。
 
-const SOUND_IDS := ["match_clear", "hit", "crit", "take_damage", "victory", "defeat", "break"]
+const SOUND_IDS := ["match_clear", "hit", "crit", "take_damage", "victory", "defeat", "break", "button_click"]
 
 const CONFIG := {
 	"sample_rate": 22050,
@@ -94,6 +95,16 @@ const CONFIG := {
 			"harmonic": 3.0,
 			"harmonic_gain": 0.30,
 		},
+		"button_click": {
+			"label": "按钮点击",
+			"frequency": 1046.5,
+			"duration": 0.045,
+			"waveform": "click",
+			"attack": 0.001,
+			"decay": 60.0,
+			"harmonic": 1.0,
+			"harmonic_gain": 0.0,
+		},
 	},
 }
 
@@ -102,6 +113,7 @@ static var enabled: bool = true
 
 var played_count: int = 0
 var dropped_count: int = 0
+var request_count: int = 0
 var peak_players: int = 0
 var last_sound_id: String = ""
 
@@ -146,7 +158,10 @@ func _load_settings() -> Dictionary:
 
 
 ## 同一帧最多触发 max_plays_per_frame 次；超过的请求直接丢弃并累计 dropped_count。
+## request_count 统计所有 play() 调用（含总开关关闭与超出上限的请求），
+## 供页面级断言确认 soundOn=false 时按钮没有发出任何播放请求。
 func play(sound_id: String) -> bool:
+	request_count += 1
 	if not enabled or not CONFIG["sounds"].has(sound_id):
 		return false
 	var frame := Engine.get_process_frames()
@@ -188,6 +203,7 @@ func player_count() -> int:
 func reset_counters() -> void:
 	played_count = 0
 	dropped_count = 0
+	request_count = 0
 	peak_players = _players.size()
 	last_sound_id = ""
 	_frame_id = -1
@@ -264,6 +280,10 @@ static func _wave_sample(waveform: String, phase: float, rng: RandomNumberGenera
 			return 1.0 if fposmod(phase, 1.0) < 0.25 else -0.35
 		"noise":
 			return rng.randf_range(-1.0, 1.0)
+		"click":
+			# 窄脉冲 + 线性收尾：与既有六种波形区分，用于短促的按钮点击。
+			var p := fposmod(phase, 1.0)
+			return (1.0 if p < 0.12 else -1.0) * (1.0 - p)
 	return 0.0
 
 

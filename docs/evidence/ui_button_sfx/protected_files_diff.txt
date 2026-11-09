@@ -1,0 +1,5 @@
+$ git diff --stat dc4a037 -- src/data src/battle/damage_calculator.gd src/battle/enemy_attack_modes.gd src/battle/battle_manager.gd tests/combat_balance_test.gd src/ui/components/battle_bgm.gd
+(no output above means no changes)
+
+$ git diff dc4a037 -- <same paths> | wc -l
+       0

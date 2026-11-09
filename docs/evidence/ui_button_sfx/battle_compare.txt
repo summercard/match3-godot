@@ -1,0 +1,6 @@
+$ cmp docs/evidence/ui_button_sfx/battle_before.json docs/evidence/ui_button_sfx/battle_after.json
+cmp: identical
+
+$ shasum -a 256 docs/evidence/ui_button_sfx/battle_before.json docs/evidence/ui_button_sfx/battle_after.json
+0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb  docs/evidence/ui_button_sfx/battle_before.json
+0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb  docs/evidence/ui_button_sfx/battle_after.json

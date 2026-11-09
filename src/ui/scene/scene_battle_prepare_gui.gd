@@ -18,9 +18,14 @@ const REWARD_SLOT_PATHS := [
 	"RewardPreview/Slots/RewardSlot3",
 ]
 
+var _button_sfx: BattleSfx = null
+
 func _ready() -> void:
 	instance = self
 	set_process(false)
+	_button_sfx = BattleSfx.new()
+	_button_sfx.name = "ButtonSfx"
+	add_child(_button_sfx)
 	_connect_gui_actions()
 	_sync_gui()
 
@@ -49,8 +54,17 @@ func _connect_gui_actions() -> void:
 
 func _connect_button(path: String, action: Callable) -> void:
 	var button := get_node_or_null(path) as BaseButton
-	if button != null and not button.pressed.is_connected(action):
+	if button == null:
+		return
+	if not button.has_meta("ui_button_sfx_wired"):
+		button.set_meta("ui_button_sfx_wired", true)
+		button.pressed.connect(_play_button_click)
+	if not button.pressed.is_connected(action):
 		button.pressed.connect(action)
+
+func _play_button_click() -> void:
+	if _button_sfx != null and _button_sfx.enabled:
+		_button_sfx.play("button_click")
 
 func _start_battle() -> void:
 	super._start_battle()
