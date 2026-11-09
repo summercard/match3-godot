@@ -978,6 +978,21 @@ func get_enemy_intents() -> Dictionary:
 		_status_effect.get_effects_snapshot()
 	)
 
+## 本回合会出手的敌人索引（供战斗界面做出手前摇预警）。
+## 存活敌人都会在敌方回合行动；蓄力中的敌人会在本回合释放蓄力并攻击。
+func get_upcoming_attackers() -> Array:
+	var attackers: Array = []
+	if battle_over:
+		return attackers
+	for i in range(enemies.size()):
+		var enemy = enemies[i]
+		if enemy == null or not enemy is Dictionary:
+			continue
+		if int(enemy.get("hp", 0)) <= 0:
+			continue
+		attackers.append(i)
+	return attackers
+
 
 # ========== 获取状态摘要 ==========
 

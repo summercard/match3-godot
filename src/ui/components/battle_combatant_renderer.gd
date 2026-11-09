@@ -9,6 +9,7 @@ static func draw_enemies(scene, battle, state: Dictionary) -> void:
 	if battle.enemies.size() == 1:
 		var enemy: Dictionary = battle.enemies[0]
 		draw_enemy_stage(scene, battle, state, enemy.get("name", "敌人"), maxi(enemy.get("hp", 0), 0), maxi(enemy.get("maxHP", 1), 1), enemy)
+		draw_windup(scene, battle, state)
 		return
 	var enemy_count: int = mini(battle.enemies.size(), 3)
 	var stage_slots := _multi_enemy_slots(enemy_count)
@@ -17,6 +18,7 @@ static func draw_enemies(scene, battle, state: Dictionary) -> void:
 		if enemy == null:
 			continue
 		draw_enemy_card(scene, battle, state, stage_slots[i].x, stage_slots[i].y, i, enemy.get("name", "敌人"), maxi(enemy.get("hp", 0), 0), maxi(enemy.get("maxHP", 1), 1), enemy)
+	draw_windup(scene, battle, state)
 
 static func draw_enemy_stage(scene, battle, state: Dictionary, name: String, hp: int, max_hp: int, enemy: Dictionary) -> void:
 	var design_w: float = state.get("design_w", 375.0)
@@ -108,6 +110,74 @@ static func _multi_enemy_slots(enemy_count: int) -> Array[Vector2]:
 	if enemy_count == 2:
 		return [Vector2(82.0, 74.0), Vector2(197.0, 74.0)]
 	return [Vector2(24.0, 72.0), Vector2(139.5, 63.0), Vector2(255.0, 72.0)]
+
+## 敌方出手前摇：在会出手的敌人头顶画跳动警示箭头，并给目标套锁定光环。
+static func draw_windup(scene, battle, state: Dictionary) -> void:
+	var indices: Array = state.get("enemy_windup_indices", [])
+	var total: float = float(state.get("enemy_windup_total", 0.0))
+	var timer: float = float(state.get("enemy_windup_timer", 0.0))
+	if battle == null or indices.is_empty() or total <= 0.0:
+		return
+	var elapsed: float = clampf(total - timer, 0.0, total)
+	var fade: float = clampf(elapsed / 0.10, 0.0, 1.0)
+	var bob: float = sin(elapsed * 24.0) * 4.0
+	var pulse: float = 0.88 + 0.12 * sin(elapsed * 26.0)
+	for index in indices:
+		if index < 0 or index >= battle.enemies.size():
+			continue
+		var enemy = battle.enemies[index]
+		if enemy == null or int(enemy.get("hp", 0)) <= 0:
+			continue
+		if battle.enemies.size() > 1:
+			_draw_windup_ring(scene, _windup_sprite_center(battle, index), elapsed, fade)
+		_draw_windup_arrow(scene, _windup_arrow_tip(battle, index) + Vector2(0.0, bob), fade * pulse)
+
+static func _windup_arrow_tip(battle, index: int) -> Vector2:
+	if battle.enemies.size() == 1:
+		return Vector2(187.5, 62.0)
+	var slots := _multi_enemy_slots(mini(battle.enemies.size(), 3))
+	return slots[index] + Vector2(48.0, 18.0)
+
+static func _windup_sprite_center(battle, index: int) -> Vector2:
+	var slots := _multi_enemy_slots(mini(battle.enemies.size(), 3))
+	return slots[index] + Vector2(48.0, 42.0)
+
+static func _draw_windup_ring(scene, center: Vector2, elapsed: float, fade: float) -> void:
+	var pulse_alpha: float = (0.34 + 0.24 * sin(elapsed * 18.0)) * fade
+	var ring_color := Color(1.0, 0.24, 0.16, pulse_alpha)
+	scene.draw_arc(center, 41.0, 0.0, TAU, 40, ring_color, 2.2, true)
+	var lock_angle: float = elapsed * 5.0
+	var lock_color := Color(1.0, 0.62, 0.26, minf(1.0, pulse_alpha + 0.30))
+	scene.draw_arc(center, 44.0, lock_angle, lock_angle + 1.15, 12, lock_color, 2.6, true)
+	scene.draw_arc(center, 44.0, lock_angle + PI, lock_angle + PI + 1.15, 12, lock_color, 2.6, true)
+
+static func _draw_windup_arrow(scene, tip: Vector2, alpha: float) -> void:
+	if alpha <= 0.01:
+		return
+	var points := _windup_arrow_points(tip, 0.72 + 0.28 * alpha)
+	var shadow := PackedVector2Array()
+	for point in points:
+		shadow.append(point + Vector2(0.0, 4.0))
+	scene.draw_colored_polygon(shadow, Color(0.10, 0.02, 0.02, 0.28 * alpha))
+	scene.draw_colored_polygon(points, Color(0.98, 0.16, 0.10, alpha))
+	var outline := points.duplicate()
+	outline.append(points[0])
+	scene.draw_polyline(outline, Color(0.32, 0.03, 0.02, alpha), 2.4, true)
+
+static func _windup_arrow_points(tip: Vector2, scale: float) -> PackedVector2Array:
+	var raw := [
+		Vector2(0.0, 0.0),
+		Vector2(-14.0, -15.0),
+		Vector2(-5.5, -15.0),
+		Vector2(-5.5, -31.0),
+		Vector2(5.5, -31.0),
+		Vector2(5.5, -15.0),
+		Vector2(14.0, -15.0),
+	]
+	var points := PackedVector2Array()
+	for point in raw:
+		points.append(tip + point * scale)
+	return points
 
 static func _draw_stage_enemy_intent(scene, state: Dictionary, hp: int) -> void:
 	if hp <= 0:
@@ -249,6 +319,7 @@ static func draw_fx(scene, battle, state: Dictionary) -> void:
 		var flash: Array = state.get("hit_flashes", []).filter(func(f): return not f.get("isEnemy", false) and f.get("monsterIndex", -1) == i)
 		if not flash.is_empty():
 			_draw_hit_spark(scene, Vector2(18.0 + i * 116.0 + 53.0, 253.0), 78.0, 0.62)
+	draw_windup(scene, battle, state)
 
 static func draw_player_card(scene, battle, state: Dictionary, x: float, y: float, index: int, name: String, hp: int, max_hp: int, monster: Dictionary) -> void:
 	var colors: Dictionary = state.get("colors", {})

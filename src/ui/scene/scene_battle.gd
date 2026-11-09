@@ -90,6 +90,12 @@ var _message_timer: float = 0.0
 var _enemy_attacks: Array = []
 var _enemy_attack_timer: float = 0.0
 
+## 敌方出手前摇：先标出本回合会出手的敌人，再结算攻击
+const ENEMY_WINDUP_DURATION: float = 0.6
+var _enemy_windup_indices: Array = []
+var _enemy_windup_timer: float = 0.0
+var _enemy_windup_total: float = 0.0
+
 ## 受击闪烁
 var _hit_flashes: Array[Dictionary] = []
 
@@ -1084,6 +1090,20 @@ const STATUS_COLORS := {
 	"stun": Color(1.0, 0.85, 0.2)
 }
 
+## 敌方出手前摇：标记本回合会出手的敌人并等待预警时长。
+func _play_enemy_windup() -> void:
+	if _battle == null:
+		return
+	_enemy_windup_indices = _battle.get_upcoming_attackers()
+	if _enemy_windup_indices.is_empty():
+		return
+	_enemy_windup_total = ENEMY_WINDUP_DURATION
+	_enemy_windup_timer = ENEMY_WINDUP_DURATION
+	await get_tree().create_timer(ENEMY_WINDUP_DURATION).timeout
+	_enemy_windup_indices.clear()
+	_enemy_windup_timer = 0.0
+	_enemy_windup_total = 0.0
+
 func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
 	
@@ -1095,6 +1115,10 @@ func _start_enemy_turn() -> void:
 	if _battle == null:
 		_state = BattleState.IDLE
 		return
+
+	# 出手前摇：先标出本回合会出手的敌人，让玩家只看画面就能预判。
+	await _play_enemy_windup()
+
 	var result: Dictionary = _battle.enemy_action()
 	
 	# 处理状态效果日志（DoT弹出、stun提示、效果消失）
@@ -1750,6 +1774,10 @@ func _process(delta: float) -> void:
 	# 更新攻击震动
 	_update_attack_shake(effective_delta)
 	_screen_flash_timer = BattleAnimationControllerScript.tick_countdown(_screen_flash_timer, delta)
+
+	# 更新敌方出手前摇计时
+	if _enemy_windup_timer > 0.0:
+		_enemy_windup_timer = maxf(0.0, _enemy_windup_timer - effective_delta)
 	
 	# 更新 HP 渐变动画
 	_update_hp_display(effective_delta)
@@ -1972,6 +2000,9 @@ func _combatant_render_state() -> Dictionary:
 		"defeated_enemies": _defeated_enemies,
 		"boss_skill_visuals": _boss_skill_visuals,
 		"enemy_intents": _battle.get_status().get("enemy_intents", {}) if _battle != null else {},
+		"enemy_windup_indices": _enemy_windup_indices.duplicate(),
+		"enemy_windup_timer": _enemy_windup_timer,
+		"enemy_windup_total": _enemy_windup_total,
 		"status_emoji": STATUS_EMOJI,
 		"status_colors": STATUS_COLORS
 	}
