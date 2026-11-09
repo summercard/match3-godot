@@ -467,16 +467,7 @@ func _init_battle() -> void:
 	if not _battle.skill_ready.is_connected(_on_skill_ready):
 		_battle.skill_ready.connect(_on_skill_ready)
 
-	# 精英关卡：应用eliteMultiplier加成敌人属性
-	var elite_mult: float = _stage_data.get("eliteMultiplier", 0.0)
-	if elite_mult > 0.0:
-		for enemy: Dictionary in _battle.enemies:
-			if enemy and not enemy.is_empty():
-				enemy["maxHP"] = int(enemy.get("maxHP", 0) * elite_mult)
-				enemy["hp"] = enemy["maxHP"]
-				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
-				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
-	
+	# 精英关加成由 BattleManager 初始化统一处理，场景层不再重复乘算。
 	var battle_hint := str(_stage_data.get("battleHint", ""))
 	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
 	_load_capture_preferences()

@@ -101,7 +101,7 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 		if not phase1.is_empty():
 			var hp_mult: float = phase1.get("hpMultiplier", 1.0)
 			enemies = phase1.get("enemies", []).map(func(id):
-				var monster = MonsterDb.get_monster_stats(id, e_level)
+				var monster = MonsterDb.get_monster_stats(id, e_level, "", true)
 				if monster != null and hp_mult != 1.0:
 					monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 					monster["hp"] = monster["maxHP"]
@@ -109,7 +109,17 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 				return monster
 			)
 	else:
-		enemies = enemy_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, e_level))
+		enemies = enemy_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, e_level, "", true))
+
+	# 精英关加成统一在战斗初始化内应用，避免只有特定 UI 入口才生效。
+	var elite_mult: float = float(s_data.get("eliteMultiplier", 0.0)) if s_data is Dictionary else 0.0
+	if elite_mult > 0.0:
+		for enemy in enemies:
+			if enemy != null and not enemy.is_empty():
+				enemy["maxHP"] = int(enemy.get("maxHP", 0) * elite_mult)
+				enemy["hp"] = enemy["maxHP"]
+				enemy["atk"] = int(enemy.get("atk", 0) * elite_mult)
+				enemy["def"] = int(enemy.get("def", 0) * elite_mult)
 
 	turn = 0
 	combo = 0

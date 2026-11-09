@@ -101,7 +101,7 @@ func try_apply_status_effects(gem_counts: Dictionary, player_team: Array, enemie
 	_effect_log = []
 
 	var weakest_enemy = _get_weakest_enemy(enemies)
-	if weakest_enemy == null:
+	if weakest_enemy == null or weakest_enemy.is_empty():
 		return
 	var target_idx: int = enemies.find(weakest_enemy)
 

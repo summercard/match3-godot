@@ -124,7 +124,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_001": {
 		"id": "monster_boss_001", "name": "花叶兽", "element": "grass",
 		"rarity": 3, "emoji": "🌺",
-		"baseHP": 350, "baseATK": 45, "baseDEF": 35, "baseSPD": 10,
+		"baseHP": 200, "baseATK": 34, "baseDEF": 30, "baseSPD": 10,
 		"skill": { "name": "花瓣风暴", "cost": 10, "multiplier": 3.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -135,7 +135,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_002": {
 		"id": "monster_boss_002", "name": "烈焰龙", "element": "fire",
 		"rarity": 3, "emoji": "🐉",
-		"baseHP": 400, "baseATK": 55, "baseDEF": 30, "baseSPD": 12,
+		"baseHP": 175, "baseATK": 36, "baseDEF": 30, "baseSPD": 12,
 		"skill": { "name": "龙息烈焰", "cost": 12, "multiplier": 3.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -265,7 +265,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_003": {
 		"id": "monster_boss_003", "name": "深海海马王", "element": "water",
 		"rarity": 4, "emoji": "🦑",
-		"baseHP": 450, "baseATK": 50, "baseDEF": 40, "baseSPD": 14,
+		"baseHP": 165, "baseATK": 38, "baseDEF": 32, "baseSPD": 14,
 		"skill": { "name": "深渊漩涡", "cost": 12, "multiplier": 3.2 },
 		"isBoss": true,
 		"enemySkills": [
@@ -277,7 +277,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_004": {
 		"id": "monster_boss_004", "name": "暗影巨龙", "element": "dark",
 		"rarity": 4, "emoji": "🐲",
-		"baseHP": 530, "baseATK": 55, "baseDEF": 45, "baseSPD": 16,
+		"baseHP": 165, "baseATK": 40, "baseDEF": 32, "baseSPD": 16,
 		"skill": { "name": "暗影龙息", "cost": 13, "multiplier": 3.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -290,7 +290,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_005": {
 		"id": "monster_boss_005", "name": "雷霆巨兽", "element": "thunder",
 		"rarity": 4, "emoji": "⚡",
-		"baseHP": 600, "baseATK": 58, "baseDEF": 48, "baseSPD": 18,
+		"baseHP": 170, "baseATK": 42, "baseDEF": 34, "baseSPD": 18,
 		"skill": { "name": "雷霆裁决", "cost": 14, "multiplier": 3.8 },
 		"isBoss": true,
 		"enemySkills": [
@@ -534,7 +534,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_006": {
 		"id": "monster_boss_006", "name": "冰霜巨龙", "element": "ice",
 		"rarity": 4, "emoji": "🐲",
-		"baseHP": 700, "baseATK": 60, "baseDEF": 55, "baseSPD": 12,
+		"baseHP": 175, "baseATK": 44, "baseDEF": 34, "baseSPD": 12,
 		"skill": { "name": "绝对零度", "cost": 15, "multiplier": 4.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -619,7 +619,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_007": {
 		"id": "monster_boss_007", "name": "虚空巨龙", "element": "void",
 		"rarity": 5, "emoji": "🌑",
-		"baseHP": 750, "baseATK": 65, "baseDEF": 50, "baseSPD": 14,
+		"baseHP": 180, "baseATK": 46, "baseDEF": 36, "baseSPD": 14,
 		"skill": { "name": "虚空湮灭", "cost": 15, "multiplier": 4.2 },
 		"isBoss": true,
 		"enemySkills": [
@@ -704,7 +704,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_008": {
 		"id": "monster_boss_008", "name": "时空巨龙", "element": "temporal",
 		"rarity": 5, "emoji": "⏳",
-		"baseHP": 800, "baseATK": 68, "baseDEF": 52, "baseSPD": 16,
+		"baseHP": 185, "baseATK": 48, "baseDEF": 36, "baseSPD": 16,
 		"skill": { "name": "时空崩灭", "cost": 16, "multiplier": 4.5 },
 		"isBoss": true,
 		"enemySkills": [
@@ -789,7 +789,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_009": {
 		"id": "monster_boss_009", "name": "星耀巨龙", "element": "star",
 		"rarity": 5, "emoji": "✨",
-		"baseHP": 850, "baseATK": 72, "baseDEF": 55, "baseSPD": 18,
+		"baseHP": 190, "baseATK": 50, "baseDEF": 38, "baseSPD": 18,
 		"skill": { "name": "星辰湮灭", "cost": 16, "multiplier": 4.8 },
 		"isBoss": true,
 		"enemySkills": [
@@ -874,7 +874,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_010": {
 		"id": "monster_boss_010", "name": "混沌兽神", "element": "chaos",
 		"rarity": 5, "emoji": "🐲",
-		"baseHP": 900, "baseATK": 75, "baseDEF": 58, "baseSPD": 20,
+		"baseHP": 195, "baseATK": 52, "baseDEF": 38, "baseSPD": 20,
 		"skill": { "name": "混沌湮灭", "cost": 16, "multiplier": 5.0 },
 		"isBoss": true,
 		"enemySkills": [
@@ -987,7 +987,7 @@ const MONSTER_DB: Dictionary = {
 	"monster_boss_011": {
 		"id": "monster_boss_011", "name": "光耀天使长", "element": "light",
 		"rarity": 5, "emoji": "👼",
-		"baseHP": 950, "baseATK": 80, "baseDEF": 62, "baseSPD": 22,
+		"baseHP": 200, "baseATK": 54, "baseDEF": 40, "baseSPD": 22,
 		"skill": { "name": "神圣制裁", "cost": 16, "multiplier": 5.2 },
 		"isBoss": true,
 		"enemySkills": [
@@ -1059,6 +1059,14 @@ const RARITY_GROWTH_RATE: Dictionary = {
 	5: 0.16   # ★5 传说
 }
 
+# ========== 敌方等级成长封顶 ==========
+## 关卡敌人等级会一路涨到 50，而玩家单周目队伍等级约 30。
+## 若敌人继续按稀有度线性成长，后期 Boss 的血量和攻击会指数膨胀，
+## 出现“Boss 打不动 + 一击秒队”的倒挂。这里给敌方等级倍率封顶，
+## 让后期难度由机制、编成和阶段技能承担，而不是纯数值膨胀。
+const ENEMY_NORMAL_MAX_LEVEL_MULT: float = 3.5
+const ENEMY_BOSS_MAX_LEVEL_MULT: float = 2.2
+
 # ========== 静态工具函数 ==========
 
 ## 获取属性克制倍率
@@ -1119,13 +1127,17 @@ static func normalize_skill(skill: Dictionary) -> Dictionary:
 	return result
 
 ## 获取怪物数据（支持等级/性格修正）
+## as_enemy 为 true 时才应用敌方等级封顶；被捕获的敌人进入队伍后按可玩怪物口径成长。
 ## JS: getMonsterStats(monsterId, level, natureId)
-static func get_monster_stats(monster_id: String, level: int = 1, nature_id: String = "") -> Dictionary:
+static func get_monster_stats(monster_id: String, level: int = 1, nature_id: String = "", as_enemy: bool = false) -> Dictionary:
 	var data: Dictionary = MONSTER_DB.get(monster_id, {})
 	if data.is_empty():
 		return {}
 	var growth_rate: float = RARITY_GROWTH_RATE.get(data.get("rarity", 2), 0.10)
 	var mult: float = 1.0 + (level - 1) * growth_rate
+	if as_enemy:
+		var cap := ENEMY_BOSS_MAX_LEVEL_MULT if bool(data.get("isBoss", false)) else ENEMY_NORMAL_MAX_LEVEL_MULT
+		mult = minf(mult, cap)
 
 	# 计算基础属性
 	var hp: int = int(data.get("baseHP", 0) * mult)

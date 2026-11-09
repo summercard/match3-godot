@@ -121,7 +121,7 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_002"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 6,
-					"rewards": {"gold": 150, "exp": 75},
+					"rewards": {"gold": 200, "exp": 110},
 					"obstacles": [
 						{"row": 1, "col": 2, "type": "rock", "hp": 2},
 						{"row": 1, "col": 5, "type": "rock", "hp": 2},

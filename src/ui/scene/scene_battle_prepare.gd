@@ -226,7 +226,7 @@ func _load_enemy_team() -> void:
 	var enemy_ids: Array = _stage_data.get("enemies", ["enemy_001", "enemy_002", "enemy_003"])
 	var enemy_level: int = _stage_data.get("enemyLevel", 3)
 	for enemy_id: String in enemy_ids:
-		var enemy: Dictionary = MonsterDBScript.get_monster_stats(enemy_id, enemy_level)
+		var enemy: Dictionary = MonsterDBScript.get_monster_stats(enemy_id, enemy_level, "", true)
 		if not enemy.is_empty():
 			enemy["power"] = enemy.get("hp", 0) + enemy.get("atk", 0) + enemy.get("def", 0) + enemy.get("spd", 0)
 			_enemy_team.append(enemy)

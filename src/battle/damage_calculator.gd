@@ -5,20 +5,10 @@
 class_name DamageCalculator
 extends RefCounted
 
-# 属性克制表 (与 monster_db.gd 保持一致)
-const ELEMENT_CHART: Dictionary = {
-	"fire":    { "fire": 1.0, "water": 0.5, "grass": 2.0, "thunder": 1.0, "light": 1.0 },
-	"water":   { "fire": 2.0, "water": 1.0, "grass": 0.5, "thunder": 1.0, "light": 1.0 },
-	"grass":   { "fire": 0.5, "water": 2.0, "grass": 1.0, "thunder": 1.0, "light": 1.0 },
-	"thunder": { "fire": 1.0, "water": 1.0, "grass": 1.0, "thunder": 1.0, "light": 2.0 },
-	"light":   { "fire": 1.0, "water": 1.0, "grass": 1.0, "thunder": 0.5, "light": 1.0 }
-}
-
-# 属性克制倍率获取
+# 属性克制倍率只保留一个公式源：MonsterDb.ELEMENT_CHART。
+# 敌方伤害也走同一张表，避免玩家 1.5x / 敌方 2.0x 的双标与后期属性缺失。
 static func get_element_multiplier(attacker_elem: String, defender_elem: String) -> float:
-	if ELEMENT_CHART.has(attacker_elem) and ELEMENT_CHART[attacker_elem].has(defender_elem):
-		return ELEMENT_CHART[attacker_elem][defender_elem]
-	return 1.0
+	return MonsterDb.get_element_multiplier(attacker_elem, defender_elem)
 
 # ============================================
 # 玩家伤害计算

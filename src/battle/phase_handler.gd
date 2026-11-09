@@ -78,7 +78,7 @@ func execute_phase_transition(phase_config: Dictionary, enemy_level: int = 1) ->
 	var new_enemies: Array = []
 
 	for enemy_id in new_enemy_ids:
-		var monster: Dictionary = MonsterDb.get_monster_stats(enemy_id, enemy_level)
+		var monster: Dictionary = MonsterDb.get_monster_stats(enemy_id, enemy_level, "", true)
 		if not monster.is_empty():
 			monster["maxHP"] = int(monster.get("maxHP", 0) * hp_mult)
 			monster["hp"] = monster["maxHP"]
