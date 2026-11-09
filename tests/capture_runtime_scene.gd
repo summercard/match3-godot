@@ -27,6 +27,11 @@ func _capture() -> void:
 		return
 	for _frame in range(int(_read_arg("--settle-frames=", "0"))):
 		await process_frame
+	if _read_arg("--hide-toast=", "0") == "1":
+		main.get_current_scene().set("_message_timer", 0.0)
+	var hold_seconds := float(_read_arg("--hold-seconds=", "0"))
+	if hold_seconds > 0.0:
+		await create_timer(hold_seconds).timeout
 	var image := root.get_texture().get_image()
 	var error := image.save_png(output_path)
 	if error != OK:
@@ -271,6 +276,8 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	if _read_arg("--battle-demo-damage=", "0") == "1":
 		_seed_battle_damage_demo(battle_scene)
 		return
+	if _read_arg("--battle-demo-windup=", "0") == "1":
+		battle_scene.call("_start_enemy_turn")
 	var chain_level := int(_read_arg("--battle-demo-chain=", "0"))
 	if chain_level >= 2:
 		_seed_battle_chain_demo(battle_scene, chain_level)
