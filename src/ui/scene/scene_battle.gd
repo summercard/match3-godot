@@ -23,6 +23,7 @@ const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rul
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
 const MatchHitFeedbackScript = preload("res://src/ui/components/match_hit_feedback.gd")
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
+const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 
@@ -83,6 +84,8 @@ var _chain_display: Dictionary = {
 	"pulse": 0.0
 }
 var _combo_sfx: ComboSfx = null
+## 战斗音效层：六个程序化合成音，参数与总开关见 battle_sfx.gd
+var _battle_sfx: Node = null
 
 ## 消息
 var _message_text: String = ""
@@ -386,9 +389,15 @@ func _ready() -> void:
 	instance = self
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_combo_sfx = ComboSfxScript.new()
-	_combo_sfx.name = "ComboSfx"
-	add_child(_combo_sfx)
+	# 先按 soundOn 同步战斗音效总开关；关闭时不创建任何音频播放器，
+	# 连锁音效节点也一并跳过，保证设置页关闭后场上播放器数为 0。
+	_battle_sfx = BattleSfxScript.new()
+	_battle_sfx.name = "BattleSfx"
+	add_child(_battle_sfx)
+	if _battle_sfx.enabled:
+		_combo_sfx = ComboSfxScript.new()
+		_combo_sfx.name = "ComboSfx"
+		add_child(_combo_sfx)
 	if not _uses_editable_gui():
 		_add_background(BATTLE_BG_PATH)
 
@@ -776,6 +785,8 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 	if target_idx >= 0:
 		_register_hit_flash(true, target_idx, 0.3)
 	if damage > 0:
+		if _battle_sfx != null:
+			_battle_sfx.play("crit" if bool(result.get("isEffective", false)) else "hit")
 		_spawn_damage_popup(
 			"-%d" % damage,
 			anchor,
@@ -952,12 +963,16 @@ func _process_matches() -> void:
 	
 	# ===== 第7步：伤害处理 =====
 	var result: Dictionary = _battle.process_match_result(gem_counts, _board.cascade_count)
+	if _battle_sfx != null:
+		_battle_sfx.play("match_clear")
 	for log: Dictionary in result.get("damage_log", []):
 		var log_damage: int = log.get("damage", 0)
 		var log_effective: bool = log.get("isEffective", log.get("is_effective", false))
 		var log_weak: bool = log.get("isWeak", log.get("is_weak", false))
 		var log_target: String = log.get("target", "")
 		var log_died: bool = log.get("targetDied", log.get("target_died", false))
+		if _battle_sfx != null:
+			_battle_sfx.play("crit" if log_effective else "hit")
 		
 		# 克制提示
 		if log_effective:
@@ -1380,6 +1395,8 @@ func _begin_battle_end_overlay() -> void:
 	if _battle_end_overlay_started:
 		return
 	_battle_end_overlay_started = true
+	if _battle_sfx != null:
+		_battle_sfx.play("victory" if _battle != null and _battle.battle_result == "win" else "defeat")
 	_clear_chain_combo()
 	_battle_end_overlay_timer = 0.0
 	_battle_end_particles_spawned = false
@@ -1732,6 +1749,8 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 	var target_name: String = action_info.get("target", "")
 	var target_idx: int = _find_player_index(target_name)
 
+	if _battle_sfx != null:
+		_battle_sfx.play("take_damage")
 	_spawn_player_damage_popup("-%d" % damage, target_idx, false, false, is_charged)
 	if target_idx >= 0:
 		_register_hit_flash(false, target_idx, 0.35)
@@ -3246,6 +3265,8 @@ func destroy() -> void:
 	_chain_display = {"level": 0, "pulse": 0.0}
 	if _combo_sfx != null:
 		_combo_sfx.stop_all()
+	if _battle_sfx != null:
+		_battle_sfx.stop_all()
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail.clear()
 	_battle_end_overlay_timer = 0.0
