@@ -917,7 +917,7 @@ func _resolve_enemy_hit(enemy: Dictionary, target: Dictionary, multiplier: float
 		leader_def_boost,
 		synergy_def_mult
 	)
-	damage = int(float(damage) * multiplier)
+	damage = maxi(1, int(float(damage) * multiplier))
 	var guard_result := _apply_guard_to_damage(target, damage)
 	return {
 		"damage": int(guard_result.get("damage", damage)),
