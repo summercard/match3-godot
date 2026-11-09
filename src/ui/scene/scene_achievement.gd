@@ -196,11 +196,13 @@ func _gui_input(event: InputEvent) -> void:
 
 func _on_tap(point: Vector2) -> void:
 	if BACK_RECT.has_point(point):
+		_vibrate_button()
 		_on_back_pressed()
 		return
 	for i in range(CATEGORIES.size()):
 		var tab_rect := _get_tab_rect(i)
 		if tab_rect.has_point(point):
+			_vibrate_button()
 			_filter_by_category(str(CATEGORIES[i]["id"]))
 			return
 	if point.y < LIST_TOP or point.y > LIST_BOTTOM:
@@ -215,11 +217,18 @@ func _on_tap(point: Vector2) -> void:
 	if not card_rect.has_point(point):
 		return
 	if ach.get("unlocked", false) and not ach.get("claimed", false) and _get_claim_rect(card_rect).has_point(point):
+		_vibrate_button()
 		_claim_achievement(ach)
 	elif ach.get("unlocked", false):
 		_show_toast("%s 已完成" % ach.get("name", "成就"))
 	else:
 		_show_toast("目标进度 %d/%d" % [int(ach.get("progress", 0)), int(ach.get("target", 1))])
+
+
+func _vibrate_button() -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.request("button_tap")
 
 
 func _scroll_by_delta(delta_y: float) -> void:

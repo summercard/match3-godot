@@ -151,10 +151,18 @@ func _gui_input(event: InputEvent) -> void:
 
 func _on_tap(point: Vector2) -> void:
 	if BACK_RECT.has_point(point):
+		_vibrate_button()
 		back_pressed.emit()
 		return
 	if CLAIM_RECT.has_point(point) and _can_sign_in:
+		_vibrate_button()
 		do_sign_in()
+
+
+func _vibrate_button() -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.request("button_tap")
 
 
 func get_today_reward() -> Dictionary:

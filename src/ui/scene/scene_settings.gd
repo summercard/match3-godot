@@ -172,24 +172,30 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _on_tap(point: Vector2) -> void:
+	# 设置页按钮是自绘控件，不在节点树里；按下任一实际按钮时补一条震动反馈。
 	if confirm_dialog:
 		if CONFIRM_YES.has_point(point):
+			_vibrate_button()
 			_do_reset_data()
 			return
 		if CONFIRM_NO.has_point(point):
+			_vibrate_button()
 			confirm_dialog = false
 			queue_redraw()
 			return
 		return
 
 	if BACK_RECT.has_point(point):
+		_vibrate_button()
 		_save_and_back()
 		return
 	if RESET_RECT.has_point(point):
+		_vibrate_button()
 		confirm_dialog = true
 		queue_redraw()
 		return
 	if DEFAULT_RECT.has_point(point):
+		_vibrate_button()
 		_restore_defaults()
 		return
 
@@ -199,15 +205,23 @@ func _on_tap(point: Vector2) -> void:
 		if not row_rect.has_point(point):
 			continue
 		if row.get("type", "") == "toggle":
+			_vibrate_button()
 			_toggle_bool(str(row.get("key", "")))
 			return
 		if row.get("type", "") == "segment":
 			var hit := _hit_segment(row, row_rect, point)
 			if hit != "":
+				_vibrate_button()
 				settings_data[str(row.get("key", ""))] = hit
 				_save_settings()
 				queue_redraw()
 			return
+
+
+func _vibrate_button() -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.request("button_tap")
 
 
 func _toggle_bool(key: String) -> void:

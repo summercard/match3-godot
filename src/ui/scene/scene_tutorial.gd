@@ -150,9 +150,17 @@ func _gui_input(event: InputEvent) -> void:
 
 func _on_tap(point: Vector2) -> void:
 	if SKIP_RECT.has_point(point):
+		_vibrate_button()
 		_complete_tutorial()
 	elif NEXT_RECT.has_point(point):
+		_vibrate_button()
 		_next_step()
+
+
+func _vibrate_button() -> void:
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.request("button_tap")
 
 
 func _next_step() -> void:

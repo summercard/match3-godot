@@ -147,6 +147,10 @@ func _layout_current_scene() -> void:
 func _initialize_scene(scene_node: Control, scene_name: String, data: Dictionary) -> void:
 	if scene_node.has_method("init"):
 		scene_node.init(data)
+	# 震动反馈：场景里的原生按钮统一接到 button_tap 事件。
+	var vibration := get_node_or_null("/root/VibrationFeedback")
+	if vibration != null:
+		vibration.wire_buttons(scene_node)
 	if scene_node.has_signal("button_pressed"):
 		scene_node.button_pressed.connect(_on_scene_button_pressed)
 	if scene_node.has_signal("stage_selected"):
