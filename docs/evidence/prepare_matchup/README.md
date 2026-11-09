@@ -1,7 +1,8 @@
 # 战斗准备页：属性克制分析
 
 准备页原来在无章节机制提示时回落到「属性无明显克制关系」。现在改为读取现有克制倍率，
-按敌方属性 × 每个上阵伙伴属性生成一句克制结论，并接在准备页「关卡机制」提示的第三行。
+按敌方属性 × 每个上阵伙伴属性生成一句克制结论，并接在准备页「关卡机制」提示的第三行；
+来源较多时同一句在「；」处折到第四行。
 
 ## 口径
 
@@ -28,7 +29,8 @@
 
 `src/ui/scene/scene_battle_prepare_gui.gd`、`src/ui/scenes/battle_prepare.tscn`
 
-- 「关卡机制」面板增加第三行 `MechanicPanel/Line3` 显示克制结论；全中性时用弱化颜色显示
+- 「关卡机制」面板增加第三行 `MechanicPanel/Line3` 显示克制结论；来源较多时在同一句的
+  「；」处折到第四行 `MechanicPanel/Line4`，避免横向裁切。全中性时用弱化颜色显示
   「属性无明显克制关系」，有强 / 弱来源时用提示色显示。
 
 ## 截图
@@ -75,9 +77,10 @@ MATCH3_SAVE_PATH=/tmp/prepare_after_clear.cfg \
 - 对每组单独渲染准备页文案，断言强 / 弱 / 中性与 `MonsterDb.get_element_multiplier`
   的倍率一致；
 - 强来源必须显示 `+X%`，弱来源必须显示 `-X%`，中性来源不得写入文案；
-- 再以真实 `battle_prepare.tscn` 校验 `MechanicPanel/Line1`、`Line2`、`Line3`：
-  关卡机制与关卡提示保持原样，`Line3` 显示克制结论；全中性时 `Line3` 显示
-  「属性无明显克制关系」。
+- 再以真实 `battle_prepare.tscn` 校验 `MechanicPanel/Line1`、`Line2`、`Line3`、
+  `Line4`：关卡机制与关卡提示保持原样，克制结论写在 `Line3`；两来源不进 `Line4`，
+  四来源长句在「；」处折到 `Line3 + Line4`；全中性时 `Line3` 显示
+  「属性无明显克制关系」且 `Line4` 为空。
 
 原始输出：[test_output.txt](test_output.txt)
 

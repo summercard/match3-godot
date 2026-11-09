@@ -271,12 +271,30 @@ func _get_element_hint() -> String:
 		else:
 			var goal_tip := str(_stage_data.get("stageGoal", {}).get("tip", ""))
 			lines.append(goal_tip if not goal_tip.is_empty() else str(_stage_data.get("prepareHint", "")))
-		lines.append(matchup_text)
+		lines.append_array(_wrap_matchup_text(matchup_text))
 		return "\n".join(lines)
 	var prepare_hint := str(_stage_data.get("prepareHint", ""))
 	if not prepare_hint.is_empty():
-		return "\n".join([prepare_hint, matchup_text])
-	return matchup_text
+		var fallback_lines := PackedStringArray([prepare_hint])
+		fallback_lines.append_array(_wrap_matchup_text(matchup_text))
+		return "\n".join(fallback_lines)
+	return "\n".join(_wrap_matchup_text(matchup_text))
+
+## 长句在来源分隔符处折成两行，避免准备页横向裁切。
+func _wrap_matchup_text(text: String) -> PackedStringArray:
+	var lines := PackedStringArray([text])
+	if text.length() <= 36 or not ("；" in text):
+		return lines
+	var clauses := text.split("；")
+	var first := str(clauses[0])
+	for i in range(1, clauses.size()):
+		var candidate := first + "；" + str(clauses[i])
+		if candidate.length() > text.length() / 2:
+			break
+		first = candidate
+	if first == text:
+		return lines
+	return PackedStringArray([first, text.substr(first.length() + 1)])
 
 ## 克制倍率分档：强 / 弱 / 中性。
 static func classify_element_matchup(multiplier: float) -> String:
@@ -658,12 +676,12 @@ func _render_element_hint() -> void:
 	var hint: String = _get_element_hint()
 	var lines: Array = hint.split("\n")
 	
-	var line_y: float = y + 34.0
+	var line_y: float = y + 37.0
 	for line in lines:
 		var is_matchup: bool = ("克" in line) and not ("无明显" in line)
 		var color: Color = C["warning"] if ("警告" in line or is_matchup) else C["text_muted"]
 		_draw_text_with_shadow(line, DESIGN_W / 2.0, line_y, color, 11.0, false, 304.0)
-		line_y += 15.0
+		line_y += 12.0
 
 func _render_synergy_preview() -> void:
 	var synergies: Array = _calc_synergy_preview()

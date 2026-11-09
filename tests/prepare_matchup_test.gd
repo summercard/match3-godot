@@ -103,8 +103,9 @@ func _test_multi_source_sentence(prepare: Control) -> void:
 	prepare.set("_player_team", allies)
 	var shown := str(prepare.call("_get_element_hint"))
 	var expected := "水克火：水龟仔 +50%；草被火克：草苗儿 -25%；火被水克：小火龙 -25%；草克水：草苗儿 +50%"
-	_expect(shown == expected, "多来源应合成一句话且去重敌方属性：预期「%s」，实际「%s」" % [expected, shown])
-	print("[PrepareMatchup] sentence=%s" % shown)
+	_expect(shown.replace("\n", "；") == expected,
+		"多来源应合成一句话且去重敌方属性：预期「%s」，实际「%s」" % [expected, shown])
+	print("[PrepareMatchup] sentence=%s" % shown.replace("\n", " / "))
 
 	var neutral_enemies: Array[Dictionary] = [{"name": "雷球", "element": "thunder"}]
 	prepare.set("_enemy_team", neutral_enemies)
@@ -133,6 +134,8 @@ func _test_gui_labels() -> void:
 	var clear_expected := "水克火：水龟仔 +50%；草被火克：草苗儿 -25%"
 	_expect((prepare.get_node("MechanicPanel/Line3") as Label).text == clear_expected,
 		"准备页 Line3 应显示克制结论：预期「%s」" % clear_expected)
+	_expect((prepare.get_node("MechanicPanel/Line4") as Label).text == "",
+		"两来源克制结论只占 Line3")
 	_expect((prepare.get_node("MechanicPanel/Line1") as Label).text.contains("岩障开路"),
 		"准备页 Line1 应继续显示关卡机制摘要")
 	_expect(not (prepare.get_node("MechanicPanel/Line2") as Label).text.is_empty(),
@@ -143,6 +146,23 @@ func _test_gui_labels() -> void:
 	prepare.call("_sync_mechanic_hint")
 	_expect((prepare.get_node("MechanicPanel/Line3") as Label).text == NEUTRAL_TEXT,
 		"准备页全中性时应显示无克制文案")
+	_expect((prepare.get_node("MechanicPanel/Line4") as Label).text == "",
+		"全中性不应占用 Line4")
+
+	prepare.init({"stageId": "stage_1_4"})
+	var complex_enemies: Array[Dictionary] = [
+		{"name": "水泡泡", "element": "water"},
+		{"name": "草精灵", "element": "grass"},
+	]
+	prepare.set("_enemy_team", complex_enemies)
+	prepare.set("_player_team", allies)
+	prepare.call("_sync_mechanic_hint")
+	var line3 := (prepare.get_node("MechanicPanel/Line3") as Label).text
+	var line4 := (prepare.get_node("MechanicPanel/Line4") as Label).text
+	var complex_expected := "火被水克：小火龙 -25%；草克水：草苗儿 +50%；火克草：小火龙 +50%；水被草克：水龟仔 -25%"
+	_expect(not line4.is_empty(), "四来源长句应折成 Line3 + Line4 两行")
+	_expect("%s；%s" % [line3, line4] == complex_expected,
+		"折行后应保持同一克制结论：预期「%s」，实际「%s；%s」" % [complex_expected, line3, line4])
 	prepare.queue_free()
 	await process_frame
 
