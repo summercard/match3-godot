@@ -19,6 +19,8 @@ func _capture() -> void:
 	await process_frame
 	await process_frame
 	_seed_demo_state(main, scene_name)
+	if _read_arg("--hide-toast=", "0") == "1":
+		main.get_current_scene().set("_message_timer", 0.0)
 	await process_frame
 	var record_seconds := float(_read_arg("--record-seconds=", "0"))
 	if record_seconds > 0.0:
@@ -27,8 +29,6 @@ func _capture() -> void:
 		return
 	for _frame in range(int(_read_arg("--settle-frames=", "0"))):
 		await process_frame
-	if _read_arg("--hide-toast=", "0") == "1":
-		main.get_current_scene().set("_message_timer", 0.0)
 	var hold_seconds := float(_read_arg("--hold-seconds=", "0"))
 	if hold_seconds > 0.0:
 		await create_timer(hold_seconds).timeout
@@ -294,6 +294,13 @@ func _seed_battle_demo_fx(main: Control) -> void:
 	var battle_scene: Control = main.get_current_scene() if main.has_method("get_current_scene") else null
 	if battle_scene == null:
 		return
+	# 证据采集：--match-hit-feedback=off 关掉命中反馈总开关，用于开/关对照。
+	if _read_arg("--match-hit-feedback=", "on") == "off":
+		var hit_feedback = load("res://src/ui/components/match_hit_feedback.gd")
+		hit_feedback.enabled = false
+	if _read_arg("--battle-demo-hit=", "0") == "1":
+		_seed_battle_hit_demo(battle_scene)
+		return
 	if _read_arg("--battle-demo-match=", "0") == "1":
 		_seed_battle_match_demo(battle_scene)
 		return
@@ -366,12 +373,7 @@ func _seed_battle_match_demo(battle_scene: Control) -> void:
 	var board = battle_scene.get("_board")
 	if board == null:
 		return
-	for r in range(board.rows):
-		for c in range(board.cols):
-			board.grid[r][c] = GEM_TYPES[(r + c * 2) % GEM_TYPES.size()]
-			board.obstacles[r][c] = null
-			board.locked_gems[r][c] = null
-			board.poison_fog[r][c] = null
+	_fill_demo_board(board)
 	# 交换 (0,0) 与 (0,1)：第 0 行形成 3 个水珠（对火属性敌人暴击），
 	# 第 0 列形成 3 个火珠（普通伤害），一次三消产生两段伤害。
 	board.grid[0][0] = "water"
@@ -382,6 +384,32 @@ func _seed_battle_match_demo(battle_scene: Control) -> void:
 	board.grid[2][0] = "fire"
 	board.cascade_count = 0
 	battle_scene.call("_do_swap", 0, 0, 0, 1)
+
+## 命中反馈证据：交换 (4,3)/(4,4)，在棋盘中部形成水 3 消（第 4 行）与火 3 消（第 3 列）。
+## 视角、棋盘、随机种子与 --battle-demo-match 一致，只把命中位置移到画面中部。
+func _seed_battle_hit_demo(battle_scene: Control) -> void:
+	var board = battle_scene.get("_board")
+	if board == null:
+		return
+	_fill_demo_board(board)
+	board.grid[4][3] = "water"
+	board.grid[4][4] = "fire"
+	board.grid[4][5] = "water"
+	board.grid[4][6] = "water"
+	board.grid[5][3] = "fire"
+	board.grid[6][3] = "fire"
+	board.cascade_count = 0
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	battle_scene.call("_do_swap", 4, 3, 4, 4)
+
+func _fill_demo_board(board) -> void:
+	for r in range(board.rows):
+		for c in range(board.cols):
+			board.grid[r][c] = GEM_TYPES[(r + c * 2) % GEM_TYPES.size()]
+			board.obstacles[r][c] = null
+			board.locked_gems[r][c] = null
+			board.poison_fog[r][c] = null
 
 func _seed_battle_chain_demo(battle_scene: Control, level: int) -> void:
 	battle_scene.set("_message_text", "")

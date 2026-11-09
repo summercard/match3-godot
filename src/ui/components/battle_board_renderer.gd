@@ -1,7 +1,7 @@
 class_name BattleBoardRenderer
 extends RefCounted
 
-static func draw_board_background(scene, design_w: float, board = null) -> void:
+static func draw_board_background(scene, design_w: float, board = null, shake_offset: Vector2 = Vector2.ZERO) -> void:
 	var cell_size: float = 39.0
 	var board_x: float = (design_w - cell_size * 8.0) / 2.0
 	var board_y: float = 296.0
@@ -9,6 +9,8 @@ static func draw_board_background(scene, design_w: float, board = null) -> void:
 		cell_size = float(board.cell_size)
 		board_x = float(board.offset_x)
 		board_y = float(board.offset_y)
+	board_x += shake_offset.x
+	board_y += shake_offset.y
 	var board_w: float = cell_size * 8.0
 	var board_h: float = cell_size * 8.0
 	var frame_tex: Texture2D = scene._get_texture("res://assets/images/battle/ui/ui_board_frame.png")
@@ -107,6 +109,7 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 		return
 	var lock_colors: Dictionary = state.get("lock_colors", {})
 	var unlock_animations: Array = state.get("unlock_animations", [])
+	var shake: Vector2 = state.get("match_shake_offset", Vector2.ZERO)
 	for row in range(board.rows):
 		for col in range(board.cols):
 			if not board.is_locked(row, col):
@@ -119,8 +122,8 @@ static func draw_locked_gems(scene, board, state: Dictionary) -> void:
 			if is_shattering:
 				continue
 			var lock: Dictionary = board.locked_gems[row][col]
-			var x: float = float(board.offset_x + col * board.cell_size)
-			var y: float = float(board.offset_y + row * board.cell_size)
+			var x: float = float(board.offset_x + col * board.cell_size) + shake.x
+			var y: float = float(board.offset_y + row * board.cell_size) + shake.y
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
@@ -147,13 +150,14 @@ static func draw_obstacles(scene, board, state: Dictionary) -> void:
 	if board == null:
 		return
 	var obstacle_colors: Dictionary = state.get("obstacle_colors", {})
+	var shake: Vector2 = state.get("match_shake_offset", Vector2.ZERO)
 	for row in range(board.rows):
 		for col in range(board.cols):
 			if not board.is_obstacle(row, col):
 				continue
 			var ob: Dictionary = board.obstacles[row][col]
-			var x: float = float(board.offset_x + col * board.cell_size)
-			var y: float = float(board.offset_y + row * board.cell_size)
+			var x: float = float(board.offset_x + col * board.cell_size) + shake.x
+			var y: float = float(board.offset_y + row * board.cell_size) + shake.y
 			var size: float = float(board.cell_size)
 			var cx: float = x + size / 2.0
 			var cy: float = y + size / 2.0
@@ -182,12 +186,13 @@ static func draw_poison_fog(scene, board, state: Dictionary) -> void:
 	var idle_time: float = state.get("idle_time", 0.0)
 	var t: float = fmod(idle_time, 1.5) / 1.5
 	var pulse_opacity: float = 0.2 + (0.4 - 0.2) * (sin(t * TAU) + 1.0) / 2.0
+	var shake: Vector2 = state.get("match_shake_offset", Vector2.ZERO)
 	for row in range(board.rows):
 		for col in range(board.cols):
 			if not board.is_poison_fog(row, col):
 				continue
-			var x: float = float(board.offset_x + col * board.cell_size)
-			var y: float = float(board.offset_y + row * board.cell_size)
+			var x: float = float(board.offset_x + col * board.cell_size) + shake.x
+			var y: float = float(board.offset_y + row * board.cell_size) + shake.y
 			var size: float = float(board.cell_size)
 			scene.draw_rect(Rect2(x + 1.0, y + 1.0, size - 2.0, size - 2.0), Color(0.31, 0.78, 0.31, pulse_opacity))
 			scene._draw_text_with_shadow("💀", x + size / 2.0, y + size / 2.0, Color(1.0, 1.0, 1.0, 0.5 + pulse_opacity), 10.0)
@@ -210,8 +215,9 @@ static func draw_unlock_animations(scene, board, state: Dictionary) -> void:
 			cell_size = float(board.cell_size)
 			board_x = float(board.offset_x)
 			board_y = float(board.offset_y)
-		var cx: float = board_x + col * cell_size + cell_size / 2.0
-		var cy: float = board_y + row * cell_size + cell_size / 2.0
+		var shake: Vector2 = state.get("match_shake_offset", Vector2.ZERO)
+		var cx: float = board_x + col * cell_size + cell_size / 2.0 + shake.x
+		var cy: float = board_y + row * cell_size + cell_size / 2.0 + shake.y
 		var dirs: Array = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 		for d: Array in dirs:
 			scene._draw_text_with_shadow("⛓", cx + d[0] * dist, cy + d[1] * dist, Color(0.6, 0.6, 0.7, alpha), 10.0)
@@ -257,8 +263,9 @@ static func draw_special_transform(scene, board, state: Dictionary) -> void:
 	var col: int = anim.get("col", -1)
 	if row < 0 or col < 0:
 		return
-	var cx: float = board_x + col * cell_size + cell_size / 2.0
-	var cy: float = board_y + row * cell_size + cell_size / 2.0
+	var shake: Vector2 = state.get("match_shake_offset", Vector2.ZERO)
+	var cx: float = board_x + col * cell_size + cell_size / 2.0 + shake.x
+	var cy: float = board_y + row * cell_size + cell_size / 2.0 + shake.y
 	if progress < 0.3:
 		var flash_progress: float = progress / 0.3
 		scene._draw_circle(cx, cy, cell_size * 1.5 * flash_progress, Color(1.0, 1.0, 1.0, 0.8 * (1.0 - flash_progress)))

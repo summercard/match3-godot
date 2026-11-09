@@ -20,6 +20,7 @@ const BattleCombatantRendererScript = preload("res://src/ui/components/battle_co
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
+const MatchHitFeedbackScript = preload("res://src/ui/components/match_hit_feedback.gd")
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
@@ -180,9 +181,17 @@ var _battle_end_overlay_started: bool = false
 var _battle_end_particles_spawned: bool = false
 var _result_transitioning: bool = false
 
-## 棋盘屏幕震动（大量消除时）
+## 棋盘屏幕震动（大量消除时，旧版表现；命中反馈开启时由命中震屏接管）
 var _board_shake_timer: float = 0.0
 var _board_shake_offset: Vector2 = Vector2.ZERO
+
+## 三消命中反馈：顿帧计时 + 命中震屏（参数与总开关见 match_hit_feedback.gd）
+var _match_hitstop_timer: float = 0.0
+var _match_shake_timer: float = 0.0
+var _match_shake_duration: float = 0.0
+var _match_shake_amplitude: float = 0.0
+var _match_shake_offset: Vector2 = Vector2.ZERO
+var _match_hit_glows: Array[Dictionary] = []  # 命中格元素爆散光斑
 
 ## 收服特效（inline 播放，Phase 4）
 var _capture_effect_node: CaptureEffect = null
@@ -407,6 +416,12 @@ func init(data: Dictionary = {}) -> void:
 	_attack_flash_timer = 0.0
 	_chain_display = {"level": 0, "pulse": 0.0}
 	_element_glow = {"type": "", "timer": 0.0, "color": Color()}
+	_match_hitstop_timer = 0.0
+	_match_shake_timer = 0.0
+	_match_shake_duration = 0.0
+	_match_shake_amplitude = 0.0
+	_match_shake_offset = Vector2.ZERO
+	_match_hit_glows.clear()
 	_selection_pulse = 0.0
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail = []
@@ -877,10 +892,16 @@ func _process_matches() -> void:
 	if _board.cascade_count >= 2:
 		_show_chain_combo(_board.cascade_count)
 	
-	# ===== 棋盘屏幕震动：大量消除或高连锁 =====
-	var total_elim: int = match_context.get("total_elim", 0)
-	if total_elim >= 5 or _board.cascade_count >= 4:
-		_board_shake_timer = 0.3
+	# ===== 命中反馈：顿帧 + 微震屏 + 元素爆散 =====
+	# 总开关关闭时 resolve 返回空字典，整段跳过；旧版的棋盘震动保持原样。
+	var hit_feedback: Dictionary = MatchHitFeedbackScript.resolve(_board.cascade_count)
+	if not hit_feedback.is_empty():
+		_begin_match_hit(hit_feedback, matches)
+	else:
+		# ===== 棋盘屏幕震动：大量消除或高连锁 =====
+		var total_elim: int = match_context.get("total_elim", 0)
+		if total_elim >= 5 or _board.cascade_count >= 4:
+			_board_shake_timer = 0.3
 	
 	# ===== 第1步：记录普通消除宝石（动画用）=====
 	_eliminating_gems.clear()
@@ -908,6 +929,11 @@ func _process_matches() -> void:
 	# ===== 第4.5步：特殊消除视觉提示存储（延迟触发，由 _trigger_special_elim 在对应延迟时执行）=====
 	# 匹配数据已存入 _special_elim_phases[].matches，供分时触发使用
 	
+	# ===== 第4.9步：命中顿帧 =====
+	# 命中瞬间冻结画面动画，只有震屏与爆散粒子继续播放；总开关关闭时不插入等待。
+	if not hit_feedback.is_empty():
+		await get_tree().create_timer(float(hit_feedback["hitstop"])).timeout
+
 	# ===== 第5步：播放普通消除动画 =====
 	await get_tree().create_timer(ELIMINATE_DURATION).timeout
 	_eliminating_gems.clear()
@@ -1008,6 +1034,71 @@ func _process_matches() -> void:
 	_state = BattleState.FALLING
 	await get_tree().create_timer(FALL_DURATION).timeout
 	_process_matches()
+
+## 命中反馈开始：启动顿帧、命中震屏，并在被消除格中心爆散元素粒子。
+func _begin_match_hit(hit_feedback: Dictionary, matches: Array) -> void:
+	_match_hitstop_timer = float(hit_feedback["hitstop"])
+	_match_shake_duration = float(hit_feedback["shake_duration"])
+	_match_shake_timer = _match_shake_duration
+	_match_shake_amplitude = float(hit_feedback["shake_amplitude"])
+	_match_shake_offset = Vector2.ZERO
+	_spawn_match_hit_burst(matches, hit_feedback.get("burst", {}))
+
+## 元素爆散：命中格中心向外喷射宝石本体色粒子，再补少量白色核心火花与元素光斑。
+func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
+	var cell_size := float(_board.cell_size) if _board != null else 39.0
+	var board_x := float(_board.offset_x) if _board != null else (DESIGN_W - 8.0 * cell_size) / 2.0
+	var board_y := float(_board.offset_y) if _board != null else float(BATTLE_BOARD_Y)
+	var count := int(burst_config.get("particles_per_gem", 12))
+	var core_count := int(burst_config.get("core_particles", 3))
+	var speed := float(burst_config.get("speed", 190.0))
+	var life := float(burst_config.get("life", 0.24))
+	var size := float(burst_config.get("size", 5.5))
+	var glow_duration := float(burst_config.get("glow_duration", 0.14))
+	var glow_alpha := float(burst_config.get("glow_alpha", 0.85))
+	var glow_radius := cell_size * float(burst_config.get("glow_radius", 0.95))
+	_match_hit_glows.clear()
+	for m in matches:
+		if not (m is Dictionary) or not m.has("row") or not m.has("col"):
+			continue
+		var cx: float = board_x + float(m["col"]) * cell_size + cell_size / 2.0
+		var cy: float = board_y + float(m["row"]) * cell_size + cell_size / 2.0
+		var gem_color: Color = GEM_COLORS.get(str(m.get("type", "")), C["white"])
+		_match_hit_glows.append({
+			"x": cx,
+			"y": cy,
+			"color": gem_color,
+			"timer": glow_duration,
+			"duration": glow_duration,
+			"radius": glow_radius,
+			"alpha": glow_alpha
+		})
+		for i in range(count):
+			var angle: float = TAU * float(i) / float(maxi(count, 1)) + randf() * 0.35
+			var particle_speed: float = speed * (0.55 + randf() * 0.75)
+			_gem_particles.append({
+				"x": cx,
+				"y": cy,
+				"vx": cos(angle) * particle_speed,
+				"vy": sin(angle) * particle_speed,
+				"life": life,
+				"max_life": life,
+				"color": gem_color,
+				"size": size + randf() * 2.0
+			})
+		for i in range(core_count):
+			var core_angle: float = randf() * TAU
+			var core_speed: float = speed * (0.25 + randf() * 0.35)
+			_gem_particles.append({
+				"x": cx,
+				"y": cy,
+				"vx": cos(core_angle) * core_speed,
+				"vy": sin(core_angle) * core_speed,
+				"life": life * 0.7,
+				"max_life": life * 0.7,
+				"color": Color(1.0, 1.0, 1.0),
+				"size": size * 1.1 + randf() * 1.5
+			})
 
 func _apply_gravity() -> void:
 	if _board:
@@ -1290,6 +1381,12 @@ func _begin_battle_end_overlay() -> void:
 	_attack_flash_timer = 0.0
 	_board_shake_timer = 0.0
 	_board_shake_offset = Vector2.ZERO
+	_match_hitstop_timer = 0.0
+	_match_shake_timer = 0.0
+	_match_shake_duration = 0.0
+	_match_shake_amplitude = 0.0
+	_match_shake_offset = Vector2.ZERO
+	_match_hit_glows.clear()
 	_screen_flash_timer = 0.0
 	_rainbow_flash = 0.0
 	_element_ripple = {"active": false, "color": Color(), "timer": 0.0, "duration": 0.6}
@@ -1748,81 +1845,88 @@ func _process(delta: float) -> void:
 				_battle_end_particles_spawned = true
 				_spawn_victory_particles()
 	
+	# 命中顿帧：冻结画面动画，只保留震屏与爆散粒子；总开关关闭时该计时恒为 0。
+	var anim_delta: float = effective_delta
+	if _match_hitstop_timer > 0.0:
+		_match_hitstop_timer = maxf(0.0, _match_hitstop_timer - delta)
+		anim_delta = 0.0
+
 	# 更新消息
-	_message_timer = BattleAnimationControllerScript.tick_countdown(_message_timer, effective_delta)
+	_message_timer = BattleAnimationControllerScript.tick_countdown(_message_timer, anim_delta)
 	
 	# 更新阶段切换状态
 	if not _phase_transition_state.is_empty():
 		var pt_timer: float = _phase_transition_state.get("timer", 0.0)
-		pt_timer = BattleAnimationControllerScript.tick_countdown(pt_timer, effective_delta)
+		pt_timer = BattleAnimationControllerScript.tick_countdown(pt_timer, anim_delta)
 		_phase_transition_state["timer"] = pt_timer
 	
 	# 更新波次横幅
 	if not _wave_banner.is_empty():
 		var wb_timer: float = _wave_banner.get("timer", 0.0)
-		wb_timer = BattleAnimationControllerScript.tick_countdown(wb_timer, effective_delta)
+		wb_timer = BattleAnimationControllerScript.tick_countdown(wb_timer, anim_delta)
 		_wave_banner["timer"] = wb_timer
 	
 	# 更新连锁提示：升级时 pulse 放大，随后自然回落到稳定尺寸。
 	if int(_chain_display.get("level", 0)) > 0:
-		_chain_display["pulse"] = maxf(0.0, float(_chain_display.get("pulse", 0.0)) - effective_delta * 4.0)
+		_chain_display["pulse"] = maxf(0.0, float(_chain_display.get("pulse", 0.0)) - anim_delta * 4.0)
 	
 	# 更新受击闪烁
-	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, effective_delta)
+	BattleAnimationControllerScript.tick_timed_entries(_hit_flashes, anim_delta)
 	
 	# 更新倒下提示
-	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, effective_delta)
+	BattleAnimationControllerScript.tick_timed_entries(_fall_messages, anim_delta)
 	
 	# 更新 idle 动画
 	if _state == BattleState.IDLE or _state == BattleState.ENEMY_TURN:
-		_idle_time += effective_delta
+		_idle_time += anim_delta
 	
 	# 更新选中光环脉冲
 	if _selected_gem.x >= 0 and _selected_gem.y >= 0:
-		_selection_pulse += effective_delta
+		_selection_pulse += anim_delta
 	
 	# 更新攻击震动
-	_update_attack_shake(effective_delta)
+	_update_attack_shake(anim_delta)
 	_screen_flash_timer = BattleAnimationControllerScript.tick_countdown(_screen_flash_timer, delta)
 
 	# 更新敌方出手前摇计时
 	if _enemy_windup_timer > 0.0:
-		_enemy_windup_timer = maxf(0.0, _enemy_windup_timer - effective_delta)
+		_enemy_windup_timer = maxf(0.0, _enemy_windup_timer - anim_delta)
 	
 	# 更新 HP 渐变动画
-	_update_hp_display(effective_delta)
+	_update_hp_display(anim_delta)
 	
 	# 更新浮动文字
-	_update_floating_texts(effective_delta)
+	_update_floating_texts(anim_delta)
 	
 	# 更新宝石消除动画
-	_update_gem_animations(effective_delta)
+	_update_gem_animations(anim_delta)
 	
 	# 更新特殊消除分时动画
-	_special_elim_timer += effective_delta
+	_special_elim_timer += anim_delta
 	for phase in _special_elim_phases:
 		if phase["triggered"]:
 			continue
-		phase["timer"] += effective_delta
+		phase["timer"] += anim_delta
 		if phase["timer"] >= phase["delay"]:
 			phase["triggered"] = true
 			_trigger_special_elim(phase)
 	
 	# 更新彩虹全屏闪光
 	if _rainbow_flash > 0:
-		_rainbow_flash -= effective_delta
+		_rainbow_flash -= anim_delta
 	
 	# 更新下落动画
-	_update_fall_animations(effective_delta)
+	_update_fall_animations(anim_delta)
 	
 	# 更新解锁碎裂动画
-	_update_unlock_animations(effective_delta)
+	_update_unlock_animations(anim_delta)
 	
 	# 更新毒雾扩散动画
-	_update_poison_fog_anims(effective_delta)
+	_update_poison_fog_anims(anim_delta)
 	
-	# 更新宝石消除粒子
+	# 更新宝石消除粒子（顿帧期间继续播放，保证爆散可见）
 	_update_gem_particles(effective_delta)
+	_update_match_hit_glows(effective_delta)
 	
 	# 更新障碍物破坏粒子
 	_update_obstacle_particles(effective_delta)
@@ -1839,17 +1943,23 @@ func _process(delta: float) -> void:
 			_battle_end_particles_spawned = true
 			_spawn_victory_particles()
 	
-	# 更新棋盘屏幕震动
-	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, effective_delta)
+	# 更新棋盘屏幕震动（旧版表现，命中反馈开启时不使用）
+	var board_shake := BattleAnimationControllerScript.update_board_shake(_board_shake_timer, anim_delta)
 	_board_shake_timer = board_shake["timer"]
 	_board_shake_offset = board_shake["offset"]
 	
+	# 更新命中震屏（顿帧期间仍继续播放）
+	var match_shake := MatchHitFeedbackScript.update_shake(
+		_match_shake_timer, _match_shake_duration, _match_shake_amplitude, effective_delta)
+	_match_shake_timer = match_shake["timer"]
+	_match_shake_offset = match_shake["offset"]
+
 	# 更新特殊宝石激活动画
 	if _special_transform_anim.get("timer", 0.0) > 0:
-		_special_transform_anim["timer"] -= effective_delta
+		_special_transform_anim["timer"] -= anim_delta
 	
 	# 更新元素连锁全屏波纹
-	BattleAnimationControllerScript.update_element_ripple(_element_ripple, effective_delta)
+	BattleAnimationControllerScript.update_element_ripple(_element_ripple, anim_delta)
 	
 	# 同步 BOSS 技能视觉状态
 	_sync_boss_skill_visuals()
@@ -1914,6 +2024,9 @@ func _draw() -> void:
 	# 绘制棋盘
 	_draw_board()
 	
+	# 命中格元素爆散光斑（顿帧期间可见）
+	_draw_match_hit_glows()
+
 	# 渲染宝石消除粒子
 	_draw_gem_particles()
 	
@@ -2027,7 +2140,8 @@ func _board_render_state() -> Dictionary:
 		"obstacle_colors": OBSTACLE_COLORS,
 		"poison_fog_colors": POISON_FOG_COLORS,
 		"idle_time": _idle_time,
-		"board_shake_offset": _board_shake_offset,
+		"board_shake_offset": _board_shake_offset + _match_shake_offset,
+		"match_shake_offset": _match_shake_offset,
 		"eliminating_gems": _eliminating_gems,
 		"selected_gem": _selected_gem,
 		"unlock_animations": _unlock_animations,
@@ -2091,7 +2205,8 @@ func _draw_player_card(x: float, y: float, index: int, name: String, hp: int, ma
 	BattleCombatantRendererScript.draw_player_card(self, _battle, _combatant_render_state(), x, y, index, name, hp, max_hp, monster)
 
 func _draw_board_background() -> void:
-	BattleBoardRendererScript.draw_board_background(self, DESIGN_W, _board)
+	# 命中震屏同时位移棋盘框与格子；旧版棋盘震动仍只作用于格子，保持关闭档与基线一致。
+	BattleBoardRendererScript.draw_board_background(self, DESIGN_W, _board, _match_shake_offset)
 
 func _draw_board() -> void:
 	BattleBoardRendererScript.draw_board(self, _board, _board_render_state())
@@ -2762,6 +2877,12 @@ func spawn_unlock_particles(row: int, col: int) -> void:
 func _update_gem_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_gem_particles, delta, 200.0)
 
+func _update_match_hit_glows(delta: float) -> void:
+	for i in range(_match_hit_glows.size() - 1, -1, -1):
+		_match_hit_glows[i]["timer"] = float(_match_hit_glows[i]["timer"]) - delta
+		if float(_match_hit_glows[i]["timer"]) <= 0.0:
+			_match_hit_glows.remove_at(i)
+
 func _update_obstacle_particles(delta: float) -> void:
 	BattleAnimationControllerScript.update_particle_list(_obstacle_particles, delta, 300.0)
 
@@ -2815,6 +2936,19 @@ func _draw_gem_particles() -> void:
 		var size: float = p["size"] * (1.0 - progress * 0.5)
 		var color: Color = Color(p["color"].r, p["color"].g, p["color"].b, alpha)
 		_draw_circle(p["x"], p["y"], size, color)
+
+## 命中格元素爆散光斑：元素色光晕 + 白色核心，快速扩散后淡出。
+func _draw_match_hit_glows() -> void:
+	for glow: Dictionary in _match_hit_glows:
+		var duration: float = maxf(float(glow.get("duration", 0.14)), 0.001)
+		var progress: float = clampf(1.0 - float(glow.get("timer", 0.0)) / duration, 0.0, 1.0)
+		var radius: float = float(glow.get("radius", 36.0)) * (0.35 + progress * 0.9)
+		var alpha: float = (1.0 - progress) * float(glow.get("alpha", 0.85))
+		var color: Color = glow.get("color", Color.WHITE)
+		var gx: float = float(glow["x"]) + _match_shake_offset.x
+		var gy: float = float(glow["y"]) + _match_shake_offset.y
+		_draw_circle(gx, gy, radius, Color(color.r, color.g, color.b, alpha * 0.45))
+		_draw_circle(gx, gy, radius * 0.5, Color(1.0, 1.0, 1.0, alpha * 0.8))
 
 func _draw_obstacle_particles() -> void:
 	for p: Dictionary in _obstacle_particles:
@@ -3069,6 +3203,12 @@ func destroy() -> void:
 	_rainbow_flash = 0.0
 	_board_shake_timer = 0.0
 	_board_shake_offset = Vector2.ZERO
+	_match_hitstop_timer = 0.0
+	_match_shake_timer = 0.0
+	_match_shake_duration = 0.0
+	_match_shake_amplitude = 0.0
+	_match_shake_offset = Vector2.ZERO
+	_match_hit_glows.clear()
 	_attack_shake_timer = 0.0
 	_attack_flash_timer = 0.0
 	_special_transform_anim = {"row": -1, "col": -1, "type": "", "timer": 0.0, "duration": 0.5, "triggered": false}
