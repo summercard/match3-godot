@@ -71,7 +71,8 @@ cmp: identical
 
 原始输出：[transcript_compare.txt](transcript_compare.txt)、[json_compare.txt](json_compare.txt)。
 两态战斗 JSON + 结算：[battle_unused.json](battle_unused.json)、
-[battle_used.json](battle_used.json)。
+[battle_used.json](battle_used.json)（两者都含 `result` 字段）；单独结算文件：
+[result_unused.json](result_unused.json)、[result_used.json](result_used.json)。
 
 ### 2. 用 1 个药水：总量、扣数量与落盘
 
