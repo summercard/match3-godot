@@ -31,6 +31,13 @@ var battle_result: String = ""     # 'win' | 'lose'
 var turn_count: int = 0
 var max_turns: int = 20
 
+# 5 级起步折算：新手保护等级 5 的队伍血量按 75% 计入战斗，
+# 让 5 级开局的伙伴约 13 下倒下，同时保留 1 级基准与 Boss 输出不变。
+const LEVEL5_OPENING_HP_FACTOR: float = 0.75
+
+# Boss 关卡曲线（stageData.bossCurve，只作用于 isBoss 敌人）
+var boss_curve: Dictionary = {}
+
 # BOSS多阶段
 var current_phase: int = 1
 var stage_phases: Array = []       # 关卡阶段配置
@@ -111,12 +118,17 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	else:
 		enemies = enemy_monster_ids.map(func(id): return MonsterDb.get_monster_stats(id, e_level))
 
+	boss_curve = s_data.get("bossCurve", {}) if s_data != null and s_data is Dictionary else {}
+	_apply_boss_tuning(enemies)
+
 	turn = 0
 	combo = 0
 	total_damage_dealt = {}
 	battle_over = false
 	battle_result = ""
 	turn_count = 0
+	var stage_max_turns: int = int(s_data.get("maxTurns", 0)) if s_data != null else 0
+	max_turns = stage_max_turns if stage_max_turns > 0 else 20
 
 	player_level = p_level
 	enemy_level = e_level
@@ -156,6 +168,12 @@ func init_with_player_team(player_team_stats: Array, enemy_monster_ids: Array, p
 	capture_windows = {}
 	capture_window_best = {}
 	_calc_and_apply_element_synergy()
+
+	if p_level == 5:
+		for m in player_team:
+			if m != null:
+				m["maxHP"] = maxi(1, int(m.get("maxHP", 1) * LEVEL5_OPENING_HP_FACTOR))
+				m["hp"] = m["maxHP"]
 
 	_status_effect.init_effects(enemies.size())
 	_refresh_capture_windows()
@@ -796,11 +814,55 @@ func get_enemies() -> Array:
 	return enemies
 
 
+## 只对 Boss 应用关卡曲线倍率，避免影响普通敌人与捕捉后的 Boss 基础数据。
+## bossCurve 支持 hp / atk / def / charge / shield / heal 六项倍率。
+func _apply_boss_tuning(list: Array) -> void:
+	if boss_curve.is_empty():
+		return
+	var hp_mult := float(boss_curve.get("hp", 1.0))
+	var atk_mult := float(boss_curve.get("atk", 1.0))
+	var def_mult := float(boss_curve.get("def", 1.0))
+	var charge_mult := float(boss_curve.get("charge", 1.0))
+	var shield_mult := float(boss_curve.get("shield", 1.0))
+	var heal_mult := float(boss_curve.get("heal", 1.0))
+	if is_equal_approx(hp_mult, 1.0) and is_equal_approx(atk_mult, 1.0) and is_equal_approx(def_mult, 1.0) \
+			and is_equal_approx(charge_mult, 1.0) and is_equal_approx(shield_mult, 1.0) and is_equal_approx(heal_mult, 1.0):
+		return
+	for enemy in list:
+		if enemy == null or not enemy is Dictionary or (enemy as Dictionary).is_empty():
+			continue
+		if not bool((enemy as Dictionary).get("isBoss", false)):
+			continue
+		if not is_equal_approx(hp_mult, 1.0):
+			enemy["maxHP"] = maxi(1, int(enemy.get("maxHP", 0) * hp_mult))
+			enemy["hp"] = enemy["maxHP"]
+		if not is_equal_approx(atk_mult, 1.0):
+			enemy["atk"] = maxi(1, int(enemy.get("atk", 0) * atk_mult))
+		if not is_equal_approx(def_mult, 1.0):
+			enemy["def"] = maxi(0, int(enemy.get("def", 0) * def_mult))
+		var skills: Variant = enemy.get("enemySkills", null)
+		if skills is Array:
+			for skill in skills:
+				if not skill is Dictionary:
+					continue
+				match str(skill.get("type", "")):
+					"charge":
+						if not is_equal_approx(charge_mult, 1.0):
+							skill["damageMultiplier"] = float(skill.get("damageMultiplier", 1.0)) * charge_mult
+					"shield":
+						if not is_equal_approx(shield_mult, 1.0):
+							skill["hp"] = maxi(1, int(int(skill.get("hp", 1)) * shield_mult))
+					"heal":
+						if not is_equal_approx(heal_mult, 1.0):
+							skill["percent"] = clampf(float(skill.get("percent", 0.1)) * heal_mult, 0.0, 1.0)
+
+
 func execute_phase_transition(phase_config: Dictionary) -> Array:
 	var new_enemies: Array = _phase_handler.execute_phase_transition(phase_config, enemy_level)
 	if new_enemies.is_empty():
 		return []
 
+	_apply_boss_tuning(new_enemies)
 	enemies = new_enemies
 	current_phase = _phase_handler.get_current_phase()
 	enemy_tempo_mods = {}

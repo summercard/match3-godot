@@ -60,6 +60,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_001"], "trigger": "hp_50", "hpMultiplier": 1.3}
 					],
 					"enemyLevel": 3,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 5.6, "atk": 0.20, "def": 0.8, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 150, "exp": 120, "guaranteedItems": [{"id": "capture_ball_plus", "count": 1}]},
 					"designGoal": "首个 Boss 用蓄力和阶段变化检验输出、守护、控场。",
 					"prepareHint": "Boss 会蓄力并在半血进入二阶段；用束缚压低蓄力伤害，用守护保住队伍。",
@@ -121,6 +123,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_002"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 6,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 1.85, "atk": 0.15, "def": 0.8, "charge": 3.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 150, "exp": 75},
 					"obstacles": [
 						{"row": 1, "col": 2, "type": "rock", "hp": 2},
@@ -188,6 +192,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_003"], "trigger": "hp_50", "hpMultiplier": 1.4}
 					],
 					"enemyLevel": 10,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 1.7, "atk": 0.21, "def": 0.52, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 200, "exp": 120}
 				}
 			]
@@ -266,6 +272,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_004"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 15,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.94, "atk": 0.13, "def": 0.41, "charge": 2.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 250, "exp": 150},
 					"lockedGems": [
 						{"row": 1, "col": 1, "hp": 2},
@@ -333,6 +341,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_005"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 20,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.78, "atk": 0.1, "def": 0.35, "charge": 2.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 300, "exp": 180}
 				}
 			]
@@ -410,6 +420,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_006"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 25,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.5, "atk": 0.1, "def": 0.29, "charge": 2.0, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 350, "exp": 200},
 					"poisonFog": {
 						"tiles": [{"row": 0, "col": 2}, {"row": 2, "col": 6}, {"row": 3, "col": 1}, {"row": 5, "col": 4}, {"row": 6, "col": 0}, {"row": 7, "col": 5}],
@@ -480,6 +492,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_007"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 30,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.38, "atk": 0.07, "def": 0.26, "charge": 3.0, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 400, "exp": 220}
 				}
 			]
@@ -539,6 +553,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_008"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 35,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.3, "atk": 0.05, "def": 0.24, "charge": 3.0, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 450, "exp": 250}
 				}
 			]
@@ -612,6 +628,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_009"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 40,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.24, "atk": 0.1, "def": 0.22, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 500, "exp": 280}
 				}
 			]
@@ -679,6 +697,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_010"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 45,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.22, "atk": 0.07, "def": 0.21, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 550, "exp": 300}
 				}
 			]
@@ -753,6 +773,8 @@ const STAGES_DATA: Dictionary = {
 						{"phase": 2, "enemies": ["monster_boss_011"], "trigger": "hp_50", "hpMultiplier": 1.5}
 					],
 					"enemyLevel": 50,
+					"maxTurns": 70,
+					"bossCurve": {"hp": 0.18, "atk": 0.06, "def": 0.18, "charge": 1.5, "shield": 0.25, "heal": 0.25},
 					"rewards": {"gold": 600, "exp": 350}
 				}
 			]
