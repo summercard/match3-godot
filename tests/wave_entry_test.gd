@@ -59,6 +59,18 @@ func _run() -> void:
 	_expect(wave_sizes == [1, 3, 3], "waves should be split as 1 / 3 / 3")
 	many.free()
 
+	# 精英倍率对首波与后续波次都应生效
+	var elite_stage: Dictionary = stage_db.get_stage("stage_4_3e")
+	var elite_ids: Array = elite_stage.get("enemies", [])
+	var elite = BattleManagerScript.new()
+	elite.init(["monster_001"], elite_ids, 5, 15, elite_stage, "stage_4_3e")
+	var base_atk: int = int(MonsterDb.get_monster_stats(elite_ids[0], 15).get("atk", 0))
+	var elite_atk: int = int(base_atk * float(elite_stage.get("eliteMultiplier", 1.0)))
+	_expect(int(elite.enemies[0].get("atk", 0)) == elite_atk, "elite multiplier should apply to the first wave")
+	elite.start_next_wave()
+	_expect(int(elite.enemies[0].get("atk", 0)) == elite_atk, "elite multiplier should apply to later waves")
+	elite.free()
+
 	# Boss 关沿用阶段切换，不做波次切分
 	var boss = BattleManagerScript.new()
 	boss.init(["monster_001"], [], 5, 3, stage_db.get_stage("stage_1_5"), "stage_1_5")
