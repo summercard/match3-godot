@@ -1,0 +1,9 @@
+md5 before.gif = 231da7d2d6806142237ab5ea0faed716
+md5 off.gif    = 231da7d2d6806142237ab5ea0faed716   (与 before.gif 逐字节一致)
+md5 on.gif     = fc056ddd411289bf73e9241dcbc67a1a
+md5 baseline_combat_log.json = 050a7e82305b0a016f5a8af2d3016740
+63189eb7f4cde6cd8621e7109729f08aeaa3d425313b4732fc84e12aa9d824eb  docs/qa/element_flight/baseline_combat_log.json
+6158395927db45f8dcf7f6fc048401e06c33f4a9e25ad609bf55bf13a2fe9b2a  docs/qa/element_flight/before.gif
+6158395927db45f8dcf7f6fc048401e06c33f4a9e25ad609bf55bf13a2fe9b2a  docs/qa/element_flight/off.gif
+9856f2969cfc698c8a4868381215eda12e60fbb45bf473e74ab87386461c44f6  docs/qa/element_flight/on.gif
+638485747994447835cb9d990bd79992e68c074085eeb801c12d06ea0172ab2b  docs/qa/element_flight/stage_compare.png
