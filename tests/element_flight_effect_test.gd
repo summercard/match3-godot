@@ -4,7 +4,8 @@ extends SceneTree
 ## 1. 参数口径：施法 0.18s / 飞行 0.24s / 总 0.42s（飞行 55%±10%）/ 命中 0.25s；
 ## 2. 坐标：出生点 = 被消除宝石中心，落点 = 怪物锚点，误差 ≤2px；
 ## 3. 命中段：扩环 10→46px 在 0.25s 内完成；白闪峰值帧不早于落点帧；
-## 4. 粒子：单次 ≤5，轻量 / 均衡 / 华丽按 0.5 / 1.0 / 1.5 缩放，轻量不超过华丽一半；
+## 4. 粒子：轻量 / 均衡 / 华丽 = 2 / 4 / 6 枚、单颗 6–10px 方形块，
+##    覆盖面积（count×size²）不低于旧口径的 1.2 倍；
 ## 5. 纯表现：a322404 固定种子战斗日志与结算 JSON 在开关开 / 关时逐字节一致。
 
 const EffectScript = preload("res://src/ui/components/element_flight_effect.gd")
@@ -59,7 +60,18 @@ func _test_config() -> void:
 		float(config["control_raise_px"]) >= 40.0 and float(config["control_raise_px"]) <= 60.0,
 		"贝塞尔控制点应抬高 40–60px，实际 %.1fpx" % float(config["control_raise_px"])
 	)
-	_expect(int(config["max_particles"]) <= 5, "单次效果粒子硬上限应为 5")
+	var tier_particles: Dictionary = config["tier_particles"]
+	_expect(int(tier_particles["lite"]) == 2, "轻量档单次命中粒子数应为 2")
+	_expect(int(tier_particles["balanced"]) == 4, "均衡档单次命中粒子数应为 4")
+	_expect(int(tier_particles["rich"]) == 6, "华丽档单次命中粒子数应为 6")
+	var tier_budgets: Dictionary = config["tier_budgets"]
+	for tier: String in ["lite", "balanced", "rich"]:
+		_expect(
+			int(tier_particles[tier]) <= int(tier_budgets[tier]["particles"]),
+			"%s 档粒子数不得超过 T3 上限 %d" % [tier, int(tier_budgets[tier]["particles"])]
+		)
+	_expect(is_equal_approx(float(config["particle_size_min"]), 6.0), "单颗粒子最小边长应为 6px")
+	_expect(is_equal_approx(float(config["particle_size_max"]), 10.0), "单颗粒子最大边长应为 10px")
 	_expect(EffectScript.enabled, "特效总开关默认开启")
 
 
@@ -94,6 +106,7 @@ func _test_timing_measurements() -> Dictionary:
 	var ring_reach := -1.0
 	var flash_peak := -1.0
 	var particles_at_landing := 0
+	var sizes_at_landing: Array[float] = []
 	var frame_landing := -1
 	var frame_peak := -1
 	var frame_peak_alpha := 0.0
@@ -113,6 +126,8 @@ func _test_timing_measurements() -> Dictionary:
 		if landing < 0.0 and float(snapshot["landing_time"]) >= 0.0:
 			landing = float(snapshot["landing_time"])
 			particles_at_landing = int(snapshot["particles_alive"])
+			for particle: Dictionary in effect.get("_particles"):
+				sizes_at_landing.append(float(particle["size"]))
 			ring_min = float(snapshot["ring_diameter"])
 		if float(snapshot["flash_peak_time"]) >= 0.0:
 			flash_peak = float(snapshot["flash_peak_time"])
@@ -159,8 +174,11 @@ func _test_timing_measurements() -> Dictionary:
 		"白闪峰值不得早于落点帧（峰值 %.3fs / 落点 %.3fs）" % [flash_peak, landing])
 	_expect(flash_peak - landing >= 0.05 and flash_peak - landing <= 0.08,
 		"白闪应在落点后约 0.06s 达峰，实际 %.3fs" % (flash_peak - landing))
-	_expect(particles_at_landing >= 3 and particles_at_landing <= 5,
-		"均衡档命中粒子应为 3–5 枚，实际 %d" % particles_at_landing)
+	_expect(particles_at_landing == 4,
+		"均衡档命中粒子应为 4 枚，实际 %d" % particles_at_landing)
+	for size: float in sizes_at_landing:
+		_expect(size >= 6.0 and size <= 10.0,
+			"单颗粒子边长应在 6–10px，实际 %.2fpx" % size)
 	_expect(ring_max <= 46.1 and effect.ring_diameter() <= 46.1, "扩环直径不得超过 46px")
 
 	# 用 60fps 帧采样复核「白闪峰值帧不早于落点帧」。
@@ -198,7 +216,9 @@ func _test_timing_measurements() -> Dictionary:
 	print("[ElementFlight] ring=%.1f->%.1fpx in %.3fs flash_peak=%.3fs landing=%.3fs peak_frame=%d landing_frame=%d" % [
 		ring_min, ring_max, ring_reach, flash_peak, landing, frame_peak, frame_landing
 	])
-	print("[ElementFlight] particles_at_landing=%d" % particles_at_landing)
+	print("[ElementFlight] particles_at_landing=%d sizes=%s" % [
+		particles_at_landing, JSON.stringify(sizes_at_landing)
+	])
 	effect.free()
 	return {
 		"cast": cast_end,
@@ -214,7 +234,13 @@ func _test_timing_measurements() -> Dictionary:
 
 
 func _test_tier_scaling() -> void:
+	var expected_counts := {"lite": 2, "balanced": 4, "rich": 6}
+	var baseline_counts := {"lite": 2, "balanced": 4, "rich": 5}
+	var config: Dictionary = EffectScript.CONFIG
+	var new_size_min := float(config["particle_size_min"])
+	var old_size_max := 3.4
 	var counts: Dictionary = {}
+	var coverage_ratios: Dictionary = {}
 	for mode: String in ["lite", "balanced", "rich"]:
 		var profile: Dictionary = PresentationProfileScript.from_settings({
 			"qualityLevel": "high",
@@ -223,8 +249,14 @@ func _test_tier_scaling() -> void:
 		var effect = EffectScript.new()
 		effect.setup(Vector2(192.5, 475.5), Vector2(187.5, 66.0), Color.WHITE, profile)
 		counts[mode] = effect.particle_count
-		_expect(effect.particle_count >= 1 and effect.particle_count <= 5,
-			"%s 档单次效果粒子应在 1–5 枚，实际 %d" % [mode, effect.particle_count])
+		_expect(effect.particle_count == int(expected_counts[mode]),
+			"%s 档单次命中粒子应为 %d 枚，实际 %d" % [mode, int(expected_counts[mode]), effect.particle_count])
+		# 最保守的口径：新粒子取最小 6px，旧粒子取最大 3.4px。
+		var old_coverage := float(baseline_counts[mode]) * old_size_max * old_size_max
+		var new_coverage := float(counts[mode]) * new_size_min * new_size_min
+		coverage_ratios[mode] = new_coverage / maxf(old_coverage, 0.001)
+		_expect(coverage_ratios[mode] >= 1.2,
+			"%s 档覆盖面积应 ≥ 旧口径 1.2 倍，实际 %.2fx" % [mode, float(coverage_ratios[mode])])
 		effect.free()
 	_expect(counts["lite"] <= counts["rich"] / 2,
 		"轻量档粒子数不得超过华丽档一半（%d / %d）" % [counts["lite"], counts["rich"]])
@@ -258,8 +290,8 @@ func _test_tier_scaling() -> void:
 		screen_peaks[mode] = peak
 	_expect(screen_peaks["lite"] <= screen_peaks["rich"] / 2,
 		"轻量档同屏粒子峰值不得超过华丽档一半（%d / %d）" % [screen_peaks["lite"], screen_peaks["rich"]])
-	print("[ElementFlight] particle_tier counts=%s screen_peak_6_effects=%s" % [
-		JSON.stringify(counts), JSON.stringify(screen_peaks)
+	print("[ElementFlight] particle_tier counts=%s coverage_conservative=%s screen_peak_6_effects=%s" % [
+		JSON.stringify(counts), JSON.stringify(coverage_ratios), JSON.stringify(screen_peaks)
 	])
 
 

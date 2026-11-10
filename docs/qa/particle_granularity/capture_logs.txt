@@ -1,0 +1,12 @@
+# 同种子采集日志（stage_1_1, seed=20261109, quality=high, chain=1,
+# projectiles=1, gem=grass, freeze at t=0.52s; viewport 375x667, capture 750x1334)
+
+# BEFORE (7585b9b)
+[ParticleGranularity] hit count=2 sizes=[2.71,2.1] config_size=2.0-3.4px anchor=(187.5,66.0) tier=lite
+[ParticleGranularity] hit count=4 sizes=[2.71,2.1,2.09,2.87] config_size=2.0-3.4px anchor=(187.5,66.0) tier=balanced
+[ParticleGranularity] hit count=5 sizes=[2.71,2.1,2.09,2.87,2.85] config_size=2.0-3.4px anchor=(187.5,66.0) tier=rich
+
+# AFTER (this branch)
+[ParticleGranularity] hit count=2 sizes=[8.02,6.28] config_size=6.0-10.0px anchor=(187.5,66.0) tier=lite
+[ParticleGranularity] hit count=4 sizes=[8.02,6.28,6.26,8.47] config_size=6.0-10.0px anchor=(187.5,66.0) tier=balanced
+[ParticleGranularity] hit count=6 sizes=[8.02,6.28,6.26,8.47,8.43,6.42] config_size=6.0-10.0px anchor=(187.5,66.0) tier=rich
