@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>萌灵消消大冒险 · 实机演示</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 28px 16px 40px;
+    background: radial-gradient(1000px 560px at 80% -10%, rgba(54,105,220,.32), transparent 60%), linear-gradient(180deg,#0a1020,#070b14 60%,#05080f);
+    color: #eef4ff; font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  }
+  main { width: min(1060px, 100%); margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 22px; margin-bottom: 18px; flex-wrap: wrap; }
+  header img { width: min(300px, 60vw); filter: drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
+  h1 { margin: 0 0 6px; font-size: clamp(20px,3vw,30px); color: #ffd76e; }
+  p { margin: 0; color: #9fb0c9; }
+  video { display: block; width: 100%; aspect-ratio: 16/9; border-radius: 16px; border: 1px solid rgba(255,214,122,.3); background: #04070e; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+  .panel { margin-top: 18px; padding: 18px 20px; border: 1px solid rgba(255,214,122,.28); border-radius: 14px; background: rgba(14,22,40,.72); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 10px 18px; margin: 0; padding: 0; list-style: none; }
+  .facts li { color: #9fb0c9; font-size: 14px; }
+  .facts b { color: #eef4ff; font-weight: 600; }
+  .note { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); font-size: 13px; line-height: 1.8; }
+  a.btn { display: inline-flex; align-items: center; min-height: 42px; margin-top: 14px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,214,122,.5); background: rgba(255,214,122,.12); color: #ffd76e; font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="logo.png" alt="萌灵消消大冒险">
+    <div>
+      <h1>实机演示 · 完整流程</h1>
+      <p>大厅 → 选关 → 战斗准备 → 三消战斗 → 结算</p>
+    </div>
+  </header>
+  <video controls playsinline preload="metadata" poster="poster.jpg">
+    <source src="gameplay.mp4" type="video/mp4">
+    当前浏览器不支持视频播放，可直接下载 MP4。
+  </video>
+  <section class="panel">
+    <ul class="facts">
+      <li>关卡 <b>第 1 章 · 第 4 关「藤蔓束缚」</b></li>
+      <li>种子 <b>20261110</b></li>
+      <li>机器 <b>macOS · Apple M1</b></li>
+      <li>规格 <b>1280×720 · 30fps · H.264</b></li>
+    </ul>
+    <p class="note">录制自 match3-godot 最新 main（e36fa13），Godot 4.7.2 Movie Maker 固定 30fps 采集；片中含一次三消连锁、一次战斗道具（HP 药水）与胜利结算。</p>
+    <a class="btn" href="gameplay.mp4" download>下载视频（MP4）</a>
+  </section>
+</main>
+</body>
+</html>
