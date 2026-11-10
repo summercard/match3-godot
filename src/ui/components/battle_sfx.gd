@@ -176,6 +176,7 @@ func play(sound_id: String) -> bool:
 	var player := _players[_next_player]
 	_next_player = (_next_player + 1) % _players.size()
 	player.stream = get_stream(sound_id)
+	player.bus = AudioMix.bus_for_sound(sound_id)
 	player.pitch_scale = 1.0
 	player.play()
 	played_count += 1
@@ -303,9 +304,10 @@ func _ensure_players() -> void:
 	if not _players.is_empty():
 		peak_players = maxi(peak_players, _players.size())
 		return
+	AudioMix.ensure_buses()
 	for i in range(int(CONFIG["max_players"])):
 		var player := AudioStreamPlayer.new()
-		player.bus = "Master"
+		player.bus = AudioMix.SFX_BUS
 		add_child(player)
 		_players.append(player)
 	peak_players = maxi(peak_players, _players.size())

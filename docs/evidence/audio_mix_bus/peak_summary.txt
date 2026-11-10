@@ -1,0 +1,15 @@
+scenario=BGM + seven battle SFX, 10s, stage_1_1 battle audio layers
+sample_rate=44100
+capture_seconds=10.0
+bus_volumes={ "BGM": -5.19274616241455, "SFX": -1.93820023536682, "Button": -3.09803915023804 }
+limiter_ceiling_db=-3.00
+max_allowed_linear=0.708000
+before_frames=441000
+before_peak_linear=3.735629
+before_peak_dbfs=11.447
+before_clipped_samples=7598
+after_frames=441000
+after_peak_linear=0.707961
+after_peak_dbfs=-3.000
+after_max_abs_s16=23197
+after_max_linear_from_s16=0.707938

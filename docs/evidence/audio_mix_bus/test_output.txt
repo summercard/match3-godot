@@ -1,0 +1,15 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[AudioMix] buses Master(0dB) <- BGM=0.55(-5.19dB), SFX=0.80(-1.94dB), Button=0.70(-3.10dB); limiter=AudioEffectHardLimiter ceiling=-3.00dBFS max_peak=0.707946
+[AudioMix] routing BGM=BGM SFX=SFX Button=Button
+[AudioMix] toggles isolated: bus_volumes={ "BGM": -5.19274616241455, "SFX": -1.93820023536682, "Button": -3.09803915023804 }
+[AudioMix] battle off/off        sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 music_players=0 sfx_players=0 played=0
+[AudioMix] battle music/silent   sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 music_players=1 sfx_players=0 played=0
+[AudioMix] battle sfx/silent     sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 music_players=0 sfx_players=8 played=8
+[AudioMix] battle on/on          sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 music_players=1 sfx_players=8 played=8
+[AudioMix] battle baseline sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc identical_states=4
+[AudioMix] evidence dir=/Users/summercards/.dsh/state/superagent/work/audio-mix-bus-f3423068c58f/docs/evidence/audio_mix_bus
+[AudioMix] capture before: frames=441000 peak=3.735629(11.45dBFS) clipped=7598
+[AudioMix] capture after : frames=441000 peak=0.707961(-3.00dBFS) max_s16=23197 limit=0.708(-3.00dBFS)
+[AudioMix] summary: before_peak=11.447dBFS after_peak=-3.000dBFS after_max_s16=23197 frames=441000
+[AudioMix] OK

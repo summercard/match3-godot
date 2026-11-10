@@ -31,9 +31,10 @@ func _ready() -> void:
 func _ensure_players() -> void:
 	if not _players.is_empty():
 		return
+	AudioMix.ensure_buses()
 	for i in range(PLAYER_POOL_SIZE):
 		var player := AudioStreamPlayer.new()
-		player.bus = "Master"
+		player.bus = AudioMix.SFX_BUS
 		add_child(player)
 		_players.append(player)
 
