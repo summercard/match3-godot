@@ -3,7 +3,9 @@
 对应「2 连锁环径 ×1.2 / 亮度 +10%，4 连锁加第二圈，轻量环径 ×0.8 且无第二圈，
 三档同屏弹体 / 环 / 粒子硬上限」的表现层改动。
 
-- 基线：`37b5277`（#29 元素飞行三段式）。
+- 行为与技术基线：`37b5277`（#29 元素飞行三段式）。
+- 视觉 Before 取自 `ddd7a01`（PR base；#30 只把单体血条整体左移 74px，不涉及
+  元素飞行 / 环 / 粒子），After 为本分支；两边的战斗 UI 状态一致。
 - 实现：只改 `src/ui/components/element_flight_effect.gd`（连锁 / 档位 / 预算参数与
   环绘制）和 `src/ui/scene/scene_battle.gd`（把 `cascade_count` 传成 `chain_level`、
   进入战斗重置预算、暴露预算计数）。
@@ -64,34 +66,35 @@
 
 同战局 `stage_1_1`、seed `20261109`、750×1334 视口、`--fixed-fps 60`，
 画质精细、战斗表现均衡。三张连锁 GIF 在命中环附近裁剪到 430×300，30fps。
-Before 帧来自 `37b5277` 代码（临时切回基线文件录制，随后恢复本分支代码）。
+Before 帧在 `ddd7a01` 的两个实现文件上录制（与 After 同一套 #30 血条 UI），
+随后恢复本分支代码；Before / After 只差 T3 的两个文件。
 
 | 文件 | 说明 | md5 |
 | --- | --- | --- |
-| [gifs/chain1.gif](gifs/chain1.gif) | 1 连锁：首圈 23.0px 半径 | `58a8a8c834d3c66f9d78877162623dbc` |
-| [gifs/chain2.gif](gifs/chain2.gif) | 2 连锁：首圈 ×1.2 = 27.6px，亮度 +11.1% | `5fb1b68b57ca3ed4552ad3bc3683a393` |
-| [gifs/chain4.gif](gifs/chain4.gif) | 4 连锁：27.6px + 第二圈 16.56px（+0.06s） | `dd813185fc46e55c805398b3975fbae9` |
-| [tier_compare.png](tier_compare.png) | Before / After 三行对照：2 连锁、4 连锁第二圈、轻量无第二圈 | `acedc4a00042b9f483d8f735edda5c16` |
-| [before_chain2.png](before_chain2.png) | 37b5277，chain=2（基线不识别连锁，环 46px 直径） | `0935d9b858a2896200ebbd89c2253fde` |
-| [after_chain2.png](after_chain2.png) | 本分支，chain=2（首圈 ×1.2） | `1e922311f156100adc19b685508775fa` |
-| [before_chain4.png](before_chain4.png) | 37b5277，chain=4（单圈） | `0935d9b858a2896200ebbd89c2253fde` |
-| [after_chain4.png](after_chain4.png) | 本分支，chain=4（首圈 + 第二圈） | `d6b2823cfbdd343f79ae010dcf853830` |
-| [after_chain4_lite.png](after_chain4_lite.png) | 本分支，轻量 4 连锁（×0.8，无第二圈） | `b4b1fb8e5109255fb61c0715750ffabd` |
-| [before_on.gif](before_on.gif) | 37b5277，总开关开启，同一交换 | `fc056ddd411289bf73e9241dcbc67a1a` |
-| [after_on.gif](after_on.gif) | 本分支，总开关开启，同一交换 | `da08096ac32ba5bc59d7b1790964ac69` |
-| [off.gif](off.gif) | 本分支，总开关关闭 | `231da7d2d6806142237ab5ea0faed716` |
+| [gifs/chain1.gif](gifs/chain1.gif) | 1 连锁：首圈 23.0px 半径 | `b08aaae0c8969fef37b90c81f9f15fff` |
+| [gifs/chain2.gif](gifs/chain2.gif) | 2 连锁：首圈 ×1.2 = 27.6px，亮度 +11.1% | `07f7df722972fdcd239f0489cedcfc36` |
+| [gifs/chain4.gif](gifs/chain4.gif) | 4 连锁：27.6px + 第二圈 16.56px（+0.06s） | `70172873c954e61028183afee5e58626` |
+| [tier_compare.png](tier_compare.png) | Before / After 三行对照：2 连锁、4 连锁第二圈、轻量无第二圈 | `7a067a71380d221ad3e81836a4d4c21d` |
+| [before_chain2.png](before_chain2.png) | ddd7a01，chain=2（基线不识别连锁，环 46px 直径） | `da6c6bab25a3484dbebf47284282ff7a` |
+| [after_chain2.png](after_chain2.png) | 本分支，chain=2（首圈 ×1.2） | `c2fa831992f78b0f9eb567af6cfaceab` |
+| [before_chain4.png](before_chain4.png) | ddd7a01，chain=4（单圈） | `da6c6bab25a3484dbebf47284282ff7a` |
+| [after_chain4.png](after_chain4.png) | 本分支，chain=4（首圈 + 第二圈） | `0a403157f00568e28f7073a6616147fc` |
+| [after_chain4_lite.png](after_chain4_lite.png) | 本分支，轻量 4 连锁（×0.8，无第二圈） | `1bbf47a3cc75a77c9322134df9fa59f1` |
+| [before_on.gif](before_on.gif) | ddd7a01，总开关开启，同一交换 | `50e7163582ff3dcd98246680fe02fb29` |
+| [after_on.gif](after_on.gif) | 本分支，总开关开启，同一交换 | `04d81ca82a1f8b5e13a38deb681d0a66` |
+| [off.gif](off.gif) | 本分支，总开关关闭 | `cf782b205496704489e8400175ae26f0` |
 
 对照结论：
 
-- `before_chain2/4.png` 与 `before_chain1` 的 md5 完全相同（`0935d9b8…`），
-  说明 37b5277 不识别连锁；`after_chain1.png` 也与该 md5 相同，说明 1 连锁画面
-  完全保持基线。
+- `before_chain2/4.png` 的 md5 完全相同（`da6c6bab…`），说明基线不识别连锁；
+  `after_chain1.png` 也与该 md5 相同，说明 1 连锁画面完全保持基线。
 - `after_chain4.png` 与 `after_chain4_rich.png` 相同（华丽首圈倍率 1.0），
   `after_chain4_lite.png` 与 `after_chain2_lite.png` 相同（轻量无第二圈，且
   2/4 连锁首圈同径），与参数口径一致。
-- 总开关关闭的录像 `off.avi` md5 为 `f1db482639ea76564e326510a1933c38`，与
-  `docs/qa/element_flight/README.md` 记录的 37b5277 基线 AVI md5 完全一致；
-  关闭状态下不创建任何表现节点，也没有任何额外等待。
+- 总开关关闭的录像与 `ddd7a01` 基线录像逐字节一致（md5 均为
+  `1c0cbd3094dbbcb833e885582a65058c`）；关闭状态下不创建任何表现节点，
+  也没有任何额外等待。相对 37b5277 的旧基线 AVI md5 `f1db4826…` 仅因 #30
+  血条位置变化而不同，元素飞行路径本身未变。
 
 ## 回归与硬约束
 
@@ -135,8 +138,8 @@ crop=430:300:160:0,fps=30,split[a][b];\
 [b][p]paletteuse=dither=none" -loop 0 chain${chain}.gif
 done
 
-# Before 帧：在 37b5277 工作树（或临时切回基线两个文件）用同一 capture 脚本
-$GODOT --path /path/to/37b5277 --fixed-fps 60 \
+# Before 帧：在 ddd7a01 工作树（或临时切回 ddd7a01 的两个实现文件）用同一脚本
+$GODOT --path /path/to/ddd7a01 --fixed-fps 60 \
   --script res://tests/element_flight_chain_capture.gd -- \
   --chain=2 --performance-mode=balanced --phase=ring --output=before_chain2.png
 ```
