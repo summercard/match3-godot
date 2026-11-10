@@ -12,8 +12,9 @@ extends Node2D
 ## - 飞行 0.18–0.42s：沿二次贝塞尔曲线飞向怪物锚点，控制点抬高 50px，速度先快后慢；
 ## - 命中 0.42–0.67s（0.25s）：白闪 0.06s 达峰，扩环直径 10→46px，粒子爆散。
 ##
-## 粒子数按表现档位 effect_density 缩放：轻量 0.5 / 均衡 1.0 / 华丽 1.5，
-## 基准 2 / 4 / 5 枚。拖尾是连续的轨迹采样，不计入爆散粒子数。
+## 命中粒子按表现档位直接取 2 / 4 / 6 枚方形像素块（边长 6–10px），
+## 仍受 T3 的单次命中粒子上限 4 / 8 / 12 约束。拖尾是连续的轨迹采样，
+## 不计入爆散粒子数。
 ##
 ## 连锁与画质档（T3）：
 ## - 2 连锁起命中环半径 ×1.2、白环亮度提到 ≥+10%；
@@ -58,14 +59,18 @@ const CONFIG := {
 		"rich": {"projectile_floor": 3, "rings": 3, "particles": 12},
 	},
 	"control_raise_px": 50.0,
-	"base_particles": 4,
-	"max_particles": 5,
-	"min_particles": 1,
+	## 一次命中的粒子数只按表现档位取，仍受 tier_budgets 的硬上限约束。
+	"tier_particles": {
+		"lite": 2,
+		"balanced": 4,
+		"rich": 6,
+	},
 	"particle_life": 0.22,
 	"particle_speed_min": 86.0,
 	"particle_speed_max": 138.0,
-	"particle_size_min": 2.0,
-	"particle_size_max": 3.4,
+	## 方形像素块的边长范围；绘制不做抗锯齿、不做圆角。
+	"particle_size_min": 6.0,
+	"particle_size_max": 10.0,
 	"trail_interval": 0.016,
 	"trail_max": 14,
 	"orb_radius": 7.0,
@@ -93,10 +98,9 @@ var origin: Vector2 = Vector2.ZERO
 var anchor: Vector2 = Vector2.ZERO
 var control: Vector2 = Vector2.ZERO
 var gem_color: Color = Color.WHITE
-var particle_count: int = int(CONFIG["base_particles"])
+var particle_count: int = int(CONFIG["tier_particles"]["balanced"])
 var chain_level: int = 1
 
-var _density: float = 1.0
 var _tier: String = "balanced"
 var _time: float = 0.0
 var _phase: String = "cast"
@@ -225,16 +229,11 @@ func setup(from: Vector2, to: Vector2, color: Color, profile: Dictionary = {}) -
 	_second_ring_enabled = (
 		chain_level >= int(CONFIG["second_ring_min_chain"]) and _tier != "lite"
 	)
-	_density = maxf(0.0, float(profile.get("effect_density", 1.0)))
-	var raw_count := clampi(
-		int(floor(float(CONFIG["base_particles"]) * _density)),
-		int(CONFIG["min_particles"]),
-		int(CONFIG["max_particles"])
-	)
+	var desired_count := maxi(0, int(CONFIG["tier_particles"].get(_tier, 0)))
 	var particle_budget := int(budget["particles"])
-	particle_count = mini(raw_count, particle_budget)
-	if raw_count > particle_budget and _uses_budget:
-		_dropped_particles += raw_count - particle_budget
+	particle_count = mini(desired_count, particle_budget)
+	if desired_count > particle_budget and _uses_budget:
+		_dropped_particles += desired_count - particle_budget
 	_rng.seed = _seed_for(from, to, color)
 	_trail = [origin]
 	set_process(true)
@@ -572,15 +571,14 @@ func _draw_hit() -> void:
 	for particle: Dictionary in _particles:
 		var life_ratio := clampf(float(particle["life"]) / maxf(float(particle["max_life"]), 0.001), 0.0, 1.0)
 		var particle_color: Color = particle["color"]
-		draw_circle(
-			particle["position"],
-			float(particle["size"]) * (0.35 + 0.65 * life_ratio),
-			Color(particle_color.r, particle_color.g, particle_color.b, life_ratio)
-		)
-		draw_circle(
-			particle["position"],
-			float(particle["size"]) * 0.45 * life_ratio,
-			Color(1.0, 1.0, 1.0, life_ratio * 0.9)
+		# 方形像素块：整数边长、硬边缘，不抗锯齿、不圆角；只淡出，不缩成碎点。
+		var side := maxf(1.0, roundf(float(particle["size"])))
+		var particle_center: Vector2 = particle["position"]
+		var block_origin := (particle_center - Vector2(side, side) * 0.5).round()
+		draw_rect(
+			Rect2(block_origin, Vector2(side, side)),
+			Color(particle_color.r, particle_color.g, particle_color.b, life_ratio),
+			true, -1.0, false
 		)
 	if hit_time < 0.1:
 		var core_ratio := 1.0 - clampf(hit_time / 0.1, 0.0, 1.0)

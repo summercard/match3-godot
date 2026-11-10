@@ -1,5 +1,9 @@
 # 三消元素飞行三段式验收素材
 
+> 后续「命中粒子加大加饱满」把命中粒子改为 2 / 4 / 6 枚、6–10px 实心方形块；
+> 参数与最新证据见 [../particle_granularity/README.md](../particle_granularity/README.md)。
+> 本文保留当时（2 / 4 / 5 枚圆形粒子）的验收记录。
+
 对应「被消除宝石先亮起 → 沿二次贝塞尔飞向怪物锚点 → 白闪 / 扩环 / 粒子爆散」的表现层改动。
 基线 `main` a322404；新代码集中在 `src/ui/components/element_flight_effect.gd`，
 `src/ui/scene/scene_battle.gd` 只增加一个 preload、一个无等待的生成调用和一个取目标锚点的小函数。
