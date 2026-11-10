@@ -32,6 +32,21 @@ func _run() -> void:
 		"BottomControls/Item1/Icon",
 	]:
 		_expect(battle.has_node(path), "battle GUI node should exist: %s" % path)
+	# 单体怪血条：控件组水平居中，尺寸/字号保持既有的 T1 数值。
+	var enemy_slot := battle.get_node("Combatants/SingleEnemy") as Control
+	var hp_bar := enemy_slot.get_node("HpBar") as Control
+	var hp_frame := enemy_slot.get_node("HpFrame") as Control
+	var hp_text := enemy_slot.get_node("HpText") as Label
+	var hp_left: float = INF
+	var hp_right: float = -INF
+	for rect: Rect2 in [hp_bar.get_rect(), hp_frame.get_rect(), hp_text.get_rect(), (enemy_slot.get_node("Orb") as Control).get_rect()]:
+		hp_left = minf(hp_left, rect.position.x)
+		hp_right = maxf(hp_right, rect.end.x)
+	_expect(is_equal_approx((hp_left + hp_right) / 2.0, 187.5), "single enemy HP widget should be horizontally centred")
+	_expect(is_equal_approx(hp_bar.size.x, 144.0) and is_equal_approx(hp_bar.size.y, 14.0), "single enemy HP bar size should stay 144x14")
+	_expect(is_equal_approx(hp_frame.size.x, 156.0), "single enemy HP frame width should stay 156")
+	_expect(hp_text.get_theme_font_size("font_size") == 10, "single enemy HP text font size should stay 10")
+
 	var board = battle.get("_board")
 	_expect(board != null and int(board.offset_y) == 300, "board should keep the lower-screen y position")
 	_expect((battle.call("_get_player_card_rect", 0) as Rect2).has_point(Vector2(75.0, 216.0)), "editable player slot should preserve skill hit area")
