@@ -383,9 +383,10 @@ func _ensure_player() -> void:
 		if not _player.playing:
 			_player.play()
 		return
+	AudioMix.ensure_buses()
 	_player = AudioStreamPlayer.new()
 	_player.name = "BgmPlayer"
-	_player.bus = "Master"
+	_player.bus = AudioMix.BGM_BUS
 	_player.stream = get_stream()
 	add_child(_player)
 	_player.play()
