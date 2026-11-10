@@ -1,0 +1,28 @@
+Godot 4.7.2.stable.official.ed1daf0bf; macOS Apple M1; --headless --fixed-fps 60
+MATCH3_SAVE_PATH 每个测试独立，避免存档互相影响。
+
+test exit
+element_flight_effect_test 0
+match_hit_feedback_test 0
+damage_feedback_test 0
+combat_balance_test 0
+p0_smoke_test 0
+presentation_settings_restart_test (write then read, same save path) 0
+battle_item_use_test 0
+battle_pause_test 0
+battle_input_test 0
+battle_gui_scene_test 0
+battle_rules_test 0
+enemy_windup_test 0
+battle_sfx_test 0
+battle_bgm_test 0
+vibration_feedback_test 0
+combo_chain_test 0
+boss_break_test 0
+stun_order_test 0
+p1_ch1_slice_test 0
+battle_result_stats_test 0
+
+battle_speed_test 1（环境性计时抖动，已在基线 a322404 工作树用同一测试复现：
+                     切档后 0.2s 计时器实测 36ms，与本分支 54ms 同类失败；
+                     两边的固定种子日志与结算 identical=true，非本改动引入）

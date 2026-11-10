@@ -23,6 +23,7 @@ const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_
 const BattleMatchRulesScript = preload("res://src/ui/components/battle_match_rules.gd")
 const BattleHazardRulesScript = preload("res://src/ui/components/battle_hazard_rules.gd")
 const MatchHitFeedbackScript = preload("res://src/ui/components/match_hit_feedback.gd")
+const ElementFlightEffectScript = preload("res://src/ui/components/element_flight_effect.gd")
 const PresentationProfileScript = preload("res://src/ui/components/presentation_profile.gd")
 const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
@@ -1344,6 +1345,9 @@ func _process_matches() -> void:
 			_eliminating_gems.append({"row": m["row"], "col": m["col"], "timer": 0.0, "duration": ELIMINATE_DURATION})
 			if m.has("type"):
 				spawn_eliminate_particles(m["row"], m["col"], m["type"])
+
+	# ===== 第1.5步：被消除宝石的元素飞行三段式（纯表现，不插入等待）=====
+	_spawn_element_flights(matches)
 	
 	# ===== 第2步：读取特殊消除宝石 =====
 	var explosion_gems: Array = match_context.get("explosion_gems", [])
@@ -1542,6 +1546,46 @@ func _spawn_match_hit_burst(matches: Array, burst_config: Dictionary) -> void:
 				"color": Color(1.0, 1.0, 1.0),
 				"size": size * 1.1 + _fx_rng.randf() * 1.5
 			})
+
+## 被消除宝石的元素飞行：每个消除格从格中心出生，飞向本回合受击怪物的锚点。
+## 只创建表现节点；总开关关闭时直接返回，不改变消除 / 下落 / 战斗时序。
+func _spawn_element_flights(matches: Array) -> void:
+	if not ElementFlightEffectScript.enabled:
+		return
+	if _battle == null or _board == null:
+		return
+	var target_idx := _weakest_enemy_visual_index()
+	if target_idx < 0:
+		return
+	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(_battle.enemies.size(), target_idx)
+	var cell_size := float(_board.cell_size)
+	var board_x := float(_board.offset_x)
+	var board_y := float(_board.offset_y)
+	for m in matches:
+		if not (m is Dictionary) or not m.has("row") or not m.has("col"):
+			continue
+		var center := Vector2(
+			board_x + (float(m["col"]) + 0.5) * cell_size,
+			board_y + (float(m["row"]) + 0.5) * cell_size
+		)
+		var gem_color: Color = GEM_COLORS.get(str(m.get("type", "")), C["white"])
+		ElementFlightEffectScript.spawn(self, center, anchor, gem_color, _presentation)
+
+## 与 BattleManager 的受击目标一致：当前血量最低的存活敌人；没有存活敌人时返回 -1。
+func _weakest_enemy_visual_index() -> int:
+	if _battle == null:
+		return -1
+	var best_index := -1
+	var best_hp := 2147483647
+	for i in range(_battle.enemies.size()):
+		var enemy = _battle.enemies[i]
+		if enemy == null or int(enemy.get("hp", 0)) <= 0:
+			continue
+		var enemy_hp := int(enemy.get("hp", 0))
+		if enemy_hp < best_hp:
+			best_hp = enemy_hp
+			best_index = i
+	return best_index
 
 func _apply_gravity() -> void:
 	if _board:
