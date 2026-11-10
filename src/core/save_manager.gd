@@ -901,7 +901,9 @@ func _get_date_minus_days(days: int) -> String:
 	return "%04d-%02d-%02d" % [dt_past["year"], dt_past["month"], dt_past["day"]]
 
 # ========== 设置（section: settings） ==========
-## 设置数据结构: { soundOn: true, musicOn: true, version: 'v0.1.0' }
+## 设置数据结构: { soundOn: true, musicOn: true, version: 'v0.1.0',
+##   bgmVolume: 100, sfxVolume: 100, buttonVolume: 100 }
+## 三个音量键是 0–100、步长 10 的百分比，作为音频子总线基准增益的倍率。
 
 ## 保存设置
 ## JS: saveSettings(data)
@@ -916,6 +918,9 @@ func load_settings() -> Dictionary:
 	return _get_value("settings", "data", {
 		"soundOn": true,
 		"musicOn": true,
+		"bgmVolume": 100,
+		"sfxVolume": 100,
+		"buttonVolume": 100,
 		"capture": {
 			"autoCapture": false,
 			"equippedItem": ""

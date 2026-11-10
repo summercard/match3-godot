@@ -1,0 +1,5 @@
+master_bus_index=0
+master_volume_db=0.000000000
+hard_limiter_count=1
+hard_limiter_ceiling_db=-3.000000000
+restart_values={ "bgmVolume": 30, "sfxVolume": 60, "buttonVolume": 100 }

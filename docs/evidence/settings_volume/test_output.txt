@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[VolumeSlider] config bases={ "BGM": 0.55, "SFX": 0.8, "Button": 0.7 } keys=["bgmVolume", "sfxVolume", "buttonVolume"] step=10
+[VolumeSlider] bus baseline={ "BGM": { "db": -5.19274616241455, "mute": false }, "SFX": { "db": -1.93820023536682, "mute": false }, "Button": { "db": -3.09803915023804, "mute": false } } mute_zero=per-layer db_100=2f50f09
+[VolumeSlider] persisted { "bgmVolume": 30, "sfxVolume": 60, "buttonVolume": 100 } -> /Users/summercards/Library/Application Support/Godot/app_userdata/三消宝可梦/test_save_game.cfg
+[VolumeSlider] battle 100%/on/on sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 played=8 muted={ "BGM": { "db": -5.19274616241455, "mute": false }, "SFX": { "db": -1.93820023536682, "mute": false }, "Button": { "db": -3.09803915023804, "mute": false } }
+[VolumeSlider] battle 0%/on/on   sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 played=8 muted={ "BGM": { "db": -5.19274616241455, "mute": true }, "SFX": { "db": -1.93820023536682, "mute": true }, "Button": { "db": -3.09803915023804, "mute": true } }
+[VolumeSlider] battle 0%/off/off sha256=215611ff244f190f84f7b4bedeab6b01f004305f549a95f52b64177a5bbd50dc bytes=17359 played=0 muted={ "BGM": { "db": -5.19274616241455, "mute": true }, "SFX": { "db": -1.93820023536682, "mute": true }, "Button": { "db": -3.09803915023804, "mute": true } }
+[VolumeSlider] master limiters=1 ceiling=-3.00
+[VolumeSlider] evidence dir=/Users/summercards/.dsh/state/superagent/work/volume-sliders-5244588df69f/docs/evidence/settings_volume rows=33
+[VolumeSlider] OK

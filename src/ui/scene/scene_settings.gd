@@ -14,9 +14,13 @@ const RESET_RECT := Rect2(34.0, 565.0, 138.0, 46.0)
 const DEFAULT_RECT := Rect2(203.0, 565.0, 138.0, 46.0)
 const ROW_X := 30.0
 const ROW_W := 315.0
-const ROW_H := 54.0
-const ROW_START_Y := 130.0
-const ROW_GAP := 9.0
+const ROW_H := 38.0
+const ROW_START_Y := 132.0
+const ROW_GAP := 4.0
+const SLIDER_TRACK_INSET := 18.0
+const SLIDER_TRACK_Y := 27.0
+const SLIDER_TRACK_H := 3.0
+const SLIDER_KNOB_RADIUS := 7.0
 const CONFIRM_BOX := Rect2(41.0, 241.0, 293.0, 182.0)
 const CONFIRM_YES := Rect2(64.0, 363.0, 112.0, 42.0)
 const CONFIRM_NO := Rect2(199.0, 363.0, 112.0, 42.0)
@@ -61,6 +65,39 @@ const SETTINGS_ROWS := [
 		"type": "toggle",
 		"key": "vibrationOn",
 		"default": true,
+	},
+	{
+		"id": "bgm_volume",
+		"label": "背景音乐音量",
+		"desc": "",
+		"type": "slider",
+		"key": "bgmVolume",
+		"default": 100,
+		"min": 0,
+		"max": 100,
+		"step": 10,
+	},
+	{
+		"id": "sfx_volume",
+		"label": "战斗音效音量",
+		"desc": "",
+		"type": "slider",
+		"key": "sfxVolume",
+		"default": 100,
+		"min": 0,
+		"max": 100,
+		"step": 10,
+	},
+	{
+		"id": "button_volume",
+		"label": "按钮音效音量",
+		"desc": "",
+		"type": "slider",
+		"key": "buttonVolume",
+		"default": 100,
+		"min": 0,
+		"max": 100,
+		"step": 10,
 	},
 	{
 		"id": "quality",
@@ -109,6 +146,8 @@ var reset_success := false
 var _storage: Node = null
 var _texture_cache: Dictionary = {}
 var _button_sfx: BattleSfx = null
+## 正在拖动的滑块行索引；-1 表示未拖动。
+var _dragging_slider: int = -1
 
 
 func _init(game_ref: Node = null) -> void:
@@ -127,10 +166,12 @@ func init(_data: Dictionary = {}) -> void:
 		game = _get_autoload("GameManager")
 	_storage = _get_storage()
 	_load_settings()
+	AudioMix.apply_settings(settings_data)
 	if _button_sfx != null:
 		_button_sfx.apply_settings(settings_data)
 	confirm_dialog = false
 	reset_success = false
+	_dragging_slider = -1
 	queue_redraw()
 
 
@@ -159,6 +200,8 @@ func _load_settings() -> void:
 		var key := str(row.get("key", ""))
 		if key != "" and not settings_data.has(key):
 			settings_data[key] = row.get("default")
+		if row.get("type", "") == "slider":
+			settings_data[key] = AudioMix.normalize_percent(settings_data.get(key, row.get("default", 100)))
 	settings_data["version"] = settings_data.get("version", "v0.1.0")
 
 
@@ -169,15 +212,29 @@ func _save_settings() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_on_tap(event.position)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_on_tap(event.position)
+		else:
+			_end_slider_drag()
 		accept_event()
-	elif event is InputEventScreenTouch and event.pressed:
-		_on_tap(event.position)
+	elif event is InputEventMouseMotion and _dragging_slider >= 0:
+		_drag_slider_to(event.position)
+		accept_event()
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_on_tap(event.position)
+		else:
+			_end_slider_drag()
+		accept_event()
+	elif event is InputEventScreenDrag and _dragging_slider >= 0:
+		_drag_slider_to(event.position)
 		accept_event()
 
 
 func _on_tap(point: Vector2) -> void:
+	# 每次按下先结束上一次可能的拖动；滑块行会重新建立拖动状态。
+	_dragging_slider = -1
 	# 设置页按钮是自绘控件，不在节点树里；按下任一实际按钮时补一条震动反馈。
 	if confirm_dialog:
 		if CONFIRM_YES.has_point(point):
@@ -222,6 +279,47 @@ func _on_tap(point: Vector2) -> void:
 				_save_settings()
 				queue_redraw()
 			return
+		if row.get("type", "") == "slider":
+			var hit_rect := _slider_hit_rect(row_rect)
+			if hit_rect.has_point(point):
+				_dragging_slider = i
+				_set_slider_from_x(i, point.x)
+			return
+
+
+## 拖动时按手指/鼠标 x 实时更新当前滑块。
+func _drag_slider_to(point: Vector2) -> void:
+	if _dragging_slider < 0 or _dragging_slider >= SETTINGS_ROWS.size():
+		return
+	_set_slider_from_x(_dragging_slider, point.x)
+
+
+func _end_slider_drag() -> void:
+	_dragging_slider = -1
+
+
+## 把滑块 x 坐标换算成 0–100 的 10% 步进值，并实时写入存档与 AudioServer。
+func _set_slider_from_x(row_index: int, x: float) -> void:
+	if row_index < 0 or row_index >= SETTINGS_ROWS.size():
+		return
+	var row: Dictionary = SETTINGS_ROWS[row_index]
+	var track := _slider_track_rect(_get_row_rect(row_index))
+	var ratio := clampf((x - track.position.x) / maxf(track.size.x, 1.0), 0.0, 1.0)
+	_set_slider_percent(str(row.get("key", "")), int(round(ratio * 100.0)))
+
+
+func _set_slider_percent(key: String, value: int) -> void:
+	if key.is_empty():
+		return
+	var percent := AudioMix.normalize_percent(value)
+	if int(settings_data.get(key, 100)) == percent:
+		queue_redraw()
+		return
+	settings_data[key] = percent
+	# 滑块值就是总线倍率：立即写 AudioServer，再落盘。
+	AudioMix.apply_settings(settings_data)
+	_save_settings()
+	queue_redraw()
 
 
 func _vibrate_button() -> void:
@@ -250,6 +348,7 @@ func _restore_defaults() -> void:
 	for row: Dictionary in SETTINGS_ROWS:
 		settings_data[str(row.get("key", ""))] = row.get("default")
 	_save_settings()
+	AudioMix.apply_settings(settings_data)
 	if _button_sfx != null:
 		_button_sfx.apply_settings(settings_data)
 	reset_success = false
@@ -296,6 +395,39 @@ func _get_row_rect(index: int) -> Rect2:
 	return Rect2(ROW_X, ROW_START_Y + index * (ROW_H + ROW_GAP), ROW_W, ROW_H)
 
 
+## 滑块轨道（设计坐标）；测试与绘制共用同一口径。
+func _slider_track_rect(row_rect: Rect2) -> Rect2:
+	return Rect2(
+		row_rect.position.x + SLIDER_TRACK_INSET,
+		row_rect.position.y + SLIDER_TRACK_Y,
+		row_rect.size.x - SLIDER_TRACK_INSET * 2.0,
+		SLIDER_TRACK_H
+	)
+
+
+## 滑块的可拖动/可点击区域：轨道上下各留出旋钮半径，便于手指点中。
+func _slider_hit_rect(row_rect: Rect2) -> Rect2:
+	var track := _slider_track_rect(row_rect)
+	return Rect2(
+		track.position.x - 8.0,
+		row_rect.position.y + 20.0,
+		track.size.x + 16.0,
+		16.0
+	)
+
+
+## 供回归测试按存档键定位滑块轨道。
+func slider_track_rect_for_key(key: String) -> Rect2:
+	for i in range(SETTINGS_ROWS.size()):
+		if str(SETTINGS_ROWS[i].get("key", "")) == key:
+			return _slider_track_rect(_get_row_rect(i))
+	return Rect2()
+
+
+func slider_percent(key: String) -> int:
+	return AudioMix.normalize_percent(settings_data.get(key, 100))
+
+
 func _hit_segment(row: Dictionary, row_rect: Rect2, point: Vector2) -> String:
 	var options: Array = row.get("options", [])
 	if options.is_empty():
@@ -303,7 +435,7 @@ func _hit_segment(row: Dictionary, row_rect: Rect2, point: Vector2) -> String:
 	var total_w := 128.0
 	var seg_w := total_w / float(options.size())
 	var start_x := row_rect.position.x + row_rect.size.x - total_w - 13.0
-	var rect := Rect2(start_x, row_rect.position.y + 13.0, total_w, 28.0)
+	var rect := Rect2(start_x, row_rect.position.y + 7.0, total_w, 24.0)
 	if not rect.has_point(point):
 		return ""
 	var idx := clampi(int((point.x - rect.position.x) / seg_w), 0, options.size() - 1)
@@ -343,25 +475,53 @@ func _draw_main_panel() -> void:
 func _draw_setting_row(index: int, row: Dictionary) -> void:
 	var rect := _get_row_rect(index)
 	_draw_texture_fit(_tex("row" if index % 2 == 0 else "row_alt"), rect, 0.96)
-	var accent := C["blue"] if row.get("type", "") == "segment" else C["green"]
-	draw_rect(Rect2(rect.position.x + 6.0, rect.position.y + 8.0, 3.0, rect.size.y - 16.0), accent, true)
-	_draw_text_left(str(row.get("label", "")), Vector2(rect.position.x + 18.0, rect.position.y + 23.0), C["white"], 17.0, true, 128.0)
-	_draw_text_left(str(row.get("desc", "")), Vector2(rect.position.x + 18.0, rect.position.y + 44.0), C["muted"], 10.0, false, 160.0)
-	if row.get("type", "") == "toggle":
+	var row_type := str(row.get("type", ""))
+	var accent := C["green"]
+	if row_type == "segment":
+		accent = C["blue"]
+	elif row_type == "slider":
+		accent = C["gold"]
+	draw_rect(Rect2(rect.position.x + 6.0, rect.position.y + 7.0, 3.0, rect.size.y - 14.0), accent, true)
+	_draw_text_left(str(row.get("label", "")), Vector2(rect.position.x + 18.0, rect.position.y + 16.0), C["white"], 15.0, true, 128.0)
+	var desc := str(row.get("desc", ""))
+	if not desc.is_empty():
+		_draw_text_left(desc, Vector2(rect.position.x + 18.0, rect.position.y + 31.0), C["muted"], 9.0, false, 160.0)
+	if row_type == "toggle":
 		_draw_toggle(rect, bool(settings_data.get(str(row.get("key", "")), row.get("default", true))))
+	elif row_type == "slider":
+		_draw_slider(rect, row)
 	else:
 		_draw_segments(rect, row)
 
 
 func _draw_toggle(row_rect: Rect2, is_on: bool) -> void:
-	var track := Rect2(row_rect.position.x + row_rect.size.x - 74.0, row_rect.position.y + 14.0, 56.0, 27.0)
+	var track := Rect2(row_rect.position.x + row_rect.size.x - 74.0, row_rect.position.y + 7.0, 56.0, 24.0)
 	var color := Color(0.18, 0.72, 0.28) if is_on else Color(0.21, 0.27, 0.36)
 	draw_circle(track.position + Vector2(track.size.y * 0.5, track.size.y * 0.5), track.size.y * 0.5, color)
 	draw_circle(track.position + Vector2(track.size.x - track.size.y * 0.5, track.size.y * 0.5), track.size.y * 0.5, color)
 	draw_rect(Rect2(track.position.x + track.size.y * 0.5, track.position.y, track.size.x - track.size.y, track.size.y), color, true)
 	var knob_x := track.position.x + track.size.x - track.size.y * 0.5 if is_on else track.position.x + track.size.y * 0.5
-	draw_circle(Vector2(knob_x, track.position.y + track.size.y * 0.5), 11.0, Color(1.0, 0.95, 0.77))
-	_draw_text("ON" if is_on else "OFF", track.get_center().x, track.position.y + 19.0, C["white"], 10.0, true, 38.0)
+	draw_circle(Vector2(knob_x, track.position.y + track.size.y * 0.5), 10.0, Color(1.0, 0.95, 0.77))
+	_draw_text("ON" if is_on else "OFF", track.get_center().x, track.position.y + 16.0, C["white"], 9.0, true, 34.0)
+
+
+func _draw_slider(row_rect: Rect2, row: Dictionary) -> void:
+	var key := str(row.get("key", ""))
+	var percent := AudioMix.normalize_percent(settings_data.get(key, row.get("default", 100)))
+	var track := _slider_track_rect(row_rect)
+	draw_rect(track, Color(0.06, 0.10, 0.18, 0.92), true)
+	var fill_w := track.size.x * float(percent) / 100.0
+	if fill_w > 0.0:
+		draw_rect(Rect2(track.position, Vector2(fill_w, track.size.y)), C["gold"], true)
+	# 10% 刻度：与滑块步长一致，方便看出吸附位置。
+	for step in range(0, 101, 10):
+		var tick_x := track.position.x + track.size.x * float(step) / 100.0
+		var tick_color := Color(1.0, 0.95, 0.77, 0.45) if step <= percent else Color(0.66, 0.72, 0.83, 0.22)
+		draw_line(Vector2(tick_x, track.position.y - 2.0), Vector2(tick_x, track.position.y + track.size.y + 2.0), tick_color, 1.0)
+	var knob_pos := Vector2(track.position.x + fill_w, track.get_center().y)
+	draw_circle(knob_pos, SLIDER_KNOB_RADIUS, Color(1.0, 0.95, 0.77))
+	draw_circle(knob_pos, SLIDER_KNOB_RADIUS - 3.0, C["gold"])
+	_draw_text_right("%d%%" % percent, Vector2(row_rect.position.x + row_rect.size.x - 18.0, row_rect.position.y + 16.0), C["gold"] if percent > 0 else C["muted"], 13.0, true, 48.0)
 
 
 func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
@@ -373,9 +533,9 @@ func _draw_segments(row_rect: Rect2, row: Dictionary) -> void:
 	for i in range(options.size()):
 		var option: Dictionary = options[i]
 		var active := current == str(option.get("value", ""))
-		var rect := Rect2(start_x + i * seg_w, row_rect.position.y + 13.0, seg_w, 28.0)
+		var rect := Rect2(start_x + i * seg_w, row_rect.position.y + 7.0, seg_w, 24.0)
 		_draw_texture_fit(_tex("tab_active" if active else "tab_inactive"), rect)
-		_draw_text(str(option.get("label", "")), rect.get_center().x, rect.position.y + 19.0, C["gold"] if active else C["muted"], 11.0, active, seg_w - 2.0)
+		_draw_text(str(option.get("label", "")), rect.get_center().x, rect.position.y + 16.0, C["gold"] if active else C["muted"], 10.0, active, seg_w - 2.0)
 
 
 func _draw_about_panel() -> void:
@@ -461,3 +621,10 @@ func _draw_text_left(text: String, pos: Vector2, color: Color, font_size: float,
 	var size_i := int(font_size)
 	draw_string(ThemeDB.fallback_font, Vector2(pos.x + 1.0, pos.y + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, C["shadow"])
 	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, width, size_i, color)
+
+
+func _draw_text_right(text: String, right_edge: Vector2, color: Color, font_size: float, _bold: bool = false, width: float = 80.0) -> void:
+	var size_i := int(font_size)
+	var pos := Vector2(right_edge.x - width, right_edge.y)
+	draw_string(ThemeDB.fallback_font, pos + Vector2(1.0, 2.0), text, HORIZONTAL_ALIGNMENT_RIGHT, width, size_i, C["shadow"])
+	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_RIGHT, width, size_i, color)

@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[VolumeSlider] write path=/tmp/match3_volume_slider.cfg values={ "bgmVolume": 30, "buttonVolume": 100, "capture": { "autoCapture": false, "equippedItem": "" }, "musicOn": true, "sfxVolume": 60, "soundOn": true, "version": "v0.1.0" }
+[VolumeSlider] OK

@@ -283,8 +283,9 @@ func _test_settings_button_tap() -> void:
 	var settings_scene = load("res://src/ui/scene/scene_settings.gd").new()
 	root.add_child(settings_scene)
 	settings_scene.call("init", {})
-	# 第三行（index 2）是「震动反馈」开关行：x=100、y=ROW_START_Y+2*(ROW_H+ROW_GAP)。
-	settings_scene.call("_on_tap", Vector2(100.0, 256.0))
+	# 第三行（index 2）是「震动反馈」开关行；按行矩形取中心，避免依赖行高常量。
+	var vibration_rect: Rect2 = settings_scene.call("_get_row_rect", 2)
+	settings_scene.call("_on_tap", vibration_rect.get_center())
 	_expect(int(vibe.event_counts.get("button_tap", 0)) == 1,
 		"设置页自绘按钮应产生 1 次 button_tap 请求")
 	settings_scene.queue_free()
