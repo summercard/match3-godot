@@ -32,6 +32,8 @@
 
 ```text
 [ElementFlight] cast=0.180s flight=0.240s total=0.420s flight_ratio=57.1%
+[ElementFlight] stages cast=0.000-0.180s flight=0.180-0.420s hit=0.420-0.670s
+[ElementFlight] cast_scale=1.000->1.250 glow_at_0.09s=0.875 trail_samples=14
 [ElementFlight] origin=(192.5,475.5) anchor=(187.5,66.0) spawn_error=0.000px landing_error=0.000px
 [ElementFlight] control_raise=50.0px first_half=325.9px second_half=83.6px
 [ElementFlight] ring=10.0->46.0px in 0.190s flash_peak=0.480s landing=0.420s peak_frame=29 landing_frame=26
@@ -42,7 +44,9 @@
 [ElementFlight] OK
 ```
 
+- 三段起止：施法 0.000–0.180s、飞行 0.180–0.420s、命中 0.420–0.670s。
 - 总时长 0.420s（要求 0.42±0.05s）；飞行占比 57.1%（要求 55%±10%）。
+- 施法段元素缩放 1.000→1.250，0.09s 时光晕 0.875（递增中）；飞行段保留 14 个拖尾采样点。
 - 出生点 (192.5,475.5) 与被消除格中心误差 0.000px；落点 (187.5,66.0) 与怪物锚点误差 0.000px。
 - 真实战斗场景一次双三消生成 6 个特效，出生点 / 落点最大误差均为 0.000px。
 - 控制点比起点与落点中点高 50.0px；飞行前半程 325.9px、后半程 83.6px，符合前快后慢。

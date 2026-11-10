@@ -84,6 +84,9 @@ func _test_timing_measurements() -> Dictionary:
 	var elapsed := 0.0
 	var cast_end := -1.0
 	var landing := -1.0
+	var cast_scale_end := 0.0
+	var glow_mid := 0.0
+	var max_trail := 0
 	var flight_start_pos := origin
 	var flight_mid_pos := origin
 	var ring_min := -1.0
@@ -100,9 +103,13 @@ func _test_timing_measurements() -> Dictionary:
 		var snapshot: Dictionary = effect.get_snapshot()
 		if cast_end < 0.0 and str(snapshot["phase"]) == "flight":
 			cast_end = float(snapshot["cast_end_time"])
+			cast_scale_end = float(snapshot["scale"])
 			flight_start_pos = snapshot["position"]
+		if absf(elapsed - 0.09) < step * 0.5:
+			glow_mid = float(snapshot["glow_alpha"])
 		if absf(elapsed - 0.30) < step * 0.5:
 			flight_mid_pos = snapshot["position"]
+		max_trail = maxi(max_trail, int(snapshot["trail_count"]))
 		if landing < 0.0 and float(snapshot["landing_time"]) >= 0.0:
 			landing = float(snapshot["landing_time"])
 			particles_at_landing = int(snapshot["particles_alive"])
@@ -127,6 +134,10 @@ func _test_timing_measurements() -> Dictionary:
 	_expect(flight_ratio >= 0.45 and flight_ratio <= 0.65,
 		"飞行段应占总时长 55%%±10%%，实测 %.1f%%" % (flight_ratio * 100.0))
 	_expect(cast_end >= 0.17 and cast_end <= 0.20, "施法段实测应接近 0.18s，实际 %.3fs" % cast_end)
+	_expect(is_equal_approx(cast_scale_end, 1.25), "施法段结束元素应放大到 1.25，实际 %.3f" % cast_scale_end)
+	_expect(glow_mid > 0.5 and glow_mid < 1.0,
+		"施法段中光晕应处于递增区间，0.09s 实际 %.3f" % glow_mid)
+	_expect(max_trail >= 4, "飞行段应留下拖尾采样，实际最多 %d 个采样点" % max_trail)
 	_expect(float(final_snapshot["spawn_error"]) <= 2.0,
 		"出生点与传入宝石中心误差应 ≤2px，实际 %.3fpx" % float(final_snapshot["spawn_error"]))
 	_expect(float(final_snapshot["landing_error"]) <= 2.0,
@@ -170,6 +181,12 @@ func _test_timing_measurements() -> Dictionary:
 
 	print("[ElementFlight] cast=%.3fs flight=%.3fs total=%.3fs flight_ratio=%.1f%%" % [
 		cast_end, flight_observed, total_observed, flight_ratio * 100.0
+	])
+	print("[ElementFlight] stages cast=0.000-%.3fs flight=%.3f-%.3fs hit=%.3f-%.3fs" % [
+		cast_end, cast_end, landing, landing, landing + float(EffectScript.CONFIG["hit_duration"])
+	])
+	print("[ElementFlight] cast_scale=1.000->%.3f glow_at_0.09s=%.3f trail_samples=%d" % [
+		cast_scale_end, glow_mid, max_trail
 	])
 	print("[ElementFlight] origin=(%.1f,%.1f) anchor=(%.1f,%.1f) spawn_error=%.3fpx landing_error=%.3fpx" % [
 		origin.x, origin.y, anchor.x, anchor.y,
