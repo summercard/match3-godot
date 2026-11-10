@@ -48,6 +48,12 @@ func _run() -> void:
 	var save_manager := root.get_node_or_null("SaveManager")
 	if save_manager != null:
 		_original_settings = save_manager.load_settings().duplicate(true)
+		# 本回归验证基准电平；设置页滑块值统一按 100% 起步，避免上一次测试的存档影响。
+		var baseline_settings := _original_settings.duplicate(true)
+		baseline_settings["bgmVolume"] = 100
+		baseline_settings["sfxVolume"] = 100
+		baseline_settings["buttonVolume"] = 100
+		save_manager.save_settings(baseline_settings)
 	_evidence_dir = _read_arg("--evidence=", "")
 
 	_test_config_and_buses()
@@ -629,6 +635,9 @@ func _set_settings(music_on: bool, sound_on: bool) -> void:
 	var settings: Dictionary = save_manager.load_settings().duplicate(true)
 	settings["musicOn"] = music_on
 	settings["soundOn"] = sound_on
+	settings["bgmVolume"] = 100
+	settings["sfxVolume"] = 100
+	settings["buttonVolume"] = 100
 	save_manager.save_settings(settings)
 
 

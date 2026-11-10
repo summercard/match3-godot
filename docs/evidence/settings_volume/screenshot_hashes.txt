@@ -1,0 +1,14 @@
+af7a904f870c5454e687dead5ba84749983cc07ad478a393a35f802ac775d854  docs/evidence/settings_volume/before/settings_100.png
+488fcbc2b715d9f952b905bd7e1e864640db8afe235e77a31cea7919d6c04192  docs/evidence/settings_volume/after/settings_100.png
+22e6f6b61ac5da869f0d7d577e9c50b0e2d8eeda0d0802bdd79eb47937c034c7  docs/evidence/settings_volume/after/settings_mixed.png
+
+dimensions:
+/Users/summercards/.dsh/state/superagent/work/volume-sliders-5244588df69f/docs/evidence/settings_volume/before/settings_100.png
+  pixelWidth: 750
+  pixelHeight: 1334
+/Users/summercards/.dsh/state/superagent/work/volume-sliders-5244588df69f/docs/evidence/settings_volume/after/settings_100.png
+  pixelWidth: 750
+  pixelHeight: 1334
+/Users/summercards/.dsh/state/superagent/work/volume-sliders-5244588df69f/docs/evidence/settings_volume/after/settings_mixed.png
+  pixelWidth: 750
+  pixelHeight: 1334

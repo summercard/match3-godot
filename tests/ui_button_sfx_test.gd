@@ -239,7 +239,7 @@ func _tap_page(page_name: String, scene: Control, sfx) -> int:
 			scene.back_pressed.connect(func(): pass)
 			var music_point: Vector2 = (scene.call("_get_row_rect", 1) as Rect2).get_center()
 			taps += await _tap(sfx, "设置 背景音乐开关", func(): scene.call("_on_tap", music_point))
-			var quality_rect: Rect2 = scene.call("_get_row_rect", 3)
+			var quality_rect: Rect2 = scene.call("_get_row_rect", 6)
 			var segment_point := Vector2(quality_rect.position.x + quality_rect.size.x - 40.0, quality_rect.position.y + 27.0)
 			taps += await _tap(sfx, "设置 画质分段", func(): scene.call("_on_tap", segment_point))
 			taps += await _tap(sfx, "设置 重置数据", func(): scene.call("_on_tap", Vector2(103.0, 588.0)))
