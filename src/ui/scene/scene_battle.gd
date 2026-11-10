@@ -27,6 +27,7 @@ const ComboSfxScript = preload("res://src/ui/components/combo_sfx.gd")
 const BattleSfxScript = preload("res://src/ui/components/battle_sfx.gd")
 const BattleBgmScript = preload("res://src/ui/components/battle_bgm.gd")
 const BattlePauseOverlayScript = preload("res://src/ui/components/battle_pause_overlay.gd")
+const BattleItemPanelScript = preload("res://src/ui/components/battle_item_panel.gd")
 const CaptureEffectScript = preload("res://src/battle/capture_effect.gd")
 const ItemDBScript = preload("res://src/data/item_db.gd")
 
@@ -35,6 +36,17 @@ const DESIGN_W := 375.0
 const DESIGN_H := 667.0
 const BATTLE_BOARD_CELL_SIZE := 39
 const BATTLE_BOARD_Y := 300
+
+## 战斗内道具入口：按钮放在顶栏倍速/设置同一排，面板向下展开，不覆盖棋盘。
+const ITEM_BUTTON_RECT := Rect2(236.0, 5.0, 42.0, 48.0)
+const ITEM_PANEL_RIGHT := 367.0
+const ITEM_PANEL_WIDTH := 276.0
+const ITEM_PANEL_TOP := 60.0
+const ITEM_PANEL_HEADER_H := 34.0
+const ITEM_PANEL_ROW_H := 54.0
+const ITEM_PANEL_PAD := 8.0
+## 使用道具后的回血表现停顿；随后照常进入敌方回合与前摇。
+const ITEM_USE_HEAL_DELAY := 0.45
 
 ## 波次切换：清空后约 1 秒补下一波，横幅提示保持约 1.6 秒
 const WAVE_GAP_SECONDS := 1.0
@@ -260,6 +272,13 @@ var _selected_hotbar_slot: int = -1             # 当前选中的格子索引
 var _auto_capture_enabled: bool = false
 var _equipped_capture_item_id: String = ""
 
+## 战斗内道具（type="battle"）：入口按钮 + 展开列表；数量 0 也保留一行灰显。
+var _battle_items: Array[Dictionary] = []       # [{id, name, desc, emoji, count, ratio, rarity, icon_path}]
+var _item_panel_open: bool = false
+var _item_pointer_active: bool = false
+var _item_panel: Control = null                 # 独立子节点，保证盖在 HUD 之上
+var _item_icon_textures: Dictionary = {}        # 战斗开始即预载，避免首次开面板图标空白
+
 ## 关卡数据
 var _stage_data: Dictionary = {}
 var _stage_id: String = ""
@@ -439,6 +458,10 @@ func _ready() -> void:
 	_battle_bgm = BattleBgmScript.new()
 	_battle_bgm.name = "BattleBgm"
 	add_child(_battle_bgm)
+	# 道具列表作为独立子节点绘制，高于 HUD、低于暂停浮层；输入仍由战斗场景统一分发。
+	_item_panel = BattleItemPanelScript.new()
+	_item_panel.name = "ItemPanel"
+	add_child(_item_panel)
 	# 暂停浮层最后加入并置顶绘制，打开时压住棋盘与 HUD；输入仍由战斗场景统一分发。
 	_pause_overlay = BattlePauseOverlayScript.new()
 	_pause_overlay.name = "PauseOverlay"
@@ -494,6 +517,7 @@ func _get_settings_button_rect() -> Rect2:
 func open_pause_panel() -> bool:
 	if _paused or _exiting_battle or _state == BattleState.BATTLE_END:
 		return false
+	_close_item_panel()
 	_pause_settings = _load_pause_settings()
 	_pause_saved_time_scale = Engine.time_scale if Engine.time_scale > 0.0 else 1.0
 	_paused = true
@@ -600,6 +624,7 @@ func exit_battle_to_stage_select() -> bool:
 		return false
 	_exiting_battle = true
 	_paused = false
+	_close_item_panel()
 	Engine.time_scale = 1.0
 	_time_scale_applied = false
 	if _pause_overlay != null:
@@ -667,6 +692,11 @@ func init(data: Dictionary = {}) -> void:
 	_pause_saved_time_scale = 1.0
 	_pause_settings = {}
 	_settings_pointer_active = false
+	_item_panel_open = false
+	_item_pointer_active = false
+	_battle_items = []
+	if _item_panel != null:
+		_item_panel.call("close")
 	_exiting_battle = false
 	if _pause_overlay != null:
 		_pause_overlay.close()
@@ -783,6 +813,7 @@ func _init_battle() -> void:
 	_show_message(battle_hint if not battle_hint.is_empty() else _stage_data.get("name", "战斗开始！"))
 	_load_capture_preferences()
 	_load_hotbar_items()
+	_load_battle_items()
 
 ## ============================================
 # 输入处理
@@ -809,6 +840,11 @@ func _handle_input_event(event: InputEvent, already_local: bool = true) -> void:
 	if _exiting_battle:
 		if event is InputEventMouseButton or event is InputEventScreenTouch or event is InputEventScreenDrag:
 			get_viewport().set_input_as_handled()
+		return
+	# 道具按钮 / 展开列表：先截获，避免点击穿透到棋盘或技能。
+	# 列表打开时点击外部只关闭列表，不触发下层交互。
+	if _handle_item_pointer(event, already_local):
+		get_viewport().set_input_as_handled()
 		return
 	# 右上角设置按钮（暂停）独立于战斗状态机：前摇/连锁/敌方回合中也能立即暂停。
 	if _handle_settings_pointer(event, already_local):
@@ -1598,6 +1634,7 @@ func _play_enemy_windup() -> void:
 
 func _start_enemy_turn() -> void:
 	_state = BattleState.ENEMY_TURN
+	_close_item_panel()
 	
 	# ===== 毒雾回合逻辑 =====
 	_process_poison_fog_turn()
@@ -1738,6 +1775,7 @@ func _begin_wave_transition() -> void:
 	if _exiting_battle or _battle == null or _state == BattleState.WAVE_TRANSITION:
 		return
 	_state = BattleState.WAVE_TRANSITION
+	_close_item_panel()
 	var cleared_wave := int(_battle.wave_index)
 	var total_waves := int(_battle.wave_total)
 	_show_message("第 %d 波 已清空！" % cleared_wave)
@@ -1779,6 +1817,7 @@ func _begin_battle_end_overlay() -> void:
 	if _exiting_battle or _battle_end_overlay_started:
 		return
 	_battle_end_overlay_started = true
+	_close_item_panel()
 	# 结算开始即停 BGM，避免与胜负音效叠在一起；离开战斗时也会再次兜底停止。
 	if _battle_bgm != null:
 		_battle_bgm.stop()
@@ -2564,6 +2603,9 @@ func _draw() -> void:
 	# 特殊宝石激活动画
 	_draw_special_transform()
 
+	# 战斗内道具入口（顶栏倍速/设置同一排）；展开列表由独立子节点绘制。
+	_draw_item_button()
+
 	# 战斗结束覆盖必须最后绘制，避免白闪、彩虹闪、波纹盖在胜负 UI 上。
 	if _state == BattleState.BATTLE_END:
 		_draw_restore()
@@ -3017,7 +3059,7 @@ func _load_hotbar_items() -> void:
 	if not _storage or not _storage.has_method("load_inventory"):
 		return
 	var inventory: Dictionary = _storage.load_inventory()
-	# 收集所有 type 为 capture 或 battle 的道具
+	# 底部快捷栏只保留捕捉类道具；战斗类道具统一走顶栏「道具」入口。
 	var candidates: Array[Dictionary] = []
 	for item_id in inventory:
 		var count: int = inventory[item_id]
@@ -3025,7 +3067,7 @@ func _load_hotbar_items() -> void:
 			continue
 		var def: Dictionary = ItemDB.get_item(item_id)
 		var item_type: String = def.get("type", "")
-		if item_type == "capture" or item_type == "battle":
+		if item_type == "capture":
 			candidates.append({"id": item_id, "count": count, "rarity": def.get("rarity", 1), "type": item_type})
 	# 按rarity降序（稀有在前）、然后count降序
 	candidates.sort_custom(func(a, b):
@@ -3033,8 +3075,6 @@ func _load_hotbar_items() -> void:
 		var b_equipped := str(b.get("id", "")) == _equipped_capture_item_id
 		if a_equipped != b_equipped:
 			return a_equipped
-		if str(a.get("type", "")) != str(b.get("type", "")):
-			return str(a.get("type", "")) == "capture"
 		return a["rarity"] > b["rarity"] or (a["rarity"] == b["rarity"] and a["count"] > b["count"])
 	)
 	for i in range(mini(candidates.size(), 3)):
@@ -3085,16 +3125,8 @@ func _try_tap_hotbar(x: float, y: float) -> bool:
 		var item: Dictionary = _hotbar_items[i]
 		if item.is_empty() or item.get("count", 0) <= 0:
 			return false
-		var def: Dictionary = ItemDB.get_item(item["id"])
 		_vibration_request("button_tap")
-		if str(def.get("type", "")) == "capture":
-			_try_use_item_at_slot(i)
-			return true
-		if _selected_hotbar_slot == i:
-			_try_use_item_at_slot(i)
-			return true
-		_selected_hotbar_slot = i
-		_show_message("选中 %s x%d" % [def.get("name", "?"), item["count"]])
+		_try_use_item_at_slot(i)
 		return true
 	return false
 
@@ -3116,31 +3148,342 @@ func _try_use_item_at_slot(slot_idx: int) -> bool:
 		_show_message("已选择 %s +%.0f%%" % [def.get("name", "捕获球"), bonus * 100.0])
 		queue_redraw()
 		return true
-	elif item_type == "battle":
-		# HP药水 → 恢复队伍50%HP
-		if _state != BattleState.IDLE:
-			_show_message("当前无法使用道具")
+	_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
+	return true
+
+## ============================================
+# 战斗内道具（type="battle"）
+# ============================================
+
+## 从 item_db 读取全部战斗类道具，数量来自背包；数量 0 也保留一行灰显。
+func _load_battle_items() -> void:
+	_battle_items.clear()
+	var inventory: Dictionary = {}
+	if _storage != null and is_instance_valid(_storage) and _storage.has_method("load_inventory"):
+		inventory = _storage.load_inventory()
+	for item_id in ItemDB.ITEMS_DB.keys():
+		var def: Dictionary = ItemDB.get_item(str(item_id))
+		if str(def.get("type", "")) != "battle":
+			continue
+		var effect: Dictionary = def.get("effect", {})
+		var icon_path := _item_icon_asset_path(str(item_id))
+		_preload_item_icon(icon_path)
+		_battle_items.append({
+			"id": str(item_id),
+			"name": str(def.get("name", item_id)),
+			"desc": str(def.get("desc", "")),
+			"emoji": str(def.get("emoji", "?")),
+			"count": int(inventory.get(item_id, 0)),
+			"ratio": float(effect.get("healRatio", 0.0)),
+			"rarity": int(def.get("rarity", 1)),
+			"icon_path": icon_path
+		})
+	_battle_items.sort_custom(func(a, b):
+		var a_owned := int(a["count"]) > 0
+		var b_owned := int(b["count"]) > 0
+		if a_owned != b_owned:
+			return a_owned
+		if int(a["rarity"]) != int(b["rarity"]):
+			return int(a["rarity"]) > int(b["rarity"])
+		return str(a["id"]) < str(b["id"])
+	)
+
+func _preload_item_icon(path: String) -> void:
+	if path.is_empty() or _item_icon_textures.has(path):
+		return
+	_item_icon_textures[path] = _get_texture(path)
+
+func _can_use_items() -> bool:
+	return _battle != null and _state == BattleState.IDLE and not _paused and not _exiting_battle
+
+## 供测试与证据读取当前战斗道具列表（含数量 0）。
+func get_battle_items() -> Array:
+	return _battle_items.duplicate(true)
+
+## 供测试与证据读取面板是否展开。
+func is_item_panel_open() -> bool:
+	return _item_panel_open
+
+## 供测试与截图打开道具列表；正常情况下由顶栏按钮触发。
+func open_item_panel() -> bool:
+	if not _can_use_items():
+		return false
+	_item_panel_open = true
+	_load_battle_items()
+	_sync_item_panel()
+	queue_redraw()
+	return true
+
+func _get_item_button_rect() -> Rect2:
+	return ITEM_BUTTON_RECT
+
+func _get_item_panel_rect() -> Rect2:
+	if _item_panel != null and is_instance_valid(_item_panel):
+		return _item_panel.call("panel_rect")
+	var rows: int = maxi(_battle_items.size(), 1)
+	return Rect2(
+		ITEM_PANEL_RIGHT - ITEM_PANEL_WIDTH,
+		ITEM_PANEL_TOP,
+		ITEM_PANEL_WIDTH,
+		ITEM_PANEL_HEADER_H + float(rows) * ITEM_PANEL_ROW_H + ITEM_PANEL_PAD
+	)
+
+func _get_item_row_rect(index: int) -> Rect2:
+	if _item_panel != null and is_instance_valid(_item_panel):
+		return _item_panel.call("row_rect", index)
+	var panel := _get_item_panel_rect()
+	return Rect2(
+		panel.position.x + 8.0,
+		panel.position.y + ITEM_PANEL_HEADER_H + float(index) * ITEM_PANEL_ROW_H + 3.0,
+		panel.size.x - 16.0,
+		ITEM_PANEL_ROW_H - 6.0
+	)
+
+func _get_item_close_rect() -> Rect2:
+	if _item_panel != null and is_instance_valid(_item_panel):
+		return _item_panel.call("close_rect")
+	var panel := _get_item_panel_rect()
+	return Rect2(panel.end.x - 34.0, panel.position.y + 6.0, 26.0, 26.0)
+
+func _get_item_index(item_id: String) -> int:
+	for i in range(_battle_items.size()):
+		if str(_battle_items[i].get("id", "")) == item_id:
+			return i
+	return -1
+
+func _item_row_at(pos: Vector2) -> int:
+	if not _item_panel_open:
+		return -1
+	if _item_panel != null and is_instance_valid(_item_panel):
+		return int(_item_panel.call("row_at", pos))
+	for i in range(_battle_items.size()):
+		if _get_item_row_rect(i).has_point(pos):
+			return i
+	return -1
+
+func _toggle_item_panel() -> void:
+	_item_panel_open = not _item_panel_open
+	if _item_panel_open:
+		_load_battle_items()
+	_sync_item_panel()
+	queue_redraw()
+
+func _close_item_panel() -> void:
+	if not _item_panel_open:
+		return
+	_item_panel_open = false
+	_sync_item_panel()
+	queue_redraw()
+
+## 把当前列表交给独立子节点绘制；数量 0 或非玩家回合时整行灰显。
+func _sync_item_panel() -> void:
+	if _item_panel == null or not is_instance_valid(_item_panel):
+		return
+	if not _item_panel_open:
+		_item_panel.call("close")
+		return
+	var display: Array = []
+	for item: Dictionary in _battle_items:
+		var row_data: Dictionary = item.duplicate(true)
+		row_data["usable"] = int(item.get("count", 0)) > 0 and _can_use_items()
+		row_data["icon"] = _item_icon_textures.get(str(item.get("icon_path", "")), null)
+		display.append(row_data)
+	_item_panel.call("open", display)
+
+## 道具按钮 / 面板点击：面板打开时点击外部只关闭面板，不穿透到棋盘。
+func _handle_item_pointer(event: InputEvent, already_local: bool) -> bool:
+	if _exiting_battle or _state == BattleState.BATTLE_END:
+		return false
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			return _on_item_press(_get_pointer_position(event, already_local))
+		if _item_pointer_active:
+			_item_pointer_active = false
 			return true
-		var heal_ratio: float = def.get("effect", {}).get("healRatio", 0.5)
-		var healed: int = 0
-		for monster: Dictionary in _battle.player_team:
-			if monster == null or monster.is_empty():
-				continue
-			var max_hp: int = monster.get("maxHP", 100)
-			var cur_hp: int = monster.get("hp", max_hp)
-			var add: int = int(max_hp * heal_ratio)
-			monster["hp"] = mini(cur_hp + add, max_hp)
-			healed += add
-		_show_message("使用 %s，恢复 %d HP" % [def.get("name", "HP药水"), healed])
-		_storage.use_item(item_id, 1) if _storage else null
-		item["count"] -= 1
-		if item["count"] <= 0:
-			_hotbar_items.remove_at(slot_idx)
-		_selected_hotbar_slot = -1
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			return _on_item_press(_get_pointer_position(event, already_local))
+		if _item_pointer_active:
+			_item_pointer_active = false
+			return true
+	elif event is InputEventScreenDrag and _item_pointer_active:
 		return true
-	else:
-		_show_message("%s 不能在战斗中使用" % def.get("name", "道具"))
+	return false
+
+func _on_item_press(pos: Vector2) -> bool:
+	if _get_item_button_rect().has_point(pos):
+		_item_pointer_active = true
+		if not _can_use_items():
+			_close_item_panel()
+			return true
+		_toggle_item_panel()
+		_play_button_click()
+		_vibration_request("button_tap")
 		return true
+	if not _item_panel_open:
+		return false
+	_item_pointer_active = true
+	if _get_item_close_rect().has_point(pos):
+		_close_item_panel()
+		_play_button_click()
+		return true
+	var row := _item_row_at(pos)
+	if row >= 0:
+		var item: Dictionary = _battle_items[row]
+		if int(item.get("count", 0)) > 0:
+			_use_battle_item(str(item.get("id", "")))
+		return true
+	if _get_item_panel_rect().has_point(pos):
+		return true
+	_close_item_panel()
+	return true
+
+## 使用一个战斗道具：先扣背包数量，再按 item_db 的 healRatio 回血，最后消耗一回合。
+func _use_battle_item(item_id: String) -> bool:
+	if not _can_use_items() or _battle == null:
+		return false
+	var index := _get_item_index(item_id)
+	if index < 0:
+		return false
+	var item: Dictionary = _battle_items[index]
+	if int(item.get("count", 0)) <= 0:
+		return false
+	var def: Dictionary = ItemDB.get_item(item_id)
+	var effect: Dictionary = def.get("effect", {})
+	if not effect.has("healRatio"):
+		return false
+	var ratio := float(effect.get("healRatio", 0.0))
+	if ratio <= 0.0:
+		return false
+	if _storage == null or not is_instance_valid(_storage) or not _storage.has_method("use_item"):
+		return false
+	if not _storage.use_item(item_id, 1):
+		return false
+
+	var report: Dictionary = _heal_living_allies(ratio)
+	_load_battle_items()
+	_close_item_panel()
+	# 使用道具消耗本回合：先 +1 回合，停一小段展示回血，再照常进入敌方回合/前摇。
+	_battle.turn_count += 1
+	_state = BattleState.MATCHING
+	_play_button_click()
+	_vibration_request("button_tap")
+	_show_message("使用 %s，全体伙伴恢复 %d HP" % [str(item.get("name", item_id)), int(report.get("healed_total", 0))])
+	_begin_item_turn()
+	return true
+
+func _begin_item_turn() -> void:
+	await get_tree().create_timer(ITEM_USE_HEAL_DELAY).timeout
+	if not is_inside_tree() or _exiting_battle or _battle == null:
+		return
+	if _state != BattleState.MATCHING:
+		return
+	_start_enemy_turn()
+
+## 全体存活伙伴按比例回血：总量取整为 healRatio × 存活 maxHP 之和，
+## 再按最大余数分到各伙伴并逐人封顶；整数血量下总量仍与数据比例一致。
+func _heal_living_allies(ratio: float) -> Dictionary:
+	var living: Array[Dictionary] = []
+	var team_indices: Array[int] = []
+	var total_max := 0
+	for i in range(_battle.player_team.size()):
+		var unit: Variant = _battle.player_team[i]
+		if unit == null or not unit is Dictionary:
+			continue
+		var monster: Dictionary = unit
+		if monster.is_empty() or int(monster.get("hp", 0)) <= 0:
+			continue
+		living.append(monster)
+		team_indices.append(i)
+		total_max += maxi(0, int(monster.get("maxHP", 0)))
+	if living.is_empty() or total_max <= 0:
+		return {"healed_total": 0, "per_ally": [], "target_total": 0}
+
+	var target_total := int(total_max * ratio)
+	var shares: Array[int] = []
+	var assigned := 0
+	for monster: Dictionary in living:
+		var base := int(floor(float(monster.get("maxHP", 0)) * ratio))
+		shares.append(base)
+		assigned += base
+	var remainder := target_total - assigned
+	if remainder > 0:
+		var order: Array[int] = []
+		for i in range(living.size()):
+			order.append(i)
+		order.sort_custom(func(a: int, b: int) -> bool:
+			var fa: float = float(living[a].get("maxHP", 0)) * ratio - floor(float(living[a].get("maxHP", 0)) * ratio)
+			var fb: float = float(living[b].get("maxHP", 0)) * ratio - floor(float(living[b].get("maxHP", 0)) * ratio)
+			if not is_equal_approx(fa, fb):
+				return fa > fb
+			var cap_a: int = int(living[a].get("maxHP", 0)) - int(living[a].get("hp", 0))
+			var cap_b: int = int(living[b].get("maxHP", 0)) - int(living[b].get("hp", 0))
+			return cap_a > cap_b
+		)
+		var guard := 0
+		while remainder > 0 and guard < 64:
+			guard += 1
+			var changed := false
+			for idx: int in order:
+				if remainder <= 0:
+					break
+				var capacity := int(living[idx].get("maxHP", 0)) - int(living[idx].get("hp", 0))
+				if shares[idx] < capacity:
+					shares[idx] += 1
+					remainder -= 1
+					changed = true
+			if not changed:
+				break
+
+	var healed_total := 0
+	var per_ally: Array = []
+	for i in range(living.size()):
+		var monster: Dictionary = living[i]
+		var max_hp := int(monster.get("maxHP", 0))
+		var before := int(monster.get("hp", 0))
+		var add := mini(shares[i], max_hp - before)
+		add = maxi(add, 0)
+		if add <= 0:
+			continue
+		monster["hp"] = before + add
+		healed_total += add
+		var anchor := BattleAnimationControllerScript.player_damage_anchor(team_indices[i])
+		_floating_texts.append({
+			"text": "+%d" % add,
+			"x": anchor.x,
+			"y": anchor.y,
+			"color": C["heal_green"],
+			"size": 20.0,
+			"timer": 0.0,
+			"duration": 1.0,
+			"critical": true
+		})
+		per_ally.append({
+			"index": team_indices[i],
+			"name": str(monster.get("name", "")),
+			"max_hp": max_hp,
+			"before": before,
+			"after": before + add,
+			"heal": add
+		})
+	return {
+		"healed_total": healed_total,
+		"per_ally": per_ally,
+		"target_total": target_total
+	}
+
+func _draw_item_button() -> void:
+	if _battle == null or _exiting_battle:
+		return
+	var rect := _get_item_button_rect()
+	var enabled := _can_use_items()
+	var active := _item_panel_open
+	var bg := Color(0.08, 0.15, 0.30, 0.94) if enabled or active else Color(0.06, 0.09, 0.15, 0.78)
+	_draw_rounded_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 6.0, bg)
+	var border := C["gold"] if active else Color(0.72, 0.86, 1.0, 0.55 if enabled else 0.25)
+	_draw_stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, 1.5, border)
+	var tint := Color(1.0, 1.0, 1.0, 1.0 if enabled or active else 0.45)
+	_draw_text_with_shadow("道具", rect.get_center().x, rect.position.y + 31.0, tint, 12.5, true)
 
 func _draw_message() -> void:
 	if _message_timer <= 0:
@@ -3668,6 +4011,10 @@ func _go_to_result() -> void:
 ## ============================================
 
 func destroy() -> void:
+	_item_panel_open = false
+	_item_pointer_active = false
+	_battle_items.clear()
+	_item_icon_textures.clear()
 	_floating_texts.clear()
 	_hit_flashes.clear()
 	_hit_reactions.clear()

@@ -1,0 +1,6 @@
+$ git diff b07a03e -- src/data src/battle/damage_calculator.gd src/battle/enemy_attack_modes.gd src/battle/battle_manager.gd tests/combat_balance_test.gd src/ui/components/battle_sfx.gd src/ui/components/battle_bgm.gd src/ui/components/vibration_feedback.gd src/ui/components/battle_pause_overlay.gd
+
+diff line count:
+       0
+
+$ git diff b07a03e -- src/ui/scene/scene_battle.gd | grep -E "^[+-].*(SPEED_LEVELS|DEFAULT_SPEED_LEVEL|set_battle_speed|toggle_battle_speed|ENEMY_WINDUP_DURATION)"

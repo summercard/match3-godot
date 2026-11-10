@@ -1,0 +1,6 @@
+$ cmp transcript_baseline.json transcript_branch.json
+cmp: identical
+
+$ shasum -a 256 transcript_baseline.json transcript_branch.json
+0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb  transcript_baseline.json
+0d6d3c718332bd2a09e2bf44b9f1116d23d6fd962216cc3fa77fb93153490adb  transcript_branch.json
