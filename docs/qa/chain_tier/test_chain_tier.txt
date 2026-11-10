@@ -7,9 +7,9 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [ElementFlightT3] chain=4 tier=lite first_peak=22.080px first_lum=1.000 first_start=0.421s second_start=-1.000s second_peak=0.000px second_lum=0.000
 [ElementFlightT3] chain=4 tier=rich first_peak=27.600px first_lum=1.000 first_start=0.421s second_start=0.481s second_peak=16.560px second_lum=0.600
 [ElementFlightT3] tier_ring lite/balanced=0.8000 balanced=27.600px rich=27.600px lite_second=0.000px
-[ElementFlightT3] budget tier=lite projectiles=0 dropped=4 rings=1 ring_drops=1 particles<=4
-[ElementFlightT3] budget tier=balanced projectiles=0 dropped=3 rings=2 ring_drops=1 particles<=8
-[ElementFlightT3] budget tier=rich projectiles=0 dropped=3 rings=3 ring_drops=0 particles<=12
+[ElementFlightT3] budget tier=lite spawned=6 dropped=0 cap=6 wave_cells=6 rings=1 ring_drops=5 particles<=4
+[ElementFlightT3] budget tier=balanced spawned=6 dropped=0 cap=6 wave_cells=6 rings=2 ring_drops=4 particles<=8
+[ElementFlightT3] budget tier=rich spawned=6 dropped=0 cap=6 wave_cells=6 rings=3 ring_drops=3 particles<=12
 [ElementFlightT3] budget chain4 rings=3 ring_drops=3
 [ElementFlightT3] scene wiring chain_level=1/4, budget drops observable, shake_records_from_effect=0
 [ElementFlightT3] OK

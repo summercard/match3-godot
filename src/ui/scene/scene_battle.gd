@@ -1566,9 +1566,15 @@ func _spawn_element_flights(matches: Array) -> void:
 	# 连锁等级来自本回合 cascade_count；每帧表现参数已由 _sync_presentation_settings 刷新。
 	var profile := _presentation.duplicate(true)
 	profile["chain_level"] = maxi(1, int(_board.cascade_count))
+	var valid_matches: Array = []
 	for m in matches:
-		if not (m is Dictionary) or not m.has("row") or not m.has("col"):
-			continue
+		if m is Dictionary and m.has("row") and m.has("col"):
+			valid_matches.append(m)
+	if valid_matches.is_empty():
+		return
+	# 本波消除格数即弹体下限：每一格都要飞，双三消 6 格至少 6 个弹体。
+	profile["wave_cells"] = valid_matches.size()
+	for m in valid_matches:
 		var center := Vector2(
 			board_x + (float(m["col"]) + 0.5) * cell_size,
 			board_y + (float(m["row"]) + 0.5) * cell_size

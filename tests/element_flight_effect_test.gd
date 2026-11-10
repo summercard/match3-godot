@@ -359,16 +359,16 @@ func _test_scene_spawn_coordinates() -> void:
 	await process_frame
 
 	var effects: Array = _collect_effects(battle)
-	# T3 起均衡档同屏弹体硬上限 3：一次双三消 6 格只生成 3 个节点，其余 3 个计入丢弃。
-	var expected_spawned := 3
-	_expect(effects.size() == expected_spawned,
-		"均衡档一次双三消应生成 %d 个元素（预算 3），实际 %d" % [expected_spawned, effects.size()])
+	# 本波弹体上限不得低于消除格数：一次双三消 6 格必须 6 个全飞、0 丢弃。
+	_expect(effects.size() == GEM_CENTERS.size(),
+		"一次双三消应为 6 个被消除格各生成 1 个元素，实际 %d" % effects.size())
 	var budget_stats: Dictionary = battle.call("get_element_flight_budget_stats")
-	_expect(int(budget_stats.get("dropped_projectiles", -1)) == GEM_CENTERS.size() - expected_spawned,
-		"超出同屏弹体预算的 %d 个应计入丢弃，实际 %d" % [
-			GEM_CENTERS.size() - expected_spawned,
-			int(budget_stats.get("dropped_projectiles", -1))
-		])
+	_expect(int(budget_stats.get("dropped_projectiles", -1)) == 0,
+		"双三消 6 格不应丢弃弹体，实际丢弃 %d" % int(budget_stats.get("dropped_projectiles", -1)))
+	_expect(int(budget_stats.get("projectile_cap", -1)) >= GEM_CENTERS.size(),
+		"双三消弹体上限应 ≥6，实际 %d" % int(budget_stats.get("projectile_cap", -1)))
+	_expect(int(budget_stats.get("wave_cells", -1)) == GEM_CENTERS.size(),
+		"预算应记录本波 6 个消除格，实际 %d" % int(budget_stats.get("wave_cells", -1)))
 	var battle_manager = battle.get("_battle")
 	var target_idx: int = battle.call("_weakest_enemy_visual_index")
 	var expected_anchor: Vector2 = BattleAnimationControllerScript.enemy_damage_anchor(

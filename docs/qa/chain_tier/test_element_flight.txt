@@ -9,7 +9,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [ElementFlight] particles_at_landing=4
 [ElementFlight] particle_tier counts={"balanced":4,"lite":2,"rich":5} screen_peak_6_effects={"balanced":24,"lite":12,"rich":30}
 [ElementFlight] baseline identical=true bytes=17434 on_off_identical=true
-[ElementFlight] scene effects=3 spawn_error_max=0.000px landing_error_max=0.000px anchor=(187.5,66.0)
+[ElementFlight] scene effects=6 spawn_error_max=0.000px landing_error_max=0.000px anchor=(187.5,66.0)
 [ElementFlight] OK
 WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
    at: cleanup (core/object/object.cpp:2536)

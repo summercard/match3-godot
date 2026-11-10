@@ -1,7 +1,7 @@
 # T3 连锁升级与同屏预算验收素材
 
 对应「2 连锁环径 ×1.2 / 亮度 +10%，4 连锁加第二圈，轻量环径 ×0.8 且无第二圈，
-三档同屏弹体 / 环 / 粒子硬上限」的表现层改动。
+弹体按本波消除格数保底、同屏环 / 单次粒子硬上限」的表现层改动。
 
 - 行为与技术基线：`37b5277`（#29 元素飞行三段式）。
 - 视觉 Before 取自 `ddd7a01`（PR base；#30 只把单体血条整体左移 74px，不涉及
@@ -24,11 +24,13 @@
 | `second_ring_peak_ratio` | 0.6 | 第二圈峰值半径 = 首圈 60% |
 | `second_ring_grow_duration` | 0.14s | 在命中段 0.25s 内完成扩环并留出可见保持帧 |
 | `tier_ring_scale` | lite 0.8 / balanced 1.0 / rich 1.0 | 轻量首圈 = 均衡 ×0.8，且无第二圈 |
-| `tier_budgets` | lite 2/1/4，balanced 3/2/8，rich 3/3/12 | 同屏弹体 / 同屏环 / 单次命中粒子 |
+| `tier_budgets` | lite 2/1/4，balanced 3/2/8，rich 3/3/12 | 弹体保底 / 同屏环 / 单次命中粒子；弹体实际上限 = max(保底, 本波消除格数) |
 
 原有 `base_particles` 4、`max_particles` 5 与 `effect_density` 0.5 / 1.0 / 1.5 的
-粒子口径未改（实测 2 / 4 / 5）。预算只决定是否创建表现节点，不插入等待，不改变
-消除 / 下落 / 敌方回合时序。
+粒子口径未改（实测 2 / 4 / 5）。弹体上限按复核意见改为「不得低于本波消除格数」：
+双三消 6 格三档都生成 6 个、`dropped_projectiles=0`，轻量档也不再是 2。环上限
+1 / 2 / 3 与单次粒子上限 4 / 8 / 12 保持硬上限。预算只决定是否创建表现节点，
+不插入等待，不改变消除 / 下落 / 敌方回合时序。
 
 ## 量测（tests/element_flight_chain_tier_test.gd）
 
@@ -42,9 +44,9 @@
 [ElementFlightT3] chain=4 tier=lite first_peak=22.080px first_lum=1.000 first_start=0.421s second_start=-1.000s second_peak=0.000px second_lum=0.000
 [ElementFlightT3] chain=4 tier=rich first_peak=27.600px first_lum=1.000 first_start=0.421s second_start=0.481s second_peak=16.560px second_lum=0.600
 [ElementFlightT3] tier_ring lite/balanced=0.8000 balanced=27.600px rich=27.600px lite_second=0.000px
-[ElementFlightT3] budget tier=lite projectiles=0 dropped=4 rings=1 ring_drops=1 particles<=4
-[ElementFlightT3] budget tier=balanced projectiles=0 dropped=3 rings=2 ring_drops=1 particles<=8
-[ElementFlightT3] budget tier=rich projectiles=0 dropped=3 rings=3 ring_drops=0 particles<=12
+[ElementFlightT3] budget tier=lite spawned=6 dropped=0 cap=6 wave_cells=6 rings=1 ring_drops=5 particles<=4
+[ElementFlightT3] budget tier=balanced spawned=6 dropped=0 cap=6 wave_cells=6 rings=2 ring_drops=4 particles<=8
+[ElementFlightT3] budget tier=rich spawned=6 dropped=0 cap=6 wave_cells=6 rings=3 ring_drops=3 particles<=12
 [ElementFlightT3] budget chain4 rings=3 ring_drops=3
 [ElementFlightT3] scene wiring chain_level=1/4, budget drops observable, shake_records_from_effect=0
 ```
@@ -56,9 +58,10 @@
   峰值 16.560 / 27.600 = **60.0%**（验收 60%±5%）。
 - 轻量 4 连锁首圈 22.080 / 均衡 27.600 = **0.8000×**（验收 0.80±0.02），
   `second_start=-1`、`second_peak=0`，确认无第二圈；华丽与均衡同径。
-- 三档预算：弹体峰值 2 / 3 / 3，环峰值 1 / 2 / 3，单次命中粒子 2 / 4 / 5 均不超
-  4 / 8 / 12；超限丢弃数在 `get_element_flight_budget_stats()` 可查（上表
-  `dropped` / `ring_drops`），4 连锁华丽档占满 3 个环后第二圈全部丢弃且不超预算。
+- 三档弹体：双三消 6 格均 **spawned=6 / dropped=0 / cap=6**；环峰值 1 / 2 / 3、
+  单次命中粒子 2 / 4 / 5 均不超 4 / 8 / 12。环超出硬上限时丢弃并计数（轻量
+  ring_drops=5、均衡 4、华丽 3），4 连锁华丽档占满 3 个环后第二圈全部丢弃且
+  不超预算；计数在 `get_element_flight_budget_stats()` 可查。
 - 元素飞行（含第二圈）不写任何命中 / 棋盘震屏字段；4 连锁命中震屏仍只由
   `MatchHitFeedback` 的连锁档产生，条数不变。
 
@@ -81,13 +84,18 @@ Before 帧在 `ddd7a01` 的两个实现文件上录制（与 After 同一套 #30
 | [after_chain4.png](after_chain4.png) | 本分支，chain=4（首圈 + 第二圈） | `0a403157f00568e28f7073a6616147fc` |
 | [after_chain4_lite.png](after_chain4_lite.png) | 本分支，轻量 4 连锁（×0.8，无第二圈） | `1bbf47a3cc75a77c9322134df9fa59f1` |
 | [before_on.gif](before_on.gif) | ddd7a01，总开关开启，同一交换 | `50e7163582ff3dcd98246680fe02fb29` |
-| [after_on.gif](after_on.gif) | 本分支，总开关开启，同一交换 | `04d81ca82a1f8b5e13a38deb681d0a66` |
+| [after_on.gif](after_on.gif) | 本分支，总开关开启，同一交换 | `1b68a6c23d23e1627617302f1f7cac0d` |
 | [off.gif](off.gif) | 本分支，总开关关闭 | `cf782b205496704489e8400175ae26f0` |
+| [double_match_before.png](double_match_before.png) | 旧弹体预算（3）下同一双三消：只有 3 个格子起飞 | `17dd20bc8d5602a81afc5fa557b7ffae` |
+| [double_match_after.png](double_match_after.png) | 修正后同一双三消：6 个格子全部起飞 | `d1772392d0f811d516689288a1a8374b` |
+| [double_match_compare.png](double_match_compare.png) | 双三消 3 弹体 vs 6 弹体全飞对照（同一帧） | `b1373771366ebddd83a73c28bfdab29f` |
 
 对照结论：
 
 - `before_chain2/4.png` 的 md5 完全相同（`da6c6bab…`），说明基线不识别连锁；
   `after_chain1.png` 也与该 md5 相同，说明 1 连锁画面完全保持基线。
+- 双三消对照统一取同一帧（录制第 15 帧）：旧预算只有 3 个元素亮起 / 起飞，
+  修正后 6 个格子全部亮起 / 起飞，`double_match_compare.png` 并排展示。
 - `after_chain4.png` 与 `after_chain4_rich.png` 相同（华丽首圈倍率 1.0），
   `after_chain4_lite.png` 与 `after_chain2_lite.png` 相同（轻量无第二圈，且
   2/4 连锁首圈同径），与参数口径一致。
@@ -101,8 +109,8 @@ Before 帧在 `ddd7a01` 的两个实现文件上录制（与 After 同一套 #30
 - `tests/element_flight_chain_tier_test.gd`：以上连锁 / 档位 / 预算 / 震屏 /
   总开关断言全部通过。
 - `tests/element_flight_effect_test.gd`：T2 三段时长、10→46px 扩环、白闪 0.06s、
-  拖尾 14 点、2/4/5 粒子口径全部保持；一次双三消 6 格在均衡档只生成 3 个节点，
-  另 3 个计入 `dropped_projectiles`（T3 预算生效）。
+  拖尾 14 点、2/4/5 粒子口径全部保持；一次双三消 6 格生成 6 个节点，
+  `dropped_projectiles=0`，`projectile_cap=6`。
 - 固定种子 20 回合（`stage_1_1`、seed `20261109`、Lv.5）开 / 关两态日志与结算
   JSON 与 37b5277 基线逐字节一致（17434 字节，
   [test_element_flight.txt](test_element_flight.txt) 中
@@ -137,6 +145,14 @@ crop=430:300:160:0,fps=30,split[a][b];\
 [a]palettegen=max_colors=128:stats_mode=diff[p];\
 [b][p]paletteuse=dither=none" -loop 0 chain${chain}.gif
 done
+
+# 双三消 6 格全飞对照：录 1.1s，取第 15 帧（施法段，6 个元素同时亮起）
+MATCH3_SAVE_PATH=/tmp/t3_double.cfg $GODOT --path . --fixed-fps 60 \
+  --write-movie /tmp/t3_double.avi \
+  --script res://tests/element_flight_capture.gd -- \
+  --effect=on --record-seconds=1.1 --performance-mode=balanced --quality-level=high
+ffmpeg -y -i /tmp/t3_double.avi -vf "select='eq(n,15)',scale=750:1334" \
+  -vsync 0 /tmp/t3_double_15.png
 
 # Before 帧：在 ddd7a01 工作树（或临时切回 ddd7a01 的两个实现文件）用同一脚本
 $GODOT --path /path/to/ddd7a01 --fixed-fps 60 \

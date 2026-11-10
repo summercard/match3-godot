@@ -51,6 +51,8 @@ const CONFIG := {
 		"rich": 1.0,
 	},
 	"tier_budgets": {
+		## projectiles 是本档保底上限；实际同屏上限 = max(保底, 本波消除格数)，
+		## 保证本轮每一格都能起飞（双三消 6 格就至少 6 个），轻量档同理。
 		"lite": {"projectiles": 2, "rings": 1, "particles": 4},
 		"balanced": {"projectiles": 3, "rings": 2, "particles": 8},
 		"rich": {"projectiles": 3, "rings": 3, "particles": 12},
@@ -84,6 +86,8 @@ static var _dropped_projectiles: int = 0
 static var _dropped_rings: int = 0
 static var _dropped_particles: int = 0
 static var _last_budget_tier: String = "balanced"
+static var _last_wave_cells: int = 0
+static var _last_projectile_cap: int = 0
 
 var origin: Vector2 = Vector2.ZERO
 var anchor: Vector2 = Vector2.ZERO
@@ -132,6 +136,8 @@ static func reset_budgets() -> void:
 	_dropped_rings = 0
 	_dropped_particles = 0
 	_last_budget_tier = "balanced"
+	_last_wave_cells = 0
+	_last_projectile_cap = 0
 
 
 ## 供测试 / 验收读取：当前同屏占用与累计丢弃数。
@@ -143,6 +149,8 @@ static func get_budget_stats() -> Dictionary:
 		"dropped_projectiles": _dropped_projectiles,
 		"dropped_rings": _dropped_rings,
 		"dropped_particles": _dropped_particles,
+		"wave_cells": _last_wave_cells,
+		"projectile_cap": _last_projectile_cap,
 	}
 
 
@@ -164,6 +172,11 @@ static func budget_for(tier: String) -> Dictionary:
 	return CONFIG["tier_budgets"].get(tier, CONFIG["tier_budgets"]["balanced"])
 
 
+## 同屏弹体实际上限：本档保底与「本波消除格数」取大，保证本轮每格都能飞。
+static func projectile_cap_for(tier: String, wave_cells: int) -> int:
+	return maxi(int(budget_for(tier)["projectiles"]), maxi(0, wave_cells))
+
+
 ## 便捷静态入口：总开关关闭、父节点不可用、没有存活敌人锚点或同屏弹体预算
 ## 已满时返回 null。预算不足只累加丢弃计数，不创建节点、不插入等待。
 static func spawn(parent: Node, from: Vector2, to: Vector2, color: Color, profile: Dictionary = {}) -> ElementFlightEffect:
@@ -173,8 +186,11 @@ static func spawn(parent: Node, from: Vector2, to: Vector2, color: Color, profil
 		return null
 	var tier := resolve_tier(profile)
 	_last_budget_tier = tier
-	var budget := budget_for(tier)
-	if _active_projectiles >= int(budget["projectiles"]):
+	var wave_cells := maxi(0, int(profile.get("wave_cells", 0)))
+	var projectile_cap := projectile_cap_for(tier, wave_cells)
+	_last_wave_cells = wave_cells
+	_last_projectile_cap = projectile_cap
+	if _active_projectiles >= projectile_cap:
 		_dropped_projectiles += 1
 		return null
 	var effect := ElementFlightEffect.new()

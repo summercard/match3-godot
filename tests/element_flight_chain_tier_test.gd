@@ -144,12 +144,15 @@ func _test_budgets() -> void:
 		var batch := _spawn_batch(tier, 6, 1)
 		var effects: Array = batch["effects"]
 		var stats: Dictionary = batch["stats"]
-		_expect(effects.size() == int(expected["projectiles"]),
-			"%s 档同屏弹体应为 %d，实际生成 %d" % [tier, int(expected["projectiles"]), effects.size()])
-		_expect(int(stats["dropped_projectiles"]) == 6 - int(expected["projectiles"]),
-			"%s 档应丢弃 %d 个弹体，实际 %d" % [
-				tier, 6 - int(expected["projectiles"]), int(stats["dropped_projectiles"])
-			])
+		# 本波消除 6 格：三档都必须 6 个全飞、0 丢弃，弹体上限不得低于格数。
+		_expect(effects.size() == 6,
+			"%s 档双三消 6 格应生成 6 个弹体，实际 %d" % [tier, effects.size()])
+		_expect(int(stats["dropped_projectiles"]) == 0,
+			"%s 档双三消 6 格不应丢弃弹体，实际 %d" % [tier, int(stats["dropped_projectiles"])])
+		_expect(int(stats["projectile_cap"]) >= 6,
+			"%s 档双三消弹体上限应 ≥6，实际 %d" % [tier, int(stats["projectile_cap"])])
+		_expect(int(stats["wave_cells"]) == 6,
+			"%s 档应记录本波 6 个消除格，实际 %d" % [tier, int(stats["wave_cells"])])
 		for effect in effects:
 			_expect(effect.particle_count <= int(expected["particles"]),
 				"%s 档单次命中粒子应 ≤%d，实际 %d" % [tier, int(expected["particles"]), effect.particle_count])
@@ -162,22 +165,24 @@ func _test_budgets() -> void:
 			ring_peak = maxi(ring_peak, int(live["active_rings"]))
 			projectile_peak = maxi(projectile_peak, int(live["active_projectiles"]))
 		var landed: Dictionary = EffectScript.get_budget_stats()
-		_expect(projectile_peak <= int(expected["projectiles"]),
-			"%s 档同屏弹体峰值应 ≤%d，实际 %d" % [tier, int(expected["projectiles"]), projectile_peak])
+		_expect(projectile_peak == 6,
+			"%s 档双三消同屏弹体峰值应为 6，实际 %d" % [tier, projectile_peak])
 		_expect(ring_peak <= int(expected["rings"]),
 			"%s 档同屏环峰值应 ≤%d，实际 %d" % [tier, int(expected["rings"]), ring_peak])
 		_expect(int(landed["active_rings"]) == int(expected["rings"]),
 			"%s 档落点后应占用 %d 个环预算，实际 %d" % [
 				tier, int(expected["rings"]), int(landed["active_rings"])
 			])
-		_expect(int(landed["dropped_rings"]) == effects.size() - int(expected["rings"]),
+		_expect(int(landed["dropped_rings"]) == 6 - int(expected["rings"]),
 			"%s 档应丢弃 %d 个环，实际 %d" % [
-				tier, effects.size() - int(expected["rings"]), int(landed["dropped_rings"])
+				tier, 6 - int(expected["rings"]), int(landed["dropped_rings"])
 			])
-		print("[ElementFlightT3] budget tier=%s projectiles=%d dropped=%d rings=%d ring_drops=%d particles<=%d" % [
+		print("[ElementFlightT3] budget tier=%s spawned=%d dropped=%d cap=%d wave_cells=%d rings=%d ring_drops=%d particles<=%d" % [
 			tier,
-			int(landed["active_projectiles"]),
+			effects.size(),
 			int(stats["dropped_projectiles"]),
+			int(stats["projectile_cap"]),
+			int(stats["wave_cells"]),
 			int(landed["active_rings"]),
 			int(landed["dropped_rings"]),
 			int(expected["particles"]),
@@ -187,6 +192,8 @@ func _test_budgets() -> void:
 	# 4 连锁 + 华丽档：首圈占满 3 个环预算后，3 个第二圈都应丢弃且不超预算。
 	var chain4 := _spawn_batch("rich", 3, 4)
 	var chain4_effects: Array = chain4["effects"]
+	_expect(int(chain4["stats"]["projectile_cap"]) == 3,
+		"4 连锁华丽档 3 格弹体上限应为 3，实际 %d" % int(chain4["stats"]["projectile_cap"]))
 	for _step in range(520):
 		for effect in chain4_effects:
 			effect.advance(0.001)
@@ -211,6 +218,7 @@ func _spawn_batch(tier: String, count: int, chain_level: int) -> Dictionary:
 		"performanceMode": tier,
 	})
 	profile["chain_level"] = chain_level
+	profile["wave_cells"] = count
 	var effects: Array = []
 	for i in range(count):
 		var effect = EffectScript.spawn(
@@ -310,9 +318,11 @@ func _test_scene_wiring() -> void:
 	await process_frame
 	effects = _collect_effects(battle)
 	var stats: Dictionary = battle.call("get_element_flight_budget_stats")
-	_expect(effects.size() == 3, "均衡档场景同屏弹体应为 3，实际 %d" % effects.size())
-	_expect(int(stats.get("dropped_projectiles", -1)) == 3,
-		"场景接线应暴露 3 个弹体丢弃，实际 %d" % int(stats.get("dropped_projectiles", -1)))
+	_expect(effects.size() == 6, "均衡档双三消应生成 6 个弹体，实际 %d" % effects.size())
+	_expect(int(stats.get("dropped_projectiles", -1)) == 0,
+		"双三消 6 格不应丢弃弹体，实际 %d" % int(stats.get("dropped_projectiles", -1)))
+	_expect(int(stats.get("projectile_cap", -1)) >= 6,
+		"场景接线弹体上限应 ≥6，实际 %d" % int(stats.get("projectile_cap", -1)))
 	for effect in effects:
 		_free_effect(effect)
 	await process_frame
