@@ -62,9 +62,9 @@
 
 | 文件 | 说明 | 字节校验 |
 | --- | --- | --- |
-| [before.gif](before.gif) | 基线 a322404，真实同一战局、同一交换 | md5 `231da7d2d6806142237ab5ea0faed716` |
+| [before.gif](before.gif) | 基线 a322404，真实同一战局、同一交换 | md5 `0637c39a68633901df6310735d0bdff1` |
 | [off.gif](off.gif) | 本分支，总开关关闭 | 与 before.gif 逐字节一致 |
-| [on.gif](on.gif) | 本分支，总开关开启：施法 → 飞行 → 命中 | md5 `fc056ddd411289bf73e9241dcbc67a1a` |
+| [on.gif](on.gif) | 本分支，总开关开启：施法 → 飞行 → 命中 | md5 `b44d033794cd22c1d1594ce27bed3075` |
 | [stage_compare.png](stage_compare.png) | 同帧 Before / After 三行对照（施法 / 飞行 / 命中） | 见 [screenshot_hashes.txt](screenshot_hashes.txt) |
 
 关闭总开关录制的 AVI 与基线 AVI 也逐字节一致（md5 均为
