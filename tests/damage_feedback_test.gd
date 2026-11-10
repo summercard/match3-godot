@@ -278,11 +278,13 @@ func _test_combat_logs_match_baseline() -> void:
 	var enabled_payload := _run_deterministic_battle()
 	var enabled_text := _canonical_json(enabled_payload)
 	_expect(enabled_text == expected_canonical, "开启伤害反馈后固定战局日志与结算 JSON 应与基线 2f50f09 逐位一致")
+	_expect(JSON.stringify(enabled_payload, "\t") == expected_text, "开启伤害反馈后的日志与结算 JSON 应与基线文件逐字节一致")
 
 	DamageFeedbackScript.enabled = false
 	var disabled_payload := _run_deterministic_battle()
 	var disabled_text := _canonical_json(disabled_payload)
 	_expect(disabled_text == expected_canonical, "关闭伤害反馈后固定战局日志与结算 JSON 应与基线 2f50f09 逐位一致")
+	_expect(JSON.stringify(disabled_payload, "\t") == expected_text, "关闭伤害反馈后的日志与结算 JSON 应与基线文件逐字节一致")
 	_expect(enabled_text == disabled_text, "总开关开 / 关不应改动战斗日志与结算 JSON")
 	DamageFeedbackScript.enabled = true
 

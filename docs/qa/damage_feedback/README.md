@@ -14,7 +14,7 @@
 - `off.gif` 与 `before.gif` 字节一致（MD5 `bfba1f6323f5cd4ad57ad319e746bfae`）。
 - `drain_off.gif` 与 `drain_before.gif` 字节一致（MD5 `24d72f56ef9236e835cf86dd83f83edb`）。
 - 固定战局 `stage_1_1`、seed `20261109`、20 回合脚本的逐回合伤害日志、承伤日志与结算
-  JSON，在开关开 / 关两种状态都与基线 2f50f09 逐位一致（`baseline_combat_log.json`）。
+  JSON，在开关开 / 关两种状态都与基线 2f50f09 逐字节一致（`baseline_combat_log.json`）。
 
 ## 证据文件
 
@@ -126,7 +126,7 @@ $GODOT --headless --path . --fixed-fps 60 --script res://tests/combo_chain_test.
 
 `tests/damage_feedback_test.gd` 覆盖：字体链 / 字重 / 字号 / 描边 / 上升 / 时长 / 快显 / 淡出 / 错峰 / 层数；
 调用方随机量范围与同 context 逐位一致；血条红条落位、白段停留与追赶、回血 / 换兵对齐、
-<30% 脉冲、总开关关闭的基线路径；开关开 / 关的固定战局日志与结算 JSON 逐位比对；
+<30% 脉冲、总开关关闭的基线路径；开关开 / 关的固定战局日志与结算 JSON 与基线文件逐字节比对；
 真实战斗场景中命中帧之前无飘字、命中帧当帧生成飘字。
 
 `tests/battle_hit_reaction_test.gd` 的 0.25s 血条缓降用例显式在 `DamageFeedback.enabled = false`
