@@ -16,6 +16,7 @@ const BattleUIFeedbackScript = preload("res://src/ui/components/battle_ui_feedba
 const BattleInputMapperScript = preload("res://src/ui/components/battle_input_mapper.gd")
 const BattleAnimationControllerScript = preload("res://src/ui/components/battle_animation_controller.gd")
 const BattleHitReactionScript = preload("res://src/ui/components/battle_hit_reaction.gd")
+const DamageFeedbackScript = preload("res://src/ui/components/damage_feedback.gd")
 const BattleBoardRendererScript = preload("res://src/ui/components/battle_board_renderer.gd")
 const BattleCombatantRendererScript = preload("res://src/ui/components/battle_combatant_renderer.gd")
 const BattleFlowControllerScript = preload("res://src/ui/components/battle_flow_controller.gd")
@@ -96,6 +97,10 @@ var _floating_texts: Array[Dictionary] = []
 
 ## 战斗表现时钟（伤害飘字排队用）
 var _fx_time: float = 0.0
+
+## 伤害飘字调用的 context 计数：同一 context 第 N 次飘字共用固定随机种子，
+## 同一战局重复渲染时位置逐位一致；不消耗战斗随机数。
+var _damage_popup_ordinals: Dictionary = {}
 
 ## 连锁提示：第 2 连锁起常驻显示，断链即清除；pulse 用于升级时的放大反馈
 var _chain_display: Dictionary = {
@@ -439,6 +444,8 @@ var _gem_icon_pool: Array[TextureRect] = []
 
 func _ready() -> void:
 	instance = self
+	# 第一帧绘制前先建好漫画飘字字体，避免在绘制回调里惰性创建系统字体。
+	DamageFeedbackScript.comic_font()
 	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_fx_rng.seed = 0x5EEDBEEF
@@ -732,6 +739,7 @@ func init(data: Dictionary = {}) -> void:
 	_selection_pulse = 0.0
 	_drag_preview = {"active": false, "direction": Vector2i.ZERO}
 	_swipe_trail = []
+	_damage_popup_ordinals.clear()
 	_battle_end_overlay_timer = 0.0
 	_battle_end_overlay_started = false
 	_battle_end_particles_spawned = false
@@ -1200,7 +1208,9 @@ func _apply_skill_result_visuals(result: Dictionary) -> void:
 			anchor,
 			"enemy:%d" % maxi(target_idx, 0),
 			bool(result.get("isEffective", false)),
-			bool(result.get("isWeak", false))
+			bool(result.get("isWeak", false)),
+			false,
+			damage
 		)
 	if shield_absorbed > 0:
 		_floating_texts.append({
@@ -1391,7 +1401,7 @@ func _process_matches() -> void:
 			_show_message("效果不佳...")
 		
 		var target_idx := _find_enemy_index(log_target)
-		_spawn_enemy_damage_popup("-%d" % log_damage, target_idx, log_effective, log_weak)
+		_spawn_enemy_damage_popup("-%d" % log_damage, target_idx, log_effective, log_weak, false, log_damage)
 		if target_idx >= 0:
 			if not log_died:
 				_register_hit_flash(true, target_idx, 0.25)
@@ -2111,7 +2121,11 @@ func _trigger_element_ripple(element_type: String, ripple_color: Color) -> void:
 # 伤害飘字（普通 / 暴击）
 ## ============================================
 
-func _spawn_damage_popup(text: String, anchor: Vector2, anchor_key: String, critical: bool, weak: bool = false, heavy: bool = false) -> void:
+func _spawn_damage_popup(text: String, anchor: Vector2, anchor_key: String, critical: bool, weak: bool = false, heavy: bool = false, amount: int = 0) -> void:
+	if DamageFeedbackScript.enabled:
+		_spawn_comic_damage_popup(text, anchor, anchor_key, critical, weak, heavy, amount)
+		return
+	# 总开关关闭：沿用基线 2f50f09 的飘字数据（无调用方随机量，渲染走旧路径）。
 	var style := BattleAnimationControllerScript.damage_style(critical, weak, heavy)
 	var schedule := BattleAnimationControllerScript.schedule_damage_popup(
 		_floating_texts, anchor_key, _fx_time, float(style["duration"]), critical or heavy,
@@ -2137,16 +2151,63 @@ func _spawn_damage_popup(text: String, anchor: Vector2, anchor_key: String, crit
 		"lane": lane
 	})
 
-func _spawn_enemy_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false) -> void:
+
+## 重置飘字 context 计数：同一段战局重复播放时，同 context 的随机量重新从第 0 次开始。
+func _reset_damage_popup_context() -> void:
+	_damage_popup_ordinals.clear()
+
+
+## 升级后的漫画飘字：随机量（出生抖动 / 上升倍率 / 横漂 / 弹出）在调用方按
+## context + 第 N 次生成一次并写入数据，渲染阶段不再取随机数。
+func _spawn_comic_damage_popup(text: String, anchor: Vector2, anchor_key: String, critical: bool, weak: bool, heavy: bool, amount: int) -> void:
+	DamageFeedbackScript.comic_font()
+	var pop_heavy := heavy or DamageFeedbackScript.is_heavy_damage(amount)
+	var style := DamageFeedbackScript.damage_style(critical, weak, pop_heavy)
+	var schedule := BattleAnimationControllerScript.schedule_damage_popup(
+		_floating_texts, anchor_key, _fx_time, float(style["duration"]), critical or pop_heavy,
+		int(_presentation.get("popup_layers", BattleAnimationControllerScript.DAMAGE_MAX_LAYERS))
+	)
+	var lane := int(schedule["lane"])
+	var offset := BattleAnimationControllerScript.damage_lane_offset(anchor, lane)
+	var ordinal := int(_damage_popup_ordinals.get(anchor_key, 0))
+	_damage_popup_ordinals[anchor_key] = ordinal + 1
+	var spread := DamageFeedbackScript.popup_random(anchor_key, ordinal)
+	var jitter: Vector2 = spread["jitter"]
+	var popup_x := clampf(anchor.x + offset.x + jitter.x, 52.0, DESIGN_W - 52.0)
+	var popup_y := anchor.y + offset.y + jitter.y
+	_floating_texts.append({
+		"text": text,
+		"x": popup_x,
+		"y": popup_y,
+		"start_x": popup_x,
+		"start_y": popup_y,
+		"color": style["color"],
+		"size": style["size"],
+		"timer": 0.0,
+		"duration": style["duration"],
+		"delay": schedule["delay"],
+		"critical": critical,
+		"damage_style": style["style"],
+		"damage_anchor": anchor_key,
+		"lane": lane,
+		"comic": true,
+		"stroke": style["stroke"],
+		"rise": DamageFeedbackScript.rise_for_anchor(anchor.y),
+		"rise_scale": float(spread["rise_scale"]),
+		"drift": float(spread["drift"]),
+		"pop": float(spread["pop"])
+	})
+
+func _spawn_enemy_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false, heavy: bool = false, amount: int = 0) -> void:
 	var enemy_count: int = _battle.enemies.size() if _battle != null else 1
 	var anchor := BattleAnimationControllerScript.enemy_damage_anchor(enemy_count, target_idx)
 	var key := "enemy:%d" % maxi(target_idx, 0)
-	_spawn_damage_popup(text, anchor, key, critical, weak)
+	_spawn_damage_popup(text, anchor, key, critical, weak, heavy, amount)
 
-func _spawn_player_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false, heavy: bool = false) -> void:
+func _spawn_player_damage_popup(text: String, target_idx: int, critical: bool, weak: bool = false, heavy: bool = false, amount: int = 0) -> void:
 	var anchor := BattleAnimationControllerScript.player_damage_anchor(target_idx)
 	var key := "player:%d" % maxi(target_idx, 0)
-	_spawn_damage_popup(text, anchor, key, critical, weak, heavy)
+	_spawn_damage_popup(text, anchor, key, critical, weak, heavy, amount)
 
 ## ============================================
 # 伤害数字信号处理
@@ -2177,7 +2238,9 @@ func _on_damage_dealt(damage_info: Dictionary) -> void:
 		anchor,
 		"enemy:%d" % maxi(target_idx, 0),
 		is_critical,
-		is_weak
+		is_weak,
+		false,
+		damage
 	)
 
 	# 护盾吸收显示
@@ -2209,7 +2272,7 @@ func _on_enemy_attacked(action_info: Dictionary) -> void:
 
 	if _battle_sfx != null:
 		_battle_sfx.play("take_damage")
-	_spawn_player_damage_popup("-%d" % damage, target_idx, false, false, is_charged)
+	_spawn_player_damage_popup("-%d" % damage, target_idx, false, false, is_charged, damage)
 	if target_idx >= 0:
 		_register_hit_flash(false, target_idx, 0.35)
 
@@ -2817,6 +2880,9 @@ func _draw_floating_texts() -> void:
 
 ## 伤害飘字：普通/暴击共用上飘+淡出，暴击额外放大与轻微抖动。
 func _draw_damage_popup(ft: Dictionary) -> void:
+	if DamageFeedbackScript.enabled and bool(ft.get("comic", false)):
+		_draw_comic_damage_popup(ft)
+		return
 	var text: String = ft.get("text", "")
 	var timer: float = ft.get("timer", 0.0)
 	var duration: float = maxf(ft.get("duration", 0.9), 0.01)
@@ -2852,6 +2918,61 @@ func _draw_crit_damage_text(text: String, x: float, y: float, color: Color, size
 	var prefix_color := Color(1.0, 0.86, 0.55, fade)
 	_draw_text_with_shadow(prefix, x, y - size * 0.95, prefix_color, prefix_size, true)
 	_draw_text_with_shadow(text, x, y, color, size, true)
+
+
+## 升级后的漫画飘字：ease-out cubic 上升、0.04s 快显、0.62 起淡出、
+## 1.28–1.48 弹出回落；字体 / 描边参数全部来自 damage_feedback.gd。
+func _draw_comic_damage_popup(ft: Dictionary) -> void:
+	var text: String = ft.get("text", "")
+	var duration: float = maxf(float(ft.get("duration", 0.85)), 0.01)
+	var timer: float = float(ft.get("timer", 0.0))
+	var alpha := DamageFeedbackScript.fade_alpha(timer, duration)
+	if alpha <= 0.0:
+		return
+	var eased := DamageFeedbackScript.ease_out_cubic(timer / duration)
+	var start_x: float = ft.get("start_x", ft.get("x", 0.0))
+	var start_y: float = ft.get("start_y", ft.get("y", 0.0))
+	var rise := float(ft.get("rise", DamageFeedbackScript.RISE_SINGLE)) * float(ft.get("rise_scale", 1.0))
+	var drift: float = float(ft.get("drift", 0.0))
+	var x: float = clampf(start_x + drift * eased, 4.0, DESIGN_W - 4.0)
+	var y: float = start_y - rise * eased
+	var scale := DamageFeedbackScript.pop_scale(timer, float(ft.get("pop", 1.0)))
+	var size: float = float(ft.get("size", DamageFeedbackScript.STYLES["normal"]["size"])) * scale
+	var stroke := DamageFeedbackScript.stroke_width(float(ft.get("stroke", DamageFeedbackScript.STROKE_NORMAL)), scale)
+	var color: Color = ft.get("color", C["white"])
+	if str(ft.get("damage_style", "")) == "crit":
+		# 「暴击」与数字同一基线左右排开：单体锚点已接近屏幕顶部，
+		# 32px 数字再上移会把标签顶出屏幕；左右排布仍保留 30px 上升。
+		var font := DamageFeedbackScript.comic_font()
+		var prefix := BattleAnimationControllerScript.DAMAGE_CRIT_PREFIX
+		var prefix_size := maxf(12.0, size * 0.5)
+		var prefix_width := font.get_string_size(prefix, HORIZONTAL_ALIGNMENT_LEFT, -1.0, prefix_size).x
+		var number_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x
+		var gap := maxf(3.0, size * 0.12)
+		var block_width := prefix_width + gap + number_width
+		var block_left := clampf(x - block_width * 0.5, 4.0, DESIGN_W - 4.0 - block_width)
+		DamageFeedbackScript.draw_popup_text(
+			self,
+			prefix,
+			block_left + prefix_width * 0.5,
+			y,
+			prefix_size,
+			Color(1.0, 0.86, 0.55),
+			alpha,
+			maxf(1.0, stroke * 0.7)
+		)
+		DamageFeedbackScript.draw_popup_text(
+			self,
+			text,
+			block_left + prefix_width + gap + number_width * 0.5,
+			y,
+			size,
+			color,
+			alpha,
+			stroke
+		)
+		return
+	DamageFeedbackScript.draw_popup_text(self, text, x, y, size, color, alpha, stroke)
 
 ## 连锁提示区域：固定在棋盘中部，避开顶部血条/头像与顶部伤害飘字。
 func get_chain_display_rect(scale: float = 1.0) -> Rect2:

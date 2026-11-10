@@ -7,6 +7,7 @@ extends SceneTree
 
 const BattleHitReactionScript = preload("res://src/ui/components/battle_hit_reaction.gd")
 const BattleHpBarScript = preload("res://src/ui/components/battle_hp_bar.gd")
+const DamageFeedbackScript = preload("res://src/ui/components/damage_feedback.gd")
 const BattleManagerScript = preload("res://src/battle/battle_manager.gd")
 const StageDBScript = preload("res://src/data/stage_db.gd")
 const BASELINE_PATH := "res://docs/qa/hit_reaction_bars/baseline_combat_log.json"
@@ -61,6 +62,9 @@ func _test_reaction_lifecycle() -> void:
 
 func _test_hp_easing() -> void:
 	BattleHitReactionScript.enabled = true
+	# 本轮伤害反馈升级后，0.25s 缓降是「伤害反馈总开关关闭」时的基线表现；
+	# 这里显式关掉新开关，继续覆盖旧缓降路径。
+	DamageFeedbackScript.enabled = false
 	var bar = BattleHpBarScript.new()
 	bar.value = 100.0
 	bar.maximum = 100.0
@@ -76,6 +80,7 @@ func _test_hp_easing() -> void:
 	_expect(is_equal_approx(bar.value, 40.0), "满 0.25s 时血条应到达目标值，实际 %.2f" % bar.value)
 	_expect(not bar.is_easing(), "到达目标值后应结束缓降")
 	bar.free()
+	DamageFeedbackScript.enabled = true
 
 
 func _test_master_switch_off() -> void:

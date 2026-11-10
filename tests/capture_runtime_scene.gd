@@ -358,6 +358,11 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		var hit_reaction = load("res://src/ui/components/battle_hit_reaction.gd")
 		if hit_reaction != null:
 			hit_reaction.enabled = false
+	# 证据采集：--damage-feedback=off 关掉本轮伤害反馈总开关，用于开/关对照。
+	if _read_arg("--damage-feedback=", "on") == "off":
+		var damage_feedback = load("res://src/ui/components/damage_feedback.gd")
+		if damage_feedback != null:
+			damage_feedback.enabled = false
 	var item_demo := _read_arg("--battle-item-demo=", "")
 	if not item_demo.is_empty():
 		await _seed_battle_item_demo(battle_scene, item_demo)
@@ -381,6 +386,12 @@ func _seed_battle_demo_fx(main: Control) -> void:
 		_seed_battle_art_aspect_qa(battle_scene)
 	if _read_arg("--battle-demo-hp=", "0") == "1":
 		_seed_battle_demo_hp(battle_scene)
+	if _read_arg("--battle-demo-drain=", "0") == "1":
+		await _seed_battle_drain_demo(battle_scene)
+		return
+	if _read_arg("--battle-popup-sample=", "0") == "1":
+		_seed_popup_sample(battle_scene)
+		return
 	if _read_arg("--battle-demo-damage=", "0") == "1":
 		_seed_battle_damage_demo(battle_scene)
 		return
@@ -595,6 +606,46 @@ func _seed_battle_chain_demo(battle_scene: Control, level: int) -> void:
 	battle_scene.call("_spawn_enemy_damage_popup", "-%d" % (level * 86), 0, false)
 	battle_scene.call("_spawn_player_damage_popup", "-34", 0, false)
 	battle_scene.queue_redraw()
+
+## 血条白段证据：敌方满血 → 25% 一次掉血，红条 0.08s 落位、白段停 0.22s
+## 后按 0.55 条/秒追上，进入 <30% 后红条开始 1.2Hz 脉冲。
+func _seed_battle_drain_demo(battle_scene: Control) -> void:
+	var battle = battle_scene.get("_battle")
+	if battle == null or battle.enemies.is_empty():
+		return
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	var enemy: Dictionary = battle.enemies[0]
+	enemy["maxHP"] = 1000
+	enemy["hp"] = 1000
+	if battle_scene.has_method("_sync_gui"):
+		battle_scene.call("_sync_gui")
+	await process_frame
+	await process_frame
+	enemy["hp"] = 250
+	if battle_scene.has_method("_sync_gui"):
+		battle_scene.call("_sync_gui")
+	battle_scene.call("_spawn_enemy_damage_popup", "-750", 0, false, false, false, 750)
+	battle_scene.queue_redraw()
+
+
+## 字号 / 描边量测：同一画面并排三档飘字，冻结在 0.4s（弹出已回落、尚未淡出）。
+## 三种样式都走正式生成入口；冻结只影响证据采集，不进游戏逻辑。
+func _seed_popup_sample(battle_scene: Control) -> void:
+	battle_scene.set("_message_text", "")
+	battle_scene.set("_message_timer", 0.0)
+	var floating = battle_scene.get("_floating_texts")
+	if floating is Array:
+		floating.clear()
+	battle_scene.call("_spawn_damage_popup", "-27", Vector2(92.0, 92.0), "sample:normal", false, false, false)
+	battle_scene.call("_spawn_damage_popup", "-94", Vector2(187.5, 92.0), "sample:heavy", false, false, true)
+	battle_scene.call("_spawn_damage_popup", "-368", Vector2(290.0, 92.0), "sample:crit", true, false, false)
+	var popups: Array = battle_scene.get("_floating_texts")
+	for popup in popups:
+		popup["timer"] = 0.4
+		popup["delay"] = 0.0
+	battle_scene.queue_redraw()
+
 
 func _seed_battle_damage_demo(battle_scene: Control) -> void:
 	var target_idx := clampi(int(_read_arg("--damage-target-index=", "0")), 0, 2)
