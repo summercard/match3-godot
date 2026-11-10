@@ -135,9 +135,9 @@ func _test_tier_ring(chain4: Dictionary) -> void:
 
 func _test_budgets() -> void:
 	var cases := {
-		"lite": {"projectiles": 2, "rings": 1, "particles": 4},
-		"balanced": {"projectiles": 3, "rings": 2, "particles": 8},
-		"rich": {"projectiles": 3, "rings": 3, "particles": 12},
+		"lite": {"projectile_floor": 2, "rings": 1, "particles": 4},
+		"balanced": {"projectile_floor": 3, "rings": 2, "particles": 8},
+		"rich": {"projectile_floor": 3, "rings": 3, "particles": 12},
 	}
 	for tier: String in ["lite", "balanced", "rich"]:
 		var expected: Dictionary = cases[tier]

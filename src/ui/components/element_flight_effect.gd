@@ -51,11 +51,11 @@ const CONFIG := {
 		"rich": 1.0,
 	},
 	"tier_budgets": {
-		## projectiles 是本档保底上限；实际同屏上限 = max(保底, 本波消除格数)，
+		## projectile_floor 是本档保底上限；实际同屏上限 = max(保底, 本波消除格数)，
 		## 保证本轮每一格都能起飞（双三消 6 格就至少 6 个），轻量档同理。
-		"lite": {"projectiles": 2, "rings": 1, "particles": 4},
-		"balanced": {"projectiles": 3, "rings": 2, "particles": 8},
-		"rich": {"projectiles": 3, "rings": 3, "particles": 12},
+		"lite": {"projectile_floor": 2, "rings": 1, "particles": 4},
+		"balanced": {"projectile_floor": 3, "rings": 2, "particles": 8},
+		"rich": {"projectile_floor": 3, "rings": 3, "particles": 12},
 	},
 	"control_raise_px": 50.0,
 	"base_particles": 4,
@@ -174,7 +174,7 @@ static func budget_for(tier: String) -> Dictionary:
 
 ## 同屏弹体实际上限：本档保底与「本波消除格数」取大，保证本轮每格都能飞。
 static func projectile_cap_for(tier: String, wave_cells: int) -> int:
-	return maxi(int(budget_for(tier)["projectiles"]), maxi(0, wave_cells))
+	return maxi(int(budget_for(tier)["projectile_floor"]), maxi(0, wave_cells))
 
 
 ## 便捷静态入口：总开关关闭、父节点不可用、没有存活敌人锚点或同屏弹体预算
