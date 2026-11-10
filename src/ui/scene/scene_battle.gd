@@ -445,6 +445,8 @@ var _gem_icon_pool: Array[TextureRect] = []
 
 func _ready() -> void:
 	instance = self
+	# 每次进入战斗重置元素飞行的同屏预算与丢弃计数，避免上一场残留。
+	ElementFlightEffectScript.reset_budgets()
 	# 第一帧绘制前先建好漫画飘字字体，避免在绘制回调里惰性创建系统字体。
 	DamageFeedbackScript.comic_font()
 	set_process_input(true)
@@ -1561,15 +1563,28 @@ func _spawn_element_flights(matches: Array) -> void:
 	var cell_size := float(_board.cell_size)
 	var board_x := float(_board.offset_x)
 	var board_y := float(_board.offset_y)
+	# 连锁等级来自本回合 cascade_count；每帧表现参数已由 _sync_presentation_settings 刷新。
+	var profile := _presentation.duplicate(true)
+	profile["chain_level"] = maxi(1, int(_board.cascade_count))
+	var valid_matches: Array = []
 	for m in matches:
-		if not (m is Dictionary) or not m.has("row") or not m.has("col"):
-			continue
+		if m is Dictionary and m.has("row") and m.has("col"):
+			valid_matches.append(m)
+	if valid_matches.is_empty():
+		return
+	# 本波消除格数即弹体下限：每一格都要飞，双三消 6 格至少 6 个弹体。
+	profile["wave_cells"] = valid_matches.size()
+	for m in valid_matches:
 		var center := Vector2(
 			board_x + (float(m["col"]) + 0.5) * cell_size,
 			board_y + (float(m["row"]) + 0.5) * cell_size
 		)
 		var gem_color: Color = GEM_COLORS.get(str(m.get("type", "")), C["white"])
-		ElementFlightEffectScript.spawn(self, center, anchor, gem_color, _presentation)
+		ElementFlightEffectScript.spawn(self, center, anchor, gem_color, profile)
+
+## 供测试和现场排查读取元素飞行同屏预算 / 丢弃计数。
+func get_element_flight_budget_stats() -> Dictionary:
+	return ElementFlightEffectScript.get_budget_stats()
 
 ## 与 BattleManager 的受击目标一致：当前血量最低的存活敌人；没有存活敌人时返回 -1。
 func _weakest_enemy_visual_index() -> int:

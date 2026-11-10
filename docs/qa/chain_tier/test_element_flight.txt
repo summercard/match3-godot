@@ -1,0 +1,15 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[ElementFlight] cast=0.180s flight=0.240s total=0.420s flight_ratio=57.1%
+[ElementFlight] stages cast=0.000-0.180s flight=0.180-0.420s hit=0.420-0.670s
+[ElementFlight] cast_scale=1.000->1.250 glow_at_0.09s=0.875 trail_samples=14
+[ElementFlight] origin=(192.5,475.5) anchor=(187.5,66.0) spawn_error=0.000px landing_error=0.000px
+[ElementFlight] control_raise=50.0px first_half=325.9px second_half=83.6px
+[ElementFlight] ring=10.0->46.0px in 0.190s flash_peak=0.480s landing=0.420s peak_frame=29 landing_frame=26
+[ElementFlight] particles_at_landing=4
+[ElementFlight] particle_tier counts={"balanced":4,"lite":2,"rich":5} screen_peak_6_effects={"balanced":24,"lite":12,"rich":30}
+[ElementFlight] baseline identical=true bytes=17434 on_off_identical=true
+[ElementFlight] scene effects=6 spawn_error_max=0.000px landing_error_max=0.000px anchor=(187.5,66.0)
+[ElementFlight] OK
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
